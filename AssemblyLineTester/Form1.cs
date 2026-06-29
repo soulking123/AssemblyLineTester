@@ -6,5 +6,10 @@ namespace AssemblyLineTester
         {
             InitializeComponent();
         }
+
+        private void btnSubmit_Click(object sender, EventArgs e)
+        {
+            label1.Text = "Button clicked";  
+        }
     }
 }
