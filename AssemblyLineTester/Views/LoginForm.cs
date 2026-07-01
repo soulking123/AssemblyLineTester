@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 
-namespace AssemblyLineTester
+namespace AssemblyLineTester.Views
 {
-    public partial class LoginPage : Form
+    public partial class LoginForm : Form
     {
-        public LoginPage()
+        public LoginForm()
         {
             InitializeComponent();
 
@@ -17,7 +17,7 @@ namespace AssemblyLineTester
         private void BtnLogin_Click(object? sender, EventArgs e)
         {
             // IDE0090 FIX: Mengubah 'new Form1()' menjadi 'new()' yang lebih ringkas dan modern
-            Form1 dashboard = new();
+            MainForm dashboard = new();
             dashboard.Show();
 
             this.Hide();

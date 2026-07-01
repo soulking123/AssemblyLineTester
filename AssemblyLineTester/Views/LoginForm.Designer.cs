@@ -1,6 +1,6 @@
-﻿namespace AssemblyLineTester
+namespace AssemblyLineTester.Views
 {
-    partial class LoginPage
+    partial class LoginForm
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -147,7 +147,7 @@
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Margin = new Padding(6, 7, 6, 7);
             MaximizeBox = false;
-            Name = "LoginPage";
+            Name = "LoginForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Assembly Line Tester - Login";
             pnlCard.ResumeLayout(false);
