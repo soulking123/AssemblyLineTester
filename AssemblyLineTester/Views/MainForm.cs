@@ -12,6 +12,9 @@ namespace AssemblyLineTester.Views
         private readonly SystemLog pageSystemLog = new();
         private readonly HarnessDatabase pageHarnessDb = new();
         private readonly Dashboard pageDashboard = new();
+        private readonly TestExecution pageTestExecution = new();
+        private readonly Reports pageReports = new();
+        private readonly UserManagement pageUserManagement = new();
 
         public MainForm()
         {
@@ -48,6 +51,10 @@ namespace AssemblyLineTester.Views
                 {
                     SetActiveMenu(btnDashboard, pageDashboard);
                 }
+                else if (clickedButton == btnTestExecution)
+                {
+                    SetActiveMenu(btnTestExecution, pageTestExecution);
+                }
                 else if (clickedButton == btnTestHistory)
                 {
                     SetActiveMenu(btnTestHistory, pageTestHistory);
@@ -60,10 +67,22 @@ namespace AssemblyLineTester.Views
                 {
                     SetActiveMenu(btnHarnessDatabase, pageHarnessDb);
                 }
+                else if (clickedButton == btnReports)
+                {
+                    SetActiveMenu(btnReports, pageReports);
+                }
+                else if (clickedButton == btnUserManagement)
+                {
+                    SetActiveMenu(btnUserManagement, pageUserManagement);
+                }
+                else if (clickedButton == btnSettings)
+                {
+                    SetActiveMenu(clickedButton, null);
+                }
             }
         }
 
-        private void SetActiveMenu(Button activeBtn, UserControl activePage)
+        private void SetActiveMenu(Button activeBtn, UserControl? activePage)
         {
             Button[] allMenus = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
 
@@ -76,11 +95,24 @@ namespace AssemblyLineTester.Views
             activeBtn.BackColor = Color.FromArgb(255, 193, 7);
             activeBtn.ForeColor = Color.Black;
 
+            splitContainer1.Panel2.Controls.Clear();
             if (activePage != null)
             {
                 activePage.Dock = DockStyle.Fill;
-                splitContainer1.Panel2.Controls.Clear();
                 splitContainer1.Panel2.Controls.Add(activePage);
+            }
+            else
+            {
+                Label lblPlaceholder = new Label
+                {
+                    Text = $"⚙️  {activeBtn.Text.Trim()} (Under Construction)",
+                    Font = new Font("Segoe UI", 16F, FontStyle.Bold),
+                    ForeColor = Color.FromArgb(100, 116, 139),
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    BackColor = Color.FromArgb(244, 245, 247)
+                };
+                splitContainer1.Panel2.Controls.Add(lblPlaceholder);
             }
         }
 

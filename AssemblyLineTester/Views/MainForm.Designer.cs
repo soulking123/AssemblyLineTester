@@ -103,6 +103,7 @@ namespace AssemblyLineTester.Views
             this.btnTestExecution.Text = "        Test Execution";
             this.btnTestExecution.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnTestExecution.UseVisualStyleBackColor = true;
+            this.btnTestExecution.Click += new System.EventHandler(this.BtnMenu_Click);
             // 
             // btnHarnessDatabase
             // 
@@ -135,6 +136,7 @@ namespace AssemblyLineTester.Views
             this.btnReports.Text = "        Reports";
             this.btnReports.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnReports.UseVisualStyleBackColor = true;
+            this.btnReports.Click += new System.EventHandler(this.BtnMenu_Click);
             // 
             // btnSystemLog
             // 
@@ -156,6 +158,7 @@ namespace AssemblyLineTester.Views
             this.btnSettings.Text = "        Settings";
             this.btnSettings.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnSettings.UseVisualStyleBackColor = true;
+            this.btnSettings.Click += new System.EventHandler(this.BtnMenu_Click);
             // 
             // btnUserManagement
             // 
@@ -166,6 +169,7 @@ namespace AssemblyLineTester.Views
             this.btnUserManagement.Text = "        User Management";
             this.btnUserManagement.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnUserManagement.UseVisualStyleBackColor = true;
+            this.btnUserManagement.Click += new System.EventHandler(this.BtnMenu_Click);
             // 
             // Form1
             // 

@@ -6,9 +6,9 @@ namespace AssemblyLineTester.Views.Pages
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                components?.Dispose();
             }
             base.Dispose(disposing);
         }
