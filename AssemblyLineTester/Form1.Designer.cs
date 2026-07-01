@@ -92,6 +92,7 @@
             this.btnDashboard.Text = "        Dashboard";
             this.btnDashboard.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnDashboard.UseVisualStyleBackColor = true;
+            this.btnDashboard.Click += new System.EventHandler(this.BtnMenu_Click);
             // 
             // btnTestExecution
             // 
@@ -112,6 +113,7 @@
             this.btnHarnessDatabase.Text = "        Harness Database";
             this.btnHarnessDatabase.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnHarnessDatabase.UseVisualStyleBackColor = true;
+            this.btnHarnessDatabase.Click += new System.EventHandler(this.BtnMenu_Click);
             // 
             // btnTestHistory
             // 

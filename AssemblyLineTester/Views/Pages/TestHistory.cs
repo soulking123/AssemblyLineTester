@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,11 +6,11 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace AssemblyLineTester
+namespace AssemblyLineTester.Views.Pages
 {
-    public partial class SystemLog : UserControl
+    public partial class TestHistory : UserControl
     {
-        public SystemLog()
+        public TestHistory()
         {
             InitializeComponent();
         }

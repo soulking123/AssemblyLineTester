@@ -12,12 +12,15 @@ namespace AssemblyLineTester
 
         private readonly TestHistory pageTestHistory = new();
         private readonly SystemLog pageSystemLog = new();
+        private readonly HarnessDatabase pageHarnessDb = new();
+        private readonly Dashboard pageDashboard = new();
 
         public Form1()
         {
             InitializeComponent();
+            this.WindowState = FormWindowState.Maximized;
             ApplySidebarStyles();
-            SetActiveMenu(btnTestHistory, pageTestHistory);
+            SetActiveMenu(btnDashboard, pageDashboard);
         }
 
         private void ApplySidebarStyles()
@@ -43,13 +46,21 @@ namespace AssemblyLineTester
         {
             if (sender is Button clickedButton)
             {
-                if (clickedButton == btnTestHistory)
+                if (clickedButton == btnDashboard)
+                {
+                    SetActiveMenu(btnDashboard, pageDashboard);
+                }
+                else if (clickedButton == btnTestHistory)
                 {
                     SetActiveMenu(btnTestHistory, pageTestHistory);
                 }
                 else if (clickedButton == btnSystemLog)
                 {
                     SetActiveMenu(btnSystemLog, pageSystemLog);
+                }
+                else if (clickedButton == btnHarnessDatabase)
+                {
+                    SetActiveMenu(btnHarnessDatabase, pageHarnessDb);
                 }
             }
         }

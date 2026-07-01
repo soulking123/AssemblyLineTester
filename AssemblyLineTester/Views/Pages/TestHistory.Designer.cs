@@ -1,4 +1,4 @@
-﻿namespace AssemblyLineTester
+namespace AssemblyLineTester.Views.Pages
 {
     partial class TestHistory
     {
