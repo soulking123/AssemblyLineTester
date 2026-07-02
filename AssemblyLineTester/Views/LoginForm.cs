@@ -1,6 +1,9 @@
 using AssemblyLineTester.Data;
+using AssemblyLineTester.Services;
 using System;
+using System.Linq;
 using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore;
 
 namespace AssemblyLineTester.Views
 {
@@ -54,6 +57,7 @@ namespace AssemblyLineTester.Views
                 using (var db = new AppDbContext())
                 {
                     var user = db.Users
+                        .Include(u => u.Role) // Eager load Role to set the Session details correctly
                         .FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
 
                     if (user == null)
@@ -66,6 +70,9 @@ namespace AssemblyLineTester.Views
 
                     if (isCorrect)
                     {
+                        // Save the logged-in user in memory
+                        SessionManager.SetSession(user);
+
                         MainForm dashboard = new();
                         
                         // Close login form to terminate the application process when dashboard closes

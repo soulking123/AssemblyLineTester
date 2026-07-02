@@ -912,7 +912,7 @@ namespace AssemblyLineTester.Views.Pages
             txtSearch.Margin = new Padding(5, 5, 10, 5);
             txtSearch.Name = "txtSearch";
             txtSearch.PlaceholderText = "Search by username, full name or email...";
-            txtSearch.Size = new Size(505, 43);
+            txtSearch.Size = new Size(505, 30);
             txtSearch.TabIndex = 0;
             // 
             // lblFilterStatus
@@ -938,7 +938,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterStatus.Location = new Point(525, 37);
             cmbFilterStatus.Margin = new Padding(5);
             cmbFilterStatus.Name = "cmbFilterStatus";
-            cmbFilterStatus.Size = new Size(250, 45);
+            cmbFilterStatus.Size = new Size(250, 31);
             cmbFilterStatus.TabIndex = 2;
             // 
             // lblFilterRole
@@ -964,7 +964,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterRole.Location = new Point(785, 37);
             cmbFilterRole.Margin = new Padding(5);
             cmbFilterRole.Name = "cmbFilterRole";
-            cmbFilterRole.Size = new Size(250, 45);
+            cmbFilterRole.Size = new Size(250, 31);
             cmbFilterRole.TabIndex = 4;
             // 
             // lblFilterDept
@@ -990,7 +990,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterDept.Location = new Point(1045, 37);
             cmbFilterDept.Margin = new Padding(5);
             cmbFilterDept.Name = "cmbFilterDept";
-            cmbFilterDept.Size = new Size(252, 45);
+            cmbFilterDept.Size = new Size(252, 31);
             cmbFilterDept.TabIndex = 6;
             // 
             // flpActionButtons
@@ -1343,7 +1343,7 @@ namespace AssemblyLineTester.Views.Pages
             lblColonStatus.Location = new Point(3, 8);
             lblColonStatus.Margin = new Padding(3, 8, 0, 0);
             lblColonStatus.Name = "lblColonStatus";
-            lblColonStatus.Size = new Size(26, 32);
+            lblColonStatus.Size = new Size(16, 20);
             lblColonStatus.TabIndex = 0;
             lblColonStatus.Text = ": ";
             // 
@@ -1353,11 +1353,11 @@ namespace AssemblyLineTester.Views.Pages
             lblValStatus.BackColor = Color.FromArgb(209, 231, 221);
             lblValStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblValStatus.ForeColor = Color.FromArgb(15, 81, 50);
-            lblValStatus.Location = new Point(32, 6);
+            lblValStatus.Location = new Point(22, 6);
             lblValStatus.Margin = new Padding(3, 6, 0, 0);
             lblValStatus.Name = "lblValStatus";
             lblValStatus.Padding = new Padding(6, 2, 6, 2);
-            lblValStatus.Size = new Size(97, 36);
+            lblValStatus.Size = new Size(65, 24);
             lblValStatus.TabIndex = 1;
             lblValStatus.Text = "Active";
             // 
@@ -1881,7 +1881,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // UserManagement
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             BackColor = Color.FromArgb(244, 245, 247);
