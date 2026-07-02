@@ -14,6 +14,7 @@ namespace AssemblyLineTester.Views
         private readonly Dashboard pageDashboard = new();
         private readonly TestExecution pageTestExecution = new();
         private readonly Reports pageReports = new();
+        private readonly Settings pageSettings = new();
         private readonly UserManagement pageUserManagement = new();
 
         public MainForm()
@@ -77,7 +78,7 @@ namespace AssemblyLineTester.Views
                 }
                 else if (clickedButton == btnSettings)
                 {
-                    SetActiveMenu(clickedButton, null);
+                    SetActiveMenu(clickedButton, pageSettings);
                 }
             }
         }
@@ -129,6 +130,12 @@ namespace AssemblyLineTester.Views
                 splitContainer1.SplitterDistance = expandedWidth;
                 isSidebarExpanded = true;
             }
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            Application.Exit();
         }
     }
 }

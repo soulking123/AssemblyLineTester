@@ -54,16 +54,20 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.RowTemplate.Height = 38;
 
             // Alignments
-            var colNo = gridReports.Columns["colNo"];
-            if (colNo is not null) colNo.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            var colReportType = gridReports.Columns["colReportType"];
-            if (colReportType is not null) colReportType.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            var colDateGenerated = gridReports.Columns["colDateGenerated"];
-            if (colDateGenerated is not null) colDateGenerated.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            var colSize = gridReports.Columns["colSize"];
-            if (colSize is not null) colSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            var colAction = gridReports.Columns["colAction"];
-            if (colAction is not null) colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            if (gridReports.Columns["colNo"] is { } colNo)
+                colNo.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+            if (gridReports.Columns["colReportType"] is { } colReportType)
+                colReportType.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+            if (gridReports.Columns["colDateGenerated"] is { } colDateGenerated)
+                colDateGenerated.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+            if (gridReports.Columns["colSize"] is { } colSize)
+                colSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+
+            if (gridReports.Columns["colAction"] is { } colAction)
+                colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
             gridReports.CellFormatting += GridReports_CellFormatting;
         }
