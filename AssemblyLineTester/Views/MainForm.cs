@@ -1,9 +1,12 @@
 using AssemblyLineTester.Views.Pages;
+using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views
 {
+    /// The main shell window for the application containing sidebar navigation and loaded subpages.
     public partial class MainForm : Form
     {
+        private readonly UserService _userService = new();
         private bool isSidebarExpanded = true;
         private readonly int expandedWidth = 380;
         private readonly int collapsedWidth = 90;
@@ -12,11 +15,22 @@ namespace AssemblyLineTester.Views
         private readonly SystemLog pageSystemLog = new();
         private readonly HarnessDatabase pageHarnessDb = new();
         private readonly Dashboard pageDashboard = new();
+        private readonly TestExecution pageTestExecution = new();
+        private readonly Reports pageReports = new();
+        private readonly Settings pageSettings = new();
+        //private readonly UserManagement pageUserManagement = new();
+        private readonly UserManagement pageUserManagement;
 
+        /// Initializes a new instance of the MainForm class.
         public MainForm()
         {
+            pageUserManagement = new UserManagement(_userService);
             InitializeComponent();
             this.WindowState = FormWindowState.Maximized;
+
+            // Restrict access to User Management sidebar button to Administrators only
+            btnUserManagement.Visible = (SessionManager.CurrentUser?.Role?.Name == "Administrator");
+
             ApplySidebarStyles();
             SetActiveMenu(btnDashboard, pageDashboard);
         }
@@ -48,6 +62,10 @@ namespace AssemblyLineTester.Views
                 {
                     SetActiveMenu(btnDashboard, pageDashboard);
                 }
+                else if (clickedButton == btnTestExecution)
+                {
+                    SetActiveMenu(btnTestExecution, pageTestExecution);
+                }
                 else if (clickedButton == btnTestHistory)
                 {
                     SetActiveMenu(btnTestHistory, pageTestHistory);
@@ -60,10 +78,22 @@ namespace AssemblyLineTester.Views
                 {
                     SetActiveMenu(btnHarnessDatabase, pageHarnessDb);
                 }
+                else if (clickedButton == btnReports)
+                {
+                    SetActiveMenu(btnReports, pageReports);
+                }
+                else if (clickedButton == btnUserManagement)
+                {
+                    SetActiveMenu(btnUserManagement, pageUserManagement);
+                }
+                else if (clickedButton == btnSettings)
+                {
+                    SetActiveMenu(clickedButton, pageSettings);
+                }
             }
         }
 
-        private void SetActiveMenu(Button activeBtn, UserControl activePage)
+        private void SetActiveMenu(Button activeBtn, UserControl? activePage)
         {
             Button[] allMenus = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
 
@@ -76,11 +106,24 @@ namespace AssemblyLineTester.Views
             activeBtn.BackColor = Color.FromArgb(255, 193, 7);
             activeBtn.ForeColor = Color.Black;
 
+            splitContainer1.Panel2.Controls.Clear();
             if (activePage != null)
             {
                 activePage.Dock = DockStyle.Fill;
-                splitContainer1.Panel2.Controls.Clear();
                 splitContainer1.Panel2.Controls.Add(activePage);
+            }
+            else
+            {
+                Label lblPlaceholder = new Label
+                {
+                    Text = $"⚙️  {activeBtn.Text.Trim()} (Under Construction)",
+                    Font = new Font("Segoe UI", 16F, FontStyle.Bold),
+                    ForeColor = Color.FromArgb(100, 116, 139),
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    BackColor = Color.FromArgb(244, 245, 247)
+                };
+                splitContainer1.Panel2.Controls.Add(lblPlaceholder);
             }
         }
 
@@ -97,6 +140,12 @@ namespace AssemblyLineTester.Views
                 splitContainer1.SplitterDistance = expandedWidth;
                 isSidebarExpanded = true;
             }
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            Application.Exit();
         }
     }
 }
