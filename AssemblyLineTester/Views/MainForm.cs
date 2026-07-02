@@ -1,9 +1,12 @@
 using AssemblyLineTester.Views.Pages;
+using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views
 {
+    /// The main shell window for the application containing sidebar navigation and loaded subpages.
     public partial class MainForm : Form
     {
+        private readonly UserService _userService = new();
         private bool isSidebarExpanded = true;
         private readonly int expandedWidth = 380;
         private readonly int collapsedWidth = 90;
@@ -15,12 +18,19 @@ namespace AssemblyLineTester.Views
         private readonly TestExecution pageTestExecution = new();
         private readonly Reports pageReports = new();
         private readonly Settings pageSettings = new();
-        private readonly UserManagement pageUserManagement = new();
+        //private readonly UserManagement pageUserManagement = new();
+        private readonly UserManagement pageUserManagement;
 
+        /// Initializes a new instance of the MainForm class.
         public MainForm()
         {
+            pageUserManagement = new UserManagement(_userService);
             InitializeComponent();
             this.WindowState = FormWindowState.Maximized;
+
+            // Restrict access to User Management sidebar button to Administrators only
+            btnUserManagement.Visible = (SessionManager.CurrentUser?.Role?.Name == "Administrator");
+
             ApplySidebarStyles();
             SetActiveMenu(btnDashboard, pageDashboard);
         }
