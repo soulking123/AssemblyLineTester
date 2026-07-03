@@ -24,11 +24,43 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        private void LogoBox_Paint(object? sender, PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var pen = new Pen(Color.FromArgb(15, 23, 42), 2.2f);
+            Rectangle rect = new Rectangle(4, 4, 22, 22);
+            e.Graphics.DrawEllipse(pen, rect);
+            e.Graphics.DrawLine(pen, 15, 15, 15, 9);
+            e.Graphics.DrawLine(pen, 15, 15, 19, 17);
+        }
+
+        private System.Drawing.Drawing2D.GraphicsPath GetRoundedPath(Rectangle rect, int radius)
+        {
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            int d = radius * 2;
+            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+            path.CloseFigure();
+            return path;
+        }
+
         private void SetupEvents()
         {
+            pnlFilterCard.Paint += pnlFilterCard_Paint;
             gridData.CellFormatting += gridData_CellFormatting;
+            gridData.CellPainting += gridData_CellPainting;
             gridSteps.CellFormatting += gridSteps_CellFormatting;
             btnRefresh.Click += (s, ev) => { LoadDummyData(); LoadDummyStepsData(); };
+        }
+
+        private void pnlFilterCard_Paint(object? sender, PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var pen = new Pen(Color.FromArgb(226, 232, 240), 1.2f);
+            using var path = GetRoundedPath(new Rectangle(0, 0, pnlFilterCard.Width - 1, pnlFilterCard.Height - 1), 8);
+            e.Graphics.DrawPath(pen, path);
         }
 
         private void SetColumnWidth(DataGridView grid, string colName, float fillWeight, DataGridViewContentAlignment alignment = DataGridViewContentAlignment.MiddleLeft)
@@ -50,13 +82,14 @@ namespace AssemblyLineTester.Views.Pages
             gridData.EnableHeadersVisualStyles = false;
             gridData.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
             gridData.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
-            gridData.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            gridData.ColumnHeadersHeight = 52;
-            gridData.DefaultCellStyle.Font = new Font("Segoe UI", 9.5F);
+            gridData.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            gridData.ColumnHeadersHeight = 44;
+            gridData.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
             gridData.DefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
             gridData.DefaultCellStyle.BackColor = Color.White;
             gridData.DefaultCellStyle.SelectionBackColor = Color.FromArgb(239, 246, 255);
             gridData.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 41, 59);
+            gridData.RowTemplate.Height = 40;
 
             gridData.Columns.Add("No", "No.");
             gridData.Columns.Add("TestTime", "Test Time ↓");
@@ -70,28 +103,28 @@ namespace AssemblyLineTester.Views.Pages
             gridData.Columns.Add("Operator", "Operator");
             gridData.Columns.Add("Action", "Action");
 
-            SetColumnWidth(gridData, "No", 45, DataGridViewContentAlignment.MiddleCenter);
-            SetColumnWidth(gridData, "TestTime", 160);
-            SetColumnWidth(gridData, "ProductModel", 90);
-            SetColumnWidth(gridData, "ProductType", 130);
-            SetColumnWidth(gridData, "Area", 140);
-            SetColumnWidth(gridData, "PartNumber", 130);
-            SetColumnWidth(gridData, "SerialNumber", 110);
-            SetColumnWidth(gridData, "Result", 90, DataGridViewContentAlignment.MiddleCenter);
-            SetColumnWidth(gridData, "TotalTime", 100, DataGridViewContentAlignment.MiddleCenter);
-            SetColumnWidth(gridData, "Operator", 100);
-            SetColumnWidth(gridData, "Action", 90, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "No", 40, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "TestTime", 155);
+            SetColumnWidth(gridData, "ProductModel", 85);
+            SetColumnWidth(gridData, "ProductType", 85, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "Area", 135);
+            SetColumnWidth(gridData, "PartNumber", 115);
+            SetColumnWidth(gridData, "SerialNumber", 100);
+            SetColumnWidth(gridData, "Result", 85, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "TotalTime", 90, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "Operator", 85);
+            SetColumnWidth(gridData, "Action", 60, DataGridViewContentAlignment.MiddleCenter);
 
-            gridData.Rows.Add("1", "15 Mar 2026 10:30:20 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12350", "PASS", "00:09:01", "Fally", "👁️ View");
-            gridData.Rows.Add("2", "15 Mar 2026 10:28:15 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12349", "PASS", "00:08:45", "Fally", "👁️ View");
-            gridData.Rows.Add("3", "15 Mar 2026 10:26:18 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12348", "FAIL", "00:10:32", "Fally", "👁️ View");
-            gridData.Rows.Add("4", "15 Mar 2026 10:24:10 AM", "6060", "DC", "Power Distribution", "WH-PWR-002", "SN12347", "PASS", "00:07:50", "Hendra", "👁️ View");
-            gridData.Rows.Add("5", "15 Mar 2026 10:21:05 AM", "797F", "AC", "Engine Control", "WH-ENG-002", "SN12346", "PASS", "00:11:20", "Budi", "👁️ View");
-            gridData.Rows.Add("6", "15 Mar 2026 10:18:50 AM", "797F", "DC", "Lighting Harness", "WH-LGT-001", "SN12345", "FAIL", "00:12:05", "Budi", "👁️ View");
-            gridData.Rows.Add("7", "15 Mar 2026 10:15:30 AM", "D11T", "AC", "Hydraulic Harness", "WH-HYD-003", "SN12344", "PASS", "00:09:40", "Fally", "👁️ View");
-            gridData.Rows.Add("8", "15 Mar 2026 10:12:15 AM", "D11T", "AC", "Transmission Harness", "WH-TRN-001", "SN12343", "PASS", "00:08:30", "Hendra", "👁️ View");
-            gridData.Rows.Add("9", "15 Mar 2026 10:09:00 AM", "6060", "DC", "Main Cabin Harness", "WH-CAB-004", "SN12342", "PASS", "00:14:15", "Fally", "👁️ View");
-            gridData.Rows.Add("10", "15 Mar 2026 10:05:45 AM", "797F", "AC", "Sensor Harness", "WH-SNS-002", "SN12341", "FAIL", "00:06:55", "Budi", "👁️ View");
+            gridData.Rows.Add("1", "15 Mar 2026 10:30:20 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12350", "PASS", "00:09:01", "Fally", "⋮");
+            gridData.Rows.Add("2", "15 Mar 2026 10:28:15 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12349", "PASS", "00:08:45", "Fally", "⋮");
+            gridData.Rows.Add("3", "15 Mar 2026 10:26:18 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12348", "FAIL", "00:10:32", "Fally", "⋮");
+            gridData.Rows.Add("4", "15 Mar 2026 10:24:11 AM", "6060", "AC", "Cabin", "WH-CAB-002", "SN12347", "PASS", "00:08:56", "Fally", "⋮");
+            gridData.Rows.Add("5", "15 Mar 2026 10:22:03 AM", "6060", "AC", "Main Frame", "WH-MF-003", "SN12346", "PASS", "00:07:58", "Fally", "⋮");
+            gridData.Rows.Add("6", "15 Mar 2026 10:20:15 AM", "6060", "AC", "Boom", "WH-BOOM-004", "SN12345", "PASS", "00:09:12", "Fally", "⋮");
+            gridData.Rows.Add("7", "15 Mar 2026 10:18:22 AM", "6060", "AC", "Power Module", "WH-PM-005", "SN12344", "PASS", "00:08:30", "Fally", "⋮");
+            gridData.Rows.Add("8", "15 Mar 2026 10:16:10 AM", "6060", "AC", "Lighting", "WH-LTG-006", "SN12343", "FAIL", "00:11:02", "Fally", "⋮");
+            gridData.Rows.Add("9", "15 Mar 2026 10:14:05 AM", "6060", "AC", "Hydraulic Control", "WH-HYD-007", "SN12342", "PASS", "00:09:05", "Fally", "⋮");
+            gridData.Rows.Add("10", "15 Mar 2026 10:12:20 AM", "6060", "AC", "Monitoring System", "WH-MON-008", "SN12341", "PASS", "00:08:40", "Fally", "⋮");
         }
 
         public void LoadDummyStepsData()
@@ -104,6 +137,7 @@ namespace AssemblyLineTester.Views.Pages
             gridSteps.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
             gridSteps.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             gridSteps.ColumnHeadersHeight = 38;
+            gridSteps.RowTemplate.Height = 36;
             gridSteps.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
             gridSteps.DefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
             gridSteps.DefaultCellStyle.BackColor = Color.White;
@@ -167,19 +201,36 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridData.Columns[e.ColumnIndex].Name == "Result" && e.Value != null)
             {
+                // Formatting handled by CellPainting for custom capsule shapes
+            }
+        }
+
+        private void gridData_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridData.Columns[e.ColumnIndex].Name == "Result" && e.Value is not null && e.Graphics is not null)
+            {
+                e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
                 string val = e.Value.ToString() ?? "";
-                if (val == "PASS")
+                Color bgCol = Color.FromArgb(209, 231, 221);
+                Color fgCol = Color.FromArgb(15, 81, 50);
+
+                if (val == "FAIL")
                 {
-                    e.CellStyle.BackColor = Color.FromArgb(209, 231, 221);
-                    e.CellStyle.ForeColor = Color.FromArgb(15, 81, 50);
-                    e.CellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                    bgCol = Color.FromArgb(248, 215, 218);
+                    fgCol = Color.FromArgb(132, 32, 41);
                 }
-                else if (val == "FAIL")
+
+                Rectangle badgeRect = new Rectangle(e.CellBounds.X + 8, e.CellBounds.Y + 7, e.CellBounds.Width - 16, e.CellBounds.Height - 14);
+                using (var brush = new SolidBrush(bgCol))
+                using (var path = GetRoundedPath(badgeRect, 10))
                 {
-                    e.CellStyle.BackColor = Color.FromArgb(248, 215, 218);
-                    e.CellStyle.ForeColor = Color.FromArgb(132, 32, 41);
-                    e.CellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                    e.Graphics.FillPath(brush, path);
                 }
+
+                TextRenderer.DrawText(e.Graphics, val, new Font("Segoe UI", 8.5F, FontStyle.Bold), badgeRect, fgCol, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                e.Handled = true;
             }
         }
 
