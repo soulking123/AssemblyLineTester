@@ -1526,7 +1526,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // TestHistory
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(244, 245, 247);
             Controls.Add(mainLayout);

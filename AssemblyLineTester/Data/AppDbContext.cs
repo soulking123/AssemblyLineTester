@@ -67,22 +67,36 @@ namespace AssemblyLineTester.Data
             );
 
             // 6. Seed initial users with secure BCrypt hashes
-            string adminHash = BCrypt.Net.BCrypt.HashPassword("000000");
+            string passHash = BCrypt.Net.BCrypt.HashPassword("000000");
             string faizHash = BCrypt.Net.BCrypt.HashPassword("12345678");
 
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
-                    UserId = 1,
+                    UserId = 100,
                     Username = "admin",
-                    PasswordHash = adminHash,
+                    PasswordHash = passHash,
                     FullName = "System Administrator",
+                    CompanyId = "CAT0100",
+                    RoleId = 1, // Administrator
+                    Department = "Engineering",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-01T08:00:00Z"),
+                    UpdatedAt = DateTime.Parse("2026-03-01T08:00:00Z")
+                },
+                new User
+                {
+                    UserId = 1,
+                    Username = "fally.kusuma",
+                    PasswordHash = passHash,
+                    FullName = "Fally Kusuma",
                     CompanyId = "CAT0001",
                     RoleId = 1, // Administrator
                     Department = "Engineering",
-                    StatusId = 1, // Active status
-                    CreatedAt = DateTime.Parse("2026-07-02T00:00:00Z"),
-                    UpdatedAt = DateTime.Parse("2026-07-02T00:00:00Z")
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-10T09:15:22"),
+                    LastLogin = DateTime.Parse("2026-03-15T10:28:41"),
+                    UpdatedAt = DateTime.Parse("2026-03-15T10:28:41")
                 },
                 new User
                 {
@@ -93,9 +107,206 @@ namespace AssemblyLineTester.Data
                     CompanyId = "CAT0002",
                     RoleId = 3, // Engineer
                     Department = "Engineering",
-                    StatusId = 1, // Active status
-                    CreatedAt = DateTime.Parse("2026-07-02T00:00:00Z"),
-                    UpdatedAt = DateTime.Parse("2026-07-02T00:00:00Z")
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-11T08:23:15"),
+                    LastLogin = DateTime.Parse("2026-03-15T09:41:12"),
+                    UpdatedAt = DateTime.Parse("2026-03-15T09:41:12")
+                },
+                new User
+                {
+                    UserId = 3,
+                    Username = "doni.pratama",
+                    PasswordHash = passHash,
+                    FullName = "Doni Pratama",
+                    CompanyId = "CAT0003",
+                    RoleId = 2, // Operator
+                    Department = "Production",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-12T14:10:05"),
+                    LastLogin = DateTime.Parse("2026-03-15T09:55:33"),
+                    UpdatedAt = DateTime.Parse("2026-03-15T09:55:33")
+                },
+                new User
+                {
+                    UserId = 4,
+                    Username = "rian.hidayat",
+                    PasswordHash = passHash,
+                    FullName = "Rian Hidayat",
+                    CompanyId = "CAT0004",
+                    RoleId = 4, // Technician
+                    Department = "Maintenance",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-12T15:45:30"),
+                    LastLogin = DateTime.Parse("2026-03-14T16:22:18"),
+                    UpdatedAt = DateTime.Parse("2026-03-14T16:22:18")
+                },
+                new User
+                {
+                    UserId = 5,
+                    Username = "maria.sari",
+                    PasswordHash = passHash,
+                    FullName = "Maria Sari",
+                    CompanyId = "CAT0005",
+                    RoleId = 2, // Operator
+                    Department = "Production",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-13T09:02:44"),
+                    LastLogin = DateTime.Parse("2026-03-15T08:17:09"),
+                    UpdatedAt = DateTime.Parse("2026-03-15T08:17:09")
+                },
+                new User
+                {
+                    UserId = 6,
+                    Username = "agus.setiawan",
+                    PasswordHash = passHash,
+                    FullName = "Agus Setiawan",
+                    CompanyId = "CAT0006",
+                    RoleId = 3, // Engineer
+                    Department = "Engineering",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-13T11:21:36"),
+                    LastLogin = DateTime.Parse("2026-03-15T07:58:23"),
+                    UpdatedAt = DateTime.Parse("2026-03-15T07:58:23")
+                },
+                new User
+                {
+                    UserId = 7,
+                    Username = "lina.putri",
+                    PasswordHash = passHash,
+                    FullName = "Lina Putri",
+                    CompanyId = "CAT0007",
+                    RoleId = 5, // Quality
+                    Department = "Quality Assurance",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-14T10:05:17"),
+                    LastLogin = DateTime.Parse("2026-03-14T17:11:05"),
+                    UpdatedAt = DateTime.Parse("2026-03-14T17:11:05")
+                },
+                new User
+                {
+                    UserId = 8,
+                    Username = "yudi.rahman",
+                    PasswordHash = passHash,
+                    FullName = "Yudi Rahman",
+                    CompanyId = "CAT0008",
+                    RoleId = 4, // Technician
+                    Department = "Maintenance",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-14T13:17:08"),
+                    LastLogin = DateTime.Parse("2026-03-14T15:33:44"),
+                    UpdatedAt = DateTime.Parse("2026-03-14T15:33:44")
+                },
+                new User
+                {
+                    UserId = 9,
+                    Username = "budi.santoso",
+                    PasswordHash = passHash,
+                    FullName = "Budi Santoso",
+                    CompanyId = "CAT0009",
+                    RoleId = 6, // Supervisor
+                    Department = "Production",
+                    StatusId = 2, // Inactive
+                    CreatedAt = DateTime.Parse("2026-03-05T09:40:10"),
+                    LastLogin = DateTime.Parse("2026-03-08T14:12:33"),
+                    UpdatedAt = DateTime.Parse("2026-03-08T14:12:33")
+                },
+                new User
+                {
+                    UserId = 10,
+                    Username = "lisa.kartika",
+                    PasswordHash = passHash,
+                    FullName = "Lisa Kartika",
+                    CompanyId = "CAT0010",
+                    RoleId = 2, // Operator
+                    Department = "Production",
+                    StatusId = 2, // Inactive
+                    CreatedAt = DateTime.Parse("2026-03-06T14:56:31"),
+                    LastLogin = DateTime.Parse("2026-03-07T11:07:15"),
+                    UpdatedAt = DateTime.Parse("2026-03-07T11:07:15")
+                },
+                new User
+                {
+                    UserId = 11,
+                    Username = "hendra.wijaya",
+                    PasswordHash = passHash,
+                    FullName = "Hendra Wijaya",
+                    CompanyId = "CAT0011",
+                    RoleId = 3, // Engineer
+                    Department = "Engineering",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-01T08:15:00"),
+                    LastLogin = DateTime.Parse("2026-03-06T10:15:00"),
+                    UpdatedAt = DateTime.Parse("2026-03-06T10:15:00")
+                },
+                new User
+                {
+                    UserId = 12,
+                    Username = "dewi.lestari",
+                    PasswordHash = passHash,
+                    FullName = "Dewi Lestari",
+                    CompanyId = "CAT0012",
+                    RoleId = 5, // Quality
+                    Department = "Quality Assurance",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-01T09:12:00"),
+                    LastLogin = DateTime.Parse("2026-03-05T14:30:15"),
+                    UpdatedAt = DateTime.Parse("2026-03-05T14:30:15")
+                },
+                new User
+                {
+                    UserId = 13,
+                    Username = "eko.nugroho",
+                    PasswordHash = passHash,
+                    FullName = "Eko Nugroho",
+                    CompanyId = "CAT0013",
+                    RoleId = 2, // Operator
+                    Department = "Production",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-02T11:20:00"),
+                    LastLogin = DateTime.Parse("2026-03-05T08:45:10"),
+                    UpdatedAt = DateTime.Parse("2026-03-05T08:45:10")
+                },
+                new User
+                {
+                    UserId = 14,
+                    Username = "siti.aminah",
+                    PasswordHash = passHash,
+                    FullName = "Siti Aminah",
+                    CompanyId = "CAT0014",
+                    RoleId = 4, // Technician
+                    Department = "Maintenance",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-02T13:30:00"),
+                    LastLogin = DateTime.Parse("2026-03-04T16:10:00"),
+                    UpdatedAt = DateTime.Parse("2026-03-04T16:10:00")
+                },
+                new User
+                {
+                    UserId = 15,
+                    Username = "joko.susilo",
+                    PasswordHash = passHash,
+                    FullName = "Joko Susilo",
+                    CompanyId = "CAT0015",
+                    RoleId = 2, // Operator
+                    Department = "Production",
+                    StatusId = 3, // Locked
+                    CreatedAt = DateTime.Parse("2026-03-03T10:00:00"),
+                    LastLogin = DateTime.Parse("2026-03-03T09:00:00"),
+                    UpdatedAt = DateTime.Parse("2026-03-03T09:00:00")
+                },
+                new User
+                {
+                    UserId = 16,
+                    Username = "ratna.sari",
+                    PasswordHash = passHash,
+                    FullName = "Ratna Sari",
+                    CompanyId = "CAT0016",
+                    RoleId = 6, // Supervisor
+                    Department = "Production",
+                    StatusId = 1, // Active
+                    CreatedAt = DateTime.Parse("2026-03-04T15:45:00"),
+                    LastLogin = DateTime.Parse("2026-03-03T13:15:20"),
+                    UpdatedAt = DateTime.Parse("2026-03-03T13:15:20")
                 }
             );
         }

@@ -720,7 +720,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // HarnessDatabase
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
             Controls.Add(tableLayoutPanelMain);

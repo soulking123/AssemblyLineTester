@@ -90,7 +90,12 @@ namespace AssemblyLineTester.Views.Pages
             btnAddUser = new Button();
             tblContentRow = new TableLayoutPanel();
             cardUserList = new Panel();
+            tblUserListContainer = new TableLayoutPanel();
             lblUserListTitle = new Label();
+            gridUsers = new DataGridView();
+            tblPagination = new TableLayoutPanel();
+            flpPaginationButtons = new FlowLayoutPanel();
+            lblPaginationInfo = new Label();
             tblDetailsColumn = new TableLayoutPanel();
             cardUserDetails = new Panel();
             tblUserBody = new TableLayoutPanel();
@@ -143,11 +148,6 @@ namespace AssemblyLineTester.Views.Pages
             lblActKey4 = new Label();
             lblActVal4 = new Label();
             lblUserActivityTitle = new Label();
-            tblUserListContainer = new TableLayoutPanel();
-            gridUsers = new DataGridView();
-            tblPagination = new TableLayoutPanel();
-            lblPaginationInfo = new Label();
-            flpPaginationButtons = new FlowLayoutPanel();
             btnPageNext = new Button();
             btnPage2 = new Button();
             btnPage1 = new Button();
@@ -180,6 +180,9 @@ namespace AssemblyLineTester.Views.Pages
             flpActionButtons.SuspendLayout();
             tblContentRow.SuspendLayout();
             cardUserList.SuspendLayout();
+            tblUserListContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)gridUsers).BeginInit();
+            tblPagination.SuspendLayout();
             tblDetailsColumn.SuspendLayout();
             cardUserDetails.SuspendLayout();
             tblUserBody.SuspendLayout();
@@ -190,7 +193,6 @@ namespace AssemblyLineTester.Views.Pages
             tblRoleLegend.SuspendLayout();
             cardUserActivity.SuspendLayout();
             tblActivityStats.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)gridUsers).BeginInit();
             SuspendLayout();
             // 
             // tblMain
@@ -912,7 +914,7 @@ namespace AssemblyLineTester.Views.Pages
             txtSearch.Margin = new Padding(5, 5, 10, 5);
             txtSearch.Name = "txtSearch";
             txtSearch.PlaceholderText = "Search by username, full name or email...";
-            txtSearch.Size = new Size(505, 30);
+            txtSearch.Size = new Size(505, 43);
             txtSearch.TabIndex = 0;
             // 
             // lblFilterStatus
@@ -938,7 +940,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterStatus.Location = new Point(525, 37);
             cmbFilterStatus.Margin = new Padding(5);
             cmbFilterStatus.Name = "cmbFilterStatus";
-            cmbFilterStatus.Size = new Size(250, 31);
+            cmbFilterStatus.Size = new Size(250, 45);
             cmbFilterStatus.TabIndex = 2;
             // 
             // lblFilterRole
@@ -964,7 +966,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterRole.Location = new Point(785, 37);
             cmbFilterRole.Margin = new Padding(5);
             cmbFilterRole.Name = "cmbFilterRole";
-            cmbFilterRole.Size = new Size(250, 31);
+            cmbFilterRole.Size = new Size(250, 45);
             cmbFilterRole.TabIndex = 4;
             // 
             // lblFilterDept
@@ -990,7 +992,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterDept.Location = new Point(1045, 37);
             cmbFilterDept.Margin = new Padding(5);
             cmbFilterDept.Name = "cmbFilterDept";
-            cmbFilterDept.Size = new Size(252, 31);
+            cmbFilterDept.Size = new Size(252, 45);
             cmbFilterDept.TabIndex = 6;
             // 
             // flpActionButtons
@@ -1076,7 +1078,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             cardUserList.BackColor = Color.White;
             cardUserList.BorderStyle = BorderStyle.FixedSingle;
-            cardUserList.Controls.Add(lblUserListTitle);
+            cardUserList.Controls.Add(tblUserListContainer);
             cardUserList.Dock = DockStyle.Fill;
             cardUserList.Location = new Point(10, 10);
             cardUserList.Margin = new Padding(10);
@@ -1085,17 +1087,89 @@ namespace AssemblyLineTester.Views.Pages
             cardUserList.Size = new Size(1398, 843);
             cardUserList.TabIndex = 0;
             // 
+            // tblUserListContainer
+            // 
+            tblUserListContainer.ColumnCount = 1;
+            tblUserListContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblUserListContainer.Controls.Add(lblUserListTitle, 0, 0);
+            tblUserListContainer.Controls.Add(gridUsers, 0, 1);
+            tblUserListContainer.Controls.Add(tblPagination, 0, 2);
+            tblUserListContainer.Dock = DockStyle.Fill;
+            tblUserListContainer.Location = new Point(15, 15);
+            tblUserListContainer.Margin = new Padding(0);
+            tblUserListContainer.Name = "tblUserListContainer";
+            tblUserListContainer.RowCount = 3;
+            tblUserListContainer.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
+            tblUserListContainer.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblUserListContainer.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
+            tblUserListContainer.Size = new Size(1366, 811);
+            tblUserListContainer.TabIndex = 0;
+            // 
             // lblUserListTitle
             // 
-            lblUserListTitle.Dock = DockStyle.Top;
+            lblUserListTitle.Dock = DockStyle.Fill;
             lblUserListTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblUserListTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblUserListTitle.Location = new Point(15, 15);
+            lblUserListTitle.Location = new Point(0, 0);
+            lblUserListTitle.Margin = new Padding(0);
             lblUserListTitle.Name = "lblUserListTitle";
-            lblUserListTitle.Size = new Size(1366, 35);
+            lblUserListTitle.Size = new Size(1366, 45);
             lblUserListTitle.TabIndex = 0;
             lblUserListTitle.Text = "USER LIST (Total: 16)";
             lblUserListTitle.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // gridUsers
+            // 
+            gridUsers.BackgroundColor = Color.White;
+            gridUsers.BorderStyle = BorderStyle.None;
+            gridUsers.ColumnHeadersHeight = 46;
+            gridUsers.Dock = DockStyle.Fill;
+            gridUsers.Location = new Point(0, 45);
+            gridUsers.Margin = new Padding(0);
+            gridUsers.Name = "gridUsers";
+            gridUsers.RowHeadersWidth = 82;
+            gridUsers.Size = new Size(1366, 714);
+            gridUsers.TabIndex = 1;
+            // 
+            // tblPagination
+            // 
+            tblPagination.ColumnCount = 3;
+            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
+            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+            tblPagination.Controls.Add(flpPaginationButtons, 0, 0);
+            tblPagination.Controls.Add(lblPaginationInfo, 2, 0);
+            tblPagination.Dock = DockStyle.Fill;
+            tblPagination.Location = new Point(0, 759);
+            tblPagination.Margin = new Padding(0);
+            tblPagination.Name = "tblPagination";
+            tblPagination.RowCount = 1;
+            tblPagination.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblPagination.Size = new Size(1366, 52);
+            tblPagination.TabIndex = 2;
+            // 
+            // flpPaginationButtons
+            // 
+            flpPaginationButtons.Dock = DockStyle.Fill;
+            flpPaginationButtons.Location = new Point(0, 0);
+            flpPaginationButtons.Margin = new Padding(0);
+            flpPaginationButtons.Name = "flpPaginationButtons";
+            flpPaginationButtons.Size = new Size(614, 52);
+            flpPaginationButtons.TabIndex = 0;
+            flpPaginationButtons.WrapContents = false;
+            // 
+            // lblPaginationInfo
+            // 
+            lblPaginationInfo.Dock = DockStyle.Fill;
+            lblPaginationInfo.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblPaginationInfo.ForeColor = Color.FromArgb(71, 85, 105);
+            lblPaginationInfo.Location = new Point(955, 0);
+            lblPaginationInfo.Margin = new Padding(0);
+            lblPaginationInfo.Name = "lblPaginationInfo";
+            lblPaginationInfo.Size = new Size(411, 52);
+            lblPaginationInfo.TabIndex = 1;
+            lblPaginationInfo.Text = "Showing 1 to 10 of 16 users";
+            lblPaginationInfo.TextAlign = ContentAlignment.MiddleRight;
             // 
             // tblDetailsColumn
             // 
@@ -1343,7 +1417,7 @@ namespace AssemblyLineTester.Views.Pages
             lblColonStatus.Location = new Point(3, 8);
             lblColonStatus.Margin = new Padding(3, 8, 0, 0);
             lblColonStatus.Name = "lblColonStatus";
-            lblColonStatus.Size = new Size(16, 20);
+            lblColonStatus.Size = new Size(26, 32);
             lblColonStatus.TabIndex = 0;
             lblColonStatus.Text = ": ";
             // 
@@ -1353,11 +1427,11 @@ namespace AssemblyLineTester.Views.Pages
             lblValStatus.BackColor = Color.FromArgb(209, 231, 221);
             lblValStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblValStatus.ForeColor = Color.FromArgb(15, 81, 50);
-            lblValStatus.Location = new Point(22, 6);
+            lblValStatus.Location = new Point(32, 6);
             lblValStatus.Margin = new Padding(3, 6, 0, 0);
             lblValStatus.Name = "lblValStatus";
             lblValStatus.Padding = new Padding(6, 2, 6, 2);
-            lblValStatus.Size = new Size(65, 24);
+            lblValStatus.Size = new Size(97, 36);
             lblValStatus.TabIndex = 1;
             lblValStatus.Text = "Active";
             // 
@@ -1807,43 +1881,6 @@ namespace AssemblyLineTester.Views.Pages
             lblUserActivityTitle.Size = new Size(556, 23);
             lblUserActivityTitle.TabIndex = 2;
             // 
-            // tblUserListContainer
-            // 
-            tblUserListContainer.Location = new Point(0, 0);
-            tblUserListContainer.Name = "tblUserListContainer";
-            tblUserListContainer.Size = new Size(200, 100);
-            tblUserListContainer.TabIndex = 0;
-            // 
-            // gridUsers
-            // 
-            gridUsers.ColumnHeadersHeight = 46;
-            gridUsers.Location = new Point(0, 0);
-            gridUsers.Name = "gridUsers";
-            gridUsers.RowHeadersWidth = 82;
-            gridUsers.Size = new Size(240, 150);
-            gridUsers.TabIndex = 0;
-            // 
-            // tblPagination
-            // 
-            tblPagination.Location = new Point(0, 0);
-            tblPagination.Name = "tblPagination";
-            tblPagination.Size = new Size(200, 100);
-            tblPagination.TabIndex = 0;
-            // 
-            // lblPaginationInfo
-            // 
-            lblPaginationInfo.Location = new Point(0, 0);
-            lblPaginationInfo.Name = "lblPaginationInfo";
-            lblPaginationInfo.Size = new Size(100, 23);
-            lblPaginationInfo.TabIndex = 0;
-            // 
-            // flpPaginationButtons
-            // 
-            flpPaginationButtons.Location = new Point(0, 0);
-            flpPaginationButtons.Name = "flpPaginationButtons";
-            flpPaginationButtons.Size = new Size(200, 100);
-            flpPaginationButtons.TabIndex = 0;
-            // 
             // btnPageNext
             // 
             btnPageNext.Location = new Point(0, 0);
@@ -1881,7 +1918,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // UserManagement
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             BackColor = Color.FromArgb(244, 245, 247);
@@ -1930,6 +1967,9 @@ namespace AssemblyLineTester.Views.Pages
             flpActionButtons.ResumeLayout(false);
             tblContentRow.ResumeLayout(false);
             cardUserList.ResumeLayout(false);
+            tblUserListContainer.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)gridUsers).EndInit();
+            tblPagination.ResumeLayout(false);
             tblDetailsColumn.ResumeLayout(false);
             cardUserDetails.ResumeLayout(false);
             tblUserBody.ResumeLayout(false);
@@ -1945,7 +1985,6 @@ namespace AssemblyLineTester.Views.Pages
             cardUserActivity.ResumeLayout(false);
             tblActivityStats.ResumeLayout(false);
             tblActivityStats.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)gridUsers).EndInit();
             ResumeLayout(false);
 
         }
