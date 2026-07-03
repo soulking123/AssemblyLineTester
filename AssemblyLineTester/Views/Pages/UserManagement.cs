@@ -182,7 +182,7 @@ namespace AssemblyLineTester.Views.Pages
                 filtered = filtered.Where(u => 
                     u.Username.ToLower().Contains(searchText) || 
                     u.FullName.ToLower().Contains(searchText) || 
-                    u.Department.ToLower().Contains(searchText));
+                    $"{u.Username.ToLower()}@caterpillar.com".Contains(searchText));
             }
 
             if (filterStatus != "Status: All")

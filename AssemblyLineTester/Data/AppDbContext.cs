@@ -10,6 +10,7 @@ namespace AssemblyLineTester.Data
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<UserStatus> UserStatuses { get; set; } = null!;
+        public DbSet<MaintenanceState> MaintenanceStates { get; set; } = null!;
 
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -73,7 +74,7 @@ namespace AssemblyLineTester.Data
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
-                    UserId = 100,
+                    UserId = 1,
                     Username = "admin",
                     PasswordHash = passHash,
                     FullName = "System Administrator",
@@ -86,8 +87,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 1,
-                    Username = "fally.kusuma",
+                    UserId = 2,
+                    Username = "fally12",
                     PasswordHash = passHash,
                     FullName = "Fally Kusuma",
                     CompanyId = "CAT0001",
@@ -100,7 +101,7 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 2,
+                    UserId = 3,
                     Username = "faiz",
                     PasswordHash = faizHash,
                     FullName = "Faiz",
@@ -114,8 +115,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 3,
-                    Username = "doni.pratama",
+                    UserId = 4,
+                    Username = "doni42",
                     PasswordHash = passHash,
                     FullName = "Doni Pratama",
                     CompanyId = "CAT0003",
@@ -128,8 +129,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 4,
-                    Username = "rian.hidayat",
+                    UserId = 5,
+                    Username = "rian24",
                     PasswordHash = passHash,
                     FullName = "Rian Hidayat",
                     CompanyId = "CAT0004",
@@ -142,8 +143,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 5,
-                    Username = "maria.sari",
+                    UserId = 6,
+                    Username = "maria57",
                     PasswordHash = passHash,
                     FullName = "Maria Sari",
                     CompanyId = "CAT0005",
@@ -156,8 +157,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 6,
-                    Username = "agus.setiawan",
+                    UserId = 7,
+                    Username = "agus08",
                     PasswordHash = passHash,
                     FullName = "Agus Setiawan",
                     CompanyId = "CAT0006",
@@ -170,8 +171,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 7,
-                    Username = "lina.putri",
+                    UserId = 8,
+                    Username = "lina15",
                     PasswordHash = passHash,
                     FullName = "Lina Putri",
                     CompanyId = "CAT0007",
@@ -184,8 +185,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 8,
-                    Username = "yudi.rahman",
+                    UserId = 9,
+                    Username = "yudi89",
                     PasswordHash = passHash,
                     FullName = "Yudi Rahman",
                     CompanyId = "CAT0008",
@@ -198,8 +199,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 9,
-                    Username = "budi.santoso",
+                    UserId = 10,
+                    Username = "budi24",
                     PasswordHash = passHash,
                     FullName = "Budi Santoso",
                     CompanyId = "CAT0009",
@@ -212,8 +213,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 10,
-                    Username = "lisa.kartika",
+                    UserId = 11,
+                    Username = "lisa11",
                     PasswordHash = passHash,
                     FullName = "Lisa Kartika",
                     CompanyId = "CAT0010",
@@ -226,8 +227,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 11,
-                    Username = "hendra.wijaya",
+                    UserId = 12,
+                    Username = "hendra655",
                     PasswordHash = passHash,
                     FullName = "Hendra Wijaya",
                     CompanyId = "CAT0011",
@@ -240,8 +241,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 12,
-                    Username = "dewi.lestari",
+                    UserId = 13,
+                    Username = "dewi89",
                     PasswordHash = passHash,
                     FullName = "Dewi Lestari",
                     CompanyId = "CAT0012",
@@ -254,8 +255,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 13,
-                    Username = "eko.nugroho",
+                    UserId = 14,
+                    Username = "eko25",
                     PasswordHash = passHash,
                     FullName = "Eko Nugroho",
                     CompanyId = "CAT0013",
@@ -268,8 +269,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 14,
-                    Username = "siti.aminah",
+                    UserId = 15,
+                    Username = "siti64",
                     PasswordHash = passHash,
                     FullName = "Siti Aminah",
                     CompanyId = "CAT0014",
@@ -282,8 +283,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 15,
-                    Username = "joko.susilo",
+                    UserId = 16,
+                    Username = "joko11",
                     PasswordHash = passHash,
                     FullName = "Joko Susilo",
                     CompanyId = "CAT0015",
@@ -296,8 +297,8 @@ namespace AssemblyLineTester.Data
                 },
                 new User
                 {
-                    UserId = 16,
-                    Username = "ratna.sari",
+                    UserId = 17,
+                    Username = "ratna97",
                     PasswordHash = passHash,
                     FullName = "Ratna Sari",
                     CompanyId = "CAT0016",
@@ -307,6 +308,17 @@ namespace AssemblyLineTester.Data
                     CreatedAt = DateTime.Parse("2026-03-04T15:45:00"),
                     LastLogin = DateTime.Parse("2026-03-03T13:15:20"),
                     UpdatedAt = DateTime.Parse("2026-03-03T13:15:20")
+                }
+            );
+
+            modelBuilder.Entity<MaintenanceState>().HasData(
+                new MaintenanceState
+                {
+                    Id = 1,
+                    LastUsageDate = DateTime.Today,
+                    OperatingSecondsToday = 0,
+                    RemainingMaintDays = 180,
+                    RemainingMaintHours = 2160.0
                 }
             );
         }

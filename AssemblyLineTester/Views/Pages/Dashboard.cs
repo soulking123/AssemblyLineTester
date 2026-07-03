@@ -2,16 +2,20 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class Dashboard : UserControl
     {
+        private System.Windows.Forms.Timer? _uiRefreshTimer;
+
         public Dashboard()
         {
             InitializeComponent();
             InitializeCustomStyles();
             LoadDummyData();
+            StartUiRefreshTimer();
         }
 
         private void InitializeCustomStyles()
@@ -236,6 +240,40 @@ namespace AssemblyLineTester.Views.Pages
                     e.ChartGraphics.Graphics.DrawString(subText, fontSub, brushSub, centerX, centerY + 16, sf);
                 }
             }
+        }
+
+        private void StartUiRefreshTimer()
+        {
+            _uiRefreshTimer = new System.Windows.Forms.Timer();
+            _uiRefreshTimer.Interval = 1000;
+            _uiRefreshTimer.Tick += (s, e) => UpdateMaintenanceLabels();
+            _uiRefreshTimer.Start();
+            UpdateMaintenanceLabels(); // Initial update on load
+        }
+
+        private void UpdateMaintenanceLabels()
+        {
+            // Update Operating Time today (hh:mm:ss)
+            TimeSpan timeToday = TimeSpan.FromSeconds(MaintenanceService.ActiveOperatingSeconds);
+            lblOpTimeVal.Text = timeToday.ToString(@"hh\:mm\:ss");
+
+            // Update Next Maintenance remaining days
+            lblMaintVal.Text = $"{MaintenanceService.RemainingDays} Days";
+
+            // Update Next Maintenance remaining hours (ticking down in real-time)
+            double currentRemainingHours = Math.Max(0, MaintenanceService.RemainingHours - (MaintenanceService.ActiveOperatingSeconds / 3600.0));
+            lblMaintSub.Text = $"Or {currentRemainingHours:N1} Hours";
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            if (_uiRefreshTimer != null)
+            {
+                _uiRefreshTimer.Stop();
+                _uiRefreshTimer.Dispose();
+                _uiRefreshTimer = null;
+            }
+            base.OnHandleDestroyed(e);
         }
     }
 }

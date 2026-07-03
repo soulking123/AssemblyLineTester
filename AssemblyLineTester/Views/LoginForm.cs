@@ -68,15 +68,28 @@ namespace AssemblyLineTester.Views
 
                     bool isCorrect = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
 
+
+                    // update last login timestamp, save the logged-in user to the session, and close login form
                     if (isCorrect)
                     {
+                        // Update LastLogin field and persist to SQLite database
+                        user.LastLogin = DateTime.Now;
+                        db.SaveChanges();
+
                         // Save the logged-in user in memory
                         SessionManager.SetSession(user);
+
+                        // Start tracking maintenance and operational hours
+                        MaintenanceService.StartTracking();
 
                         MainForm dashboard = new();
                         
                         // Close login form to terminate the application process when dashboard closes
-                        dashboard.FormClosed += (s, args) => this.Close(); 
+                        dashboard.FormClosed += (s, args) => 
+                        {
+                            MaintenanceService.StopTrackingAndSave();
+                            this.Close();
+                        };
                         
                         dashboard.Show();
                         this.Hide();
