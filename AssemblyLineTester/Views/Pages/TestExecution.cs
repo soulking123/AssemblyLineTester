@@ -51,20 +51,22 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.Columns.Add("Measured", "Measured Value");
             gridLiveDetails.Columns.Add("Status", "Status");
 
-            gridLiveDetails.Columns["StepNo"]!.Width = 45;
-            gridLiveDetails.Columns["TestPoint"]!.Width = 130;
-            gridLiveDetails.Columns["TestType"]!.Width = 130;
-            gridLiveDetails.Columns["Expected"]!.Width = 120;
-            gridLiveDetails.Columns["Measured"]!.Width = 120;
+            gridLiveDetails.AllowUserToResizeColumns = true;
+            gridLiveDetails.Columns["StepNo"]!.Width = 55;
+            gridLiveDetails.Columns["TestPoint"]!.Width = 240;
+            gridLiveDetails.Columns["TestType"]!.Width = 180;
+            gridLiveDetails.Columns["Expected"]!.Width = 240;
+            gridLiveDetails.Columns["Measured"]!.Width = 240;
+            gridLiveDetails.Columns["Status"]!.MinimumWidth = 140;
             gridLiveDetails.Columns["Status"]!.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-            gridLiveDetails.RowTemplate.Height = 32;
-            gridLiveDetails.ColumnHeadersHeight = 36;
+            gridLiveDetails.RowTemplate.Height = 36;
+            gridLiveDetails.ColumnHeadersHeight = 40;
             gridLiveDetails.EnableHeadersVisualStyles = false;
             gridLiveDetails.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
             gridLiveDetails.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
             gridLiveDetails.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            gridLiveDetails.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+            gridLiveDetails.DefaultCellStyle.Font = new Font("Segoe UI", 9.2F);
 
             // Add dummy test execution rows
             object[][] rows = new object[][]

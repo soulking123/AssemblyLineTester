@@ -72,8 +72,10 @@ namespace AssemblyLineTester.Views.Pages
                     Color textCol = val == "Active" ? Color.FromArgb(22, 101, 52) : Color.FromArgb(71, 85, 105);
 
                     e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    int pillWidth = 72;
-                    int pillHeight = 24;
+                    using var font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+                    int textWidth = (int)Math.Ceiling(e.Graphics.MeasureString(val, font).Width);
+                    int pillWidth = Math.Max(76, textWidth + 24);
+                    int pillHeight = 26;
                     int x = e.CellBounds.X + (e.CellBounds.Width - pillWidth) / 2;
                     int y = e.CellBounds.Y + (e.CellBounds.Height - pillHeight) / 2;
                     var pillRect = new Rectangle(x, y, pillWidth, pillHeight);
@@ -88,8 +90,9 @@ namespace AssemblyLineTester.Views.Pages
                     path.CloseFigure();
                     e.Graphics.FillPath(brush, path);
 
-                    using var font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-                    TextRenderer.DrawText(e.Graphics, val, font, pillRect, textCol, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    using var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                    using var textBrush = new SolidBrush(textCol);
+                    e.Graphics.DrawString(val, font, textBrush, pillRect, sf);
                 }
                 e.Handled = true;
             }
@@ -208,7 +211,8 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         AutoSize = true,
                         FlowDirection = FlowDirection.LeftToRight,
-                        Margin = new Padding(0, 4, 0, 0)
+                        WrapContents = false,
+                        Margin = new Padding(0, 2, 0, 0)
                     };
                     var lblColon = new Label
                     {
@@ -216,20 +220,41 @@ namespace AssemblyLineTester.Views.Pages
                         Font = new Font("Segoe UI", 9F),
                         ForeColor = Color.FromArgb(51, 65, 85),
                         AutoSize = true,
-                        Margin = new Padding(0, 2, 4, 0)
+                        Margin = new Padding(0, 4, 4, 0)
                     };
-                    var lblBadge = new Label
+                    string statusText = data[i].Val.Replace(":", "").Trim();
+                    using var badgeFont = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+                    int textWidth = TextRenderer.MeasureText(statusText, badgeFont).Width;
+                    int badgeWidth = Math.Max(76, textWidth + 24);
+                    Color backCol = statusText == "Active" ? Color.FromArgb(220, 252, 231) : Color.FromArgb(241, 245, 249);
+                    Color textCol = statusText == "Active" ? Color.FromArgb(22, 101, 52) : Color.FromArgb(71, 85, 105);
+                    var pnlBadge = new Panel
                     {
-                        Text = "Active",
-                        Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
-                        ForeColor = Color.FromArgb(22, 101, 52),
-                        BackColor = Color.FromArgb(220, 252, 231),
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        Size = new Size(68, 24),
-                        Margin = new Padding(0)
+                        Size = new Size(badgeWidth, 26),
+                        Margin = new Padding(0),
+                        BackColor = Color.Transparent
+                    };
+                    pnlBadge.Paint += (s, pe) =>
+                    {
+                        pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                        var pillRect = new Rectangle(0, 0, pnlBadge.Width, pnlBadge.Height);
+                        using var brush = new SolidBrush(backCol);
+                        using var path = new GraphicsPath();
+                        int r = 6;
+                        path.AddArc(pillRect.X, pillRect.Y, r * 2, r * 2, 180, 90);
+                        path.AddArc(pillRect.Right - r * 2, pillRect.Y, r * 2, r * 2, 270, 90);
+                        path.AddArc(pillRect.Right - r * 2, pillRect.Bottom - r * 2, r * 2, r * 2, 0, 90);
+                        path.AddArc(pillRect.X, pillRect.Bottom - r * 2, r * 2, r * 2, 90, 90);
+                        path.CloseFigure();
+                        pe.Graphics.FillPath(brush, path);
+
+                        using var f = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+                        using var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                        using var textBrush = new SolidBrush(textCol);
+                        pe.Graphics.DrawString(statusText, f, textBrush, new RectangleF(0, 0, pnlBadge.Width, pnlBadge.Height), sf);
                     };
                     pnlStatus.Controls.Add(lblColon);
-                    pnlStatus.Controls.Add(lblBadge);
+                    pnlStatus.Controls.Add(pnlBadge);
                     tblGenInfo.Controls.Add(pnlStatus, 1, i);
                 }
                 else

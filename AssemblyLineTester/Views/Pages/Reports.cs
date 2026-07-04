@@ -42,8 +42,9 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
             gridReports.ColumnHeadersDefaultCellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
             gridReports.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(248, 250, 252);
-            gridReports.ColumnHeadersDefaultCellStyle.Padding = new(8);
-            gridReports.ColumnHeadersHeight = 40;
+            gridReports.ColumnHeadersDefaultCellStyle.Padding = new(8, 4, 8, 4);
+            gridReports.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            gridReports.ColumnHeadersHeight = 48;
 
             // Row Style
             gridReports.DefaultCellStyle.BackColor = Color.White;
@@ -51,7 +52,7 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.DefaultCellStyle.SelectionBackColor = Color.FromArgb(241, 245, 249);
             gridReports.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 41, 59);
             gridReports.DefaultCellStyle.Padding = new(6);
-            gridReports.RowTemplate.Height = 38;
+            gridReports.RowTemplate.Height = 48;
 
             // Alignments
             if (gridReports.Columns["colNo"] is { } colNo)

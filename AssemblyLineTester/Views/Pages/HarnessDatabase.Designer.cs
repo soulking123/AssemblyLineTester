@@ -28,8 +28,8 @@ namespace AssemblyLineTester.Views.Pages
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             splitContainerMain = new SplitContainer();
             tableLayoutPanelLeft = new TableLayoutPanel();
             lblListTitle = new Label();
@@ -181,25 +181,24 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewList.BorderStyle = BorderStyle.None;
             dataGridViewList.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             dataGridViewList.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.FromArgb(248, 250, 252);
-            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dataGridViewCellStyle3.ForeColor = Color.FromArgb(71, 85, 105);
-            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(248, 250, 252);
-            dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(71, 85, 105);
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
-            dataGridViewList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            dataGridViewList.ColumnHeadersHeight = 40;
-            dataGridViewList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 250, 252);
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle1.ForeColor = Color.FromArgb(71, 85, 105);
+            dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(248, 250, 252);
+            dataGridViewCellStyle1.SelectionForeColor = Color.FromArgb(71, 85, 105);
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dataGridViewList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewList.Columns.AddRange(new DataGridViewColumn[] { colNo, colProductModel, colProductType, colArea, colPartNumber, colEcnNo, colRevision, colStatus, colLastUpdated });
-            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = Color.White;
-            dataGridViewCellStyle4.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle4.ForeColor = Color.FromArgb(30, 41, 59);
-            dataGridViewCellStyle4.SelectionBackColor = Color.FromArgb(239, 246, 255);
-            dataGridViewCellStyle4.SelectionForeColor = Color.FromArgb(30, 41, 59);
-            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.False;
-            dataGridViewList.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.White;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(30, 41, 59);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(239, 246, 255);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(30, 41, 59);
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dataGridViewList.DefaultCellStyle = dataGridViewCellStyle2;
             dataGridViewList.Dock = DockStyle.Fill;
             dataGridViewList.EnableHeadersVisualStyles = false;
             dataGridViewList.GridColor = Color.FromArgb(241, 245, 249);
@@ -216,64 +215,73 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // colNo
             // 
+            colNo.FillWeight = 30F;
             colNo.HeaderText = "No.";
-            colNo.MinimumWidth = 10;
+            colNo.MinimumWidth = 35;
             colNo.Name = "colNo";
             colNo.ReadOnly = true;
             // 
             // colProductModel
             // 
-            colProductModel.HeaderText = "Product Model";
-            colProductModel.MinimumWidth = 10;
+            colProductModel.FillWeight = 60F;
+            colProductModel.HeaderText = "Product\r\nModel";
+            colProductModel.MinimumWidth = 65;
             colProductModel.Name = "colProductModel";
             colProductModel.ReadOnly = true;
             // 
             // colProductType
             // 
-            colProductType.HeaderText = "Product Type";
-            colProductType.MinimumWidth = 10;
+            colProductType.FillWeight = 55F;
+            colProductType.HeaderText = "Product\r\nType";
+            colProductType.MinimumWidth = 60;
             colProductType.Name = "colProductType";
             colProductType.ReadOnly = true;
             // 
             // colArea
             // 
+            colArea.FillWeight = 220F;
             colArea.HeaderText = "Area";
-            colArea.MinimumWidth = 10;
+            colArea.MinimumWidth = 160;
             colArea.Name = "colArea";
             colArea.ReadOnly = true;
             // 
             // colPartNumber
             // 
-            colPartNumber.HeaderText = "Part Number";
-            colPartNumber.MinimumWidth = 10;
+            colPartNumber.FillWeight = 160F;
+            colPartNumber.HeaderText = "Part\r\nNumber";
+            colPartNumber.MinimumWidth = 130;
             colPartNumber.Name = "colPartNumber";
             colPartNumber.ReadOnly = true;
             // 
             // colEcnNo
             // 
-            colEcnNo.HeaderText = "ECN No.";
-            colEcnNo.MinimumWidth = 10;
+            colEcnNo.FillWeight = 75F;
+            colEcnNo.HeaderText = "ECN\r\nNo.";
+            colEcnNo.MinimumWidth = 75;
             colEcnNo.Name = "colEcnNo";
             colEcnNo.ReadOnly = true;
             // 
             // colRevision
             // 
-            colRevision.HeaderText = "Revision";
-            colRevision.MinimumWidth = 10;
+            colRevision.FillWeight = 45F;
+            colRevision.HeaderText = "Rev.";
+            colRevision.MinimumWidth = 45;
             colRevision.Name = "colRevision";
             colRevision.ReadOnly = true;
             // 
             // colStatus
             // 
+            colStatus.FillWeight = 75F;
             colStatus.HeaderText = "Status";
-            colStatus.MinimumWidth = 10;
+            colStatus.MinimumWidth = 75;
             colStatus.Name = "colStatus";
             colStatus.ReadOnly = true;
             // 
             // colLastUpdated
             // 
-            colLastUpdated.HeaderText = "Last Updated";
-            colLastUpdated.MinimumWidth = 10;
+            colLastUpdated.FillWeight = 95F;
+            colLastUpdated.HeaderText = "Last\r\nUpdated";
+            colLastUpdated.MinimumWidth = 90;
             colLastUpdated.Name = "colLastUpdated";
             colLastUpdated.ReadOnly = true;
             // 
@@ -363,7 +371,7 @@ namespace AssemblyLineTester.Views.Pages
             tableLayoutPanelRight.Name = "tableLayoutPanelRight";
             tableLayoutPanelRight.RowCount = 2;
             tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 58F));
-            tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 42F));
+            tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tableLayoutPanelRight.Size = new Size(3311, 2815);
             tableLayoutPanelRight.TabIndex = 0;
             // 
@@ -671,7 +679,6 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblSpecsContent
             // 
-            tblSpecsContent.AutoScroll = true;
             tblSpecsContent.ColumnCount = 4;
             tblSpecsContent.ColumnStyles.Add(new ColumnStyle());
             tblSpecsContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
@@ -682,10 +689,10 @@ namespace AssemblyLineTester.Views.Pages
             tblSpecsContent.Margin = new Padding(0);
             tblSpecsContent.Name = "tblSpecsContent";
             tblSpecsContent.RowCount = 4;
-            tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 292F));
-            tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 272F));
-            tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 276F));
-            tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 8F));
+            tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblSpecsContent.Size = new Size(1757, 1089);
             tblSpecsContent.TabIndex = 1;
             // 
@@ -715,7 +722,6 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblTestSummaryContent
             // 
-            tblTestSummaryContent.AutoScroll = true;
             tblTestSummaryContent.ColumnCount = 2;
             tblTestSummaryContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
             tblTestSummaryContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
@@ -724,10 +730,10 @@ namespace AssemblyLineTester.Views.Pages
             tblTestSummaryContent.Margin = new Padding(0);
             tblTestSummaryContent.Name = "tblTestSummaryContent";
             tblTestSummaryContent.RowCount = 4;
-            tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 292F));
-            tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 272F));
-            tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 276F));
-            tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 8F));
+            tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblTestSummaryContent.Size = new Size(1442, 1089);
             tblTestSummaryContent.TabIndex = 1;
             // 

@@ -17,7 +17,11 @@ namespace AssemblyLineTester.Views.Pages
             this.BackColor = Color.FromArgb(248, 250, 252);
             panelFilters.Paint += PanelFilters_Paint;
             pnlLeft.Paint += PanelFilters_Paint;
-            pnlSummary.Paint += PnlSummary_Paint;
+            pnlSummary.Paint += PanelFilters_Paint;
+            if (pnlChartContainer != null)
+            {
+                pnlChartContainer.Paint += PnlChartContainer_Paint;
+            }
             pnlLevelStats.Paint += PnlLevelStats_Paint;
             pnlModuleStats.Paint += PnlModuleStats_Paint;
             pnlLogDetail.Paint += PanelFilters_Paint;
@@ -82,6 +86,10 @@ namespace AssemblyLineTester.Views.Pages
             gridData.Rows.Add("10", "15 Mar 2026 10:35:07 AM", "INFO", "Communication", "System", "Reconnected", "PLC reconnected successfully", "192.168.1.100   ⋮");
             gridData.Rows.Add("11", "15 Mar 2026 10:40:11 AM", "INFO", "User Management", "Fally", "Login", "User login success", "192.168.1.105   ⋮");
             gridData.Rows.Add("12", "15 Mar 2026 10:45:33 AM", "WARNING", "Database", "System", "Backup", "Database auto backup completed", "192.168.1.100   ⋮");
+
+            if (lblLegInfo != null) lblLegInfo.Text = "INFO : 1,142 (90.8%)";
+            if (lblLegWarn != null) lblLegWarn.Text = "WARNING : 84 (6.7%)";
+            if (lblLegError != null) lblLegError.Text = "ERROR : 32 (2.5%)";
         }
 
         private void SetColumnWidth(DataGridView grid, string colName, float fillWeight, DataGridViewContentAlignment alignment = DataGridViewContentAlignment.MiddleLeft)
@@ -138,66 +146,33 @@ namespace AssemblyLineTester.Views.Pages
             e.Graphics.DrawPath(pen, path);
         }
 
-        private void PnlSummary_Paint(object? sender, PaintEventArgs e)
+        private void PnlChartContainer_Paint(object? sender, PaintEventArgs e)
         {
-            if (sender is not Control card) return;
-            PanelFilters_Paint(sender, e);
+            if (sender is not Control container) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            int chartX = 36;
-            int chartY = 65;
-            int chartSize = Math.Min(140, card.Height - 85);
-            if (chartSize < 50) return;
-            Rectangle chartRect = new Rectangle(chartX, chartY, chartSize, chartSize);
+            int size = Math.Min(container.Width, container.Height) - 20;
+            if (size <= 0) return;
+            int x = (container.Width - size) / 2;
+            int y = (container.Height - size) / 2;
+            var rect = new Rectangle(x, y, size, size);
 
-            using (var brushInfo = new SolidBrush(Color.FromArgb(59, 130, 246)))
-            using (var brushWarn = new SolidBrush(Color.FromArgb(245, 158, 11)))
-            using (var brushErr = new SolidBrush(Color.FromArgb(239, 68, 68)))
-            using (var brushWhite = new SolidBrush(Color.White))
+            // Doughnut: ~91% INFO (Blue), ~7% WARN (Amber), ~2% ERROR (Red)
+            using (var penInfo = new Pen(Color.FromArgb(59, 130, 246), 18))
+            using (var penWarn = new Pen(Color.FromArgb(245, 158, 11), 18))
+            using (var penErr = new Pen(Color.FromArgb(239, 68, 68), 18))
             {
-                e.Graphics.FillPie(brushInfo, chartRect, 0, 327);
-                e.Graphics.FillPie(brushWarn, chartRect, 327, 24);
-                e.Graphics.FillPie(brushErr, chartRect, 351, 9);
-
-                int holeSize = (int)(chartSize * 0.62f);
-                int offset = (chartSize - holeSize) / 2;
-                Rectangle holeRect = new Rectangle(chartRect.X + offset, chartRect.Y + offset, holeSize, holeSize);
-                e.Graphics.FillPie(brushWhite, holeRect, 0, 360);
+                e.Graphics.DrawArc(penInfo, rect, -90, 327);
+                e.Graphics.DrawArc(penWarn, rect, 237, 24);
+                e.Graphics.DrawArc(penErr, rect, 261, 9);
             }
 
-            using (var fontBold = new Font("Segoe UI", 11F, FontStyle.Bold))
-            using (var fontSub = new Font("Segoe UI", 7.5F))
-            using (var brushText = new SolidBrush(Color.FromArgb(30, 41, 59)))
-            using (var brushSub = new SolidBrush(Color.FromArgb(100, 116, 139)))
+            string text = "1,258\nTOTAL";
+            using (var font = new Font("Segoe UI", 9.5F, FontStyle.Bold))
+            using (var brush = new SolidBrush(Color.FromArgb(30, 41, 59)))
+            using (var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
             {
-                int centerY = chartRect.Y + (chartSize / 2);
-                var sf = new StringFormat { Alignment = StringAlignment.Center };
-                Rectangle topTextRect = new Rectangle(chartRect.X, centerY - 22, chartRect.Width, 25);
-                Rectangle bottomTextRect = new Rectangle(chartRect.X, centerY + 4, chartRect.Width, 25);
-
-                e.Graphics.DrawString("1,258", fontBold, brushText, topTextRect, sf);
-                e.Graphics.DrawString("Total Logs", fontSub, brushSub, bottomTextRect, sf);
-            }
-
-            int legendX = chartRect.Right + 35;
-            int legendY = chartRect.Y + 12;
-            int legendRowStep = 42;
-            DrawLegendItem(e.Graphics, legendX, legendY, Color.FromArgb(59, 130, 246), "INFO", "1,142 (90.8%)");
-            DrawLegendItem(e.Graphics, legendX, legendY + legendRowStep, Color.FromArgb(245, 158, 11), "WARNING", "84 (6.7%)");
-            DrawLegendItem(e.Graphics, legendX, legendY + (legendRowStep * 2), Color.FromArgb(239, 68, 68), "ERROR", "32 (2.5%)");
-        }
-
-        private void DrawLegendItem(Graphics g, int x, int y, Color dotColor, string label, string val)
-        {
-            using (var dotBrush = new SolidBrush(dotColor))
-            using (var fontLabel = new Font("Segoe UI", 9F, FontStyle.Bold))
-            using (var fontVal = new Font("Segoe UI", 9F))
-            using (var textBrush = new SolidBrush(Color.FromArgb(51, 65, 85)))
-            using (var valBrush = new SolidBrush(Color.FromArgb(100, 116, 139)))
-            {
-                g.FillEllipse(dotBrush, x, y + 4, 12, 12);
-                g.DrawString(label, fontLabel, textBrush, x + 20, y);
-                g.DrawString(val, fontVal, valBrush, x + 135, y);
+                e.Graphics.DrawString(text, font, brush, new RectangleF(x, y, size, size), format);
             }
         }
 

@@ -69,6 +69,16 @@ namespace AssemblyLineTester.Views.Pages
             btnPageNext = new Button();
             rightLayout = new TableLayoutPanel();
             pnlSummary = new Panel();
+            tblSummaryContent = new TableLayoutPanel();
+            tblSummaryBody = new TableLayoutPanel();
+            pnlChartContainer = new Panel();
+            tblSummaryLegend = new TableLayoutPanel();
+            lblLegInfoIcon = new Label();
+            lblLegInfo = new Label();
+            lblLegWarnIcon = new Label();
+            lblLegWarn = new Label();
+            lblLegErrorIcon = new Label();
+            lblLegError = new Label();
             lblSummaryTitle = new Label();
             pnlLevelStats = new Panel();
             lblLevelStatsTitle = new Label();
@@ -85,6 +95,9 @@ namespace AssemblyLineTester.Views.Pages
             ((System.ComponentModel.ISupportInitialize)gridData).BeginInit();
             rightLayout.SuspendLayout();
             pnlSummary.SuspendLayout();
+            tblSummaryContent.SuspendLayout();
+            tblSummaryBody.SuspendLayout();
+            tblSummaryLegend.SuspendLayout();
             pnlLevelStats.SuspendLayout();
             pnlModuleStats.SuspendLayout();
             pnlLogDetail.SuspendLayout();
@@ -557,24 +570,168 @@ namespace AssemblyLineTester.Views.Pages
             // pnlSummary
             // 
             pnlSummary.BackColor = Color.White;
-            pnlSummary.Controls.Add(lblSummaryTitle);
+            pnlSummary.Controls.Add(tblSummaryContent);
             pnlSummary.Dock = DockStyle.Fill;
             pnlSummary.Location = new Point(0, 0);
             pnlSummary.Margin = new Padding(0, 0, 0, 40);
             pnlSummary.Name = "pnlSummary";
+            pnlSummary.Padding = new Padding(16, 12, 16, 12);
             pnlSummary.Size = new Size(701, 287);
             pnlSummary.TabIndex = 0;
             // 
+            // tblSummaryContent
+            // 
+            tblSummaryContent.ColumnCount = 1;
+            tblSummaryContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblSummaryContent.Controls.Add(lblSummaryTitle, 0, 0);
+            tblSummaryContent.Controls.Add(tblSummaryBody, 0, 1);
+            tblSummaryContent.Dock = DockStyle.Fill;
+            tblSummaryContent.Location = new Point(16, 12);
+            tblSummaryContent.Margin = new Padding(0);
+            tblSummaryContent.Name = "tblSummaryContent";
+            tblSummaryContent.RowCount = 2;
+            tblSummaryContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
+            tblSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblSummaryContent.Size = new Size(669, 263);
+            tblSummaryContent.TabIndex = 0;
+            // 
             // lblSummaryTitle
             // 
-            lblSummaryTitle.AutoSize = true;
+            lblSummaryTitle.Dock = DockStyle.Fill;
             lblSummaryTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblSummaryTitle.Location = new Point(32, 32);
-            lblSummaryTitle.Margin = new Padding(5, 0, 5, 0);
+            lblSummaryTitle.ForeColor = Color.FromArgb(30, 41, 59);
+            lblSummaryTitle.Location = new Point(0, 0);
+            lblSummaryTitle.Margin = new Padding(0);
             lblSummaryTitle.Name = "lblSummaryTitle";
-            lblSummaryTitle.Size = new Size(266, 37);
+            lblSummaryTitle.Size = new Size(669, 45);
             lblSummaryTitle.TabIndex = 0;
             lblSummaryTitle.Text = "LOG DISTRIBUTION";
+            lblSummaryTitle.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // tblSummaryBody
+            // 
+            tblSummaryBody.ColumnCount = 2;
+            tblSummaryBody.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+            tblSummaryBody.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
+            tblSummaryBody.Controls.Add(pnlChartContainer, 0, 0);
+            tblSummaryBody.Controls.Add(tblSummaryLegend, 1, 0);
+            tblSummaryBody.Dock = DockStyle.Fill;
+            tblSummaryBody.Location = new Point(0, 45);
+            tblSummaryBody.Margin = new Padding(0);
+            tblSummaryBody.Name = "tblSummaryBody";
+            tblSummaryBody.RowCount = 1;
+            tblSummaryBody.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblSummaryBody.Size = new Size(669, 218);
+            tblSummaryBody.TabIndex = 1;
+            // 
+            // pnlChartContainer
+            // 
+            pnlChartContainer.Dock = DockStyle.Fill;
+            pnlChartContainer.Location = new Point(0, 0);
+            pnlChartContainer.Margin = new Padding(0);
+            pnlChartContainer.Name = "pnlChartContainer";
+            pnlChartContainer.Size = new Size(267, 218);
+            pnlChartContainer.TabIndex = 0;
+            // 
+            // tblSummaryLegend
+            // 
+            tblSummaryLegend.ColumnCount = 2;
+            tblSummaryLegend.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 45F));
+            tblSummaryLegend.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblSummaryLegend.Controls.Add(lblLegInfoIcon, 0, 0);
+            tblSummaryLegend.Controls.Add(lblLegInfo, 1, 0);
+            tblSummaryLegend.Controls.Add(lblLegWarnIcon, 0, 1);
+            tblSummaryLegend.Controls.Add(lblLegWarn, 1, 1);
+            tblSummaryLegend.Controls.Add(lblLegErrorIcon, 0, 2);
+            tblSummaryLegend.Controls.Add(lblLegError, 1, 2);
+            tblSummaryLegend.Dock = DockStyle.Fill;
+            tblSummaryLegend.Location = new Point(277, 0);
+            tblSummaryLegend.Margin = new Padding(10, 0, 0, 0);
+            tblSummaryLegend.Name = "tblSummaryLegend";
+            tblSummaryLegend.RowCount = 3;
+            tblSummaryLegend.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
+            tblSummaryLegend.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
+            tblSummaryLegend.RowStyles.Add(new RowStyle(SizeType.Percent, 33.34F));
+            tblSummaryLegend.Size = new Size(392, 218);
+            tblSummaryLegend.TabIndex = 1;
+            // 
+            // lblLegInfoIcon
+            // 
+            lblLegInfoIcon.Dock = DockStyle.Fill;
+            lblLegInfoIcon.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblLegInfoIcon.ForeColor = Color.FromArgb(16, 185, 129);
+            lblLegInfoIcon.Location = new Point(0, 0);
+            lblLegInfoIcon.Margin = new Padding(0);
+            lblLegInfoIcon.Name = "lblLegInfoIcon";
+            lblLegInfoIcon.Size = new Size(45, 72);
+            lblLegInfoIcon.TabIndex = 0;
+            lblLegInfoIcon.Text = "●";
+            lblLegInfoIcon.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblLegInfo
+            // 
+            lblLegInfo.Dock = DockStyle.Fill;
+            lblLegInfo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblLegInfo.ForeColor = Color.FromArgb(30, 41, 59);
+            lblLegInfo.Location = new Point(45, 0);
+            lblLegInfo.Margin = new Padding(0);
+            lblLegInfo.Name = "lblLegInfo";
+            lblLegInfo.Size = new Size(347, 72);
+            lblLegInfo.TabIndex = 1;
+            lblLegInfo.Text = "INFO : 1,148 (91.3%)";
+            lblLegInfo.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // lblLegWarnIcon
+            // 
+            lblLegWarnIcon.Dock = DockStyle.Fill;
+            lblLegWarnIcon.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblLegWarnIcon.ForeColor = Color.FromArgb(245, 158, 11);
+            lblLegWarnIcon.Location = new Point(0, 72);
+            lblLegWarnIcon.Margin = new Padding(0);
+            lblLegWarnIcon.Name = "lblLegWarnIcon";
+            lblLegWarnIcon.Size = new Size(45, 72);
+            lblLegWarnIcon.TabIndex = 2;
+            lblLegWarnIcon.Text = "●";
+            lblLegWarnIcon.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblLegWarn
+            // 
+            lblLegWarn.Dock = DockStyle.Fill;
+            lblLegWarn.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblLegWarn.ForeColor = Color.FromArgb(30, 41, 59);
+            lblLegWarn.Location = new Point(45, 72);
+            lblLegWarn.Margin = new Padding(0);
+            lblLegWarn.Name = "lblLegWarn";
+            lblLegWarn.Size = new Size(347, 72);
+            lblLegWarn.TabIndex = 3;
+            lblLegWarn.Text = "WARNING : 84 (6.7%)";
+            lblLegWarn.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // lblLegErrorIcon
+            // 
+            lblLegErrorIcon.Dock = DockStyle.Fill;
+            lblLegErrorIcon.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblLegErrorIcon.ForeColor = Color.FromArgb(239, 68, 68);
+            lblLegErrorIcon.Location = new Point(0, 144);
+            lblLegErrorIcon.Margin = new Padding(0);
+            lblLegErrorIcon.Name = "lblLegErrorIcon";
+            lblLegErrorIcon.Size = new Size(45, 74);
+            lblLegErrorIcon.TabIndex = 4;
+            lblLegErrorIcon.Text = "●";
+            lblLegErrorIcon.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblLegError
+            // 
+            lblLegError.Dock = DockStyle.Fill;
+            lblLegError.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblLegError.ForeColor = Color.FromArgb(30, 41, 59);
+            lblLegError.Location = new Point(45, 144);
+            lblLegError.Margin = new Padding(0);
+            lblLegError.Name = "lblLegError";
+            lblLegError.Size = new Size(347, 74);
+            lblLegError.TabIndex = 5;
+            lblLegError.Text = "ERROR : 26 (2.1%)";
+            lblLegError.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // pnlLevelStats
             // 
@@ -675,7 +832,9 @@ namespace AssemblyLineTester.Views.Pages
             ((System.ComponentModel.ISupportInitialize)gridData).EndInit();
             rightLayout.ResumeLayout(false);
             pnlSummary.ResumeLayout(false);
-            pnlSummary.PerformLayout();
+            tblSummaryContent.ResumeLayout(false);
+            tblSummaryBody.ResumeLayout(false);
+            tblSummaryLegend.ResumeLayout(false);
             pnlLevelStats.ResumeLayout(false);
             pnlLevelStats.PerformLayout();
             pnlModuleStats.ResumeLayout(false);
@@ -748,7 +907,16 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.TableLayoutPanel rightLayout;
 
         private System.Windows.Forms.Panel pnlSummary;
-
+        private System.Windows.Forms.TableLayoutPanel tblSummaryContent;
+        private System.Windows.Forms.TableLayoutPanel tblSummaryBody;
+        private System.Windows.Forms.Panel pnlChartContainer;
+        private System.Windows.Forms.TableLayoutPanel tblSummaryLegend;
+        private System.Windows.Forms.Label lblLegInfoIcon;
+        private System.Windows.Forms.Label lblLegInfo;
+        private System.Windows.Forms.Label lblLegWarnIcon;
+        private System.Windows.Forms.Label lblLegWarn;
+        private System.Windows.Forms.Label lblLegErrorIcon;
+        private System.Windows.Forms.Label lblLegError;
         private System.Windows.Forms.Label lblSummaryTitle;
 
         private System.Windows.Forms.Panel pnlLevelStats;
