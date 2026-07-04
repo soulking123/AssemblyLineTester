@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Views.Modals;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -34,6 +35,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterRole.SelectedIndexChanged += FilterChanged;
             cmbFilterDept.SelectedIndexChanged += FilterChanged;
             btnRefresh.Click += BtnRefresh_Click;
+            btnAddUser.Click += BtnAddUser_Click;
 
             gridUsers.CellFormatting += GridUsers_CellFormatting;
             gridUsers.CellPainting += GridUsers_CellPainting;
@@ -326,6 +328,16 @@ namespace AssemblyLineTester.Views.Pages
         private void BtnRefresh_Click(object? sender, EventArgs e)
         {
             LoadDatabaseData();
+        }
+
+        /// Opens the Add User modal dialog and refreshes database records if a new user was created.
+        private void BtnAddUser_Click(object? sender, EventArgs e)
+        {
+            using var modal = new AddUserModalForm(_userService);
+            if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
+            {
+                LoadDatabaseData();
+            }
         }
 
         /// Handles displaying user details on the side panel when a grid row is selected.

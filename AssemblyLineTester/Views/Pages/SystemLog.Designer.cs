@@ -35,967 +35,666 @@ namespace AssemblyLineTester.Views.Pages
         private void InitializeComponent()
 
         {
-
-            this.pnlTop = new Panel();
-
-            this.logoBox = new PictureBox();
-
-            this.lblTitle = new Label();
-
-            this.lblDateRange = new Label();
-
-            this.dtpStart = new DateTimePicker();
-
-            this.lblDash = new Label();
-
-            this.dtpEnd = new DateTimePicker();
-
-            this.lblLogLevel = new Label();
-
-            this.cmbLogLevel = new ComboBox();
-
-            this.lblModule = new Label();
-
-            this.cmbModule = new ComboBox();
-
-            this.lblUser = new Label();
-
-            this.cmbUser = new ComboBox();
-
-            this.lblAction = new Label();
-
-            this.cmbAction = new ComboBox();
-
-            this.lblKeyword = new Label();
-
-            this.txtKeyword = new TextBox();
-
-            this.btnSearch = new Button();
-
-            this.btnReset = new Button();
-
-            this.mainLayout = new TableLayoutPanel();
-
-            this.pnlLeft = new Panel();
-
-            this.btnExport = new Button();
-
-            this.btnRefresh = new Button();
-
-            this.gridData = new DataGridView();
-
-            this.lblTableTitle = new Label();
-
-            this.rightLayout = new TableLayoutPanel();
-
-            this.pnlSummary = new Panel();
-
-            this.lblSummaryTitle = new Label();
-
-            this.pnlLevelStats = new Panel();
-
-            this.lblLevelStatsTitle = new Label();
-
-            this.pnlModuleStats = new Panel();
-
-            this.lblModuleStatsTitle = new Label();
-
-            this.pnlLogDetail = new Panel();
-
-            this.lblLogDetailTitle = new Label();
-
-            this.lblLogDetailContent = new Label();
-
-            this.pnlTop.SuspendLayout();
-
+            pnlTop = new Panel();
+            logoBox = new PictureBox();
+            lblTitle = new Label();
+            panelFilters = new Panel();
+            lblDateRange = new Label();
+            dtpStart = new DateTimePicker();
+            lblDash = new Label();
+            dtpEnd = new DateTimePicker();
+            lblLogLevel = new Label();
+            cmbLogLevel = new ComboBox();
+            lblModule = new Label();
+            cmbModule = new ComboBox();
+            lblUser = new Label();
+            cmbUser = new ComboBox();
+            lblAction = new Label();
+            cmbAction = new ComboBox();
+            lblKeyword = new Label();
+            txtKeyword = new TextBox();
+            btnSearch = new Button();
+            btnReset = new Button();
+            mainLayout = new TableLayoutPanel();
+            pnlLeft = new Panel();
+            btnExport = new Button();
+            btnRefresh = new Button();
+            gridData = new DataGridView();
+            lblTableTitle = new Label();
+            lblPaginationInfo = new Label();
+            btnPagePrev = new Button();
+            btnPage1 = new Button();
+            btnPage2 = new Button();
+            btnPage3 = new Button();
+            btnPageNext = new Button();
+            rightLayout = new TableLayoutPanel();
+            pnlSummary = new Panel();
+            lblSummaryTitle = new Label();
+            pnlLevelStats = new Panel();
+            lblLevelStatsTitle = new Label();
+            pnlModuleStats = new Panel();
+            lblModuleStatsTitle = new Label();
+            pnlLogDetail = new Panel();
+            lblLogDetailTitle = new Label();
+            lblLogDetailContent = new Label();
+            pnlTop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)logoBox).BeginInit();
-
-            this.mainLayout.SuspendLayout();
-
-            this.pnlLeft.SuspendLayout();
-
+            panelFilters.SuspendLayout();
+            mainLayout.SuspendLayout();
+            pnlLeft.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridData).BeginInit();
-
-            this.rightLayout.SuspendLayout();
-
-            this.pnlSummary.SuspendLayout();
-
-            this.pnlLevelStats.SuspendLayout();
-
-            this.pnlModuleStats.SuspendLayout();
-
-            this.pnlLogDetail.SuspendLayout();
-
-            this.SuspendLayout();
-
+            rightLayout.SuspendLayout();
+            pnlSummary.SuspendLayout();
+            pnlLevelStats.SuspendLayout();
+            pnlModuleStats.SuspendLayout();
+            pnlLogDetail.SuspendLayout();
+            SuspendLayout();
             // 
-
             // pnlTop
-
             // 
-
-            this.pnlTop.BackColor = System.Drawing.Color.White;
-
-            this.pnlTop.Controls.Add(logoBox);
-
-            this.pnlTop.Controls.Add(lblTitle);
-
-            this.pnlTop.Controls.Add(lblDateRange);
-
-            this.pnlTop.Controls.Add(dtpStart);
-
-            this.pnlTop.Controls.Add(lblDash);
-
-            this.pnlTop.Controls.Add(dtpEnd);
-
-            this.pnlTop.Controls.Add(lblLogLevel);
-
-            this.pnlTop.Controls.Add(cmbLogLevel);
-
-            this.pnlTop.Controls.Add(lblModule);
-
-            this.pnlTop.Controls.Add(cmbModule);
-
-            this.pnlTop.Controls.Add(lblUser);
-
-            this.pnlTop.Controls.Add(cmbUser);
-
-            this.pnlTop.Controls.Add(lblAction);
-
-            this.pnlTop.Controls.Add(cmbAction);
-
-            this.pnlTop.Controls.Add(lblKeyword);
-
-            this.pnlTop.Controls.Add(txtKeyword);
-
-            this.pnlTop.Controls.Add(btnSearch);
-
-            this.pnlTop.Controls.Add(btnReset);
-
-            this.pnlTop.Dock = DockStyle.Top;
-
-            this.pnlTop.Location = new Point(0, 0);
-
-            this.pnlTop.Name = "pnlTop";
-
-            this.pnlTop.Size = new Size(2210, 212);
-
-            this.pnlTop.TabIndex = 0;
-
+            pnlTop.BackColor = Color.FromArgb(248, 250, 252);
+            pnlTop.Controls.Add(logoBox);
+            pnlTop.Controls.Add(lblTitle);
+            pnlTop.Controls.Add(panelFilters);
+            pnlTop.Dock = DockStyle.Top;
+            pnlTop.Location = new Point(0, 0);
+            pnlTop.Margin = new Padding(5);
+            pnlTop.Name = "pnlTop";
+            pnlTop.Size = new Size(2520, 294);
+            pnlTop.TabIndex = 0;
             // 
-
             // logoBox
-
             // 
-
-            this.logoBox.BackColor = System.Drawing.Color.LightGray;
-
-            this.logoBox.Location = new Point(40, 20);
-
-            this.logoBox.Name = "logoBox";
-
-            this.logoBox.Size = new Size(45, 45);
-
-            this.logoBox.TabIndex = 0;
-
-            this.logoBox.TabStop = false;
-
+            logoBox.BackColor = Color.LightGray;
+            logoBox.Location = new Point(39, 29);
+            logoBox.Margin = new Padding(5);
+            logoBox.Name = "logoBox";
+            logoBox.Size = new Size(68, 67);
+            logoBox.TabIndex = 0;
+            logoBox.TabStop = false;
             // 
-
             // lblTitle
-
             // 
-
-            this.lblTitle.AutoSize = true;
-
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblTitle.Location = new Point(100, 23);
-
-            this.lblTitle.Name = "lblTitle";
-
-            this.lblTitle.Size = new Size(285, 59);
-
-            this.lblTitle.TabIndex = 1;
-
-            this.lblTitle.Text = "SYSTEM LOG";
-
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTitle.Location = new Point(127, 29);
+            lblTitle.Margin = new Padding(5, 0, 5, 0);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(261, 54);
+            lblTitle.TabIndex = 1;
+            lblTitle.Text = "SYSTEM LOG";
             // 
-
+            // panelFilters
+            // 
+            panelFilters.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panelFilters.BackColor = Color.White;
+            panelFilters.Controls.Add(lblDateRange);
+            panelFilters.Controls.Add(dtpStart);
+            panelFilters.Controls.Add(lblDash);
+            panelFilters.Controls.Add(dtpEnd);
+            panelFilters.Controls.Add(lblLogLevel);
+            panelFilters.Controls.Add(cmbLogLevel);
+            panelFilters.Controls.Add(lblModule);
+            panelFilters.Controls.Add(cmbModule);
+            panelFilters.Controls.Add(lblUser);
+            panelFilters.Controls.Add(cmbUser);
+            panelFilters.Controls.Add(lblAction);
+            panelFilters.Controls.Add(cmbAction);
+            panelFilters.Controls.Add(lblKeyword);
+            panelFilters.Controls.Add(txtKeyword);
+            panelFilters.Controls.Add(btnSearch);
+            panelFilters.Controls.Add(btnReset);
+            panelFilters.Location = new Point(39, 120);
+            panelFilters.Margin = new Padding(5);
+            panelFilters.Name = "panelFilters";
+            panelFilters.Size = new Size(2442, 160);
+            panelFilters.TabIndex = 2;
+            // 
             // lblDateRange
-
             // 
-
-            this.lblDateRange.AutoSize = true;
-
-            this.lblDateRange.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblDateRange.Location = new Point(40, 96);
-
-            this.lblDateRange.Name = "lblDateRange";
-
-            this.lblDateRange.Size = new Size(146, 32);
-
-            this.lblDateRange.TabIndex = 2;
-
-            this.lblDateRange.Text = "Date Range";
-
+            lblDateRange.AutoSize = true;
+            lblDateRange.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblDateRange.ForeColor = Color.FromArgb(71, 85, 105);
+            lblDateRange.Location = new Point(32, 29);
+            lblDateRange.Margin = new Padding(5, 0, 5, 0);
+            lblDateRange.Name = "lblDateRange";
+            lblDateRange.Size = new Size(137, 31);
+            lblDateRange.TabIndex = 2;
+            lblDateRange.Text = "Date Range";
             // 
-
             // dtpStart
-
             // 
-
-            this.dtpStart.Format = DateTimePickerFormat.Short;
-
-            this.dtpStart.Location = new Point(40, 138);
-
-            this.dtpStart.Name = "dtpStart";
-
-            this.dtpStart.Size = new Size(217, 39);
-
-            this.dtpStart.TabIndex = 3;
-
+            dtpStart.Font = new Font("Segoe UI", 9.5F);
+            dtpStart.Format = DateTimePickerFormat.Short;
+            dtpStart.Location = new Point(32, 90);
+            dtpStart.Margin = new Padding(5);
+            dtpStart.Name = "dtpStart";
+            dtpStart.Size = new Size(200, 41);
+            dtpStart.TabIndex = 3;
             // 
-
             // lblDash
-
             // 
-
-            this.lblDash.AutoSize = true;
-
-            this.lblDash.Location = new Point(275, 137);
-
-            this.lblDash.Name = "lblDash";
-
-            this.lblDash.Size = new Size(24, 32);
-
-            this.lblDash.TabIndex = 4;
-
-            this.lblDash.Text = "-";
-
+            lblDash.AutoSize = true;
+            lblDash.Font = new Font("Segoe UI", 9.5F);
+            lblDash.Location = new Point(244, 96);
+            lblDash.Margin = new Padding(5, 0, 5, 0);
+            lblDash.Name = "lblDash";
+            lblDash.Size = new Size(25, 36);
+            lblDash.TabIndex = 4;
+            lblDash.Text = "-";
             // 
-
             // dtpEnd
-
             // 
-
-            this.dtpEnd.Format = DateTimePickerFormat.Short;
-
-            this.dtpEnd.Location = new Point(316, 137);
-
-            this.dtpEnd.Name = "dtpEnd";
-
-            this.dtpEnd.Size = new Size(228, 39);
-
-            this.dtpEnd.TabIndex = 5;
-
+            dtpEnd.Font = new Font("Segoe UI", 9.5F);
+            dtpEnd.Format = DateTimePickerFormat.Short;
+            dtpEnd.Location = new Point(280, 90);
+            dtpEnd.Margin = new Padding(5);
+            dtpEnd.Name = "dtpEnd";
+            dtpEnd.Size = new Size(200, 41);
+            dtpEnd.TabIndex = 5;
             // 
-
             // lblLogLevel
-
             // 
-
-            this.lblLogLevel.AutoSize = true;
-
-            this.lblLogLevel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblLogLevel.Location = new Point(595, 96);
-
-            this.lblLogLevel.Name = "lblLogLevel";
-
-            this.lblLogLevel.Size = new Size(121, 32);
-
-            this.lblLogLevel.TabIndex = 6;
-
-            this.lblLogLevel.Text = "Log Level";
-
+            lblLogLevel.AutoSize = true;
+            lblLogLevel.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblLogLevel.ForeColor = Color.FromArgb(71, 85, 105);
+            lblLogLevel.Location = new Point(515, 29);
+            lblLogLevel.Margin = new Padding(5, 0, 5, 0);
+            lblLogLevel.Name = "lblLogLevel";
+            lblLogLevel.Size = new Size(115, 31);
+            lblLogLevel.TabIndex = 6;
+            lblLogLevel.Text = "Log Level";
             // 
-
             // cmbLogLevel
-
             // 
-
-            this.cmbLogLevel.FormattingEnabled = true;
-
-            this.cmbLogLevel.Items.AddRange(new object[] { "All", "INFO", "WARNING", "ERROR" });
-
-            this.cmbLogLevel.Location = new Point(595, 137);
-
-            this.cmbLogLevel.Name = "cmbLogLevel";
-
-            this.cmbLogLevel.Size = new Size(180, 40);
-
-            this.cmbLogLevel.TabIndex = 7;
-
-            this.cmbLogLevel.Text = "All";
-
+            cmbLogLevel.FlatStyle = FlatStyle.System;
+            cmbLogLevel.Font = new Font("Segoe UI", 9.5F);
+            cmbLogLevel.FormattingEnabled = true;
+            cmbLogLevel.Items.AddRange(new object[] { "All", "INFO", "WARNING", "ERROR" });
+            cmbLogLevel.Location = new Point(515, 90);
+            cmbLogLevel.Margin = new Padding(5);
+            cmbLogLevel.Name = "cmbLogLevel";
+            cmbLogLevel.Size = new Size(238, 43);
+            cmbLogLevel.TabIndex = 7;
+            cmbLogLevel.Text = "All";
             // 
-
             // lblModule
-
             // 
-
-            this.lblModule.AutoSize = true;
-
-            this.lblModule.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblModule.Location = new Point(815, 96);
-
-            this.lblModule.Name = "lblModule";
-
-            this.lblModule.Size = new Size(102, 32);
-
-            this.lblModule.TabIndex = 8;
-
-            this.lblModule.Text = "Module";
-
+            lblModule.AutoSize = true;
+            lblModule.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblModule.ForeColor = Color.FromArgb(71, 85, 105);
+            lblModule.Location = new Point(791, 29);
+            lblModule.Margin = new Padding(5, 0, 5, 0);
+            lblModule.Name = "lblModule";
+            lblModule.Size = new Size(97, 31);
+            lblModule.TabIndex = 8;
+            lblModule.Text = "Module";
             // 
-
             // cmbModule
-
             // 
-
-            this.cmbModule.FormattingEnabled = true;
-
-            this.cmbModule.Items.AddRange(new object[] { "All", "Test Execution", "Communication" });
-
-            this.cmbModule.Location = new Point(815, 137);
-
-            this.cmbModule.Name = "cmbModule";
-
-            this.cmbModule.Size = new Size(180, 40);
-
-            this.cmbModule.TabIndex = 9;
-
-            this.cmbModule.Text = "All";
-
+            cmbModule.FlatStyle = FlatStyle.System;
+            cmbModule.Font = new Font("Segoe UI", 9.5F);
+            cmbModule.FormattingEnabled = true;
+            cmbModule.Items.AddRange(new object[] { "All", "Test Execution", "Communication", "Harness Database", "Database", "User Management", "System" });
+            cmbModule.Location = new Point(791, 90);
+            cmbModule.Margin = new Padding(5);
+            cmbModule.Name = "cmbModule";
+            cmbModule.Size = new Size(244, 43);
+            cmbModule.TabIndex = 9;
+            cmbModule.Text = "All";
             // 
-
             // lblUser
-
             // 
-
-            this.lblUser.AutoSize = true;
-
-            this.lblUser.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblUser.Location = new Point(1035, 96);
-
-            this.lblUser.Name = "lblUser";
-
-            this.lblUser.Size = new Size(65, 32);
-
-            this.lblUser.TabIndex = 10;
-
-            this.lblUser.Text = "User";
-
+            lblUser.AutoSize = true;
+            lblUser.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblUser.ForeColor = Color.FromArgb(71, 85, 105);
+            lblUser.Location = new Point(1066, 30);
+            lblUser.Margin = new Padding(5, 0, 5, 0);
+            lblUser.Name = "lblUser";
+            lblUser.Size = new Size(62, 31);
+            lblUser.TabIndex = 10;
+            lblUser.Text = "User";
             // 
-
             // cmbUser
-
             // 
-
-            this.cmbUser.FormattingEnabled = true;
-
-            this.cmbUser.Items.AddRange(new object[] { "All", "System", "Fally" });
-
-            this.cmbUser.Location = new Point(1035, 136);
-
-            this.cmbUser.Name = "cmbUser";
-
-            this.cmbUser.Size = new Size(180, 40);
-
-            this.cmbUser.TabIndex = 11;
-
-            this.cmbUser.Text = "All";
-
+            cmbUser.FlatStyle = FlatStyle.System;
+            cmbUser.Font = new Font("Segoe UI", 9.5F);
+            cmbUser.FormattingEnabled = true;
+            cmbUser.Items.AddRange(new object[] { "All", "System", "Fally" });
+            cmbUser.Location = new Point(1066, 91);
+            cmbUser.Margin = new Padding(5);
+            cmbUser.Name = "cmbUser";
+            cmbUser.Size = new Size(170, 43);
+            cmbUser.TabIndex = 11;
+            cmbUser.Text = "All";
             // 
-
             // lblAction
-
             // 
-
-            this.lblAction.AutoSize = true;
-
-            this.lblAction.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblAction.Location = new Point(1255, 96);
-
-            this.lblAction.Name = "lblAction";
-
-            this.lblAction.Size = new Size(89, 32);
-
-            this.lblAction.TabIndex = 12;
-
-            this.lblAction.Text = "Action";
-
+            lblAction.AutoSize = true;
+            lblAction.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblAction.ForeColor = Color.FromArgb(71, 85, 105);
+            lblAction.Location = new Point(1263, 30);
+            lblAction.Margin = new Padding(5, 0, 5, 0);
+            lblAction.Name = "lblAction";
+            lblAction.Size = new Size(85, 31);
+            lblAction.TabIndex = 12;
+            lblAction.Text = "Action";
             // 
-
             // cmbAction
-
             // 
-
-            this.cmbAction.FormattingEnabled = true;
-
-            this.cmbAction.Items.AddRange(new object[] { "All", "Start Test", "Load Program" });
-
-            this.cmbAction.Location = new Point(1255, 137);
-
-            this.cmbAction.Name = "cmbAction";
-
-            this.cmbAction.Size = new Size(180, 40);
-
-            this.cmbAction.TabIndex = 13;
-
-            this.cmbAction.Text = "All";
-
+            cmbAction.FlatStyle = FlatStyle.System;
+            cmbAction.Font = new Font("Segoe UI", 9.5F);
+            cmbAction.FormattingEnabled = true;
+            cmbAction.Items.AddRange(new object[] { "All", "Start Test", "Load Program", "Step Complete", "Test Complete", "Update", "Connection Lost", "Reconnected", "Login", "Backup" });
+            cmbAction.Location = new Point(1263, 91);
+            cmbAction.Margin = new Padding(5);
+            cmbAction.Name = "cmbAction";
+            cmbAction.Size = new Size(248, 43);
+            cmbAction.TabIndex = 13;
+            cmbAction.Text = "All";
             // 
-
             // lblKeyword
-
             // 
-
-            this.lblKeyword.AutoSize = true;
-
-            this.lblKeyword.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblKeyword.Location = new Point(1475, 96);
-
-            this.lblKeyword.Name = "lblKeyword";
-
-            this.lblKeyword.Size = new Size(115, 32);
-
-            this.lblKeyword.TabIndex = 14;
-
-            this.lblKeyword.Text = "Keyword";
-
+            lblKeyword.AutoSize = true;
+            lblKeyword.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblKeyword.ForeColor = Color.FromArgb(71, 85, 105);
+            lblKeyword.Location = new Point(1539, 29);
+            lblKeyword.Margin = new Padding(5, 0, 5, 0);
+            lblKeyword.Name = "lblKeyword";
+            lblKeyword.Size = new Size(108, 31);
+            lblKeyword.TabIndex = 14;
+            lblKeyword.Text = "Keyword";
             // 
-
             // txtKeyword
-
             // 
-
-            this.txtKeyword.Location = new Point(1475, 136);
-
-            this.txtKeyword.Name = "txtKeyword";
-
-            this.txtKeyword.PlaceholderText = "Search log...";
-
-            this.txtKeyword.Size = new Size(220, 39);
-
-            this.txtKeyword.TabIndex = 15;
-
+            txtKeyword.Font = new Font("Segoe UI", 9.5F);
+            txtKeyword.Location = new Point(1539, 90);
+            txtKeyword.Margin = new Padding(5);
+            txtKeyword.Name = "txtKeyword";
+            txtKeyword.PlaceholderText = "Search log...";
+            txtKeyword.Size = new Size(351, 41);
+            txtKeyword.TabIndex = 15;
             // 
-
             // btnSearch
-
             // 
-
-            this.btnSearch.BackColor = System.Drawing.Color.FromArgb(255, 193, 7);
-
-            this.btnSearch.FlatAppearance.BorderSize = 0;
-
-            this.btnSearch.FlatStyle = FlatStyle.Flat;
-
-            this.btnSearch.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.btnSearch.Location = new Point(1891, 125);
-
-            this.btnSearch.Name = "btnSearch";
-
-            this.btnSearch.Size = new Size(140, 50);
-
-            this.btnSearch.TabIndex = 16;
-
-            this.btnSearch.Text = "Search";
-
-            this.btnSearch.UseVisualStyleBackColor = false;
-
+            btnSearch.BackColor = Color.FromArgb(250, 204, 21);
+            btnSearch.FlatAppearance.BorderSize = 0;
+            btnSearch.FlatStyle = FlatStyle.Flat;
+            btnSearch.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnSearch.ForeColor = Color.FromArgb(15, 23, 42);
+            btnSearch.Location = new Point(1916, 87);
+            btnSearch.Margin = new Padding(5);
+            btnSearch.Name = "btnSearch";
+            btnSearch.Size = new Size(160, 44);
+            btnSearch.TabIndex = 16;
+            btnSearch.Text = "🔍 Search";
+            btnSearch.UseVisualStyleBackColor = false;
             // 
-
             // btnReset
-
             // 
-
-            this.btnReset.BackColor = System.Drawing.Color.White;
-
-            this.btnReset.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
-
-            this.btnReset.FlatStyle = FlatStyle.Flat;
-
-            this.btnReset.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.btnReset.Location = new Point(2047, 125);
-
-            this.btnReset.Name = "btnReset";
-
-            this.btnReset.Size = new Size(120, 50);
-
-            this.btnReset.TabIndex = 17;
-
-            this.btnReset.Text = "Reset";
-
-            this.btnReset.UseVisualStyleBackColor = false;
-
+            btnReset.BackColor = Color.FromArgb(248, 250, 252);
+            btnReset.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnReset.FlatStyle = FlatStyle.Flat;
+            btnReset.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnReset.ForeColor = Color.FromArgb(71, 85, 105);
+            btnReset.Location = new Point(2096, 87);
+            btnReset.Margin = new Padding(5);
+            btnReset.Name = "btnReset";
+            btnReset.Size = new Size(140, 44);
+            btnReset.TabIndex = 17;
+            btnReset.Text = "Reset";
+            btnReset.UseVisualStyleBackColor = false;
             // 
-
             // mainLayout
-
             // 
-
-            this.mainLayout.ColumnCount = 2;
-
-            this.mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
-
-            this.mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
-
-            this.mainLayout.Controls.Add(pnlLeft, 0, 0);
-
-            this.mainLayout.Controls.Add(rightLayout, 1, 0);
-
-            this.mainLayout.Dock = DockStyle.Fill;
-
-            this.mainLayout.Location = new Point(0, 212);
-
-            this.mainLayout.Name = "mainLayout";
-
-            this.mainLayout.Padding = new Padding(32, 37, 32, 20);
-
-            this.mainLayout.RowCount = 1;
-
-            this.mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-
-            this.mainLayout.Size = new Size(2210, 766);
-
-            this.mainLayout.TabIndex = 1;
-
+            mainLayout.ColumnCount = 2;
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+            mainLayout.Controls.Add(pnlLeft, 0, 0);
+            mainLayout.Controls.Add(rightLayout, 1, 0);
+            mainLayout.Dock = DockStyle.Fill;
+            mainLayout.Location = new Point(0, 294);
+            mainLayout.Margin = new Padding(5);
+            mainLayout.Name = "mainLayout";
+            mainLayout.Padding = new Padding(32, 39, 32, 32);
+            mainLayout.RowCount = 1;
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            mainLayout.Size = new Size(2520, 1101);
+            mainLayout.TabIndex = 1;
             // 
-
             // pnlLeft
-
             // 
-
-            this.pnlLeft.BackColor = System.Drawing.Color.White;
-
-            this.pnlLeft.Controls.Add(btnExport);
-
-            this.pnlLeft.Controls.Add(btnRefresh);
-
-            this.pnlLeft.Controls.Add(gridData);
-
-            this.pnlLeft.Controls.Add(lblTableTitle);
-
-            this.pnlLeft.Dock = DockStyle.Fill;
-
-            this.pnlLeft.Location = new Point(43, 49);
-
-            this.pnlLeft.Margin = new Padding(11, 12, 11, 12);
-
-            this.pnlLeft.Name = "pnlLeft";
-
-            this.pnlLeft.Size = new Size(1480, 685);
-
-            this.pnlLeft.TabIndex = 0;
-
+            pnlLeft.BackColor = Color.White;
+            pnlLeft.Controls.Add(btnExport);
+            pnlLeft.Controls.Add(btnRefresh);
+            pnlLeft.Controls.Add(gridData);
+            pnlLeft.Controls.Add(lblTableTitle);
+            pnlLeft.Controls.Add(lblPaginationInfo);
+            pnlLeft.Controls.Add(btnPagePrev);
+            pnlLeft.Controls.Add(btnPage1);
+            pnlLeft.Controls.Add(btnPage2);
+            pnlLeft.Controls.Add(btnPage3);
+            pnlLeft.Controls.Add(btnPageNext);
+            pnlLeft.Dock = DockStyle.Fill;
+            pnlLeft.Location = new Point(40, 48);
+            pnlLeft.Margin = new Padding(8, 9, 8, 9);
+            pnlLeft.Name = "pnlLeft";
+            pnlLeft.Size = new Size(1703, 1012);
+            pnlLeft.TabIndex = 0;
             // 
-
             // btnExport
-
             // 
-
-            this.btnExport.BackColor = System.Drawing.Color.White;
-
-            this.btnExport.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
-
-            this.btnExport.FlatStyle = FlatStyle.Flat;
-
-            this.btnExport.Location = new Point(1313, 30);
-
-            this.btnExport.Name = "btnExport";
-
-            this.btnExport.Size = new Size(130, 45);
-
-            this.btnExport.TabIndex = 1;
-
-            this.btnExport.Text = "Export";
-
-            this.btnExport.UseVisualStyleBackColor = false;
-
+            btnExport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnExport.BackColor = Color.White;
+            btnExport.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnExport.FlatStyle = FlatStyle.Flat;
+            btnExport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnExport.ForeColor = Color.FromArgb(71, 85, 105);
+            btnExport.Location = new Point(1435, 38);
+            btnExport.Margin = new Padding(5);
+            btnExport.Name = "btnExport";
+            btnExport.Size = new Size(203, 70);
+            btnExport.TabIndex = 1;
+            btnExport.Text = "📤 Export";
+            btnExport.UseVisualStyleBackColor = false;
             // 
-
             // btnRefresh
-
             // 
-
-            this.btnRefresh.BackColor = System.Drawing.Color.White;
-
-            this.btnRefresh.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
-
-            this.btnRefresh.FlatStyle = FlatStyle.Flat;
-
-            this.btnRefresh.Location = new Point(1177, 30);
-
-            this.btnRefresh.Name = "btnRefresh";
-
-            this.btnRefresh.Size = new Size(130, 45);
-
-            this.btnRefresh.TabIndex = 0;
-
-            this.btnRefresh.Text = "Refresh";
-
-            this.btnRefresh.UseVisualStyleBackColor = false;
-
+            btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnRefresh.BackColor = Color.White;
+            btnRefresh.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnRefresh.FlatStyle = FlatStyle.Flat;
+            btnRefresh.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnRefresh.ForeColor = Color.FromArgb(71, 85, 105);
+            btnRefresh.Location = new Point(1212, 38);
+            btnRefresh.Margin = new Padding(5);
+            btnRefresh.Name = "btnRefresh";
+            btnRefresh.Size = new Size(203, 70);
+            btnRefresh.TabIndex = 0;
+            btnRefresh.Text = "↻ Refresh";
+            btnRefresh.UseVisualStyleBackColor = false;
             // 
-
             // gridData
-
             // 
-
-            this.gridData.AllowUserToAddRows = false;
-
-            this.gridData.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-
-            this.gridData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            this.gridData.BackgroundColor = System.Drawing.Color.White;
-
-            this.gridData.BorderStyle = BorderStyle.None;
-
-            this.gridData.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-
-            this.gridData.Location = new Point(40, 100);
-
-            this.gridData.Name = "gridData";
-
-            this.gridData.RowHeadersVisible = false;
-
-            this.gridData.RowHeadersWidth = 82;
-
-            this.gridData.Size = new Size(1400, 545);
-
-            this.gridData.TabIndex = 1;
-
+            gridData.AllowUserToAddRows = false;
+            gridData.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            gridData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            gridData.BackgroundColor = Color.White;
+            gridData.BorderStyle = BorderStyle.None;
+            gridData.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            gridData.Location = new Point(65, 136);
+            gridData.Margin = new Padding(5);
+            gridData.Name = "gridData";
+            gridData.RowHeadersVisible = false;
+            gridData.RowHeadersWidth = 82;
+            gridData.Size = new Size(1573, 748);
+            gridData.TabIndex = 1;
             // 
-
             // lblTableTitle
-
             // 
-
-            this.lblTableTitle.AutoSize = true;
-
-            this.lblTableTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblTableTitle.Location = new Point(40, 30);
-
-            this.lblTableTitle.Name = "lblTableTitle";
-
-            this.lblTableTitle.Size = new Size(360, 45);
-
-            this.lblTableTitle.TabIndex = 2;
-
-            this.lblTableTitle.Text = "LOG LIST (Total: 1,258)";
-
+            lblTableTitle.AutoSize = true;
+            lblTableTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
+            lblTableTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTableTitle.Location = new Point(65, 45);
+            lblTableTitle.Margin = new Padding(5, 0, 5, 0);
+            lblTableTitle.Name = "lblTableTitle";
+            lblTableTitle.Size = new Size(395, 47);
+            lblTableTitle.TabIndex = 2;
+            lblTableTitle.Text = "LOG LIST (Total: 1,258)";
             // 
-
+            // lblPaginationInfo
+            // 
+            lblPaginationInfo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblPaginationInfo.AutoSize = true;
+            lblPaginationInfo.Font = new Font("Segoe UI", 9.5F);
+            lblPaginationInfo.ForeColor = Color.FromArgb(100, 116, 139);
+            lblPaginationInfo.Location = new Point(65, 921);
+            lblPaginationInfo.Margin = new Padding(5, 0, 5, 0);
+            lblPaginationInfo.Name = "lblPaginationInfo";
+            lblPaginationInfo.Size = new Size(385, 36);
+            lblPaginationInfo.TabIndex = 3;
+            lblPaginationInfo.Text = "Showing 1 to 12 of 1,258 entries";
+            // 
+            // btnPagePrev
+            // 
+            btnPagePrev.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnPagePrev.BackColor = Color.White;
+            btnPagePrev.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnPagePrev.FlatStyle = FlatStyle.Flat;
+            btnPagePrev.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnPagePrev.ForeColor = Color.FromArgb(71, 85, 105);
+            btnPagePrev.Location = new Point(947, 908);
+            btnPagePrev.Margin = new Padding(5);
+            btnPagePrev.Name = "btnPagePrev";
+            btnPagePrev.Size = new Size(138, 61);
+            btnPagePrev.TabIndex = 4;
+            btnPagePrev.Text = "Previous";
+            btnPagePrev.UseVisualStyleBackColor = false;
+            // 
+            // btnPage1
+            // 
+            btnPage1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnPage1.BackColor = Color.FromArgb(37, 99, 235);
+            btnPage1.FlatAppearance.BorderColor = Color.FromArgb(37, 99, 235);
+            btnPage1.FlatStyle = FlatStyle.Flat;
+            btnPage1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnPage1.ForeColor = Color.White;
+            btnPage1.Location = new Point(1098, 908);
+            btnPage1.Margin = new Padding(5);
+            btnPage1.Name = "btnPage1";
+            btnPage1.Size = new Size(62, 61);
+            btnPage1.TabIndex = 5;
+            btnPage1.Text = "1";
+            btnPage1.UseVisualStyleBackColor = false;
+            // 
+            // btnPage2
+            // 
+            btnPage2.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnPage2.BackColor = Color.White;
+            btnPage2.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnPage2.FlatStyle = FlatStyle.Flat;
+            btnPage2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnPage2.ForeColor = Color.FromArgb(71, 85, 105);
+            btnPage2.Location = new Point(1173, 908);
+            btnPage2.Margin = new Padding(5);
+            btnPage2.Name = "btnPage2";
+            btnPage2.Size = new Size(62, 61);
+            btnPage2.TabIndex = 6;
+            btnPage2.Text = "2";
+            btnPage2.UseVisualStyleBackColor = false;
+            // 
+            // btnPage3
+            // 
+            btnPage3.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnPage3.BackColor = Color.White;
+            btnPage3.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnPage3.FlatStyle = FlatStyle.Flat;
+            btnPage3.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnPage3.ForeColor = Color.FromArgb(71, 85, 105);
+            btnPage3.Location = new Point(1248, 908);
+            btnPage3.Margin = new Padding(5);
+            btnPage3.Name = "btnPage3";
+            btnPage3.Size = new Size(62, 61);
+            btnPage3.TabIndex = 7;
+            btnPage3.Text = "3";
+            btnPage3.UseVisualStyleBackColor = false;
+            // 
+            // btnPageNext
+            // 
+            btnPageNext.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnPageNext.BackColor = Color.White;
+            btnPageNext.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnPageNext.FlatStyle = FlatStyle.Flat;
+            btnPageNext.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnPageNext.ForeColor = Color.FromArgb(71, 85, 105);
+            btnPageNext.Location = new Point(1323, 908);
+            btnPageNext.Margin = new Padding(5);
+            btnPageNext.Name = "btnPageNext";
+            btnPageNext.Size = new Size(138, 61);
+            btnPageNext.TabIndex = 8;
+            btnPageNext.Text = "Next";
+            btnPageNext.UseVisualStyleBackColor = false;
+            // 
             // rightLayout
-
             // 
-
-            this.rightLayout.ColumnCount = 1;
-
-            this.rightLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-
-            this.rightLayout.Controls.Add(pnlSummary, 0, 0);
-
-            this.rightLayout.Controls.Add(pnlLevelStats, 0, 1);
-
-            this.rightLayout.Controls.Add(pnlModuleStats, 0, 2);
-
-            this.rightLayout.Dock = DockStyle.Fill;
-
-            this.rightLayout.Location = new Point(1545, 49);
-
-            this.rightLayout.Margin = new Padding(11, 12, 11, 12);
-
-            this.rightLayout.Name = "rightLayout";
-
-            this.rightLayout.RowCount = 3;
-
-            this.rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
-
-            this.rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
-
-            this.rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 34F));
-
-            this.rightLayout.Size = new Size(622, 685);
-
-            this.rightLayout.TabIndex = 1;
-
+            rightLayout.ColumnCount = 1;
+            rightLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            rightLayout.Controls.Add(pnlSummary, 0, 0);
+            rightLayout.Controls.Add(pnlLevelStats, 0, 1);
+            rightLayout.Controls.Add(pnlModuleStats, 0, 2);
+            rightLayout.Dock = DockStyle.Fill;
+            rightLayout.Location = new Point(1769, 58);
+            rightLayout.Margin = new Padding(18, 19, 18, 19);
+            rightLayout.Name = "rightLayout";
+            rightLayout.RowCount = 3;
+            rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
+            rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
+            rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 34F));
+            rightLayout.Size = new Size(701, 992);
+            rightLayout.TabIndex = 1;
             // 
-
             // pnlSummary
-
             // 
-
-            this.pnlSummary.BackColor = System.Drawing.Color.White;
-
-            this.pnlSummary.Controls.Add(lblSummaryTitle);
-
-            this.pnlSummary.Dock = DockStyle.Fill;
-
-            this.pnlSummary.Location = new Point(0, 0);
-
-            this.pnlSummary.Margin = new Padding(0, 0, 0, 25);
-
-            this.pnlSummary.Name = "pnlSummary";
-
-            this.pnlSummary.Size = new Size(622, 201);
-
-            this.pnlSummary.TabIndex = 0;
-
+            pnlSummary.BackColor = Color.White;
+            pnlSummary.Controls.Add(lblSummaryTitle);
+            pnlSummary.Dock = DockStyle.Fill;
+            pnlSummary.Location = new Point(0, 0);
+            pnlSummary.Margin = new Padding(0, 0, 0, 40);
+            pnlSummary.Name = "pnlSummary";
+            pnlSummary.Size = new Size(701, 287);
+            pnlSummary.TabIndex = 0;
             // 
-
             // lblSummaryTitle
-
             // 
-
-            this.lblSummaryTitle.AutoSize = true;
-
-            this.lblSummaryTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblSummaryTitle.Location = new Point(20, 20);
-
-            this.lblSummaryTitle.Name = "lblSummaryTitle";
-
-            this.lblSummaryTitle.Size = new Size(216, 37);
-
-            this.lblSummaryTitle.TabIndex = 0;
-
-            this.lblSummaryTitle.Text = "LOG SUMMARY";
-
+            lblSummaryTitle.AutoSize = true;
+            lblSummaryTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblSummaryTitle.Location = new Point(32, 32);
+            lblSummaryTitle.Margin = new Padding(5, 0, 5, 0);
+            lblSummaryTitle.Name = "lblSummaryTitle";
+            lblSummaryTitle.Size = new Size(266, 37);
+            lblSummaryTitle.TabIndex = 0;
+            lblSummaryTitle.Text = "LOG DISTRIBUTION";
             // 
-
             // pnlLevelStats
-
             // 
-
-            this.pnlLevelStats.BackColor = System.Drawing.Color.White;
-
-            this.pnlLevelStats.Controls.Add(lblLevelStatsTitle);
-
-            this.pnlLevelStats.Dock = DockStyle.Fill;
-
-            this.pnlLevelStats.Location = new Point(0, 226);
-
-            this.pnlLevelStats.Margin = new Padding(0, 0, 0, 25);
-
-            this.pnlLevelStats.Name = "pnlLevelStats";
-
-            this.pnlLevelStats.Size = new Size(622, 201);
-
-            this.pnlLevelStats.TabIndex = 1;
-
+            pnlLevelStats.BackColor = Color.White;
+            pnlLevelStats.Controls.Add(lblLevelStatsTitle);
+            pnlLevelStats.Dock = DockStyle.Fill;
+            pnlLevelStats.Location = new Point(0, 327);
+            pnlLevelStats.Margin = new Padding(0, 0, 0, 40);
+            pnlLevelStats.Name = "pnlLevelStats";
+            pnlLevelStats.Size = new Size(701, 287);
+            pnlLevelStats.TabIndex = 1;
             // 
-
             // lblLevelStatsTitle
-
             // 
-
-            this.lblLevelStatsTitle.AutoSize = true;
-
-            this.lblLevelStatsTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblLevelStatsTitle.Location = new Point(20, 20);
-
-            this.lblLevelStatsTitle.Name = "lblLevelStatsTitle";
-
-            this.lblLevelStatsTitle.Size = new Size(150, 37);
-
-            this.lblLevelStatsTitle.TabIndex = 0;
-
-            this.lblLevelStatsTitle.Text = "LOG LEVEL";
-
+            lblLevelStatsTitle.AutoSize = true;
+            lblLevelStatsTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblLevelStatsTitle.Location = new Point(32, 32);
+            lblLevelStatsTitle.Margin = new Padding(5, 0, 5, 0);
+            lblLevelStatsTitle.Name = "lblLevelStatsTitle";
+            lblLevelStatsTitle.Size = new Size(150, 37);
+            lblLevelStatsTitle.TabIndex = 0;
+            lblLevelStatsTitle.Text = "LOG LEVEL";
             // 
-
             // pnlModuleStats
-
             // 
-
-            this.pnlModuleStats.BackColor = System.Drawing.Color.White;
-
-            this.pnlModuleStats.Controls.Add(lblModuleStatsTitle);
-
-            this.pnlModuleStats.Dock = DockStyle.Fill;
-
-            this.pnlModuleStats.Location = new Point(3, 455);
-
-            this.pnlModuleStats.Name = "pnlModuleStats";
-
-            this.pnlModuleStats.Size = new Size(616, 227);
-
-            this.pnlModuleStats.TabIndex = 2;
-
+            pnlModuleStats.BackColor = Color.White;
+            pnlModuleStats.Controls.Add(lblModuleStatsTitle);
+            pnlModuleStats.Dock = DockStyle.Fill;
+            pnlModuleStats.Location = new Point(5, 659);
+            pnlModuleStats.Margin = new Padding(5);
+            pnlModuleStats.Name = "pnlModuleStats";
+            pnlModuleStats.Size = new Size(691, 328);
+            pnlModuleStats.TabIndex = 2;
             // 
-
             // lblModuleStatsTitle
-
             // 
-
-            this.lblModuleStatsTitle.AutoSize = true;
-
-            this.lblModuleStatsTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblModuleStatsTitle.Location = new Point(20, 20);
-
-            this.lblModuleStatsTitle.Name = "lblModuleStatsTitle";
-
-            this.lblModuleStatsTitle.Size = new Size(131, 37);
-
-            this.lblModuleStatsTitle.TabIndex = 0;
-
-            this.lblModuleStatsTitle.Text = "MODULE";
-
+            lblModuleStatsTitle.AutoSize = true;
+            lblModuleStatsTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblModuleStatsTitle.Location = new Point(32, 32);
+            lblModuleStatsTitle.Margin = new Padding(5, 0, 5, 0);
+            lblModuleStatsTitle.Name = "lblModuleStatsTitle";
+            lblModuleStatsTitle.Size = new Size(131, 37);
+            lblModuleStatsTitle.TabIndex = 0;
+            lblModuleStatsTitle.Text = "MODULE";
             // 
-
             // pnlLogDetail
-
             // 
-
-            this.pnlLogDetail.BackColor = System.Drawing.Color.White;
-
-            this.pnlLogDetail.Controls.Add(lblLogDetailTitle);
-
-            this.pnlLogDetail.Controls.Add(lblLogDetailContent);
-
-            this.pnlLogDetail.Dock = DockStyle.Bottom;
-
-            this.pnlLogDetail.Location = new Point(0, 978);
-
-            this.pnlLogDetail.Name = "pnlLogDetail";
-
-            this.pnlLogDetail.Size = new Size(2210, 180);
-
-            this.pnlLogDetail.TabIndex = 2;
-
+            pnlLogDetail.BackColor = Color.White;
+            pnlLogDetail.Controls.Add(lblLogDetailTitle);
+            pnlLogDetail.Controls.Add(lblLogDetailContent);
+            pnlLogDetail.Dock = DockStyle.Bottom;
+            pnlLogDetail.Location = new Point(0, 1395);
+            pnlLogDetail.Margin = new Padding(5);
+            pnlLogDetail.Name = "pnlLogDetail";
+            pnlLogDetail.Size = new Size(2520, 175);
+            pnlLogDetail.TabIndex = 2;
             // 
-
             // lblLogDetailTitle
-
             // 
-
-            this.lblLogDetailTitle.AutoSize = true;
-
-            this.lblLogDetailTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblLogDetailTitle.Location = new Point(40, 20);
-
-            this.lblLogDetailTitle.Name = "lblLogDetailTitle";
-
-            this.lblLogDetailTitle.Size = new Size(166, 37);
-
-            this.lblLogDetailTitle.TabIndex = 0;
-
-            this.lblLogDetailTitle.Text = "LOG DETAIL";
-
+            lblLogDetailTitle.AutoSize = true;
+            lblLogDetailTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblLogDetailTitle.Location = new Point(65, 32);
+            lblLogDetailTitle.Margin = new Padding(5, 0, 5, 0);
+            lblLogDetailTitle.Name = "lblLogDetailTitle";
+            lblLogDetailTitle.Size = new Size(166, 37);
+            lblLogDetailTitle.TabIndex = 0;
+            lblLogDetailTitle.Text = "LOG DETAIL";
             // 
-
             // lblLogDetailContent
-
             // 
-
-            this.lblLogDetailContent.AutoSize = true;
-
-            this.lblLogDetailContent.Location = new Point(40, 75);
-
-            this.lblLogDetailContent.Name = "lblLogDetailContent";
-
-            this.lblLogDetailContent.Size = new Size(1938, 32);
-
-            this.lblLogDetailContent.TabIndex = 1;
-
-            this.lblLogDetailContent.Text = "Date & Time: 15 Mar 2026 10:30:20 AM   |   Log Level: INFO   |   Module: Test Execution   |   User: Fally   |   Action: Start Test   |   Description: Test started for Part Number WH-ENG-001";
-
+            lblLogDetailContent.AutoSize = true;
+            lblLogDetailContent.Location = new Point(65, 86);
+            lblLogDetailContent.Margin = new Padding(5, 0, 5, 0);
+            lblLogDetailContent.Name = "lblLogDetailContent";
+            lblLogDetailContent.Size = new Size(1938, 32);
+            lblLogDetailContent.TabIndex = 1;
+            lblLogDetailContent.Text = "Date & Time: 15 Mar 2026 10:30:20 AM   |   Log Level: INFO   |   Module: Test Execution   |   User: Fally   |   Action: Start Test   |   Description: Test started for Part Number WH-ENG-001";
             // 
-
             // SystemLog
-
             // 
-
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-
-            this.AutoScaleMode = AutoScaleMode.Font;
-
-            this.BackColor = System.Drawing.Color.FromArgb(244, 245, 247);
-
-            this.Controls.Add(mainLayout);
-
-            this.Controls.Add(pnlLogDetail);
-
-            this.Controls.Add(pnlTop);
-
-            this.Margin = new Padding(6, 7, 6, 7);
-
-            this.Name = "SystemLog";
-
-            this.Size = new Size(2210, 1158);
-
-            this.pnlTop.ResumeLayout(false);
-
-            this.pnlTop.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(248, 250, 252);
+            Controls.Add(mainLayout);
+            Controls.Add(pnlLogDetail);
+            Controls.Add(pnlTop);
+            Margin = new Padding(10, 11, 10, 11);
+            Name = "SystemLog";
+            Size = new Size(2520, 1570);
+            pnlTop.ResumeLayout(false);
+            pnlTop.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)logoBox).EndInit();
-
-            this.mainLayout.ResumeLayout(false);
-
-            this.pnlLeft.ResumeLayout(false);
-
-            this.pnlLeft.PerformLayout();
-
+            panelFilters.ResumeLayout(false);
+            panelFilters.PerformLayout();
+            mainLayout.ResumeLayout(false);
+            pnlLeft.ResumeLayout(false);
+            pnlLeft.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)gridData).EndInit();
-
-            this.rightLayout.ResumeLayout(false);
-
-            this.pnlSummary.ResumeLayout(false);
-
-            this.pnlSummary.PerformLayout();
-
-            this.pnlLevelStats.ResumeLayout(false);
-
-            this.pnlLevelStats.PerformLayout();
-
-            this.pnlModuleStats.ResumeLayout(false);
-
-            this.pnlModuleStats.PerformLayout();
-
-            this.pnlLogDetail.ResumeLayout(false);
-
-            this.pnlLogDetail.PerformLayout();
-
-            this.ResumeLayout(false);
-
+            rightLayout.ResumeLayout(false);
+            pnlSummary.ResumeLayout(false);
+            pnlSummary.PerformLayout();
+            pnlLevelStats.ResumeLayout(false);
+            pnlLevelStats.PerformLayout();
+            pnlModuleStats.ResumeLayout(false);
+            pnlModuleStats.PerformLayout();
+            pnlLogDetail.ResumeLayout(false);
+            pnlLogDetail.PerformLayout();
+            ResumeLayout(false);
         }
-
-
 
         #endregion
 
-
-
         private System.Windows.Forms.Panel pnlTop;
-
+        private System.Windows.Forms.Panel panelFilters;
         private System.Windows.Forms.PictureBox logoBox;
-
         private System.Windows.Forms.Label lblTitle;
 
-
-
         // Filter Controls
-
         private System.Windows.Forms.Label lblDateRange;
-
         private System.Windows.Forms.DateTimePicker dtpStart;
-
         private System.Windows.Forms.Label lblDash;
 
         private System.Windows.Forms.DateTimePicker dtpEnd;
@@ -1037,11 +736,13 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Button btnRefresh;
 
         private System.Windows.Forms.Label lblTableTitle;
-
         private System.Windows.Forms.DataGridView gridData;
-
-
-
+        private System.Windows.Forms.Label lblPaginationInfo;
+        private System.Windows.Forms.Button btnPagePrev;
+        private System.Windows.Forms.Button btnPage1;
+        private System.Windows.Forms.Button btnPage2;
+        private System.Windows.Forms.Button btnPage3;
+        private System.Windows.Forms.Button btnPageNext;
         // Right Side Components
 
         private System.Windows.Forms.TableLayoutPanel rightLayout;
