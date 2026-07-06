@@ -45,2074 +45,1102 @@ namespace AssemblyLineTester.Views.Pages
         private void InitializeComponent()
 
         {
-
-            this.tblMain = new System.Windows.Forms.TableLayoutPanel();
-
-            this.tblTop = new System.Windows.Forms.TableLayoutPanel();
-
-            this.cardTester = new System.Windows.Forms.Panel();
-
-            this.lblTesterSub = new System.Windows.Forms.Label();
-
-            this.lblTesterStatus = new System.Windows.Forms.Label();
-
-            this.lblTesterTitle = new System.Windows.Forms.Label();
-
-            this.cardMachine = new System.Windows.Forms.Panel();
-
-            this.lblMachineSub = new System.Windows.Forms.Label();
-
-            this.lblMachineStatus = new System.Windows.Forms.Label();
-
-            this.lblMachineTitle = new System.Windows.Forms.Label();
-
-            this.cardDatabase = new System.Windows.Forms.Panel();
-
-            this.lblDatabaseSub = new System.Windows.Forms.Label();
-
-            this.lblDatabaseStatus = new System.Windows.Forms.Label();
-
-            this.lblDatabaseTitle = new System.Windows.Forms.Label();
-
-            this.cardActiveProg = new System.Windows.Forms.Panel();
-
-            this.btnChangeProg = new System.Windows.Forms.Button();
-
-            this.picHarness = new System.Windows.Forms.PictureBox();
-
-            this.lblProgDetails = new System.Windows.Forms.Label();
-
-            this.lblActiveProgTitle = new System.Windows.Forms.Label();
-
-            this.tblMiddle = new System.Windows.Forms.TableLayoutPanel();
-
-            this.cardSummary = new System.Windows.Forms.Panel();
-
-            this.tblCharts = new System.Windows.Forms.TableLayoutPanel();
-
-            this.chartHistory = new System.Windows.Forms.DataVisualization.Charting.Chart();
-
-            this.chartFailReason = new System.Windows.Forms.DataVisualization.Charting.Chart();
-
-            this.tblKpi = new System.Windows.Forms.TableLayoutPanel();
-
-            this.kpiTotalTested = new System.Windows.Forms.Panel();
-
-            this.lblTotalTestedVal = new System.Windows.Forms.Label();
-
-            this.lblTotalTestedTitle = new System.Windows.Forms.Label();
-
-            this.kpiPass = new System.Windows.Forms.Panel();
-
-            this.lblPassVal = new System.Windows.Forms.Label();
-
-            this.lblPassTitle = new System.Windows.Forms.Label();
-
-            this.kpiFail = new System.Windows.Forms.Panel();
-
-            this.lblFailVal = new System.Windows.Forms.Label();
-
-            this.lblFailTitle = new System.Windows.Forms.Label();
-
-            this.kpiYield = new System.Windows.Forms.Panel();
-
-            this.lblYieldVal = new System.Windows.Forms.Label();
-
-            this.lblYieldTitle = new System.Windows.Forms.Label();
-
-            this.kpiCycleTime = new System.Windows.Forms.Panel();
-
-            this.lblCycleTimeVal = new System.Windows.Forms.Label();
-
-            this.lblCycleTimeTitle = new System.Windows.Forms.Label();
-
-            this.cmbTimeRange = new System.Windows.Forms.ComboBox();
-
-            this.lblSummaryTitle = new System.Windows.Forms.Label();
-
-            this.cardHistory = new System.Windows.Forms.Panel();
-
-            this.gridRecent = new System.Windows.Forms.DataGridView();
-
-            this.lnkViewAll = new System.Windows.Forms.LinkLabel();
-
-            this.lblRecentTitle = new System.Windows.Forms.Label();
-
-            this.tblBottom = new System.Windows.Forms.TableLayoutPanel();
-
-            this.cardModules = new System.Windows.Forms.Panel();
-
-            this.tblModules = new System.Windows.Forms.TableLayoutPanel();
-
-            this.pnlMod1 = new System.Windows.Forms.Panel();
-
-            this.lblMod1Status = new System.Windows.Forms.Label();
-
-            this.lblMod1Title = new System.Windows.Forms.Label();
-
-            this.pnlMod2 = new System.Windows.Forms.Panel();
-
-            this.lblMod2Status = new System.Windows.Forms.Label();
-
-            this.lblMod2Title = new System.Windows.Forms.Label();
-
-            this.pnlMod3 = new System.Windows.Forms.Panel();
-
-            this.lblMod3Status = new System.Windows.Forms.Label();
-
-            this.lblMod3Title = new System.Windows.Forms.Label();
-
-            this.pnlMod4 = new System.Windows.Forms.Panel();
-
-            this.lblMod4Status = new System.Windows.Forms.Label();
-
-            this.lblMod4Title = new System.Windows.Forms.Label();
-
-            this.lblModulesTitle = new System.Windows.Forms.Label();
-
-            this.cardOperatingTime = new System.Windows.Forms.Panel();
-
-            this.lblOpTimeSub = new System.Windows.Forms.Label();
-
-            this.lblOpTimeVal = new System.Windows.Forms.Label();
-
-            this.lblOpTimeTitle = new System.Windows.Forms.Label();
-
-            this.cardMaintenance = new System.Windows.Forms.Panel();
-
-            this.lblMaintSub = new System.Windows.Forms.Label();
-
-            this.lblMaintVal = new System.Windows.Forms.Label();
-
-            this.lblMaintTitle = new System.Windows.Forms.Label();
-
-            this.tblMain.SuspendLayout();
-
-            this.tblTop.SuspendLayout();
-
-            this.cardTester.SuspendLayout();
-
-            this.cardMachine.SuspendLayout();
-
-            this.cardDatabase.SuspendLayout();
-
-            this.cardActiveProg.SuspendLayout();
-
-            ((System.ComponentModel.ISupportInitialize)(this.picHarness)).BeginInit();
-
-            this.tblMiddle.SuspendLayout();
-
-            this.cardSummary.SuspendLayout();
-
-            this.tblCharts.SuspendLayout();
-
-            ((System.ComponentModel.ISupportInitialize)(this.chartHistory)).BeginInit();
-
-            ((System.ComponentModel.ISupportInitialize)(this.chartFailReason)).BeginInit();
-
-            this.tblKpi.SuspendLayout();
-
-            this.kpiTotalTested.SuspendLayout();
-
-            this.kpiPass.SuspendLayout();
-
-            this.kpiFail.SuspendLayout();
-
-            this.kpiYield.SuspendLayout();
-
-            this.kpiCycleTime.SuspendLayout();
-
-            this.cardHistory.SuspendLayout();
-
-            ((System.ComponentModel.ISupportInitialize)(this.gridRecent)).BeginInit();
-
-            this.tblBottom.SuspendLayout();
-
-            this.cardModules.SuspendLayout();
-
-            this.tblModules.SuspendLayout();
-
-            this.pnlMod1.SuspendLayout();
-
-            this.pnlMod2.SuspendLayout();
-
-            this.pnlMod3.SuspendLayout();
-
-            this.pnlMod4.SuspendLayout();
-
-            this.cardOperatingTime.SuspendLayout();
-
-            this.cardMaintenance.SuspendLayout();
-
-            this.SuspendLayout();
-
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            tblMain = new TableLayoutPanel();
+            tblTop = new TableLayoutPanel();
+            cardTester = new Panel();
+            lblTesterSub = new Label();
+            lblTesterStatus = new Label();
+            lblTesterTitle = new Label();
+            cardMachine = new Panel();
+            lblMachineSub = new Label();
+            lblMachineStatus = new Label();
+            lblMachineTitle = new Label();
+            cardDatabase = new Panel();
+            lblDatabaseSub = new Label();
+            lblDatabaseStatus = new Label();
+            lblDatabaseTitle = new Label();
+            cardActiveProg = new Panel();
+            btnChangeProg = new Button();
+            picHarness = new PictureBox();
+            lblProgDetails = new Label();
+            lblActiveProgTitle = new Label();
+            tblMiddle = new TableLayoutPanel();
+            cardSummary = new Panel();
+            tblCharts = new TableLayoutPanel();
+            chartHistory = new Chart();
+            chartFailReason = new Chart();
+            tblKpi = new TableLayoutPanel();
+            kpiTotalTested = new Panel();
+            lblTotalTestedVal = new Label();
+            lblTotalTestedTitle = new Label();
+            kpiPass = new Panel();
+            lblPassVal = new Label();
+            lblPassTitle = new Label();
+            kpiFail = new Panel();
+            lblFailVal = new Label();
+            lblFailTitle = new Label();
+            kpiYield = new Panel();
+            lblYieldVal = new Label();
+            lblYieldTitle = new Label();
+            kpiCycleTime = new Panel();
+            lblCycleTimeVal = new Label();
+            lblCycleTimeTitle = new Label();
+            cmbTimeRange = new ComboBox();
+            lblSummaryTitle = new Label();
+            cardHistory = new Panel();
+            gridRecent = new DataGridView();
+            lnkViewAll = new LinkLabel();
+            lblRecentTitle = new Label();
+            tblBottom = new TableLayoutPanel();
+            cardModules = new Panel();
+            tblModules = new TableLayoutPanel();
+            pnlMod1 = new Panel();
+            lblMod1Status = new Label();
+            lblMod1Title = new Label();
+            pnlMod2 = new Panel();
+            lblMod2Status = new Label();
+            lblMod2Title = new Label();
+            pnlMod3 = new Panel();
+            lblMod3Status = new Label();
+            lblMod3Title = new Label();
+            pnlMod4 = new Panel();
+            lblMod4Status = new Label();
+            lblMod4Title = new Label();
+            lblModulesTitle = new Label();
+            cardOperatingTime = new Panel();
+            lblOpTimeSub = new Label();
+            lblOpTimeVal = new Label();
+            lblOpTimeTitle = new Label();
+            cardMaintenance = new Panel();
+            lblMaintSub = new Label();
+            lblMaintVal = new Label();
+            lblMaintTitle = new Label();
+            tblMain.SuspendLayout();
+            tblTop.SuspendLayout();
+            cardTester.SuspendLayout();
+            cardMachine.SuspendLayout();
+            cardDatabase.SuspendLayout();
+            cardActiveProg.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picHarness).BeginInit();
+            tblMiddle.SuspendLayout();
+            cardSummary.SuspendLayout();
+            tblCharts.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)chartHistory).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)chartFailReason).BeginInit();
+            tblKpi.SuspendLayout();
+            kpiTotalTested.SuspendLayout();
+            kpiPass.SuspendLayout();
+            kpiFail.SuspendLayout();
+            kpiYield.SuspendLayout();
+            kpiCycleTime.SuspendLayout();
+            cardHistory.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)gridRecent).BeginInit();
+            tblBottom.SuspendLayout();
+            cardModules.SuspendLayout();
+            tblModules.SuspendLayout();
+            pnlMod1.SuspendLayout();
+            pnlMod2.SuspendLayout();
+            pnlMod3.SuspendLayout();
+            pnlMod4.SuspendLayout();
+            cardOperatingTime.SuspendLayout();
+            cardMaintenance.SuspendLayout();
+            SuspendLayout();
             // 
-
             // tblMain
-
             // 
-
-            this.tblMain.ColumnCount = 1;
-
-            this.tblMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-
-            this.tblMain.Controls.Add(this.tblTop, 0, 0);
-
-            this.tblMain.Controls.Add(this.tblMiddle, 0, 1);
-
-            this.tblMain.Controls.Add(this.tblBottom, 0, 2);
-
-            this.tblMain.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.tblMain.Location = new System.Drawing.Point(0, 0);
-
-            this.tblMain.Margin = new System.Windows.Forms.Padding(0);
-
-            this.tblMain.Name = "tblMain";
-
-            this.tblMain.RowCount = 3;
-
-            this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-
-            this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 65F));
-
-            this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
-
-            this.tblMain.Size = new System.Drawing.Size(1600, 900);
-
-            this.tblMain.TabIndex = 0;
-
+            tblMain.ColumnCount = 1;
+            tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblMain.Controls.Add(tblTop, 0, 0);
+            tblMain.Controls.Add(tblMiddle, 0, 1);
+            tblMain.Controls.Add(tblBottom, 0, 2);
+            tblMain.Dock = DockStyle.Fill;
+            tblMain.Location = new Point(0, 0);
+            tblMain.Margin = new Padding(0);
+            tblMain.Name = "tblMain";
+            tblMain.RowCount = 3;
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 65F));
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 15F));
+            tblMain.Size = new Size(2600, 1440);
+            tblMain.TabIndex = 0;
             // 
-
             // tblTop
-
             // 
-
-            this.tblTop.ColumnCount = 4;
-
-            this.tblTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22F));
-
-            this.tblTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22F));
-
-            this.tblTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22F));
-
-            this.tblTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 34F));
-
-            this.tblTop.Controls.Add(this.cardTester, 0, 0);
-
-            this.tblTop.Controls.Add(this.cardMachine, 1, 0);
-
-            this.tblTop.Controls.Add(this.cardDatabase, 2, 0);
-
-            this.tblTop.Controls.Add(this.cardActiveProg, 3, 0);
-
-            this.tblTop.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.tblTop.Location = new System.Drawing.Point(8, 8);
-
-            this.tblTop.Margin = new System.Windows.Forms.Padding(8);
-
-            this.tblTop.Name = "tblTop";
-
-            this.tblTop.RowCount = 1;
-
-            this.tblTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-
-            this.tblTop.Size = new System.Drawing.Size(1584, 164);
-
-            this.tblTop.TabIndex = 0;
-
+            tblTop.ColumnCount = 4;
+            tblTop.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
+            tblTop.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
+            tblTop.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
+            tblTop.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34F));
+            tblTop.Controls.Add(cardTester, 0, 0);
+            tblTop.Controls.Add(cardMachine, 1, 0);
+            tblTop.Controls.Add(cardDatabase, 2, 0);
+            tblTop.Controls.Add(cardActiveProg, 3, 0);
+            tblTop.Dock = DockStyle.Fill;
+            tblTop.Location = new Point(13, 13);
+            tblTop.Margin = new Padding(13);
+            tblTop.Name = "tblTop";
+            tblTop.RowCount = 1;
+            tblTop.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblTop.Size = new Size(2574, 262);
+            tblTop.TabIndex = 0;
             // 
-
             // cardTester
-
             // 
-
-            this.cardTester.BackColor = System.Drawing.Color.White;
-
-            this.cardTester.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardTester.Controls.Add(this.lblTesterSub);
-
-            this.cardTester.Controls.Add(this.lblTesterStatus);
-
-            this.cardTester.Controls.Add(this.lblTesterTitle);
-
-            this.cardTester.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardTester.Location = new System.Drawing.Point(6, 6);
-
-            this.cardTester.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardTester.Name = "cardTester";
-
-            this.cardTester.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardTester.Size = new System.Drawing.Size(336, 152);
-
-            this.cardTester.TabIndex = 0;
-
+            cardTester.BackColor = Color.White;
+            cardTester.BorderStyle = BorderStyle.FixedSingle;
+            cardTester.Controls.Add(lblTesterSub);
+            cardTester.Controls.Add(lblTesterStatus);
+            cardTester.Controls.Add(lblTesterTitle);
+            cardTester.Dock = DockStyle.Fill;
+            cardTester.Location = new Point(10, 10);
+            cardTester.Margin = new Padding(10);
+            cardTester.Name = "cardTester";
+            cardTester.Padding = new Padding(24);
+            cardTester.Size = new Size(546, 242);
+            cardTester.TabIndex = 0;
             // 
-
             // lblTesterSub
-
             // 
-
-            this.lblTesterSub.AutoSize = true;
-
-            this.lblTesterSub.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-            this.lblTesterSub.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-
-            this.lblTesterSub.Location = new System.Drawing.Point(15, 100);
-
-            this.lblTesterSub.Name = "lblTesterSub";
-
-            this.lblTesterSub.Size = new System.Drawing.Size(201, 20);
-
-            this.lblTesterSub.TabIndex = 2;
-
-            this.lblTesterSub.Text = "All tester modules are operational";
-
+            lblTesterSub.AutoSize = true;
+            lblTesterSub.Font = new Font("Segoe UI", 9F);
+            lblTesterSub.ForeColor = Color.FromArgb(100, 116, 139);
+            lblTesterSub.Location = new Point(24, 160);
+            lblTesterSub.Margin = new Padding(5, 0, 5, 0);
+            lblTesterSub.Name = "lblTesterSub";
+            lblTesterSub.Size = new Size(375, 32);
+            lblTesterSub.TabIndex = 2;
+            lblTesterSub.Text = "All tester modules are operational";
             // 
-
             // lblTesterStatus
-
             // 
-
-            this.lblTesterStatus.AutoSize = true;
-
-            this.lblTesterStatus.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblTesterStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblTesterStatus.Location = new System.Drawing.Point(13, 50);
-
-            this.lblTesterStatus.Name = "lblTesterStatus";
-
-            this.lblTesterStatus.Size = new System.Drawing.Size(155, 37);
-
-            this.lblTesterStatus.TabIndex = 1;
-
-            this.lblTesterStatus.Text = " ONLINE";
-
+            lblTesterStatus.AutoSize = true;
+            lblTesterStatus.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            lblTesterStatus.ForeColor = Color.FromArgb(76, 175, 80);
+            lblTesterStatus.Location = new Point(21, 80);
+            lblTesterStatus.Margin = new Padding(5, 0, 5, 0);
+            lblTesterStatus.Name = "lblTesterStatus";
+            lblTesterStatus.Size = new Size(197, 59);
+            lblTesterStatus.TabIndex = 1;
+            lblTesterStatus.Text = " ONLINE";
             // 
-
             // lblTesterTitle
-
             // 
-
-            this.lblTesterTitle.AutoSize = true;
-
-            this.lblTesterTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblTesterTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-
-            this.lblTesterTitle.Location = new System.Drawing.Point(15, 15);
-
-            this.lblTesterTitle.Name = "lblTesterTitle";
-
-            this.lblTesterTitle.Size = new System.Drawing.Size(131, 23);
-
-            this.lblTesterTitle.TabIndex = 0;
-
-            this.lblTesterTitle.Text = "TESTER STATUS";
-
+            lblTesterTitle.AutoSize = true;
+            lblTesterTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblTesterTitle.ForeColor = Color.FromArgb(51, 65, 85);
+            lblTesterTitle.Location = new Point(24, 24);
+            lblTesterTitle.Margin = new Padding(5, 0, 5, 0);
+            lblTesterTitle.Name = "lblTesterTitle";
+            lblTesterTitle.Size = new Size(214, 37);
+            lblTesterTitle.TabIndex = 0;
+            lblTesterTitle.Text = "TESTER STATUS";
             // 
-
             // cardMachine
-
             // 
-
-            this.cardMachine.BackColor = System.Drawing.Color.White;
-
-            this.cardMachine.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardMachine.Controls.Add(this.lblMachineSub);
-
-            this.cardMachine.Controls.Add(this.lblMachineStatus);
-
-            this.cardMachine.Controls.Add(this.lblMachineTitle);
-
-            this.cardMachine.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardMachine.Location = new System.Drawing.Point(354, 6);
-
-            this.cardMachine.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardMachine.Name = "cardMachine";
-
-            this.cardMachine.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardMachine.Size = new System.Drawing.Size(336, 152);
-
-            this.cardMachine.TabIndex = 1;
-
+            cardMachine.BackColor = Color.White;
+            cardMachine.BorderStyle = BorderStyle.FixedSingle;
+            cardMachine.Controls.Add(lblMachineSub);
+            cardMachine.Controls.Add(lblMachineStatus);
+            cardMachine.Controls.Add(lblMachineTitle);
+            cardMachine.Dock = DockStyle.Fill;
+            cardMachine.Location = new Point(576, 10);
+            cardMachine.Margin = new Padding(10);
+            cardMachine.Name = "cardMachine";
+            cardMachine.Padding = new Padding(24);
+            cardMachine.Size = new Size(546, 242);
+            cardMachine.TabIndex = 1;
             // 
-
             // lblMachineSub
-
             // 
-
-            this.lblMachineSub.AutoSize = true;
-
-            this.lblMachineSub.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMachineSub.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-
-            this.lblMachineSub.Location = new System.Drawing.Point(15, 100);
-
-            this.lblMachineSub.Name = "lblMachineSub";
-
-            this.lblMachineSub.Size = new System.Drawing.Size(121, 20);
-
-            this.lblMachineSub.TabIndex = 2;
-
-            this.lblMachineSub.Text = "No active alarms";
-
+            lblMachineSub.AutoSize = true;
+            lblMachineSub.Font = new Font("Segoe UI", 9F);
+            lblMachineSub.ForeColor = Color.FromArgb(100, 116, 139);
+            lblMachineSub.Location = new Point(24, 160);
+            lblMachineSub.Margin = new Padding(5, 0, 5, 0);
+            lblMachineSub.Name = "lblMachineSub";
+            lblMachineSub.Size = new Size(191, 32);
+            lblMachineSub.TabIndex = 2;
+            lblMachineSub.Text = "No active alarms";
             // 
-
             // lblMachineStatus
-
             // 
-
-            this.lblMachineStatus.AutoSize = true;
-
-            this.lblMachineStatus.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMachineStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblMachineStatus.Location = new System.Drawing.Point(13, 50);
-
-            this.lblMachineStatus.Name = "lblMachineStatus";
-
-            this.lblMachineStatus.Size = new System.Drawing.Size(139, 37);
-
-            this.lblMachineStatus.TabIndex = 1;
-
-            this.lblMachineStatus.Text = " READY";
-
+            lblMachineStatus.AutoSize = true;
+            lblMachineStatus.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            lblMachineStatus.ForeColor = Color.FromArgb(76, 175, 80);
+            lblMachineStatus.Location = new Point(21, 80);
+            lblMachineStatus.Margin = new Padding(5, 0, 5, 0);
+            lblMachineStatus.Name = "lblMachineStatus";
+            lblMachineStatus.Size = new Size(177, 59);
+            lblMachineStatus.TabIndex = 1;
+            lblMachineStatus.Text = " READY";
             // 
-
             // lblMachineTitle
-
             // 
-
-            this.lblMachineTitle.AutoSize = true;
-
-            this.lblMachineTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMachineTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-
-            this.lblMachineTitle.Location = new System.Drawing.Point(15, 15);
-
-            this.lblMachineTitle.Name = "lblMachineTitle";
-
-            this.lblMachineTitle.Size = new System.Drawing.Size(152, 23);
-
-            this.lblMachineTitle.TabIndex = 0;
-
-            this.lblMachineTitle.Text = "MACHINE STATUS";
-
+            lblMachineTitle.AutoSize = true;
+            lblMachineTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblMachineTitle.ForeColor = Color.FromArgb(51, 65, 85);
+            lblMachineTitle.Location = new Point(24, 24);
+            lblMachineTitle.Margin = new Padding(5, 0, 5, 0);
+            lblMachineTitle.Name = "lblMachineTitle";
+            lblMachineTitle.Size = new Size(248, 37);
+            lblMachineTitle.TabIndex = 0;
+            lblMachineTitle.Text = "MACHINE STATUS";
             // 
-
             // cardDatabase
-
             // 
-
-            this.cardDatabase.BackColor = System.Drawing.Color.White;
-
-            this.cardDatabase.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardDatabase.Controls.Add(this.lblDatabaseSub);
-
-            this.cardDatabase.Controls.Add(this.lblDatabaseStatus);
-
-            this.cardDatabase.Controls.Add(this.lblDatabaseTitle);
-
-            this.cardDatabase.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardDatabase.Location = new System.Drawing.Point(702, 6);
-
-            this.cardDatabase.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardDatabase.Name = "cardDatabase";
-
-            this.cardDatabase.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardDatabase.Size = new System.Drawing.Size(336, 152);
-
-            this.cardDatabase.TabIndex = 2;
-
+            cardDatabase.BackColor = Color.White;
+            cardDatabase.BorderStyle = BorderStyle.FixedSingle;
+            cardDatabase.Controls.Add(lblDatabaseSub);
+            cardDatabase.Controls.Add(lblDatabaseStatus);
+            cardDatabase.Controls.Add(lblDatabaseTitle);
+            cardDatabase.Dock = DockStyle.Fill;
+            cardDatabase.Location = new Point(1142, 10);
+            cardDatabase.Margin = new Padding(10);
+            cardDatabase.Name = "cardDatabase";
+            cardDatabase.Padding = new Padding(24);
+            cardDatabase.Size = new Size(546, 242);
+            cardDatabase.TabIndex = 2;
             // 
-
             // lblDatabaseSub
-
             // 
-
-            this.lblDatabaseSub.AutoSize = true;
-
-            this.lblDatabaseSub.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-            this.lblDatabaseSub.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-
-            this.lblDatabaseSub.Location = new System.Drawing.Point(15, 100);
-
-            this.lblDatabaseSub.Name = "lblDatabaseSub";
-
-            this.lblDatabaseSub.Size = new System.Drawing.Size(133, 20);
-
-            this.lblDatabaseSub.TabIndex = 2;
-
-            this.lblDatabaseSub.Text = "SQL Server: Online";
-
+            lblDatabaseSub.AutoSize = true;
+            lblDatabaseSub.Font = new Font("Segoe UI", 9F);
+            lblDatabaseSub.ForeColor = Color.FromArgb(100, 116, 139);
+            lblDatabaseSub.Location = new Point(24, 160);
+            lblDatabaseSub.Margin = new Padding(5, 0, 5, 0);
+            lblDatabaseSub.Name = "lblDatabaseSub";
+            lblDatabaseSub.Size = new Size(213, 32);
+            lblDatabaseSub.TabIndex = 2;
+            lblDatabaseSub.Text = "SQL Server: Online";
             // 
-
             // lblDatabaseStatus
-
             // 
-
-            this.lblDatabaseStatus.AutoSize = true;
-
-            this.lblDatabaseStatus.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblDatabaseStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblDatabaseStatus.Location = new System.Drawing.Point(13, 50);
-
-            this.lblDatabaseStatus.Name = "lblDatabaseStatus";
-
-            this.lblDatabaseStatus.Size = new System.Drawing.Size(209, 37);
-
-            this.lblDatabaseStatus.TabIndex = 1;
-
-            this.lblDatabaseStatus.Text = " CONNECTED";
-
+            lblDatabaseStatus.AutoSize = true;
+            lblDatabaseStatus.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            lblDatabaseStatus.ForeColor = Color.FromArgb(76, 175, 80);
+            lblDatabaseStatus.Location = new Point(21, 80);
+            lblDatabaseStatus.Margin = new Padding(5, 0, 5, 0);
+            lblDatabaseStatus.Name = "lblDatabaseStatus";
+            lblDatabaseStatus.Size = new Size(294, 59);
+            lblDatabaseStatus.TabIndex = 1;
+            lblDatabaseStatus.Text = " CONNECTED";
             // 
-
             // lblDatabaseTitle
-
             // 
-
-            this.lblDatabaseTitle.AutoSize = true;
-
-            this.lblDatabaseTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblDatabaseTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-
-            this.lblDatabaseTitle.Location = new System.Drawing.Point(15, 15);
-
-            this.lblDatabaseTitle.Name = "lblDatabaseTitle";
-
-            this.lblDatabaseTitle.Size = new System.Drawing.Size(158, 23);
-
-            this.lblDatabaseTitle.TabIndex = 0;
-
-            this.lblDatabaseTitle.Text = "DATABASE STATUS";
-
+            lblDatabaseTitle.AutoSize = true;
+            lblDatabaseTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblDatabaseTitle.ForeColor = Color.FromArgb(51, 65, 85);
+            lblDatabaseTitle.Location = new Point(24, 24);
+            lblDatabaseTitle.Margin = new Padding(5, 0, 5, 0);
+            lblDatabaseTitle.Name = "lblDatabaseTitle";
+            lblDatabaseTitle.Size = new Size(256, 37);
+            lblDatabaseTitle.TabIndex = 0;
+            lblDatabaseTitle.Text = "DATABASE STATUS";
             // 
-
             // cardActiveProg
-
             // 
-
-            this.cardActiveProg.BackColor = System.Drawing.Color.White;
-
-            this.cardActiveProg.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardActiveProg.Controls.Add(this.btnChangeProg);
-
-            this.cardActiveProg.Controls.Add(this.picHarness);
-
-            this.cardActiveProg.Controls.Add(this.lblProgDetails);
-
-            this.cardActiveProg.Controls.Add(this.lblActiveProgTitle);
-
-            this.cardActiveProg.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardActiveProg.Location = new System.Drawing.Point(1050, 6);
-
-            this.cardActiveProg.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardActiveProg.Name = "cardActiveProg";
-
-            this.cardActiveProg.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardActiveProg.Size = new System.Drawing.Size(528, 152);
-
-            this.cardActiveProg.TabIndex = 3;
-
+            cardActiveProg.BackColor = Color.White;
+            cardActiveProg.BorderStyle = BorderStyle.FixedSingle;
+            cardActiveProg.Controls.Add(btnChangeProg);
+            cardActiveProg.Controls.Add(picHarness);
+            cardActiveProg.Controls.Add(lblProgDetails);
+            cardActiveProg.Controls.Add(lblActiveProgTitle);
+            cardActiveProg.Dock = DockStyle.Fill;
+            cardActiveProg.Location = new Point(1708, 10);
+            cardActiveProg.Margin = new Padding(10);
+            cardActiveProg.Name = "cardActiveProg";
+            cardActiveProg.Padding = new Padding(24);
+            cardActiveProg.Size = new Size(856, 242);
+            cardActiveProg.TabIndex = 3;
             // 
-
             // btnChangeProg
-
             // 
-
-            this.btnChangeProg.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-
-            this.btnChangeProg.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
-
-            this.btnChangeProg.FlatAppearance.BorderSize = 0;
-
-            this.btnChangeProg.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-
-            this.btnChangeProg.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.btnChangeProg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-
-            this.btnChangeProg.Location = new System.Drawing.Point(365, 105);
-
-            this.btnChangeProg.Name = "btnChangeProg";
-
-            this.btnChangeProg.Size = new System.Drawing.Size(145, 34);
-
-            this.btnChangeProg.TabIndex = 3;
-
-            this.btnChangeProg.Text = "Change Program";
-
-            this.btnChangeProg.UseVisualStyleBackColor = false;
-
+            btnChangeProg.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnChangeProg.BackColor = Color.FromArgb(255, 193, 7);
+            btnChangeProg.FlatAppearance.BorderSize = 0;
+            btnChangeProg.FlatStyle = FlatStyle.Flat;
+            btnChangeProg.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnChangeProg.ForeColor = Color.FromArgb(30, 41, 59);
+            btnChangeProg.Location = new Point(592, 168);
+            btnChangeProg.Margin = new Padding(5);
+            btnChangeProg.Name = "btnChangeProg";
+            btnChangeProg.Size = new Size(236, 54);
+            btnChangeProg.TabIndex = 3;
+            btnChangeProg.Text = "Change Program";
+            btnChangeProg.UseVisualStyleBackColor = false;
             // 
-
             // picHarness
-
             // 
-
-            this.picHarness.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-
-            this.picHarness.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-
-            this.picHarness.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.picHarness.Location = new System.Drawing.Point(365, 15);
-
-            this.picHarness.Name = "picHarness";
-
-            this.picHarness.Size = new System.Drawing.Size(145, 80);
-
-            this.picHarness.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-
-            this.picHarness.TabIndex = 2;
-
-            this.picHarness.TabStop = false;
-
+            picHarness.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            picHarness.BackColor = Color.FromArgb(248, 250, 252);
+            picHarness.BorderStyle = BorderStyle.FixedSingle;
+            picHarness.Location = new Point(592, 24);
+            picHarness.Margin = new Padding(5);
+            picHarness.Name = "picHarness";
+            picHarness.Size = new Size(234, 127);
+            picHarness.SizeMode = PictureBoxSizeMode.Zoom;
+            picHarness.TabIndex = 2;
+            picHarness.TabStop = false;
             // 
-
             // lblProgDetails
-
             // 
-
-            this.lblProgDetails.AutoSize = true;
-
-            this.lblProgDetails.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-            this.lblProgDetails.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-
-            this.lblProgDetails.Location = new System.Drawing.Point(15, 45);
-
-            this.lblProgDetails.Name = "lblProgDetails";
-
-            this.lblProgDetails.Size = new System.Drawing.Size(225, 100);
-
-            this.lblProgDetails.TabIndex = 1;
-
-            this.lblProgDetails.Text = "Product Model : 6060\r\nProduct Type  : AC\r\nArea          : Engine Control\r\nPart Number   : WH-ENG-001\r\nECN No.       : 123.R001";
-
+            lblProgDetails.AutoSize = true;
+            lblProgDetails.Font = new Font("Segoe UI", 9F);
+            lblProgDetails.ForeColor = Color.FromArgb(51, 65, 85);
+            lblProgDetails.Location = new Point(24, 72);
+            lblProgDetails.Margin = new Padding(5, 0, 5, 0);
+            lblProgDetails.Name = "lblProgDetails";
+            lblProgDetails.Size = new Size(326, 160);
+            lblProgDetails.TabIndex = 1;
+            lblProgDetails.Text = "Product Model : 6060\r\nProduct Type  : AC\r\nArea          : Engine Control\r\nPart Number   : WH-ENG-001\r\nECN No.       : 123.R001";
             // 
-
             // lblActiveProgTitle
-
             // 
-
-            this.lblActiveProgTitle.AutoSize = true;
-
-            this.lblActiveProgTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblActiveProgTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-
-            this.lblActiveProgTitle.Location = new System.Drawing.Point(15, 15);
-
-            this.lblActiveProgTitle.Name = "lblActiveProgTitle";
-
-            this.lblActiveProgTitle.Size = new System.Drawing.Size(155, 23);
-
-            this.lblActiveProgTitle.TabIndex = 0;
-
-            this.lblActiveProgTitle.Text = "ACTIVE PROGRAM";
-
+            lblActiveProgTitle.AutoSize = true;
+            lblActiveProgTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblActiveProgTitle.ForeColor = Color.FromArgb(51, 65, 85);
+            lblActiveProgTitle.Location = new Point(24, 24);
+            lblActiveProgTitle.Margin = new Padding(5, 0, 5, 0);
+            lblActiveProgTitle.Name = "lblActiveProgTitle";
+            lblActiveProgTitle.Size = new Size(254, 37);
+            lblActiveProgTitle.TabIndex = 0;
+            lblActiveProgTitle.Text = "ACTIVE PROGRAM";
             // 
-
             // tblMiddle
-
             // 
-
-            this.tblMiddle.ColumnCount = 2;
-
-            this.tblMiddle.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 55F));
-
-            this.tblMiddle.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 45F));
-
-            this.tblMiddle.Controls.Add(this.cardSummary, 0, 0);
-
-            this.tblMiddle.Controls.Add(this.cardHistory, 1, 0);
-
-            this.tblMiddle.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.tblMiddle.Location = new System.Drawing.Point(8, 188);
-
-            this.tblMiddle.Margin = new System.Windows.Forms.Padding(8);
-
-            this.tblMiddle.Name = "tblMiddle";
-
-            this.tblMiddle.RowCount = 1;
-
-            this.tblMiddle.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-
-            this.tblMiddle.Size = new System.Drawing.Size(1584, 569);
-
-            this.tblMiddle.TabIndex = 1;
-
+            tblMiddle.ColumnCount = 2;
+            tblMiddle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 67.28827F));
+            tblMiddle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32.71173F));
+            tblMiddle.Controls.Add(cardSummary, 0, 0);
+            tblMiddle.Controls.Add(cardHistory, 1, 0);
+            tblMiddle.Dock = DockStyle.Fill;
+            tblMiddle.Location = new Point(13, 301);
+            tblMiddle.Margin = new Padding(13);
+            tblMiddle.Name = "tblMiddle";
+            tblMiddle.RowCount = 1;
+            tblMiddle.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblMiddle.Size = new Size(2574, 910);
+            tblMiddle.TabIndex = 1;
             // 
-
             // cardSummary
-
             // 
-
-            this.cardSummary.BackColor = System.Drawing.Color.White;
-
-            this.cardSummary.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardSummary.Controls.Add(this.tblCharts);
-
-            this.cardSummary.Controls.Add(this.tblKpi);
-
-            this.cardSummary.Controls.Add(this.cmbTimeRange);
-
-            this.cardSummary.Controls.Add(this.lblSummaryTitle);
-
-            this.cardSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardSummary.Location = new System.Drawing.Point(6, 6);
-
-            this.cardSummary.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardSummary.Name = "cardSummary";
-
-            this.cardSummary.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardSummary.Size = new System.Drawing.Size(859, 557);
-
-            this.cardSummary.TabIndex = 0;
-
+            cardSummary.BackColor = Color.White;
+            cardSummary.BorderStyle = BorderStyle.FixedSingle;
+            cardSummary.Controls.Add(tblCharts);
+            cardSummary.Controls.Add(tblKpi);
+            cardSummary.Controls.Add(cmbTimeRange);
+            cardSummary.Controls.Add(lblSummaryTitle);
+            cardSummary.Dock = DockStyle.Fill;
+            cardSummary.Location = new Point(10, 10);
+            cardSummary.Margin = new Padding(10);
+            cardSummary.Name = "cardSummary";
+            cardSummary.Padding = new Padding(24);
+            cardSummary.Size = new Size(1712, 890);
+            cardSummary.TabIndex = 0;
             // 
-
             // tblCharts
-
             // 
-
-            this.tblCharts.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-
-            | System.Windows.Forms.AnchorStyles.Left)
-
-            | System.Windows.Forms.AnchorStyles.Right)));
-
-            this.tblCharts.ColumnCount = 2;
-
-            this.tblCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65F));
-
-            this.tblCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
-
-            this.tblCharts.Controls.Add(this.chartHistory, 0, 0);
-
-            this.tblCharts.Controls.Add(this.chartFailReason, 1, 0);
-
-            this.tblCharts.Location = new System.Drawing.Point(15, 150);
-
-            this.tblCharts.Name = "tblCharts";
-
-            this.tblCharts.RowCount = 1;
-
-            this.tblCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-
-            this.tblCharts.Size = new System.Drawing.Size(827, 390);
-
-            this.tblCharts.TabIndex = 3;
-
+            tblCharts.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tblCharts.ColumnCount = 2;
+            tblCharts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 72.48645F));
+            tblCharts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 27.513546F));
+            tblCharts.Controls.Add(chartHistory, 0, 0);
+            tblCharts.Controls.Add(chartFailReason, 1, 0);
+            tblCharts.Location = new Point(24, 240);
+            tblCharts.Margin = new Padding(5);
+            tblCharts.Name = "tblCharts";
+            tblCharts.RowCount = 1;
+            tblCharts.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblCharts.Size = new Size(1661, 624);
+            tblCharts.TabIndex = 3;
             // 
-
             // chartHistory
-
             // 
-
-            this.chartHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.chartHistory.Location = new System.Drawing.Point(3, 3);
-
-            this.chartHistory.Name = "chartHistory";
-
-            this.chartHistory.Size = new System.Drawing.Size(531, 384);
-
-            this.chartHistory.TabIndex = 0;
-
-            this.chartHistory.Text = "chartHistory";
-
+            chartHistory.Dock = DockStyle.Fill;
+            chartHistory.Location = new Point(5, 5);
+            chartHistory.Margin = new Padding(5);
+            chartHistory.Name = "chartHistory";
+            chartHistory.Size = new Size(1193, 614);
+            chartHistory.TabIndex = 0;
+            chartHistory.Text = "chartHistory";
             // 
-
             // chartFailReason
-
             // 
-
-            this.chartFailReason.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.chartFailReason.Location = new System.Drawing.Point(540, 3);
-
-            this.chartFailReason.Name = "chartFailReason";
-
-            this.chartFailReason.Size = new System.Drawing.Size(284, 384);
-
-            this.chartFailReason.TabIndex = 1;
-
-            this.chartFailReason.Text = "chartFailReason";
-
+            chartFailReason.Dock = DockStyle.Fill;
+            chartFailReason.Location = new Point(1208, 5);
+            chartFailReason.Margin = new Padding(5);
+            chartFailReason.Name = "chartFailReason";
+            chartFailReason.Size = new Size(448, 614);
+            chartFailReason.TabIndex = 1;
+            chartFailReason.Text = "chartFailReason";
             // 
-
             // tblKpi
-
             // 
-
-            this.tblKpi.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-
-            | System.Windows.Forms.AnchorStyles.Right)));
-
-            this.tblKpi.ColumnCount = 5;
-
-            this.tblKpi.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-
-            this.tblKpi.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-
-            this.tblKpi.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-
-            this.tblKpi.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-
-            this.tblKpi.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-
-            this.tblKpi.Controls.Add(this.kpiTotalTested, 0, 0);
-
-            this.tblKpi.Controls.Add(this.kpiPass, 1, 0);
-
-            this.tblKpi.Controls.Add(this.kpiFail, 2, 0);
-
-            this.tblKpi.Controls.Add(this.kpiYield, 3, 0);
-
-            this.tblKpi.Controls.Add(this.kpiCycleTime, 4, 0);
-
-            this.tblKpi.Location = new System.Drawing.Point(15, 55);
-
-            this.tblKpi.Name = "tblKpi";
-
-            this.tblKpi.RowCount = 1;
-
-            this.tblKpi.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-
-            this.tblKpi.Size = new System.Drawing.Size(827, 85);
-
-            this.tblKpi.TabIndex = 2;
-
+            tblKpi.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            tblKpi.ColumnCount = 5;
+            tblKpi.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpi.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpi.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpi.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpi.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpi.Controls.Add(kpiTotalTested, 0, 0);
+            tblKpi.Controls.Add(kpiPass, 1, 0);
+            tblKpi.Controls.Add(kpiFail, 2, 0);
+            tblKpi.Controls.Add(kpiYield, 3, 0);
+            tblKpi.Controls.Add(kpiCycleTime, 4, 0);
+            tblKpi.Location = new Point(24, 88);
+            tblKpi.Margin = new Padding(5);
+            tblKpi.Name = "tblKpi";
+            tblKpi.RowCount = 1;
+            tblKpi.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblKpi.Size = new Size(1661, 136);
+            tblKpi.TabIndex = 2;
             // 
-
             // kpiTotalTested
-
             // 
-
-            this.kpiTotalTested.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-
-            this.kpiTotalTested.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.kpiTotalTested.Controls.Add(this.lblTotalTestedVal);
-
-            this.kpiTotalTested.Controls.Add(this.lblTotalTestedTitle);
-
-            this.kpiTotalTested.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.kpiTotalTested.Location = new System.Drawing.Point(4, 4);
-
-            this.kpiTotalTested.Margin = new System.Windows.Forms.Padding(4);
-
-            this.kpiTotalTested.Name = "kpiTotalTested";
-
-            this.kpiTotalTested.Size = new System.Drawing.Size(157, 77);
-
-            this.kpiTotalTested.TabIndex = 0;
-
+            kpiTotalTested.BackColor = Color.FromArgb(248, 250, 252);
+            kpiTotalTested.BorderStyle = BorderStyle.FixedSingle;
+            kpiTotalTested.Controls.Add(lblTotalTestedVal);
+            kpiTotalTested.Controls.Add(lblTotalTestedTitle);
+            kpiTotalTested.Dock = DockStyle.Fill;
+            kpiTotalTested.Location = new Point(6, 6);
+            kpiTotalTested.Margin = new Padding(6);
+            kpiTotalTested.Name = "kpiTotalTested";
+            kpiTotalTested.Size = new Size(320, 124);
+            kpiTotalTested.TabIndex = 0;
             // 
-
             // lblTotalTestedVal
-
             // 
-
-            this.lblTotalTestedVal.AutoSize = true;
-
-            this.lblTotalTestedVal.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblTotalTestedVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-
-            this.lblTotalTestedVal.Location = new System.Drawing.Point(8, 25);
-
-            this.lblTotalTestedVal.Name = "lblTotalTestedVal";
-
-            this.lblTotalTestedVal.Size = new System.Drawing.Size(69, 41);
-
-            this.lblTotalTestedVal.TabIndex = 1;
-
-            this.lblTotalTestedVal.Text = "215";
-
+            lblTotalTestedVal.AutoSize = true;
+            lblTotalTestedVal.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblTotalTestedVal.ForeColor = Color.FromArgb(37, 99, 235);
+            lblTotalTestedVal.Location = new Point(13, 40);
+            lblTotalTestedVal.Margin = new Padding(5, 0, 5, 0);
+            lblTotalTestedVal.Name = "lblTotalTestedVal";
+            lblTotalTestedVal.Size = new Size(112, 65);
+            lblTotalTestedVal.TabIndex = 1;
+            lblTotalTestedVal.Text = "215";
             // 
-
             // lblTotalTestedTitle
-
             // 
-
-            this.lblTotalTestedTitle.AutoSize = true;
-
-            this.lblTotalTestedTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblTotalTestedTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-
-            this.lblTotalTestedTitle.Location = new System.Drawing.Point(8, 8);
-
-            this.lblTotalTestedTitle.Name = "lblTotalTestedTitle";
-
-            this.lblTotalTestedTitle.Size = new System.Drawing.Size(104, 19);
-
-            this.lblTotalTestedTitle.TabIndex = 0;
-
-            this.lblTotalTestedTitle.Text = "TOTAL TESTED";
-
+            lblTotalTestedTitle.AutoSize = true;
+            lblTotalTestedTitle.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblTotalTestedTitle.ForeColor = Color.FromArgb(37, 99, 235);
+            lblTotalTestedTitle.Location = new Point(13, 13);
+            lblTotalTestedTitle.Margin = new Padding(5, 0, 5, 0);
+            lblTotalTestedTitle.Name = "lblTotalTestedTitle";
+            lblTotalTestedTitle.Size = new Size(162, 30);
+            lblTotalTestedTitle.TabIndex = 0;
+            lblTotalTestedTitle.Text = "TOTAL TESTED";
             // 
-
             // kpiPass
-
             // 
-
-            this.kpiPass.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-
-            this.kpiPass.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.kpiPass.Controls.Add(this.lblPassVal);
-
-            this.kpiPass.Controls.Add(this.lblPassTitle);
-
-            this.kpiPass.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.kpiPass.Location = new System.Drawing.Point(169, 4);
-
-            this.kpiPass.Margin = new System.Windows.Forms.Padding(4);
-
-            this.kpiPass.Name = "kpiPass";
-
-            this.kpiPass.Size = new System.Drawing.Size(157, 77);
-
-            this.kpiPass.TabIndex = 1;
-
+            kpiPass.BackColor = Color.FromArgb(248, 250, 252);
+            kpiPass.BorderStyle = BorderStyle.FixedSingle;
+            kpiPass.Controls.Add(lblPassVal);
+            kpiPass.Controls.Add(lblPassTitle);
+            kpiPass.Dock = DockStyle.Fill;
+            kpiPass.Location = new Point(338, 6);
+            kpiPass.Margin = new Padding(6);
+            kpiPass.Name = "kpiPass";
+            kpiPass.Size = new Size(320, 124);
+            kpiPass.TabIndex = 1;
             // 
-
             // lblPassVal
-
             // 
-
-            this.lblPassVal.AutoSize = true;
-
-            this.lblPassVal.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblPassVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblPassVal.Location = new System.Drawing.Point(8, 25);
-
-            this.lblPassVal.Name = "lblPassVal";
-
-            this.lblPassVal.Size = new System.Drawing.Size(69, 41);
-
-            this.lblPassVal.TabIndex = 1;
-
-            this.lblPassVal.Text = "212";
-
+            lblPassVal.AutoSize = true;
+            lblPassVal.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblPassVal.ForeColor = Color.FromArgb(76, 175, 80);
+            lblPassVal.Location = new Point(13, 40);
+            lblPassVal.Margin = new Padding(5, 0, 5, 0);
+            lblPassVal.Name = "lblPassVal";
+            lblPassVal.Size = new Size(112, 65);
+            lblPassVal.TabIndex = 1;
+            lblPassVal.Text = "212";
             // 
-
             // lblPassTitle
-
             // 
-
-            this.lblPassTitle.AutoSize = true;
-
-            this.lblPassTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblPassTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblPassTitle.Location = new System.Drawing.Point(8, 8);
-
-            this.lblPassTitle.Name = "lblPassTitle";
-
-            this.lblPassTitle.Size = new System.Drawing.Size(111, 19);
-
-            this.lblPassTitle.TabIndex = 0;
-
-            this.lblPassTitle.Text = "PASS (98.60%)";
-
+            lblPassTitle.AutoSize = true;
+            lblPassTitle.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblPassTitle.ForeColor = Color.FromArgb(76, 175, 80);
+            lblPassTitle.Location = new Point(13, 13);
+            lblPassTitle.Margin = new Padding(5, 0, 5, 0);
+            lblPassTitle.Name = "lblPassTitle";
+            lblPassTitle.Size = new Size(164, 30);
+            lblPassTitle.TabIndex = 0;
+            lblPassTitle.Text = "PASS (98.60%)";
             // 
-
             // kpiFail
-
             // 
-
-            this.kpiFail.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-
-            this.kpiFail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.kpiFail.Controls.Add(this.lblFailVal);
-
-            this.kpiFail.Controls.Add(this.lblFailTitle);
-
-            this.kpiFail.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.kpiFail.Location = new System.Drawing.Point(334, 4);
-
-            this.kpiFail.Margin = new System.Windows.Forms.Padding(4);
-
-            this.kpiFail.Name = "kpiFail";
-
-            this.kpiFail.Size = new System.Drawing.Size(157, 77);
-
-            this.kpiFail.TabIndex = 2;
-
+            kpiFail.BackColor = Color.FromArgb(248, 250, 252);
+            kpiFail.BorderStyle = BorderStyle.FixedSingle;
+            kpiFail.Controls.Add(lblFailVal);
+            kpiFail.Controls.Add(lblFailTitle);
+            kpiFail.Dock = DockStyle.Fill;
+            kpiFail.Location = new Point(670, 6);
+            kpiFail.Margin = new Padding(6);
+            kpiFail.Name = "kpiFail";
+            kpiFail.Size = new Size(320, 124);
+            kpiFail.TabIndex = 2;
             // 
-
             // lblFailVal
-
             // 
-
-            this.lblFailVal.AutoSize = true;
-
-            this.lblFailVal.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblFailVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(67)))), ((int)(((byte)(54)))));
-
-            this.lblFailVal.Location = new System.Drawing.Point(8, 25);
-
-            this.lblFailVal.Name = "lblFailVal";
-
-            this.lblFailVal.Size = new System.Drawing.Size(35, 41);
-
-            this.lblFailVal.TabIndex = 1;
-
-            this.lblFailVal.Text = "3";
-
+            lblFailVal.AutoSize = true;
+            lblFailVal.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblFailVal.ForeColor = Color.FromArgb(244, 67, 54);
+            lblFailVal.Location = new Point(13, 40);
+            lblFailVal.Margin = new Padding(5, 0, 5, 0);
+            lblFailVal.Name = "lblFailVal";
+            lblFailVal.Size = new Size(56, 65);
+            lblFailVal.TabIndex = 1;
+            lblFailVal.Text = "3";
             // 
-
             // lblFailTitle
-
             // 
-
-            this.lblFailTitle.AutoSize = true;
-
-            this.lblFailTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblFailTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(67)))), ((int)(((byte)(54)))));
-
-            this.lblFailTitle.Location = new System.Drawing.Point(8, 8);
-
-            this.lblFailTitle.Name = "lblFailTitle";
-
-            this.lblFailTitle.Size = new System.Drawing.Size(96, 19);
-
-            this.lblFailTitle.TabIndex = 0;
-
-            this.lblFailTitle.Text = "FAIL (1.40%)";
-
+            lblFailTitle.AutoSize = true;
+            lblFailTitle.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblFailTitle.ForeColor = Color.FromArgb(244, 67, 54);
+            lblFailTitle.Location = new Point(13, 13);
+            lblFailTitle.Margin = new Padding(5, 0, 5, 0);
+            lblFailTitle.Name = "lblFailTitle";
+            lblFailTitle.Size = new Size(142, 30);
+            lblFailTitle.TabIndex = 0;
+            lblFailTitle.Text = "FAIL (1.40%)";
             // 
-
             // kpiYield
-
             // 
-
-            this.kpiYield.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-
-            this.kpiYield.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.kpiYield.Controls.Add(this.lblYieldVal);
-
-            this.kpiYield.Controls.Add(this.lblYieldTitle);
-
-            this.kpiYield.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.kpiYield.Location = new System.Drawing.Point(499, 4);
-
-            this.kpiYield.Margin = new System.Windows.Forms.Padding(4);
-
-            this.kpiYield.Name = "kpiYield";
-
-            this.kpiYield.Size = new System.Drawing.Size(157, 77);
-
-            this.kpiYield.TabIndex = 3;
-
+            kpiYield.BackColor = Color.FromArgb(248, 250, 252);
+            kpiYield.BorderStyle = BorderStyle.FixedSingle;
+            kpiYield.Controls.Add(lblYieldVal);
+            kpiYield.Controls.Add(lblYieldTitle);
+            kpiYield.Dock = DockStyle.Fill;
+            kpiYield.Location = new Point(1002, 6);
+            kpiYield.Margin = new Padding(6);
+            kpiYield.Name = "kpiYield";
+            kpiYield.Size = new Size(320, 124);
+            kpiYield.TabIndex = 3;
             // 
-
             // lblYieldVal
-
             // 
-
-            this.lblYieldVal.AutoSize = true;
-
-            this.lblYieldVal.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblYieldVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(179)))), ((int)(((byte)(8)))));
-
-            this.lblYieldVal.Location = new System.Drawing.Point(8, 25);
-
-            this.lblYieldVal.Name = "lblYieldVal";
-
-            this.lblYieldVal.Size = new System.Drawing.Size(126, 41);
-
-            this.lblYieldVal.TabIndex = 1;
-
-            this.lblYieldVal.Text = "98.60%";
-
+            lblYieldVal.AutoSize = true;
+            lblYieldVal.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblYieldVal.ForeColor = Color.FromArgb(234, 179, 8);
+            lblYieldVal.Location = new Point(13, 40);
+            lblYieldVal.Margin = new Padding(5, 0, 5, 0);
+            lblYieldVal.Name = "lblYieldVal";
+            lblYieldVal.Size = new Size(195, 65);
+            lblYieldVal.TabIndex = 1;
+            lblYieldVal.Text = "98.60%";
             // 
-
             // lblYieldTitle
-
             // 
-
-            this.lblYieldTitle.AutoSize = true;
-
-            this.lblYieldTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblYieldTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(179)))), ((int)(((byte)(8)))));
-
-            this.lblYieldTitle.Location = new System.Drawing.Point(8, 8);
-
-            this.lblYieldTitle.Name = "lblYieldTitle";
-
-            this.lblYieldTitle.Size = new System.Drawing.Size(46, 19);
-
-            this.lblYieldTitle.TabIndex = 0;
-
-            this.lblYieldTitle.Text = "YIELD";
-
+            lblYieldTitle.AutoSize = true;
+            lblYieldTitle.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblYieldTitle.ForeColor = Color.FromArgb(234, 179, 8);
+            lblYieldTitle.Location = new Point(13, 13);
+            lblYieldTitle.Margin = new Padding(5, 0, 5, 0);
+            lblYieldTitle.Name = "lblYieldTitle";
+            lblYieldTitle.Size = new Size(72, 30);
+            lblYieldTitle.TabIndex = 0;
+            lblYieldTitle.Text = "YIELD";
             // 
-
             // kpiCycleTime
-
             // 
-
-            this.kpiCycleTime.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-
-            this.kpiCycleTime.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.kpiCycleTime.Controls.Add(this.lblCycleTimeVal);
-
-            this.kpiCycleTime.Controls.Add(this.lblCycleTimeTitle);
-
-            this.kpiCycleTime.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.kpiCycleTime.Location = new System.Drawing.Point(664, 4);
-
-            this.kpiCycleTime.Margin = new System.Windows.Forms.Padding(4);
-
-            this.kpiCycleTime.Name = "kpiCycleTime";
-
-            this.kpiCycleTime.Size = new System.Drawing.Size(159, 77);
-
-            this.kpiCycleTime.TabIndex = 4;
-
+            kpiCycleTime.BackColor = Color.FromArgb(248, 250, 252);
+            kpiCycleTime.BorderStyle = BorderStyle.FixedSingle;
+            kpiCycleTime.Controls.Add(lblCycleTimeVal);
+            kpiCycleTime.Controls.Add(lblCycleTimeTitle);
+            kpiCycleTime.Dock = DockStyle.Fill;
+            kpiCycleTime.Location = new Point(1334, 6);
+            kpiCycleTime.Margin = new Padding(6);
+            kpiCycleTime.Name = "kpiCycleTime";
+            kpiCycleTime.Size = new Size(321, 124);
+            kpiCycleTime.TabIndex = 4;
             // 
-
             // lblCycleTimeVal
-
             // 
-
-            this.lblCycleTimeVal.AutoSize = true;
-
-            this.lblCycleTimeVal.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblCycleTimeVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(165)))), ((int)(((byte)(233)))));
-
-            this.lblCycleTimeVal.Location = new System.Drawing.Point(8, 25);
-
-            this.lblCycleTimeVal.Name = "lblCycleTimeVal";
-
-            this.lblCycleTimeVal.Size = new System.Drawing.Size(130, 41);
-
-            this.lblCycleTimeVal.TabIndex = 1;
-
-            this.lblCycleTimeVal.Text = "16.2 sec";
-
+            lblCycleTimeVal.AutoSize = true;
+            lblCycleTimeVal.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblCycleTimeVal.ForeColor = Color.FromArgb(14, 165, 233);
+            lblCycleTimeVal.Location = new Point(13, 40);
+            lblCycleTimeVal.Margin = new Padding(5, 0, 5, 0);
+            lblCycleTimeVal.Name = "lblCycleTimeVal";
+            lblCycleTimeVal.Size = new Size(208, 65);
+            lblCycleTimeVal.TabIndex = 1;
+            lblCycleTimeVal.Text = "16.2 sec";
             // 
-
             // lblCycleTimeTitle
-
             // 
-
-            this.lblCycleTimeTitle.AutoSize = true;
-
-            this.lblCycleTimeTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblCycleTimeTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(165)))), ((int)(((byte)(233)))));
-
-            this.lblCycleTimeTitle.Location = new System.Drawing.Point(8, 8);
-
-            this.lblCycleTimeTitle.Name = "lblCycleTimeTitle";
-
-            this.lblCycleTimeTitle.Size = new System.Drawing.Size(123, 19);
-
-            this.lblCycleTimeTitle.TabIndex = 0;
-
-            this.lblCycleTimeTitle.Text = "AVG CYCLE TIME";
-
+            lblCycleTimeTitle.AutoSize = true;
+            lblCycleTimeTitle.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblCycleTimeTitle.ForeColor = Color.FromArgb(14, 165, 233);
+            lblCycleTimeTitle.Location = new Point(13, 13);
+            lblCycleTimeTitle.Margin = new Padding(5, 0, 5, 0);
+            lblCycleTimeTitle.Name = "lblCycleTimeTitle";
+            lblCycleTimeTitle.Size = new Size(186, 30);
+            lblCycleTimeTitle.TabIndex = 0;
+            lblCycleTimeTitle.Text = "AVG CYCLE TIME";
             // 
-
             // cmbTimeRange
-
             // 
-
-            this.cmbTimeRange.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-
-            this.cmbTimeRange.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-
-            this.cmbTimeRange.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-            this.cmbTimeRange.FormattingEnabled = true;
-
-            this.cmbTimeRange.Items.AddRange(new object[] {
-
-            "Today"});
-
-            this.cmbTimeRange.Location = new System.Drawing.Point(732, 13);
-
-            this.cmbTimeRange.Name = "cmbTimeRange";
-
-            this.cmbTimeRange.Size = new System.Drawing.Size(110, 28);
-
-            this.cmbTimeRange.TabIndex = 1;
-
+            cmbTimeRange.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            cmbTimeRange.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbTimeRange.Font = new Font("Segoe UI", 9F);
+            cmbTimeRange.FormattingEnabled = true;
+            cmbTimeRange.Items.AddRange(new object[] { "Today" });
+            cmbTimeRange.Location = new Point(1507, 21);
+            cmbTimeRange.Margin = new Padding(5);
+            cmbTimeRange.Name = "cmbTimeRange";
+            cmbTimeRange.Size = new Size(176, 40);
+            cmbTimeRange.TabIndex = 1;
             // 
-
             // lblSummaryTitle
-
             // 
-
-            this.lblSummaryTitle.AutoSize = true;
-
-            this.lblSummaryTitle.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblSummaryTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-
-            this.lblSummaryTitle.Location = new System.Drawing.Point(15, 15);
-
-            this.lblSummaryTitle.Name = "lblSummaryTitle";
-
-            this.lblSummaryTitle.Size = new System.Drawing.Size(248, 25);
-
-            this.lblSummaryTitle.TabIndex = 0;
-
-            this.lblSummaryTitle.Text = "SUMMARY REPORT (Today)";
-
+            lblSummaryTitle.AutoSize = true;
+            lblSummaryTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            lblSummaryTitle.ForeColor = Color.FromArgb(30, 41, 59);
+            lblSummaryTitle.Location = new Point(24, 24);
+            lblSummaryTitle.Margin = new Padding(5, 0, 5, 0);
+            lblSummaryTitle.Name = "lblSummaryTitle";
+            lblSummaryTitle.Size = new Size(410, 41);
+            lblSummaryTitle.TabIndex = 0;
+            lblSummaryTitle.Text = "SUMMARY REPORT (Today)";
             // 
-
             // cardHistory
-
             // 
-
-            this.cardHistory.BackColor = System.Drawing.Color.White;
-
-            this.cardHistory.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardHistory.Controls.Add(this.gridRecent);
-
-            this.cardHistory.Controls.Add(this.lnkViewAll);
-
-            this.cardHistory.Controls.Add(this.lblRecentTitle);
-
-            this.cardHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardHistory.Location = new System.Drawing.Point(877, 6);
-
-            this.cardHistory.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardHistory.Name = "cardHistory";
-
-            this.cardHistory.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardHistory.Size = new System.Drawing.Size(701, 557);
-
-            this.cardHistory.TabIndex = 1;
-
+            cardHistory.BackColor = Color.White;
+            cardHistory.BorderStyle = BorderStyle.FixedSingle;
+            cardHistory.Controls.Add(gridRecent);
+            cardHistory.Controls.Add(lnkViewAll);
+            cardHistory.Controls.Add(lblRecentTitle);
+            cardHistory.Dock = DockStyle.Fill;
+            cardHistory.Location = new Point(1742, 10);
+            cardHistory.Margin = new Padding(10);
+            cardHistory.Name = "cardHistory";
+            cardHistory.Padding = new Padding(24);
+            cardHistory.Size = new Size(822, 890);
+            cardHistory.TabIndex = 1;
             // 
-
             // gridRecent
-
             // 
-
-            this.gridRecent.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-
-            | System.Windows.Forms.AnchorStyles.Left)
-
-            | System.Windows.Forms.AnchorStyles.Right)));
-
-            this.gridRecent.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-
-            this.gridRecent.Location = new System.Drawing.Point(15, 55);
-
-            this.gridRecent.Name = "gridRecent";
-
-            this.gridRecent.RowHeadersWidth = 51;
-
-            this.gridRecent.RowTemplate.Height = 35;
-
-            this.gridRecent.Size = new System.Drawing.Size(669, 485);
-
-            this.gridRecent.TabIndex = 2;
-
+            gridRecent.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.Control;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            gridRecent.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            gridRecent.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.Window;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            gridRecent.DefaultCellStyle = dataGridViewCellStyle2;
+            gridRecent.Location = new Point(24, 88);
+            gridRecent.Margin = new Padding(5);
+            gridRecent.Name = "gridRecent";
+            gridRecent.RowHeadersWidth = 51;
+            gridRecent.RowTemplate.Height = 35;
+            gridRecent.Size = new Size(771, 776);
+            gridRecent.TabIndex = 2;
             // 
-
             // lnkViewAll
-
             // 
-
-            this.lnkViewAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-
-            this.lnkViewAll.AutoSize = true;
-
-            this.lnkViewAll.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lnkViewAll.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-
-            this.lnkViewAll.Location = new System.Drawing.Point(618, 18);
-
-            this.lnkViewAll.Name = "lnkViewAll";
-
-            this.lnkViewAll.Size = new System.Drawing.Size(66, 20);
-
-            this.lnkViewAll.TabIndex = 1;
-
-            this.lnkViewAll.TabStop = true;
-
-            this.lnkViewAll.Text = "View All";
-
+            lnkViewAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lnkViewAll.AutoSize = true;
+            lnkViewAll.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lnkViewAll.LinkColor = Color.FromArgb(37, 99, 235);
+            lnkViewAll.Location = new Point(688, 29);
+            lnkViewAll.Margin = new Padding(5, 0, 5, 0);
+            lnkViewAll.Name = "lnkViewAll";
+            lnkViewAll.Size = new Size(107, 32);
+            lnkViewAll.TabIndex = 1;
+            lnkViewAll.TabStop = true;
+            lnkViewAll.Text = "View All";
             // 
-
             // lblRecentTitle
-
             // 
-
-            this.lblRecentTitle.AutoSize = true;
-
-            this.lblRecentTitle.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblRecentTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-
-            this.lblRecentTitle.Location = new System.Drawing.Point(15, 15);
-
-            this.lblRecentTitle.Name = "lblRecentTitle";
-
-            this.lblRecentTitle.Size = new System.Drawing.Size(214, 25);
-
-            this.lblRecentTitle.TabIndex = 0;
-
-            this.lblRecentTitle.Text = "RECENT TEST HISTORY";
-
+            lblRecentTitle.AutoSize = true;
+            lblRecentTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            lblRecentTitle.ForeColor = Color.FromArgb(30, 41, 59);
+            lblRecentTitle.Location = new Point(24, 24);
+            lblRecentTitle.Margin = new Padding(5, 0, 5, 0);
+            lblRecentTitle.Name = "lblRecentTitle";
+            lblRecentTitle.Size = new Size(344, 41);
+            lblRecentTitle.TabIndex = 0;
+            lblRecentTitle.Text = "RECENT TEST HISTORY";
             // 
-
             // tblBottom
-
             // 
-
-            this.tblBottom.ColumnCount = 3;
-
-            this.tblBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 55F));
-
-            this.tblBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.5F));
-
-            this.tblBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.5F));
-
-            this.tblBottom.Controls.Add(this.cardModules, 0, 0);
-
-            this.tblBottom.Controls.Add(this.cardOperatingTime, 1, 0);
-
-            this.tblBottom.Controls.Add(this.cardMaintenance, 2, 0);
-
-            this.tblBottom.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.tblBottom.Location = new System.Drawing.Point(8, 773);
-
-            this.tblBottom.Margin = new System.Windows.Forms.Padding(8);
-
-            this.tblBottom.Name = "tblBottom";
-
-            this.tblBottom.RowCount = 1;
-
-            this.tblBottom.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-
-            this.tblBottom.Size = new System.Drawing.Size(1584, 119);
-
-            this.tblBottom.TabIndex = 2;
-
+            tblBottom.ColumnCount = 3;
+            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
+            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22.5F));
+            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22.5F));
+            tblBottom.Controls.Add(cardModules, 0, 0);
+            tblBottom.Controls.Add(cardOperatingTime, 1, 0);
+            tblBottom.Controls.Add(cardMaintenance, 2, 0);
+            tblBottom.Dock = DockStyle.Fill;
+            tblBottom.Location = new Point(13, 1237);
+            tblBottom.Margin = new Padding(13);
+            tblBottom.Name = "tblBottom";
+            tblBottom.RowCount = 1;
+            tblBottom.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblBottom.Size = new Size(2574, 190);
+            tblBottom.TabIndex = 2;
             // 
-
             // cardModules
-
             // 
-
-            this.cardModules.BackColor = System.Drawing.Color.White;
-
-            this.cardModules.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardModules.Controls.Add(this.tblModules);
-
-            this.cardModules.Controls.Add(this.lblModulesTitle);
-
-            this.cardModules.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardModules.Location = new System.Drawing.Point(6, 6);
-
-            this.cardModules.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardModules.Name = "cardModules";
-
-            this.cardModules.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardModules.Size = new System.Drawing.Size(859, 107);
-
-            this.cardModules.TabIndex = 0;
-
+            cardModules.BackColor = Color.White;
+            cardModules.BorderStyle = BorderStyle.FixedSingle;
+            cardModules.Controls.Add(tblModules);
+            cardModules.Controls.Add(lblModulesTitle);
+            cardModules.Dock = DockStyle.Fill;
+            cardModules.Location = new Point(10, 10);
+            cardModules.Margin = new Padding(10);
+            cardModules.Name = "cardModules";
+            cardModules.Padding = new Padding(24);
+            cardModules.Size = new Size(1395, 170);
+            cardModules.TabIndex = 0;
             // 
-
             // tblModules
-
             // 
-
-            this.tblModules.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-
-            | System.Windows.Forms.AnchorStyles.Left)
-
-            | System.Windows.Forms.AnchorStyles.Right)));
-
-            this.tblModules.ColumnCount = 4;
-
-            this.tblModules.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-
-            this.tblModules.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-
-            this.tblModules.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-
-            this.tblModules.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-
-            this.tblModules.Controls.Add(this.pnlMod1, 0, 0);
-
-            this.tblModules.Controls.Add(this.pnlMod2, 1, 0);
-
-            this.tblModules.Controls.Add(this.pnlMod3, 2, 0);
-
-            this.tblModules.Controls.Add(this.pnlMod4, 3, 0);
-
-            this.tblModules.Location = new System.Drawing.Point(15, 38);
-
-            this.tblModules.Name = "tblModules";
-
-            this.tblModules.RowCount = 1;
-
-            this.tblModules.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-
-            this.tblModules.Size = new System.Drawing.Size(827, 52);
-
-            this.tblModules.TabIndex = 1;
-
+            tblModules.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tblModules.ColumnCount = 4;
+            tblModules.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblModules.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblModules.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblModules.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblModules.Controls.Add(pnlMod1, 0, 0);
+            tblModules.Controls.Add(pnlMod2, 1, 0);
+            tblModules.Controls.Add(pnlMod3, 2, 0);
+            tblModules.Controls.Add(pnlMod4, 3, 0);
+            tblModules.Location = new Point(24, 61);
+            tblModules.Margin = new Padding(5);
+            tblModules.Name = "tblModules";
+            tblModules.RowCount = 1;
+            tblModules.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblModules.Size = new Size(1344, 83);
+            tblModules.TabIndex = 1;
             // 
-
             // pnlMod1
-
             // 
-
-            this.pnlMod1.Controls.Add(this.lblMod1Status);
-
-            this.pnlMod1.Controls.Add(this.lblMod1Title);
-
-            this.pnlMod1.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.pnlMod1.Location = new System.Drawing.Point(3, 3);
-
-            this.pnlMod1.Name = "pnlMod1";
-
-            this.pnlMod1.Size = new System.Drawing.Size(200, 46);
-
-            this.pnlMod1.TabIndex = 0;
-
+            pnlMod1.Controls.Add(lblMod1Status);
+            pnlMod1.Controls.Add(lblMod1Title);
+            pnlMod1.Dock = DockStyle.Fill;
+            pnlMod1.Location = new Point(5, 5);
+            pnlMod1.Margin = new Padding(5);
+            pnlMod1.Name = "pnlMod1";
+            pnlMod1.Size = new Size(326, 73);
+            pnlMod1.TabIndex = 0;
             // 
-
             // lblMod1Status
-
             // 
-
-            this.lblMod1Status.AutoSize = true;
-
-            this.lblMod1Status.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMod1Status.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblMod1Status.Location = new System.Drawing.Point(3, 22);
-
-            this.lblMod1Status.Name = "lblMod1Status";
-
-            this.lblMod1Status.Size = new System.Drawing.Size(84, 20);
-
-            this.lblMod1Status.TabIndex = 1;
-
-            this.lblMod1Status.Text = " ONLINE";
-
+            lblMod1Status.AutoSize = true;
+            lblMod1Status.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMod1Status.ForeColor = Color.FromArgb(76, 175, 80);
+            lblMod1Status.Location = new Point(5, 35);
+            lblMod1Status.Margin = new Padding(5, 0, 5, 0);
+            lblMod1Status.Name = "lblMod1Status";
+            lblMod1Status.Size = new Size(110, 32);
+            lblMod1Status.TabIndex = 1;
+            lblMod1Status.Text = " ONLINE";
             // 
-
             // lblMod1Title
-
             // 
-
-            this.lblMod1Title.AutoSize = true;
-
-            this.lblMod1Title.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMod1Title.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-
-            this.lblMod1Title.Location = new System.Drawing.Point(3, 2);
-
-            this.lblMod1Title.Name = "lblMod1Title";
-
-            this.lblMod1Title.Size = new System.Drawing.Size(95, 20);
-
-            this.lblMod1Title.TabIndex = 0;
-
-            this.lblMod1Title.Text = "Relay Matrix";
-
+            lblMod1Title.AutoSize = true;
+            lblMod1Title.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMod1Title.ForeColor = Color.FromArgb(71, 85, 105);
+            lblMod1Title.Location = new Point(5, 3);
+            lblMod1Title.Margin = new Padding(5, 0, 5, 0);
+            lblMod1Title.Name = "lblMod1Title";
+            lblMod1Title.Size = new Size(157, 32);
+            lblMod1Title.TabIndex = 0;
+            lblMod1Title.Text = "Relay Matrix";
             // 
-
             // pnlMod2
-
             // 
-
-            this.pnlMod2.Controls.Add(this.lblMod2Status);
-
-            this.pnlMod2.Controls.Add(this.lblMod2Title);
-
-            this.pnlMod2.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.pnlMod2.Location = new System.Drawing.Point(209, 3);
-
-            this.pnlMod2.Name = "pnlMod2";
-
-            this.pnlMod2.Size = new System.Drawing.Size(200, 46);
-
-            this.pnlMod2.TabIndex = 1;
-
+            pnlMod2.Controls.Add(lblMod2Status);
+            pnlMod2.Controls.Add(lblMod2Title);
+            pnlMod2.Dock = DockStyle.Fill;
+            pnlMod2.Location = new Point(341, 5);
+            pnlMod2.Margin = new Padding(5);
+            pnlMod2.Name = "pnlMod2";
+            pnlMod2.Size = new Size(326, 73);
+            pnlMod2.TabIndex = 1;
             // 
-
             // lblMod2Status
-
             // 
-
-            this.lblMod2Status.AutoSize = true;
-
-            this.lblMod2Status.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMod2Status.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblMod2Status.Location = new System.Drawing.Point(3, 22);
-
-            this.lblMod2Status.Name = "lblMod2Status";
-
-            this.lblMod2Status.Size = new System.Drawing.Size(84, 20);
-
-            this.lblMod2Status.TabIndex = 1;
-
-            this.lblMod2Status.Text = " ONLINE";
-
+            lblMod2Status.AutoSize = true;
+            lblMod2Status.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMod2Status.ForeColor = Color.FromArgb(76, 175, 80);
+            lblMod2Status.Location = new Point(5, 35);
+            lblMod2Status.Margin = new Padding(5, 0, 5, 0);
+            lblMod2Status.Name = "lblMod2Status";
+            lblMod2Status.Size = new Size(110, 32);
+            lblMod2Status.TabIndex = 1;
+            lblMod2Status.Text = " ONLINE";
             // 
-
             // lblMod2Title
-
             // 
-
-            this.lblMod2Title.AutoSize = true;
-
-            this.lblMod2Title.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMod2Title.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-
-            this.lblMod2Title.Location = new System.Drawing.Point(3, 2);
-
-            this.lblMod2Title.Name = "lblMod2Title";
-
-            this.lblMod2Title.Size = new System.Drawing.Size(100, 20);
-
-            this.lblMod2Title.TabIndex = 0;
-
-            this.lblMod2Title.Text = "Power Supply";
-
+            lblMod2Title.AutoSize = true;
+            lblMod2Title.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMod2Title.ForeColor = Color.FromArgb(71, 85, 105);
+            lblMod2Title.Location = new Point(5, 3);
+            lblMod2Title.Margin = new Padding(5, 0, 5, 0);
+            lblMod2Title.Name = "lblMod2Title";
+            lblMod2Title.Size = new Size(170, 32);
+            lblMod2Title.TabIndex = 0;
+            lblMod2Title.Text = "Power Supply";
             // 
-
             // pnlMod3
-
             // 
-
-            this.pnlMod3.Controls.Add(this.lblMod3Status);
-
-            this.pnlMod3.Controls.Add(this.lblMod3Title);
-
-            this.pnlMod3.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.pnlMod3.Location = new System.Drawing.Point(415, 3);
-
-            this.pnlMod3.Name = "pnlMod3";
-
-            this.pnlMod3.Size = new System.Drawing.Size(200, 46);
-
-            this.pnlMod3.TabIndex = 2;
-
+            pnlMod3.Controls.Add(lblMod3Status);
+            pnlMod3.Controls.Add(lblMod3Title);
+            pnlMod3.Dock = DockStyle.Fill;
+            pnlMod3.Location = new Point(677, 5);
+            pnlMod3.Margin = new Padding(5);
+            pnlMod3.Name = "pnlMod3";
+            pnlMod3.Size = new Size(326, 73);
+            pnlMod3.TabIndex = 2;
             // 
-
             // lblMod3Status
-
             // 
-
-            this.lblMod3Status.AutoSize = true;
-
-            this.lblMod3Status.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMod3Status.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblMod3Status.Location = new System.Drawing.Point(3, 22);
-
-            this.lblMod3Status.Name = "lblMod3Status";
-
-            this.lblMod3Status.Size = new System.Drawing.Size(84, 20);
-
-            this.lblMod3Status.TabIndex = 1;
-
-            this.lblMod3Status.Text = " ONLINE";
-
+            lblMod3Status.AutoSize = true;
+            lblMod3Status.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMod3Status.ForeColor = Color.FromArgb(76, 175, 80);
+            lblMod3Status.Location = new Point(5, 35);
+            lblMod3Status.Margin = new Padding(5, 0, 5, 0);
+            lblMod3Status.Name = "lblMod3Status";
+            lblMod3Status.Size = new Size(110, 32);
+            lblMod3Status.TabIndex = 1;
+            lblMod3Status.Text = " ONLINE";
             // 
-
             // lblMod3Title
-
             // 
-
-            this.lblMod3Title.AutoSize = true;
-
-            this.lblMod3Title.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMod3Title.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-
-            this.lblMod3Title.Location = new System.Drawing.Point(3, 2);
-
-            this.lblMod3Title.Name = "lblMod3Title";
-
-            this.lblMod3Title.Size = new System.Drawing.Size(110, 20);
-
-            this.lblMod3Title.TabIndex = 0;
-
-            this.lblMod3Title.Text = "PLC Controller";
-
+            lblMod3Title.AutoSize = true;
+            lblMod3Title.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMod3Title.ForeColor = Color.FromArgb(71, 85, 105);
+            lblMod3Title.Location = new Point(5, 3);
+            lblMod3Title.Margin = new Padding(5, 0, 5, 0);
+            lblMod3Title.Name = "lblMod3Title";
+            lblMod3Title.Size = new Size(178, 32);
+            lblMod3Title.TabIndex = 0;
+            lblMod3Title.Text = "PLC Controller";
             // 
-
             // pnlMod4
-
             // 
-
-            this.pnlMod4.Controls.Add(this.lblMod4Status);
-
-            this.pnlMod4.Controls.Add(this.lblMod4Title);
-
-            this.pnlMod4.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.pnlMod4.Location = new System.Drawing.Point(621, 3);
-
-            this.pnlMod4.Name = "pnlMod4";
-
-            this.pnlMod4.Size = new System.Drawing.Size(203, 46);
-
-            this.pnlMod4.TabIndex = 3;
-
+            pnlMod4.Controls.Add(lblMod4Status);
+            pnlMod4.Controls.Add(lblMod4Title);
+            pnlMod4.Dock = DockStyle.Fill;
+            pnlMod4.Location = new Point(1013, 5);
+            pnlMod4.Margin = new Padding(5);
+            pnlMod4.Name = "pnlMod4";
+            pnlMod4.Size = new Size(326, 73);
+            pnlMod4.TabIndex = 3;
             // 
-
             // lblMod4Status
-
             // 
-
-            this.lblMod4Status.AutoSize = true;
-
-            this.lblMod4Status.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMod4Status.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-
-            this.lblMod4Status.Location = new System.Drawing.Point(3, 22);
-
-            this.lblMod4Status.Name = "lblMod4Status";
-
-            this.lblMod4Status.Size = new System.Drawing.Size(84, 20);
-
-            this.lblMod4Status.TabIndex = 1;
-
-            this.lblMod4Status.Text = " ONLINE";
-
+            lblMod4Status.AutoSize = true;
+            lblMod4Status.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMod4Status.ForeColor = Color.FromArgb(76, 175, 80);
+            lblMod4Status.Location = new Point(5, 35);
+            lblMod4Status.Margin = new Padding(5, 0, 5, 0);
+            lblMod4Status.Name = "lblMod4Status";
+            lblMod4Status.Size = new Size(110, 32);
+            lblMod4Status.TabIndex = 1;
+            lblMod4Status.Text = " ONLINE";
             // 
-
             // lblMod4Title
-
             // 
-
-            this.lblMod4Title.AutoSize = true;
-
-            this.lblMod4Title.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMod4Title.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-
-            this.lblMod4Title.Location = new System.Drawing.Point(3, 2);
-
-            this.lblMod4Title.Name = "lblMod4Title";
-
-            this.lblMod4Title.Size = new System.Drawing.Size(87, 20);
-
-            this.lblMod4Title.TabIndex = 0;
-
-            this.lblMod4Title.Text = "I/O Module";
-
+            lblMod4Title.AutoSize = true;
+            lblMod4Title.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMod4Title.ForeColor = Color.FromArgb(71, 85, 105);
+            lblMod4Title.Location = new Point(5, 3);
+            lblMod4Title.Margin = new Padding(5, 0, 5, 0);
+            lblMod4Title.Name = "lblMod4Title";
+            lblMod4Title.Size = new Size(146, 32);
+            lblMod4Title.TabIndex = 0;
+            lblMod4Title.Text = "I/O Module";
             // 
-
             // lblModulesTitle
-
             // 
-
-            this.lblModulesTitle.AutoSize = true;
-
-            this.lblModulesTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblModulesTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-
-            this.lblModulesTitle.Location = new System.Drawing.Point(15, 12);
-
-            this.lblModulesTitle.Name = "lblModulesTitle";
-
-            this.lblModulesTitle.Size = new System.Drawing.Size(217, 23);
-
-            this.lblModulesTitle.TabIndex = 0;
-
-            this.lblModulesTitle.Text = "SYSTEM MODULE STATUS";
-
+            lblModulesTitle.AutoSize = true;
+            lblModulesTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblModulesTitle.ForeColor = Color.FromArgb(51, 65, 85);
+            lblModulesTitle.Location = new Point(24, 19);
+            lblModulesTitle.Margin = new Padding(5, 0, 5, 0);
+            lblModulesTitle.Name = "lblModulesTitle";
+            lblModulesTitle.Size = new Size(344, 37);
+            lblModulesTitle.TabIndex = 0;
+            lblModulesTitle.Text = "SYSTEM MODULE STATUS";
             // 
-
             // cardOperatingTime
-
             // 
-
-            this.cardOperatingTime.BackColor = System.Drawing.Color.White;
-
-            this.cardOperatingTime.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardOperatingTime.Controls.Add(this.lblOpTimeSub);
-
-            this.cardOperatingTime.Controls.Add(this.lblOpTimeVal);
-
-            this.cardOperatingTime.Controls.Add(this.lblOpTimeTitle);
-
-            this.cardOperatingTime.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardOperatingTime.Location = new System.Drawing.Point(877, 6);
-
-            this.cardOperatingTime.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardOperatingTime.Name = "cardOperatingTime";
-
-            this.cardOperatingTime.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardOperatingTime.Size = new System.Drawing.Size(344, 107);
-
-            this.cardOperatingTime.TabIndex = 1;
-
+            cardOperatingTime.BackColor = Color.White;
+            cardOperatingTime.BorderStyle = BorderStyle.FixedSingle;
+            cardOperatingTime.Controls.Add(lblOpTimeSub);
+            cardOperatingTime.Controls.Add(lblOpTimeVal);
+            cardOperatingTime.Controls.Add(lblOpTimeTitle);
+            cardOperatingTime.Dock = DockStyle.Fill;
+            cardOperatingTime.Location = new Point(1425, 10);
+            cardOperatingTime.Margin = new Padding(10);
+            cardOperatingTime.Name = "cardOperatingTime";
+            cardOperatingTime.Padding = new Padding(24);
+            cardOperatingTime.Size = new Size(559, 170);
+            cardOperatingTime.TabIndex = 1;
             // 
-
             // lblOpTimeSub
-
             // 
-
-            this.lblOpTimeSub.AutoSize = true;
-
-            this.lblOpTimeSub.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-            this.lblOpTimeSub.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-
-            this.lblOpTimeSub.Location = new System.Drawing.Point(15, 75);
-
-            this.lblOpTimeSub.Name = "lblOpTimeSub";
-
-            this.lblOpTimeSub.Size = new System.Drawing.Size(100, 20);
-
-            this.lblOpTimeSub.TabIndex = 2;
-
-            this.lblOpTimeSub.Text = "HH : MM : SS";
-
+            lblOpTimeSub.AutoSize = true;
+            lblOpTimeSub.Font = new Font("Segoe UI", 9F);
+            lblOpTimeSub.ForeColor = Color.FromArgb(100, 116, 139);
+            lblOpTimeSub.Location = new Point(24, 120);
+            lblOpTimeSub.Margin = new Padding(5, 0, 5, 0);
+            lblOpTimeSub.Name = "lblOpTimeSub";
+            lblOpTimeSub.Size = new Size(156, 32);
+            lblOpTimeSub.TabIndex = 2;
+            lblOpTimeSub.Text = "HH : MM : SS";
             // 
-
             // lblOpTimeVal
-
             // 
-
-            this.lblOpTimeVal.AutoSize = true;
-
-            this.lblOpTimeVal.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblOpTimeVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-
-            this.lblOpTimeVal.Location = new System.Drawing.Point(12, 32);
-
-            this.lblOpTimeVal.Name = "lblOpTimeVal";
-
-            this.lblOpTimeVal.Size = new System.Drawing.Size(206, 46);
-
-            this.lblOpTimeVal.TabIndex = 1;
-
-            this.lblOpTimeVal.Text = "03 : 46 : 22";
-
+            lblOpTimeVal.AutoSize = true;
+            lblOpTimeVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            lblOpTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
+            lblOpTimeVal.Location = new Point(20, 51);
+            lblOpTimeVal.Margin = new Padding(5, 0, 5, 0);
+            lblOpTimeVal.Name = "lblOpTimeVal";
+            lblOpTimeVal.Size = new Size(306, 72);
+            lblOpTimeVal.TabIndex = 1;
+            lblOpTimeVal.Text = "03 : 46 : 22";
             // 
-
             // lblOpTimeTitle
-
             // 
-
-            this.lblOpTimeTitle.AutoSize = true;
-
-            this.lblOpTimeTitle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblOpTimeTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-
-            this.lblOpTimeTitle.Location = new System.Drawing.Point(15, 12);
-
-            this.lblOpTimeTitle.Name = "lblOpTimeTitle";
-
-            this.lblOpTimeTitle.Size = new System.Drawing.Size(232, 20);
-
-            this.lblOpTimeTitle.TabIndex = 0;
-
-            this.lblOpTimeTitle.Text = "TOTAL OPERATING TIME (Today)";
-
+            lblOpTimeTitle.AutoSize = true;
+            lblOpTimeTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblOpTimeTitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblOpTimeTitle.Location = new Point(24, 19);
+            lblOpTimeTitle.Margin = new Padding(5, 0, 5, 0);
+            lblOpTimeTitle.Name = "lblOpTimeTitle";
+            lblOpTimeTitle.Size = new Size(385, 32);
+            lblOpTimeTitle.TabIndex = 0;
+            lblOpTimeTitle.Text = "TOTAL OPERATING TIME (Today)";
             // 
-
             // cardMaintenance
-
             // 
-
-            this.cardMaintenance.BackColor = System.Drawing.Color.White;
-
-            this.cardMaintenance.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            this.cardMaintenance.Controls.Add(this.lblMaintSub);
-
-            this.cardMaintenance.Controls.Add(this.lblMaintVal);
-
-            this.cardMaintenance.Controls.Add(this.lblMaintTitle);
-
-            this.cardMaintenance.Dock = System.Windows.Forms.DockStyle.Fill;
-
-            this.cardMaintenance.Location = new System.Drawing.Point(1233, 6);
-
-            this.cardMaintenance.Margin = new System.Windows.Forms.Padding(6);
-
-            this.cardMaintenance.Name = "cardMaintenance";
-
-            this.cardMaintenance.Padding = new System.Windows.Forms.Padding(15);
-
-            this.cardMaintenance.Size = new System.Drawing.Size(345, 107);
-
-            this.cardMaintenance.TabIndex = 2;
-
+            cardMaintenance.BackColor = Color.White;
+            cardMaintenance.BorderStyle = BorderStyle.FixedSingle;
+            cardMaintenance.Controls.Add(lblMaintSub);
+            cardMaintenance.Controls.Add(lblMaintVal);
+            cardMaintenance.Controls.Add(lblMaintTitle);
+            cardMaintenance.Dock = DockStyle.Fill;
+            cardMaintenance.Location = new Point(2004, 10);
+            cardMaintenance.Margin = new Padding(10);
+            cardMaintenance.Name = "cardMaintenance";
+            cardMaintenance.Padding = new Padding(24);
+            cardMaintenance.Size = new Size(560, 170);
+            cardMaintenance.TabIndex = 2;
             // 
-
             // lblMaintSub
-
             // 
-
-            this.lblMaintSub.AutoSize = true;
-
-            this.lblMaintSub.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMaintSub.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-
-            this.lblMaintSub.Location = new System.Drawing.Point(15, 75);
-
-            this.lblMaintSub.Name = "lblMaintSub";
-
-            this.lblMaintSub.Size = new System.Drawing.Size(114, 20);
-
-            this.lblMaintSub.TabIndex = 2;
-
-            this.lblMaintSub.Text = "Or 6,500 Hours";
-
+            lblMaintSub.AutoSize = true;
+            lblMaintSub.Font = new Font("Segoe UI", 9F);
+            lblMaintSub.ForeColor = Color.FromArgb(100, 116, 139);
+            lblMaintSub.Location = new Point(24, 120);
+            lblMaintSub.Margin = new Padding(5, 0, 5, 0);
+            lblMaintSub.Name = "lblMaintSub";
+            lblMaintSub.Size = new Size(174, 32);
+            lblMaintSub.TabIndex = 2;
+            lblMaintSub.Text = "Or 6,500 Hours";
             // 
-
             // lblMaintVal
-
             // 
-
-            this.lblMaintVal.AutoSize = true;
-
-            this.lblMaintVal.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMaintVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-
-            this.lblMaintVal.Location = new System.Drawing.Point(12, 32);
-
-            this.lblMaintVal.Name = "lblMaintVal";
-
-            this.lblMaintVal.Size = new System.Drawing.Size(159, 46);
-
-            this.lblMaintVal.TabIndex = 1;
-
-            this.lblMaintVal.Text = "145 Days";
-
+            lblMaintVal.AutoSize = true;
+            lblMaintVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            lblMaintVal.ForeColor = Color.FromArgb(30, 41, 59);
+            lblMaintVal.Location = new Point(20, 51);
+            lblMaintVal.Margin = new Padding(5, 0, 5, 0);
+            lblMaintVal.Name = "lblMaintVal";
+            lblMaintVal.Size = new Size(260, 72);
+            lblMaintVal.TabIndex = 1;
+            lblMaintVal.Text = "145 Days";
             // 
-
             // lblMaintTitle
-
             // 
-
-            this.lblMaintTitle.AutoSize = true;
-
-            this.lblMaintTitle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-
-            this.lblMaintTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-
-            this.lblMaintTitle.Location = new System.Drawing.Point(15, 12);
-
-            this.lblMaintTitle.Name = "lblMaintTitle";
-
-            this.lblMaintTitle.Size = new System.Drawing.Size(135, 20);
-
-            this.lblMaintTitle.TabIndex = 0;
-
-            this.lblMaintTitle.Text = "Next Maintenance";
-
+            lblMaintTitle.AutoSize = true;
+            lblMaintTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMaintTitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblMaintTitle.Location = new Point(24, 19);
+            lblMaintTitle.Margin = new Padding(5, 0, 5, 0);
+            lblMaintTitle.Name = "lblMaintTitle";
+            lblMaintTitle.Size = new Size(223, 32);
+            lblMaintTitle.TabIndex = 0;
+            lblMaintTitle.Text = "Next Maintenance";
             // 
-
             // Dashboard
-
             // 
-
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(245)))), ((int)(((byte)(247)))));
-
-            this.Controls.Add(this.tblMain);
-
-            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-            this.Margin = new System.Windows.Forms.Padding(0);
-
-            this.Name = "Dashboard";
-
-            this.Size = new System.Drawing.Size(1600, 900);
-
-            this.tblMain.ResumeLayout(false);
-
-            this.tblTop.ResumeLayout(false);
-
-            this.cardTester.ResumeLayout(false);
-
-            this.cardTester.PerformLayout();
-
-            this.cardMachine.ResumeLayout(false);
-
-            this.cardMachine.PerformLayout();
-
-            this.cardDatabase.ResumeLayout(false);
-
-            this.cardDatabase.PerformLayout();
-
-            this.cardActiveProg.ResumeLayout(false);
-
-            this.cardActiveProg.PerformLayout();
-
-            ((System.ComponentModel.ISupportInitialize)(this.picHarness)).EndInit();
-
-            this.tblMiddle.ResumeLayout(false);
-
-            this.cardSummary.ResumeLayout(false);
-
-            this.cardSummary.PerformLayout();
-
-            this.tblCharts.ResumeLayout(false);
-
-            ((System.ComponentModel.ISupportInitialize)(this.chartHistory)).EndInit();
-
-            ((System.ComponentModel.ISupportInitialize)(this.chartFailReason)).EndInit();
-
-            this.tblKpi.ResumeLayout(false);
-
-            this.kpiTotalTested.ResumeLayout(false);
-
-            this.kpiTotalTested.PerformLayout();
-
-            this.kpiPass.ResumeLayout(false);
-
-            this.kpiPass.PerformLayout();
-
-            this.kpiFail.ResumeLayout(false);
-
-            this.kpiFail.PerformLayout();
-
-            this.kpiYield.ResumeLayout(false);
-
-            this.kpiYield.PerformLayout();
-
-            this.kpiCycleTime.ResumeLayout(false);
-
-            this.kpiCycleTime.PerformLayout();
-
-            this.cardHistory.ResumeLayout(false);
-
-            this.cardHistory.PerformLayout();
-
-            ((System.ComponentModel.ISupportInitialize)(this.gridRecent)).EndInit();
-
-            this.tblBottom.ResumeLayout(false);
-
-            this.cardModules.ResumeLayout(false);
-
-            this.cardModules.PerformLayout();
-
-            this.tblModules.ResumeLayout(false);
-
-            this.pnlMod1.ResumeLayout(false);
-
-            this.pnlMod1.PerformLayout();
-
-            this.pnlMod2.ResumeLayout(false);
-
-            this.pnlMod2.PerformLayout();
-
-            this.pnlMod3.ResumeLayout(false);
-
-            this.pnlMod3.PerformLayout();
-
-            this.pnlMod4.ResumeLayout(false);
-
-            this.pnlMod4.PerformLayout();
-
-            this.cardOperatingTime.ResumeLayout(false);
-
-            this.cardOperatingTime.PerformLayout();
-
-            this.cardMaintenance.ResumeLayout(false);
-
-            this.cardMaintenance.PerformLayout();
-
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(244, 245, 247);
+            Controls.Add(tblMain);
+            Font = new Font("Segoe UI", 9F);
+            Margin = new Padding(0);
+            Name = "Dashboard";
+            Size = new Size(2600, 1440);
+            tblMain.ResumeLayout(false);
+            tblTop.ResumeLayout(false);
+            cardTester.ResumeLayout(false);
+            cardTester.PerformLayout();
+            cardMachine.ResumeLayout(false);
+            cardMachine.PerformLayout();
+            cardDatabase.ResumeLayout(false);
+            cardDatabase.PerformLayout();
+            cardActiveProg.ResumeLayout(false);
+            cardActiveProg.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picHarness).EndInit();
+            tblMiddle.ResumeLayout(false);
+            cardSummary.ResumeLayout(false);
+            cardSummary.PerformLayout();
+            tblCharts.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)chartHistory).EndInit();
+            ((System.ComponentModel.ISupportInitialize)chartFailReason).EndInit();
+            tblKpi.ResumeLayout(false);
+            kpiTotalTested.ResumeLayout(false);
+            kpiTotalTested.PerformLayout();
+            kpiPass.ResumeLayout(false);
+            kpiPass.PerformLayout();
+            kpiFail.ResumeLayout(false);
+            kpiFail.PerformLayout();
+            kpiYield.ResumeLayout(false);
+            kpiYield.PerformLayout();
+            kpiCycleTime.ResumeLayout(false);
+            kpiCycleTime.PerformLayout();
+            cardHistory.ResumeLayout(false);
+            cardHistory.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)gridRecent).EndInit();
+            tblBottom.ResumeLayout(false);
+            cardModules.ResumeLayout(false);
+            cardModules.PerformLayout();
+            tblModules.ResumeLayout(false);
+            pnlMod1.ResumeLayout(false);
+            pnlMod1.PerformLayout();
+            pnlMod2.ResumeLayout(false);
+            pnlMod2.PerformLayout();
+            pnlMod3.ResumeLayout(false);
+            pnlMod3.PerformLayout();
+            pnlMod4.ResumeLayout(false);
+            pnlMod4.PerformLayout();
+            cardOperatingTime.ResumeLayout(false);
+            cardOperatingTime.PerformLayout();
+            cardMaintenance.ResumeLayout(false);
+            cardMaintenance.PerformLayout();
+            ResumeLayout(false);
 
 
 

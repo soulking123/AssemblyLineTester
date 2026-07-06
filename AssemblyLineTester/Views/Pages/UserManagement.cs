@@ -522,7 +522,7 @@ namespace AssemblyLineTester.Views.Pages
                 g.FillEllipse(placeholderBrush, chartRect);
             }
 
-            int innerSize = (int)(size * 0.62);
+            int innerSize = (int)(size * 0.85);
             Rectangle innerRect = new(chartRect.X + (size - innerSize) / 2, chartRect.Y + (size - innerSize) / 2, innerSize, innerSize);
             using SolidBrush bCenter = new(Color.White);
             g.FillEllipse(bCenter, innerRect);

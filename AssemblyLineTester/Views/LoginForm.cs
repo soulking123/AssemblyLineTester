@@ -88,7 +88,15 @@ namespace AssemblyLineTester.Views
                         dashboard.FormClosed += (s, args) => 
                         {
                             MaintenanceService.StopTrackingAndSave();
-                            this.Close();
+                            if (dashboard.IsLoggingOut)
+                            {
+                                SessionManager.ClearSession();
+                                this.Show();
+                            }
+                            else
+                            {
+                                this.Close();
+                            }
                         };
                         
                         dashboard.Show();

@@ -40,8 +40,7 @@ namespace AssemblyLineTester.Views.Pages
 
             // Header Style
             gridRecent.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
-            gridRecent.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
-            gridRecent.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            gridRecent.ColumnHeadersDefaultCellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
             gridRecent.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(248, 250, 252);
             gridRecent.ColumnHeadersDefaultCellStyle.Padding = new Padding(8);
             gridRecent.ColumnHeadersHeight = 40;
@@ -69,52 +68,64 @@ namespace AssemblyLineTester.Views.Pages
             chartHistory.Series.Clear();
             chartHistory.Legends.Clear();
 
-            ChartArea areaBar = new ChartArea("BarArea");
-            areaBar.BackColor = Color.White;
+            ChartArea areaBar = new("BarArea")
+            {
+                BackColor = Color.White
+            };
             areaBar.AxisX.MajorGrid.Enabled = false;
-            areaBar.AxisX.LabelStyle.Font = new Font("Segoe UI", 8.5F);
+            areaBar.AxisX.LabelStyle.Font = new("Segoe UI", 8.5F);
             areaBar.AxisX.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaBar.AxisX.LineColor = Color.FromArgb(226, 232, 240);
 
             areaBar.AxisY.MajorGrid.LineColor = Color.FromArgb(241, 245, 249);
-            areaBar.AxisY.LabelStyle.Font = new Font("Segoe UI", 8.5F);
+            areaBar.AxisY.LabelStyle.Font = new("Segoe UI", 8.5F);
             areaBar.AxisY.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaBar.AxisY.LineColor = Color.Transparent;
             areaBar.AxisY.Maximum = 250;
             areaBar.AxisY.Interval = 50;
+            areaBar.AxisX.Interval = 1;
             chartHistory.ChartAreas.Add(areaBar);
 
-            Legend legBar = new Legend("BarLegend");
-            legBar.Docking = Docking.Top;
-            legBar.Alignment = StringAlignment.Center;
-            legBar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            Legend legBar = new("BarLegend")
+            {
+                Docking = Docking.Top,
+                Alignment = StringAlignment.Center,
+                Font = new("Segoe UI", 9F, FontStyle.Bold)
+            };
             chartHistory.Legends.Add(legBar);
 
-            Series sPass = new Series("Pass");
-            sPass.ChartType = SeriesChartType.Column;
-            sPass.Color = Color.FromArgb(76, 175, 80);
-            sPass.LegendText = "Pass";
+            Series sPass = new("Pass")
+            {
+                ChartType = SeriesChartType.Column,
+                Color = Color.FromArgb(76, 175, 80),
+                LegendText = "Pass",
+                IsXValueIndexed = true
+            };
             sPass["PointWidth"] = "0.45";
 
-            Series sFail = new Series("Fail");
-            sFail.ChartType = SeriesChartType.Column;
-            sFail.Color = Color.FromArgb(244, 67, 54);
-            sFail.LegendText = "Fail";
+            Series sFail = new("Fail")
+            {
+                ChartType = SeriesChartType.Column,
+                Color = Color.FromArgb(244, 67, 54),
+                LegendText = "Fail",
+                IsXValueIndexed = true
+            };
             sFail["PointWidth"] = "0.45";
 
-            string[] dates = { "09 Mar", "10 Mar", "11 Mar", "12 Mar", "13 Mar", "14 Mar", "15 Mar" };
-            int[] passVals = { 180, 192, 205, 198, 210, 208, 215 };
-            int[] failVals = { 4, 3, 2, 4, 2, 3, 3 };
+            int[] passVals = [180, 192, 205, 198, 210, 208, 215];
+            int[] failVals = [4, 3, 2, 4, 2, 3, 3];
 
-            for (int i = 0; i < dates.Length; i++)
+            for (int i = 0; i < 7; i++)
             {
-                int pIdx = sPass.Points.AddXY(dates[i], passVals[i]);
-                sPass.Points[pIdx].Label = passVals[i].ToString();
-                sPass.Points[pIdx].Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+                string dateLabel = DateTime.Now.AddDays(-6 + i).ToString("dd MMM");
 
-                int fIdx = sFail.Points.AddXY(dates[i], failVals[i]);
+                int pIdx = sPass.Points.AddXY(dateLabel, passVals[i]);
+                sPass.Points[pIdx].Label = passVals[i].ToString();
+                sPass.Points[pIdx].Font = new("Segoe UI", 8F, FontStyle.Bold);
+
+                int fIdx = sFail.Points.AddXY(dateLabel, failVals[i]);
                 sFail.Points[fIdx].Label = failVals[i].ToString();
-                sFail.Points[fIdx].Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+                sFail.Points[fIdx].Font = new("Segoe UI", 8F, FontStyle.Bold);
             }
 
             chartHistory.Series.Add(sPass);
@@ -127,19 +138,25 @@ namespace AssemblyLineTester.Views.Pages
             chartFailReason.Series.Clear();
             chartFailReason.Legends.Clear();
 
-            ChartArea areaPie = new ChartArea("PieArea");
-            areaPie.BackColor = Color.White;
+            ChartArea areaPie = new("PieArea")
+            {
+                BackColor = Color.White
+            };
             chartFailReason.ChartAreas.Add(areaPie);
 
-            Legend legPie = new Legend("PieLegend");
-            legPie.Docking = Docking.Right;
-            legPie.Alignment = StringAlignment.Center;
-            legPie.Font = new Font("Segoe UI", 8.5F);
+            Legend legPie = new("PieLegend")
+            {
+                Docking = Docking.Bottom,
+                Alignment = StringAlignment.Center,
+                Font = new("Segoe UI", 9F, FontStyle.Regular)
+            };
             chartFailReason.Legends.Add(legPie);
 
-            Series sReason = new Series("FailReason");
-            sReason.ChartType = SeriesChartType.Doughnut;
-            sReason["DoughnutRadius"] = "65";
+            Series sReason = new("FailReason")
+            {
+                ChartType = SeriesChartType.Doughnut
+            };
+            sReason["DoughnutRadius"] = "25";
 
             int p1 = sReason.Points.AddY(2);
             sReason.Points[p1].Color = Color.FromArgb(244, 67, 54);
@@ -181,17 +198,17 @@ namespace AssemblyLineTester.Views.Pages
             if (colResult != null) { colResult.FillWeight = 50; colResult.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter; }
             if (colOperator != null) colOperator.FillWeight = 55;
 
-            object[][] rows = new object[][]
-            {
-                new object[] { "1", "10:30:12", "WH-ENG-001", "SN12350", "PASS", "Fally" },
-                new object[] { "2", "10:28:56", "WH-ENG-001", "SN12349", "PASS", "Fally" },
-                new object[] { "3", "10:27:40", "WH-ENG-001", "SN12348", "FAIL", "Fally" },
-                new object[] { "4", "10:26:18", "WH-ENG-001", "SN12347", "PASS", "Fally" },
-                new object[] { "5", "10:25:05", "WH-ENG-001", "SN12346", "PASS", "Fally" },
-                new object[] { "6", "10:23:51", "WH-ENG-001", "SN12345", "PASS", "Fally" },
-                new object[] { "7", "10:22:33", "WH-ENG-001", "SN12344", "PASS", "Fally" },
-                new object[] { "8", "10:21:20", "WH-ENG-001", "SN12343", "PASS", "Fally" }
-            };
+            object[][] rows =
+            [
+                ["1", "10:30:12", "WH-ENG-001", "SN12350", "PASS", "Fally"],
+                ["2", "10:28:56", "WH-ENG-001", "SN12349", "PASS", "Fally"],
+                ["3", "10:27:40", "WH-ENG-001", "SN12348", "FAIL", "Fally"],
+                ["4", "10:26:18", "WH-ENG-001", "SN12347", "PASS", "Fally"],
+                ["5", "10:25:05", "WH-ENG-001", "SN12346", "PASS", "Fally"],
+                ["6", "10:23:51", "WH-ENG-001", "SN12345", "PASS", "Fally"],
+                ["7", "10:22:33", "WH-ENG-001", "SN12344", "PASS", "Fally"],
+                ["8", "10:21:20", "WH-ENG-001", "SN12343", "PASS", "Fally"]
+            ];
 
             foreach (var r in rows)
             {
@@ -208,13 +225,13 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     e.CellStyle.BackColor = Color.FromArgb(220, 252, 231);
                     e.CellStyle.ForeColor = Color.FromArgb(22, 101, 52);
-                    e.CellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                    e.CellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
                 }
                 else if (val == "FAIL")
                 {
                     e.CellStyle.BackColor = Color.FromArgb(254, 226, 226);
                     e.CellStyle.ForeColor = Color.FromArgb(153, 27, 27);
-                    e.CellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                    e.CellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
                 }
             }
         }
@@ -224,28 +241,29 @@ namespace AssemblyLineTester.Views.Pages
             if (e.ChartElement is ChartArea area)
             {
                 string numText = "3";
-                string subText = "Total Fail";
+                string subText = "TOTAL FAIL";
 
-                using (Font fontNum = new Font("Segoe UI", 20F, FontStyle.Bold))
-                using (Font fontSub = new Font("Segoe UI", 9F, FontStyle.Regular))
-                using (SolidBrush brushNum = new SolidBrush(Color.FromArgb(30, 41, 59)))
-                using (SolidBrush brushSub = new SolidBrush(Color.FromArgb(100, 116, 139)))
-                using (StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
-                {
-                    RectangleF chartRect = e.ChartGraphics.GetAbsoluteRectangle(area.Position.ToRectangleF());
-                    float centerX = chartRect.Left + (chartRect.Width * 0.42f);
-                    float centerY = chartRect.Top + (chartRect.Height * 0.5f);
+                using Font fontNum = new("Segoe UI", 22F, FontStyle.Bold);
+                using Font fontSub = new("Segoe UI", 8.5F, FontStyle.Bold);
+                using SolidBrush brushNum = new(Color.FromArgb(30, 41, 59));
+                using SolidBrush brushSub = new(Color.FromArgb(100, 116, 139));
+                using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
 
-                    e.ChartGraphics.Graphics.DrawString(numText, fontNum, brushNum, centerX, centerY - 12, sf);
-                    e.ChartGraphics.Graphics.DrawString(subText, fontSub, brushSub, centerX, centerY + 16, sf);
-                }
+                RectangleF chartRect = e.ChartGraphics.GetAbsoluteRectangle(area.Position.ToRectangleF());
+                float centerX = chartRect.Left + (chartRect.Width * 0.50f);
+                float centerY = chartRect.Top + (chartRect.Height * 0.5f);
+
+                e.ChartGraphics.Graphics.DrawString(numText, fontNum, brushNum, centerX, centerY - 14, sf);
+                e.ChartGraphics.Graphics.DrawString(subText, fontSub, brushSub, centerX, centerY + 16, sf);
             }
         }
 
         private void StartUiRefreshTimer()
         {
-            _uiRefreshTimer = new System.Windows.Forms.Timer();
-            _uiRefreshTimer.Interval = 1000;
+            _uiRefreshTimer = new()
+            {
+                Interval = 1000
+            };
             _uiRefreshTimer.Tick += (s, e) => UpdateMaintenanceLabels();
             _uiRefreshTimer.Start();
             UpdateMaintenanceLabels(); // Initial update on load
