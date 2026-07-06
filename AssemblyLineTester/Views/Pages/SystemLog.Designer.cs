@@ -62,14 +62,11 @@ namespace AssemblyLineTester.Views.Pages
             gridData = new DataGridView();
             lblTableTitle = new Label();
             lblPaginationInfo = new Label();
-            btnPagePrev = new Button();
-            btnPage1 = new Button();
-            btnPage2 = new Button();
-            btnPage3 = new Button();
-            btnPageNext = new Button();
+            flpPages = new FlowLayoutPanel();
             rightLayout = new TableLayoutPanel();
             pnlSummary = new Panel();
             tblSummaryContent = new TableLayoutPanel();
+            lblSummaryTitle = new Label();
             tblSummaryBody = new TableLayoutPanel();
             pnlChartContainer = new Panel();
             tblSummaryLegend = new TableLayoutPanel();
@@ -79,7 +76,6 @@ namespace AssemblyLineTester.Views.Pages
             lblLegWarn = new Label();
             lblLegErrorIcon = new Label();
             lblLegError = new Label();
-            lblSummaryTitle = new Label();
             pnlLevelStats = new Panel();
             lblLevelStatsTitle = new Label();
             pnlModuleStats = new Panel();
@@ -384,11 +380,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlLeft.Controls.Add(gridData);
             pnlLeft.Controls.Add(lblTableTitle);
             pnlLeft.Controls.Add(lblPaginationInfo);
-            pnlLeft.Controls.Add(btnPagePrev);
-            pnlLeft.Controls.Add(btnPage1);
-            pnlLeft.Controls.Add(btnPage2);
-            pnlLeft.Controls.Add(btnPage3);
-            pnlLeft.Controls.Add(btnPageNext);
+            pnlLeft.Controls.Add(flpPages);
             pnlLeft.Dock = DockStyle.Fill;
             pnlLeft.Location = new Point(40, 48);
             pnlLeft.Margin = new Padding(8, 9, 8, 9);
@@ -469,85 +461,17 @@ namespace AssemblyLineTester.Views.Pages
             lblPaginationInfo.TabIndex = 3;
             lblPaginationInfo.Text = "Showing 1 to 12 of 1,258 entries";
             // 
-            // btnPagePrev
+            // flpPages
             // 
-            btnPagePrev.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnPagePrev.BackColor = Color.White;
-            btnPagePrev.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnPagePrev.FlatStyle = FlatStyle.Flat;
-            btnPagePrev.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnPagePrev.ForeColor = Color.FromArgb(71, 85, 105);
-            btnPagePrev.Location = new Point(947, 908);
-            btnPagePrev.Margin = new Padding(5);
-            btnPagePrev.Name = "btnPagePrev";
-            btnPagePrev.Size = new Size(138, 61);
-            btnPagePrev.TabIndex = 4;
-            btnPagePrev.Text = "Previous";
-            btnPagePrev.UseVisualStyleBackColor = false;
-            // 
-            // btnPage1
-            // 
-            btnPage1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnPage1.BackColor = Color.FromArgb(37, 99, 235);
-            btnPage1.FlatAppearance.BorderColor = Color.FromArgb(37, 99, 235);
-            btnPage1.FlatStyle = FlatStyle.Flat;
-            btnPage1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnPage1.ForeColor = Color.White;
-            btnPage1.Location = new Point(1098, 908);
-            btnPage1.Margin = new Padding(5);
-            btnPage1.Name = "btnPage1";
-            btnPage1.Size = new Size(62, 61);
-            btnPage1.TabIndex = 5;
-            btnPage1.Text = "1";
-            btnPage1.UseVisualStyleBackColor = false;
-            // 
-            // btnPage2
-            // 
-            btnPage2.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnPage2.BackColor = Color.White;
-            btnPage2.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnPage2.FlatStyle = FlatStyle.Flat;
-            btnPage2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnPage2.ForeColor = Color.FromArgb(71, 85, 105);
-            btnPage2.Location = new Point(1173, 908);
-            btnPage2.Margin = new Padding(5);
-            btnPage2.Name = "btnPage2";
-            btnPage2.Size = new Size(62, 61);
-            btnPage2.TabIndex = 6;
-            btnPage2.Text = "2";
-            btnPage2.UseVisualStyleBackColor = false;
-            // 
-            // btnPage3
-            // 
-            btnPage3.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnPage3.BackColor = Color.White;
-            btnPage3.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnPage3.FlatStyle = FlatStyle.Flat;
-            btnPage3.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnPage3.ForeColor = Color.FromArgb(71, 85, 105);
-            btnPage3.Location = new Point(1248, 908);
-            btnPage3.Margin = new Padding(5);
-            btnPage3.Name = "btnPage3";
-            btnPage3.Size = new Size(62, 61);
-            btnPage3.TabIndex = 7;
-            btnPage3.Text = "3";
-            btnPage3.UseVisualStyleBackColor = false;
-            // 
-            // btnPageNext
-            // 
-            btnPageNext.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnPageNext.BackColor = Color.White;
-            btnPageNext.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnPageNext.FlatStyle = FlatStyle.Flat;
-            btnPageNext.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnPageNext.ForeColor = Color.FromArgb(71, 85, 105);
-            btnPageNext.Location = new Point(1323, 908);
-            btnPageNext.Margin = new Padding(5);
-            btnPageNext.Name = "btnPageNext";
-            btnPageNext.Size = new Size(138, 61);
-            btnPageNext.TabIndex = 8;
-            btnPageNext.Text = "Next";
-            btnPageNext.UseVisualStyleBackColor = false;
+            flpPages.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            flpPages.AutoSize = true;
+            flpPages.FlowDirection = FlowDirection.LeftToRight;
+            flpPages.Location = new Point(900, 908);
+            flpPages.Margin = new Padding(0);
+            flpPages.Name = "flpPages";
+            flpPages.Size = new Size(580, 65);
+            flpPages.TabIndex = 4;
+            flpPages.WrapContents = false;
             // 
             // rightLayout
             // 
@@ -760,10 +684,10 @@ namespace AssemblyLineTester.Views.Pages
             pnlModuleStats.BackColor = Color.White;
             pnlModuleStats.Controls.Add(lblModuleStatsTitle);
             pnlModuleStats.Dock = DockStyle.Fill;
-            pnlModuleStats.Location = new Point(5, 659);
-            pnlModuleStats.Margin = new Padding(5);
+            pnlModuleStats.Location = new Point(0, 654);
+            pnlModuleStats.Margin = new Padding(0);
             pnlModuleStats.Name = "pnlModuleStats";
-            pnlModuleStats.Size = new Size(691, 328);
+            pnlModuleStats.Size = new Size(701, 338);
             pnlModuleStats.TabIndex = 2;
             // 
             // lblModuleStatsTitle
@@ -897,11 +821,7 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Label lblTableTitle;
         private System.Windows.Forms.DataGridView gridData;
         private System.Windows.Forms.Label lblPaginationInfo;
-        private System.Windows.Forms.Button btnPagePrev;
-        private System.Windows.Forms.Button btnPage1;
-        private System.Windows.Forms.Button btnPage2;
-        private System.Windows.Forms.Button btnPage3;
-        private System.Windows.Forms.Button btnPageNext;
+        private System.Windows.Forms.FlowLayoutPanel flpPages;
         // Right Side Components
 
         private System.Windows.Forms.TableLayoutPanel rightLayout;

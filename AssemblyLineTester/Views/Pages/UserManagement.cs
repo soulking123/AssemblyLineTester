@@ -13,12 +13,12 @@ namespace AssemblyLineTester.Views.Pages
     public partial class UserManagement : UserControl
     {
         private readonly UserService _userService;
-        private List<User> _allUsers = new();
-        private Dictionary<string, int> _roleCounts = new();
-        private int _totalUserCount = 0;
+        private List<User> _allUsers = [];
+        private Dictionary<string, int> _roleCounts = [];
+        private int _totalUserCount;
         private int _currentPage = 1;
         private int _pageSize = 10;
-        private ComboBox cmbPageSize = new ComboBox();
+        private readonly ComboBox cmbPageSize = new();
 
         /// Initializes a new instance of the UserManagement class.
         public UserManagement(UserService userService)
@@ -41,10 +41,7 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.CellPainting += GridUsers_CellPainting;
             gridUsers.SelectionChanged += GridUsers_SelectionChanged;
 
-            if (pnlRoleChart is not null)
-            {
-                pnlRoleChart.Paint += PnlRoleChart_Paint;
-            }
+            pnlRoleChart.Paint += PnlRoleChart_Paint;
 
             // Wire up the Load event to fetch database records only when the page is displayed on screen
             this.Load += UserManagement_Load;
@@ -57,14 +54,14 @@ namespace AssemblyLineTester.Views.Pages
 
         private void InitializePaginationControls()
         {
-            FlowLayoutPanel flpPageSize = new FlowLayoutPanel
+            FlowLayoutPanel flpPageSize = new()
             {
                 Dock = DockStyle.Fill,
                 WrapContents = false,
                 FlowDirection = FlowDirection.LeftToRight
             };
 
-            Label lblShow = new Label
+            Label lblShow = new()
             {
                 Text = "Show",
                 AutoSize = true,
@@ -87,7 +84,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
             };
 
-            Label lblEntries = new Label
+            Label lblEntries = new()
             {
                 Text = "entries",
                 AutoSize = true,
@@ -124,7 +121,7 @@ namespace AssemblyLineTester.Views.Pages
             try
             {
                 // Fetch using the injected service, excluding system admin account from user list display
-                _allUsers = _userService.GetAllUsers().Where(u => u.Username != "admin").OrderBy(u => u.UserId).ToList();
+                _allUsers = [.. _userService.GetAllUsers().Where(u => u.Username != "admin").OrderBy(u => u.UserId)];
 
                 _totalUserCount = _allUsers.Count;
                 int activeUsers = _allUsers.Count(u => u.Status.Name == "Active");
@@ -172,7 +169,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             gridUsers.Rows.Clear();
 
-            string searchText = txtSearch.Text.Trim().ToLower();
+            string searchText = txtSearch.Text.Trim();
             string filterStatus = cmbFilterStatus.SelectedItem?.ToString() ?? "Status: All";
             string filterRole = cmbFilterRole.SelectedItem?.ToString() ?? "Role: All";
             string filterDept = cmbFilterDept.SelectedItem?.ToString() ?? "Department: All";
@@ -182,9 +179,9 @@ namespace AssemblyLineTester.Views.Pages
             if (!string.IsNullOrEmpty(searchText))
             {
                 filtered = filtered.Where(u => 
-                    u.Username.ToLower().Contains(searchText) || 
-                    u.FullName.ToLower().Contains(searchText) || 
-                    $"{u.Username.ToLower()}@caterpillar.com".Contains(searchText));
+                    u.Username.Contains(searchText, StringComparison.OrdinalIgnoreCase) || 
+                    u.FullName.Contains(searchText, StringComparison.OrdinalIgnoreCase) || 
+                    $"{u.Username}@caterpillar.com".Contains(searchText, StringComparison.OrdinalIgnoreCase));
             }
 
             if (filterStatus != "Status: All")
@@ -202,7 +199,7 @@ namespace AssemblyLineTester.Views.Pages
                 filtered = filtered.Where(u => u.Department.Equals(filterDept, StringComparison.OrdinalIgnoreCase));
             }
 
-            var filteredList = filtered.ToList();
+            List<User> filteredList = [.. filtered];
             int totalFiltered = filteredList.Count;
 
             lblUserListTitle.Text = $"USER LIST (Total: {totalFiltered})";
@@ -256,15 +253,17 @@ namespace AssemblyLineTester.Views.Pages
 
             for (int p = 1; p <= totalPages; p++)
             {
-                int pageNum = p;
-                var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateUserGrid(); });
-                flpPaginationButtons.Controls.Add(btnPage);
-            }
-
-            if (totalPages >= 2)
-            {
-                var btnDots = CreatePageButton("...", false, false, null);
-                flpPaginationButtons.Controls.Add(btnDots);
+                if (p == 1 || p == totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
+                {
+                    int pageNum = p;
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateUserGrid(); });
+                    flpPaginationButtons.Controls.Add(btnPage);
+                }
+                else if (p == _currentPage - 2 || p == _currentPage + 2)
+                {
+                    var btnDots = CreatePageButton("...", false, false, null);
+                    flpPaginationButtons.Controls.Add(btnDots);
+                }
             }
 
             var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; PopulateUserGrid(); } });
@@ -274,20 +273,32 @@ namespace AssemblyLineTester.Views.Pages
             flpPaginationButtons.Controls.Add(btnLast);
         }
 
-        private Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
         {
-            Button btn = new Button
+            Button btn = new()
             {
                 Text = text,
-                Size = new Size(38, 36),
+                Size = new Size(38, 40),
                 Margin = new Padding(2, 6, 2, 6),
                 FlatStyle = FlatStyle.Flat,
                 Enabled = isEnabled,
-                Cursor = isEnabled ? Cursors.Hand : Cursors.Default
+                Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Padding = new Padding(0, 0, 0, 2),
+                UseCompatibleTextRendering = true
             };
             btn.FlatAppearance.BorderSize = 1;
 
-            if (isActive)
+            if (text == "...")
+            {
+                btn.BackColor = Color.Transparent;
+                btn.ForeColor = Color.FromArgb(100, 116, 139);
+                btn.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                btn.FlatAppearance.BorderSize = 0;
+                btn.Enabled = false;
+                btn.Cursor = Cursors.Default;
+            }
+            else if (isActive)
             {
                 btn.BackColor = Color.FromArgb(250, 204, 21);
                 btn.ForeColor = Color.FromArgb(15, 23, 42);
@@ -309,7 +320,7 @@ namespace AssemblyLineTester.Views.Pages
                 btn.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
             }
 
-            if (onClick != null)
+            if (onClick is not null)
             {
                 btn.Click += onClick;
             }
@@ -453,7 +464,7 @@ namespace AssemblyLineTester.Views.Pages
                 int badgeHeight = 26;
                 int x = e.CellBounds.X + (e.CellBounds.Width - badgeWidth) / 2;
                 int y = e.CellBounds.Y + (e.CellBounds.Height - badgeHeight) / 2;
-                Rectangle badgeRect = new Rectangle(x, y, badgeWidth, badgeHeight);
+                Rectangle badgeRect = new(x, y, badgeWidth, badgeHeight);
 
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 using (var brush = new SolidBrush(pillColor))
@@ -468,7 +479,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private System.Drawing.Drawing2D.GraphicsPath GetRoundedRectPath(Rectangle rect, int radius)
+        private static System.Drawing.Drawing2D.GraphicsPath GetRoundedRectPath(Rectangle rect, int radius)
         {
             var path = new System.Drawing.Drawing2D.GraphicsPath();
             int d = radius * 2;
@@ -483,7 +494,6 @@ namespace AssemblyLineTester.Views.Pages
         /// Draws the Doughnut Chart dynamically based on the proportion of user roles in the database.
         private void PnlRoleChart_Paint(object? sender, PaintEventArgs e)
         {
-            if (pnlRoleChart is null) return;
             Graphics g = e.Graphics;
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             Rectangle rect = new(5, 5, pnlRoleChart.Width - 10, pnlRoleChart.Height - 10);

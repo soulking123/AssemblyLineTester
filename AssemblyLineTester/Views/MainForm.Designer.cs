@@ -84,7 +84,7 @@ namespace AssemblyLineTester.Views
             splitContainer1.Panel2.Controls.Add(pnlContent);
             splitContainer1.Panel2.Controls.Add(pnlTopHeader);
             splitContainer1.Size = new Size(2884, 1759);
-            splitContainer1.SplitterDistance = 618;
+            splitContainer1.SplitterDistance = 432;
             splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 0;
             // 
@@ -105,10 +105,11 @@ namespace AssemblyLineTester.Views
             // 
             // btnDashboard
             // 
+            btnDashboard.Font = new Font("Segoe UI", 11F);
             btnDashboard.Location = new Point(32, 160);
             btnDashboard.Margin = new Padding(5);
             btnDashboard.Name = "btnDashboard";
-            btnDashboard.Size = new Size(552, 80);
+            btnDashboard.Size = new Size(377, 80);
             btnDashboard.TabIndex = 2;
             btnDashboard.Text = "        Dashboard";
             btnDashboard.TextAlign = ContentAlignment.MiddleLeft;
@@ -117,10 +118,11 @@ namespace AssemblyLineTester.Views
             // 
             // btnTestExecution
             // 
+            btnTestExecution.Font = new Font("Segoe UI", 11F);
             btnTestExecution.Location = new Point(32, 256);
             btnTestExecution.Margin = new Padding(5);
             btnTestExecution.Name = "btnTestExecution";
-            btnTestExecution.Size = new Size(552, 80);
+            btnTestExecution.Size = new Size(377, 80);
             btnTestExecution.TabIndex = 3;
             btnTestExecution.Text = "        Test Execution";
             btnTestExecution.TextAlign = ContentAlignment.MiddleLeft;
@@ -129,10 +131,11 @@ namespace AssemblyLineTester.Views
             // 
             // btnHarnessDatabase
             // 
+            btnHarnessDatabase.Font = new Font("Segoe UI", 11F);
             btnHarnessDatabase.Location = new Point(32, 352);
             btnHarnessDatabase.Margin = new Padding(5);
             btnHarnessDatabase.Name = "btnHarnessDatabase";
-            btnHarnessDatabase.Size = new Size(552, 80);
+            btnHarnessDatabase.Size = new Size(377, 80);
             btnHarnessDatabase.TabIndex = 4;
             btnHarnessDatabase.Text = "        Harness Database";
             btnHarnessDatabase.TextAlign = ContentAlignment.MiddleLeft;
@@ -141,10 +144,11 @@ namespace AssemblyLineTester.Views
             // 
             // btnTestHistory
             // 
+            btnTestHistory.Font = new Font("Segoe UI", 11F);
             btnTestHistory.Location = new Point(32, 448);
             btnTestHistory.Margin = new Padding(5);
             btnTestHistory.Name = "btnTestHistory";
-            btnTestHistory.Size = new Size(552, 80);
+            btnTestHistory.Size = new Size(377, 80);
             btnTestHistory.TabIndex = 5;
             btnTestHistory.Text = "        Test History";
             btnTestHistory.TextAlign = ContentAlignment.MiddleLeft;
@@ -153,10 +157,11 @@ namespace AssemblyLineTester.Views
             // 
             // btnReports
             // 
+            btnReports.Font = new Font("Segoe UI", 11F);
             btnReports.Location = new Point(32, 544);
             btnReports.Margin = new Padding(5);
             btnReports.Name = "btnReports";
-            btnReports.Size = new Size(552, 80);
+            btnReports.Size = new Size(377, 80);
             btnReports.TabIndex = 6;
             btnReports.Text = "        Reports";
             btnReports.TextAlign = ContentAlignment.MiddleLeft;
@@ -165,10 +170,11 @@ namespace AssemblyLineTester.Views
             // 
             // btnSystemLog
             // 
+            btnSystemLog.Font = new Font("Segoe UI", 11F);
             btnSystemLog.Location = new Point(32, 640);
             btnSystemLog.Margin = new Padding(5);
             btnSystemLog.Name = "btnSystemLog";
-            btnSystemLog.Size = new Size(552, 80);
+            btnSystemLog.Size = new Size(377, 80);
             btnSystemLog.TabIndex = 7;
             btnSystemLog.Text = "        System Log";
             btnSystemLog.TextAlign = ContentAlignment.MiddleLeft;
@@ -177,10 +183,11 @@ namespace AssemblyLineTester.Views
             // 
             // btnSettings
             // 
+            btnSettings.Font = new Font("Segoe UI", 11F);
             btnSettings.Location = new Point(32, 736);
             btnSettings.Margin = new Padding(5);
             btnSettings.Name = "btnSettings";
-            btnSettings.Size = new Size(552, 80);
+            btnSettings.Size = new Size(377, 80);
             btnSettings.TabIndex = 8;
             btnSettings.Text = "        Settings";
             btnSettings.TextAlign = ContentAlignment.MiddleLeft;
@@ -189,10 +196,11 @@ namespace AssemblyLineTester.Views
             // 
             // btnUserManagement
             // 
+            btnUserManagement.Font = new Font("Segoe UI", 11F);
             btnUserManagement.Location = new Point(32, 832);
             btnUserManagement.Margin = new Padding(5);
             btnUserManagement.Name = "btnUserManagement";
-            btnUserManagement.Size = new Size(552, 80);
+            btnUserManagement.Size = new Size(377, 80);
             btnUserManagement.TabIndex = 9;
             btnUserManagement.Text = "        User Management";
             btnUserManagement.TextAlign = ContentAlignment.MiddleLeft;
@@ -218,7 +226,7 @@ namespace AssemblyLineTester.Views
             pnlContent.Location = new Point(0, 122);
             pnlContent.Margin = new Padding(5);
             pnlContent.Name = "pnlContent";
-            pnlContent.Size = new Size(2261, 1637);
+            pnlContent.Size = new Size(2447, 1637);
             pnlContent.TabIndex = 1;
             // 
             // pnlTopHeader
@@ -230,7 +238,7 @@ namespace AssemblyLineTester.Views
             pnlTopHeader.Location = new Point(0, 0);
             pnlTopHeader.Margin = new Padding(5);
             pnlTopHeader.Name = "pnlTopHeader";
-            pnlTopHeader.Size = new Size(2261, 122);
+            pnlTopHeader.Size = new Size(2447, 122);
             pnlTopHeader.TabIndex = 0;
             pnlTopHeader.Paint += PnlTopHeader_Paint;
             // 
@@ -243,7 +251,7 @@ namespace AssemblyLineTester.Views
             pnlRight.Controls.Add(pnlUser);
             pnlRight.Dock = DockStyle.Right;
             pnlRight.FlowDirection = FlowDirection.RightToLeft;
-            pnlRight.Location = new Point(1311, 0);
+            pnlRight.Location = new Point(1497, 0);
             pnlRight.Margin = new Padding(5);
             pnlRight.MinimumSize = new Size(950, 122);
             pnlRight.Name = "pnlRight";
@@ -410,7 +418,7 @@ namespace AssemblyLineTester.Views
             btnLogOut.Name = "btnLogOut";
             btnLogOut.Size = new Size(204, 44);
             btnLogOut.TabIndex = 2;
-            btnLogOut.Text = "⏻   Log Out";
+            btnLogOut.Text = "\u23fb   Log Out";
             btnLogOut.TextAlign = ContentAlignment.MiddleLeft;
             btnLogOut.UseVisualStyleBackColor = false;
             btnLogOut.Click += BtnLogOut_Click;
@@ -447,7 +455,6 @@ namespace AssemblyLineTester.Views
             pnlUser.ResumeLayout(false);
             pnlUser.PerformLayout();
             pnlUserDropdown.ResumeLayout(false);
-            pnlUserDropdown.PerformLayout();
             ResumeLayout(false);
 
         }

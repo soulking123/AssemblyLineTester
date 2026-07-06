@@ -87,6 +87,7 @@ namespace AssemblyLineTester.Views.Pages
                 BackColor = Color.White
             };
             areaTrend.AxisX.MajorGrid.Enabled = false;
+            areaTrend.AxisX.Interval = 1;
             areaTrend.AxisX.LabelStyle.Font = new("Segoe UI", 8.5F);
             areaTrend.AxisX.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaTrend.AxisX.LineColor = Color.FromArgb(226, 232, 240);
@@ -110,35 +111,39 @@ namespace AssemblyLineTester.Views.Pages
 
             Series sPassRate = new("Pass Rate (%)")
             {
-                ChartType = SeriesChartType.Line,
+                ChartType = SeriesChartType.Spline,
                 Color = Color.FromArgb(34, 197, 94), // Modern Green
                 BorderWidth = 3,
                 MarkerStyle = MarkerStyle.Circle,
                 MarkerSize = 7,
-                MarkerColor = Color.FromArgb(22, 101, 52)
+                MarkerColor = Color.FromArgb(22, 101, 52),
+                IsXValueIndexed = true
             };
+            sPassRate["LabelStyle"] = "Top";
 
             Series sTarget = new("Target Yield (%)")
             {
-                ChartType = SeriesChartType.Line,
+                ChartType = SeriesChartType.Spline,
                 Color = Color.FromArgb(59, 130, 246), // Modern Blue
                 BorderWidth = 2,
                 BorderDashStyle = ChartDashStyle.Dash,
                 MarkerStyle = MarkerStyle.Diamond,
                 MarkerSize = 6,
-                MarkerColor = Color.FromArgb(30, 64, 175)
+                MarkerColor = Color.FromArgb(30, 64, 175),
+                IsXValueIndexed = true
             };
 
-            string[] dates = ["08 Mar", "09 Mar", "10 Mar", "11 Mar", "12 Mar", "13 Mar", "14 Mar", "15 Mar"];
-            double[] passRates = [96.5, 98.0, 95.2, 98.8, 97.5, 98.5, 96.8, 99.1];
+            double[] passRates = [96.5, 98.0, 95.2, 98.8, 97.5, 98.5, 99.1];
 
-            for (int i = 0; i < dates.Length; i++)
+            for (int i = 0; i < passRates.Length; i++)
             {
-                int idx = sPassRate.Points.AddXY(dates[i], passRates[i]);
+                string dateLabel = DateTime.Now.AddDays(-6 + i).ToString("dd MMM");
+                int idx = sPassRate.Points.AddXY(dateLabel, passRates[i]);
                 sPassRate.Points[idx].Label = passRates[i].ToString() + "%";
-                sPassRate.Points[idx].Font = new("Segoe UI", 7.5F, FontStyle.Bold);
+                sPassRate.Points[idx].Font = new("Segoe UI", 8F, FontStyle.Bold);
+                sPassRate.Points[idx].LabelForeColor = Color.FromArgb(22, 101, 52);
 
-                sTarget.Points.AddXY(dates[i], 97.0);
+                sTarget.Points.AddXY(dateLabel, 97.0);
             }
 
             chartTrend.Series.Add(sPassRate);
