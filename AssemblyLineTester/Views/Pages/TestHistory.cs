@@ -1,11 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class TestHistory : UserControl
     {
+        private int _currentPage = 1;
+        private int _pageSize = 10;
+        private readonly List<string[]> _allHistoryRecords = [];
+
         public TestHistory()
         {
             InitializeComponent();
@@ -26,17 +33,17 @@ namespace AssemblyLineTester.Views.Pages
 
         private void LogoBox_Paint(object? sender, PaintEventArgs e)
         {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             using var pen = new Pen(Color.FromArgb(15, 23, 42), 2.2f);
-            Rectangle rect = new Rectangle(4, 4, 22, 22);
+            Rectangle rect = new(4, 4, 22, 22);
             e.Graphics.DrawEllipse(pen, rect);
             e.Graphics.DrawLine(pen, 15, 15, 15, 9);
             e.Graphics.DrawLine(pen, 15, 15, 19, 17);
         }
 
-        private System.Drawing.Drawing2D.GraphicsPath GetRoundedPath(Rectangle rect, int radius)
+        private static GraphicsPath GetRoundedPath(Rectangle rect, int radius)
         {
-            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            var path = new GraphicsPath();
             int d = radius * 2;
             path.AddArc(rect.X, rect.Y, d, d, 180, 90);
             path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
@@ -53,20 +60,47 @@ namespace AssemblyLineTester.Views.Pages
             gridData.CellPainting += gridData_CellPainting;
             gridSteps.CellFormatting += gridSteps_CellFormatting;
             btnRefresh.Click += (s, ev) => { LoadDummyData(); LoadDummyStepsData(); };
+
+            cmbPageSize.SelectedIndexChanged += (s, ev) =>
+            {
+                if (int.TryParse(cmbPageSize.SelectedItem?.ToString(), out int newSize) && newSize > 0)
+                {
+                    _pageSize = newSize;
+                    _currentPage = 1;
+                    PopulateHistoryGrid();
+                }
+            };
+
+            txtGoToPage.KeyDown += (s, ev) =>
+            {
+                if (ev.KeyCode == Keys.Enter)
+                {
+                    ev.SuppressKeyPress = true;
+                    if (int.TryParse(txtGoToPage.Text, out int pageNum))
+                    {
+                        int totalPages = (int)Math.Ceiling(_allHistoryRecords.Count / (double)_pageSize);
+                        if (pageNum >= 1 && pageNum <= totalPages)
+                        {
+                            _currentPage = pageNum;
+                            PopulateHistoryGrid();
+                        }
+                    }
+                }
+            };
         }
 
         private void pnlFilterCard_Paint(object? sender, PaintEventArgs e)
         {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             using var pen = new Pen(Color.FromArgb(226, 232, 240), 1.2f);
             using var path = GetRoundedPath(new Rectangle(0, 0, pnlFilterCard.Width - 1, pnlFilterCard.Height - 1), 8);
             e.Graphics.DrawPath(pen, path);
         }
 
-        private void SetColumnWidth(DataGridView grid, string colName, float fillWeight, DataGridViewContentAlignment alignment = DataGridViewContentAlignment.MiddleLeft)
+        private static void SetColumnWidth(DataGridView grid, string colName, float fillWeight, DataGridViewContentAlignment alignment = DataGridViewContentAlignment.MiddleLeft)
         {
             var col = grid.Columns[colName];
-            if (col != null)
+            if (col is not null)
             {
                 col.FillWeight = fillWeight;
                 col.DefaultCellStyle.Alignment = alignment;
@@ -75,10 +109,39 @@ namespace AssemblyLineTester.Views.Pages
 
         public void LoadDummyData()
         {
+            if (_allHistoryRecords.Count == 0)
+            {
+                string[] models = ["6060", "6061", "7050", "8010", "5020"];
+                string[] types = ["AC", "DC", "HV", "HYBRID"];
+                string[] areas = ["Engine Control", "Cabin", "Main Frame", "Boom", "Power Module", "Lighting", "Hydraulic Control", "Monitoring System"];
+                string[] parts = ["WH-ENG-001", "WH-CAB-002", "WH-MF-003", "WH-BOOM-004", "WH-PM-005", "WH-LTG-006", "WH-HYD-007", "WH-MON-008"];
+                string[] operators = ["Fally", "System", "Admin", "John", "Sarah"];
+                string[] results = ["PASS", "PASS", "PASS", "PASS", "FAIL"];
+
+                for (int i = 1; i <= 58; i++)
+                {
+                    string model = models[i % models.Length];
+                    string type = types[i % types.Length];
+                    string area = areas[i % areas.Length];
+                    string part = parts[i % parts.Length];
+                    string serial = $"SN{12300 + i}";
+                    string result = results[i % results.Length];
+                    string totalTime = $"00:{(08 + i % 5):D2}:{(10 + i * 7) % 60:D2}";
+                    string op = operators[i % operators.Length];
+                    string time = $"15 Mar 2026 {(10 + i / 60):D2}:{(30 + i % 60) % 60:D2}:{(20 + i * 3) % 60:D2} AM";
+
+                    _allHistoryRecords.Add([i.ToString(), time, model, type, area, part, serial, result, totalTime, op, "⋮"]);
+                }
+            }
+
+            PopulateHistoryGrid();
+        }
+
+        private void PopulateHistoryGrid()
+        {
             gridData.Columns.Clear();
             gridData.Rows.Clear();
 
-            // Setup DataGridView styling
             gridData.EnableHeadersVisualStyles = false;
             gridData.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
             gridData.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
@@ -103,28 +166,130 @@ namespace AssemblyLineTester.Views.Pages
             gridData.Columns.Add("Operator", "Operator");
             gridData.Columns.Add("Action", "Action");
 
-            SetColumnWidth(gridData, "No", 40, DataGridViewContentAlignment.MiddleCenter);
-            SetColumnWidth(gridData, "TestTime", 155);
-            SetColumnWidth(gridData, "ProductModel", 85);
-            SetColumnWidth(gridData, "ProductType", 85, DataGridViewContentAlignment.MiddleCenter);
-            SetColumnWidth(gridData, "Area", 135);
-            SetColumnWidth(gridData, "PartNumber", 115);
-            SetColumnWidth(gridData, "SerialNumber", 100);
-            SetColumnWidth(gridData, "Result", 85, DataGridViewContentAlignment.MiddleCenter);
-            SetColumnWidth(gridData, "TotalTime", 90, DataGridViewContentAlignment.MiddleCenter);
-            SetColumnWidth(gridData, "Operator", 85);
+            SetColumnWidth(gridData, "No", 45, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "TestTime", 165);
+            SetColumnWidth(gridData, "ProductModel", 95);
+            SetColumnWidth(gridData, "ProductType", 95, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "Area", 145);
+            SetColumnWidth(gridData, "PartNumber", 125);
+            SetColumnWidth(gridData, "SerialNumber", 110);
+            SetColumnWidth(gridData, "Result", 95, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "TotalTime", 100, DataGridViewContentAlignment.MiddleCenter);
+            SetColumnWidth(gridData, "Operator", 95);
             SetColumnWidth(gridData, "Action", 60, DataGridViewContentAlignment.MiddleCenter);
 
-            gridData.Rows.Add("1", "15 Mar 2026 10:30:20 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12350", "PASS", "00:09:01", "Fally", "⋮");
-            gridData.Rows.Add("2", "15 Mar 2026 10:28:15 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12349", "PASS", "00:08:45", "Fally", "⋮");
-            gridData.Rows.Add("3", "15 Mar 2026 10:26:18 AM", "6060", "AC", "Engine Control", "WH-ENG-001", "SN12348", "FAIL", "00:10:32", "Fally", "⋮");
-            gridData.Rows.Add("4", "15 Mar 2026 10:24:11 AM", "6060", "AC", "Cabin", "WH-CAB-002", "SN12347", "PASS", "00:08:56", "Fally", "⋮");
-            gridData.Rows.Add("5", "15 Mar 2026 10:22:03 AM", "6060", "AC", "Main Frame", "WH-MF-003", "SN12346", "PASS", "00:07:58", "Fally", "⋮");
-            gridData.Rows.Add("6", "15 Mar 2026 10:20:15 AM", "6060", "AC", "Boom", "WH-BOOM-004", "SN12345", "PASS", "00:09:12", "Fally", "⋮");
-            gridData.Rows.Add("7", "15 Mar 2026 10:18:22 AM", "6060", "AC", "Power Module", "WH-PM-005", "SN12344", "PASS", "00:08:30", "Fally", "⋮");
-            gridData.Rows.Add("8", "15 Mar 2026 10:16:10 AM", "6060", "AC", "Lighting", "WH-LTG-006", "SN12343", "FAIL", "00:11:02", "Fally", "⋮");
-            gridData.Rows.Add("9", "15 Mar 2026 10:14:05 AM", "6060", "AC", "Hydraulic Control", "WH-HYD-007", "SN12342", "PASS", "00:09:05", "Fally", "⋮");
-            gridData.Rows.Add("10", "15 Mar 2026 10:12:20 AM", "6060", "AC", "Monitoring System", "WH-MON-008", "SN12341", "PASS", "00:08:40", "Fally", "⋮");
+            int totalRecords = _allHistoryRecords.Count;
+            int totalPages = (int)Math.Ceiling(totalRecords / (double)_pageSize);
+            if (totalPages == 0) totalPages = 1;
+            if (_currentPage > totalPages) _currentPage = totalPages;
+            if (_currentPage < 1) _currentPage = 1;
+
+            var pageRecords = _allHistoryRecords.Skip((_currentPage - 1) * _pageSize).Take(_pageSize);
+            foreach (var rec in pageRecords)
+            {
+                gridData.Rows.Add(rec);
+            }
+
+            UpdatePaginationUI(totalRecords, totalPages);
+        }
+
+        private void UpdatePaginationUI(int totalFiltered, int totalPages)
+        {
+            if (totalFiltered == 0)
+            {
+                lblEntries.Text = "Showing 0 to 0 of 0 entries";
+            }
+            else
+            {
+                int start = (_currentPage - 1) * _pageSize + 1;
+                int end = Math.Min(_currentPage * _pageSize, totalFiltered);
+                lblEntries.Text = $"Showing {start} to {end} of {totalFiltered} entries";
+            }
+
+            if (flpPageNav is null) return;
+            flpPageNav.Controls.Clear();
+
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; PopulateHistoryGrid(); });
+            flpPageNav.Controls.Add(btnFirst);
+
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; PopulateHistoryGrid(); } });
+            flpPageNav.Controls.Add(btnPrev);
+
+            for (int p = 1; p <= totalPages; p++)
+            {
+                if (p == 1 || p == totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
+                {
+                    int pageNum = p;
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateHistoryGrid(); });
+                    flpPageNav.Controls.Add(btnPage);
+                }
+                else if (p == _currentPage - 2 || p == _currentPage + 2)
+                {
+                    var btnDots = CreatePageButton("...", false, false, null);
+                    flpPageNav.Controls.Add(btnDots);
+                }
+            }
+
+            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; PopulateHistoryGrid(); } });
+            flpPageNav.Controls.Add(btnNext);
+
+            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; PopulateHistoryGrid(); });
+            flpPageNav.Controls.Add(btnLast);
+        }
+
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
+        {
+            Button btn = new()
+            {
+                Text = text,
+                Size = new Size(38, 40),
+                Margin = new Padding(2, 6, 2, 6),
+                FlatStyle = FlatStyle.Flat,
+                Enabled = isEnabled,
+                Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Padding = new Padding(0, 0, 0, 2),
+                UseCompatibleTextRendering = true
+            };
+            btn.FlatAppearance.BorderSize = 1;
+
+            if (text == "...")
+            {
+                btn.BackColor = Color.Transparent;
+                btn.ForeColor = Color.FromArgb(100, 116, 139);
+                btn.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                btn.FlatAppearance.BorderSize = 0;
+                btn.Enabled = false;
+                btn.Cursor = Cursors.Default;
+            }
+            else if (isActive)
+            {
+                btn.BackColor = Color.FromArgb(250, 204, 21);
+                btn.ForeColor = Color.FromArgb(15, 23, 42);
+                btn.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                btn.FlatAppearance.BorderColor = Color.FromArgb(234, 179, 8);
+            }
+            else if (!isEnabled)
+            {
+                btn.BackColor = Color.FromArgb(248, 250, 252);
+                btn.ForeColor = Color.FromArgb(203, 213, 225);
+                btn.Font = new Font("Segoe UI", 9.5F);
+                btn.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
+            }
+            else
+            {
+                btn.BackColor = Color.White;
+                btn.ForeColor = Color.FromArgb(51, 65, 85);
+                btn.Font = new Font("Segoe UI", 9.5F);
+                btn.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            }
+
+            if (onClick is not null)
+            {
+                btn.Click += onClick;
+            }
+
+            return btn;
         }
 
         public void LoadDummyStepsData()
@@ -171,7 +336,7 @@ namespace AssemblyLineTester.Views.Pages
             };
             pnlCustomChart.Paint += (s, e) =>
             {
-                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 int size = Math.Min(pnlCustomChart.Width, pnlCustomChart.Height) - 20;
                 if (size <= 0) return;
                 int x = (pnlCustomChart.Width - size) / 2;
@@ -179,27 +344,23 @@ namespace AssemblyLineTester.Views.Pages
                 var rect = new Rectangle(x, y, size, size);
 
                 // Doughnut: 80% Pass (Green), 20% Fail (Red)
-                using (var penGreen = new Pen(Color.FromArgb(76, 175, 80), 18))
-                using (var penRed = new Pen(Color.FromArgb(244, 67, 54), 18))
-                {
-                    e.Graphics.DrawArc(penGreen, rect, -90, 288);
-                    e.Graphics.DrawArc(penRed, rect, 198, 72);
-                }
+                using var penGreen = new Pen(Color.FromArgb(76, 175, 80), 18);
+                using var penRed = new Pen(Color.FromArgb(244, 67, 54), 18);
+                e.Graphics.DrawArc(penGreen, rect, -90, 288);
+                e.Graphics.DrawArc(penRed, rect, 198, 72);
 
                 string text = "5\nTOTAL";
-                using (var font = new Font("Segoe UI", 9.5F, FontStyle.Bold))
-                using (var brush = new SolidBrush(Color.FromArgb(30, 41, 59)))
-                using (var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
-                {
-                    e.Graphics.DrawString(text, font, brush, new RectangleF(x, y, size, size), format);
-                }
+                using var font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                using var brush = new SolidBrush(Color.FromArgb(30, 41, 59));
+                using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                e.Graphics.DrawString(text, font, brush, new RectangleF(x, y, size, size), format);
             };
             pnlChartContainer.Controls.Add(pnlCustomChart);
         }
 
-        public void gridData_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        private static void gridData_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridData.Columns[e.ColumnIndex].Name == "Result" && e.Value != null)
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && e.Value != null)
             {
                 // Formatting handled by CellPainting for custom capsule shapes
             }
@@ -210,7 +371,7 @@ namespace AssemblyLineTester.Views.Pages
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridData.Columns[e.ColumnIndex].Name == "Result" && e.Value is not null && e.Graphics is not null)
             {
                 e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
-                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
                 string val = e.Value.ToString() ?? "";
                 Color bgCol = Color.FromArgb(209, 231, 221);
@@ -222,36 +383,38 @@ namespace AssemblyLineTester.Views.Pages
                     fgCol = Color.FromArgb(132, 32, 41);
                 }
 
-                Rectangle badgeRect = new Rectangle(e.CellBounds.X + 8, e.CellBounds.Y + 7, e.CellBounds.Width - 16, e.CellBounds.Height - 14);
-                using (var brush = new SolidBrush(bgCol))
-                using (var path = GetRoundedPath(badgeRect, 10))
-                {
-                    e.Graphics.FillPath(brush, path);
-                }
+                Rectangle badgeRect = new(e.CellBounds.X + 8, e.CellBounds.Y + 7, e.CellBounds.Width - 16, e.CellBounds.Height - 14);
+                using var brush = new SolidBrush(bgCol);
+                using var path = GetRoundedPath(badgeRect, 10);
+                e.Graphics.FillPath(brush, path);
 
                 TextRenderer.DrawText(e.Graphics, val, new Font("Segoe UI", 8.5F, FontStyle.Bold), badgeRect, fgCol, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 e.Handled = true;
             }
         }
 
-        public void gridSteps_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        private static void gridSteps_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridSteps.Columns[e.ColumnIndex].Name == "Result" && e.Value != null)
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && e.Value != null)
             {
-                string val = e.Value.ToString() ?? "";
-                if (val == "PASS")
+                if (sender is not DataGridView grid || e.ColumnIndex >= grid.Columns.Count) return;
+                if (grid.Columns[e.ColumnIndex].Name == "Result")
                 {
-                    e.Value = "✔ PASS";
-                    e.CellStyle.ForeColor = Color.FromArgb(22, 101, 52);
-                    e.CellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-                    e.FormattingApplied = true;
-                }
-                else if (val == "FAIL")
-                {
-                    e.Value = "✖ FAIL";
-                    e.CellStyle.ForeColor = Color.FromArgb(153, 27, 27);
-                    e.CellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-                    e.FormattingApplied = true;
+                    string val = e.Value.ToString() ?? "";
+                    if (val == "PASS")
+                    {
+                        e.Value = "✔ PASS";
+                        e.CellStyle.ForeColor = Color.FromArgb(22, 101, 52);
+                        e.CellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                        e.FormattingApplied = true;
+                    }
+                    else if (val == "FAIL")
+                    {
+                        e.Value = "✖ FAIL";
+                        e.CellStyle.ForeColor = Color.FromArgb(153, 27, 27);
+                        e.CellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                        e.FormattingApplied = true;
+                    }
                 }
             }
         }

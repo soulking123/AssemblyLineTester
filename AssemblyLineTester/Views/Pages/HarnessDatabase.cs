@@ -13,6 +13,11 @@ namespace AssemblyLineTester.Views.Pages
 {
     public partial class HarnessDatabase : UserControl
     {
+        private int _currentPage = 1;
+        private int _pageSize = 10;
+        private readonly List<string[]> _allHarnesses = [];
+        private Label? _lblPageInfo;
+
         public HarnessDatabase()
         {
             InitializeComponent();
@@ -24,8 +29,36 @@ namespace AssemblyLineTester.Views.Pages
             picHarnessImage.Paint += PicHarnessImage_Paint;
             picMachineArea.Paint += PicMachineArea_Paint;
             dataGridViewList.CellPainting += DataGridViewList_CellPainting;
+            this.Load += HarnessDatabase_Load;
             SetupPagination();
             PopulateDummyData();
+        }
+
+        private void HarnessDatabase_Load(object? sender, EventArgs e)
+        {
+            if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                if (dataGridViewList.Columns["colNo"] is DataGridViewColumn colNo)
+                {
+                    colNo.MinimumWidth = 55;
+                    colNo.FillWeight = 45F;
+                }
+                if (dataGridViewList.Columns["colProductModel"] is DataGridViewColumn colProductModel)
+                {
+                    colProductModel.MinimumWidth = 85;
+                    colProductModel.FillWeight = 80F;
+                }
+                if (dataGridViewList.Columns["colEcnNo"] is DataGridViewColumn colEcnNo)
+                {
+                    colEcnNo.MinimumWidth = 95;
+                    colEcnNo.FillWeight = 90F;
+                }
+                if (dataGridViewList.Columns["colLastUpdated"] is DataGridViewColumn colLastUpdated)
+                {
+                    colLastUpdated.MinimumWidth = 120;
+                    colLastUpdated.FillWeight = 110F;
+                }
+            }
         }
 
         private void PanelFilters_Paint(object? sender, PaintEventArgs e)
@@ -101,56 +134,45 @@ namespace AssemblyLineTester.Views.Pages
         private void SetupPagination()
         {
             flpPages.Controls.Clear();
-            string[] pages = { "<", "1", "2", "3", "4", "5", "...", "6", ">|" };
-            foreach (var p in pages)
-            {
-                var btn = new Button
-                {
-                    Text = p,
-                    Size = new Size(34, 32),
-                    FlatStyle = FlatStyle.Flat,
-                    Margin = new Padding(2, 10, 2, 0),
-                    Font = new Font("Segoe UI", 8.5F, p == "1" ? FontStyle.Bold : FontStyle.Regular),
-                    Cursor = p == "..." ? Cursors.Default : Cursors.Hand
-                };
-                btn.FlatAppearance.BorderSize = 0;
-                if (p == "1")
-                {
-                    btn.BackColor = Color.FromArgb(250, 204, 21);
-                    btn.ForeColor = Color.FromArgb(15, 23, 42);
-                }
-                else if (p == "...")
-                {
-                    btn.BackColor = Color.Transparent;
-                    btn.ForeColor = Color.FromArgb(100, 116, 139);
-                    btn.Enabled = false;
-                }
-                else
-                {
-                    btn.BackColor = Color.FromArgb(241, 245, 249);
-                    btn.ForeColor = Color.FromArgb(51, 65, 85);
-                }
-                flpPages.Controls.Add(btn);
-            }
             if (cmbShowEntries.Items.Count > 0) cmbShowEntries.SelectedIndex = 0;
+            cmbShowEntries.SelectedIndexChanged += (s, e) =>
+            {
+                if (int.TryParse(cmbShowEntries.SelectedItem?.ToString(), out int size))
+                {
+                    _pageSize = size;
+                    _currentPage = 1;
+                    PopulateGrid();
+                }
+            };
+
+            _lblPageInfo = new Label
+            {
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9F),
+                ForeColor = Color.FromArgb(100, 116, 139),
+                Margin = new Padding(20, 19, 0, 0),
+                Name = "lblPageInfo"
+            };
+            flpShowEntries.Controls.Add(_lblPageInfo);
         }
 
         private void PopulateDummyData()
         {
-            dataGridViewList.Rows.Clear();
-            // Exact 12 rows matching the layout picture
-            dataGridViewList.Rows.Add("1", "6060", "AC", "Engine Control", "WH-ENG-001", "123.R001", "A", "Active", "14 Mar 2026");
-            dataGridViewList.Rows.Add("2", "6060", "AC", "Cabin", "WH-CAB-002", "123.R001", "A", "Active", "14 Mar 2026");
-            dataGridViewList.Rows.Add("3", "6060", "AC", "Main Frame", "WH-MF-003", "123.R001", "B", "Active", "13 Mar 2026");
-            dataGridViewList.Rows.Add("4", "6060", "AC", "Boom", "WH-BOOM-004", "124.R000", "A", "Active", "13 Mar 2026");
-            dataGridViewList.Rows.Add("5", "6060", "AC", "Power Module", "WH-PM-005", "124.R000", "A", "Active", "12 Mar 2026");
-            dataGridViewList.Rows.Add("6", "6060", "AC", "Lighting", "WH-LTG-006", "124.R001", "A", "Active", "12 Mar 2026");
-            dataGridViewList.Rows.Add("7", "6060", "AC", "Hydraulic Control", "WH-HYD-007", "125.R000", "B", "Active", "11 Mar 2026");
-            dataGridViewList.Rows.Add("8", "6060", "AC", "Monitoring System", "WH-MON-008", "125.R000", "A", "Active", "11 Mar 2026");
-            dataGridViewList.Rows.Add("9", "6060", "AC", "Battery Power", "WH-BP-009", "125.R001", "A", "Active", "10 Mar 2026");
-            dataGridViewList.Rows.Add("10", "6060", "AC", "Fuel System", "WH-FUEL-010", "126.R000", "A", "Inactive", "10 Mar 2026");
-            dataGridViewList.Rows.Add("11", "6060", "AC", "Attachment Control", "WH-ATT-011", "126.R001", "A", "Active", "09 Mar 2026");
-            dataGridViewList.Rows.Add("12", "6060", "AC", "Telematics", "WH-TEL-012", "126.R001", "A", "Active", "09 Mar 2026");
+            _allHarnesses.Clear();
+            string[] areas = ["Engine Control", "Cabin", "Main Frame", "Boom", "Power Module", "Lighting", "Hydraulic Control", "Monitoring System", "Battery Power", "Fuel System", "Attachment Control", "Telematics"];
+            string[] status = ["Active", "Active", "Active", "Active", "Inactive"];
+            string[] revs = ["A", "A", "B", "C"];
+
+            for (int i = 1; i <= 58; i++)
+            {
+                string area = areas[(i - 1) % areas.Length];
+                string partNo = $"WH-{(area.Length >= 3 ? area[..3].ToUpper() : "GEN")}-{i:D3}";
+                string ecn = $"12{(3 + i % 5)}.R00{(i % 3)}";
+                string rev = revs[i % revs.Length];
+                string st = status[i % status.Length];
+                string date = $"{(15 - (i % 10)):D2} Mar 2026";
+                _allHarnesses.Add([i.ToString(), "6060", "AC", area, partNo, ecn, rev, st, date]);
+            }
 
             // Populate ComboBoxes
             cmbProductModel.Items.Clear();
@@ -171,6 +193,121 @@ namespace AssemblyLineTester.Views.Pages
 
             PopulateGeneralInfo();
             PopulateBottomCards();
+            PopulateGrid();
+        }
+
+        private void PopulateGrid()
+        {
+            int totalFiltered = _allHarnesses.Count;
+            int totalPages = (int)Math.Ceiling((double)totalFiltered / _pageSize);
+            if (_currentPage > totalPages && totalPages > 0) _currentPage = totalPages;
+            if (_currentPage < 1) _currentPage = 1;
+
+            dataGridViewList.Rows.Clear();
+            var pageItems = _allHarnesses.Skip((_currentPage - 1) * _pageSize).Take(_pageSize);
+            foreach (var item in pageItems)
+            {
+                dataGridViewList.Rows.Add(item);
+            }
+
+            UpdatePaginationUI(totalFiltered, totalPages);
+        }
+
+        private void UpdatePaginationUI(int totalFiltered, int totalPages)
+        {
+            if (_lblPageInfo != null)
+            {
+                if (totalFiltered == 0)
+                {
+                    _lblPageInfo.Text = "Showing 0 to 0 of 0 harnesses";
+                }
+                else
+                {
+                    int start = (_currentPage - 1) * _pageSize + 1;
+                    int end = Math.Min(_currentPage * _pageSize, totalFiltered);
+                    _lblPageInfo.Text = $"Showing {start} to {end} of {totalFiltered} harnesses";
+                }
+            }
+
+            flpPages.Controls.Clear();
+
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; PopulateGrid(); });
+            flpPages.Controls.Add(btnFirst);
+
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; PopulateGrid(); } });
+            flpPages.Controls.Add(btnPrev);
+
+            for (int p = 1; p <= totalPages; p++)
+            {
+                if (p == 1 || p == totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
+                {
+                    int pageNum = p;
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateGrid(); });
+                    flpPages.Controls.Add(btnPage);
+                }
+                else if (p == _currentPage - 2 || p == _currentPage + 2)
+                {
+                    var btnDots = CreatePageButton("...", false, false, null);
+                    flpPages.Controls.Add(btnDots);
+                }
+            }
+
+            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; PopulateGrid(); } });
+            flpPages.Controls.Add(btnNext);
+
+            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; PopulateGrid(); });
+            flpPages.Controls.Add(btnLast);
+        }
+
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
+        {
+            Button btn = new()
+            {
+                Text = text,
+                Size = new Size(38, 40),
+                Margin = new Padding(2, 6, 2, 6),
+                FlatStyle = FlatStyle.Flat,
+                Enabled = isEnabled,
+                Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Padding = new Padding(0, 0, 0, 2),
+                UseCompatibleTextRendering = true
+            };
+            btn.FlatAppearance.BorderSize = 1;
+
+            if (text == "...")
+            {
+                btn.BackColor = Color.Transparent;
+                btn.ForeColor = Color.FromArgb(100, 116, 139);
+                btn.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                btn.FlatAppearance.BorderSize = 0;
+                btn.Enabled = false;
+                btn.Cursor = Cursors.Default;
+            }
+            else if (isActive)
+            {
+                btn.BackColor = Color.FromArgb(250, 204, 21);
+                btn.ForeColor = Color.FromArgb(15, 23, 42);
+                btn.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                btn.FlatAppearance.BorderColor = Color.FromArgb(234, 179, 8);
+            }
+            else if (!isEnabled)
+            {
+                btn.BackColor = Color.FromArgb(248, 250, 252);
+                btn.ForeColor = Color.FromArgb(203, 213, 225);
+                btn.Font = new Font("Segoe UI", 9.5F);
+                btn.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
+            }
+            else
+            {
+                btn.BackColor = Color.White;
+                btn.ForeColor = Color.FromArgb(51, 65, 85);
+                btn.Font = new Font("Segoe UI", 9.5F);
+                btn.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            }
+
+            if (onClick != null) btn.Click += onClick;
+            return btn;
         }
 
         private void PopulateGeneralInfo()

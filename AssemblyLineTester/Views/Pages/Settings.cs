@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,6 +25,39 @@ namespace AssemblyLineTester.Views.Pages
             {
                 InitializeDefaults();
                 SetupInteractiveTabs();
+                AdjustCardLayouts();
+            }
+        }
+
+        private void AdjustCardLayouts()
+        {
+            TableLayoutPanel[] cards = [tblGenCard, tblTestCard, tblFileCard, tblAppCard];
+            foreach (var card in cards)
+            {
+                if (card is not null)
+                {
+                    FixMiniTables(card);
+                }
+            }
+        }
+
+        private void FixMiniTables(Control parent)
+        {
+            foreach (Control ctrl in parent.Controls)
+            {
+                if (ctrl is TableLayoutPanel tbl && tbl.RowCount == 2 && tbl.Controls.Count >= 2)
+                {
+                    tbl.Margin = new Padding(6, 2, 6, 2);
+                    if (tbl.RowStyles.Count >= 2)
+                    {
+                        tbl.RowStyles[0] = new RowStyle(SizeType.AutoSize);
+                        tbl.RowStyles[1] = new RowStyle(SizeType.Percent, 100F);
+                    }
+                }
+                if (ctrl.HasChildren)
+                {
+                    FixMiniTables(ctrl);
+                }
             }
         }
 

@@ -66,17 +66,6 @@ namespace AssemblyLineTester.Views.Pages
             gridData = new DataGridView();
             tblPagination = new TableLayoutPanel();
             flpPageNav = new FlowLayoutPanel();
-            btnFirst = new Button();
-            btnPrev = new Button();
-            btnP1 = new Button();
-            btnP2 = new Button();
-            btnP3 = new Button();
-            btnP4 = new Button();
-            btnP5 = new Button();
-            lblDots = new Label();
-            btnP22 = new Button();
-            btnNext = new Button();
-            btnLast = new Button();
             flpPageInfo = new FlowLayoutPanel();
             txtGoToPage = new TextBox();
             lblGoTo = new Label();
@@ -578,17 +567,6 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // flpPageNav
             // 
-            flpPageNav.Controls.Add(btnFirst);
-            flpPageNav.Controls.Add(btnPrev);
-            flpPageNav.Controls.Add(btnP1);
-            flpPageNav.Controls.Add(btnP2);
-            flpPageNav.Controls.Add(btnP3);
-            flpPageNav.Controls.Add(btnP4);
-            flpPageNav.Controls.Add(btnP5);
-            flpPageNav.Controls.Add(lblDots);
-            flpPageNav.Controls.Add(btnP22);
-            flpPageNav.Controls.Add(btnNext);
-            flpPageNav.Controls.Add(btnLast);
             flpPageNav.Dock = DockStyle.Fill;
             flpPageNav.Location = new Point(20, 0);
             flpPageNav.Margin = new Padding(0);
@@ -596,178 +574,6 @@ namespace AssemblyLineTester.Views.Pages
             flpPageNav.Size = new Size(720, 55);
             flpPageNav.TabIndex = 0;
             flpPageNav.WrapContents = false;
-            // 
-            // btnFirst
-            // 
-            btnFirst.BackColor = Color.White;
-            btnFirst.Cursor = Cursors.Hand;
-            btnFirst.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnFirst.FlatStyle = FlatStyle.Flat;
-            btnFirst.Font = new Font("Segoe UI", 8.5F);
-            btnFirst.ForeColor = Color.FromArgb(71, 85, 105);
-            btnFirst.Location = new Point(0, 0);
-            btnFirst.Margin = new Padding(0);
-            btnFirst.Name = "btnFirst";
-            btnFirst.Size = new Size(32, 48);
-            btnFirst.TabIndex = 0;
-            btnFirst.Text = "|<";
-            btnFirst.UseVisualStyleBackColor = false;
-            // 
-            // btnPrev
-            // 
-            btnPrev.BackColor = Color.White;
-            btnPrev.Cursor = Cursors.Hand;
-            btnPrev.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnPrev.FlatStyle = FlatStyle.Flat;
-            btnPrev.Font = new Font("Segoe UI", 8.5F);
-            btnPrev.ForeColor = Color.FromArgb(71, 85, 105);
-            btnPrev.Location = new Point(32, 0);
-            btnPrev.Margin = new Padding(0);
-            btnPrev.Name = "btnPrev";
-            btnPrev.Size = new Size(32, 48);
-            btnPrev.TabIndex = 1;
-            btnPrev.Text = "<";
-            btnPrev.UseVisualStyleBackColor = false;
-            // 
-            // btnP1
-            // 
-            btnP1.BackColor = Color.FromArgb(250, 204, 21);
-            btnP1.Cursor = Cursors.Hand;
-            btnP1.FlatAppearance.BorderSize = 0;
-            btnP1.FlatStyle = FlatStyle.Flat;
-            btnP1.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnP1.ForeColor = Color.FromArgb(15, 23, 42);
-            btnP1.Location = new Point(64, 0);
-            btnP1.Margin = new Padding(0);
-            btnP1.Name = "btnP1";
-            btnP1.Size = new Size(32, 48);
-            btnP1.TabIndex = 2;
-            btnP1.Text = "1";
-            btnP1.UseVisualStyleBackColor = false;
-            // 
-            // btnP2
-            // 
-            btnP2.BackColor = Color.White;
-            btnP2.Cursor = Cursors.Hand;
-            btnP2.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnP2.FlatStyle = FlatStyle.Flat;
-            btnP2.Font = new Font("Segoe UI", 8.5F);
-            btnP2.ForeColor = Color.FromArgb(71, 85, 105);
-            btnP2.Location = new Point(96, 0);
-            btnP2.Margin = new Padding(0);
-            btnP2.Name = "btnP2";
-            btnP2.Size = new Size(32, 48);
-            btnP2.TabIndex = 3;
-            btnP2.Text = "2";
-            btnP2.UseVisualStyleBackColor = false;
-            // 
-            // btnP3
-            // 
-            btnP3.BackColor = Color.White;
-            btnP3.Cursor = Cursors.Hand;
-            btnP3.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnP3.FlatStyle = FlatStyle.Flat;
-            btnP3.Font = new Font("Segoe UI", 8.5F);
-            btnP3.ForeColor = Color.FromArgb(71, 85, 105);
-            btnP3.Location = new Point(128, 0);
-            btnP3.Margin = new Padding(0);
-            btnP3.Name = "btnP3";
-            btnP3.Size = new Size(32, 48);
-            btnP3.TabIndex = 4;
-            btnP3.Text = "3";
-            btnP3.UseVisualStyleBackColor = false;
-            // 
-            // btnP4
-            // 
-            btnP4.BackColor = Color.White;
-            btnP4.Cursor = Cursors.Hand;
-            btnP4.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnP4.FlatStyle = FlatStyle.Flat;
-            btnP4.Font = new Font("Segoe UI", 8.5F);
-            btnP4.ForeColor = Color.FromArgb(71, 85, 105);
-            btnP4.Location = new Point(160, 0);
-            btnP4.Margin = new Padding(0);
-            btnP4.Name = "btnP4";
-            btnP4.Size = new Size(32, 48);
-            btnP4.TabIndex = 5;
-            btnP4.Text = "4";
-            btnP4.UseVisualStyleBackColor = false;
-            // 
-            // btnP5
-            // 
-            btnP5.BackColor = Color.White;
-            btnP5.Cursor = Cursors.Hand;
-            btnP5.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnP5.FlatStyle = FlatStyle.Flat;
-            btnP5.Font = new Font("Segoe UI", 8.5F);
-            btnP5.ForeColor = Color.FromArgb(71, 85, 105);
-            btnP5.Location = new Point(192, 0);
-            btnP5.Margin = new Padding(0);
-            btnP5.Name = "btnP5";
-            btnP5.Size = new Size(32, 48);
-            btnP5.TabIndex = 6;
-            btnP5.Text = "5";
-            btnP5.UseVisualStyleBackColor = false;
-            // 
-            // lblDots
-            // 
-            lblDots.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblDots.ForeColor = Color.FromArgb(100, 116, 139);
-            lblDots.Location = new Point(224, 0);
-            lblDots.Margin = new Padding(0);
-            lblDots.Name = "lblDots";
-            lblDots.Size = new Size(20, 48);
-            lblDots.TabIndex = 7;
-            lblDots.Text = "...";
-            lblDots.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // btnP22
-            // 
-            btnP22.BackColor = Color.White;
-            btnP22.Cursor = Cursors.Hand;
-            btnP22.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnP22.FlatStyle = FlatStyle.Flat;
-            btnP22.Font = new Font("Segoe UI", 8.5F);
-            btnP22.ForeColor = Color.FromArgb(71, 85, 105);
-            btnP22.Location = new Point(244, 0);
-            btnP22.Margin = new Padding(0);
-            btnP22.Name = "btnP22";
-            btnP22.Size = new Size(36, 48);
-            btnP22.TabIndex = 8;
-            btnP22.Text = "22";
-            btnP22.UseVisualStyleBackColor = false;
-            // 
-            // btnNext
-            // 
-            btnNext.BackColor = Color.White;
-            btnNext.Cursor = Cursors.Hand;
-            btnNext.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnNext.FlatStyle = FlatStyle.Flat;
-            btnNext.Font = new Font("Segoe UI", 8.5F);
-            btnNext.ForeColor = Color.FromArgb(71, 85, 105);
-            btnNext.Location = new Point(280, 0);
-            btnNext.Margin = new Padding(0);
-            btnNext.Name = "btnNext";
-            btnNext.Size = new Size(32, 48);
-            btnNext.TabIndex = 9;
-            btnNext.Text = ">";
-            btnNext.UseVisualStyleBackColor = false;
-            // 
-            // btnLast
-            // 
-            btnLast.BackColor = Color.White;
-            btnLast.Cursor = Cursors.Hand;
-            btnLast.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
-            btnLast.FlatStyle = FlatStyle.Flat;
-            btnLast.Font = new Font("Segoe UI", 8.5F);
-            btnLast.ForeColor = Color.FromArgb(71, 85, 105);
-            btnLast.Location = new Point(312, 0);
-            btnLast.Margin = new Padding(0);
-            btnLast.Name = "btnLast";
-            btnLast.Size = new Size(37, 48);
-            btnLast.TabIndex = 10;
-            btnLast.Text = ">|";
-            btnLast.UseVisualStyleBackColor = false;
             // 
             // flpPageInfo
             // 
@@ -1671,28 +1477,6 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.TableLayoutPanel tblPagination;
 
         private System.Windows.Forms.FlowLayoutPanel flpPageNav;
-
-        private System.Windows.Forms.Button btnFirst;
-
-        private System.Windows.Forms.Button btnPrev;
-
-        private System.Windows.Forms.Button btnP1;
-
-        private System.Windows.Forms.Button btnP2;
-
-        private System.Windows.Forms.Button btnP3;
-
-        private System.Windows.Forms.Button btnP4;
-
-        private System.Windows.Forms.Button btnP5;
-
-        private System.Windows.Forms.Label lblDots;
-
-        private System.Windows.Forms.Button btnP22;
-
-        private System.Windows.Forms.Button btnNext;
-
-        private System.Windows.Forms.Button btnLast;
 
         private System.Windows.Forms.FlowLayoutPanel flpPageInfo;
 

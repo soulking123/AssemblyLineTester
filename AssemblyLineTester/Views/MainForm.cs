@@ -8,8 +8,10 @@ namespace AssemblyLineTester.Views
     {
         private readonly UserService _userService = new();
         private bool isSidebarExpanded = true;
-        private readonly int expandedWidth = 380;
-        private readonly int collapsedWidth = 90;
+        private int expandedWidth = 380;
+        private int collapsedWidth = 90;
+
+        public bool IsLoggingOut { get; private set; } = false;
 
         private readonly TestHistory pageTestHistory = new();
         private readonly SystemLog pageSystemLog = new();
@@ -27,12 +29,46 @@ namespace AssemblyLineTester.Views
             pageUserManagement = new UserManagement(_userService);
             InitializeComponent();
             this.WindowState = FormWindowState.Maximized;
+            expandedWidth = splitContainer1.SplitterDistance;
+            collapsedWidth = this.LogicalToDeviceUnits(85);
 
             // Restrict access to User Management sidebar button to Administrators only
             btnUserManagement.Visible = (SessionManager.CurrentUser?.Role?.Name == "Administrator");
 
             ApplySidebarStyles();
+            InitializeUserInfo();
+
+            // Wire up header click events to auto-close dropdown when clicking outside
+            pnlTopHeader.Click += CloseDropdownIfOpen;
+            lblHeaderTitle.Click += CloseDropdownIfOpen;
+            pnlRight.Click += CloseDropdownIfOpen;
+            pnlDateTime.Click += CloseDropdownIfOpen;
+            lblDateText.Click += CloseDropdownIfOpen;
+            lblTimeText.Click += CloseDropdownIfOpen;
+
             SetActiveMenu(btnDashboard, pageDashboard);
+        }
+
+        private void InitializeUserInfo()
+        {
+            string fullName = SessionManager.CurrentUser?.FullName ?? "Fally Kusuma";
+            if (!string.IsNullOrWhiteSpace(fullName)) lblUserName.Text = fullName;
+            string roleName = SessionManager.CurrentUser?.Role?.Name ?? "Administrator";
+            if (!string.IsNullOrWhiteSpace(roleName)) lblUserRole.Text = roleName;
+            lblDateText.Text = DateTime.Now.ToString("dd MMM yyyy");
+            lblTimeText.Text = DateTime.Now.ToString("hh:mm:ss tt");
+        }
+
+        private void PnlTopHeader_Paint(object? sender, PaintEventArgs e)
+        {
+            using var pen = new Pen(Color.FromArgb(226, 232, 240), 1);
+            e.Graphics.DrawLine(pen, 0, pnlTopHeader.Height - 1, pnlTopHeader.Width, pnlTopHeader.Height - 1);
+        }
+
+        private void ClockTimer_Tick(object? sender, EventArgs e)
+        {
+            lblDateText.Text = DateTime.Now.ToString("dd MMM yyyy");
+            lblTimeText.Text = DateTime.Now.ToString("hh:mm:ss tt");
         }
 
         private void ApplySidebarStyles()
@@ -51,50 +87,46 @@ namespace AssemblyLineTester.Views
                 btn.Padding = new Padding(10, 0, 0, 0);
                 btn.BackColor = Color.Transparent;
             }
+
+            btnDashboard.Text = "  📊    Dashboard";
+            btnTestExecution.Text = "  ⚡    Test Execution";
+            btnHarnessDatabase.Text = "  🗄️    Harness Database";
+            btnTestHistory.Text = "  📜    Test History";
+            btnReports.Text = "  📑    Reports";
+            btnSystemLog.Text = "  🖥️    System Log";
+            btnSettings.Text = "  ⚙️    Settings";
+            btnUserManagement.Text = "  👥    User Management";
         }
 
         // IDE1006 FIX: Huruf awal kapital (PascalCase)
         private void BtnMenu_Click(object sender, EventArgs e)
         {
-            if (sender is Button clickedButton)
+            if (sender is not Button clickedButton) return;
+
+            UserControl? targetPage = clickedButton.Name switch
             {
-                if (clickedButton == btnDashboard)
-                {
-                    SetActiveMenu(btnDashboard, pageDashboard);
-                }
-                else if (clickedButton == btnTestExecution)
-                {
-                    SetActiveMenu(btnTestExecution, pageTestExecution);
-                }
-                else if (clickedButton == btnTestHistory)
-                {
-                    SetActiveMenu(btnTestHistory, pageTestHistory);
-                }
-                else if (clickedButton == btnSystemLog)
-                {
-                    SetActiveMenu(btnSystemLog, pageSystemLog);
-                }
-                else if (clickedButton == btnHarnessDatabase)
-                {
-                    SetActiveMenu(btnHarnessDatabase, pageHarnessDb);
-                }
-                else if (clickedButton == btnReports)
-                {
-                    SetActiveMenu(btnReports, pageReports);
-                }
-                else if (clickedButton == btnUserManagement)
-                {
-                    SetActiveMenu(btnUserManagement, pageUserManagement);
-                }
-                else if (clickedButton == btnSettings)
-                {
-                    SetActiveMenu(clickedButton, pageSettings);
-                }
-            }
+                "btnDashboard" => pageDashboard,
+                "btnTestExecution" => pageTestExecution,
+                "btnHarnessDatabase" => pageHarnessDb,
+                "btnTestHistory" => pageTestHistory,
+                "btnReports" => pageReports,
+                "btnSystemLog" => pageSystemLog,
+                "btnSettings" => pageSettings,
+                "btnUserManagement" => pageUserManagement,
+                _ => null
+            };
+
+            SetActiveMenu(clickedButton, targetPage);
         }
 
         private void SetActiveMenu(Button activeBtn, UserControl? activePage)
         {
+            if (pnlUserDropdown != null && pnlUserDropdown.Visible)
+            {
+                pnlUserDropdown.Visible = false;
+                lblArrow.Text = "⌄";
+            }
+
             Button[] allMenus = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
 
             foreach (Button btn in allMenus)
@@ -106,24 +138,25 @@ namespace AssemblyLineTester.Views
             activeBtn.BackColor = Color.FromArgb(255, 193, 7);
             activeBtn.ForeColor = Color.Black;
 
-            splitContainer1.Panel2.Controls.Clear();
+            if (pnlContent == null) return;
+            pnlContent.Controls.Clear();
             if (activePage != null)
             {
                 activePage.Dock = DockStyle.Fill;
-                splitContainer1.Panel2.Controls.Add(activePage);
+                pnlContent.Controls.Add(activePage);
             }
             else
             {
                 Label lblPlaceholder = new Label
                 {
-                    Text = $"⚙️  {activeBtn.Text.Trim()} (Under Construction)",
+                    Text = $"{activeBtn.Text.Trim()} (Under Construction)",
                     Font = new Font("Segoe UI", 16F, FontStyle.Bold),
                     ForeColor = Color.FromArgb(100, 116, 139),
                     Dock = DockStyle.Fill,
                     TextAlign = ContentAlignment.MiddleCenter,
                     BackColor = Color.FromArgb(244, 245, 247)
                 };
-                splitContainer1.Panel2.Controls.Add(lblPlaceholder);
+                pnlContent.Controls.Add(lblPlaceholder);
             }
         }
 
@@ -134,11 +167,70 @@ namespace AssemblyLineTester.Views
             {
                 splitContainer1.SplitterDistance = collapsedWidth;
                 isSidebarExpanded = false;
+                lblMenu.Visible = false;
             }
             else
             {
                 splitContainer1.SplitterDistance = expandedWidth;
                 isSidebarExpanded = true;
+                lblMenu.Visible = true;
+            }
+        }
+
+        private void CloseDropdownIfOpen(object? sender, EventArgs e)
+        {
+            if (pnlUserDropdown != null && pnlUserDropdown.Visible)
+            {
+                pnlUserDropdown.Visible = false;
+                lblArrow.Text = "⌄";
+            }
+        }
+
+        private void ToggleUserDropdown(object? sender, EventArgs e)
+        {
+            if (pnlUserDropdown == null) return;
+            if (pnlUserDropdown.Visible)
+            {
+                pnlUserDropdown.Visible = false;
+                lblArrow.Text = "⌄";
+            }
+            else
+            {
+                // Align compact logout dropdown cleanly under the right side of pnlUser (near arrow)
+                Point screenPos = pnlUser.PointToScreen(new Point(pnlUser.Width - pnlUserDropdown.Width - 15, pnlUser.Height));
+                Point containerPos = this.PointToClient(screenPos);
+
+                pnlUserDropdown.Location = containerPos;
+                pnlUserDropdown.Visible = true;
+                pnlUserDropdown.BringToFront();
+                lblArrow.Text = "⌃";
+            }
+        }
+
+        private void PnlUserDropdown_Paint(object? sender, PaintEventArgs e)
+        {
+            using var pen = new Pen(Color.FromArgb(203, 213, 225), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, pnlUserDropdown.Width - 1, pnlUserDropdown.Height - 1);
+        }
+
+        private void BtnLogOut_MouseEnter(object? sender, EventArgs e)
+        {
+            btnLogOut.BackColor = Color.FromArgb(254, 242, 242);
+        }
+
+        private void BtnLogOut_MouseLeave(object? sender, EventArgs e)
+        {
+            btnLogOut.BackColor = Color.Transparent;
+        }
+
+        private void BtnLogOut_Click(object? sender, EventArgs e)
+        {
+            if (pnlUserDropdown != null) pnlUserDropdown.Visible = false;
+            lblArrow.Text = "⌄";
+            if (MessageBox.Show("Are you sure you want to log out of Assembly Line Tester?", "Confirm Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                IsLoggingOut = true;
+                this.Close();
             }
         }
 
