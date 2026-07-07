@@ -21,8 +21,10 @@ namespace AssemblyLineTester.Views.Pages
             InitializeComponent();
             InitializeCustomStyles();
             WireEvents();
+
             _reportService.SeedSampleDataIfEmpty();
-            LoadReportData();
+            ResetFilters();     // override the hardcoded Designer date range with a sensible default
+            LoadReportData();   // auto-load on page open, no button click required
         }
 
         private void InitializeCustomStyles()
@@ -101,10 +103,11 @@ namespace AssemblyLineTester.Views.Pages
             btnPrint.Click += (s, e) => MessageBox.Show("Print belum diimplementasikan.", "Info");
         }
 
+        // OVERRIDES THE DESIGNER'S HARDCODED DATE RANGE WITH A DYNAMIC, ALWAYS-RELEVANT DEFAULT.
         private void ResetFilters()
         {
-            dtpStart.Value = DateTime.Now.AddDays(-7);
             dtpEnd.Value = DateTime.Now;
+            dtpStart.Value = DateTime.Now.AddDays(-30);
             cmbModel.SelectedIndex = 0;
             cmbType.SelectedIndex = 0;
             cmbArea.SelectedIndex = 0;
@@ -164,8 +167,9 @@ namespace AssemblyLineTester.Views.Pages
             lblSumProgVal.Text = summary.InProgressCount.ToString("N0");
         }
 
-        private static string FormatPct(int count, int total) => total == 0 ? "0.00%" : $"{count * 100.0 / total:0.00}";
+        private static string FormatPct(int count, int total) => total == 0 ? "0.00%" : $"{count * 100.0 / total:0.00}%";
 
+        // BUILDS THE "RESULT TREND" CHART WITH 3 LINES: PASS, FAIL, TOTAL (counts per day, not percentage).
         private void LoadTrendChart(ReportFilter filter)
         {
             var trend = _reportService.GetResultTrend(filter);
@@ -185,9 +189,7 @@ namespace AssemblyLineTester.Views.Pages
             areaTrend.AxisY.LabelStyle.Font = new("Segoe UI", 8.5F);
             areaTrend.AxisY.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaTrend.AxisY.LineColor = Color.Transparent;
-            areaTrend.AxisY.Minimum = 0;
-            areaTrend.AxisY.Maximum = 100;
-            areaTrend.AxisY.Interval = 20;
+            areaTrend.AxisY.Minimum = 0; // let EF pick a sensible max automatically based on data
             chartTrend.ChartAreas.Add(areaTrend);
 
             Legend legTrend = new("TrendLegend")
@@ -198,7 +200,18 @@ namespace AssemblyLineTester.Views.Pages
             };
             chartTrend.Legends.Add(legTrend);
 
-            Series sPassRate = new("Pass Rate (%)")
+            Series sTotal = new("Total")
+            {
+                ChartType = SeriesChartType.Spline,
+                Color = Color.FromArgb(100, 116, 139),
+                BorderWidth = 2,
+                BorderDashStyle = ChartDashStyle.Dash,
+                MarkerStyle = MarkerStyle.Circle,
+                MarkerSize = 6,
+                IsXValueIndexed = true
+            };
+
+            Series sPass = new("Pass")
             {
                 ChartType = SeriesChartType.Spline,
                 Color = Color.FromArgb(34, 197, 94),
@@ -208,18 +221,29 @@ namespace AssemblyLineTester.Views.Pages
                 MarkerColor = Color.FromArgb(22, 101, 52),
                 IsXValueIndexed = true
             };
-            sPassRate["LabelStyle"] = "Top";
+
+            Series sFail = new("Fail")
+            {
+                ChartType = SeriesChartType.Spline,
+                Color = Color.FromArgb(239, 68, 68),
+                BorderWidth = 3,
+                MarkerStyle = MarkerStyle.Circle,
+                MarkerSize = 7,
+                MarkerColor = Color.FromArgb(153, 27, 27),
+                IsXValueIndexed = true
+            };
 
             foreach (var point in trend)
             {
-                double passRate = point.TotalCount == 0 ? 0 : Math.Round(point.PassCount * 100.0 / point.TotalCount, 1);
-                int idx = sPassRate.Points.AddXY(point.Date.ToString("dd MMM"), passRate);
-                sPassRate.Points[idx].Label = $"{passRate}%";
-                sPassRate.Points[idx].Font = new("Segoe UI", 8F, FontStyle.Bold);
-                sPassRate.Points[idx].LabelForeColor = Color.FromArgb(22, 101, 52);
+                string label = point.Date.ToString("dd MMM");
+                sTotal.Points.AddXY(label, point.TotalCount);
+                sPass.Points.AddXY(label, point.PassCount);
+                sFail.Points.AddXY(label, point.FailCount);
             }
 
-            chartTrend.Series.Add(sPassRate);
+            chartTrend.Series.Add(sTotal);
+            chartTrend.Series.Add(sPass);
+            chartTrend.Series.Add(sFail);
         }
 
         private void LoadReportsGrid(ReportFilter filter)
