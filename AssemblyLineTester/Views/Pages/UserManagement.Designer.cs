@@ -89,6 +89,7 @@ namespace AssemblyLineTester.Views.Pages
             btnRefresh = new Button();
             btnAddUser = new Button();
             tblContentRow = new TableLayoutPanel();
+            tblDetailsColumn = new TableLayoutPanel();
             cardUserList = new Panel();
             tblUserListContainer = new TableLayoutPanel();
             lblUserListTitle = new Label();
@@ -96,7 +97,6 @@ namespace AssemblyLineTester.Views.Pages
             tblPagination = new TableLayoutPanel();
             flpPaginationButtons = new FlowLayoutPanel();
             lblPaginationInfo = new Label();
-            tblDetailsColumn = new TableLayoutPanel();
             cardUserDetails = new Panel();
             tblUserBody = new TableLayoutPanel();
             lblDetailAvatar = new Label();
@@ -183,7 +183,6 @@ namespace AssemblyLineTester.Views.Pages
             tblUserListContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridUsers).BeginInit();
             tblPagination.SuspendLayout();
-            tblDetailsColumn.SuspendLayout();
             cardUserDetails.SuspendLayout();
             tblUserBody.SuspendLayout();
             tblUserFields.SuspendLayout();
@@ -231,12 +230,12 @@ namespace AssemblyLineTester.Views.Pages
             // tblKpiRow
             // 
             tblKpiRow.ColumnCount = 6;
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.7F));
             tblKpiRow.Controls.Add(cardKpi1, 0, 0);
             tblKpiRow.Controls.Add(cardKpi2, 1, 0);
             tblKpiRow.Controls.Add(cardKpi3, 2, 0);
@@ -870,8 +869,8 @@ namespace AssemblyLineTester.Views.Pages
             // tblFilterInner
             // 
             tblFilterInner.ColumnCount = 2;
-            tblFilterInner.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
-            tblFilterInner.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
+            tblFilterInner.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblFilterInner.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             tblFilterInner.Controls.Add(tblFilterInputs, 0, 0);
             tblFilterInner.Controls.Add(flpActionButtons, 1, 0);
             tblFilterInner.Dock = DockStyle.Fill;
@@ -908,7 +907,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // txtSearch
             // 
-            txtSearch.Dock = DockStyle.Fill;
+            txtSearch.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtSearch.Font = new Font("Segoe UI", 10F);
             txtSearch.Location = new Point(5, 37);
             txtSearch.Margin = new Padding(5, 5, 10, 5);
@@ -933,7 +932,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // cmbFilterStatus
             // 
-            cmbFilterStatus.Dock = DockStyle.Fill;
+            cmbFilterStatus.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbFilterStatus.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbFilterStatus.Font = new Font("Segoe UI", 10F);
             cmbFilterStatus.FormattingEnabled = true;
@@ -959,7 +958,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // cmbFilterRole
             // 
-            cmbFilterRole.Dock = DockStyle.Fill;
+            cmbFilterRole.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbFilterRole.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbFilterRole.Font = new Font("Segoe UI", 10F);
             cmbFilterRole.FormattingEnabled = true;
@@ -985,7 +984,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // cmbFilterDept
             // 
-            cmbFilterDept.Dock = DockStyle.Fill;
+            cmbFilterDept.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbFilterDept.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbFilterDept.Font = new Font("Segoe UI", 10F);
             cmbFilterDept.FormattingEnabled = true;
@@ -997,16 +996,16 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // flpActionButtons
             // 
+            flpActionButtons.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            flpActionButtons.AutoSize = true;
             flpActionButtons.Controls.Add(btnExport);
             flpActionButtons.Controls.Add(btnRefresh);
             flpActionButtons.Controls.Add(btnAddUser);
-            flpActionButtons.Dock = DockStyle.Fill;
-            flpActionButtons.FlowDirection = FlowDirection.RightToLeft;
-            flpActionButtons.Location = new Point(1302, 0);
+            flpActionButtons.FlowDirection = FlowDirection.LeftToRight;
+            flpActionButtons.Location = new Point(1300, 30);
             flpActionButtons.Margin = new Padding(0);
             flpActionButtons.Name = "flpActionButtons";
-            flpActionButtons.Padding = new Padding(0, 32, 5, 0);
-            flpActionButtons.Size = new Size(702, 94);
+            flpActionButtons.Size = new Size(430, 55);
             flpActionButtons.TabIndex = 1;
             flpActionButtons.WrapContents = false;
             // 
@@ -1018,8 +1017,8 @@ namespace AssemblyLineTester.Views.Pages
             btnExport.FlatStyle = FlatStyle.Flat;
             btnExport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnExport.ForeColor = Color.FromArgb(71, 85, 105);
-            btnExport.Location = new Point(567, 32);
-            btnExport.Margin = new Padding(0);
+            btnExport.Location = new Point(0, 0);
+            btnExport.Margin = new Padding(0, 0, 10, 0);
             btnExport.Name = "btnExport";
             btnExport.Size = new Size(130, 46);
             btnExport.TabIndex = 1;
@@ -1034,8 +1033,8 @@ namespace AssemblyLineTester.Views.Pages
             btnRefresh.FlatStyle = FlatStyle.Flat;
             btnRefresh.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnRefresh.ForeColor = Color.FromArgb(71, 85, 105);
-            btnRefresh.Location = new Point(437, 32);
-            btnRefresh.Margin = new Padding(0);
+            btnRefresh.Location = new Point(140, 0);
+            btnRefresh.Margin = new Padding(0, 0, 10, 0);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.Size = new Size(130, 46);
             btnRefresh.TabIndex = 0;
@@ -1050,7 +1049,7 @@ namespace AssemblyLineTester.Views.Pages
             btnAddUser.FlatStyle = FlatStyle.Flat;
             btnAddUser.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnAddUser.ForeColor = Color.FromArgb(30, 41, 59);
-            btnAddUser.Location = new Point(282, 32);
+            btnAddUser.Location = new Point(280, 0);
             btnAddUser.Margin = new Padding(0);
             btnAddUser.Name = "btnAddUser";
             btnAddUser.Size = new Size(155, 46);
@@ -1073,6 +1072,24 @@ namespace AssemblyLineTester.Views.Pages
             tblContentRow.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tblContentRow.Size = new Size(2026, 863);
             tblContentRow.TabIndex = 3;
+            // 
+            // tblDetailsColumn
+            // 
+            tblDetailsColumn.ColumnCount = 1;
+            tblDetailsColumn.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblDetailsColumn.Controls.Add(cardUserDetails, 0, 0);
+            tblDetailsColumn.Controls.Add(cardRoleSummary, 0, 1);
+            tblDetailsColumn.Controls.Add(cardUserActivity, 0, 2);
+            tblDetailsColumn.Dock = DockStyle.Fill;
+            tblDetailsColumn.Location = new Point(1418, 0);
+            tblDetailsColumn.Margin = new Padding(0);
+            tblDetailsColumn.Name = "tblDetailsColumn";
+            tblDetailsColumn.RowCount = 3;
+            tblDetailsColumn.RowStyles.Add(new RowStyle(SizeType.Percent, 45F));
+            tblDetailsColumn.RowStyles.Add(new RowStyle(SizeType.Percent, 35F));
+            tblDetailsColumn.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
+            tblDetailsColumn.Size = new Size(608, 863);
+            tblDetailsColumn.TabIndex = 1;
             // 
             // cardUserList
             // 
@@ -1170,24 +1187,6 @@ namespace AssemblyLineTester.Views.Pages
             lblPaginationInfo.TabIndex = 1;
             lblPaginationInfo.Text = "Showing 1 to 10 of 16 users";
             lblPaginationInfo.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // tblDetailsColumn
-            // 
-            tblDetailsColumn.ColumnCount = 1;
-            tblDetailsColumn.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblDetailsColumn.Controls.Add(cardUserDetails, 0, 0);
-            tblDetailsColumn.Controls.Add(cardRoleSummary, 0, 1);
-            tblDetailsColumn.Controls.Add(cardUserActivity, 0, 2);
-            tblDetailsColumn.Dock = DockStyle.Fill;
-            tblDetailsColumn.Location = new Point(1418, 0);
-            tblDetailsColumn.Margin = new Padding(0);
-            tblDetailsColumn.Name = "tblDetailsColumn";
-            tblDetailsColumn.RowCount = 3;
-            tblDetailsColumn.RowStyles.Add(new RowStyle(SizeType.Percent, 45F));
-            tblDetailsColumn.RowStyles.Add(new RowStyle(SizeType.Percent, 35F));
-            tblDetailsColumn.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tblDetailsColumn.Size = new Size(608, 863);
-            tblDetailsColumn.TabIndex = 1;
             // 
             // cardUserDetails
             // 
@@ -1970,7 +1969,6 @@ namespace AssemblyLineTester.Views.Pages
             tblUserListContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)gridUsers).EndInit();
             tblPagination.ResumeLayout(false);
-            tblDetailsColumn.ResumeLayout(false);
             cardUserDetails.ResumeLayout(false);
             tblUserBody.ResumeLayout(false);
             tblUserBody.PerformLayout();

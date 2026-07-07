@@ -244,12 +244,12 @@ namespace AssemblyLineTester.Views.Pages
             // tblFilters
             // 
             tblFilters.ColumnCount = 6;
-            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
-            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
-            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
-            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
-            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
-            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
+            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
+            tblFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.7F));
             tblFilters.Controls.Add(lblFilterModel, 0, 0);
             tblFilters.Controls.Add(cmbProductModel, 0, 1);
             tblFilters.Controls.Add(lblFilterType, 1, 0);
