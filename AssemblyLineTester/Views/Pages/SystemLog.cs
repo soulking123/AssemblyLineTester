@@ -4,13 +4,20 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using AssemblyLineTester.Models.Dto;
+using AssemblyLineTester.Services;
+using static AssemblyLineTester.Models.SystemLog;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class SystemLog : UserControl
     {
+        private readonly SystemLogService _logService = new();
+        private SystemLogSummary _summary = new();
+
         public SystemLog()
         {
             InitializeComponent();
@@ -27,7 +34,11 @@ namespace AssemblyLineTester.Views.Pages
             pnlLogDetail.Paint += PanelFilters_Paint;
 
             gridData.CellPainting += gridData_CellPainting;
-            btnRefresh.Click += (s, ev) => { LoadDummyLogData(); };
+            InitializeGridColumns();
+
+            btnSearch.Click += (s, ev) => LoadLogData();
+            btnReset.Click += (s, ev) => { ResetFilters(); LoadLogData(); };
+            btnRefresh.Click += (s, ev) => LoadLogData();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -35,14 +46,98 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                LoadDummyLogData();
+                _logService.SeedSampleDataIfEmpty();
+                ResetFilters();
+                LoadLogData();
             }
         }
 
-        public void LoadDummyLogData()
+        // RESETS FILTER CONTROLS TO DEFAULT (LAST 30 DAYS, NO FILTER).
+        private void ResetFilters()
+        {
+            dtpEnd.Value = DateTime.Now;
+            dtpStart.Value = DateTime.Now.AddDays(-30);
+            cmbLogLevel.Text = "All";
+            cmbModule.Text = "All";
+            cmbUser.Text = "All";
+            cmbAction.Text = "All";
+            txtKeyword.Text = string.Empty;
+        }
+
+        // BUILDS A SystemLogFilter FROM THE CURRENT STATE OF THE FILTER CONTROLS.
+        private SystemLogFilter BuildFilterFromControls()
+        {
+            var filter = new SystemLogFilter
+            {
+                DateFrom = dtpStart.Value.Date,
+                DateTo = dtpEnd.Value.Date,
+                PageSize = 500 // no pagination UI yet, so pull a large single page
+            };
+
+            if (!string.Equals(cmbLogLevel.Text, "All", StringComparison.OrdinalIgnoreCase)
+                && Enum.TryParse<LogSeverity>(cmbLogLevel.Text, true, out var level))
+            {
+                filter.SeverityLevel = level;
+            }
+
+            if (!string.Equals(cmbModule.Text, "All", StringComparison.OrdinalIgnoreCase))
+                filter.ModuleName = cmbModule.Text;
+
+            if (!string.Equals(cmbUser.Text, "All", StringComparison.OrdinalIgnoreCase))
+                filter.UserName = cmbUser.Text;
+
+            if (!string.Equals(cmbAction.Text, "All", StringComparison.OrdinalIgnoreCase))
+                filter.ActionName = cmbAction.Text;
+
+            if (!string.IsNullOrWhiteSpace(txtKeyword.Text))
+                filter.Keyword = txtKeyword.Text.Trim();
+
+            return filter;
+        }
+
+        // LOADS REAL LOG DATA AND SUMMARY FROM SystemLogService, THEN REFRESHES ALL VISUALS.
+        public void LoadLogData()
+        {
+            var filter = BuildFilterFromControls();
+            var paged = _logService.GetLogs(filter);
+            _summary = _logService.GetSummary(filter);
+
+            gridData.Rows.Clear();
+            int no = 1;
+            foreach (var log in paged.Items)
+            {
+                gridData.Rows.Add(
+                    no++,
+                    log.Timestamp.ToLocalTime().ToString("dd MMM yyyy hh:mm:ss tt"),
+                    log.SeverityLevel.ToString().ToUpperInvariant(),
+                    log.ModuleName,
+                    string.IsNullOrEmpty(log.UserName) ? "-" : log.UserName,
+                    log.ActionName,
+                    log.Message,
+                    string.IsNullOrEmpty(log.IPAddress) ? "-" : $"{log.IPAddress}   \u22ee");
+            }
+
+            UpdateLegendLabels();
+            pnlChartContainer?.Invalidate();
+            pnlLevelStats.Invalidate();
+            pnlModuleStats.Invalidate();
+        }
+
+        private void UpdateLegendLabels()
+        {
+            if (lblLegInfo != null) lblLegInfo.Text = $"INFO : {_summary.InfoCount:N0} ({FormatPct(_summary.InfoCount, _summary.Total)})";
+            if (lblLegWarn != null) lblLegWarn.Text = $"WARNING : {_summary.WarningCount:N0} ({FormatPct(_summary.WarningCount, _summary.Total)})";
+            if (lblLegError != null) lblLegError.Text = $"ERROR : {_summary.ErrorCount:N0} ({FormatPct(_summary.ErrorCount, _summary.Total)})";
+        }
+
+        private static string FormatPct(int count, int total) => total == 0 ? "0.0%" : $"{count * 100.0 / total:0.0}%";
+
+        private static float Ratio(int count, int total) => total == 0 ? 0f : (float)count / total;
+
+        // ONE-TIME GRID COLUMN/STYLE SETUP. ROW DATA IS POPULATED SEPARATELY IN LoadLogData().
+        private void InitializeGridColumns()
         {
             gridData.Columns.Clear();
-            gridData.Rows.Clear();
 
             gridData.EnableHeadersVisualStyles = false;
             gridData.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
@@ -73,23 +168,6 @@ namespace AssemblyLineTester.Views.Pages
             SetColumnWidth(gridData, "Action", 120);
             SetColumnWidth(gridData, "Description", 260);
             SetColumnWidth(gridData, "IP", 130);
-
-            gridData.Rows.Add("1", "15 Mar 2026 10:30:20 AM", "INFO", "Test Execution", "Fally", "Start Test", "Test started for Part Number WH-ENG-001", "192.168.1.105   ⋮");
-            gridData.Rows.Add("2", "15 Mar 2026 10:30:22 AM", "INFO", "Test Execution", "Fally", "Load Program", "Test program loaded successfully", "192.168.1.105   ⋮");
-            gridData.Rows.Add("3", "15 Mar 2026 10:30:35 AM", "INFO", "Test Execution", "Fally", "Step Complete", "Step \"Continuity Test\" completed", "192.168.1.105   ⋮");
-            gridData.Rows.Add("4", "15 Mar 2026 10:31:10 AM", "INFO", "Test Execution", "Fally", "Step Complete", "Step \"Short Circuit Test\" completed", "192.168.1.105   ⋮");
-            gridData.Rows.Add("5", "15 Mar 2026 10:31:45 AM", "INFO", "Test Execution", "Fally", "Step Complete", "Step \"Insulation Test\" completed", "192.168.1.105   ⋮");
-            gridData.Rows.Add("6", "15 Mar 2026 10:32:15 AM", "INFO", "Test Execution", "Fally", "Step Complete", "Step \"Functional Test\" completed", "192.168.1.105   ⋮");
-            gridData.Rows.Add("7", "15 Mar 2026 10:32:21 AM", "INFO", "Test Execution", "Fally", "Test Complete", "Test completed with result: PASS", "192.168.1.105   ⋮");
-            gridData.Rows.Add("8", "15 Mar 2026 10:32:25 AM", "WARNING", "Harness Database", "Fally", "Update", "ECN revision updated for WH-ENG-001", "192.168.1.105   ⋮");
-            gridData.Rows.Add("9", "15 Mar 2026 10:35:02 AM", "ERROR", "Communication", "System", "Connection Lost", "Lost connection with PLC at 192.168.1.20", "192.168.1.100   ⋮");
-            gridData.Rows.Add("10", "15 Mar 2026 10:35:07 AM", "INFO", "Communication", "System", "Reconnected", "PLC reconnected successfully", "192.168.1.100   ⋮");
-            gridData.Rows.Add("11", "15 Mar 2026 10:40:11 AM", "INFO", "User Management", "Fally", "Login", "User login success", "192.168.1.105   ⋮");
-            gridData.Rows.Add("12", "15 Mar 2026 10:45:33 AM", "WARNING", "Database", "System", "Backup", "Database auto backup completed", "192.168.1.100   ⋮");
-
-            if (lblLegInfo != null) lblLegInfo.Text = "INFO : 1,142 (90.8%)";
-            if (lblLegWarn != null) lblLegWarn.Text = "WARNING : 84 (6.7%)";
-            if (lblLegError != null) lblLegError.Text = "ERROR : 32 (2.5%)";
         }
 
         private void SetColumnWidth(DataGridView grid, string colName, float fillWeight, DataGridViewContentAlignment alignment = DataGridViewContentAlignment.MiddleLeft)
@@ -157,17 +235,33 @@ namespace AssemblyLineTester.Views.Pages
             int y = (container.Height - size) / 2;
             var rect = new Rectangle(x, y, size, size);
 
-            // Doughnut: ~91% INFO (Blue), ~7% WARN (Amber), ~2% ERROR (Red)
-            using (var penInfo = new Pen(Color.FromArgb(59, 130, 246), 18))
-            using (var penWarn = new Pen(Color.FromArgb(245, 158, 11), 18))
-            using (var penErr = new Pen(Color.FromArgb(239, 68, 68), 18))
+            if (_summary.Total == 0)
             {
-                e.Graphics.DrawArc(penInfo, rect, -90, 327);
-                e.Graphics.DrawArc(penWarn, rect, 237, 24);
-                e.Graphics.DrawArc(penErr, rect, 261, 9);
+                using (var penEmpty = new Pen(Color.FromArgb(226, 232, 240), 18))
+                {
+                    e.Graphics.DrawArc(penEmpty, rect, -90, 359.9f);
+                }
+            }
+            else
+            {
+                float infoSweep = 360f * _summary.InfoCount / _summary.Total;
+                float warnSweep = 360f * _summary.WarningCount / _summary.Total;
+                float errSweep = 360f * _summary.ErrorCount / _summary.Total;
+                float start = -90f;
+
+                using (var penInfo = new Pen(Color.FromArgb(59, 130, 246), 18))
+                using (var penWarn = new Pen(Color.FromArgb(245, 158, 11), 18))
+                using (var penErr = new Pen(Color.FromArgb(239, 68, 68), 18))
+                {
+                    if (infoSweep > 0) e.Graphics.DrawArc(penInfo, rect, start, infoSweep);
+                    start += infoSweep;
+                    if (warnSweep > 0) e.Graphics.DrawArc(penWarn, rect, start, warnSweep);
+                    start += warnSweep;
+                    if (errSweep > 0) e.Graphics.DrawArc(penErr, rect, start, errSweep);
+                }
             }
 
-            string text = "1,258\nTOTAL";
+            string text = $"{_summary.Total:N0}\nTOTAL";
             using (var font = new Font("Segoe UI", 9.5F, FontStyle.Bold))
             using (var brush = new SolidBrush(Color.FromArgb(30, 41, 59)))
             using (var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
@@ -188,9 +282,15 @@ namespace AssemblyLineTester.Views.Pages
             int w = card.Width - (leftMargin * 2);
             if (w <= 0) return;
 
-            DrawStatRow(e.Graphics, leftMargin, startY, w, "INFO", "1,142 (90.8%)", 0.908f, Color.FromArgb(59, 130, 246));
-            DrawStatRow(e.Graphics, leftMargin, startY + rowStep, w, "WARNING", "84 (6.7%)", 0.067f, Color.FromArgb(245, 158, 11));
-            DrawStatRow(e.Graphics, leftMargin, startY + (rowStep * 2), w, "ERROR", "32 (2.5%)", 0.025f, Color.FromArgb(239, 68, 68));
+            DrawStatRow(e.Graphics, leftMargin, startY, w, "INFO",
+                $"{_summary.InfoCount:N0} ({FormatPct(_summary.InfoCount, _summary.Total)})",
+                Ratio(_summary.InfoCount, _summary.Total), Color.FromArgb(59, 130, 246));
+            DrawStatRow(e.Graphics, leftMargin, startY + rowStep, w, "WARNING",
+                $"{_summary.WarningCount:N0} ({FormatPct(_summary.WarningCount, _summary.Total)})",
+                Ratio(_summary.WarningCount, _summary.Total), Color.FromArgb(245, 158, 11));
+            DrawStatRow(e.Graphics, leftMargin, startY + (rowStep * 2), w, "ERROR",
+                $"{_summary.ErrorCount:N0} ({FormatPct(_summary.ErrorCount, _summary.Total)})",
+                Ratio(_summary.ErrorCount, _summary.Total), Color.FromArgb(239, 68, 68));
         }
 
         private void DrawStatRow(Graphics g, int x, int y, int width, string label, string val, float pct, Color barColor)
@@ -236,16 +336,21 @@ namespace AssemblyLineTester.Views.Pages
             int w = card.Width - (leftMargin * 2);
             if (w <= 0) return;
 
-            string[] names = { "Test Execution", "Communication", "Harness Database", "Database", "User Management", "System" };
-            string[] counts = { "542 (43%)", "318 (25%)", "185 (15%)", "124 (10%)", "56 (4%)", "33 (3%)" };
-            float[] pcts = { 0.43f, 0.25f, 0.15f, 0.10f, 0.04f, 0.03f };
+            var topModules = _summary.CountByModule
+                .OrderByDescending(m => m.Value)
+                .Take(6)
+                .ToList();
+            if (topModules.Count == 0) return;
 
             int availableHeight = card.Height - startY - 20;
-            int rowStep = Math.Max(38, availableHeight / names.Length);
+            int rowStep = Math.Max(38, availableHeight / topModules.Count);
 
-            for (int i = 0; i < names.Length; i++)
+            for (int i = 0; i < topModules.Count; i++)
             {
-                DrawStatRow(e.Graphics, leftMargin, startY + (i * rowStep), w, names[i], counts[i], pcts[i], Color.FromArgb(99, 102, 241));
+                var (module, count) = (topModules[i].Key, topModules[i].Value);
+                DrawStatRow(e.Graphics, leftMargin, startY + (i * rowStep), w, module,
+                    $"{count:N0} ({FormatPct(count, _summary.Total)})",
+                    Ratio(count, _summary.Total), Color.FromArgb(99, 102, 241));
             }
         }
 

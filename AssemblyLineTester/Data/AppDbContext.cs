@@ -11,6 +11,7 @@ namespace AssemblyLineTester.Data
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<UserStatus> UserStatuses { get; set; } = null!;
         public DbSet<MaintenanceState> MaintenanceStates { get; set; } = null!;
+        public DbSet<SystemLog> SystemLogs { get; set; } = null!;
 
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -68,8 +69,8 @@ namespace AssemblyLineTester.Data
             );
 
             // 6. Seed initial users with secure BCrypt hashes
-            string passHash = BCrypt.Net.BCrypt.HashPassword("000000");
-            string faizHash = BCrypt.Net.BCrypt.HashPassword("12345678");
+            const string passHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm";
+            const string faizHash = "$2b$11$rZFf4GHizQh2xGlxxdSj4eRzsOf4gSoVdwbLOcvwfozyn5nVfKd/2";
 
             modelBuilder.Entity<User>().HasData(
                 new User
