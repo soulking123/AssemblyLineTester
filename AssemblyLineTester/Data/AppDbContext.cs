@@ -12,11 +12,21 @@ namespace AssemblyLineTester.Data
         public DbSet<UserStatus> UserStatuses { get; set; } = null!;
         public DbSet<MaintenanceState> MaintenanceStates { get; set; } = null!;
         public DbSet<SystemLog> SystemLogs { get; set; } = null!;
+        public DbSet<TestReport> TestReports { get; set; } = null!;
+        public DbSet<TestDetail> TestDetails { get; set; } = null!;
+        public DbSet<TestType> TestTypes { get; set; } = null!;
 
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=users.db");
+            string appDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AssemblyLineTester");
+
+            Directory.CreateDirectory(appDataFolder); // create if not exists
+
+            string dbPath = Path.Combine(appDataFolder, "users.db");
+            optionsBuilder.UseSqlite($"Data Source={dbPath}");
         }
 
         /// Configures entity mapping relationships, unique indexes, and seeds initial data.
@@ -310,6 +320,38 @@ namespace AssemblyLineTester.Data
                     LastLogin = DateTime.Parse("2026-03-03T13:15:20"),
                     UpdatedAt = DateTime.Parse("2026-03-03T13:15:20")
                 }
+            );
+
+            // Unique indexes for the new tables
+            modelBuilder.Entity<TestReport>()
+                .HasIndex(r => r.ReportNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<TestType>()
+                .HasIndex(t => t.TestTypeName)
+                .IsUnique();
+
+            // TestDetails -> TestReports (cascade delete: deleting a report removes its details)
+            modelBuilder.Entity<TestDetail>()
+                .HasOne(d => d.Report)
+                .WithMany(r => r.Details)
+                .HasForeignKey(d => d.ReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // TestDetails -> TestTypes (lookup by name, restrict delete to prevent orphan details)
+            modelBuilder.Entity<TestDetail>()
+                .HasOne(d => d.TestTypeInfo)
+                .WithMany()
+                .HasForeignKey(d => d.TestTypeName)
+                .HasPrincipalKey(t => t.TestTypeName);
+
+            // Seed initial test types
+            modelBuilder.Entity<TestType>().HasData(
+                new TestType { Id = 1, TestTypeName = "Continuity Test", DisplayName = "Continuity Test" },
+                new TestType { Id = 2, TestTypeName = "Short Circuit Test", DisplayName = "Short Circuit Test" },
+                new TestType { Id = 3, TestTypeName = "Insulation Test", DisplayName = "Insulation Test" },
+                new TestType { Id = 4, TestTypeName = "Functional Test", DisplayName = "Functional Test" },
+                new TestType { Id = 5, TestTypeName = "Final Verification", DisplayName = "Final Verification" }
             );
 
             modelBuilder.Entity<MaintenanceState>().HasData(

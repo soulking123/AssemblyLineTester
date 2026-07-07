@@ -63,6 +63,51 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TestReports",
+                columns: table => new
+                {
+                    ReportId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ReportNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    ProductModel = table.Column<string>(type: "TEXT", nullable: false),
+                    ProductType = table.Column<string>(type: "TEXT", nullable: false),
+                    Area = table.Column<string>(type: "TEXT", nullable: false),
+                    ECNNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    Revision = table.Column<string>(type: "TEXT", nullable: false),
+                    PartNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    SerialNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    Operator = table.Column<string>(type: "TEXT", nullable: false),
+                    TesterModel = table.Column<string>(type: "TEXT", nullable: false),
+                    TestDateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    EndDateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    TotalNets = table.Column<int>(type: "INTEGER", nullable: false),
+                    PassCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    FailCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    OverallResult = table.Column<string>(type: "TEXT", nullable: false),
+                    FilePath = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestReports", x => x.ReportId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TestTypeName = table.Column<string>(type: "TEXT", nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestTypes", x => x.Id);
+                    table.UniqueConstraint("AK_TestTypes_TestTypeName", x => x.TestTypeName);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserStatuses",
                 columns: table => new
                 {
@@ -74,6 +119,43 @@ namespace AssemblyLineTester.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserStatuses", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestDetails",
+                columns: table => new
+                {
+                    DetailId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ReportId = table.Column<int>(type: "INTEGER", nullable: false),
+                    NetId = table.Column<string>(type: "TEXT", nullable: false),
+                    HarnessGroup = table.Column<string>(type: "TEXT", nullable: false),
+                    FromPin = table.Column<string>(type: "TEXT", nullable: false),
+                    ToPin = table.Column<string>(type: "TEXT", nullable: false),
+                    Color = table.Column<string>(type: "TEXT", nullable: false),
+                    TestTypeName = table.Column<string>(type: "TEXT", nullable: false),
+                    MeasuredValue = table.Column<double>(type: "REAL", nullable: true),
+                    LowerLimit = table.Column<double>(type: "REAL", nullable: true),
+                    UpperLimit = table.Column<double>(type: "REAL", nullable: true),
+                    Unit = table.Column<string>(type: "TEXT", nullable: false),
+                    Result = table.Column<int>(type: "INTEGER", nullable: false),
+                    ErrorDetail = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestDetails", x => x.DetailId);
+                    table.ForeignKey(
+                        name: "FK_TestDetails_TestReports_ReportId",
+                        column: x => x.ReportId,
+                        principalTable: "TestReports",
+                        principalColumn: "ReportId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TestDetails_TestTypes_TestTypeName",
+                        column: x => x.TestTypeName,
+                        principalTable: "TestTypes",
+                        principalColumn: "TestTypeName",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -129,6 +211,18 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "TestTypes",
+                columns: new[] { "Id", "DisplayName", "TestTypeName" },
+                values: new object[,]
+                {
+                    { 1, "", "Capacitance" },
+                    { 2, "", "Diodes" },
+                    { 3, "", "Resistance" },
+                    { 4, "", "Insulation Resistance" },
+                    { 5, "", "Dielectric Withstand" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "UserStatuses",
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
@@ -169,6 +263,28 @@ namespace AssemblyLineTester.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_TestDetails_ReportId",
+                table: "TestDetails",
+                column: "ReportId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestDetails_TestTypeName",
+                table: "TestDetails",
+                column: "TestTypeName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestReports_ReportNumber",
+                table: "TestReports",
+                column: "ReportNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestTypes_TestTypeName",
+                table: "TestTypes",
+                column: "TestTypeName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
                 table: "Users",
                 column: "RoleId");
@@ -201,7 +317,16 @@ namespace AssemblyLineTester.Migrations
                 name: "SystemLogs");
 
             migrationBuilder.DropTable(
+                name: "TestDetails");
+
+            migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "TestReports");
+
+            migrationBuilder.DropTable(
+                name: "TestTypes");
 
             migrationBuilder.DropTable(
                 name: "Roles");

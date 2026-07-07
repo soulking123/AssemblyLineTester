@@ -144,6 +144,200 @@ namespace AssemblyLineTester.Migrations
                     b.ToTable("SystemLogs");
                 });
 
+            modelBuilder.Entity("AssemblyLineTester.Models.TestDetail", b =>
+                {
+                    b.Property<int>("DetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorDetail")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FromPin")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HarnessGroup")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("LowerLimit")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("MeasuredValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("NetId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Result")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestTypeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ToPin")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("UpperLimit")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("DetailId");
+
+                    b.HasIndex("ReportId");
+
+                    b.HasIndex("TestTypeName");
+
+                    b.ToTable("TestDetails");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestReport", b =>
+                {
+                    b.Property<int>("ReportId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Area")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ECNNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("EndDateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FailCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OverallResult")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PassCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProductModel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ReportNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Revision")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TestDateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TesterModel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TotalNets")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ReportId");
+
+                    b.HasIndex("ReportNumber")
+                        .IsUnique();
+
+                    b.ToTable("TestReports");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TestTypeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestTypeName")
+                        .IsUnique();
+
+                    b.ToTable("TestTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DisplayName = "Continuity Test",
+                            TestTypeName = "Continuity Test"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DisplayName = "Short Circuit Test",
+                            TestTypeName = "Short Circuit Test"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DisplayName = "Insulation Test",
+                            TestTypeName = "Insulation Test"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DisplayName = "Functional Test",
+                            TestTypeName = "Functional Test"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DisplayName = "Final Verification",
+                            TestTypeName = "Final Verification"
+                        });
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -477,6 +671,26 @@ namespace AssemblyLineTester.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AssemblyLineTester.Models.TestDetail", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestReport", "Report")
+                        .WithMany("Details")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AssemblyLineTester.Models.TestType", "TestTypeInfo")
+                        .WithMany()
+                        .HasForeignKey("TestTypeName")
+                        .HasPrincipalKey("TestTypeName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Report");
+
+                    b.Navigation("TestTypeInfo");
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.User", b =>
                 {
                     b.HasOne("AssemblyLineTester.Models.Role", "Role")
@@ -494,6 +708,11 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestReport", b =>
+                {
+                    b.Navigation("Details");
                 });
 #pragma warning restore 612, 618
         }

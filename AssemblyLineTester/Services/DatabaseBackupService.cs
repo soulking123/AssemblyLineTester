@@ -10,7 +10,11 @@ namespace AssemblyLineTester.Services
     // which is safe to use even while the database is actively being used by the app.
     public static class DatabaseBackupService
     {
-        private const string DbFileName = "users.db";
+        // Must match the path used in AppDbContext.OnConfiguring().
+        private static readonly string DbPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "AssemblyLineTester",
+            "users.db");
 
         // COPIES THE LIVE DATABASE TO A BACKUP FILE AT THE GIVEN PATH.
         public static void Backup(string destinationPath)
@@ -18,11 +22,14 @@ namespace AssemblyLineTester.Services
             if (string.IsNullOrWhiteSpace(destinationPath))
                 throw new ArgumentException("Destination path is required.", nameof(destinationPath));
 
+            if (!File.Exists(DbPath))
+                throw new FileNotFoundException("Live database not found.", DbPath);
+
             var destDir = Path.GetDirectoryName(Path.GetFullPath(destinationPath));
             if (!string.IsNullOrEmpty(destDir) && !Directory.Exists(destDir))
                 throw new DirectoryNotFoundException($"Destination folder not found: {destDir}");
 
-            using var source = new SqliteConnection($"Data Source={DbFileName}");
+            using var source = new SqliteConnection($"Data Source={DbPath}");
             using var target = new SqliteConnection($"Data Source={destinationPath}");
             source.Open();
             target.Open();
@@ -43,7 +50,7 @@ namespace AssemblyLineTester.Services
             SqliteConnection.ClearAllPools();
 
             using var backup = new SqliteConnection($"Data Source={sourcePath}");
-            using var live = new SqliteConnection($"Data Source={DbFileName}");
+            using var live = new SqliteConnection($"Data Source={DbPath}");
             backup.Open();
             live.Open();
 
