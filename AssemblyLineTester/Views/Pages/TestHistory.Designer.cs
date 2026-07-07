@@ -37,7 +37,10 @@ namespace AssemblyLineTester.Views.Pages
         {
             pnlTop = new Panel();
             pnlFilterCard = new Panel();
+            tblFilterInner = new TableLayoutPanel();
+            tblFilterInputs = new TableLayoutPanel();
             lblDateRange = new Label();
+            tblDateRange = new TableLayoutPanel();
             dtpStart = new DateTimePicker();
             lblDash = new Label();
             dtpEnd = new DateTimePicker();
@@ -51,6 +54,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbResult = new ComboBox();
             lblOperator = new Label();
             cmbOperator = new ComboBox();
+            flpActionButtons = new FlowLayoutPanel();
             btnSearch = new Button();
             btnReset = new Button();
             logoBox = new PictureBox();
@@ -125,6 +129,10 @@ namespace AssemblyLineTester.Views.Pages
             gridSteps = new DataGridView();
             pnlTop.SuspendLayout();
             pnlFilterCard.SuspendLayout();
+            tblFilterInner.SuspendLayout();
+            tblFilterInputs.SuspendLayout();
+            tblDateRange.SuspendLayout();
+            flpActionButtons.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)logoBox).BeginInit();
             mainLayout.SuspendLayout();
             pnlLeft.SuspendLayout();
@@ -133,7 +141,6 @@ namespace AssemblyLineTester.Views.Pages
             flpLeftButtons.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridData).BeginInit();
             tblPagination.SuspendLayout();
-            flpPageNav.SuspendLayout();
             flpPageInfo.SuspendLayout();
             rightLayout.SuspendLayout();
             pnlDetail.SuspendLayout();
@@ -167,193 +174,278 @@ namespace AssemblyLineTester.Views.Pages
             // 
             pnlFilterCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlFilterCard.BackColor = Color.White;
-            pnlFilterCard.Controls.Add(lblDateRange);
-            pnlFilterCard.Controls.Add(dtpStart);
-            pnlFilterCard.Controls.Add(lblDash);
-            pnlFilterCard.Controls.Add(dtpEnd);
-            pnlFilterCard.Controls.Add(lblProductModel);
-            pnlFilterCard.Controls.Add(cmbProductModel);
-            pnlFilterCard.Controls.Add(lblProductType);
-            pnlFilterCard.Controls.Add(cmbProductType);
-            pnlFilterCard.Controls.Add(lblArea);
-            pnlFilterCard.Controls.Add(cmbArea);
-            pnlFilterCard.Controls.Add(lblResult);
-            pnlFilterCard.Controls.Add(cmbResult);
-            pnlFilterCard.Controls.Add(lblOperator);
-            pnlFilterCard.Controls.Add(cmbOperator);
-            pnlFilterCard.Controls.Add(btnSearch);
-            pnlFilterCard.Controls.Add(btnReset);
+            pnlFilterCard.Controls.Add(tblFilterInner);
             pnlFilterCard.Location = new Point(32, 88);
             pnlFilterCard.Margin = new Padding(8);
             pnlFilterCard.Name = "pnlFilterCard";
+            pnlFilterCard.Padding = new Padding(12);
             pnlFilterCard.Size = new Size(2210, 128);
             pnlFilterCard.TabIndex = 2;
+            // 
+            // tblFilterInner
+            // 
+            tblFilterInner.ColumnCount = 2;
+            tblFilterInner.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblFilterInner.ColumnStyles.Add(new ColumnStyle());
+            tblFilterInner.Controls.Add(tblFilterInputs, 0, 0);
+            tblFilterInner.Controls.Add(flpActionButtons, 1, 0);
+            tblFilterInner.Dock = DockStyle.Fill;
+            tblFilterInner.Location = new Point(12, 12);
+            tblFilterInner.Margin = new Padding(0);
+            tblFilterInner.Name = "tblFilterInner";
+            tblFilterInner.RowCount = 1;
+            tblFilterInner.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblFilterInner.Size = new Size(2186, 104);
+            tblFilterInner.TabIndex = 0;
+            // 
+            // tblFilterInputs
+            // 
+            tblFilterInputs.ColumnCount = 6;
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.5F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
+            tblFilterInputs.Controls.Add(lblDateRange, 0, 0);
+            tblFilterInputs.Controls.Add(tblDateRange, 0, 1);
+            tblFilterInputs.Controls.Add(lblProductModel, 1, 0);
+            tblFilterInputs.Controls.Add(cmbProductModel, 1, 1);
+            tblFilterInputs.Controls.Add(lblProductType, 2, 0);
+            tblFilterInputs.Controls.Add(cmbProductType, 2, 1);
+            tblFilterInputs.Controls.Add(lblArea, 3, 0);
+            tblFilterInputs.Controls.Add(cmbArea, 3, 1);
+            tblFilterInputs.Controls.Add(lblResult, 4, 0);
+            tblFilterInputs.Controls.Add(cmbResult, 4, 1);
+            tblFilterInputs.Controls.Add(lblOperator, 5, 0);
+            tblFilterInputs.Controls.Add(cmbOperator, 5, 1);
+            tblFilterInputs.Dock = DockStyle.Fill;
+            tblFilterInputs.Location = new Point(0, 0);
+            tblFilterInputs.Margin = new Padding(0);
+            tblFilterInputs.Name = "tblFilterInputs";
+            tblFilterInputs.RowCount = 2;
+            tblFilterInputs.RowStyles.Add(new RowStyle(SizeType.Percent, 35F));
+            tblFilterInputs.RowStyles.Add(new RowStyle(SizeType.Percent, 65F));
+            tblFilterInputs.Size = new Size(1890, 104);
+            tblFilterInputs.TabIndex = 0;
             // 
             // lblDateRange
             // 
             lblDateRange.AutoSize = true;
+            lblDateRange.Dock = DockStyle.Fill;
             lblDateRange.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblDateRange.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDateRange.Location = new Point(24, 19);
-            lblDateRange.Margin = new Padding(8, 0, 8, 0);
+            lblDateRange.Location = new Point(4, 0);
+            lblDateRange.Margin = new Padding(4, 0, 4, 2);
             lblDateRange.Name = "lblDateRange";
-            lblDateRange.Size = new Size(137, 31);
+            lblDateRange.Size = new Size(530, 34);
             lblDateRange.TabIndex = 2;
             lblDateRange.Text = "Date Range";
+            lblDateRange.TextAlign = ContentAlignment.BottomLeft;
+            // 
+            // tblDateRange
+            // 
+            tblDateRange.ColumnCount = 3;
+            tblDateRange.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblDateRange.ColumnStyles.Add(new ColumnStyle());
+            tblDateRange.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblDateRange.Controls.Add(dtpStart, 0, 0);
+            tblDateRange.Controls.Add(lblDash, 1, 0);
+            tblDateRange.Controls.Add(dtpEnd, 2, 0);
+            tblDateRange.Dock = DockStyle.Fill;
+            tblDateRange.Location = new Point(0, 36);
+            tblDateRange.Margin = new Padding(0);
+            tblDateRange.Name = "tblDateRange";
+            tblDateRange.RowCount = 1;
+            tblDateRange.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblDateRange.Size = new Size(538, 68);
+            tblDateRange.TabIndex = 0;
             // 
             // dtpStart
             // 
+            dtpStart.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             dtpStart.CustomFormat = "dd Mar yyyy";
             dtpStart.Font = new Font("Segoe UI", 9F);
             dtpStart.Format = DateTimePickerFormat.Custom;
-            dtpStart.Location = new Point(24, 61);
-            dtpStart.Margin = new Padding(8);
+            dtpStart.Location = new Point(4, 14);
+            dtpStart.Margin = new Padding(4);
             dtpStart.Name = "dtpStart";
-            dtpStart.Size = new Size(209, 39);
+            dtpStart.Size = new Size(249, 39);
             dtpStart.TabIndex = 3;
             // 
             // lblDash
             // 
             lblDash.AutoSize = true;
+            lblDash.Dock = DockStyle.Fill;
             lblDash.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDash.ForeColor = Color.FromArgb(100, 116, 139);
-            lblDash.Location = new Point(245, 67);
-            lblDash.Margin = new Padding(8, 0, 8, 0);
+            lblDash.Location = new Point(257, 0);
+            lblDash.Margin = new Padding(0);
             lblDash.Name = "lblDash";
-            lblDash.Size = new Size(24, 32);
+            lblDash.Size = new Size(24, 68);
             lblDash.TabIndex = 4;
             lblDash.Text = "-";
+            lblDash.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // dtpEnd
             // 
+            dtpEnd.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             dtpEnd.CustomFormat = "dd Mar yyyy";
             dtpEnd.Font = new Font("Segoe UI", 9F);
             dtpEnd.Format = DateTimePickerFormat.Custom;
-            dtpEnd.Location = new Point(278, 61);
-            dtpEnd.Margin = new Padding(8);
+            dtpEnd.Location = new Point(285, 14);
+            dtpEnd.Margin = new Padding(4);
             dtpEnd.Name = "dtpEnd";
-            dtpEnd.Size = new Size(209, 39);
+            dtpEnd.Size = new Size(249, 39);
             dtpEnd.TabIndex = 5;
             // 
             // lblProductModel
             // 
             lblProductModel.AutoSize = true;
+            lblProductModel.Dock = DockStyle.Fill;
             lblProductModel.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblProductModel.ForeColor = Color.FromArgb(51, 65, 85);
-            lblProductModel.Location = new Point(520, 19);
-            lblProductModel.Margin = new Padding(8, 0, 8, 0);
+            lblProductModel.Location = new Point(542, 0);
+            lblProductModel.Margin = new Padding(4, 0, 4, 2);
             lblProductModel.Name = "lblProductModel";
-            lblProductModel.Size = new Size(174, 31);
+            lblProductModel.Size = new Size(262, 34);
             lblProductModel.TabIndex = 6;
             lblProductModel.Text = "Product Model";
+            lblProductModel.TextAlign = ContentAlignment.BottomLeft;
             // 
             // cmbProductModel
             // 
+            cmbProductModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbProductModel.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbProductModel.Font = new Font("Segoe UI", 9F);
             cmbProductModel.FormattingEnabled = true;
             cmbProductModel.Items.AddRange(new object[] { "All", "6060", "797F", "D11T" });
-            cmbProductModel.Location = new Point(520, 61);
-            cmbProductModel.Margin = new Padding(8);
+            cmbProductModel.Location = new Point(542, 50);
+            cmbProductModel.Margin = new Padding(4);
             cmbProductModel.Name = "cmbProductModel";
-            cmbProductModel.Size = new Size(209, 40);
+            cmbProductModel.Size = new Size(262, 40);
             cmbProductModel.TabIndex = 7;
             // 
             // lblProductType
             // 
             lblProductType.AutoSize = true;
+            lblProductType.Dock = DockStyle.Fill;
             lblProductType.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblProductType.ForeColor = Color.FromArgb(51, 65, 85);
-            lblProductType.Location = new Point(764, 19);
-            lblProductType.Margin = new Padding(8, 0, 8, 0);
+            lblProductType.Location = new Point(812, 0);
+            lblProductType.Margin = new Padding(4, 0, 4, 2);
             lblProductType.Name = "lblProductType";
-            lblProductType.Size = new Size(155, 31);
+            lblProductType.Size = new Size(262, 34);
             lblProductType.TabIndex = 8;
             lblProductType.Text = "Product Type";
+            lblProductType.TextAlign = ContentAlignment.BottomLeft;
             // 
             // cmbProductType
             // 
+            cmbProductType.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbProductType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbProductType.Font = new Font("Segoe UI", 9F);
             cmbProductType.FormattingEnabled = true;
             cmbProductType.Items.AddRange(new object[] { "All", "AC", "DC" });
-            cmbProductType.Location = new Point(764, 61);
-            cmbProductType.Margin = new Padding(8);
+            cmbProductType.Location = new Point(812, 50);
+            cmbProductType.Margin = new Padding(4);
             cmbProductType.Name = "cmbProductType";
-            cmbProductType.Size = new Size(209, 40);
+            cmbProductType.Size = new Size(262, 40);
             cmbProductType.TabIndex = 9;
             // 
             // lblArea
             // 
             lblArea.AutoSize = true;
+            lblArea.Dock = DockStyle.Fill;
             lblArea.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblArea.ForeColor = Color.FromArgb(51, 65, 85);
-            lblArea.Location = new Point(1008, 19);
-            lblArea.Margin = new Padding(8, 0, 8, 0);
+            lblArea.Location = new Point(1082, 0);
+            lblArea.Margin = new Padding(4, 0, 4, 2);
             lblArea.Name = "lblArea";
-            lblArea.Size = new Size(63, 31);
+            lblArea.Size = new Size(262, 34);
             lblArea.TabIndex = 10;
             lblArea.Text = "Area";
+            lblArea.TextAlign = ContentAlignment.BottomLeft;
             // 
             // cmbArea
             // 
+            cmbArea.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbArea.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbArea.Font = new Font("Segoe UI", 9F);
             cmbArea.FormattingEnabled = true;
             cmbArea.Items.AddRange(new object[] { "All", "Engine Control", "Cabin", "Main Frame", "Boom", "Power Module", "Lighting", "Hydraulic Control", "Monitoring System" });
-            cmbArea.Location = new Point(1008, 61);
-            cmbArea.Margin = new Padding(8);
+            cmbArea.Location = new Point(1082, 50);
+            cmbArea.Margin = new Padding(4);
             cmbArea.Name = "cmbArea";
-            cmbArea.Size = new Size(258, 40);
+            cmbArea.Size = new Size(262, 40);
             cmbArea.TabIndex = 11;
             // 
             // lblResult
             // 
             lblResult.AutoSize = true;
+            lblResult.Dock = DockStyle.Fill;
             lblResult.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblResult.ForeColor = Color.FromArgb(51, 65, 85);
-            lblResult.Location = new Point(1300, 19);
-            lblResult.Margin = new Padding(8, 0, 8, 0);
+            lblResult.Location = new Point(1352, 0);
+            lblResult.Margin = new Padding(4, 0, 4, 2);
             lblResult.Name = "lblResult";
-            lblResult.Size = new Size(80, 31);
+            lblResult.Size = new Size(262, 34);
             lblResult.TabIndex = 12;
             lblResult.Text = "Result";
+            lblResult.TextAlign = ContentAlignment.BottomLeft;
             // 
             // cmbResult
             // 
+            cmbResult.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbResult.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbResult.Font = new Font("Segoe UI", 9F);
             cmbResult.FormattingEnabled = true;
             cmbResult.Items.AddRange(new object[] { "All", "PASS", "FAIL" });
-            cmbResult.Location = new Point(1300, 61);
-            cmbResult.Margin = new Padding(8);
+            cmbResult.Location = new Point(1352, 50);
+            cmbResult.Margin = new Padding(4);
             cmbResult.Name = "cmbResult";
-            cmbResult.Size = new Size(176, 40);
+            cmbResult.Size = new Size(262, 40);
             cmbResult.TabIndex = 13;
             // 
             // lblOperator
             // 
             lblOperator.AutoSize = true;
+            lblOperator.Dock = DockStyle.Fill;
             lblOperator.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblOperator.ForeColor = Color.FromArgb(51, 65, 85);
-            lblOperator.Location = new Point(1511, 19);
-            lblOperator.Margin = new Padding(8, 0, 8, 0);
+            lblOperator.Location = new Point(1622, 0);
+            lblOperator.Margin = new Padding(4, 0, 4, 2);
             lblOperator.Name = "lblOperator";
-            lblOperator.Size = new Size(110, 31);
+            lblOperator.Size = new Size(264, 34);
             lblOperator.TabIndex = 14;
             lblOperator.Text = "Operator";
+            lblOperator.TextAlign = ContentAlignment.BottomLeft;
             // 
             // cmbOperator
             // 
+            cmbOperator.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbOperator.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbOperator.Font = new Font("Segoe UI", 9F);
             cmbOperator.FormattingEnabled = true;
             cmbOperator.Items.AddRange(new object[] { "All", "Fally", "Hendra", "Budi" });
-            cmbOperator.Location = new Point(1511, 61);
-            cmbOperator.Margin = new Padding(8);
+            cmbOperator.Location = new Point(1622, 50);
+            cmbOperator.Margin = new Padding(4);
             cmbOperator.Name = "cmbOperator";
-            cmbOperator.Size = new Size(209, 40);
+            cmbOperator.Size = new Size(264, 40);
             cmbOperator.TabIndex = 15;
+            // 
+            // flpActionButtons
+            // 
+            flpActionButtons.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            flpActionButtons.AutoSize = true;
+            flpActionButtons.Controls.Add(btnSearch);
+            flpActionButtons.Controls.Add(btnReset);
+            flpActionButtons.Location = new Point(1902, 51);
+            flpActionButtons.Margin = new Padding(12, 0, 0, 0);
+            flpActionButtons.Name = "flpActionButtons";
+            flpActionButtons.Size = new Size(284, 53);
+            flpActionButtons.TabIndex = 1;
+            flpActionButtons.WrapContents = false;
             // 
             // btnSearch
             // 
@@ -363,8 +455,8 @@ namespace AssemblyLineTester.Views.Pages
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSearch.ForeColor = Color.FromArgb(15, 23, 42);
-            btnSearch.Location = new Point(1755, 56);
-            btnSearch.Margin = new Padding(8);
+            btnSearch.Location = new Point(0, 0);
+            btnSearch.Margin = new Padding(0, 0, 8, 0);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(154, 53);
             btnSearch.TabIndex = 16;
@@ -379,8 +471,8 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.FlatStyle = FlatStyle.Flat;
             btnReset.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnReset.ForeColor = Color.FromArgb(71, 85, 105);
-            btnReset.Location = new Point(1926, 56);
-            btnReset.Margin = new Padding(8);
+            btnReset.Location = new Point(162, 0);
+            btnReset.Margin = new Padding(0);
             btnReset.Name = "btnReset";
             btnReset.Size = new Size(122, 53);
             btnReset.TabIndex = 17;
@@ -449,7 +541,7 @@ namespace AssemblyLineTester.Views.Pages
             tblLeftContent.Margin = new Padding(0);
             tblLeftContent.Name = "tblLeftContent";
             tblLeftContent.RowCount = 3;
-            tblLeftContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 55F));
+            tblLeftContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 79F));
             tblLeftContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tblLeftContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 55F));
             tblLeftContent.Size = new Size(1350, 1220);
@@ -469,7 +561,7 @@ namespace AssemblyLineTester.Views.Pages
             tblLeftHeader.Padding = new Padding(20, 0, 20, 0);
             tblLeftHeader.RowCount = 1;
             tblLeftHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblLeftHeader.Size = new Size(1350, 55);
+            tblLeftHeader.Size = new Size(1350, 79);
             tblLeftHeader.TabIndex = 0;
             // 
             // lblTableTitle
@@ -480,7 +572,7 @@ namespace AssemblyLineTester.Views.Pages
             lblTableTitle.Location = new Point(20, 0);
             lblTableTitle.Margin = new Padding(0);
             lblTableTitle.Name = "lblTableTitle";
-            lblTableTitle.Size = new Size(720, 55);
+            lblTableTitle.Size = new Size(720, 79);
             lblTableTitle.TabIndex = 0;
             lblTableTitle.Text = "TEST HISTORY LIST (Total: 215)";
             lblTableTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -494,7 +586,7 @@ namespace AssemblyLineTester.Views.Pages
             flpLeftButtons.Location = new Point(740, 0);
             flpLeftButtons.Margin = new Padding(0);
             flpLeftButtons.Name = "flpLeftButtons";
-            flpLeftButtons.Size = new Size(590, 55);
+            flpLeftButtons.Size = new Size(590, 79);
             flpLeftButtons.TabIndex = 1;
             flpLeftButtons.WrapContents = false;
             // 
@@ -506,10 +598,10 @@ namespace AssemblyLineTester.Views.Pages
             btnExport.FlatStyle = FlatStyle.Flat;
             btnExport.Font = new Font("Segoe UI", 9F);
             btnExport.ForeColor = Color.FromArgb(30, 41, 59);
-            btnExport.Location = new Point(489, 10);
+            btnExport.Location = new Point(427, 10);
             btnExport.Margin = new Padding(0, 10, 0, 0);
             btnExport.Name = "btnExport";
-            btnExport.Size = new Size(101, 55);
+            btnExport.Size = new Size(163, 55);
             btnExport.TabIndex = 1;
             btnExport.Text = "Export";
             btnExport.UseVisualStyleBackColor = false;
@@ -522,10 +614,10 @@ namespace AssemblyLineTester.Views.Pages
             btnRefresh.FlatStyle = FlatStyle.Flat;
             btnRefresh.Font = new Font("Segoe UI", 9F);
             btnRefresh.ForeColor = Color.FromArgb(30, 41, 59);
-            btnRefresh.Location = new Point(373, 10);
-            btnRefresh.Margin = new Padding(0, 10, 0, 0);
+            btnRefresh.Location = new Point(229, 10);
+            btnRefresh.Margin = new Padding(0, 10, 20, 0);
             btnRefresh.Name = "btnRefresh";
-            btnRefresh.Size = new Size(116, 55);
+            btnRefresh.Size = new Size(178, 55);
             btnRefresh.TabIndex = 0;
             btnRefresh.Text = "Refresh";
             btnRefresh.UseVisualStyleBackColor = false;
@@ -539,13 +631,13 @@ namespace AssemblyLineTester.Views.Pages
             gridData.BorderStyle = BorderStyle.None;
             gridData.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             gridData.Dock = DockStyle.Fill;
-            gridData.Location = new Point(20, 75);
+            gridData.Location = new Point(20, 99);
             gridData.Margin = new Padding(20, 20, 20, 0);
             gridData.Name = "gridData";
             gridData.ReadOnly = true;
             gridData.RowHeadersVisible = false;
             gridData.RowHeadersWidth = 51;
-            gridData.Size = new Size(1310, 1090);
+            gridData.Size = new Size(1310, 1066);
             gridData.TabIndex = 1;
             // 
             // tblPagination
@@ -1116,7 +1208,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlSummary.Margin = new Padding(0, 0, 0, 20);
             pnlSummary.Name = "pnlSummary";
             pnlSummary.Padding = new Padding(16, 12, 16, 12);
-            pnlSummary.Size = new Size(809, 254);
+            pnlSummary.Size = new Size(809, 285);
             pnlSummary.TabIndex = 1;
             // 
             // tblSummaryContent
@@ -1132,7 +1224,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryContent.RowCount = 2;
             tblSummaryContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
             tblSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblSummaryContent.Size = new Size(775, 228);
+            tblSummaryContent.Size = new Size(775, 259);
             tblSummaryContent.TabIndex = 0;
             // 
             // lblSummaryTitle
@@ -1161,7 +1253,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryBody.Name = "tblSummaryBody";
             tblSummaryBody.RowCount = 1;
             tblSummaryBody.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblSummaryBody.Size = new Size(775, 183);
+            tblSummaryBody.Size = new Size(775, 214);
             tblSummaryBody.TabIndex = 1;
             // 
             // pnlChartContainer
@@ -1170,7 +1262,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlChartContainer.Location = new Point(0, 0);
             pnlChartContainer.Margin = new Padding(0);
             pnlChartContainer.Name = "pnlChartContainer";
-            pnlChartContainer.Size = new Size(310, 183);
+            pnlChartContainer.Size = new Size(310, 214);
             pnlChartContainer.TabIndex = 0;
             // 
             // tblSummaryLegend
@@ -1195,7 +1287,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryLegend.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblSummaryLegend.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblSummaryLegend.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblSummaryLegend.Size = new Size(455, 183);
+            tblSummaryLegend.Size = new Size(455, 214);
             tblSummaryLegend.TabIndex = 1;
             // 
             // lblLegPassIcon
@@ -1206,7 +1298,7 @@ namespace AssemblyLineTester.Views.Pages
             lblLegPassIcon.Location = new Point(0, 0);
             lblLegPassIcon.Margin = new Padding(0);
             lblLegPassIcon.Name = "lblLegPassIcon";
-            lblLegPassIcon.Size = new Size(50, 45);
+            lblLegPassIcon.Size = new Size(50, 53);
             lblLegPassIcon.TabIndex = 0;
             lblLegPassIcon.Text = "●";
             lblLegPassIcon.TextAlign = ContentAlignment.MiddleCenter;
@@ -1219,7 +1311,7 @@ namespace AssemblyLineTester.Views.Pages
             lblLegPassText.Location = new Point(50, 0);
             lblLegPassText.Margin = new Padding(0);
             lblLegPassText.Name = "lblLegPassText";
-            lblLegPassText.Size = new Size(405, 45);
+            lblLegPassText.Size = new Size(405, 53);
             lblLegPassText.TabIndex = 1;
             lblLegPassText.Text = "Pass : 4 (80.00%)";
             lblLegPassText.TextAlign = ContentAlignment.MiddleLeft;
@@ -1229,10 +1321,10 @@ namespace AssemblyLineTester.Views.Pages
             lblLegFailIcon.Dock = DockStyle.Fill;
             lblLegFailIcon.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblLegFailIcon.ForeColor = Color.FromArgb(244, 67, 54);
-            lblLegFailIcon.Location = new Point(0, 45);
+            lblLegFailIcon.Location = new Point(0, 53);
             lblLegFailIcon.Margin = new Padding(0);
             lblLegFailIcon.Name = "lblLegFailIcon";
-            lblLegFailIcon.Size = new Size(50, 45);
+            lblLegFailIcon.Size = new Size(50, 53);
             lblLegFailIcon.TabIndex = 2;
             lblLegFailIcon.Text = "●";
             lblLegFailIcon.TextAlign = ContentAlignment.MiddleCenter;
@@ -1242,10 +1334,10 @@ namespace AssemblyLineTester.Views.Pages
             lblLegFailText.Dock = DockStyle.Fill;
             lblLegFailText.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblLegFailText.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLegFailText.Location = new Point(50, 45);
+            lblLegFailText.Location = new Point(50, 53);
             lblLegFailText.Margin = new Padding(0);
             lblLegFailText.Name = "lblLegFailText";
-            lblLegFailText.Size = new Size(405, 45);
+            lblLegFailText.Size = new Size(405, 53);
             lblLegFailText.TabIndex = 3;
             lblLegFailText.Text = "Fail : 1 (20.00%)";
             lblLegFailText.TextAlign = ContentAlignment.MiddleLeft;
@@ -1255,10 +1347,10 @@ namespace AssemblyLineTester.Views.Pages
             lblLegProgIcon.Dock = DockStyle.Fill;
             lblLegProgIcon.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblLegProgIcon.ForeColor = Color.FromArgb(255, 193, 7);
-            lblLegProgIcon.Location = new Point(0, 90);
+            lblLegProgIcon.Location = new Point(0, 106);
             lblLegProgIcon.Margin = new Padding(0);
             lblLegProgIcon.Name = "lblLegProgIcon";
-            lblLegProgIcon.Size = new Size(50, 45);
+            lblLegProgIcon.Size = new Size(50, 53);
             lblLegProgIcon.TabIndex = 4;
             lblLegProgIcon.Text = "●";
             lblLegProgIcon.TextAlign = ContentAlignment.MiddleCenter;
@@ -1268,10 +1360,10 @@ namespace AssemblyLineTester.Views.Pages
             lblLegProgText.Dock = DockStyle.Fill;
             lblLegProgText.Font = new Font("Segoe UI", 9F);
             lblLegProgText.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLegProgText.Location = new Point(50, 90);
+            lblLegProgText.Location = new Point(50, 106);
             lblLegProgText.Margin = new Padding(0);
             lblLegProgText.Name = "lblLegProgText";
-            lblLegProgText.Size = new Size(405, 45);
+            lblLegProgText.Size = new Size(405, 53);
             lblLegProgText.TabIndex = 5;
             lblLegProgText.Text = "In Progress : 0 (0.00%)";
             lblLegProgText.TextAlign = ContentAlignment.MiddleLeft;
@@ -1281,10 +1373,10 @@ namespace AssemblyLineTester.Views.Pages
             lblLegStopIcon.Dock = DockStyle.Fill;
             lblLegStopIcon.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblLegStopIcon.ForeColor = Color.FromArgb(158, 158, 158);
-            lblLegStopIcon.Location = new Point(0, 135);
+            lblLegStopIcon.Location = new Point(0, 159);
             lblLegStopIcon.Margin = new Padding(0);
             lblLegStopIcon.Name = "lblLegStopIcon";
-            lblLegStopIcon.Size = new Size(50, 48);
+            lblLegStopIcon.Size = new Size(50, 55);
             lblLegStopIcon.TabIndex = 6;
             lblLegStopIcon.Text = "●";
             lblLegStopIcon.TextAlign = ContentAlignment.MiddleCenter;
@@ -1294,10 +1386,10 @@ namespace AssemblyLineTester.Views.Pages
             lblLegStopText.Dock = DockStyle.Fill;
             lblLegStopText.Font = new Font("Segoe UI", 9F);
             lblLegStopText.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLegStopText.Location = new Point(50, 135);
+            lblLegStopText.Location = new Point(50, 159);
             lblLegStopText.Margin = new Padding(0);
             lblLegStopText.Name = "lblLegStopText";
-            lblLegStopText.Size = new Size(405, 48);
+            lblLegStopText.Size = new Size(405, 55);
             lblLegStopText.TabIndex = 7;
             lblLegStopText.Text = "Stop : 0 (0.00%)";
             lblLegStopText.TextAlign = ContentAlignment.MiddleLeft;
@@ -1309,10 +1401,10 @@ namespace AssemblyLineTester.Views.Pages
             pnlSteps.Controls.Add(tblStepsContent);
             pnlSteps.Dock = DockStyle.Fill;
             pnlSteps.Location = new Point(0, 793);
-            pnlSteps.Margin = new Padding(0, 0, 0, 0);
+            pnlSteps.Margin = new Padding(0);
             pnlSteps.Name = "pnlSteps";
             pnlSteps.Padding = new Padding(16, 12, 16, 12);
-            pnlSteps.Size = new Size(809, 376);
+            pnlSteps.Size = new Size(809, 427);
             pnlSteps.TabIndex = 2;
             // 
             // tblStepsContent
@@ -1328,7 +1420,7 @@ namespace AssemblyLineTester.Views.Pages
             tblStepsContent.RowCount = 2;
             tblStepsContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
             tblStepsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblStepsContent.Size = new Size(775, 350);
+            tblStepsContent.Size = new Size(775, 401);
             tblStepsContent.TabIndex = 0;
             // 
             // lblStepsTitle
@@ -1359,7 +1451,7 @@ namespace AssemblyLineTester.Views.Pages
             gridSteps.ReadOnly = true;
             gridSteps.RowHeadersVisible = false;
             gridSteps.RowHeadersWidth = 51;
-            gridSteps.Size = new Size(775, 305);
+            gridSteps.Size = new Size(775, 356);
             gridSteps.TabIndex = 1;
             // 
             // TestHistory
@@ -1375,7 +1467,13 @@ namespace AssemblyLineTester.Views.Pages
             pnlTop.ResumeLayout(false);
             pnlTop.PerformLayout();
             pnlFilterCard.ResumeLayout(false);
-            pnlFilterCard.PerformLayout();
+            tblFilterInner.ResumeLayout(false);
+            tblFilterInner.PerformLayout();
+            tblFilterInputs.ResumeLayout(false);
+            tblFilterInputs.PerformLayout();
+            tblDateRange.ResumeLayout(false);
+            tblDateRange.PerformLayout();
+            flpActionButtons.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)logoBox).EndInit();
             mainLayout.ResumeLayout(false);
             pnlLeft.ResumeLayout(false);
@@ -1384,7 +1482,6 @@ namespace AssemblyLineTester.Views.Pages
             flpLeftButtons.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)gridData).EndInit();
             tblPagination.ResumeLayout(false);
-            flpPageNav.ResumeLayout(false);
             flpPageInfo.ResumeLayout(false);
             flpPageInfo.PerformLayout();
             rightLayout.ResumeLayout(false);
@@ -1593,6 +1690,10 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.DataGridView gridSteps;
 
         private System.Windows.Forms.Panel pnlFilterCard;
+        private System.Windows.Forms.TableLayoutPanel tblFilterInner;
+        private System.Windows.Forms.TableLayoutPanel tblFilterInputs;
+        private System.Windows.Forms.TableLayoutPanel tblDateRange;
+        private System.Windows.Forms.FlowLayoutPanel flpActionButtons;
 
     }
 
