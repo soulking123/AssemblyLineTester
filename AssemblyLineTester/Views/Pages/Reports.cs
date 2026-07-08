@@ -16,6 +16,10 @@ namespace AssemblyLineTester.Views.Pages
         private int _totalPages = 1;
         private int? _selectedReportId;
 
+        // The filter actually being displayed (list/summary/trend). Only changes when
+        // the user clicks "Generate Report" (or "Reset"), NOT on every control change.
+        private ReportFilter _appliedFilter = new();
+
         public Reports()
         {
             InitializeComponent();
@@ -23,8 +27,10 @@ namespace AssemblyLineTester.Views.Pages
             WireEvents();
 
             _reportService.SeedSampleDataIfEmpty();
-            ResetFilters();     // override the hardcoded Designer date range with a sensible default
-            LoadReportData();   // auto-load on page open, no button click required
+
+            // No filter applied yet -> show everything.
+            _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
+            RenderReportData(_appliedFilter);
         }
 
         private void InitializeCustomStyles()
@@ -35,6 +41,14 @@ namespace AssemblyLineTester.Views.Pages
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbOperator.Items.Count > 0) cmbOperator.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
+
+            // Plain date picker, no checkbox - dd/MM/yy format, user picks whenever they want.
+            dtpStart.Format = DateTimePickerFormat.Custom;
+            dtpStart.CustomFormat = "dd/MM/yy";
+            dtpEnd.Format = DateTimePickerFormat.Custom;
+            dtpEnd.CustomFormat = "dd/MM/yy";
+            dtpStart.Value = DateTime.Now.AddDays(-30);
+            dtpEnd.Value = DateTime.Now;
 
             gridReports.BorderStyle = BorderStyle.None;
             gridReports.BackgroundColor = Color.White;
@@ -79,8 +93,23 @@ namespace AssemblyLineTester.Views.Pages
 
         private void WireEvents()
         {
-            btnGenerate.Click += (s, e) => { _currentPage = 1; LoadReportData(); };
-            btnReset.Click += (s, e) => { ResetFilters(); _currentPage = 1; LoadReportData(); };
+            // Generate = read current control values and apply them as the new filter.
+            btnGenerate.Click += (s, e) =>
+            {
+                _currentPage = 1;
+                _appliedFilter = BuildFilterFromControls();
+                _appliedFilter.Page = _currentPage;
+                RenderReportData(_appliedFilter);
+            };
+
+            // Reset = clear controls back to defaults AND clear the applied filter (show everything again).
+            btnReset.Click += (s, e) =>
+            {
+                ResetFilterControls();
+                _currentPage = 1;
+                _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
+                RenderReportData(_appliedFilter);
+            };
 
             gridReports.SelectionChanged += (s, e) =>
             {
@@ -103,11 +132,11 @@ namespace AssemblyLineTester.Views.Pages
             btnPrint.Click += (s, e) => MessageBox.Show("Print belum diimplementasikan.", "Info");
         }
 
-        // OVERRIDES THE DESIGNER'S HARDCODED DATE RANGE WITH A DYNAMIC, ALWAYS-RELEVANT DEFAULT.
-        private void ResetFilters()
+        // RESETS THE FILTER CONTROLS ONLY (visual state) - does NOT apply/render anything by itself.
+        private void ResetFilterControls()
         {
-            dtpEnd.Value = DateTime.Now;
             dtpStart.Value = DateTime.Now.AddDays(-30);
+            dtpEnd.Value = DateTime.Now;
             cmbModel.SelectedIndex = 0;
             cmbType.SelectedIndex = 0;
             cmbArea.SelectedIndex = 0;
@@ -116,13 +145,14 @@ namespace AssemblyLineTester.Views.Pages
             txtPartNumber.Text = string.Empty;
         }
 
+        // READS THE CURRENT (possibly unsaved/unapplied) CONTROL VALUES INTO A FILTER OBJECT.
+        // Only called when the user explicitly clicks "Generate Report".
         private ReportFilter BuildFilterFromControls()
         {
             var filter = new ReportFilter
             {
                 DateFrom = dtpStart.Value.Date,
                 DateTo = dtpEnd.Value.Date,
-                Page = _currentPage,
                 PageSize = _pageSize
             };
 
@@ -147,10 +177,9 @@ namespace AssemblyLineTester.Views.Pages
             return filter;
         }
 
-        public void LoadReportData()
+        // RENDERS SUMMARY + TREND + GRID FOR THE GIVEN (ALREADY-APPLIED) FILTER.
+        private void RenderReportData(ReportFilter filter)
         {
-            var filter = BuildFilterFromControls();
-
             LoadSummaryCards(filter);
             LoadTrendChart(filter);
             LoadReportsGrid(filter);
@@ -160,7 +189,10 @@ namespace AssemblyLineTester.Views.Pages
         {
             var summary = _reportService.GetSummary(filter);
 
-            lblSummaryTitle.Text = $"SUMMARY ({dtpStart.Value:dd MMM yyyy} - {dtpEnd.Value:dd MMM yyyy})";
+            lblSummaryTitle.Text = filter.DateFrom.HasValue && filter.DateTo.HasValue
+                ? $"SUMMARY ({filter.DateFrom:dd MMM yyyy} - {filter.DateTo:dd MMM yyyy})"
+                : "SUMMARY (All Data)";
+
             lblSumTotalVal.Text = summary.TotalTested.ToString("N0");
             lblSumPassVal.Text = $"{summary.PassCount:N0} ({FormatPct(summary.PassCount, summary.TotalTested)})";
             lblSumFailVal.Text = $"{summary.FailCount:N0} ({FormatPct(summary.FailCount, summary.TotalTested)})";
@@ -189,7 +221,7 @@ namespace AssemblyLineTester.Views.Pages
             areaTrend.AxisY.LabelStyle.Font = new("Segoe UI", 8.5F);
             areaTrend.AxisY.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaTrend.AxisY.LineColor = Color.Transparent;
-            areaTrend.AxisY.Minimum = 0; // let EF pick a sensible max automatically based on data
+            areaTrend.AxisY.Minimum = 0;
             chartTrend.ChartAreas.Add(areaTrend);
 
             Legend legTrend = new("TrendLegend")
@@ -289,12 +321,14 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        // Pagination always re-renders using the last APPLIED filter, never the live control values.
         private void GoToPage(int page)
         {
             int target = Math.Max(1, Math.Min(page, _totalPages));
             if (target == _currentPage) return;
             _currentPage = target;
-            LoadReportsGrid(BuildFilterFromControls());
+            _appliedFilter.Page = _currentPage;
+            LoadReportsGrid(_appliedFilter);
         }
 
         private void UpdatePaginationUI(int totalCount)

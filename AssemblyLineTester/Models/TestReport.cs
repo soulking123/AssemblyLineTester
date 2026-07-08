@@ -4,6 +4,19 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AssemblyLineTester.Models
 {
+    public enum TestStatus
+    {
+        Completed,
+        InProgress,
+        Stopped
+    }
+
+    public enum TestResult
+    {
+        Pass,
+        Fail
+    }
+
     public class TestReport
     {
         [Key]
@@ -29,11 +42,13 @@ namespace AssemblyLineTester.Models
         public int PassCount { get; set; }
         public int FailCount { get; set; }
 
-        public string OverallResult { get; set; } = string.Empty; // PASS / FAIL / IN_PROGRESS
-        public string? FilePath { get; set; }
+        public TestStatus Status { get; set; } = TestStatus.Completed;
+        public TestResult? OverallResult { get; set; }
 
+        public string? FilePath { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public List<TestDetail> Details { get; set; } = new();
+        public List<TestStep> Steps { get; set; } = new();
     }
 }

@@ -6,6 +6,7 @@
         public int PassCount { get; set; }
         public int FailCount { get; set; }
         public int InProgressCount { get; set; }
+        public int StopCount { get; set; }
         public double PassRatePercent { get; set; }
     }
 }

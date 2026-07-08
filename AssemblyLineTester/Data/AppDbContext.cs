@@ -15,6 +15,8 @@ namespace AssemblyLineTester.Data
         public DbSet<TestReport> TestReports { get; set; } = null!;
         public DbSet<TestDetail> TestDetails { get; set; } = null!;
         public DbSet<TestType> TestTypes { get; set; } = null!;
+        public DbSet<TestStep> TestSteps { get; set; } = null!;
+
 
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -353,6 +355,30 @@ namespace AssemblyLineTester.Data
                 new TestType { Id = 4, TestTypeName = "Functional Test", DisplayName = "Functional Test" },
                 new TestType { Id = 5, TestTypeName = "Final Verification", DisplayName = "Final Verification" }
             );
+
+            // Configure Report → TestStep relationship (One Report has many Test Steps)
+            modelBuilder.Entity<TestStep>()
+                .HasOne(s => s.Report)
+                .WithMany(r => r.Steps)
+                .HasForeignKey(s => s.ReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure TestTypeInfo → TestStep relationship using TestTypeName
+            modelBuilder.Entity<TestStep>()
+                .HasOne(s => s.TestTypeInfo)
+                .WithMany()
+                .HasForeignKey(s => s.TestTypeName)
+                .HasPrincipalKey(t => t.TestTypeName)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Ensure StepNo is unique within each Report
+            modelBuilder.Entity<TestStep>()
+                .HasIndex(s => new { s.ReportId, s.StepNo })
+                .IsUnique();
+
+            // Speeds up Test History pagination/sorting once row count grows into the hundreds/thousands.
+            modelBuilder.Entity<TestReport>()
+                .HasIndex(r => r.TestDateTime);
 
             modelBuilder.Entity<MaintenanceState>().HasData(
                 new MaintenanceState

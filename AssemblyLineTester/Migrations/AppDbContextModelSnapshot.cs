@@ -43,7 +43,7 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            LastUsageDate = new DateTime(2026, 7, 7, 0, 0, 0, 0, DateTimeKind.Local),
+                            LastUsageDate = new DateTime(2026, 7, 8, 0, 0, 0, 0, DateTimeKind.Local),
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,
                             RemainingMaintHours = 2160.0
@@ -235,9 +235,8 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("OverallResult")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("OverallResult")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PartNumber")
                         .IsRequired()
@@ -266,6 +265,9 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("TestDateTime")
                         .HasColumnType("TEXT");
 
@@ -281,7 +283,41 @@ namespace AssemblyLineTester.Migrations
                     b.HasIndex("ReportNumber")
                         .IsUnique();
 
+                    b.HasIndex("TestDateTime");
+
                     b.ToTable("TestReports");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestStep", b =>
+                {
+                    b.Property<int>("StepId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DurationSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Result")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StepNo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestTypeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("StepId");
+
+                    b.HasIndex("TestTypeName");
+
+                    b.HasIndex("ReportId", "StepNo")
+                        .IsUnique();
+
+                    b.ToTable("TestSteps");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.TestType", b =>
@@ -691,6 +727,26 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("TestTypeInfo");
                 });
 
+            modelBuilder.Entity("AssemblyLineTester.Models.TestStep", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestReport", "Report")
+                        .WithMany("Steps")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AssemblyLineTester.Models.TestType", "TestTypeInfo")
+                        .WithMany()
+                        .HasForeignKey("TestTypeName")
+                        .HasPrincipalKey("TestTypeName")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Report");
+
+                    b.Navigation("TestTypeInfo");
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.User", b =>
                 {
                     b.HasOne("AssemblyLineTester.Models.Role", "Role")
@@ -713,6 +769,8 @@ namespace AssemblyLineTester.Migrations
             modelBuilder.Entity("AssemblyLineTester.Models.TestReport", b =>
                 {
                     b.Navigation("Details");
+
+                    b.Navigation("Steps");
                 });
 #pragma warning restore 612, 618
         }
