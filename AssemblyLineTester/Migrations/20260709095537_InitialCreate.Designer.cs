@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260709014752_AddSystemLogAndTestTables")]
-    partial class AddSystemLogAndTestTables
+    [Migration("20260709095537_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -145,6 +145,104 @@ namespace AssemblyLineTester.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SystemLogs");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestConfigNet", b =>
+                {
+                    b.Property<int>("NetConfigId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ConfigId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FromAddress")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FromLabel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HarnessGroup")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("LowerLimit")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("MeasurementUnit")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NetId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SequenceNo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TestTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ToAddress")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ToLabel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("UpperLimit")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("NetConfigId");
+
+                    b.HasIndex("TestTypeId");
+
+                    b.HasIndex("ConfigId", "SequenceNo")
+                        .IsUnique();
+
+                    b.ToTable("TestConfigNets");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestConfiguration", b =>
+                {
+                    b.Property<int>("ConfigId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConfigCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConfigName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProductModel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ConfigId");
+
+                    b.HasIndex("ConfigCode");
+
+                    b.ToTable("TestConfigurations");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.TestDetail", b =>
@@ -710,6 +808,25 @@ namespace AssemblyLineTester.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AssemblyLineTester.Models.TestConfigNet", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestConfiguration", "Configuration")
+                        .WithMany("Nets")
+                        .HasForeignKey("ConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AssemblyLineTester.Models.TestType", "TestType")
+                        .WithMany()
+                        .HasForeignKey("TestTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Configuration");
+
+                    b.Navigation("TestType");
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.TestDetail", b =>
                 {
                     b.HasOne("AssemblyLineTester.Models.TestReport", "Report")
@@ -767,6 +884,11 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestConfiguration", b =>
+                {
+                    b.Navigation("Nets");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.TestReport", b =>

@@ -148,6 +148,10 @@ namespace AssemblyLineTester.Services
         }
 
         // TEMPORARY: SEEDS SAMPLE TEST REPORTS + DETAILS + STEPS. Shared by Reports page and Test History page.
+        // TEMPORARY: Seeds sample test reports + details + steps, spread evenly across
+        // the last 365 days (including today), so every Dashboard time-range option
+        // (Today/7d/30d/3mo/6mo/1yr) has visible data. Only runs once - skipped entirely
+        // once TestReports has any row. Replace with real data ingestion later.
         public void SeedSampleDataIfEmpty()
         {
             using (var db = new AppDbContext())
@@ -167,121 +171,126 @@ namespace AssemblyLineTester.Services
             var allDetails = new List<TestDetail>();
             var allSteps = new List<TestStep>();
 
-            const int totalReports = 220; // roughly matches the "Total: 215" scale seen in Test History
-            var baseTime = DateTime.Now.AddDays(-45);
-
-            for (int r = 1; r <= totalReports; r++)
+            // 365 days ending today, 1-5 reports per weekday, 0-1 on weekends (more realistic).
+            for (int dayOffset = 364; dayOffset >= 0; dayOffset--)
             {
-                var testStart = baseTime.AddMinutes(r * 45 + rnd.Next(0, 20));
+                var day = DateTime.Today.AddDays(-dayOffset);
+                bool isWeekend = day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+                int reportsToday = isWeekend ? rnd.Next(0, 2) : rnd.Next(1, 6);
 
-                string model = productModels[rnd.Next(productModels.Length)];
-                string type = productTypes[rnd.Next(productTypes.Length)];
-                string area = areas[rnd.Next(areas.Length)];
-                string oper = operators[rnd.Next(operators.Length)];
-                string partNumber = $"WH-ENG-{rnd.Next(1, 20):000}";
-                string serialNumber = $"SN{rnd.Next(10000, 99999)}";
-
-                double statusRoll = rnd.NextDouble();
-                TestStatus status = statusRoll < 0.90 ? TestStatus.Completed
-                    : statusRoll < 0.95 ? TestStatus.InProgress
-                    : TestStatus.Stopped;
-
-                var report = new TestReport
+                for (int n = 0; n < reportsToday; n++)
                 {
-                    ReportNumber = $"TR-{testStart:yyyyMMdd-HHmmss}",
-                    ProductModel = model,
-                    ProductType = type,
-                    Area = area,
-                    ECNNumber = $"12{rnd.Next(1, 9)}.R00{rnd.Next(1, 3)}",
-                    Revision = "A",
-                    PartNumber = partNumber,
-                    SerialNumber = serialNumber,
-                    Operator = oper,
-                    TesterModel = "ALT-2000",
-                    TestDateTime = testStart,
-                    Status = status,
-                    CreatedAt = testStart
-                };
+                    var testStart = day.AddHours(7 + rnd.NextDouble() * 10); // spread within 07:00-17:00
 
-                // Completed reports run all 5 steps; InProgress/Stopped only got partway through.
-                int stepsToRun = status == TestStatus.Completed
-                    ? FixedTestTypeOrder.Length
-                    : rnd.Next(1, FixedTestTypeOrder.Length);
+                    string model = productModels[rnd.Next(productModels.Length)];
+                    string type = productTypes[rnd.Next(productTypes.Length)];
+                    string area = areas[rnd.Next(areas.Length)];
+                    string oper = operators[rnd.Next(operators.Length)];
+                    string partNumber = $"WH-ENG-{rnd.Next(1, 20):000}";
+                    string serialNumber = $"SN{rnd.Next(10000, 99999)}";
 
-                int detailCount = 0;
-                int passCount = 0;
-                var cursor = testStart;
+                    double statusRoll = rnd.NextDouble();
+                    var status = statusRoll < 0.92 ? TestStatus.Completed
+                        : statusRoll < 0.97 ? TestStatus.InProgress
+                        : TestStatus.Stopped;
 
-                int[] countsPerType = { rnd.Next(30, 45), rnd.Next(0, 5), rnd.Next(5, 12), rnd.Next(0, 8), rnd.Next(0, 6) };
-
-                for (int t = 0; t < stepsToRun; t++)
-                {
-                    string testType = FixedTestTypeOrder[t];
-                    int count = countsPerType[t];
-                    int stepDurationSeconds = rnd.Next(20, 150);
-                    bool stepAllPassed = true;
-
-                    for (int n = 1; n <= count; n++)
+                    var report = new TestReport
                     {
-                        detailCount++;
-                        bool forceFail = rnd.NextDouble() < 0.04;
-                        bool isOpen = forceFail && rnd.NextDouble() < 0.3;
+                        ReportNumber = $"TR-{testStart:yyyyMMdd-HHmmss}",
+                        ProductModel = model,
+                        ProductType = type,
+                        Area = area,
+                        ECNNumber = $"12{rnd.Next(1, 9)}.R00{rnd.Next(1, 3)}",
+                        Revision = "A",
+                        PartNumber = partNumber,
+                        SerialNumber = serialNumber,
+                        Operator = oper,
+                        TesterModel = "ALT-2000",
+                        TestDateTime = testStart,
+                        Status = status,
+                        OverallResult = null,
+                        CreatedAt = testStart
+                    };
 
-                        var (measured, lower, upper, unit, result, errorDetail) = GenerateMeasurement(testType, forceFail, isOpen, rnd);
-                        if (result) passCount++;
-                        else stepAllPassed = false;
+                    int stepsToRun = status == TestStatus.Completed
+                        ? FixedTestTypeOrder.Length
+                        : rnd.Next(1, FixedTestTypeOrder.Length);
 
-                        allDetails.Add(new TestDetail
+                    int detailCount = 0;
+                    int passCount = 0;
+                    var cursor = testStart;
+
+                    int[] countsPerType = { rnd.Next(20, 35), rnd.Next(0, 5), rnd.Next(5, 12), rnd.Next(0, 8), rnd.Next(0, 6) };
+
+                    for (int t = 0; t < stepsToRun; t++)
+                    {
+                        string testType = FixedTestTypeOrder[t];
+                        int count = countsPerType[t];
+                        int stepDurationSeconds = rnd.Next(20, 150);
+                        bool stepAllPassed = true;
+
+                        for (int i = 1; i <= count; i++)
+                        {
+                            detailCount++;
+                            bool forceFail = rnd.NextDouble() < 0.04;
+                            bool isOpen = forceFail && rnd.NextDouble() < 0.3;
+
+                            var (measured, lower, upper, unit, result, errorDetail) = GenerateMeasurement(testType, forceFail, isOpen, rnd);
+                            if (result) passCount++;
+                            else stepAllPassed = false;
+
+                            allDetails.Add(new TestDetail
+                            {
+                                Report = report,
+                                NetId = $"N{detailCount:000}",
+                                HarnessGroup = $"{area} Connector",
+                                FromPin = $"J{rnd.Next(1, 9)}-{rnd.Next(1, 20)}",
+                                ToPin = $"J{rnd.Next(9, 13)}-{rnd.Next(1, 20)}",
+                                Color = colors[rnd.Next(colors.Length)],
+                                TestTypeName = testType,
+                                MeasuredValue = measured,
+                                LowerLimit = lower,
+                                UpperLimit = upper,
+                                Unit = unit,
+                                Result = result,
+                                ErrorDetail = errorDetail
+                            });
+                        }
+
+                        allSteps.Add(new TestStep
                         {
                             Report = report,
-                            NetId = $"N{detailCount:000}",
-                            HarnessGroup = $"{area} Connector",
-                            FromPin = $"J{rnd.Next(1, 9)}-{rnd.Next(1, 20)}",
-                            ToPin = $"J{rnd.Next(9, 13)}-{rnd.Next(1, 20)}",
-                            Color = colors[rnd.Next(colors.Length)],
+                            StepNo = t + 1,
                             TestTypeName = testType,
-                            MeasuredValue = measured,
-                            LowerLimit = lower,
-                            UpperLimit = upper,
-                            Unit = unit,
-                            Result = result,
-                            ErrorDetail = errorDetail
+                            Result = stepAllPassed,
+                            DurationSeconds = stepDurationSeconds
                         });
+
+                        cursor = cursor.AddSeconds(stepDurationSeconds);
                     }
 
-                    allSteps.Add(new TestStep
+                    report.TotalNets = detailCount;
+                    report.PassCount = passCount;
+                    report.FailCount = detailCount - passCount;
+
+                    if (status == TestStatus.Completed)
                     {
-                        Report = report,
-                        StepNo = t + 1,
-                        TestTypeName = testType,
-                        Result = stepAllPassed,
-                        DurationSeconds = stepDurationSeconds
-                    });
+                        report.OverallResult = report.FailCount == 0 ? TestResult.Pass : TestResult.Fail;
+                        report.EndDateTime = cursor;
+                    }
+                    else if (status == TestStatus.Stopped)
+                    {
+                        report.OverallResult = null;
+                        report.EndDateTime = cursor;
+                    }
+                    else // InProgress
+                    {
+                        report.OverallResult = null;
+                        report.EndDateTime = null;
+                    }
 
-                    cursor = cursor.AddSeconds(stepDurationSeconds);
+                    reports.Add(report);
                 }
-
-                report.TotalNets = detailCount;
-                report.PassCount = passCount;
-                report.FailCount = detailCount - passCount;
-
-                if (status == TestStatus.Completed)
-                {
-                    report.OverallResult = report.FailCount == 0 ? TestResult.Pass : TestResult.Fail;
-                    report.EndDateTime = cursor;
-                }
-                else if (status == TestStatus.Stopped)
-                {
-                    report.OverallResult = null;
-                    report.EndDateTime = cursor; 
-                }
-                else // InProgress
-                {
-                    report.OverallResult = null;
-                    report.EndDateTime = null; 
-                }
-
-                reports.Add(report);
             }
 
             using (var db = new AppDbContext())
