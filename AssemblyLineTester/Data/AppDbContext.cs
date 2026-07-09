@@ -16,6 +16,8 @@ namespace AssemblyLineTester.Data
         public DbSet<TestDetail> TestDetails { get; set; } = null!;
         public DbSet<TestType> TestTypes { get; set; } = null!;
         public DbSet<TestStep> TestSteps { get; set; } = null!;
+        public DbSet<TestConfiguration> TestConfigurations { get; set; } = null!;
+        public DbSet<TestConfigNet> TestConfigNets { get; set; } = null!;
 
 
         /// Configures the database provider and connection string.
@@ -390,6 +392,29 @@ namespace AssemblyLineTester.Data
                     RemainingMaintHours = 2160.0
                 }
             );
+
+            // Configure relationship between TestConfiguration and TestConfigNet
+            modelBuilder.Entity<TestConfigNet>()
+                .HasOne(n => n.Configuration)
+                .WithMany(c => c.Nets)
+                .HasForeignKey(n => n.ConfigId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure relationship between TestConfigNet and TestType
+            modelBuilder.Entity<TestConfigNet>()
+                .HasOne(n => n.TestType)
+                .WithMany()
+                .HasForeignKey(n => n.TestTypeId)
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            // Create an index for faster search by ConfigCode
+            modelBuilder.Entity<TestConfiguration>()
+                .HasIndex(c => c.ConfigCode);
+
+            // Make SequenceNo unique within the same configuration
+            modelBuilder.Entity<TestConfigNet>()
+                .HasIndex(n => new { n.ConfigId, n.SequenceNo })
+                .IsUnique();
         }
     }
 }
