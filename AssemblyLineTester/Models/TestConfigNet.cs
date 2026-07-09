@@ -10,6 +10,7 @@ namespace AssemblyLineTester.Models
 
         public int ConfigId { get; set; }
         public TestConfiguration Configuration { get; set; } = null!;
+        public string NetId { get; set; } = string.Empty;
 
         public int SequenceNo { get; set; }
 

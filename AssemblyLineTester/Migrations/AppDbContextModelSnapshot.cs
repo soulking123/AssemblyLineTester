@@ -171,6 +171,10 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("NetId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("SequenceNo")
                         .HasColumnType("INTEGER");
 
