@@ -7,69 +7,42 @@ namespace AssemblyLineTester.Views.Pages
 {
     public partial class Reports : UserControl
     {
+        private Chart chartTrend = null!;
+
         public Reports()
         {
             InitializeComponent();
+            this.Load += Reports_Load;
+        }
+
+        private void Reports_Load(object? sender, EventArgs e)
+        {
+            if (DesignMode || System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                return;
+            }
             InitializeCustomStyles();
             LoadDummyData();
         }
 
         private void InitializeCustomStyles()
         {
-            // Set Default ComboBox Selections
+            // Create Chart programmatically to avoid WinForms Designer serialization issues
+            chartTrend = new Chart
+            {
+                Dock = DockStyle.Fill,
+                Name = "chartTrend",
+                TabIndex = 1
+            };
+            cardTrend.Controls.Add(chartTrend);
+            cardTrend.Controls.SetChildIndex(chartTrend, 0);
             if (cmbReportType.Items.Count > 0) cmbReportType.SelectedIndex = 0;
             if (cmbModel.Items.Count > 0) cmbModel.SelectedIndex = 0;
             if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
-            if (cmbOperator.Items.Count > 0) cmbOperator.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
-
-            // DataGridView Modern Styling
-            gridReports.BorderStyle = BorderStyle.None;
-            gridReports.BackgroundColor = Color.White;
-            gridReports.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            gridReports.GridColor = Color.FromArgb(241, 245, 249);
-            gridReports.RowHeadersVisible = false;
-            gridReports.AllowUserToAddRows = false;
-            gridReports.AllowUserToDeleteRows = false;
-            gridReports.ReadOnly = true;
-            gridReports.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridReports.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            gridReports.EnableHeadersVisualStyles = false;
-
-            // Header Style
-            gridReports.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
-            gridReports.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
-            gridReports.ColumnHeadersDefaultCellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
-            gridReports.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(248, 250, 252);
-            gridReports.ColumnHeadersDefaultCellStyle.Padding = new(8, 4, 8, 4);
-            gridReports.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            gridReports.ColumnHeadersHeight = 48;
-
-            // Row Style
-            gridReports.DefaultCellStyle.BackColor = Color.White;
-            gridReports.DefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
-            gridReports.DefaultCellStyle.SelectionBackColor = Color.FromArgb(241, 245, 249);
-            gridReports.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 41, 59);
-            gridReports.DefaultCellStyle.Padding = new(6);
-            gridReports.RowTemplate.Height = 48;
-
-            // Alignments
-            if (gridReports.Columns["colNo"] is { } colNo)
-                colNo.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-            if (gridReports.Columns["colReportType"] is { } colReportType)
-                colReportType.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-            if (gridReports.Columns["colDateGenerated"] is { } colDateGenerated)
-                colDateGenerated.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-            if (gridReports.Columns["colSize"] is { } colSize)
-                colSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-
-            if (gridReports.Columns["colAction"] is { } colAction)
-                colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
+            if (dtpStart != null) dtpStart.Value = DateTime.Today.AddDays(-7);
+            if (dtpEnd != null) dtpEnd.Value = DateTime.Today;
             gridReports.CellFormatting += GridReports_CellFormatting;
         }
 

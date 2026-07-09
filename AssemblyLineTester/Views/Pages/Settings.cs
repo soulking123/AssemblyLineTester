@@ -16,6 +16,15 @@ namespace AssemblyLineTester.Views.Pages
         public Settings()
         {
             InitializeComponent();
+            if (cmbLang.Items.Count > 0) cmbLang.SelectedIndex = 0;
+            if (cmbDateFormat.Items.Count > 0) cmbDateFormat.SelectedIndex = 0;
+            if (cmbTimeFormat.Items.Count > 0) cmbTimeFormat.SelectedIndex = 0;
+            if (cmbAutoLogout.Items.Count > 0) cmbAutoLogout.SelectedIndex = 0;
+            if (cmbTestType.Items.Count > 0) cmbTestType.SelectedIndex = 0;
+            if (cmbDefaultArea.Items.Count > 0) cmbDefaultArea.SelectedIndex = 0;
+            if (cmbDefaultOp.Items.Count > 0) cmbDefaultOp.SelectedIndex = 0;
+            if (cmbRefresh.Items.Count > 0) cmbRefresh.SelectedIndex = 0;
+            if (cmbTimeZone.Items.Count > 0) cmbTimeZone.SelectedIndex = 0;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -23,7 +32,6 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                InitializeDefaults();
                 SetupInteractiveTabs();
                 AdjustCardLayouts();
             }
@@ -47,11 +55,12 @@ namespace AssemblyLineTester.Views.Pages
             {
                 if (ctrl is TableLayoutPanel tbl && tbl.RowCount == 2 && tbl.Controls.Count >= 2)
                 {
+                    tbl.AutoSize = true;
                     tbl.Margin = new Padding(6, 2, 6, 2);
                     if (tbl.RowStyles.Count >= 2)
                     {
                         tbl.RowStyles[0] = new RowStyle(SizeType.AutoSize);
-                        tbl.RowStyles[1] = new RowStyle(SizeType.Percent, 100F);
+                        tbl.RowStyles[1] = new RowStyle(SizeType.AutoSize);
                     }
                 }
                 if (ctrl.HasChildren)
@@ -61,18 +70,6 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void InitializeDefaults()
-        {
-            if (cmbLang.Items.Count > 0) cmbLang.SelectedIndex = 0;
-            if (cmbDateFormat.Items.Count > 0) cmbDateFormat.SelectedIndex = 0;
-            if (cmbTimeFormat.Items.Count > 0) cmbTimeFormat.SelectedIndex = 0;
-            if (cmbAutoLogout.Items.Count > 0) cmbAutoLogout.SelectedIndex = 0;
-            if (cmbTestType.Items.Count > 0) cmbTestType.SelectedIndex = 0;
-            if (cmbDefaultArea.Items.Count > 0) cmbDefaultArea.SelectedIndex = 0;
-            if (cmbDefaultOp.Items.Count > 0) cmbDefaultOp.SelectedIndex = 0;
-            if (cmbRefresh.Items.Count > 0) cmbRefresh.SelectedIndex = 0;
-            if (cmbTimeZone.Items.Count > 0) cmbTimeZone.SelectedIndex = 0;
-        }
 
         private void SetupInteractiveTabs()
         {

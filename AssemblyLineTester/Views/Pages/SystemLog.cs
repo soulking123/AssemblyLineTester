@@ -33,6 +33,23 @@ namespace AssemblyLineTester.Views.Pages
 
             gridData.CellPainting += gridData_CellPainting;
             btnRefresh.Click += (s, ev) => { LoadDummyLogData(); };
+
+            if (cmbLogLevel.Items.Count > 0) cmbLogLevel.SelectedIndex = 0;
+            if (cmbModule.Items.Count > 0) cmbModule.SelectedIndex = 0;
+            if (cmbUser.Items.Count > 0) cmbUser.SelectedIndex = 0;
+            if (cmbAction.Items.Count > 0) cmbAction.SelectedIndex = 0;
+
+            btnSearch.Click += (s, ev) => { _currentPage = 1; PopulateLogGrid(); };
+            btnReset.Click += (s, ev) =>
+            {
+                if (cmbLogLevel.Items.Count > 0) cmbLogLevel.SelectedIndex = 0;
+                if (cmbModule.Items.Count > 0) cmbModule.SelectedIndex = 0;
+                if (cmbUser.Items.Count > 0) cmbUser.SelectedIndex = 0;
+                if (cmbAction.Items.Count > 0) cmbAction.SelectedIndex = 0;
+                txtKeyword.Text = "";
+                _currentPage = 1;
+                PopulateLogGrid();
+            };
         }
 
         protected override void OnLoad(EventArgs e)
@@ -111,13 +128,23 @@ namespace AssemblyLineTester.Views.Pages
             SetColumnWidth(gridData, "Description", 260);
             SetColumnWidth(gridData, "IP", 130);
 
-            int totalLogs = _allLogs.Count;
+            var filteredLogs = _allLogs.Where(l =>
+            {
+                if (cmbLogLevel.SelectedItem is string level && level != "All" && !string.Equals(l[2], level, StringComparison.OrdinalIgnoreCase)) return false;
+                if (cmbModule.SelectedItem is string module && module != "All" && !string.Equals(l[3], module, StringComparison.OrdinalIgnoreCase)) return false;
+                if (cmbUser.SelectedItem is string user && user != "All" && !string.Equals(l[4], user, StringComparison.OrdinalIgnoreCase)) return false;
+                if (cmbAction.SelectedItem is string action && action != "All" && !string.Equals(l[5], action, StringComparison.OrdinalIgnoreCase)) return false;
+                if (!string.IsNullOrWhiteSpace(txtKeyword.Text) && !l.Any(col => col.Contains(txtKeyword.Text, StringComparison.OrdinalIgnoreCase))) return false;
+                return true;
+            }).ToList();
+
+            int totalLogs = filteredLogs.Count;
             int totalPages = (int)Math.Ceiling(totalLogs / (double)_pageSize);
             if (totalPages == 0) totalPages = 1;
             if (_currentPage > totalPages) _currentPage = totalPages;
             if (_currentPage < 1) _currentPage = 1;
 
-            var pageLogs = _allLogs.Skip((_currentPage - 1) * _pageSize).Take(_pageSize);
+            var pageLogs = filteredLogs.Skip((_currentPage - 1) * _pageSize).Take(_pageSize);
             foreach (var log in pageLogs)
             {
                 gridData.Rows.Add(log);
