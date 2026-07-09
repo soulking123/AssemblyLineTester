@@ -394,6 +394,7 @@ namespace AssemblyLineTester.Views.Modals
             // Guarantee at least 55 pixels per row so 60 connections never overlap!
             float rowSpacing = Math.Max(55f, availHeight / Math.Max(rowCount, 1));
 
+            List<DiagramNode> rawLeftNodes = [];
             List<DiagramNode> rawRightNodes = [];
 
             for (int i = 0; i < rowCount; i++)
@@ -404,18 +405,14 @@ namespace AssemblyLineTester.Views.Modals
                 string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
                 string toLabel = row.Cells["colToLabel"].Value?.ToString() ?? $"Y1-0{i + 1}";
 
-                float yPos = startY + i * rowSpacing;
-
                 DiagramNode lNode = new()
                 {
                     RowIndex = i,
                     Address = fromAddr,
                     Label = fromLabel,
-                    IsLeft = true,
-                    NodeRect = new(190, yPos - 20, 42, 42),
-                    LabelRect = new(50, yPos - 18, 120, 36)
+                    IsLeft = true
                 };
-                leftNodes.Add(lNode);
+                rawLeftNodes.Add(lNode);
 
                 DiagramNode rNode = new()
                 {
@@ -427,14 +424,25 @@ namespace AssemblyLineTester.Views.Modals
                 rawRightNodes.Add(rNode);
             }
 
-            // Sort right nodes ascending by address to create the signature crossover pattern
+            // Sort left nodes ascending by address so the smallest address is always at the top!
+            var sortedLeftNodes = rawLeftNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
+            for (int idx = 0; idx < sortedLeftNodes.Count; idx++)
+            {
+                float yPos = startY + idx * rowSpacing;
+                var lNode = sortedLeftNodes[idx];
+                lNode.NodeRect = new(185, yPos - 22, 50, 44);
+                lNode.LabelRect = new(45, yPos - 18, 132, 36);
+                leftNodes.Add(lNode);
+            }
+
+            // Sort right nodes ascending by address so the smallest address is always at the top!
             var sortedRightNodes = rawRightNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
             for (int idx = 0; idx < sortedRightNodes.Count; idx++)
             {
                 float yPos = startY + idx * rowSpacing;
                 var rNode = sortedRightNodes[idx];
-                rNode.NodeRect = new(r.Width - 232, yPos - 20, 42, 42);
-                rNode.LabelRect = new(r.Width - 170, yPos - 18, 120, 36);
+                rNode.NodeRect = new(r.Width - 235, yPos - 22, 50, 44);
+                rNode.LabelRect = new(r.Width - 177, yPos - 18, 132, 36);
                 rightNodes.Add(rNode);
             }
 
@@ -477,14 +485,15 @@ namespace AssemblyLineTester.Views.Modals
 
             using Font fontLabel = new("Segoe UI", 9.5F, FontStyle.Bold);
             using Font fontAddr = new("Segoe UI", 10.5F, FontStyle.Bold);
-            using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            using StringFormat sfLabel = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap, Trimming = StringTrimming.EllipsisCharacter };
+            using StringFormat sfAddr = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.NoClip };
 
             // PASS 2: Draw UNHIGHLIGHTED nodes and labels
             foreach (var node in leftNodes.Concat(rightNodes))
             {
                 if (!highlightedRows.Contains(node.RowIndex))
                 {
-                    DrawNodeAndLabel(g, node, false, fontLabel, fontAddr, sf);
+                    DrawNodeAndLabel(g, node, false, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
             }
 
@@ -505,35 +514,36 @@ namespace AssemblyLineTester.Views.Modals
             {
                 if (highlightedRows.Contains(node.RowIndex))
                 {
-                    DrawNodeAndLabel(g, node, true, fontLabel, fontAddr, sf);
+                    DrawNodeAndLabel(g, node, true, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
             }
         }
 
-        private static void DrawNodeAndLabel(Graphics g, DiagramNode node, bool isHighlight, Font fontLabel, Font fontAddr, StringFormat sf)
+        private static void DrawNodeAndLabel(Graphics g, DiagramNode node, bool isHighlight, Font fontLabel, Font fontAddr, StringFormat sfLabel, StringFormat sfAddr)
         {
             if (isHighlight)
             {
                 RectangleF haloRect = RectangleF.Inflate(node.NodeRect, 6f, 6f);
                 using SolidBrush haloFill = new(Color.FromArgb(254, 240, 138));
                 using Pen haloBorder = new(Color.FromArgb(245, 158, 11), 3f);
-                g.FillEllipse(haloFill, haloRect);
-                g.DrawEllipse(haloBorder, haloRect);
+                DrawRoundedRectangle(g, haloFill, haloBorder, haloRect, 24f);
             }
 
             using SolidBrush labelBg = new(isHighlight ? Color.FromArgb(254, 249, 195) : Color.FromArgb(226, 232, 240));
             using Pen labelBorder = new(isHighlight ? Color.FromArgb(245, 158, 11) : Color.FromArgb(203, 213, 225), 1.5f);
             using SolidBrush labelText = new(Color.FromArgb(30, 41, 59));
             DrawRoundedRectangle(g, labelBg, labelBorder, node.LabelRect, 8f);
-            g.DrawString(node.Label, fontLabel, labelText, node.LabelRect, sf);
+            g.DrawString(node.Label, fontLabel, labelText, node.LabelRect, sfLabel);
 
             Color nodeColor = node.IsLeft ? Color.FromArgb(0, 180, 216) : Color.FromArgb(74, 222, 128);
             using SolidBrush nodeFill = new(nodeColor);
             using Pen nodeBorder = new(Color.FromArgb(15, 23, 42), 2f);
             using SolidBrush addrText = new(Color.FromArgb(15, 23, 42));
-            g.FillEllipse(nodeFill, node.NodeRect);
-            g.DrawEllipse(nodeBorder, node.NodeRect);
-            g.DrawString(node.Address, fontAddr, addrText, node.NodeRect, sf);
+            DrawRoundedRectangle(g, nodeFill, nodeBorder, node.NodeRect, 20f);
+
+            float dynamicSize = node.Address.Length >= 4 ? 7.5F : (node.Address.Length == 3 ? 8.5F : (node.Address.Length == 2 ? 9.5F : 10.5F));
+            using Font dynamicAddrFont = new("Segoe UI", dynamicSize, FontStyle.Bold);
+            g.DrawString(node.Address, dynamicAddrFont, addrText, node.NodeRect, sfAddr);
         }
 
         private static void DrawRoundedRectangle(Graphics g, Brush brush, Pen pen, RectangleF rect, float radius)
