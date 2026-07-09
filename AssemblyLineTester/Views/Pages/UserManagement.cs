@@ -426,7 +426,7 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.Columns[cDept].FillWeight = 95F;
 
             var cStatus = gridUsers.Columns.Add("colStatus", "Status");
-            gridUsers.Columns[cStatus].FillWeight = 65F;
+            gridUsers.Columns[cStatus].FillWeight = 75F;
             gridUsers.Columns[cStatus].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
             var cLogin = gridUsers.Columns.Add("colLastLogin", "Last Login");
@@ -460,20 +460,20 @@ namespace AssemblyLineTester.Views.Pages
                 Color pillColor = status == "Active" ? Color.FromArgb(220, 252, 231) : (status == "Locked" ? Color.FromArgb(254, 226, 226) : Color.FromArgb(226, 232, 240));
                 Color textColor = status == "Active" ? Color.FromArgb(22, 101, 52) : (status == "Locked" ? Color.FromArgb(153, 27, 27) : Color.FromArgb(71, 85, 105));
                 
-                int badgeWidth = 68;
+                using var font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+                Size textSize = TextRenderer.MeasureText(status, font);
+                int badgeWidth = Math.Max(72, textSize.Width + 20);
                 int badgeHeight = 26;
                 int x = e.CellBounds.X + (e.CellBounds.Width - badgeWidth) / 2;
                 int y = e.CellBounds.Y + (e.CellBounds.Height - badgeHeight) / 2;
                 Rectangle badgeRect = new(x, y, badgeWidth, badgeHeight);
 
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                using (var brush = new SolidBrush(pillColor))
-                using (var path = GetRoundedRectPath(badgeRect, 6))
-                {
-                    e.Graphics.FillPath(brush, path);
-                }
+                using var brush = new SolidBrush(pillColor);
+                using var path = GetRoundedRectPath(badgeRect, 6);
+                e.Graphics.FillPath(brush, path);
 
-                TextRenderer.DrawText(e.Graphics, status, new Font("Segoe UI", 8.5F, FontStyle.Bold), badgeRect, textColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                TextRenderer.DrawText(e.Graphics, status, font, badgeRect, textColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 
                 e.Handled = true;
             }

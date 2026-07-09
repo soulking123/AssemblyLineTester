@@ -16,6 +16,13 @@ namespace AssemblyLineTester.Views.Pages
             InitializeComponent();
             LoadDummyData();
             SetupDiagramPointers();
+            btnLoadProgram.Click += BtnLoadProgram_Click;
+        }
+
+        private void BtnLoadProgram_Click(object? sender, EventArgs e)
+        {
+            using var modal = new AssemblyLineTester.Views.Modals.AutomatedTestConfigModalForm();
+            modal.ShowDialog(this);
         }
 
         private void LoadDummyData()
