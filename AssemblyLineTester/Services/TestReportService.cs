@@ -193,6 +193,7 @@ namespace AssemblyLineTester.Services
                     var status = statusRoll < 0.92 ? TestStatus.Completed
                         : statusRoll < 0.97 ? TestStatus.InProgress
                         : TestStatus.Stopped;
+                    bool intendedPass = rnd.NextDouble() < 0.60;
 
                     var report = new TestReport
                     {
@@ -232,7 +233,7 @@ namespace AssemblyLineTester.Services
                         for (int i = 1; i <= count; i++)
                         {
                             detailCount++;
-                            bool forceFail = rnd.NextDouble() < 0.04;
+                            bool forceFail = !intendedPass && rnd.NextDouble() < 0.15;
                             bool isOpen = forceFail && rnd.NextDouble() < 0.3;
 
                             var (measured, lower, upper, unit, result, errorDetail) = GenerateMeasurement(testType, forceFail, isOpen, rnd);
