@@ -28,6 +28,17 @@ namespace AssemblyLineTester.Views
         {
             pageUserManagement = new UserManagement(_userService);
             InitializeComponent();
+
+            // Load CAT logo image into sidebar menu header
+            try
+            {
+                string logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
+                if (System.IO.File.Exists(logoPath))
+                {
+                    lblMenu.Image = Image.FromFile(logoPath);
+                }
+            }
+            catch { /* fallback silently */ }
             this.WindowState = FormWindowState.Maximized;
             expandedWidth = splitContainer1.SplitterDistance;
             collapsedWidth = this.LogicalToDeviceUnits(85);
@@ -45,6 +56,29 @@ namespace AssemblyLineTester.Views
             pnlDateTime.Click += CloseDropdownIfOpen;
             lblDateText.Click += CloseDropdownIfOpen;
             lblTimeText.Click += CloseDropdownIfOpen;
+
+            // Wire up header dragging for borderless form
+            pnlTopHeader.MouseDown += Header_MouseDown;
+            lblHeaderTitle.MouseDown += Header_MouseDown;
+            pnlRight.MouseDown += Header_MouseDown;
+            pnlDateTime.MouseDown += Header_MouseDown;
+            lblDateText.MouseDown += Header_MouseDown;
+            lblTimeText.MouseDown += Header_MouseDown;
+
+            btnMinimize.Click += (s, e) => { this.WindowState = FormWindowState.Minimized; };
+            btnMaximize.Click += (s, e) => { ToggleMaximize(); };
+            btnClose.Click += (s, e) => { this.Close(); };
+
+            btnMinimize.MouseEnter += (s, e) => { btnMinimize.BackColor = Color.FromArgb(226, 232, 240); btnMinimize.ForeColor = Color.FromArgb(15, 23, 42); };
+            btnMinimize.MouseLeave += (s, e) => { btnMinimize.BackColor = Color.Transparent; btnMinimize.ForeColor = Color.FromArgb(100, 116, 139); };
+
+            btnMaximize.MouseEnter += (s, e) => { btnMaximize.BackColor = Color.FromArgb(226, 232, 240); btnMaximize.ForeColor = Color.FromArgb(15, 23, 42); };
+            btnMaximize.MouseLeave += (s, e) => { btnMaximize.BackColor = Color.Transparent; btnMaximize.ForeColor = Color.FromArgb(100, 116, 139); };
+
+            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(239, 68, 68); btnClose.ForeColor = Color.White; };
+            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.ForeColor = Color.FromArgb(100, 116, 139); };
+
+            this.Resize += MainForm_Resize;
 
             SetActiveMenu(btnDashboard, pageDashboard);
         }
@@ -73,10 +107,10 @@ namespace AssemblyLineTester.Views
 
         private void ApplySidebarStyles()
         {
-            Button[] menuButtons = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
+            AssemblyLineTester.Views.Controls.MenuButton[] menuButtons = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
             Font menuFont = new("Segoe UI", 11F, FontStyle.Regular);
 
-            foreach (Button btn in menuButtons)
+            foreach (var btn in menuButtons)
             {
                 btn.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
                 btn.FlatAppearance.BorderSize = 0;
@@ -88,20 +122,46 @@ namespace AssemblyLineTester.Views
                 btn.BackColor = Color.Transparent;
             }
 
+            btnDashboard.EmojiIcon = "📊";
+            btnDashboard.FullText = "  📊    Dashboard";
             btnDashboard.Text = "  📊    Dashboard";
+
+            btnTestExecution.EmojiIcon = "⚡";
+            btnTestExecution.FullText = "  ⚡    Test Execution";
             btnTestExecution.Text = "  ⚡    Test Execution";
+
+            btnHarnessDatabase.EmojiIcon = "🗄️";
+            btnHarnessDatabase.FullText = "  🗄️    Harness Database";
             btnHarnessDatabase.Text = "  🗄️    Harness Database";
+
+            btnTestHistory.EmojiIcon = "📜";
+            btnTestHistory.FullText = "  📜    Test History";
             btnTestHistory.Text = "  📜    Test History";
+
+            btnReports.EmojiIcon = "📑";
+            btnReports.FullText = "  📑    Reports";
             btnReports.Text = "  📑    Reports";
+
+            btnSystemLog.EmojiIcon = "🖥️";
+            btnSystemLog.FullText = "  🖥️    System Log";
             btnSystemLog.Text = "  🖥️    System Log";
+
+            btnSettings.EmojiIcon = "⚙️";
+            btnSettings.FullText = "  ⚙️    Settings";
             btnSettings.Text = "  ⚙️    Settings";
+
+            btnUserManagement.EmojiIcon = "👥";
+            btnUserManagement.FullText = "  👥    User Management";
             btnUserManagement.Text = "  👥    User Management";
+
+            // Set Dashboard as initial active menu
+            btnDashboard.IsActive = true;
         }
 
         // IDE1006 FIX: Huruf awal kapital (PascalCase)
         private void BtnMenu_Click(object sender, EventArgs e)
         {
-            if (sender is not Button clickedButton) return;
+            if (sender is not AssemblyLineTester.Views.Controls.MenuButton clickedButton) return;
 
             UserControl? targetPage = clickedButton.Name switch
             {
@@ -119,7 +179,7 @@ namespace AssemblyLineTester.Views
             SetActiveMenu(clickedButton, targetPage);
         }
 
-        private void SetActiveMenu(Button activeBtn, UserControl? activePage)
+        private void SetActiveMenu(AssemblyLineTester.Views.Controls.MenuButton activeBtn, UserControl? activePage)
         {
             if (pnlUserDropdown != null && pnlUserDropdown.Visible)
             {
@@ -127,16 +187,12 @@ namespace AssemblyLineTester.Views
                 lblArrow.Text = "⌄";
             }
 
-            Button[] allMenus = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
+            AssemblyLineTester.Views.Controls.MenuButton[] allMenus = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
 
-            foreach (Button btn in allMenus)
+            foreach (var btn in allMenus)
             {
-                btn.BackColor = Color.Transparent;
-                btn.ForeColor = Color.White;
+                btn.IsActive = (btn == activeBtn);
             }
-
-            activeBtn.BackColor = Color.FromArgb(255, 193, 7);
-            activeBtn.ForeColor = Color.Black;
 
             if (pnlContent == null) return;
             pnlContent.Controls.Clear();
@@ -149,7 +205,7 @@ namespace AssemblyLineTester.Views
             {
                 Label lblPlaceholder = new Label
                 {
-                    Text = $"{activeBtn.Text.Trim()} (Under Construction)",
+                    Text = $"{activeBtn.FullText.Trim()} (Under Construction)",
                     Font = new Font("Segoe UI", 16F, FontStyle.Bold),
                     ForeColor = Color.FromArgb(100, 116, 139),
                     Dock = DockStyle.Fill,
@@ -163,17 +219,49 @@ namespace AssemblyLineTester.Views
         // IDE1006 FIX: Huruf awal kapital (PascalCase)
         private void BtnToggleSidebar_Click(object sender, EventArgs e)
         {
+            var menuButtons = new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
+
             if (isSidebarExpanded)
             {
                 splitContainer1.SplitterDistance = collapsedWidth;
                 isSidebarExpanded = false;
-                lblMenu.Visible = false;
+
+                pnlLogoHeader.IsMinimized = true;
+                pnlLogoHeader.Size = new Size(collapsedWidth, 85);
+                lblMenu.Size = new Size(65, 65);
+                lblMenu.Location = new Point((collapsedWidth - 65) / 2, 10);
+                btnToggleSidebar.Location = new Point(0, 88);
+                btnToggleSidebar.Size = new Size(collapsedWidth, 66);
+
+                int currentY = 180;
+                foreach (var btn in menuButtons)
+                {
+                    btn.SetMinimized(true);
+                    btn.Location = new Point(0, currentY);
+                    btn.Width = collapsedWidth;
+                    currentY += btn.Height + 12;
+                }
             }
             else
             {
                 splitContainer1.SplitterDistance = expandedWidth;
                 isSidebarExpanded = true;
-                lblMenu.Visible = true;
+
+                pnlLogoHeader.IsMinimized = false;
+                pnlLogoHeader.Size = new Size(300, 130);
+                lblMenu.Size = new Size(200, 90);
+                lblMenu.Location = new Point(16, 20);
+                btnToggleSidebar.Location = new Point(320, 24);
+                btnToggleSidebar.Size = new Size(88, 88);
+
+                int currentY = 160;
+                foreach (var btn in menuButtons)
+                {
+                    btn.SetMinimized(false);
+                    btn.Location = new Point(32, currentY);
+                    btn.Width = expandedWidth - 55;
+                    currentY += btn.Height + 16;
+                }
             }
         }
 
@@ -238,6 +326,89 @@ namespace AssemblyLineTester.Views
         {
             base.OnFormClosed(e);
             Application.Exit();
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool ReleaseCapture();
+
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HT_CAPTION = 0x2;
+
+        private void Header_MouseDown(object? sender, MouseEventArgs e)
+        {
+            CloseDropdownIfOpen(sender, e);
+            if (e.Button == MouseButtons.Left)
+            {
+                if (e.Clicks == 2)
+                {
+                    ToggleMaximize();
+                    return;
+                }
+                ReleaseCapture();
+                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+        }
+
+        private void ToggleMaximize()
+        {
+            if (this.WindowState == FormWindowState.Maximized)
+            {
+                this.WindowState = FormWindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = FormWindowState.Maximized;
+            }
+            UpdateMaximizeButtonText();
+        }
+
+        private void MainForm_Resize(object? sender, EventArgs e)
+        {
+            UpdateMaximizeButtonText();
+        }
+
+        private void UpdateMaximizeButtonText()
+        {
+            if (btnMaximize != null)
+            {
+                btnMaximize.Text = (this.WindowState == FormWindowState.Maximized) ? "❐" : "□";
+            }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_NCHITTEST = 0x0084;
+            const int resizeAreaSize = 10;
+
+            if (m.Msg == WM_NCHITTEST && this.WindowState == FormWindowState.Normal)
+            {
+                base.WndProc(ref m);
+                if ((int)m.Result == 1) // HTCLIENT
+                {
+                    Point screenPoint = new Point(m.LParam.ToInt32());
+                    Point clientPoint = this.PointToClient(screenPoint);
+
+                    bool left = clientPoint.X <= resizeAreaSize;
+                    bool right = clientPoint.X >= this.ClientSize.Width - resizeAreaSize;
+                    bool top = clientPoint.Y <= resizeAreaSize;
+                    bool bottom = clientPoint.Y >= this.ClientSize.Height - resizeAreaSize;
+
+                    if (top && left) m.Result = (IntPtr)13; // HTTOPLEFT
+                    else if (top && right) m.Result = (IntPtr)14; // HTTOPRIGHT
+                    else if (bottom && left) m.Result = (IntPtr)16; // HTBOTTOMLEFT
+                    else if (bottom && right) m.Result = (IntPtr)17; // HTBOTTOMRIGHT
+                    else if (left) m.Result = (IntPtr)10; // HTLEFT
+                    else if (right) m.Result = (IntPtr)11; // HTRIGHT
+                    else if (top) m.Result = (IntPtr)12; // HTTOP
+                    else if (bottom) m.Result = (IntPtr)15; // HTBOTTOM
+                }
+                return;
+            }
+
+            base.WndProc(ref m);
         }
     }
 }

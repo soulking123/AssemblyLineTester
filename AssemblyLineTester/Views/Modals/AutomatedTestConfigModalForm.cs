@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using FontAwesome.Sharp;
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -38,10 +40,36 @@ namespace AssemblyLineTester.Views.Modals
         public AutomatedTestConfigModalForm()
         {
             InitializeComponent();
+            LoadConfigInfoData();
             SetupEvents();
             LoadDefaultData();
             UpdateTotalNetCount();
             UpdateDiagramSize();
+            ApplyFormRounding();
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ApplyFormRounding();
+        }
+
+        private void ApplyFormRounding()
+        {
+            if (Width <= 0 || Height <= 0) return;
+            int radius = 24;
+            Rectangle rect = new Rectangle(0, 0, Width, Height);
+            using (var path = new System.Drawing.Drawing2D.GraphicsPath())
+            {
+                int d = radius * 2;
+                path.StartFigure();
+                path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+                path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+                path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+                path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+                path.CloseFigure();
+                this.Region = new Region(path);
+            }
         }
 
         private void SetupEvents()
@@ -64,6 +92,116 @@ namespace AssemblyLineTester.Views.Modals
             picPreview.MouseDown += PicPreview_MouseDown;
             picPreview.Resize += (s, e) => picPreview.Invalidate();
             pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
+
+            // Window control buttons
+            btnClose.Click += (s, e) => Close();
+            btnMaximize.Click += (s, e) => ToggleMaximize();
+            btnMinimize.Click += (s, e) => WindowState = FormWindowState.Minimized;
+
+            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(239, 68, 68); btnClose.IconColor = Color.White; };
+            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
+
+            btnMaximize.MouseEnter += (s, e) => { btnMaximize.BackColor = Color.FromArgb(30, 41, 59); btnMaximize.IconColor = Color.White; };
+            btnMaximize.MouseLeave += (s, e) => { btnMaximize.BackColor = Color.Transparent; btnMaximize.IconColor = Color.FromArgb(203, 213, 225); };
+
+            btnMinimize.MouseEnter += (s, e) => { btnMinimize.BackColor = Color.FromArgb(30, 41, 59); btnMinimize.IconColor = Color.White; };
+            btnMinimize.MouseLeave += (s, e) => { btnMinimize.BackColor = Color.Transparent; btnMinimize.IconColor = Color.FromArgb(203, 213, 225); };
+
+            // Window dragging via title bar
+            pnlCustomHeader.MouseDown += TitleBar_MouseDown;
+            iconLogo.MouseDown += TitleBar_MouseDown;
+
+            pnlCustomHeader.DoubleClick += (s, e) => ToggleMaximize();
+            iconLogo.DoubleClick += (s, e) => ToggleMaximize();
+        }
+
+        [DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+        private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && e.Clicks == 1)
+            {
+                if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
+                {
+                    gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
+                }
+                if (gridConfigInfo.IsCurrentCellInEditMode || gridConfigInfo.IsCurrentCellDirty)
+                {
+                    gridConfigInfo.EndEdit(DataGridViewDataErrorContexts.Commit);
+                }
+                ActiveControl = pnlCustomHeader;
+                ValidateChildren();
+
+                ReleaseCapture();
+                SendMessage(Handle, 0xA1, 0x2, 0);
+            }
+        }
+
+        private void ToggleMaximize()
+        {
+            if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
+            {
+                gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
+            }
+            if (gridConfigInfo.IsCurrentCellInEditMode || gridConfigInfo.IsCurrentCellDirty)
+            {
+                gridConfigInfo.EndEdit(DataGridViewDataErrorContexts.Commit);
+            }
+            ActiveControl = pnlCustomHeader;
+            ValidateChildren();
+
+            if (WindowState == FormWindowState.Maximized)
+            {
+                WindowState = FormWindowState.Normal;
+                btnMaximize.IconChar = IconChar.WindowMaximize;
+                Padding = new Padding(1);
+            }
+            else
+            {
+                MaximizedBounds = Screen.FromHandle(Handle).WorkingArea;
+                WindowState = FormWindowState.Maximized;
+                btnMaximize.IconChar = IconChar.WindowRestore;
+                Padding = new Padding(0);
+            }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_NCHITTEST = 0x0084;
+            const int HTLEFT = 10;
+            const int HTRIGHT = 11;
+            const int HTTOP = 12;
+            const int HTTOPLEFT = 13;
+            const int HTTOPRIGHT = 14;
+            const int HTBOTTOM = 15;
+            const int HTBOTTOMLEFT = 16;
+            const int HTBOTTOMRIGHT = 17;
+
+            base.WndProc(ref m);
+
+            if (m.Msg == WM_NCHITTEST && (int)m.Result == 1 && WindowState == FormWindowState.Normal)
+            {
+                Point pt = PointToClient(Cursor.Position);
+                int border = 6;
+                bool overButtons = pt.X >= btnMinimize.Left && pt.Y <= pnlCustomHeader.Height;
+
+                if (overButtons)
+                {
+                    return;
+                }
+
+                if (pt.X <= border && pt.Y <= border) m.Result = (IntPtr)HTTOPLEFT;
+                else if (pt.X >= ClientSize.Width - border && pt.Y <= border) m.Result = (IntPtr)HTTOPRIGHT;
+                else if (pt.X <= border && pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOMLEFT;
+                else if (pt.X >= ClientSize.Width - border && pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOMRIGHT;
+                else if (pt.X <= border) m.Result = (IntPtr)HTLEFT;
+                else if (pt.X >= ClientSize.Width - border) m.Result = (IntPtr)HTRIGHT;
+                else if (pt.Y <= border) m.Result = (IntPtr)HTTOP;
+                else if (pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOM;
+            }
         }
 
         private static string[] GetUnitsForTestType(string testType)
@@ -98,6 +236,23 @@ namespace AssemblyLineTester.Views.Modals
                 {
                     unitCell.Value = allowedUnits.Length > 0 ? allowedUnits[0] : "";
                 }
+            }
+        }
+
+        private void LoadConfigInfoData()
+        {
+            gridConfigInfo.Rows.Clear();
+
+            string[][] configData =
+            [
+                ["Main Harness Test", "6060", "Standard continuity and resistance test configuration"],
+                ["ECM Connector Validation", "6070", "ECM main connector verification for capacitance and voltage"],
+                ["Final Assembly Check", "8080", "Complete assembly line functional test suite"]
+            ];
+
+            foreach (string[] row in configData)
+            {
+                gridConfigInfo.Rows.Add(row[0], row[1], row[2]);
             }
         }
 
@@ -227,7 +382,8 @@ namespace AssemblyLineTester.Views.Modals
 
         private void GridConfig_CurrentCellDirtyStateChanged(object? sender, EventArgs e)
         {
-            if (gridConfig.IsCurrentCellDirty)
+            if (gridConfig.IsCurrentCellDirty &&
+               (gridConfig.CurrentCell is DataGridViewComboBoxCell || gridConfig.CurrentCell is DataGridViewCheckBoxCell))
             {
                 gridConfig.CommitEdit(DataGridViewDataErrorContexts.Commit);
             }
@@ -240,8 +396,17 @@ namespace AssemblyLineTester.Views.Modals
             {
                 string testType = gridConfig.CurrentRow?.Cells["colTestType"]?.Value?.ToString() ?? "";
                 string[] allowedUnits = GetUnitsForTestType(testType);
+                string currentSelection = combo.Text;
                 combo.Items.Clear();
                 combo.Items.AddRange(allowedUnits);
+                if (allowedUnits.Contains(currentSelection))
+                {
+                    combo.SelectedItem = currentSelection;
+                }
+                else if (allowedUnits.Length > 0)
+                {
+                    combo.SelectedIndex = 0;
+                }
             }
         }
 

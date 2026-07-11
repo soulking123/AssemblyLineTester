@@ -17,6 +17,56 @@ namespace AssemblyLineTester.Views.Modals
             InitializeDropdowns();
 
             btnSave.Click += BtnSave_Click;
+
+            btnClose.Click += (s, e) => this.Close();
+            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
+            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
+
+            pnlCustomHeader.MouseDown += TitleBar_MouseDown;
+            iconLogo.MouseDown += TitleBar_MouseDown;
+
+            ApplyFormRounding();
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ApplyFormRounding();
+        }
+
+        private void ApplyFormRounding()
+        {
+            if (Width <= 0 || Height <= 0) return;
+            int radius = 24;
+            Rectangle rect = new Rectangle(0, 0, Width, Height);
+            using (var path = new System.Drawing.Drawing2D.GraphicsPath())
+            {
+                int d = radius * 2;
+                path.StartFigure();
+                path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+                path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+                path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+                path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+                path.CloseFigure();
+                this.Region = new Region(path);
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+        private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && e.Clicks == 1)
+            {
+                ActiveControl = pnlCustomHeader;
+                ValidateChildren();
+
+                ReleaseCapture();
+                SendMessage(Handle, 0xA1, 0x2, 0);
+            }
         }
 
         private void InitializeDropdowns()
