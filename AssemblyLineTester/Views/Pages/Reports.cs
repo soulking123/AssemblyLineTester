@@ -10,6 +10,7 @@ namespace AssemblyLineTester.Views.Pages
 {
     public partial class Reports : UserControl
     {
+//<<<<<<< HEAD
         private readonly TestReportService _reportService = new();
         private int _currentPage = 1;
         private readonly int _pageSize = 10;
@@ -19,10 +20,22 @@ namespace AssemblyLineTester.Views.Pages
         // The filter actually being displayed (list/summary/trend). Only changes when
         // the user clicks "Generate Report" (or "Reset"), NOT on every control change.
         private ReportFilter _appliedFilter = new();
+//=======
+        private Chart chartTrend = null!;
+//>>>>>>> dashboard
 
         public Reports()
         {
             InitializeComponent();
+            this.Load += Reports_Load;
+        }
+
+        private void Reports_Load(object? sender, EventArgs e)
+        {
+            if (DesignMode || System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                return;
+            }
             InitializeCustomStyles();
             WireEvents();
 
@@ -35,12 +48,24 @@ namespace AssemblyLineTester.Views.Pages
 
         private void InitializeCustomStyles()
         {
+            //<<<<<<< HEAD
+            //=======
+            // Create Chart programmatically to avoid WinForms Designer serialization issues
+            chartTrend = new Chart
+            {
+                Dock = DockStyle.Fill,
+                Name = "chartTrend",
+                TabIndex = 1
+            };
+            cardTrend.Controls.Add(chartTrend);
+            cardTrend.Controls.SetChildIndex(chartTrend, 0);
+//>>>>>>> dashboard
             if (cmbReportType.Items.Count > 0) cmbReportType.SelectedIndex = 0;
             if (cmbModel.Items.Count > 0) cmbModel.SelectedIndex = 0;
             if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
-            if (cmbOperator.Items.Count > 0) cmbOperator.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
+//<<<<<<< HEAD
 
             // Plain date picker, no checkbox - dd/MM/yy format, user picks whenever they want.
             dtpStart.Format = DateTimePickerFormat.Custom;
@@ -88,6 +113,10 @@ namespace AssemblyLineTester.Views.Pages
             if (gridReports.Columns["colAction"] is { } colAction)
                 colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
+//=======
+//            if (dtpStart != null) dtpStart.Value = DateTime.Today.AddDays(-7);
+//            if (dtpEnd != null) dtpEnd.Value = DateTime.Today;
+//>>>>>>> dashboard
             gridReports.CellFormatting += GridReports_CellFormatting;
         }
 

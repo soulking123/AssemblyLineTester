@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using FontAwesome.Sharp;
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -38,10 +40,36 @@ namespace AssemblyLineTester.Views.Modals
         public AutomatedTestConfigModalForm()
         {
             InitializeComponent();
+            LoadConfigInfoData();
             SetupEvents();
             LoadDefaultData();
             UpdateTotalNetCount();
             UpdateDiagramSize();
+            ApplyFormRounding();
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ApplyFormRounding();
+        }
+
+        private void ApplyFormRounding()
+        {
+            if (Width <= 0 || Height <= 0) return;
+            int radius = 24;
+            Rectangle rect = new Rectangle(0, 0, Width, Height);
+            using (var path = new System.Drawing.Drawing2D.GraphicsPath())
+            {
+                int d = radius * 2;
+                path.StartFigure();
+                path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+                path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+                path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+                path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+                path.CloseFigure();
+                this.Region = new Region(path);
+            }
         }
 
         private void SetupEvents()
@@ -64,6 +92,116 @@ namespace AssemblyLineTester.Views.Modals
             picPreview.MouseDown += PicPreview_MouseDown;
             picPreview.Resize += (s, e) => picPreview.Invalidate();
             pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
+
+            // Window control buttons
+            btnClose.Click += (s, e) => Close();
+            btnMaximize.Click += (s, e) => ToggleMaximize();
+            btnMinimize.Click += (s, e) => WindowState = FormWindowState.Minimized;
+
+            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(239, 68, 68); btnClose.IconColor = Color.White; };
+            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
+
+            btnMaximize.MouseEnter += (s, e) => { btnMaximize.BackColor = Color.FromArgb(30, 41, 59); btnMaximize.IconColor = Color.White; };
+            btnMaximize.MouseLeave += (s, e) => { btnMaximize.BackColor = Color.Transparent; btnMaximize.IconColor = Color.FromArgb(203, 213, 225); };
+
+            btnMinimize.MouseEnter += (s, e) => { btnMinimize.BackColor = Color.FromArgb(30, 41, 59); btnMinimize.IconColor = Color.White; };
+            btnMinimize.MouseLeave += (s, e) => { btnMinimize.BackColor = Color.Transparent; btnMinimize.IconColor = Color.FromArgb(203, 213, 225); };
+
+            // Window dragging via title bar
+            pnlCustomHeader.MouseDown += TitleBar_MouseDown;
+            iconLogo.MouseDown += TitleBar_MouseDown;
+
+            pnlCustomHeader.DoubleClick += (s, e) => ToggleMaximize();
+            iconLogo.DoubleClick += (s, e) => ToggleMaximize();
+        }
+
+        [DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+        private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && e.Clicks == 1)
+            {
+                if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
+                {
+                    gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
+                }
+                if (gridConfigInfo.IsCurrentCellInEditMode || gridConfigInfo.IsCurrentCellDirty)
+                {
+                    gridConfigInfo.EndEdit(DataGridViewDataErrorContexts.Commit);
+                }
+                ActiveControl = pnlCustomHeader;
+                ValidateChildren();
+
+                ReleaseCapture();
+                SendMessage(Handle, 0xA1, 0x2, 0);
+            }
+        }
+
+        private void ToggleMaximize()
+        {
+            if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
+            {
+                gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
+            }
+            if (gridConfigInfo.IsCurrentCellInEditMode || gridConfigInfo.IsCurrentCellDirty)
+            {
+                gridConfigInfo.EndEdit(DataGridViewDataErrorContexts.Commit);
+            }
+            ActiveControl = pnlCustomHeader;
+            ValidateChildren();
+
+            if (WindowState == FormWindowState.Maximized)
+            {
+                WindowState = FormWindowState.Normal;
+                btnMaximize.IconChar = IconChar.WindowMaximize;
+                Padding = new Padding(1);
+            }
+            else
+            {
+                MaximizedBounds = Screen.FromHandle(Handle).WorkingArea;
+                WindowState = FormWindowState.Maximized;
+                btnMaximize.IconChar = IconChar.WindowRestore;
+                Padding = new Padding(0);
+            }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_NCHITTEST = 0x0084;
+            const int HTLEFT = 10;
+            const int HTRIGHT = 11;
+            const int HTTOP = 12;
+            const int HTTOPLEFT = 13;
+            const int HTTOPRIGHT = 14;
+            const int HTBOTTOM = 15;
+            const int HTBOTTOMLEFT = 16;
+            const int HTBOTTOMRIGHT = 17;
+
+            base.WndProc(ref m);
+
+            if (m.Msg == WM_NCHITTEST && (int)m.Result == 1 && WindowState == FormWindowState.Normal)
+            {
+                Point pt = PointToClient(Cursor.Position);
+                int border = 6;
+                bool overButtons = pt.X >= btnMinimize.Left && pt.Y <= pnlCustomHeader.Height;
+
+                if (overButtons)
+                {
+                    return;
+                }
+
+                if (pt.X <= border && pt.Y <= border) m.Result = (IntPtr)HTTOPLEFT;
+                else if (pt.X >= ClientSize.Width - border && pt.Y <= border) m.Result = (IntPtr)HTTOPRIGHT;
+                else if (pt.X <= border && pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOMLEFT;
+                else if (pt.X >= ClientSize.Width - border && pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOMRIGHT;
+                else if (pt.X <= border) m.Result = (IntPtr)HTLEFT;
+                else if (pt.X >= ClientSize.Width - border) m.Result = (IntPtr)HTRIGHT;
+                else if (pt.Y <= border) m.Result = (IntPtr)HTTOP;
+                else if (pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOM;
+            }
         }
 
         private static string[] GetUnitsForTestType(string testType)
@@ -98,6 +236,23 @@ namespace AssemblyLineTester.Views.Modals
                 {
                     unitCell.Value = allowedUnits.Length > 0 ? allowedUnits[0] : "";
                 }
+            }
+        }
+
+        private void LoadConfigInfoData()
+        {
+            gridConfigInfo.Rows.Clear();
+
+            string[][] configData =
+            [
+                ["Main Harness Test", "6060", "Standard continuity and resistance test configuration"],
+                ["ECM Connector Validation", "6070", "ECM main connector verification for capacitance and voltage"],
+                ["Final Assembly Check", "8080", "Complete assembly line functional test suite"]
+            ];
+
+            foreach (string[] row in configData)
+            {
+                gridConfigInfo.Rows.Add(row[0], row[1], row[2]);
             }
         }
 
@@ -227,7 +382,8 @@ namespace AssemblyLineTester.Views.Modals
 
         private void GridConfig_CurrentCellDirtyStateChanged(object? sender, EventArgs e)
         {
-            if (gridConfig.IsCurrentCellDirty)
+            if (gridConfig.IsCurrentCellDirty &&
+               (gridConfig.CurrentCell is DataGridViewComboBoxCell || gridConfig.CurrentCell is DataGridViewCheckBoxCell))
             {
                 gridConfig.CommitEdit(DataGridViewDataErrorContexts.Commit);
             }
@@ -240,8 +396,17 @@ namespace AssemblyLineTester.Views.Modals
             {
                 string testType = gridConfig.CurrentRow?.Cells["colTestType"]?.Value?.ToString() ?? "";
                 string[] allowedUnits = GetUnitsForTestType(testType);
+                string currentSelection = combo.Text;
                 combo.Items.Clear();
                 combo.Items.AddRange(allowedUnits);
+                if (allowedUnits.Contains(currentSelection))
+                {
+                    combo.SelectedItem = currentSelection;
+                }
+                else if (allowedUnits.Length > 0)
+                {
+                    combo.SelectedIndex = 0;
+                }
             }
         }
 
@@ -394,6 +559,7 @@ namespace AssemblyLineTester.Views.Modals
             // Guarantee at least 55 pixels per row so 60 connections never overlap!
             float rowSpacing = Math.Max(55f, availHeight / Math.Max(rowCount, 1));
 
+            List<DiagramNode> rawLeftNodes = [];
             List<DiagramNode> rawRightNodes = [];
 
             for (int i = 0; i < rowCount; i++)
@@ -404,18 +570,14 @@ namespace AssemblyLineTester.Views.Modals
                 string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
                 string toLabel = row.Cells["colToLabel"].Value?.ToString() ?? $"Y1-0{i + 1}";
 
-                float yPos = startY + i * rowSpacing;
-
                 DiagramNode lNode = new()
                 {
                     RowIndex = i,
                     Address = fromAddr,
                     Label = fromLabel,
-                    IsLeft = true,
-                    NodeRect = new(190, yPos - 20, 42, 42),
-                    LabelRect = new(50, yPos - 18, 120, 36)
+                    IsLeft = true
                 };
-                leftNodes.Add(lNode);
+                rawLeftNodes.Add(lNode);
 
                 DiagramNode rNode = new()
                 {
@@ -427,14 +589,25 @@ namespace AssemblyLineTester.Views.Modals
                 rawRightNodes.Add(rNode);
             }
 
-            // Sort right nodes ascending by address to create the signature crossover pattern
+            // Sort left nodes ascending by address so the smallest address is always at the top!
+            var sortedLeftNodes = rawLeftNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
+            for (int idx = 0; idx < sortedLeftNodes.Count; idx++)
+            {
+                float yPos = startY + idx * rowSpacing;
+                var lNode = sortedLeftNodes[idx];
+                lNode.NodeRect = new(185, yPos - 22, 50, 44);
+                lNode.LabelRect = new(45, yPos - 18, 132, 36);
+                leftNodes.Add(lNode);
+            }
+
+            // Sort right nodes ascending by address so the smallest address is always at the top!
             var sortedRightNodes = rawRightNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
             for (int idx = 0; idx < sortedRightNodes.Count; idx++)
             {
                 float yPos = startY + idx * rowSpacing;
                 var rNode = sortedRightNodes[idx];
-                rNode.NodeRect = new(r.Width - 232, yPos - 20, 42, 42);
-                rNode.LabelRect = new(r.Width - 170, yPos - 18, 120, 36);
+                rNode.NodeRect = new(r.Width - 235, yPos - 22, 50, 44);
+                rNode.LabelRect = new(r.Width - 177, yPos - 18, 132, 36);
                 rightNodes.Add(rNode);
             }
 
@@ -477,14 +650,15 @@ namespace AssemblyLineTester.Views.Modals
 
             using Font fontLabel = new("Segoe UI", 9.5F, FontStyle.Bold);
             using Font fontAddr = new("Segoe UI", 10.5F, FontStyle.Bold);
-            using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            using StringFormat sfLabel = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap, Trimming = StringTrimming.EllipsisCharacter };
+            using StringFormat sfAddr = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.NoClip };
 
             // PASS 2: Draw UNHIGHLIGHTED nodes and labels
             foreach (var node in leftNodes.Concat(rightNodes))
             {
                 if (!highlightedRows.Contains(node.RowIndex))
                 {
-                    DrawNodeAndLabel(g, node, false, fontLabel, fontAddr, sf);
+                    DrawNodeAndLabel(g, node, false, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
             }
 
@@ -505,35 +679,36 @@ namespace AssemblyLineTester.Views.Modals
             {
                 if (highlightedRows.Contains(node.RowIndex))
                 {
-                    DrawNodeAndLabel(g, node, true, fontLabel, fontAddr, sf);
+                    DrawNodeAndLabel(g, node, true, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
             }
         }
 
-        private static void DrawNodeAndLabel(Graphics g, DiagramNode node, bool isHighlight, Font fontLabel, Font fontAddr, StringFormat sf)
+        private static void DrawNodeAndLabel(Graphics g, DiagramNode node, bool isHighlight, Font fontLabel, Font fontAddr, StringFormat sfLabel, StringFormat sfAddr)
         {
             if (isHighlight)
             {
                 RectangleF haloRect = RectangleF.Inflate(node.NodeRect, 6f, 6f);
                 using SolidBrush haloFill = new(Color.FromArgb(254, 240, 138));
                 using Pen haloBorder = new(Color.FromArgb(245, 158, 11), 3f);
-                g.FillEllipse(haloFill, haloRect);
-                g.DrawEllipse(haloBorder, haloRect);
+                DrawRoundedRectangle(g, haloFill, haloBorder, haloRect, 24f);
             }
 
             using SolidBrush labelBg = new(isHighlight ? Color.FromArgb(254, 249, 195) : Color.FromArgb(226, 232, 240));
             using Pen labelBorder = new(isHighlight ? Color.FromArgb(245, 158, 11) : Color.FromArgb(203, 213, 225), 1.5f);
             using SolidBrush labelText = new(Color.FromArgb(30, 41, 59));
             DrawRoundedRectangle(g, labelBg, labelBorder, node.LabelRect, 8f);
-            g.DrawString(node.Label, fontLabel, labelText, node.LabelRect, sf);
+            g.DrawString(node.Label, fontLabel, labelText, node.LabelRect, sfLabel);
 
             Color nodeColor = node.IsLeft ? Color.FromArgb(0, 180, 216) : Color.FromArgb(74, 222, 128);
             using SolidBrush nodeFill = new(nodeColor);
             using Pen nodeBorder = new(Color.FromArgb(15, 23, 42), 2f);
             using SolidBrush addrText = new(Color.FromArgb(15, 23, 42));
-            g.FillEllipse(nodeFill, node.NodeRect);
-            g.DrawEllipse(nodeBorder, node.NodeRect);
-            g.DrawString(node.Address, fontAddr, addrText, node.NodeRect, sf);
+            DrawRoundedRectangle(g, nodeFill, nodeBorder, node.NodeRect, 20f);
+
+            float dynamicSize = node.Address.Length >= 4 ? 7.5F : (node.Address.Length == 3 ? 8.5F : (node.Address.Length == 2 ? 9.5F : 10.5F));
+            using Font dynamicAddrFont = new("Segoe UI", dynamicSize, FontStyle.Bold);
+            g.DrawString(node.Address, dynamicAddrFont, addrText, node.NodeRect, sfAddr);
         }
 
         private static void DrawRoundedRectangle(Graphics g, Brush brush, Pen pen, RectangleF rect, float radius)

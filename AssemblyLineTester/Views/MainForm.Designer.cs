@@ -20,18 +20,24 @@ namespace AssemblyLineTester.Views
             components = new System.ComponentModel.Container();
             splitContainer1 = new SplitContainer();
             btnToggleSidebar = new Button();
-            btnDashboard = new Button();
-            btnTestExecution = new Button();
-            btnHarnessDatabase = new Button();
-            btnTestHistory = new Button();
-            btnReports = new Button();
-            btnSystemLog = new Button();
-            btnSettings = new Button();
-            btnUserManagement = new Button();
-            lblMenu = new Label();
+            btnDashboard = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnTestExecution = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnHarnessDatabase = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnTestHistory = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnReports = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnSystemLog = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnSettings = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnUserManagement = new AssemblyLineTester.Views.Controls.MenuButton();
+            pnlLogoHeader = new AssemblyLineTester.Views.Controls.LogoHeaderPanel();
+            lblMenu = new PictureBox();
             pnlContent = new Panel();
             pnlTopHeader = new Panel();
             pnlRight = new FlowLayoutPanel();
+            pnlWindowControls = new FlowLayoutPanel();
+            btnMinimize = new Button();
+            btnMaximize = new Button();
+            btnClose = new Button();
+            pnlSep2 = new Panel();
             pnlDateTime = new Panel();
             lblDateIcon = new Label();
             lblDateText = new Label();
@@ -50,8 +56,11 @@ namespace AssemblyLineTester.Views
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            pnlLogoHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)lblMenu).BeginInit();
             pnlTopHeader.SuspendLayout();
             pnlRight.SuspendLayout();
+            pnlWindowControls.SuspendLayout();
             pnlDateTime.SuspendLayout();
             pnlUser.SuspendLayout();
             pnlUserDropdown.SuspendLayout();
@@ -77,7 +86,8 @@ namespace AssemblyLineTester.Views
             splitContainer1.Panel1.Controls.Add(btnSystemLog);
             splitContainer1.Panel1.Controls.Add(btnSettings);
             splitContainer1.Panel1.Controls.Add(btnUserManagement);
-            splitContainer1.Panel1.Controls.Add(lblMenu);
+            splitContainer1.Panel1.Controls.Add(btnToggleSidebar);
+            splitContainer1.Panel1.Controls.Add(pnlLogoHeader);
             // 
             // splitContainer1.Panel2
             // 
@@ -94,14 +104,38 @@ namespace AssemblyLineTester.Views
             btnToggleSidebar.FlatStyle = FlatStyle.Flat;
             btnToggleSidebar.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             btnToggleSidebar.ForeColor = Color.White;
-            btnToggleSidebar.Location = new Point(32, 32);
+            btnToggleSidebar.Location = new Point(320, 24);
             btnToggleSidebar.Margin = new Padding(5);
             btnToggleSidebar.Name = "btnToggleSidebar";
-            btnToggleSidebar.Size = new Size(98, 96);
+            btnToggleSidebar.Size = new Size(88, 88);
             btnToggleSidebar.TabIndex = 1;
             btnToggleSidebar.Text = "☰";
             btnToggleSidebar.UseVisualStyleBackColor = true;
             btnToggleSidebar.Click += BtnToggleSidebar_Click;
+            // 
+            // pnlLogoHeader
+            // 
+            pnlLogoHeader.BackColor = Color.Transparent;
+            pnlLogoHeader.Controls.Add(lblMenu);
+            pnlLogoHeader.CornerRadius = 24F;
+            pnlLogoHeader.Location = new Point(0, 0);
+            pnlLogoHeader.Margin = new Padding(0);
+            pnlLogoHeader.Name = "pnlLogoHeader";
+            pnlLogoHeader.Size = new Size(300, 130);
+            pnlLogoHeader.SlopeOffset = 50F;
+            pnlLogoHeader.TabColor = Color.FromArgb(250, 204, 21);
+            pnlLogoHeader.TabIndex = 0;
+            // 
+            // lblMenu
+            // 
+            lblMenu.BackColor = Color.Transparent;
+            lblMenu.Location = new Point(16, 20);
+            lblMenu.Margin = new Padding(5, 0, 5, 0);
+            lblMenu.Name = "lblMenu";
+            lblMenu.Size = new Size(200, 90);
+            lblMenu.SizeMode = PictureBoxSizeMode.Zoom;
+            lblMenu.TabIndex = 0;
+            lblMenu.TabStop = false;
             // 
             // btnDashboard
             // 
@@ -207,18 +241,6 @@ namespace AssemblyLineTester.Views
             btnUserManagement.UseVisualStyleBackColor = true;
             btnUserManagement.Click += BtnMenu_Click;
             // 
-            // lblMenu
-            // 
-            lblMenu.AutoSize = true;
-            lblMenu.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblMenu.ForeColor = Color.White;
-            lblMenu.Location = new Point(162, 48);
-            lblMenu.Margin = new Padding(5, 0, 5, 0);
-            lblMenu.Name = "lblMenu";
-            lblMenu.Size = new Size(214, 45);
-            lblMenu.TabIndex = 0;
-            lblMenu.Text = "MAIN MENU";
-            // 
             // pnlContent
             // 
             pnlContent.BackColor = Color.FromArgb(244, 245, 247);
@@ -246,19 +268,89 @@ namespace AssemblyLineTester.Views
             // 
             pnlRight.AutoSize = true;
             pnlRight.BackColor = Color.Transparent;
+            pnlRight.Controls.Add(pnlWindowControls);
+            pnlRight.Controls.Add(pnlSep2);
             pnlRight.Controls.Add(pnlDateTime);
             pnlRight.Controls.Add(pnlSep);
             pnlRight.Controls.Add(pnlUser);
             pnlRight.Dock = DockStyle.Right;
             pnlRight.FlowDirection = FlowDirection.RightToLeft;
-            pnlRight.Location = new Point(1497, 0);
+            pnlRight.Location = new Point(1312, 0);
             pnlRight.Margin = new Padding(5);
-            pnlRight.MinimumSize = new Size(950, 122);
+            pnlRight.MinimumSize = new Size(1100, 122);
             pnlRight.Name = "pnlRight";
-            pnlRight.Padding = new Padding(0, 24, 41, 0);
-            pnlRight.Size = new Size(950, 122);
+            pnlRight.Padding = new Padding(0, 24, 25, 0);
+            pnlRight.Size = new Size(1135, 122);
             pnlRight.TabIndex = 1;
             pnlRight.WrapContents = false;
+            // 
+            // pnlWindowControls
+            // 
+            pnlWindowControls.AutoSize = true;
+            pnlWindowControls.BackColor = Color.Transparent;
+            pnlWindowControls.Controls.Add(btnMinimize);
+            pnlWindowControls.Controls.Add(btnMaximize);
+            pnlWindowControls.Controls.Add(btnClose);
+            pnlWindowControls.Location = new Point(942, 35);
+            pnlWindowControls.Margin = new Padding(0, 11, 0, 0);
+            pnlWindowControls.Name = "pnlWindowControls";
+            pnlWindowControls.Size = new Size(168, 52);
+            pnlWindowControls.TabIndex = 4;
+            pnlWindowControls.WrapContents = false;
+            // 
+            // btnMinimize
+            // 
+            btnMinimize.Cursor = Cursors.Hand;
+            btnMinimize.FlatAppearance.BorderSize = 0;
+            btnMinimize.FlatStyle = FlatStyle.Flat;
+            btnMinimize.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            btnMinimize.ForeColor = Color.FromArgb(100, 116, 139);
+            btnMinimize.Location = new Point(2, 0);
+            btnMinimize.Margin = new Padding(2, 0, 2, 0);
+            btnMinimize.Name = "btnMinimize";
+            btnMinimize.Size = new Size(52, 52);
+            btnMinimize.TabIndex = 0;
+            btnMinimize.Text = "—";
+            btnMinimize.UseVisualStyleBackColor = true;
+            // 
+            // btnMaximize
+            // 
+            btnMaximize.Cursor = Cursors.Hand;
+            btnMaximize.FlatAppearance.BorderSize = 0;
+            btnMaximize.FlatStyle = FlatStyle.Flat;
+            btnMaximize.Font = new Font("Segoe UI", 13F);
+            btnMaximize.ForeColor = Color.FromArgb(100, 116, 139);
+            btnMaximize.Location = new Point(58, 0);
+            btnMaximize.Margin = new Padding(2, 0, 2, 0);
+            btnMaximize.Name = "btnMaximize";
+            btnMaximize.Size = new Size(52, 52);
+            btnMaximize.TabIndex = 1;
+            btnMaximize.Text = "❐";
+            btnMaximize.UseVisualStyleBackColor = true;
+            // 
+            // btnClose
+            // 
+            btnClose.Cursor = Cursors.Hand;
+            btnClose.FlatAppearance.BorderSize = 0;
+            btnClose.FlatStyle = FlatStyle.Flat;
+            btnClose.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
+            btnClose.ForeColor = Color.FromArgb(100, 116, 139);
+            btnClose.Location = new Point(114, 0);
+            btnClose.Margin = new Padding(2, 0, 2, 0);
+            btnClose.Name = "btnClose";
+            btnClose.Size = new Size(52, 52);
+            btnClose.TabIndex = 2;
+            btnClose.Text = "✕";
+            btnClose.UseVisualStyleBackColor = true;
+            // 
+            // pnlSep2
+            // 
+            pnlSep2.BackColor = Color.FromArgb(203, 213, 225);
+            pnlSep2.Location = new Point(908, 32);
+            pnlSep2.Margin = new Padding(32, 8, 32, 0);
+            pnlSep2.Name = "pnlSep2";
+            pnlSep2.Size = new Size(2, 58);
+            pnlSep2.TabIndex = 3;
             // 
             // pnlDateTime
             // 
@@ -266,7 +358,7 @@ namespace AssemblyLineTester.Views
             pnlDateTime.Controls.Add(lblDateIcon);
             pnlDateTime.Controls.Add(lblDateText);
             pnlDateTime.Controls.Add(lblTimeText);
-            pnlDateTime.Location = new Point(559, 24);
+            pnlDateTime.Location = new Point(526, 24);
             pnlDateTime.Margin = new Padding(0);
             pnlDateTime.Name = "pnlDateTime";
             pnlDateTime.Size = new Size(350, 74);
@@ -309,7 +401,7 @@ namespace AssemblyLineTester.Views
             // pnlSep
             // 
             pnlSep.BackColor = Color.FromArgb(203, 213, 225);
-            pnlSep.Location = new Point(525, 32);
+            pnlSep.Location = new Point(492, 32);
             pnlSep.Margin = new Padding(32, 8, 32, 0);
             pnlSep.Name = "pnlSep";
             pnlSep.Size = new Size(2, 58);
@@ -323,7 +415,7 @@ namespace AssemblyLineTester.Views
             pnlUser.Controls.Add(lblUserRole);
             pnlUser.Controls.Add(lblArrow);
             pnlUser.Cursor = Cursors.Hand;
-            pnlUser.Location = new Point(33, 24);
+            pnlUser.Location = new Point(0, 24);
             pnlUser.Margin = new Padding(0);
             pnlUser.Name = "pnlUser";
             pnlUser.Size = new Size(460, 74);
@@ -438,18 +530,22 @@ namespace AssemblyLineTester.Views
             ClientSize = new Size(2884, 1759);
             Controls.Add(pnlUserDropdown);
             Controls.Add(splitContainer1);
+            FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(5);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Assembly Line Tester - Dashboard";
             splitContainer1.Panel1.ResumeLayout(false);
-            splitContainer1.Panel1.PerformLayout();
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            pnlLogoHeader.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)lblMenu).EndInit();
             pnlTopHeader.ResumeLayout(false);
             pnlTopHeader.PerformLayout();
             pnlRight.ResumeLayout(false);
+            pnlRight.PerformLayout();
+            pnlWindowControls.ResumeLayout(false);
             pnlDateTime.ResumeLayout(false);
             pnlDateTime.PerformLayout();
             pnlUser.ResumeLayout(false);
@@ -463,15 +559,16 @@ namespace AssemblyLineTester.Views
 
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Button btnToggleSidebar;
-        private System.Windows.Forms.Label lblMenu;
-        private System.Windows.Forms.Button btnDashboard;
-        private System.Windows.Forms.Button btnTestExecution;
-        private System.Windows.Forms.Button btnHarnessDatabase;
-        private System.Windows.Forms.Button btnTestHistory;
-        private System.Windows.Forms.Button btnReports;
-        private System.Windows.Forms.Button btnSystemLog;
-        private System.Windows.Forms.Button btnSettings;
-        private System.Windows.Forms.Button btnUserManagement;
+        private AssemblyLineTester.Views.Controls.LogoHeaderPanel pnlLogoHeader;
+        private System.Windows.Forms.PictureBox lblMenu;
+        private AssemblyLineTester.Views.Controls.MenuButton btnDashboard;
+        private AssemblyLineTester.Views.Controls.MenuButton btnTestExecution;
+        private AssemblyLineTester.Views.Controls.MenuButton btnHarnessDatabase;
+        private AssemblyLineTester.Views.Controls.MenuButton btnTestHistory;
+        private AssemblyLineTester.Views.Controls.MenuButton btnReports;
+        private AssemblyLineTester.Views.Controls.MenuButton btnSystemLog;
+        private AssemblyLineTester.Views.Controls.MenuButton btnSettings;
+        private AssemblyLineTester.Views.Controls.MenuButton btnUserManagement;
         private System.Windows.Forms.Panel pnlTopHeader;
         private System.Windows.Forms.Panel pnlContent;
         private System.Windows.Forms.Label lblHeaderTitle;
@@ -489,5 +586,10 @@ namespace AssemblyLineTester.Views
         private System.Windows.Forms.Timer clockTimer;
         private System.Windows.Forms.Panel pnlUserDropdown;
         private System.Windows.Forms.Button btnLogOut;
+        private System.Windows.Forms.FlowLayoutPanel pnlWindowControls;
+        private System.Windows.Forms.Button btnMinimize;
+        private System.Windows.Forms.Button btnMaximize;
+        private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.Panel pnlSep2;
     }
 }
