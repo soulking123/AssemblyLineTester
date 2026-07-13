@@ -6,11 +6,18 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
+using System.Diagnostics;
+
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class TestExecution : UserControl
     {
         private readonly TestConfigFileService _configFileService = new();
+        private readonly InstrumentService _instrument = new();
+        private List<LiveTestDetailRowDto> _loadedRows = new();
+        private string _customTestText = string.Empty;
+        private double _continuityResistance ;
+
 
         public TestExecution()
         {
@@ -54,7 +61,6 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.Columns.Add("StepNo", "#");
             gridLiveDetails.Columns.Add("TestPoint", "Test Point");
             gridLiveDetails.Columns.Add("TestType", "Test Type");
-            gridLiveDetails.Columns.Add("Expected", "Expected Value");
             gridLiveDetails.Columns.Add("Measured", "Measured Value");
             gridLiveDetails.Columns.Add("Status", "Status");
 
@@ -62,7 +68,6 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.Columns["StepNo"]!.Width = 55;
             gridLiveDetails.Columns["TestPoint"]!.Width = 240;
             gridLiveDetails.Columns["TestType"]!.Width = 180;
-            gridLiveDetails.Columns["Expected"]!.Width = 240;
             gridLiveDetails.Columns["Measured"]!.Width = 240;
             gridLiveDetails.Columns["Status"]!.MinimumWidth = 140;
             gridLiveDetails.Columns["Status"]!.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
@@ -80,26 +85,123 @@ namespace AssemblyLineTester.Views.Pages
         {
             using var ofd = new OpenFileDialog
             {
-                Filter = "Test Config Files (*.json)|*.json|All Files (*.*)|*.*",
+                Filter = "Wirelist/Text Files (*.txt;*.wir)|*.txt;*.wir|All Files (*.*)|*.*",
                 Title = "Select Test Program File"
             };
 
             if (ofd.ShowDialog() != DialogResult.OK) return;
 
-            List<TestConfigNetDto> nets;
             try
             {
-                nets = _configFileService.LoadConfigFile(ofd.FileName);
+                _customTestText = System.IO.File.ReadAllText(ofd.FileName);
+                Debug.WriteLine($"Nilai custom text saat ini: {_customTestText}");
+
+
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to load config file: {ex.Message}", "Load Program",
+                _customTestText = string.Empty;
+                MessageBox.Show($"Failed to read file: {ex.Message}", "Load Program",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnStartTest_Click(object? sender, EventArgs e)
+        {
+            // 1. Connect to the instrument
+            bool isConnected = _instrument.Connect();
+            if (!isConnected)
+            {
+                MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            var liveRows = _configFileService.BuildLiveDetailRows(nets);
-            PopulateLiveDetailsGrid(liveRows);
+            string loadedProgramName = "1107061216";
+            string testProgramDetails = string.Empty;
+
+            // 2. Load the test program
+            if (!string.IsNullOrEmpty(_customTestText))
+            {
+                // Upload custom test text without saving to database (using empty string as testName)
+                var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
+                if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+                {
+                    _instrument.Disconnect();
+                    MessageBox.Show($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                loadedProgramName = "Custom Wirelist (Active)";
+                testProgramDetails = _customTestText;
+                _continuityResistance = _instrument.GetContinuityResistance();
+
+                Debug.WriteLine($"Nilai Continuity Resistance saat ini: {_continuityResistance}");
+            }
+            else
+            {
+                // Fallback: Fetch/load the specified test program "1107061216"
+                //var getTestResult = _instrument.GetTestProgram("1107061216");
+                //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
+                //{
+                //    testProgramDetails = getTestResult.Result;
+                //}
+            }
+
+            // 3. Run Single Test (Hipot=false, Shorts=true)
+            var testResult = _instrument.RunSingleTest(false, true);
+            if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+            {
+                _instrument.Disconnect();
+                MessageBox.Show($"Test run failed to execute. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Test Run Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 4. Get Measured Values
+            var measuredValuesResult = _instrument.GetMeasuredValues();
+            _loadedRows = new List<LiveTestDetailRowDto>();
+
+            if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
+            {
+                var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
+                if (list != null)
+                {
+                    int step = 1;
+                    foreach (var measurement in list)
+                    {
+                        var status = LiveTestStatus.Pending;
+                        string statusStr = measurement.Status1?.Trim() ?? "";
+                        if (measurement.Value1 <= _continuityResistance )
+                        {
+                            status = LiveTestStatus.Pass;
+                        }
+                        else 
+                        {
+                            status = LiveTestStatus.Fail;
+                        }
+
+                        _loadedRows.Add(new LiveTestDetailRowDto
+                        {
+                            StepNo = step++,
+                            NetId = measurement.Instruction ?? "",
+                            TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
+                            TestType = measurement.Instruction ?? "",
+                            MeasuredValue = Math.Round(measurement.Value1, 3),
+                            Status = status
+                        });
+                    }
+                }
+            }
+
+            // 5. Repopulate the GridView to show the results
+            PopulateLiveDetailsGrid(_loadedRows);
+
+            // 6. Disconnect after test run
+            _instrument.Disconnect();
+
+            // 7. Show summary MessageBox
+            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed 
+                ? "PASSED" 
+                : "FAILED or INCOMPLETE";
+
         }
 
         private void PopulateLiveDetailsGrid(List<LiveTestDetailRowDto> rows)
@@ -112,8 +214,7 @@ namespace AssemblyLineTester.Views.Pages
                     row.StepNo.ToString(),
                     row.TestPoint,
                     row.TestType,
-                    row.ExpectedValue,
-                    row.MeasuredValue?.ToString() ?? "",
+                    row.MeasuredValue?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "",
                     row.Status.ToString().ToUpperInvariant());
 
                 ApplyStatusStyle(gridLiveDetails.Rows[idx], row.Status);
@@ -345,5 +446,7 @@ namespace AssemblyLineTester.Views.Pages
                 g.DrawString("● Active Loop: J1-23 to J3-16", legendFont, blueBrush, 30, r.Height - 40);
             }
         }
+
+        
     }
 }

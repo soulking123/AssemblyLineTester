@@ -151,7 +151,6 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblMain
             // 
-            tblMain.AutoScroll = false;
             tblMain.BackColor = Color.FromArgb(244, 245, 247);
             tblMain.ColumnCount = 1;
             tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -180,7 +179,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlTopBar.Location = new Point(5, 5);
             pnlTopBar.Margin = new Padding(5);
             pnlTopBar.Name = "pnlTopBar";
-            pnlTopBar.Size = new Size(2666, 171);
+            pnlTopBar.Size = new Size(2666, 154);
             pnlTopBar.TabIndex = 0;
             // 
             // tblTopWrapper
@@ -196,7 +195,7 @@ namespace AssemblyLineTester.Views.Pages
             tblTopWrapper.RowCount = 2;
             tblTopWrapper.RowStyles.Add(new RowStyle());
             tblTopWrapper.RowStyles.Add(new RowStyle());
-            tblTopWrapper.Size = new Size(2666, 171);
+            tblTopWrapper.Size = new Size(2666, 154);
             tblTopWrapper.TabIndex = 0;
             // 
             // lblPageHeader
@@ -208,7 +207,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPageHeader.Location = new Point(10, 0);
             lblPageHeader.Margin = new Padding(10, 0, 0, 8);
             lblPageHeader.Name = "lblPageHeader";
-            lblPageHeader.Size = new Size(2656, 48);
+            lblPageHeader.Size = new Size(2656, 31);
             lblPageHeader.TabIndex = 0;
             lblPageHeader.Text = "🏠  TEST EXECUTION";
             lblPageHeader.TextAlign = ContentAlignment.BottomLeft;
@@ -221,7 +220,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterRow.Controls.Add(pnlFilterCard, 0, 0);
             tblFilterRow.Controls.Add(tblActionButtons, 1, 0);
             tblFilterRow.Dock = DockStyle.Fill;
-            tblFilterRow.Location = new Point(0, 56);
+            tblFilterRow.Location = new Point(0, 39);
             tblFilterRow.Margin = new Padding(0);
             tblFilterRow.Name = "tblFilterRow";
             tblFilterRow.RowCount = 1;
@@ -281,7 +280,7 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterModel.Location = new Point(11, 4);
             lblFilterModel.Margin = new Padding(3, 0, 3, 2);
             lblFilterModel.Name = "lblFilterModel";
-            lblFilterModel.Size = new Size(322, 32);
+            lblFilterModel.Size = new Size(322, 20);
             lblFilterModel.TabIndex = 0;
             lblFilterModel.Text = "Product Model";
             // 
@@ -291,9 +290,9 @@ namespace AssemblyLineTester.Views.Pages
             cmbProductModel.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbProductModel.Font = new Font("Segoe UI", 10F);
             cmbProductModel.FormattingEnabled = true;
-            cmbProductModel.Location = new Point(11, 51);
+            cmbProductModel.Location = new Point(11, 52);
             cmbProductModel.Name = "cmbProductModel";
-            cmbProductModel.Size = new Size(322, 45);
+            cmbProductModel.Size = new Size(322, 31);
             cmbProductModel.TabIndex = 1;
             // 
             // lblFilterType
@@ -305,7 +304,7 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterType.Location = new Point(339, 4);
             lblFilterType.Margin = new Padding(3, 0, 3, 2);
             lblFilterType.Name = "lblFilterType";
-            lblFilterType.Size = new Size(322, 32);
+            lblFilterType.Size = new Size(322, 20);
             lblFilterType.TabIndex = 2;
             lblFilterType.Text = "Product Type";
             // 
@@ -315,9 +314,9 @@ namespace AssemblyLineTester.Views.Pages
             cmbProductType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbProductType.Font = new Font("Segoe UI", 10F);
             cmbProductType.FormattingEnabled = true;
-            cmbProductType.Location = new Point(339, 51);
+            cmbProductType.Location = new Point(339, 52);
             cmbProductType.Name = "cmbProductType";
-            cmbProductType.Size = new Size(322, 45);
+            cmbProductType.Size = new Size(322, 31);
             cmbProductType.TabIndex = 3;
             // 
             // lblFilterArea
@@ -329,7 +328,7 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterArea.Location = new Point(667, 4);
             lblFilterArea.Margin = new Padding(3, 0, 3, 2);
             lblFilterArea.Name = "lblFilterArea";
-            lblFilterArea.Size = new Size(322, 32);
+            lblFilterArea.Size = new Size(322, 20);
             lblFilterArea.TabIndex = 4;
             lblFilterArea.Text = "Area";
             // 
@@ -339,9 +338,9 @@ namespace AssemblyLineTester.Views.Pages
             cmbArea.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbArea.Font = new Font("Segoe UI", 10F);
             cmbArea.FormattingEnabled = true;
-            cmbArea.Location = new Point(667, 51);
+            cmbArea.Location = new Point(667, 52);
             cmbArea.Name = "cmbArea";
-            cmbArea.Size = new Size(322, 45);
+            cmbArea.Size = new Size(322, 31);
             cmbArea.TabIndex = 5;
             // 
             // lblFilterPart
@@ -353,7 +352,7 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterPart.Location = new Point(995, 4);
             lblFilterPart.Margin = new Padding(3, 0, 3, 2);
             lblFilterPart.Name = "lblFilterPart";
-            lblFilterPart.Size = new Size(322, 32);
+            lblFilterPart.Size = new Size(322, 20);
             lblFilterPart.TabIndex = 6;
             lblFilterPart.Text = "Part Number";
             // 
@@ -363,9 +362,9 @@ namespace AssemblyLineTester.Views.Pages
             cmbPartNumber.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbPartNumber.Font = new Font("Segoe UI", 10F);
             cmbPartNumber.FormattingEnabled = true;
-            cmbPartNumber.Location = new Point(995, 51);
+            cmbPartNumber.Location = new Point(995, 52);
             cmbPartNumber.Name = "cmbPartNumber";
-            cmbPartNumber.Size = new Size(322, 45);
+            cmbPartNumber.Size = new Size(322, 31);
             cmbPartNumber.TabIndex = 7;
             // 
             // lblFilterEcn
@@ -377,7 +376,7 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterEcn.Location = new Point(1323, 4);
             lblFilterEcn.Margin = new Padding(3, 0, 3, 2);
             lblFilterEcn.Name = "lblFilterEcn";
-            lblFilterEcn.Size = new Size(322, 32);
+            lblFilterEcn.Size = new Size(322, 20);
             lblFilterEcn.TabIndex = 8;
             lblFilterEcn.Text = "ECN No.";
             // 
@@ -387,9 +386,9 @@ namespace AssemblyLineTester.Views.Pages
             cmbEcnNo.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbEcnNo.Font = new Font("Segoe UI", 10F);
             cmbEcnNo.FormattingEnabled = true;
-            cmbEcnNo.Location = new Point(1323, 51);
+            cmbEcnNo.Location = new Point(1323, 52);
             cmbEcnNo.Name = "cmbEcnNo";
-            cmbEcnNo.Size = new Size(322, 45);
+            cmbEcnNo.Size = new Size(322, 31);
             cmbEcnNo.TabIndex = 9;
             // 
             // btnLoadProgram
@@ -440,6 +439,7 @@ namespace AssemblyLineTester.Views.Pages
             btnStartTest.TabIndex = 0;
             btnStartTest.Text = "▶ START TEST";
             btnStartTest.UseVisualStyleBackColor = false;
+            btnStartTest.Click += btnStartTest_Click;
             // 
             // btnStopTest
             // 
@@ -470,11 +470,11 @@ namespace AssemblyLineTester.Views.Pages
             tblRow1.Controls.Add(cardHarnessConn, 2, 0);
             tblRow1.Controls.Add(cardTestStatus, 3, 0);
             tblRow1.Dock = DockStyle.Fill;
-            tblRow1.Location = new Point(3, 184);
+            tblRow1.Location = new Point(3, 167);
             tblRow1.Name = "tblRow1";
             tblRow1.RowCount = 1;
             tblRow1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblRow1.Size = new Size(2670, 489);
+            tblRow1.Size = new Size(2670, 470);
             tblRow1.TabIndex = 1;
             // 
             // cardMachineOverview
@@ -488,7 +488,7 @@ namespace AssemblyLineTester.Views.Pages
             cardMachineOverview.Margin = new Padding(5);
             cardMachineOverview.Name = "cardMachineOverview";
             cardMachineOverview.Padding = new Padding(10);
-            cardMachineOverview.Size = new Size(657, 479);
+            cardMachineOverview.Size = new Size(657, 460);
             cardMachineOverview.TabIndex = 0;
             // 
             // picMachineOverview
@@ -497,7 +497,7 @@ namespace AssemblyLineTester.Views.Pages
             picMachineOverview.Dock = DockStyle.Fill;
             picMachineOverview.Location = new Point(10, 56);
             picMachineOverview.Name = "picMachineOverview";
-            picMachineOverview.Size = new Size(635, 411);
+            picMachineOverview.Size = new Size(635, 392);
             picMachineOverview.TabIndex = 1;
             picMachineOverview.TabStop = false;
             // 
@@ -524,7 +524,7 @@ namespace AssemblyLineTester.Views.Pages
             cardAreaDetail.Margin = new Padding(5);
             cardAreaDetail.Name = "cardAreaDetail";
             cardAreaDetail.Padding = new Padding(10);
-            cardAreaDetail.Size = new Size(657, 479);
+            cardAreaDetail.Size = new Size(657, 460);
             cardAreaDetail.TabIndex = 1;
             // 
             // picAreaDetail
@@ -532,7 +532,7 @@ namespace AssemblyLineTester.Views.Pages
             picAreaDetail.Dock = DockStyle.Fill;
             picAreaDetail.Location = new Point(10, 10);
             picAreaDetail.Name = "picAreaDetail";
-            picAreaDetail.Size = new Size(635, 457);
+            picAreaDetail.Size = new Size(635, 438);
             picAreaDetail.TabIndex = 0;
             picAreaDetail.TabStop = false;
             // 
@@ -554,7 +554,7 @@ namespace AssemblyLineTester.Views.Pages
             cardHarnessConn.Margin = new Padding(5);
             cardHarnessConn.Name = "cardHarnessConn";
             cardHarnessConn.Padding = new Padding(10);
-            cardHarnessConn.Size = new Size(657, 479);
+            cardHarnessConn.Size = new Size(657, 460);
             cardHarnessConn.TabIndex = 2;
             // 
             // pnlHarnessImgContainer
@@ -564,7 +564,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlHarnessImgContainer.Dock = DockStyle.Fill;
             pnlHarnessImgContainer.Location = new Point(10, 56);
             pnlHarnessImgContainer.Name = "pnlHarnessImgContainer";
-            pnlHarnessImgContainer.Size = new Size(635, 411);
+            pnlHarnessImgContainer.Size = new Size(635, 392);
             pnlHarnessImgContainer.TabIndex = 1;
             // 
             // btnViewPinMap
@@ -576,7 +576,7 @@ namespace AssemblyLineTester.Views.Pages
             btnViewPinMap.FlatStyle = FlatStyle.Flat;
             btnViewPinMap.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnViewPinMap.ForeColor = Color.White;
-            btnViewPinMap.Location = new Point(460, 360);
+            btnViewPinMap.Location = new Point(460, 341);
             btnViewPinMap.Name = "btnViewPinMap";
             btnViewPinMap.Size = new Size(160, 40);
             btnViewPinMap.TabIndex = 1;
@@ -590,7 +590,7 @@ namespace AssemblyLineTester.Views.Pages
             picHarnessConn.Dock = DockStyle.Fill;
             picHarnessConn.Location = new Point(0, 0);
             picHarnessConn.Name = "picHarnessConn";
-            picHarnessConn.Size = new Size(635, 411);
+            picHarnessConn.Size = new Size(635, 392);
             picHarnessConn.SizeMode = PictureBoxSizeMode.Zoom;
             picHarnessConn.TabIndex = 0;
             picHarnessConn.TabStop = false;
@@ -619,7 +619,7 @@ namespace AssemblyLineTester.Views.Pages
             cardTestStatus.Margin = new Padding(5);
             cardTestStatus.Name = "cardTestStatus";
             cardTestStatus.Padding = new Padding(10);
-            cardTestStatus.Size = new Size(659, 479);
+            cardTestStatus.Size = new Size(659, 460);
             cardTestStatus.TabIndex = 3;
             // 
             // tblStatusLabels
@@ -643,7 +643,7 @@ namespace AssemblyLineTester.Views.Pages
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblStatusLabels.Size = new Size(637, 340);
+            tblStatusLabels.Size = new Size(637, 321);
             tblStatusLabels.TabIndex = 2;
             // 
             // lblStartTimeKey
@@ -654,7 +654,7 @@ namespace AssemblyLineTester.Views.Pages
             lblStartTimeKey.ForeColor = Color.FromArgb(100, 116, 139);
             lblStartTimeKey.Location = new Point(3, 0);
             lblStartTimeKey.Name = "lblStartTimeKey";
-            lblStartTimeKey.Size = new Size(277, 85);
+            lblStartTimeKey.Size = new Size(248, 80);
             lblStartTimeKey.TabIndex = 0;
             lblStartTimeKey.Text = "Start Time :";
             lblStartTimeKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -665,9 +665,9 @@ namespace AssemblyLineTester.Views.Pages
             lblStartTimeVal.Dock = DockStyle.Fill;
             lblStartTimeVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblStartTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblStartTimeVal.Location = new Point(286, 0);
+            lblStartTimeVal.Location = new Point(257, 0);
             lblStartTimeVal.Name = "lblStartTimeVal";
-            lblStartTimeVal.Size = new Size(348, 85);
+            lblStartTimeVal.Size = new Size(377, 80);
             lblStartTimeVal.TabIndex = 1;
             lblStartTimeVal.Text = "15 Mar 2026 10:30:20 AM";
             lblStartTimeVal.TextAlign = ContentAlignment.MiddleRight;
@@ -678,9 +678,9 @@ namespace AssemblyLineTester.Views.Pages
             lblElapsedKey.Dock = DockStyle.Fill;
             lblElapsedKey.Font = new Font("Segoe UI", 8.5F);
             lblElapsedKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblElapsedKey.Location = new Point(3, 85);
+            lblElapsedKey.Location = new Point(3, 80);
             lblElapsedKey.Name = "lblElapsedKey";
-            lblElapsedKey.Size = new Size(277, 85);
+            lblElapsedKey.Size = new Size(248, 80);
             lblElapsedKey.TabIndex = 2;
             lblElapsedKey.Text = "Elapsed Time :";
             lblElapsedKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -691,9 +691,9 @@ namespace AssemblyLineTester.Views.Pages
             lblElapsedVal.Dock = DockStyle.Fill;
             lblElapsedVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblElapsedVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblElapsedVal.Location = new Point(286, 85);
+            lblElapsedVal.Location = new Point(257, 80);
             lblElapsedVal.Name = "lblElapsedVal";
-            lblElapsedVal.Size = new Size(348, 85);
+            lblElapsedVal.Size = new Size(377, 80);
             lblElapsedVal.TabIndex = 3;
             lblElapsedVal.Text = "00:02:15";
             lblElapsedVal.TextAlign = ContentAlignment.MiddleRight;
@@ -704,9 +704,9 @@ namespace AssemblyLineTester.Views.Pages
             lblEstimatedKey.Dock = DockStyle.Fill;
             lblEstimatedKey.Font = new Font("Segoe UI", 8.5F);
             lblEstimatedKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblEstimatedKey.Location = new Point(3, 170);
+            lblEstimatedKey.Location = new Point(3, 160);
             lblEstimatedKey.Name = "lblEstimatedKey";
-            lblEstimatedKey.Size = new Size(277, 85);
+            lblEstimatedKey.Size = new Size(248, 80);
             lblEstimatedKey.TabIndex = 4;
             lblEstimatedKey.Text = "Estimated Time :";
             lblEstimatedKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -717,9 +717,9 @@ namespace AssemblyLineTester.Views.Pages
             lblEstimatedVal.Dock = DockStyle.Fill;
             lblEstimatedVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblEstimatedVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblEstimatedVal.Location = new Point(286, 170);
+            lblEstimatedVal.Location = new Point(257, 160);
             lblEstimatedVal.Name = "lblEstimatedVal";
-            lblEstimatedVal.Size = new Size(348, 85);
+            lblEstimatedVal.Size = new Size(377, 80);
             lblEstimatedVal.TabIndex = 5;
             lblEstimatedVal.Text = "00:09:01";
             lblEstimatedVal.TextAlign = ContentAlignment.MiddleRight;
@@ -730,9 +730,9 @@ namespace AssemblyLineTester.Views.Pages
             lblEndTimeKey.Dock = DockStyle.Fill;
             lblEndTimeKey.Font = new Font("Segoe UI", 8.5F);
             lblEndTimeKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblEndTimeKey.Location = new Point(3, 255);
+            lblEndTimeKey.Location = new Point(3, 240);
             lblEndTimeKey.Name = "lblEndTimeKey";
-            lblEndTimeKey.Size = new Size(277, 85);
+            lblEndTimeKey.Size = new Size(248, 81);
             lblEndTimeKey.TabIndex = 6;
             lblEndTimeKey.Text = "End Time (Est.) :";
             lblEndTimeKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -743,9 +743,9 @@ namespace AssemblyLineTester.Views.Pages
             lblEndTimeVal.Dock = DockStyle.Fill;
             lblEndTimeVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblEndTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblEndTimeVal.Location = new Point(286, 255);
+            lblEndTimeVal.Location = new Point(257, 240);
             lblEndTimeVal.Name = "lblEndTimeVal";
-            lblEndTimeVal.Size = new Size(348, 85);
+            lblEndTimeVal.Size = new Size(377, 81);
             lblEndTimeVal.TabIndex = 7;
             lblEndTimeVal.Text = "15 Mar 2026 10:39:21 AM";
             lblEndTimeVal.TextAlign = ContentAlignment.MiddleRight;
@@ -782,11 +782,11 @@ namespace AssemblyLineTester.Views.Pages
             tblRow2.Controls.Add(cardProgress, 0, 0);
             tblRow2.Controls.Add(cardCurrentPoint, 1, 0);
             tblRow2.Dock = DockStyle.Fill;
-            tblRow2.Location = new Point(3, 679);
+            tblRow2.Location = new Point(3, 643);
             tblRow2.Name = "tblRow2";
             tblRow2.RowCount = 1;
             tblRow2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblRow2.Size = new Size(2670, 324);
+            tblRow2.Size = new Size(2670, 336);
             tblRow2.TabIndex = 2;
             // 
             // cardProgress
@@ -799,7 +799,7 @@ namespace AssemblyLineTester.Views.Pages
             cardProgress.Margin = new Padding(5);
             cardProgress.Name = "cardProgress";
             cardProgress.Padding = new Padding(10);
-            cardProgress.Size = new Size(1859, 314);
+            cardProgress.Size = new Size(1859, 326);
             cardProgress.TabIndex = 0;
             // 
             // tblProgressCard
@@ -814,7 +814,7 @@ namespace AssemblyLineTester.Views.Pages
             tblProgressCard.Name = "tblProgressCard";
             tblProgressCard.RowCount = 1;
             tblProgressCard.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblProgressCard.Size = new Size(1837, 292);
+            tblProgressCard.Size = new Size(1837, 304);
             tblProgressCard.TabIndex = 0;
             // 
             // pnlSequenceSection
@@ -825,7 +825,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlSequenceSection.Location = new Point(0, 0);
             pnlSequenceSection.Margin = new Padding(0, 0, 10, 0);
             pnlSequenceSection.Name = "pnlSequenceSection";
-            pnlSequenceSection.Size = new Size(1312, 292);
+            pnlSequenceSection.Size = new Size(1312, 304);
             pnlSequenceSection.TabIndex = 0;
             // 
             // tblSteps
@@ -846,7 +846,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSteps.Name = "tblSteps";
             tblSteps.RowCount = 1;
             tblSteps.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblSteps.Size = new Size(1314, 251);
+            tblSteps.Size = new Size(1312, 261);
             tblSteps.TabIndex = 1;
             // 
             // lblStep1
@@ -858,7 +858,7 @@ namespace AssemblyLineTester.Views.Pages
             lblStep1.Location = new Point(3, 3);
             lblStep1.Margin = new Padding(3);
             lblStep1.Name = "lblStep1";
-            lblStep1.Size = new Size(256, 245);
+            lblStep1.Size = new Size(256, 255);
             lblStep1.TabIndex = 0;
             lblStep1.Text = "✔ Continuity Test\r\n\r\n(00:01:42)";
             lblStep1.TextAlign = ContentAlignment.MiddleCenter;
@@ -872,7 +872,7 @@ namespace AssemblyLineTester.Views.Pages
             lblStep2.Location = new Point(265, 3);
             lblStep2.Margin = new Padding(3);
             lblStep2.Name = "lblStep2";
-            lblStep2.Size = new Size(256, 245);
+            lblStep2.Size = new Size(256, 255);
             lblStep2.TabIndex = 1;
             lblStep2.Text = "✔ Short Circuit\r\n\r\n(00:01:35)";
             lblStep2.TextAlign = ContentAlignment.MiddleCenter;
@@ -886,7 +886,7 @@ namespace AssemblyLineTester.Views.Pages
             lblStep3.Location = new Point(527, 3);
             lblStep3.Margin = new Padding(3);
             lblStep3.Name = "lblStep3";
-            lblStep3.Size = new Size(256, 245);
+            lblStep3.Size = new Size(256, 255);
             lblStep3.TabIndex = 2;
             lblStep3.Text = "✔ Insulation Test\r\n\r\n(00:01:28)";
             lblStep3.TextAlign = ContentAlignment.MiddleCenter;
@@ -900,7 +900,7 @@ namespace AssemblyLineTester.Views.Pages
             lblStep4.Location = new Point(789, 3);
             lblStep4.Margin = new Padding(3);
             lblStep4.Name = "lblStep4";
-            lblStep4.Size = new Size(256, 245);
+            lblStep4.Size = new Size(256, 255);
             lblStep4.TabIndex = 3;
             lblStep4.Text = "⏳ Functional Test\r\n\r\nIn Progress\r\n\r\n(00:02:15)";
             lblStep4.TextAlign = ContentAlignment.MiddleCenter;
@@ -914,7 +914,7 @@ namespace AssemblyLineTester.Views.Pages
             lblStep5.Location = new Point(1051, 3);
             lblStep5.Margin = new Padding(3);
             lblStep5.Name = "lblStep5";
-            lblStep5.Size = new Size(260, 245);
+            lblStep5.Size = new Size(258, 255);
             lblStep5.TabIndex = 4;
             lblStep5.Text = "Final Verification\r\n(Pending)";
             lblStep5.TextAlign = ContentAlignment.MiddleCenter;
@@ -926,7 +926,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSequenceTitle.ForeColor = Color.FromArgb(30, 41, 59);
             lblSequenceTitle.Location = new Point(0, 0);
             lblSequenceTitle.Name = "lblSequenceTitle";
-            lblSequenceTitle.Size = new Size(1314, 43);
+            lblSequenceTitle.Size = new Size(1312, 43);
             lblSequenceTitle.TabIndex = 0;
             lblSequenceTitle.Text = "TEST SEQUENCE & PROGRESS";
             lblSequenceTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -941,7 +941,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlOverallStatsSection.Location = new Point(1322, 0);
             pnlOverallStatsSection.Margin = new Padding(0);
             pnlOverallStatsSection.Name = "pnlOverallStatsSection";
-            pnlOverallStatsSection.Size = new Size(515, 292);
+            pnlOverallStatsSection.Size = new Size(515, 304);
             pnlOverallStatsSection.TabIndex = 1;
             // 
             // lblProgressStats
@@ -951,7 +951,7 @@ namespace AssemblyLineTester.Views.Pages
             lblProgressStats.ForeColor = Color.FromArgb(71, 85, 105);
             lblProgressStats.Location = new Point(0, 155);
             lblProgressStats.Name = "lblProgressStats";
-            lblProgressStats.Size = new Size(515, 139);
+            lblProgressStats.Size = new Size(515, 149);
             lblProgressStats.TabIndex = 3;
             lblProgressStats.Text = "Total Steps: 5 | Completed: 2 | Remaining: 3";
             lblProgressStats.TextAlign = ContentAlignment.MiddleCenter;
@@ -1001,7 +1001,7 @@ namespace AssemblyLineTester.Views.Pages
             cardCurrentPoint.Margin = new Padding(5);
             cardCurrentPoint.Name = "cardCurrentPoint";
             cardCurrentPoint.Padding = new Padding(10);
-            cardCurrentPoint.Size = new Size(791, 314);
+            cardCurrentPoint.Size = new Size(791, 326);
             cardCurrentPoint.TabIndex = 1;
             // 
             // tblCurrentPointDetails
@@ -1022,7 +1022,7 @@ namespace AssemblyLineTester.Views.Pages
             tblCurrentPointDetails.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
             tblCurrentPointDetails.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
             tblCurrentPointDetails.RowStyles.Add(new RowStyle(SizeType.Percent, 33.34F));
-            tblCurrentPointDetails.Size = new Size(771, 204);
+            tblCurrentPointDetails.Size = new Size(769, 214);
             tblCurrentPointDetails.TabIndex = 2;
             // 
             // lblExpectedKey
@@ -1033,7 +1033,7 @@ namespace AssemblyLineTester.Views.Pages
             lblExpectedKey.ForeColor = Color.FromArgb(100, 116, 139);
             lblExpectedKey.Location = new Point(3, 0);
             lblExpectedKey.Name = "lblExpectedKey";
-            lblExpectedKey.Size = new Size(418, 67);
+            lblExpectedKey.Size = new Size(416, 71);
             lblExpectedKey.TabIndex = 0;
             lblExpectedKey.Text = "Expected Resistance:";
             lblExpectedKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1044,9 +1044,9 @@ namespace AssemblyLineTester.Views.Pages
             lblExpectedVal.Dock = DockStyle.Fill;
             lblExpectedVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblExpectedVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblExpectedVal.Location = new Point(427, 0);
+            lblExpectedVal.Location = new Point(425, 0);
             lblExpectedVal.Name = "lblExpectedVal";
-            lblExpectedVal.Size = new Size(341, 67);
+            lblExpectedVal.Size = new Size(341, 71);
             lblExpectedVal.TabIndex = 1;
             lblExpectedVal.Text = "< 1.00 Ω";
             lblExpectedVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1057,9 +1057,9 @@ namespace AssemblyLineTester.Views.Pages
             lblMeasuredKey.Dock = DockStyle.Fill;
             lblMeasuredKey.Font = new Font("Segoe UI", 9F);
             lblMeasuredKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblMeasuredKey.Location = new Point(3, 67);
+            lblMeasuredKey.Location = new Point(3, 71);
             lblMeasuredKey.Name = "lblMeasuredKey";
-            lblMeasuredKey.Size = new Size(418, 67);
+            lblMeasuredKey.Size = new Size(416, 71);
             lblMeasuredKey.TabIndex = 2;
             lblMeasuredKey.Text = "Measured Resistance:";
             lblMeasuredKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1070,9 +1070,9 @@ namespace AssemblyLineTester.Views.Pages
             lblMeasuredVal.Dock = DockStyle.Fill;
             lblMeasuredVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblMeasuredVal.ForeColor = Color.FromArgb(40, 167, 69);
-            lblMeasuredVal.Location = new Point(427, 67);
+            lblMeasuredVal.Location = new Point(425, 71);
             lblMeasuredVal.Name = "lblMeasuredVal";
-            lblMeasuredVal.Size = new Size(341, 67);
+            lblMeasuredVal.Size = new Size(341, 71);
             lblMeasuredVal.TabIndex = 3;
             lblMeasuredVal.Text = "0.23 Ω";
             lblMeasuredVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1083,9 +1083,9 @@ namespace AssemblyLineTester.Views.Pages
             lblResultKey.Dock = DockStyle.Fill;
             lblResultKey.Font = new Font("Segoe UI", 9F);
             lblResultKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblResultKey.Location = new Point(3, 134);
+            lblResultKey.Location = new Point(3, 142);
             lblResultKey.Name = "lblResultKey";
-            lblResultKey.Size = new Size(418, 70);
+            lblResultKey.Size = new Size(416, 72);
             lblResultKey.TabIndex = 4;
             lblResultKey.Text = "Result:";
             lblResultKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1096,9 +1096,9 @@ namespace AssemblyLineTester.Views.Pages
             lblResultVal.Dock = DockStyle.Fill;
             lblResultVal.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblResultVal.ForeColor = Color.FromArgb(40, 167, 69);
-            lblResultVal.Location = new Point(427, 134);
+            lblResultVal.Location = new Point(425, 142);
             lblResultVal.Name = "lblResultVal";
-            lblResultVal.Size = new Size(341, 70);
+            lblResultVal.Size = new Size(341, 72);
             lblResultVal.TabIndex = 5;
             lblResultVal.Text = "PASS";
             lblResultVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1110,7 +1110,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPointsRoute.ForeColor = Color.FromArgb(30, 41, 59);
             lblPointsRoute.Location = new Point(10, 53);
             lblPointsRoute.Name = "lblPointsRoute";
-            lblPointsRoute.Size = new Size(771, 47);
+            lblPointsRoute.Size = new Size(769, 47);
             lblPointsRoute.TabIndex = 1;
             lblPointsRoute.Text = "Dari \"J1-23\"  ➔  Ke \"J3-16\"";
             lblPointsRoute.TextAlign = ContentAlignment.MiddleCenter;
@@ -1122,7 +1122,7 @@ namespace AssemblyLineTester.Views.Pages
             lblCurrentPointTitle.ForeColor = Color.FromArgb(30, 41, 59);
             lblCurrentPointTitle.Location = new Point(10, 10);
             lblCurrentPointTitle.Name = "lblCurrentPointTitle";
-            lblCurrentPointTitle.Size = new Size(771, 43);
+            lblCurrentPointTitle.Size = new Size(769, 43);
             lblCurrentPointTitle.TabIndex = 0;
             lblCurrentPointTitle.Text = "CURRENT TEST POINT";
             lblCurrentPointTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -1137,11 +1137,11 @@ namespace AssemblyLineTester.Views.Pages
             tblRow3.Controls.Add(cardWiringDiagram, 1, 0);
             tblRow3.Controls.Add(tblSummaryNotes, 2, 0);
             tblRow3.Dock = DockStyle.Fill;
-            tblRow3.Location = new Point(3, 1009);
+            tblRow3.Location = new Point(3, 985);
             tblRow3.Name = "tblRow3";
             tblRow3.RowCount = 1;
             tblRow3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblRow3.Size = new Size(2670, 657);
+            tblRow3.Size = new Size(2670, 665);
             tblRow3.TabIndex = 3;
             // 
             // cardLiveDetails
@@ -1155,7 +1155,7 @@ namespace AssemblyLineTester.Views.Pages
             cardLiveDetails.Margin = new Padding(5);
             cardLiveDetails.Name = "cardLiveDetails";
             cardLiveDetails.Padding = new Padding(10);
-            cardLiveDetails.Size = new Size(1325, 647);
+            cardLiveDetails.Size = new Size(1325, 655);
             cardLiveDetails.TabIndex = 0;
             // 
             // gridLiveDetails
@@ -1171,7 +1171,7 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.ReadOnly = true;
             gridLiveDetails.RowHeadersVisible = false;
             gridLiveDetails.RowHeadersWidth = 82;
-            gridLiveDetails.Size = new Size(1303, 563);
+            gridLiveDetails.Size = new Size(1303, 571);
             gridLiveDetails.TabIndex = 1;
             // 
             // lblLiveDetailsTitle
@@ -1197,7 +1197,7 @@ namespace AssemblyLineTester.Views.Pages
             cardWiringDiagram.Margin = new Padding(5);
             cardWiringDiagram.Name = "cardWiringDiagram";
             cardWiringDiagram.Padding = new Padding(10);
-            cardWiringDiagram.Size = new Size(657, 647);
+            cardWiringDiagram.Size = new Size(657, 655);
             cardWiringDiagram.TabIndex = 1;
             // 
             // pnlWiringPlaceholder
@@ -1207,7 +1207,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlWiringPlaceholder.Dock = DockStyle.Fill;
             pnlWiringPlaceholder.Location = new Point(10, 72);
             pnlWiringPlaceholder.Name = "pnlWiringPlaceholder";
-            pnlWiringPlaceholder.Size = new Size(635, 563);
+            pnlWiringPlaceholder.Size = new Size(635, 571);
             pnlWiringPlaceholder.TabIndex = 1;
             // 
             // lblWiringMockText
@@ -1217,7 +1217,7 @@ namespace AssemblyLineTester.Views.Pages
             lblWiringMockText.ForeColor = Color.FromArgb(100, 116, 139);
             lblWiringMockText.Location = new Point(0, 0);
             lblWiringMockText.Name = "lblWiringMockText";
-            lblWiringMockText.Size = new Size(635, 563);
+            lblWiringMockText.Size = new Size(635, 571);
             lblWiringMockText.TabIndex = 0;
             lblWiringMockText.Text = "J1 to J3 Visual Wiring Map Placeholder\r\n\r\nLegend:\r\n✔ Completed\r\n⏳ Testing\r\n⏳ Pending";
             lblWiringMockText.TextAlign = ContentAlignment.MiddleCenter;
@@ -1247,7 +1247,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryNotes.RowCount = 2;
             tblSummaryNotes.RowStyles.Add(new RowStyle(SizeType.Percent, 60F));
             tblSummaryNotes.RowStyles.Add(new RowStyle(SizeType.Percent, 40F));
-            tblSummaryNotes.Size = new Size(668, 657);
+            tblSummaryNotes.Size = new Size(668, 665);
             tblSummaryNotes.TabIndex = 2;
             // 
             // cardTestSummary
@@ -1261,7 +1261,7 @@ namespace AssemblyLineTester.Views.Pages
             cardTestSummary.Margin = new Padding(5, 5, 5, 2);
             cardTestSummary.Name = "cardTestSummary";
             cardTestSummary.Padding = new Padding(10);
-            cardTestSummary.Size = new Size(658, 387);
+            cardTestSummary.Size = new Size(658, 392);
             cardTestSummary.TabIndex = 0;
             // 
             // lblSummaryText
@@ -1271,7 +1271,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSummaryText.ForeColor = Color.FromArgb(51, 65, 85);
             lblSummaryText.Location = new Point(10, 56);
             lblSummaryText.Name = "lblSummaryText";
-            lblSummaryText.Size = new Size(636, 319);
+            lblSummaryText.Size = new Size(636, 324);
             lblSummaryText.TabIndex = 1;
             lblSummaryText.Text = "Continuity Test (212/212 ✔️)\r\nShort Circuit Test (212/212 ✔️)\r\nInsulation Test (212/212 ⏳)\r\nFunctional Test (64/212 ⏳)\r\nFinal Verification (0/212)";
             // 
@@ -1294,11 +1294,11 @@ namespace AssemblyLineTester.Views.Pages
             cardNotes.Controls.Add(txtNotes);
             cardNotes.Controls.Add(lblNotesTitle);
             cardNotes.Dock = DockStyle.Fill;
-            cardNotes.Location = new Point(5, 396);
+            cardNotes.Location = new Point(5, 401);
             cardNotes.Margin = new Padding(5, 2, 5, 5);
             cardNotes.Name = "cardNotes";
             cardNotes.Padding = new Padding(10);
-            cardNotes.Size = new Size(658, 256);
+            cardNotes.Size = new Size(658, 259);
             cardNotes.TabIndex = 1;
             // 
             // txtNotes
@@ -1309,7 +1309,7 @@ namespace AssemblyLineTester.Views.Pages
             txtNotes.Location = new Point(10, 57);
             txtNotes.Multiline = true;
             txtNotes.Name = "txtNotes";
-            txtNotes.Size = new Size(636, 187);
+            txtNotes.Size = new Size(636, 190);
             txtNotes.TabIndex = 1;
             // 
             // lblNotesTitle
@@ -1326,7 +1326,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // TestExecution
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             BackColor = Color.FromArgb(244, 245, 247);
