@@ -21,15 +21,11 @@ namespace AssemblyLineTester.Views.Pages
         public HarnessDatabase()
         {
             InitializeComponent();
-            panelFilters.Paint += PanelFilters_Paint;
-            tableLayoutPanelLeft.Paint += Card_Paint;
-            panelDetailCard.Paint += Card_Paint;
-            panelCardSpecs.Paint += Card_Paint;
-            panelCardTestSummary.Paint += Card_Paint;
             picHarnessImage.Paint += PicHarnessImage_Paint;
             picMachineArea.Paint += PicMachineArea_Paint;
             dataGridViewList.CellPainting += DataGridViewList_CellPainting;
             this.Load += HarnessDatabase_Load;
+            SetupEvents();
             SetupPagination();
             PopulateDummyData();
         }
@@ -61,35 +57,157 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void PanelFilters_Paint(object? sender, PaintEventArgs e)
+        private static GraphicsPath GetRoundedPath(Rectangle rect, int radius)
         {
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var pen = new Pen(Color.FromArgb(226, 232, 240), 1);
-            int rad = 8;
-            var rect = new Rectangle(0, 0, panelFilters.Width - 1, panelFilters.Height - 1);
-            using var path = new GraphicsPath();
-            path.AddArc(rect.X, rect.Y, rad * 2, rad * 2, 180, 90);
-            path.AddArc(rect.Right - rad * 2, rect.Y, rad * 2, rad * 2, 270, 90);
-            path.AddArc(rect.Right - rad * 2, rect.Bottom - rad * 2, rad * 2, rad * 2, 0, 90);
-            path.AddArc(rect.X, rect.Bottom - rad * 2, rad * 2, rad * 2, 90, 90);
+            var path = new GraphicsPath();
+            int d = radius * 2;
+            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
             path.CloseFigure();
-            e.Graphics.DrawPath(pen, path);
+            return path;
         }
 
-        private void Card_Paint(object? sender, PaintEventArgs e)
+        private void SetupEvents()
         {
-            if (sender is not Control ctrl) return;
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var pen = new Pen(Color.FromArgb(226, 232, 240), 1);
-            int rad = 8;
-            var rect = new Rectangle(0, 0, ctrl.Width - 1, ctrl.Height - 1);
-            using var path = new GraphicsPath();
-            path.AddArc(rect.X, rect.Y, rad * 2, rad * 2, 180, 90);
-            path.AddArc(rect.Right - rad * 2, rect.Y, rad * 2, rad * 2, 270, 90);
-            path.AddArc(rect.Right - rad * 2, rect.Bottom - rad * 2, rad * 2, rad * 2, 0, 90);
-            path.AddArc(rect.X, rect.Bottom - rad * 2, rad * 2, rad * 2, 90, 90);
-            path.CloseFigure();
-            e.Graphics.DrawPath(pen, path);
+            SetupCardRoundedEdges(panelFilters, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(tableLayoutPanelLeft, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(panelDetailCard, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(panelCardSpecs, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(panelCardTestSummary, 12, Color.FromArgb(34, 40, 49), 2.5f);
+
+            SetupButtonRoundedEdges(btnSearch, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
+            SetupButtonRoundedEdges(btnAddHarness, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            SetupButtonRoundedEdges(btnEdit, 10, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.Transparent);
+            SetupButtonRoundedEdges(btnDelete, 10, Color.FromArgb(254, 242, 242), Color.FromArgb(254, 226, 226), Color.FromArgb(254, 202, 202), Color.Transparent);
+        }
+
+        private static void SetupCardRoundedEdges(Control card, int radius, Color borderColor, float borderWidth = 2.5f)
+        {
+            if (card is TableLayoutPanel || card.Padding.Left < 4 || card.Padding.Top < 4 || card.Padding.Right < 4 || card.Padding.Bottom < 4)
+            {
+                card.Padding = new Padding(
+                    Math.Max(card.Padding.Left, 4),
+                    Math.Max(card.Padding.Top, 4),
+                    Math.Max(card.Padding.Right, 4),
+                    Math.Max(card.Padding.Bottom, 4)
+                );
+            }
+
+            card.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                Color parentBg = card.Parent?.BackColor != null && card.Parent.BackColor != Color.Transparent
+                    ? card.Parent.BackColor
+                    : Color.FromArgb(244, 245, 247);
+
+                using (var parentBrush = new SolidBrush(parentBg))
+                {
+                    e.Graphics.FillRectangle(parentBrush, 0, 0, card.Width, card.Height);
+                }
+
+                var rectOuter = new Rectangle(0, 0, card.Width, card.Height);
+                using var pathOuter = GetRoundedPath(rectOuter, radius);
+                using (var cardBrush = new SolidBrush(card.BackColor))
+                {
+                    e.Graphics.FillPath(cardBrush, pathOuter);
+                }
+
+                var rectBorder = new Rectangle(1, 1, card.Width - 3, card.Height - 3);
+                using var pathBorder = GetRoundedPath(rectBorder, radius);
+                using var pen = new Pen(borderColor, borderWidth);
+                e.Graphics.DrawPath(pen, pathBorder);
+            };
+
+            card.Resize += (s, e) =>
+            {
+                if (card.Width > 0 && card.Height > 0)
+                {
+                    var oldRegion = card.Region;
+                    card.Region = new Region(GetRoundedPath(new Rectangle(0, 0, card.Width, card.Height), radius));
+                    oldRegion?.Dispose();
+                    card.Invalidate();
+                }
+            };
+
+            if (card.Width > 0 && card.Height > 0)
+            {
+                card.Region = new Region(GetRoundedPath(new Rectangle(0, 0, card.Width, card.Height), radius));
+            }
+        }
+
+        private static void SetupButtonRoundedEdges(Button btn, int radius, Color normalColor, Color hoverColor, Color pressedColor, Color borderColor)
+        {
+            bool isHovered = false;
+            bool isPressed = false;
+
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.BackColor = normalColor;
+
+            btn.MouseEnter += (s, e) => { isHovered = true; btn.Invalidate(); };
+            btn.MouseLeave += (s, e) => { isHovered = false; isPressed = false; btn.Invalidate(); };
+            btn.MouseDown += (s, e) => { if (e.Button == MouseButtons.Left) { isPressed = true; btn.Invalidate(); } };
+            btn.MouseUp += (s, e) => { if (e.Button == MouseButtons.Left) { isPressed = false; btn.Invalidate(); } };
+
+            btn.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                Color parentBg = btn.Parent?.BackColor != null && btn.Parent.BackColor != Color.Transparent
+                    ? btn.Parent.BackColor
+                    : Color.White;
+
+                using (var parentBrush = new SolidBrush(parentBg))
+                {
+                    e.Graphics.FillRectangle(parentBrush, 0, 0, btn.Width, btn.Height);
+                }
+
+                Color currentColor = !btn.Enabled ? Color.FromArgb(248, 250, 252) : (isPressed ? pressedColor : (isHovered ? hoverColor : normalColor));
+
+                var rect = new Rectangle(0, 0, btn.Width - 1, btn.Height - 1);
+                using var path = GetRoundedPath(rect, radius);
+                using (var fillBrush = new SolidBrush(currentColor))
+                {
+                    e.Graphics.FillPath(fillBrush, path);
+                }
+
+                if (borderColor != Color.Transparent && borderColor != Color.Empty)
+                {
+                    using var pen = new Pen(borderColor, 1.6f);
+                    e.Graphics.DrawPath(pen, path);
+                }
+
+                TextRenderer.DrawText(
+                    e.Graphics,
+                    btn.Text,
+                    btn.Font,
+                    new Rectangle(0, 0, btn.Width, btn.Height),
+                    btn.ForeColor,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis
+                );
+            };
+
+            btn.Resize += (s, e) =>
+            {
+                if (btn.Width > 0 && btn.Height > 0)
+                {
+                    var oldRegion = btn.Region;
+                    btn.Region = new Region(GetRoundedPath(new Rectangle(0, 0, btn.Width, btn.Height), radius));
+                    oldRegion?.Dispose();
+                    btn.Invalidate();
+                }
+            };
+
+            if (btn.Width > 0 && btn.Height > 0)
+            {
+                btn.Region = new Region(GetRoundedPath(new Rectangle(0, 0, btn.Width, btn.Height), radius));
+            }
         }
 
         private void DataGridViewList_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
@@ -145,12 +263,13 @@ namespace AssemblyLineTester.Views.Pages
                 }
             };
 
+            flpShowEntries.WrapContents = false;
             _lblPageInfo = new Label
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 9F),
                 ForeColor = Color.FromArgb(100, 116, 139),
-                Margin = new Padding(20, 19, 0, 0),
+                Margin = new Padding(10, 19, 0, 0),
                 Name = "lblPageInfo"
             };
             flpShowEntries.Controls.Add(_lblPageInfo);
@@ -307,6 +426,16 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             if (onClick != null) btn.Click += onClick;
+
+            if (text != "...")
+            {
+                Color norm = isActive ? Color.FromArgb(250, 204, 21) : (!isEnabled ? Color.FromArgb(248, 250, 252) : Color.White);
+                Color hover = isActive ? Color.FromArgb(254, 216, 53) : (!isEnabled ? Color.FromArgb(248, 250, 252) : Color.FromArgb(248, 250, 252));
+                Color press = isActive ? Color.FromArgb(234, 186, 10) : (!isEnabled ? Color.FromArgb(248, 250, 252) : Color.FromArgb(241, 245, 249));
+                Color border = Color.Transparent;
+                SetupButtonRoundedEdges(btn, 8, norm, hover, press, border);
+            }
+
             return btn;
         }
 
@@ -514,7 +643,7 @@ namespace AssemblyLineTester.Views.Pages
             var rect = ctrl.ClientRectangle;
             if (rect.Width <= 1 || rect.Height <= 1) return;
 
-            using var penBorder = new Pen(Color.FromArgb(226, 232, 240), 1);
+            using var penBorder = new Pen(Color.FromArgb(148, 163, 184), 1.5f);
             e.Graphics.DrawRectangle(penBorder, 0, 0, rect.Width - 1, rect.Height - 1);
 
             using var penCable = new Pen(Color.FromArgb(51, 65, 85), 4);
@@ -540,7 +669,7 @@ namespace AssemblyLineTester.Views.Pages
             var rect = ctrl.ClientRectangle;
             if (rect.Width <= 1 || rect.Height <= 1) return;
 
-            using var penBorder = new Pen(Color.FromArgb(226, 232, 240), 1);
+            using var penBorder = new Pen(Color.FromArgb(148, 163, 184), 1.5f);
             e.Graphics.DrawRectangle(penBorder, 0, 0, rect.Width - 1, rect.Height - 1);
 
             using var penBox = new Pen(Color.FromArgb(148, 163, 184), 2);

@@ -150,6 +150,7 @@ namespace AssemblyLineTester.Views.Pages
             tableLayoutPanelLeft.Location = new Point(0, 0);
             tableLayoutPanelLeft.Margin = new Padding(0);
             tableLayoutPanelLeft.Name = "tableLayoutPanelLeft";
+            tableLayoutPanelLeft.Padding = new Padding(4);
             tableLayoutPanelLeft.RowCount = 3;
             tableLayoutPanelLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 80F));
             tableLayoutPanelLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
@@ -160,6 +161,7 @@ namespace AssemblyLineTester.Views.Pages
             // lblListTitle
             // 
             lblListTitle.AutoSize = true;
+            lblListTitle.BorderStyle = BorderStyle.None;
             lblListTitle.Dock = DockStyle.Fill;
             lblListTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblListTitle.ForeColor = Color.FromArgb(15, 23, 42);
@@ -288,8 +290,8 @@ namespace AssemblyLineTester.Views.Pages
             // tblPagination
             // 
             tblPagination.ColumnCount = 2;
-            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
-            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
+            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
             tblPagination.Controls.Add(flpPages, 0, 0);
             tblPagination.Controls.Add(flpShowEntries, 1, 0);
             tblPagination.Dock = DockStyle.Fill;
@@ -322,6 +324,7 @@ namespace AssemblyLineTester.Views.Pages
             flpShowEntries.Name = "flpShowEntries";
             flpShowEntries.Size = new Size(749, 114);
             flpShowEntries.TabIndex = 1;
+            flpShowEntries.WrapContents = false;
             // 
             // lblShowEntries2
             // 
@@ -784,7 +787,6 @@ namespace AssemblyLineTester.Views.Pages
             // panelFilters
             // 
             panelFilters.BackColor = Color.White;
-            panelFilters.BorderStyle = BorderStyle.FixedSingle;
             panelFilters.Controls.Add(lblProductModel);
             panelFilters.Controls.Add(cmbProductModel);
             panelFilters.Controls.Add(lblProductType);

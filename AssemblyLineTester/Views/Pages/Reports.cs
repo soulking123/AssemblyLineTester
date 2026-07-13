@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -44,6 +45,7 @@ namespace AssemblyLineTester.Views.Pages
             if (dtpStart != null) dtpStart.Value = DateTime.Today.AddDays(-7);
             if (dtpEnd != null) dtpEnd.Value = DateTime.Today;
             gridReports.CellFormatting += GridReports_CellFormatting;
+            SetupEvents();
         }
 
         private void LoadDummyData()
@@ -185,6 +187,182 @@ namespace AssemblyLineTester.Views.Pages
                 e.CellStyle.ForeColor = Color.FromArgb(37, 99, 235);
                 e.CellStyle.Font = new("Segoe UI", 8.5F, FontStyle.Bold);
             }
+        }
+
+        private void SetupEvents()
+        {
+            SetupCardRoundedEdges(cardFilters, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(cardTrend, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(cardReportList, 12, Color.FromArgb(34, 40, 49), 2.5f);
+
+            SetupCardRoundedEdges(pnlSumTotal, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(pnlSumPass, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(pnlSumFail, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(pnlSumProg, 10, Color.FromArgb(34, 40, 49), 2.5f);
+
+            SetupCardRoundedEdges(pnlPreviewContainer, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(cardPaper, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(pnlGenInfoBox, 8, Color.FromArgb(34, 40, 49), 2.5f);
+            SetupCardRoundedEdges(pnlNotesCard, 8, Color.FromArgb(34, 40, 49), 2.5f);
+
+            SetupButtonRoundedEdges(btnGenerate, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
+
+            SetupButtonRoundedEdges(btnExportPDF, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            SetupButtonRoundedEdges(btnExportExcel, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            SetupButtonRoundedEdges(btnPrint, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+
+            SetupButtonRoundedEdges(btnPageFirst, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            SetupButtonRoundedEdges(btnPagePrev, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            SetupButtonRoundedEdges(btnPage1, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            SetupButtonRoundedEdges(btnPage2, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            SetupButtonRoundedEdges(btnPageDots, 8, Color.FromArgb(248, 250, 252), Color.FromArgb(248, 250, 252), Color.FromArgb(248, 250, 252), Color.Transparent);
+            SetupButtonRoundedEdges(btnPageNext, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            SetupButtonRoundedEdges(btnPageLast, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+        }
+
+        private static void SetupCardRoundedEdges(Control card, int radius, Color borderColor, float borderWidth = 2.5f)
+        {
+            if (card is TableLayoutPanel || card.Padding.Left < 4 || card.Padding.Top < 4 || card.Padding.Right < 4 || card.Padding.Bottom < 4)
+            {
+                card.Padding = new Padding(
+                    Math.Max(card.Padding.Left, 4),
+                    Math.Max(card.Padding.Top, 4),
+                    Math.Max(card.Padding.Right, 4),
+                    Math.Max(card.Padding.Bottom, 4)
+                );
+            }
+
+            card.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                Color parentBg = card.Parent?.BackColor != null && card.Parent.BackColor != Color.Transparent
+                    ? card.Parent.BackColor
+                    : Color.FromArgb(244, 245, 247);
+
+                using (var parentBrush = new SolidBrush(parentBg))
+                {
+                    e.Graphics.FillRectangle(parentBrush, 0, 0, card.Width, card.Height);
+                }
+
+                var rectOuter = new Rectangle(0, 0, card.Width, card.Height);
+                using var pathOuter = GetRoundedPath(rectOuter, radius);
+                using (var cardBrush = new SolidBrush(card.BackColor))
+                {
+                    e.Graphics.FillPath(cardBrush, pathOuter);
+                }
+
+                var rectBorder = new Rectangle(1, 1, card.Width - 3, card.Height - 3);
+                using var pathBorder = GetRoundedPath(rectBorder, radius);
+                using var pen = new Pen(borderColor, borderWidth);
+                e.Graphics.DrawPath(pen, pathBorder);
+            };
+
+            card.Resize += (s, e) =>
+            {
+                if (card.Width > 0 && card.Height > 0)
+                {
+                    var oldRegion = card.Region;
+                    card.Region = new Region(GetRoundedPath(new Rectangle(0, 0, card.Width, card.Height), radius));
+                    oldRegion?.Dispose();
+                    card.Invalidate();
+                }
+            };
+
+            if (card.Width > 0 && card.Height > 0)
+            {
+                card.Region = new Region(GetRoundedPath(new Rectangle(0, 0, card.Width, card.Height), radius));
+            }
+        }
+
+        private static void SetupButtonRoundedEdges(Button btn, int radius, Color normColor, Color hoverColor, Color pressColor, Color borderColor)
+        {
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.BackColor = normColor;
+            btn.Cursor = Cursors.Hand;
+
+            btn.MouseEnter += (s, e) => { btn.BackColor = hoverColor; btn.Invalidate(); };
+            btn.MouseLeave += (s, e) => { btn.BackColor = normColor; btn.Invalidate(); };
+            btn.MouseDown += (s, e) => { btn.BackColor = pressColor; btn.Invalidate(); };
+            btn.MouseUp += (s, e) => { btn.BackColor = hoverColor; btn.Invalidate(); };
+
+            btn.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                Color parentBg = btn.Parent?.BackColor != null && btn.Parent.BackColor != Color.Transparent
+                    ? btn.Parent.BackColor
+                    : Color.White;
+
+                using (var parentBrush = new SolidBrush(parentBg))
+                {
+                    e.Graphics.FillRectangle(parentBrush, 0, 0, btn.Width, btn.Height);
+                }
+
+                var rectOuter = new Rectangle(0, 0, btn.Width, btn.Height);
+                using var pathOuter = GetRoundedPath(rectOuter, radius);
+                using (var brush = new SolidBrush(btn.BackColor))
+                {
+                    e.Graphics.FillPath(brush, pathOuter);
+                }
+
+                if (borderColor != Color.Transparent)
+                {
+                    var rectBorder = new Rectangle(1, 1, btn.Width - 3, btn.Height - 3);
+                    using var pathBorder = GetRoundedPath(rectBorder, radius);
+                    using var pen = new Pen(borderColor, 1.5f);
+                    e.Graphics.DrawPath(pen, pathBorder);
+                }
+
+                TextRenderer.DrawText(
+                    e.Graphics,
+                    btn.Text,
+                    btn.Font,
+                    rectOuter,
+                    btn.ForeColor,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak
+                );
+            };
+
+            btn.Resize += (s, e) =>
+            {
+                if (btn.Width > 0 && btn.Height > 0)
+                {
+                    var oldRegion = btn.Region;
+                    btn.Region = new Region(GetRoundedPath(new Rectangle(0, 0, btn.Width, btn.Height), radius));
+                    oldRegion?.Dispose();
+                    btn.Invalidate();
+                }
+            };
+
+            if (btn.Width > 0 && btn.Height > 0)
+            {
+                btn.Region = new Region(GetRoundedPath(new Rectangle(0, 0, btn.Width, btn.Height), radius));
+            }
+        }
+
+        private static GraphicsPath GetRoundedPath(Rectangle rect, int radius)
+        {
+            GraphicsPath path = new();
+            int d = radius * 2;
+            if (rect.Width <= 0 || rect.Height <= 0)
+            {
+                path.AddRectangle(rect);
+                return path;
+            }
+            if (d > rect.Width) d = rect.Width;
+            if (d > rect.Height) d = rect.Height;
+
+            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+            path.CloseFigure();
+            return path;
         }
     }
 }

@@ -426,7 +426,8 @@ namespace AssemblyLineTester.Views.Pages
             tblLeftColumn.RowStyles.Add(new RowStyle());
             tblLeftColumn.RowStyles.Add(new RowStyle());
             tblLeftColumn.RowStyles.Add(new RowStyle());
-            tblLeftColumn.Size = new Size(1270, 1547);
+            tblLeftColumn.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tblLeftColumn.Size = new Size(1270, 1255);
             tblLeftColumn.TabIndex = 0;
             // 
             // cardGeneral
@@ -434,13 +435,13 @@ namespace AssemblyLineTester.Views.Pages
             cardGeneral.AutoSize = true;
             cardGeneral.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             cardGeneral.BackColor = Color.White;
-            cardGeneral.BorderStyle = BorderStyle.FixedSingle;
+            cardGeneral.BorderStyle = BorderStyle.None;
             cardGeneral.Controls.Add(tblGenCard);
             cardGeneral.Dock = DockStyle.Fill;
             cardGeneral.Location = new Point(0, 0);
             cardGeneral.Margin = new Padding(0, 0, 0, 19);
             cardGeneral.Name = "cardGeneral";
-            cardGeneral.Size = new Size(1270, 386);
+            cardGeneral.Size = new Size(1270, 351);
             cardGeneral.TabIndex = 0;
             // 
             // tblGenCard
@@ -462,7 +463,7 @@ namespace AssemblyLineTester.Views.Pages
             tblGenCard.RowStyles.Add(new RowStyle());
             tblGenCard.RowStyles.Add(new RowStyle());
             tblGenCard.RowStyles.Add(new RowStyle());
-            tblGenCard.Size = new Size(1268, 384);
+            tblGenCard.Size = new Size(1268, 349);
             tblGenCard.TabIndex = 0;
             // 
             // lblGenTitle
@@ -737,7 +738,7 @@ namespace AssemblyLineTester.Views.Pages
             tblGenRow3.Name = "tblGenRow3";
             tblGenRow3.RowCount = 1;
             tblGenRow3.RowStyles.Add(new RowStyle());
-            tblGenRow3.Size = new Size(1246, 128);
+            tblGenRow3.Size = new Size(1246, 93);
             tblGenRow3.TabIndex = 3;
             // 
             // tblAutoLogout
@@ -784,31 +785,27 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // chkConfirmExit
             // 
+            chkConfirmExit.AutoSize = true;
             chkConfirmExit.Checked = true;
             chkConfirmExit.CheckState = CheckState.Checked;
-            chkConfirmExit.Cursor = Cursors.Hand;
-            chkConfirmExit.Dock = DockStyle.Fill;
-            chkConfirmExit.FlatStyle = FlatStyle.Flat;
             chkConfirmExit.Font = new Font("Segoe UI", 9.5F);
-            chkConfirmExit.ForeColor = Color.FromArgb(15, 23, 42);
-            chkConfirmExit.Location = new Point(433, 19);
-            chkConfirmExit.Margin = new Padding(10, 19, 10, 10);
+            chkConfirmExit.ForeColor = Color.FromArgb(30, 41, 59);
+            chkConfirmExit.Location = new Point(433, 43);
+            chkConfirmExit.Margin = new Padding(10, 43, 10, 10);
             chkConfirmExit.Name = "chkConfirmExit";
-            chkConfirmExit.Size = new Size(391, 99);
+            chkConfirmExit.Size = new Size(391, 40);
             chkConfirmExit.TabIndex = 1;
             chkConfirmExit.Text = "Show confirmation before exit";
             // 
             // chkDarkMode
             // 
-            chkDarkMode.Cursor = Cursors.Hand;
-            chkDarkMode.Dock = DockStyle.Fill;
-            chkDarkMode.FlatStyle = FlatStyle.Flat;
+            chkDarkMode.AutoSize = true;
             chkDarkMode.Font = new Font("Segoe UI", 9.5F);
-            chkDarkMode.ForeColor = Color.FromArgb(15, 23, 42);
-            chkDarkMode.Location = new Point(844, 19);
-            chkDarkMode.Margin = new Padding(10, 19, 10, 10);
+            chkDarkMode.ForeColor = Color.FromArgb(30, 41, 59);
+            chkDarkMode.Location = new Point(844, 43);
+            chkDarkMode.Margin = new Padding(10, 43, 10, 10);
             chkDarkMode.Name = "chkDarkMode";
-            chkDarkMode.Size = new Size(392, 99);
+            chkDarkMode.Size = new Size(253, 40);
             chkDarkMode.TabIndex = 2;
             chkDarkMode.Text = "Enable dark mode";
             // 
@@ -817,13 +814,13 @@ namespace AssemblyLineTester.Views.Pages
             cardTestSettings.AutoSize = true;
             cardTestSettings.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             cardTestSettings.BackColor = Color.White;
-            cardTestSettings.BorderStyle = BorderStyle.FixedSingle;
+            cardTestSettings.BorderStyle = BorderStyle.None;
             cardTestSettings.Controls.Add(tblTestCard);
             cardTestSettings.Dock = DockStyle.Fill;
-            cardTestSettings.Location = new Point(0, 405);
+            cardTestSettings.Location = new Point(0, 370);
             cardTestSettings.Margin = new Padding(0, 0, 0, 19);
             cardTestSettings.Name = "cardTestSettings";
-            cardTestSettings.Size = new Size(1270, 405);
+            cardTestSettings.Size = new Size(1270, 318);
             cardTestSettings.TabIndex = 1;
             // 
             // tblTestCard
@@ -845,7 +842,7 @@ namespace AssemblyLineTester.Views.Pages
             tblTestCard.RowStyles.Add(new RowStyle());
             tblTestCard.RowStyles.Add(new RowStyle());
             tblTestCard.RowStyles.Add(new RowStyle());
-            tblTestCard.Size = new Size(1268, 435);
+            tblTestCard.Size = new Size(1268, 348);
             tblTestCard.TabIndex = 0;
             // 
             // lblTestTitle
@@ -1147,6 +1144,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblTestRow3
             // 
+            tblTestRow3.AutoSize = true;
             tblTestRow3.ColumnCount = 3;
             tblTestRow3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
             tblTestRow3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
@@ -1159,55 +1157,49 @@ namespace AssemblyLineTester.Views.Pages
             tblTestRow3.Margin = new Padding(0);
             tblTestRow3.Name = "tblTestRow3";
             tblTestRow3.RowCount = 1;
-            tblTestRow3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblTestRow3.Size = new Size(1246, 147);
+            tblTestRow3.RowStyles.Add(new RowStyle());
+            tblTestRow3.Size = new Size(1246, 60);
             tblTestRow3.TabIndex = 3;
             // 
             // chkAutoStart
             // 
+            chkAutoStart.AutoSize = true;
             chkAutoStart.Checked = true;
             chkAutoStart.CheckState = CheckState.Checked;
-            chkAutoStart.Cursor = Cursors.Hand;
-            chkAutoStart.Dock = DockStyle.Fill;
-            chkAutoStart.FlatStyle = FlatStyle.Flat;
             chkAutoStart.Font = new Font("Segoe UI", 9.5F);
-            chkAutoStart.ForeColor = Color.FromArgb(15, 23, 42);
-            chkAutoStart.Location = new Point(10, 19);
-            chkAutoStart.Margin = new Padding(10, 19, 10, 10);
+            chkAutoStart.ForeColor = Color.FromArgb(30, 41, 59);
+            chkAutoStart.Location = new Point(10, 10);
+            chkAutoStart.Margin = new Padding(10);
             chkAutoStart.Name = "chkAutoStart";
-            chkAutoStart.Size = new Size(395, 118);
+            chkAutoStart.Size = new Size(395, 40);
             chkAutoStart.TabIndex = 0;
             chkAutoStart.Text = "Auto start next test after completion";
             // 
             // chkBuzzer
             // 
+            chkBuzzer.AutoSize = true;
             chkBuzzer.Checked = true;
             chkBuzzer.CheckState = CheckState.Checked;
-            chkBuzzer.Cursor = Cursors.Hand;
-            chkBuzzer.Dock = DockStyle.Fill;
-            chkBuzzer.FlatStyle = FlatStyle.Flat;
             chkBuzzer.Font = new Font("Segoe UI", 9.5F);
-            chkBuzzer.ForeColor = Color.FromArgb(15, 23, 42);
-            chkBuzzer.Location = new Point(425, 19);
-            chkBuzzer.Margin = new Padding(10, 19, 10, 10);
+            chkBuzzer.ForeColor = Color.FromArgb(30, 41, 59);
+            chkBuzzer.Location = new Point(425, 10);
+            chkBuzzer.Margin = new Padding(10);
             chkBuzzer.Name = "chkBuzzer";
-            chkBuzzer.Size = new Size(395, 118);
+            chkBuzzer.Size = new Size(325, 40);
             chkBuzzer.TabIndex = 1;
             chkBuzzer.Text = "Buzzer on test complete";
             // 
             // chkPauseFail
             // 
+            chkPauseFail.AutoSize = true;
             chkPauseFail.Checked = true;
             chkPauseFail.CheckState = CheckState.Checked;
-            chkPauseFail.Cursor = Cursors.Hand;
-            chkPauseFail.Dock = DockStyle.Fill;
-            chkPauseFail.FlatStyle = FlatStyle.Flat;
             chkPauseFail.Font = new Font("Segoe UI", 9.5F);
-            chkPauseFail.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPauseFail.Location = new Point(840, 19);
-            chkPauseFail.Margin = new Padding(10, 19, 10, 10);
+            chkPauseFail.ForeColor = Color.FromArgb(30, 41, 59);
+            chkPauseFail.Location = new Point(840, 10);
+            chkPauseFail.Margin = new Padding(10);
             chkPauseFail.Name = "chkPauseFail";
-            chkPauseFail.Size = new Size(396, 118);
+            chkPauseFail.Size = new Size(241, 40);
             chkPauseFail.TabIndex = 2;
             chkPauseFail.Text = "Pause on test fail";
             // 
@@ -1216,13 +1208,13 @@ namespace AssemblyLineTester.Views.Pages
             cardFileSettings.AutoSize = true;
             cardFileSettings.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             cardFileSettings.BackColor = Color.White;
-            cardFileSettings.BorderStyle = BorderStyle.FixedSingle;
+            cardFileSettings.BorderStyle = BorderStyle.None;
             cardFileSettings.Controls.Add(tblFileCard);
             cardFileSettings.Dock = DockStyle.Fill;
-            cardFileSettings.Location = new Point(0, 829);
+            cardFileSettings.Location = new Point(0, 707);
             cardFileSettings.Margin = new Padding(0, 0, 0, 30);
             cardFileSettings.Name = "cardFileSettings";
-            cardFileSettings.Size = new Size(1270, 384);
+            cardFileSettings.Size = new Size(1270, 241);
             cardFileSettings.TabIndex = 2;
             // 
             // tblFileCard
@@ -1242,7 +1234,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFileCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             tblFileCard.RowStyles.Add(new RowStyle());
             tblFileCard.RowStyles.Add(new RowStyle());
-            tblFileCard.Size = new Size(1268, 382);
+            tblFileCard.Size = new Size(1268, 239);
             tblFileCard.TabIndex = 0;
             // 
             // lblFileTitle
@@ -1250,10 +1242,10 @@ namespace AssemblyLineTester.Views.Pages
             lblFileTitle.Dock = DockStyle.Fill;
             lblFileTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblFileTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblFileTitle.Location = new Point(19, 0);
-            lblFileTitle.Margin = new Padding(8, 0, 8, 0);
+            lblFileTitle.Location = new Point(11, 0);
+            lblFileTitle.Margin = new Padding(0, 0, 0, 14);
             lblFileTitle.Name = "lblFileTitle";
-            lblFileTitle.Size = new Size(1230, 50);
+            lblFileTitle.Size = new Size(1246, 36);
             lblFileTitle.TabIndex = 0;
             lblFileTitle.Text = "FILE & DATA SETTINGS";
             lblFileTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -1268,7 +1260,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFileRow1.Controls.Add(tblReportStorage, 1, 0);
             tblFileRow1.Dock = DockStyle.Fill;
             tblFileRow1.Location = new Point(11, 50);
-            tblFileRow1.Margin = new Padding(0, 0, 0, 6);
+            tblFileRow1.Margin = new Padding(0, 0, 0, 15);
             tblFileRow1.Name = "tblFileRow1";
             tblFileRow1.RowCount = 1;
             tblFileRow1.RowStyles.Add(new RowStyle());
@@ -1298,7 +1290,7 @@ namespace AssemblyLineTester.Views.Pages
             lblDataStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDataStorage.ForeColor = Color.FromArgb(51, 65, 85);
             lblDataStorage.Location = new Point(0, 0);
-            lblDataStorage.Margin = new Padding(0, 0, 0, 2);
+            lblDataStorage.Margin = new Padding(0, 0, 0, 6);
             lblDataStorage.Name = "lblDataStorage";
             lblDataStorage.Size = new Size(218, 32);
             lblDataStorage.TabIndex = 0;
@@ -1372,7 +1364,7 @@ namespace AssemblyLineTester.Views.Pages
             lblReportStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblReportStorage.ForeColor = Color.FromArgb(51, 65, 85);
             lblReportStorage.Location = new Point(0, 0);
-            lblReportStorage.Margin = new Padding(0, 0, 0, 2);
+            lblReportStorage.Margin = new Padding(0, 0, 0, 6);
             lblReportStorage.Name = "lblReportStorage";
             lblReportStorage.Size = new Size(243, 32);
             lblReportStorage.TabIndex = 0;
@@ -1439,7 +1431,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFileRow2.Name = "tblFileRow2";
             tblFileRow2.RowCount = 1;
             tblFileRow2.RowStyles.Add(new RowStyle());
-            tblFileRow2.Size = new Size(1246, 219);
+            tblFileRow2.Size = new Size(1246, 85);
             tblFileRow2.TabIndex = 2;
             // 
             // tblLogRet
@@ -1465,7 +1457,7 @@ namespace AssemblyLineTester.Views.Pages
             lblLogRet.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblLogRet.ForeColor = Color.FromArgb(51, 65, 85);
             lblLogRet.Location = new Point(0, 0);
-            lblLogRet.Margin = new Padding(0, 0, 0, 2);
+            lblLogRet.Margin = new Padding(0, 0, 0, 6);
             lblLogRet.Name = "lblLogRet";
             lblLogRet.Size = new Size(254, 32);
             lblLogRet.TabIndex = 0;
@@ -1505,7 +1497,7 @@ namespace AssemblyLineTester.Views.Pages
             lblMaxSize.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblMaxSize.ForeColor = Color.FromArgb(51, 65, 85);
             lblMaxSize.Location = new Point(0, 0);
-            lblMaxSize.Margin = new Padding(0, 0, 0, 2);
+            lblMaxSize.Margin = new Padding(0, 0, 0, 6);
             lblMaxSize.Name = "lblMaxSize";
             lblMaxSize.Size = new Size(227, 32);
             lblMaxSize.TabIndex = 0;
@@ -1524,15 +1516,15 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // chkAutoDelete
             // 
+            chkAutoDelete.AutoSize = true;
             chkAutoDelete.Checked = true;
             chkAutoDelete.CheckState = CheckState.Checked;
-            chkAutoDelete.Dock = DockStyle.Fill;
             chkAutoDelete.Font = new Font("Segoe UI", 9.5F);
             chkAutoDelete.ForeColor = Color.FromArgb(30, 41, 59);
-            chkAutoDelete.Location = new Point(844, 19);
-            chkAutoDelete.Margin = new Padding(10, 6, 10, 2);
+            chkAutoDelete.Location = new Point(844, 35);
+            chkAutoDelete.Margin = new Padding(10, 35, 10, 10);
             chkAutoDelete.Name = "chkAutoDelete";
-            chkAutoDelete.Size = new Size(392, 190);
+            chkAutoDelete.Size = new Size(392, 40);
             chkAutoDelete.TabIndex = 1;
             chkAutoDelete.Text = "Auto delete logs older than retention";
             // 
@@ -1541,13 +1533,13 @@ namespace AssemblyLineTester.Views.Pages
             cardAppSettings.AutoSize = true;
             cardAppSettings.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             cardAppSettings.BackColor = Color.White;
-            cardAppSettings.BorderStyle = BorderStyle.FixedSingle;
+            cardAppSettings.BorderStyle = BorderStyle.None;
             cardAppSettings.Controls.Add(tblAppCard);
             cardAppSettings.Dock = DockStyle.Fill;
-            cardAppSettings.Location = new Point(0, 1243);
+            cardAppSettings.Location = new Point(0, 978);
             cardAppSettings.Margin = new Padding(0);
             cardAppSettings.Name = "cardAppSettings";
-            cardAppSettings.Size = new Size(1270, 304);
+            cardAppSettings.Size = new Size(1270, 277);
             cardAppSettings.TabIndex = 3;
             // 
             // tblAppCard
@@ -1564,8 +1556,8 @@ namespace AssemblyLineTester.Views.Pages
             tblAppCard.Padding = new Padding(11, 0, 11, 0);
             tblAppCard.RowCount = 2;
             tblAppCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 51F));
-            tblAppCard.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblAppCard.Size = new Size(1268, 300);
+            tblAppCard.RowStyles.Add(new RowStyle());
+            tblAppCard.Size = new Size(1268, 237);
             tblAppCard.TabIndex = 0;
             // 
             // lblAppTitle
@@ -1573,16 +1565,17 @@ namespace AssemblyLineTester.Views.Pages
             lblAppTitle.Dock = DockStyle.Fill;
             lblAppTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblAppTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblAppTitle.Location = new Point(19, 0);
-            lblAppTitle.Margin = new Padding(8, 0, 8, 0);
+            lblAppTitle.Location = new Point(11, 0);
+            lblAppTitle.Margin = new Padding(0, 0, 0, 14);
             lblAppTitle.Name = "lblAppTitle";
-            lblAppTitle.Size = new Size(1230, 51);
+            lblAppTitle.Size = new Size(1246, 37);
             lblAppTitle.TabIndex = 0;
             lblAppTitle.Text = "APPLICATION SETTINGS";
             lblAppTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // tblAppCols
             // 
+            tblAppCols.AutoSize = true;
             tblAppCols.ColumnCount = 2;
             tblAppCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblAppCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
@@ -1593,12 +1586,13 @@ namespace AssemblyLineTester.Views.Pages
             tblAppCols.Margin = new Padding(0);
             tblAppCols.Name = "tblAppCols";
             tblAppCols.RowCount = 1;
-            tblAppCols.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblAppCols.Size = new Size(1246, 249);
+            tblAppCols.RowStyles.Add(new RowStyle());
+            tblAppCols.Size = new Size(1246, 186);
             tblAppCols.TabIndex = 1;
             // 
             // tblAppLeft
             // 
+            tblAppLeft.AutoSize = true;
             tblAppLeft.ColumnCount = 1;
             tblAppLeft.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblAppLeft.Controls.Add(chkCheckUpdate, 0, 0);
@@ -1609,54 +1603,55 @@ namespace AssemblyLineTester.Views.Pages
             tblAppLeft.Margin = new Padding(0);
             tblAppLeft.Name = "tblAppLeft";
             tblAppLeft.RowCount = 3;
-            tblAppLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
-            tblAppLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
-            tblAppLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 33.34F));
-            tblAppLeft.Size = new Size(623, 249);
+            tblAppLeft.RowStyles.Add(new RowStyle());
+            tblAppLeft.RowStyles.Add(new RowStyle());
+            tblAppLeft.RowStyles.Add(new RowStyle());
+            tblAppLeft.Size = new Size(623, 186);
             tblAppLeft.TabIndex = 0;
             // 
             // chkCheckUpdate
             // 
+            chkCheckUpdate.AutoSize = true;
             chkCheckUpdate.Checked = true;
             chkCheckUpdate.CheckState = CheckState.Checked;
-            chkCheckUpdate.Dock = DockStyle.Fill;
-            chkCheckUpdate.Font = new Font("Segoe UI", 8.5F);
+            chkCheckUpdate.Font = new Font("Segoe UI", 9.5F);
             chkCheckUpdate.ForeColor = Color.FromArgb(30, 41, 59);
-            chkCheckUpdate.Location = new Point(26, 26);
-            chkCheckUpdate.Margin = new Padding(26);
+            chkCheckUpdate.Location = new Point(10, 16);
+            chkCheckUpdate.Margin = new Padding(10, 16, 10, 10);
             chkCheckUpdate.Name = "chkCheckUpdate";
-            chkCheckUpdate.Size = new Size(571, 30);
+            chkCheckUpdate.Size = new Size(474, 40);
             chkCheckUpdate.TabIndex = 0;
             chkCheckUpdate.Text = "Check for software update on startup";
             // 
             // chkMinTray
             // 
-            chkMinTray.Dock = DockStyle.Fill;
-            chkMinTray.Font = new Font("Segoe UI", 8.5F);
+            chkMinTray.AutoSize = true;
+            chkMinTray.Font = new Font("Segoe UI", 9.5F);
             chkMinTray.ForeColor = Color.FromArgb(30, 41, 59);
-            chkMinTray.Location = new Point(26, 108);
-            chkMinTray.Margin = new Padding(26);
+            chkMinTray.Location = new Point(10, 76);
+            chkMinTray.Margin = new Padding(10);
             chkMinTray.Name = "chkMinTray";
-            chkMinTray.Size = new Size(571, 30);
+            chkMinTray.Size = new Size(320, 40);
             chkMinTray.TabIndex = 1;
             chkMinTray.Text = "Minimize to system tray";
             // 
             // chkSoundNotif
             // 
+            chkSoundNotif.AutoSize = true;
             chkSoundNotif.Checked = true;
             chkSoundNotif.CheckState = CheckState.Checked;
-            chkSoundNotif.Dock = DockStyle.Fill;
-            chkSoundNotif.Font = new Font("Segoe UI", 8.5F);
+            chkSoundNotif.Font = new Font("Segoe UI", 9.5F);
             chkSoundNotif.ForeColor = Color.FromArgb(30, 41, 59);
-            chkSoundNotif.Location = new Point(26, 190);
-            chkSoundNotif.Margin = new Padding(26);
+            chkSoundNotif.Location = new Point(10, 136);
+            chkSoundNotif.Margin = new Padding(10);
             chkSoundNotif.Name = "chkSoundNotif";
-            chkSoundNotif.Size = new Size(571, 33);
+            chkSoundNotif.Size = new Size(348, 40);
             chkSoundNotif.TabIndex = 2;
             chkSoundNotif.Text = "Enable sound notifications";
             // 
             // tblAppRight
             // 
+            tblAppRight.AutoSize = true;
             tblAppRight.ColumnCount = 1;
             tblAppRight.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblAppRight.Controls.Add(tblRefreshField, 0, 0);
@@ -1669,9 +1664,9 @@ namespace AssemblyLineTester.Views.Pages
             tblAppRight.Name = "tblAppRight";
             tblAppRight.RowCount = 3;
             tblAppRight.RowStyles.Add(new RowStyle());
-            tblAppRight.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblAppRight.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblAppRight.Size = new Size(623, 249);
+            tblAppRight.RowStyles.Add(new RowStyle());
+            tblAppRight.RowStyles.Add(new RowStyle());
+            tblAppRight.Size = new Size(623, 186);
             tblAppRight.TabIndex = 1;
             // 
             // tblRefreshField
@@ -1718,29 +1713,29 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // chkConfirmDelete
             // 
+            chkConfirmDelete.AutoSize = true;
             chkConfirmDelete.Checked = true;
             chkConfirmDelete.CheckState = CheckState.Checked;
-            chkConfirmDelete.Dock = DockStyle.Fill;
-            chkConfirmDelete.Font = new Font("Segoe UI", 8.5F);
+            chkConfirmDelete.Font = new Font("Segoe UI", 9.5F);
             chkConfirmDelete.ForeColor = Color.FromArgb(30, 41, 59);
-            chkConfirmDelete.Location = new Point(26, 89);
-            chkConfirmDelete.Margin = new Padding(26);
+            chkConfirmDelete.Location = new Point(10, 73);
+            chkConfirmDelete.Margin = new Padding(10);
             chkConfirmDelete.Name = "chkConfirmDelete";
-            chkConfirmDelete.Size = new Size(571, 41);
+            chkConfirmDelete.Size = new Size(378, 40);
             chkConfirmDelete.TabIndex = 1;
             chkConfirmDelete.Text = "Confirm before deleting data";
             // 
             // chkAuditTrail
             // 
+            chkAuditTrail.AutoSize = true;
             chkAuditTrail.Checked = true;
             chkAuditTrail.CheckState = CheckState.Checked;
-            chkAuditTrail.Dock = DockStyle.Fill;
-            chkAuditTrail.Font = new Font("Segoe UI", 8.5F);
+            chkAuditTrail.Font = new Font("Segoe UI", 9.5F);
             chkAuditTrail.ForeColor = Color.FromArgb(30, 41, 59);
-            chkAuditTrail.Location = new Point(26, 182);
-            chkAuditTrail.Margin = new Padding(26);
+            chkAuditTrail.Location = new Point(10, 133);
+            chkAuditTrail.Margin = new Padding(10);
             chkAuditTrail.Name = "chkAuditTrail";
-            chkAuditTrail.Size = new Size(571, 41);
+            chkAuditTrail.Size = new Size(238, 40);
             chkAuditTrail.TabIndex = 2;
             chkAuditTrail.Text = "Enable audit trail";
             // 
@@ -1760,7 +1755,8 @@ namespace AssemblyLineTester.Views.Pages
             tblRightColumn.RowStyles.Add(new RowStyle());
             tblRightColumn.RowStyles.Add(new RowStyle());
             tblRightColumn.RowStyles.Add(new RowStyle());
-            tblRightColumn.Size = new Size(672, 1547);
+            tblRightColumn.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tblRightColumn.Size = new Size(672, 1255);
             tblRightColumn.TabIndex = 1;
             // 
             // cardSystemStatus
@@ -1768,7 +1764,7 @@ namespace AssemblyLineTester.Views.Pages
             cardSystemStatus.AutoSize = true;
             cardSystemStatus.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             cardSystemStatus.BackColor = Color.White;
-            cardSystemStatus.BorderStyle = BorderStyle.FixedSingle;
+            cardSystemStatus.BorderStyle = BorderStyle.None;
             cardSystemStatus.Controls.Add(tblStatusCard);
             cardSystemStatus.Dock = DockStyle.Fill;
             cardSystemStatus.Location = new Point(0, 0);
@@ -2000,7 +1996,7 @@ namespace AssemblyLineTester.Views.Pages
             cardLicenseInfo.AutoSize = true;
             cardLicenseInfo.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             cardLicenseInfo.BackColor = Color.White;
-            cardLicenseInfo.BorderStyle = BorderStyle.FixedSingle;
+            cardLicenseInfo.BorderStyle = BorderStyle.None;
             cardLicenseInfo.Controls.Add(tblLicenseCard);
             cardLicenseInfo.Dock = DockStyle.Fill;
             cardLicenseInfo.Location = new Point(0, 476);
@@ -2221,14 +2217,14 @@ namespace AssemblyLineTester.Views.Pages
             cardSystemTime.AutoSize = true;
             cardSystemTime.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             cardSystemTime.BackColor = Color.White;
-            cardSystemTime.BorderStyle = BorderStyle.FixedSingle;
+            cardSystemTime.BorderStyle = BorderStyle.None;
             cardSystemTime.Controls.Add(tblTimeCard);
             cardSystemTime.Dock = DockStyle.Fill;
             cardSystemTime.Location = new Point(0, 927);
             cardSystemTime.Margin = new Padding(0);
             cardSystemTime.Name = "cardSystemTime";
             cardSystemTime.Padding = new Padding(11, 0, 11, 0);
-            cardSystemTime.Size = new Size(672, 620);
+            cardSystemTime.Size = new Size(672, 328);
             cardSystemTime.TabIndex = 2;
             // 
             // tblTimeCard
@@ -2244,10 +2240,10 @@ namespace AssemblyLineTester.Views.Pages
             tblTimeCard.Margin = new Padding(8);
             tblTimeCard.Name = "tblTimeCard";
             tblTimeCard.RowCount = 3;
-            tblTimeCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 82F));
+            tblTimeCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 51F));
             tblTimeCard.RowStyles.Add(new RowStyle());
             tblTimeCard.RowStyles.Add(new RowStyle());
-            tblTimeCard.Size = new Size(648, 366);
+            tblTimeCard.Size = new Size(648, 326);
             tblTimeCard.TabIndex = 0;
             // 
             // lblTimeTitle
@@ -2258,7 +2254,7 @@ namespace AssemblyLineTester.Views.Pages
             lblTimeTitle.Location = new Point(8, 0);
             lblTimeTitle.Margin = new Padding(8, 0, 8, 0);
             lblTimeTitle.Name = "lblTimeTitle";
-            lblTimeTitle.Size = new Size(632, 82);
+            lblTimeTitle.Size = new Size(632, 51);
             lblTimeTitle.TabIndex = 0;
             lblTimeTitle.Text = "SYSTEM TIME";
             lblTimeTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -2276,15 +2272,14 @@ namespace AssemblyLineTester.Views.Pages
             tblTimeGrid.Controls.Add(lblTimeKeyZone, 0, 2);
             tblTimeGrid.Controls.Add(cmbTimeZone, 1, 2);
             tblTimeGrid.Dock = DockStyle.Fill;
-            tblTimeGrid.Location = new Point(0, 82);
+            tblTimeGrid.Location = new Point(0, 51);
             tblTimeGrid.Margin = new Padding(0);
             tblTimeGrid.Name = "tblTimeGrid";
-            tblTimeGrid.RowCount = 4;
-            tblTimeGrid.RowStyles.Add(new RowStyle());
-            tblTimeGrid.RowStyles.Add(new RowStyle());
-            tblTimeGrid.RowStyles.Add(new RowStyle());
-            tblTimeGrid.RowStyles.Add(new RowStyle());
-            tblTimeGrid.Size = new Size(648, 223);
+            tblTimeGrid.RowCount = 3;
+            tblTimeGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
+            tblTimeGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
+            tblTimeGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
+            tblTimeGrid.Size = new Size(648, 180);
             tblTimeGrid.TabIndex = 1;
             // 
             // lblTimeKeyDate
@@ -2295,7 +2290,7 @@ namespace AssemblyLineTester.Views.Pages
             lblTimeKeyDate.Location = new Point(8, 0);
             lblTimeKeyDate.Margin = new Padding(8, 0, 8, 0);
             lblTimeKeyDate.Name = "lblTimeKeyDate";
-            lblTimeKeyDate.Size = new Size(230, 81);
+            lblTimeKeyDate.Size = new Size(230, 60);
             lblTimeKeyDate.TabIndex = 0;
             lblTimeKeyDate.Text = "Current Date";
             lblTimeKeyDate.TextAlign = ContentAlignment.MiddleLeft;
@@ -2308,7 +2303,7 @@ namespace AssemblyLineTester.Views.Pages
             lblTimeValDate.Location = new Point(254, 0);
             lblTimeValDate.Margin = new Padding(8, 0, 8, 0);
             lblTimeValDate.Name = "lblTimeValDate";
-            lblTimeValDate.Size = new Size(386, 81);
+            lblTimeValDate.Size = new Size(386, 60);
             lblTimeValDate.TabIndex = 1;
             lblTimeValDate.Text = "15 Mar 2026";
             lblTimeValDate.TextAlign = ContentAlignment.MiddleRight;
@@ -2318,10 +2313,10 @@ namespace AssemblyLineTester.Views.Pages
             lblTimeKeyTime.Dock = DockStyle.Fill;
             lblTimeKeyTime.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblTimeKeyTime.ForeColor = Color.FromArgb(30, 41, 59);
-            lblTimeKeyTime.Location = new Point(8, 81);
+            lblTimeKeyTime.Location = new Point(8, 60);
             lblTimeKeyTime.Margin = new Padding(8, 0, 8, 0);
             lblTimeKeyTime.Name = "lblTimeKeyTime";
-            lblTimeKeyTime.Size = new Size(230, 81);
+            lblTimeKeyTime.Size = new Size(230, 60);
             lblTimeKeyTime.TabIndex = 2;
             lblTimeKeyTime.Text = "Current Time";
             lblTimeKeyTime.TextAlign = ContentAlignment.MiddleLeft;
@@ -2331,10 +2326,10 @@ namespace AssemblyLineTester.Views.Pages
             lblTimeValTime.Dock = DockStyle.Fill;
             lblTimeValTime.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblTimeValTime.ForeColor = Color.FromArgb(37, 99, 235);
-            lblTimeValTime.Location = new Point(254, 81);
+            lblTimeValTime.Location = new Point(254, 60);
             lblTimeValTime.Margin = new Padding(8, 0, 8, 0);
             lblTimeValTime.Name = "lblTimeValTime";
-            lblTimeValTime.Size = new Size(386, 81);
+            lblTimeValTime.Size = new Size(386, 60);
             lblTimeValTime.TabIndex = 3;
             lblTimeValTime.Text = "10:30:45 AM";
             lblTimeValTime.TextAlign = ContentAlignment.MiddleRight;
@@ -2344,10 +2339,10 @@ namespace AssemblyLineTester.Views.Pages
             lblTimeKeyZone.Dock = DockStyle.Fill;
             lblTimeKeyZone.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblTimeKeyZone.ForeColor = Color.FromArgb(30, 41, 59);
-            lblTimeKeyZone.Location = new Point(8, 162);
+            lblTimeKeyZone.Location = new Point(8, 120);
             lblTimeKeyZone.Margin = new Padding(8, 0, 8, 0);
             lblTimeKeyZone.Name = "lblTimeKeyZone";
-            lblTimeKeyZone.Size = new Size(230, 61);
+            lblTimeKeyZone.Size = new Size(230, 60);
             lblTimeKeyZone.TabIndex = 4;
             lblTimeKeyZone.Text = "Time Zone";
             lblTimeKeyZone.TextAlign = ContentAlignment.MiddleLeft;
@@ -2358,7 +2353,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbTimeZone.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbTimeZone.Font = new Font("Segoe UI", 9.5F);
             cmbTimeZone.Items.AddRange(new object[] { "(UTC+07:00) Bangkok, Hanoi, Jakarta", "(UTC+00:00) Dublin, Edinburgh, Lisbon, London", "(UTC-05:00) Eastern Time (US & Canada)" });
-            cmbTimeZone.Location = new Point(254, 170);
+            cmbTimeZone.Location = new Point(254, 128);
             cmbTimeZone.Margin = new Padding(8);
             cmbTimeZone.Name = "cmbTimeZone";
             cmbTimeZone.Size = new Size(386, 43);
@@ -2373,10 +2368,10 @@ namespace AssemblyLineTester.Views.Pages
             btnSyncTime.FlatStyle = FlatStyle.Flat;
             btnSyncTime.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnSyncTime.ForeColor = Color.Black;
-            btnSyncTime.Location = new Point(36, 313);
-            btnSyncTime.Margin = new Padding(8);
+            btnSyncTime.Location = new Point(65, 246);
+            btnSyncTime.Margin = new Padding(8, 15, 8, 15);
             btnSyncTime.Name = "btnSyncTime";
-            btnSyncTime.Size = new Size(575, 45);
+            btnSyncTime.Size = new Size(518, 65);
             btnSyncTime.TabIndex = 6;
             btnSyncTime.Text = "Sync with System Time";
             btnSyncTime.UseVisualStyleBackColor = false;
@@ -2443,6 +2438,7 @@ namespace AssemblyLineTester.Views.Pages
             tblResTol.ResumeLayout(false);
             tblResTol.PerformLayout();
             tblTestRow3.ResumeLayout(false);
+            tblTestRow3.PerformLayout();
             cardFileSettings.ResumeLayout(false);
             cardFileSettings.PerformLayout();
             tblFileCard.ResumeLayout(false);
@@ -2466,8 +2462,11 @@ namespace AssemblyLineTester.Views.Pages
             cardAppSettings.ResumeLayout(false);
             cardAppSettings.PerformLayout();
             tblAppCard.ResumeLayout(false);
+            tblAppCard.PerformLayout();
             tblAppCols.ResumeLayout(false);
+            tblAppCols.PerformLayout();
             tblAppLeft.ResumeLayout(false);
+            tblAppLeft.PerformLayout();
             tblAppRight.ResumeLayout(false);
             tblAppRight.PerformLayout();
             tblRefreshField.ResumeLayout(false);

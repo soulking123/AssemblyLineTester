@@ -254,7 +254,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardKpi1
             // 
             cardKpi1.BackColor = Color.White;
-            cardKpi1.BorderStyle = BorderStyle.FixedSingle;
+            cardKpi1.BorderStyle = BorderStyle.None;
             cardKpi1.Controls.Add(tblKpiCard1);
             cardKpi1.Dock = DockStyle.Fill;
             cardKpi1.Location = new Point(5, 5);
@@ -352,7 +352,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardKpi2
             // 
             cardKpi2.BackColor = Color.White;
-            cardKpi2.BorderStyle = BorderStyle.FixedSingle;
+            cardKpi2.BorderStyle = BorderStyle.None;
             cardKpi2.Controls.Add(tblKpiCard2);
             cardKpi2.Dock = DockStyle.Fill;
             cardKpi2.Location = new Point(342, 5);
@@ -450,7 +450,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardKpi3
             // 
             cardKpi3.BackColor = Color.White;
-            cardKpi3.BorderStyle = BorderStyle.FixedSingle;
+            cardKpi3.BorderStyle = BorderStyle.None;
             cardKpi3.Controls.Add(tblKpiCard3);
             cardKpi3.Dock = DockStyle.Fill;
             cardKpi3.Location = new Point(679, 5);
@@ -548,7 +548,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardKpi4
             // 
             cardKpi4.BackColor = Color.White;
-            cardKpi4.BorderStyle = BorderStyle.FixedSingle;
+            cardKpi4.BorderStyle = BorderStyle.None;
             cardKpi4.Controls.Add(tblKpiCard4);
             cardKpi4.Dock = DockStyle.Fill;
             cardKpi4.Location = new Point(1016, 5);
@@ -646,7 +646,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardKpi5
             // 
             cardKpi5.BackColor = Color.White;
-            cardKpi5.BorderStyle = BorderStyle.FixedSingle;
+            cardKpi5.BorderStyle = BorderStyle.None;
             cardKpi5.Controls.Add(tblKpiCard5);
             cardKpi5.Dock = DockStyle.Fill;
             cardKpi5.Location = new Point(1353, 5);
@@ -744,7 +744,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardKpi6
             // 
             cardKpi6.BackColor = Color.White;
-            cardKpi6.BorderStyle = BorderStyle.FixedSingle;
+            cardKpi6.BorderStyle = BorderStyle.None;
             cardKpi6.Controls.Add(tblKpiCard6);
             cardKpi6.Dock = DockStyle.Fill;
             cardKpi6.Location = new Point(1690, 5);
@@ -856,7 +856,7 @@ namespace AssemblyLineTester.Views.Pages
             // pnlFilterCard
             // 
             pnlFilterCard.BackColor = Color.White;
-            pnlFilterCard.BorderStyle = BorderStyle.FixedSingle;
+            pnlFilterCard.BorderStyle = BorderStyle.None;
             pnlFilterCard.Controls.Add(tblFilterInner);
             pnlFilterCard.Dock = DockStyle.Fill;
             pnlFilterCard.Location = new Point(0, 0);
@@ -1094,7 +1094,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardUserList
             // 
             cardUserList.BackColor = Color.White;
-            cardUserList.BorderStyle = BorderStyle.FixedSingle;
+            cardUserList.BorderStyle = BorderStyle.None;
             cardUserList.Controls.Add(tblUserListContainer);
             cardUserList.Dock = DockStyle.Fill;
             cardUserList.Location = new Point(10, 10);
@@ -1191,7 +1191,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardUserDetails
             // 
             cardUserDetails.BackColor = Color.White;
-            cardUserDetails.BorderStyle = BorderStyle.FixedSingle;
+            cardUserDetails.BorderStyle = BorderStyle.None;
             cardUserDetails.Controls.Add(tblUserBody);
             cardUserDetails.Controls.Add(lblUserDetailsTitle);
             cardUserDetails.Dock = DockStyle.Fill;
@@ -1497,7 +1497,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardRoleSummary
             // 
             cardRoleSummary.BackColor = Color.White;
-            cardRoleSummary.BorderStyle = BorderStyle.FixedSingle;
+            cardRoleSummary.BorderStyle = BorderStyle.None;
             cardRoleSummary.Controls.Add(tblRoleContainer);
             cardRoleSummary.Controls.Add(lblRoleSummaryTitle);
             cardRoleSummary.Dock = DockStyle.Fill;
@@ -1733,7 +1733,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardUserActivity
             // 
             cardUserActivity.BackColor = Color.White;
-            cardUserActivity.BorderStyle = BorderStyle.FixedSingle;
+            cardUserActivity.BorderStyle = BorderStyle.None;
             cardUserActivity.Controls.Add(tblActivityStats);
             cardUserActivity.Controls.Add(lblUserActivityTitle);
             cardUserActivity.Dock = DockStyle.Fill;
