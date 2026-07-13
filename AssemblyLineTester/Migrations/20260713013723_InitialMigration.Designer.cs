@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260710013051_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260713013723_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,7 +46,7 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            LastUsageDate = new DateTime(2026, 7, 10, 0, 0, 0, 0, DateTimeKind.Local),
+                            LastUsageDate = new DateTime(2026, 7, 13, 0, 0, 0, 0, DateTimeKind.Local),
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,
                             RemainingMaintHours = 2160.0
