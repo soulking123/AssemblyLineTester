@@ -1,29 +1,38 @@
+using AssemblyLineTester.Models.Dto;
+using AssemblyLineTester.Services;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class Dashboard : UserControl
     {
+        private readonly DashboardService _dashboardService = new();
         private System.Windows.Forms.Timer? _uiRefreshTimer;
+        private DashboardTimeRange _selectedRange = DashboardTimeRange.Today;
+        private int _totalFailForChart;
 
         public Dashboard()
         {
             InitializeComponent();
             InitializeCustomStyles();
-            LoadDummyData();
+            LoadDashboardData();
             StartUiRefreshTimer();
         }
 
         private void InitializeCustomStyles()
         {
-            if (cmbTimeRange.Items.Count > 0)
+            // cmbTimeRange only has "Today" in the Designer - expand it here without touching the Designer file.
+            cmbTimeRange.Items.Clear();
+            cmbTimeRange.Items.AddRange(new object[]
             {
-                cmbTimeRange.SelectedIndex = 0;
-            }
+                "Today", "Last 7 Days", "Last 30 Days", "Last 3 Months", "Last 6 Months", "Last 1 Year"
+            });
+            cmbTimeRange.SelectedIndex = 0;
+            cmbTimeRange.SelectedIndexChanged += CmbTimeRange_SelectedIndexChanged;
 
             // DataGridView Modern Styling
             gridRecent.BorderStyle = BorderStyle.None;
@@ -57,33 +66,77 @@ namespace AssemblyLineTester.Views.Pages
 
             // Attach PostPaint for center text in Doughnut Chart
             chartFailReason.PostPaint += ChartFailReason_PostPaint;
+
+            // NOTE: cardTester / cardMachine / cardDatabase / cardModules status labels are left as
+            // static Designer defaults (ONLINE / READY / CONNECTED, etc.) for now - there is no
+            // hardware/connection status table in the schema yet, so this is intentionally hardcoded.
         }
 
-        private void LoadDummyData()
+        private void CmbTimeRange_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            // ----------------------------------------------------
-            // 1. Setup Bar Chart (History)
-            // ----------------------------------------------------
+            _selectedRange = cmbTimeRange.SelectedIndex switch
+            {
+                1 => DashboardTimeRange.Last7Days,
+                2 => DashboardTimeRange.Last30Days,
+                3 => DashboardTimeRange.Last3Months,
+                4 => DashboardTimeRange.Last6Months,
+                5 => DashboardTimeRange.Last1Year,
+                _ => DashboardTimeRange.Today
+            };
+            LoadDashboardData();
+        }
+
+        // MAIN ENTRY POINT: pulls KPI, trend chart, fail-reason chart, recent list, and active program
+        // from DashboardService and refreshes every data-driven part of the page.
+        private void LoadDashboardData()
+        {
+            LoadKpiCards();
+            LoadHistoryChart();
+            LoadFailReasonChart();
+            LoadRecentGrid();
+            LoadActiveProgram();
+        }
+
+        private void LoadKpiCards()
+        {
+            var kpi = _dashboardService.GetKpiSummary(_selectedRange);
+
+            lblTotalTestedVal.Text = kpi.TotalTested.ToString("N0");
+            lblPassVal.Text = kpi.PassCount.ToString("N0");
+            lblFailVal.Text = kpi.FailCount.ToString("N0");
+            lblYieldVal.Text = $"{kpi.YieldPercent:0.0}%";
+            lblCycleTimeVal.Text = kpi.AvgCycleTimeFormatted;
+
+            double passPct = kpi.TotalTested == 0 ? 0 : Math.Round(kpi.PassCount * 100.0 / kpi.TotalTested, 2);
+            double failPct = kpi.TotalTested == 0 ? 0 : Math.Round(kpi.FailCount * 100.0 / kpi.TotalTested, 2);
+            lblPassTitle.Text = $"PASS ({passPct:0.00}%)";
+            lblFailTitle.Text = $"FAIL ({failPct:0.00}%)";
+
+            lblSummaryTitle.Text = $"SUMMARY ({cmbTimeRange.Text})";
+        }
+
+        // Bar Chart (History): Pass/Fail grouped adaptively (day/week/month) based on the range,
+        // from DashboardService.GetHistoryTrend.
+        private void LoadHistoryChart()
+        {
+            var trend = _dashboardService.GetHistoryTrend(_selectedRange);
+
             chartHistory.ChartAreas.Clear();
             chartHistory.Series.Clear();
             chartHistory.Legends.Clear();
 
-            ChartArea areaBar = new("BarArea")
-            {
-                BackColor = Color.White
-            };
+            ChartArea areaBar = new("BarArea") { BackColor = Color.White };
             areaBar.AxisX.MajorGrid.Enabled = false;
             areaBar.AxisX.LabelStyle.Font = new("Segoe UI", 8.5F);
             areaBar.AxisX.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaBar.AxisX.LineColor = Color.FromArgb(226, 232, 240);
+            areaBar.AxisX.Interval = 1;
 
             areaBar.AxisY.MajorGrid.LineColor = Color.FromArgb(241, 245, 249);
             areaBar.AxisY.LabelStyle.Font = new("Segoe UI", 8.5F);
             areaBar.AxisY.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaBar.AxisY.LineColor = Color.Transparent;
-            areaBar.AxisY.Maximum = 250;
-            areaBar.AxisY.Interval = 50;
-            areaBar.AxisX.Interval = 1;
+            areaBar.AxisY.Minimum = 0;
             chartHistory.ChartAreas.Add(areaBar);
 
             Legend legBar = new("BarLegend")
@@ -112,36 +165,41 @@ namespace AssemblyLineTester.Views.Pages
             };
             sFail["PointWidth"] = "0.45";
 
-            int[] passVals = [180, 192, 205, 198, 210, 208, 215];
-            int[] failVals = [4, 3, 2, 4, 2, 3, 3];
-
-            for (int i = 0; i < 7; i++)
+            string labelFormat = trend.Granularity switch
             {
-                string dateLabel = DateTime.Now.AddDays(-6 + i).ToString("dd MMM");
+                TrendGranularity.Weekly => "'Wk' dd MMM",
+                TrendGranularity.Monthly => "MMM yyyy",
+                _ => "dd MMM"
+            };
 
-                int pIdx = sPass.Points.AddXY(dateLabel, passVals[i]);
-                sPass.Points[pIdx].Label = passVals[i].ToString();
+            foreach (var point in trend.Points)
+            {
+                string dateLabel = point.Date.ToString(labelFormat);
+
+                int pIdx = sPass.Points.AddXY(dateLabel, point.PassCount);
+                sPass.Points[pIdx].Label = point.PassCount.ToString();
                 sPass.Points[pIdx].Font = new("Segoe UI", 8F, FontStyle.Bold);
 
-                int fIdx = sFail.Points.AddXY(dateLabel, failVals[i]);
-                sFail.Points[fIdx].Label = failVals[i].ToString();
+                int fIdx = sFail.Points.AddXY(dateLabel, point.FailCount);
+                sFail.Points[fIdx].Label = point.FailCount.ToString();
                 sFail.Points[fIdx].Font = new("Segoe UI", 8F, FontStyle.Bold);
             }
 
             chartHistory.Series.Add(sPass);
             chartHistory.Series.Add(sFail);
+        }
 
-            // ----------------------------------------------------
-            // 2. Setup Doughnut Chart (Fail By Reason)
-            // ----------------------------------------------------
+        // Doughnut Chart (Fail By Reason): grouped by test type, from DashboardService.GetFailReasonBreakdown.
+        private void LoadFailReasonChart()
+        {
+            var reasons = _dashboardService.GetFailReasonBreakdown(_selectedRange);
+            _totalFailForChart = reasons.Sum(r => r.FailCount);
+
             chartFailReason.ChartAreas.Clear();
             chartFailReason.Series.Clear();
             chartFailReason.Legends.Clear();
 
-            ChartArea areaPie = new("PieArea")
-            {
-                BackColor = Color.White
-            };
+            ChartArea areaPie = new("PieArea") { BackColor = Color.White };
             chartFailReason.ChartAreas.Add(areaPie);
 
             Legend legPie = new("PieLegend")
@@ -152,30 +210,43 @@ namespace AssemblyLineTester.Views.Pages
             };
             chartFailReason.Legends.Add(legPie);
 
-            Series sReason = new("FailReason")
-            {
-                ChartType = SeriesChartType.Doughnut
-            };
+            Series sReason = new("FailReason") { ChartType = SeriesChartType.Doughnut };
             sReason["DoughnutRadius"] = "25";
 
-            int p1 = sReason.Points.AddY(2);
-            sReason.Points[p1].Color = Color.FromArgb(244, 67, 54);
-            sReason.Points[p1].LegendText = "Continuity Fail   2 (66.7%)";
+            Color[] palette =
+            {
+                Color.FromArgb(244, 67, 54),
+                Color.FromArgb(255, 152, 0),
+                Color.FromArgb(33, 150, 243),
+                Color.FromArgb(156, 39, 176),
+                Color.FromArgb(0, 150, 136)
+            };
 
-            int p2 = sReason.Points.AddY(1);
-            sReason.Points[p2].Color = Color.FromArgb(255, 152, 0);
-            sReason.Points[p2].LegendText = "Insulation Fail   1 (33.3%)";
-
-            int p3 = sReason.Points.AddY(0);
-            sReason.Points[p3].Color = Color.FromArgb(33, 150, 243);
-            sReason.Points[p3].LegendText = "Short Circuit Fail 0 (0%)";
-            sReason.Points[p3].IsEmpty = true;
+            if (reasons.Count == 0)
+            {
+                int emptyIdx = sReason.Points.AddY(1);
+                sReason.Points[emptyIdx].Color = Color.FromArgb(226, 232, 240);
+                sReason.Points[emptyIdx].LegendText = "No failures in this period";
+            }
+            else
+            {
+                for (int i = 0; i < reasons.Count; i++)
+                {
+                    var r = reasons[i];
+                    int idx = sReason.Points.AddY(r.FailCount);
+                    sReason.Points[idx].Color = palette[i % palette.Length];
+                    sReason.Points[idx].LegendText = $"{r.TestTypeName}   {r.FailCount} ({r.PercentOfTotalFail:0.0}%)";
+                }
+            }
 
             chartFailReason.Series.Add(sReason);
+        }
 
-            // ----------------------------------------------------
-            // 3. Setup DataGridView (Recent Test History)
-            // ----------------------------------------------------
+        // DataGridView (Recent Test History): latest reports, from DashboardService.GetRecentTests.
+        private void LoadRecentGrid()
+        {
+            var recent = _dashboardService.GetRecentTests(8);
+
             gridRecent.Columns.Clear();
             gridRecent.Columns.Add("ColNo", "No.");
             gridRecent.Columns.Add("ColTime", "Test Time");
@@ -198,22 +269,32 @@ namespace AssemblyLineTester.Views.Pages
             if (colResult != null) { colResult.FillWeight = 50; colResult.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter; }
             if (colOperator != null) colOperator.FillWeight = 55;
 
-            object[][] rows =
-            [
-                ["1", "10:30:12", "WH-ENG-001", "SN12350", "PASS", "Fally"],
-                ["2", "10:28:56", "WH-ENG-001", "SN12349", "PASS", "Fally"],
-                ["3", "10:27:40", "WH-ENG-001", "SN12348", "FAIL", "Fally"],
-                ["4", "10:26:18", "WH-ENG-001", "SN12347", "PASS", "Fally"],
-                ["5", "10:25:05", "WH-ENG-001", "SN12346", "PASS", "Fally"],
-                ["6", "10:23:51", "WH-ENG-001", "SN12345", "PASS", "Fally"],
-                ["7", "10:22:33", "WH-ENG-001", "SN12344", "PASS", "Fally"],
-                ["8", "10:21:20", "WH-ENG-001", "SN12343", "PASS", "Fally"]
-            ];
-
-            foreach (var r in rows)
+            gridRecent.Rows.Clear();
+            int no = 1;
+            foreach (var r in recent)
             {
-                gridRecent.Rows.Add(r);
+                int rowIdx = gridRecent.Rows.Add(
+                    no++,
+                    r.TestTime.ToString("HH:mm:ss"),
+                    r.PartNumber,
+                    r.SerialNumber,
+                    r.Result ?? "-",
+                    r.Operator);
+                gridRecent.Rows[rowIdx].Tag = r.ReportId;
             }
+        }
+
+        // "ACTIVE PROGRAM" card: prioritizes an in-progress report, falls back to the latest one.
+        private void LoadActiveProgram()
+        {
+            var active = _dashboardService.GetActiveProgram();
+
+            lblProgDetails.Text = active is null
+                ? "No test program has been run yet."
+                : $"Product Model : {active.ProductModel}\n" +
+                  $"Part Number   : {active.PartNumber}\n" +
+                  $"Status        : {active.StatusLabel}\n" +
+                  $"Last Run      : {active.LastRunAt:dd MMM yyyy HH:mm}";
         }
 
         private void GridRecent_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
@@ -233,6 +314,12 @@ namespace AssemblyLineTester.Views.Pages
                     e.CellStyle.ForeColor = Color.FromArgb(153, 27, 27);
                     e.CellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
                 }
+                else
+                {
+                    e.CellStyle.BackColor = Color.FromArgb(241, 245, 249);
+                    e.CellStyle.ForeColor = Color.FromArgb(100, 116, 139);
+                    e.CellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
+                }
             }
         }
 
@@ -240,7 +327,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (e.ChartElement is ChartArea area)
             {
-                string numText = "3";
+                string numText = _totalFailForChart.ToString();
                 string subText = "TOTAL FAIL";
 
                 using Font fontNum = new("Segoe UI", 22F, FontStyle.Bold);
@@ -260,10 +347,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void StartUiRefreshTimer()
         {
-            _uiRefreshTimer = new()
-            {
-                Interval = 1000
-            };
+            _uiRefreshTimer = new() { Interval = 1000 };
             _uiRefreshTimer.Tick += (s, e) => UpdateMaintenanceLabels();
             _uiRefreshTimer.Start();
             UpdateMaintenanceLabels(); // Initial update on load

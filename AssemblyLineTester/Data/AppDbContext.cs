@@ -11,11 +11,25 @@ namespace AssemblyLineTester.Data
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<UserStatus> UserStatuses { get; set; } = null!;
         public DbSet<MaintenanceState> MaintenanceStates { get; set; } = null!;
+        public DbSet<SystemLog> SystemLogs { get; set; } = null!;
+        public DbSet<TestReport> TestReports { get; set; } = null!;
+        public DbSet<TestDetail> TestDetails { get; set; } = null!;
+        public DbSet<TestType> TestTypes { get; set; } = null!;
+        public DbSet<TestStep> TestSteps { get; set; } = null!;
+        public DbSet<TestConfiguration> TestConfigurations { get; set; } = null!;
+        public DbSet<TestConfigNet> TestConfigNets { get; set; } = null!;
 
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=users.db");
+            string appDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AssemblyLineTester");
+
+            Directory.CreateDirectory(appDataFolder); // create if not exists
+
+            string dbPath = Path.Combine(appDataFolder, "users.db");
+            optionsBuilder.UseSqlite($"Data Source={dbPath}");
         }
 
         /// Configures entity mapping relationships, unique indexes, and seeds initial data.
@@ -68,8 +82,8 @@ namespace AssemblyLineTester.Data
             );
 
             // 6. Seed initial users with secure BCrypt hashes
-            string passHash = BCrypt.Net.BCrypt.HashPassword("000000");
-            string faizHash = BCrypt.Net.BCrypt.HashPassword("12345678");
+            const string passHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm";
+            const string faizHash = "$2b$11$rZFf4GHizQh2xGlxxdSj4eRzsOf4gSoVdwbLOcvwfozyn5nVfKd/2";
 
             modelBuilder.Entity<User>().HasData(
                 new User
@@ -310,6 +324,72 @@ namespace AssemblyLineTester.Data
                     UpdatedAt = DateTime.Parse("2026-03-03T13:15:20")
                 }
             );
+
+            // Unique indexes for the new tables
+            modelBuilder.Entity<TestReport>()
+                .HasIndex(r => r.ReportNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<TestType>()
+                .HasIndex(t => t.TestTypeName)
+                .IsUnique();
+
+            // TestDetails -> TestReports (cascade delete: deleting a report removes its details)
+            modelBuilder.Entity<TestDetail>()
+                .HasOne(d => d.Report)
+                .WithMany(r => r.Details)
+                .HasForeignKey(d => d.ReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // TestDetails -> TestTypes (lookup by name, restrict delete to prevent orphan details)
+            modelBuilder.Entity<TestDetail>()
+                .HasOne(d => d.TestTypeInfo)
+                .WithMany()
+                .HasForeignKey(d => d.TestTypeName)
+                .HasPrincipalKey(t => t.TestTypeName);
+
+            // Seed initial test types
+            modelBuilder.Entity<TestType>().HasData(
+                new TestType { Id = 1, TestTypeName = "4RESISTOR", DisplayName = "4RESISTOR" },
+                new TestType { Id = 2, TestTypeName = "4WIRE", DisplayName = "4WIRE" },
+                new TestType { Id = 3, TestTypeName = "CAPACITOR", DisplayName = "CAPACITOR" },
+                new TestType { Id = 4, TestTypeName = "CLOSE", DisplayName = "CLOSE" },
+                new TestType { Id = 5, TestTypeName = "COMMENT", DisplayName = "COMMENT" },
+                new TestType { Id = 6, TestTypeName = "DIODE", DisplayName = "DIODE" },
+                new TestType { Id = 7, TestTypeName = "LINK", DisplayName = "LINK" },
+                new TestType { Id = 8, TestTypeName = "LUA COMPONENT", DisplayName = "LUA COMPONENT" },
+                new TestType { Id = 9, TestTypeName = "OPEN", DisplayName = "OPEN" },
+                new TestType { Id = 10, TestTypeName = "PROBE", DisplayName = "PROBE" },
+                new TestType { Id = 11, TestTypeName = "RESISTOR", DisplayName = "RESISTOR" },
+                new TestType { Id = 12, TestTypeName = "SIGNATURE DIODE", DisplayName = "SIGNATURE DIODE" },
+                new TestType { Id = 13, TestTypeName = "SIGNATURE WIRE", DisplayName = "SIGNATURE WIRE" },
+                new TestType { Id = 14, TestTypeName = "TWISTED PAIR", DisplayName = "TWISTED PAIR" },
+                new TestType { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE" }
+            );
+
+            // Configure Report → TestStep relationship (One Report has many Test Steps)
+            modelBuilder.Entity<TestStep>()
+                .HasOne(s => s.Report)
+                .WithMany(r => r.Steps)
+                .HasForeignKey(s => s.ReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure TestTypeInfo → TestStep relationship using TestTypeName
+            modelBuilder.Entity<TestStep>()
+                .HasOne(s => s.TestTypeInfo)
+                .WithMany()
+                .HasForeignKey(s => s.TestTypeName)
+                .HasPrincipalKey(t => t.TestTypeName)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Ensure StepNo is unique within each Report
+            modelBuilder.Entity<TestStep>()
+                .HasIndex(s => new { s.ReportId, s.StepNo })
+                .IsUnique();
+
+            // Speeds up Test History pagination/sorting once row count grows into the hundreds/thousands.
+            modelBuilder.Entity<TestReport>()
+                .HasIndex(r => r.TestDateTime);
 
             modelBuilder.Entity<MaintenanceState>().HasData(
                 new MaintenanceState

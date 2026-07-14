@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -7,14 +6,20 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using AssemblyLineTester.Models.Dto;
+using AssemblyLineTester.Services;
+using static AssemblyLineTester.Models.SystemLog;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class SystemLog : UserControl
     {
+        private readonly SystemLogService _logService = new();
+        private SystemLogSummary _summary = new();
         private int _currentPage = 1;
-        private int _pageSize = 10;
-        private readonly List<string[]> _allLogs = [];
+        private readonly int _pageSize = 10;
+        private int _totalPages = 1;
+        private int _totalCount = 0;
 
         public SystemLog()
         {
@@ -28,24 +33,11 @@ namespace AssemblyLineTester.Views.Pages
             pnlModuleStats.Paint += PnlModuleStats_Paint;
 
             gridData.CellPainting += gridData_CellPainting;
-            btnRefresh.Click += (s, ev) => { LoadDummyLogData(); };
+            InitializeGridColumns();
 
-            if (cmbLogLevel.Items.Count > 0) cmbLogLevel.SelectedIndex = 0;
-            if (cmbModule.Items.Count > 0) cmbModule.SelectedIndex = 0;
-            if (cmbUser.Items.Count > 0) cmbUser.SelectedIndex = 0;
-            if (cmbAction.Items.Count > 0) cmbAction.SelectedIndex = 0;
-
-            btnSearch.Click += (s, ev) => { _currentPage = 1; PopulateLogGrid(); };
-            btnReset.Click += (s, ev) =>
-            {
-                if (cmbLogLevel.Items.Count > 0) cmbLogLevel.SelectedIndex = 0;
-                if (cmbModule.Items.Count > 0) cmbModule.SelectedIndex = 0;
-                if (cmbUser.Items.Count > 0) cmbUser.SelectedIndex = 0;
-                if (cmbAction.Items.Count > 0) cmbAction.SelectedIndex = 0;
-                txtKeyword.Text = "";
-                _currentPage = 1;
-                PopulateLogGrid();
-            };
+            btnSearch.Click += (s, ev) => { _currentPage = 1; LoadLogData(); };
+            btnReset.Click += (s, ev) => { ResetFilters(); _currentPage = 1; LoadLogData(); };
+            btnRefresh.Click += (s, ev) => LoadLogData();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -53,46 +45,112 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                LoadDummyLogData();
+                _logService.SeedSampleDataIfEmpty();
+                ResetFilters();
+                LoadLogData();
             }
         }
 
-        public void LoadDummyLogData()
+        // RESETS FILTER CONTROLS TO DEFAULT (LAST 30 DAYS, NO FILTER).
+        private void ResetFilters()
         {
-            if (_allLogs.Count == 0)
-            {
-                string[] modules = ["Test Execution", "Communication", "Harness Database", "Database", "User Management", "System"];
-                string[] users = ["Fally", "System", "Admin", "John", "Sarah"];
-                string[] levels = ["INFO", "INFO", "INFO", "INFO", "WARNING", "ERROR"];
-                string[] actions = ["Start Test", "Load Program", "Step Complete", "Test Complete", "Update", "Connection Lost", "Reconnected", "Login", "Backup"];
-
-                for (int i = 1; i <= 58; i++)
-                {
-                    string level = levels[i % levels.Length];
-                    string module = modules[i % modules.Length];
-                    string user = users[i % users.Length];
-                    string action = actions[i % actions.Length];
-                    string desc = level == "ERROR" ? $"Error detected in {module}: timeout on line {i}" :
-                                  level == "WARNING" ? $"Warning in {module}: retry attempt {i % 3 + 1}" :
-                                  $"Successfully completed {action.ToLower()} for unit #{1000 + i}";
-                    string ip = $"192.168.1.{100 + (i % 20)}   ⋮";
-                    string time = $"15 Mar 2026 {(10 + i / 60):D2}:{(30 + i % 60) % 60:D2}:{(20 + i * 3) % 60:D2} AM";
-
-                    _allLogs.Add([i.ToString(), time, level, module, user, action, desc, ip]);
-                }
-            }
-
-            PopulateLogGrid();
-
-            if (lblLegInfo is not null) lblLegInfo.Text = "INFO : 1,142 (90.8%)";
-            if (lblLegWarn is not null) lblLegWarn.Text = "WARNING : 84 (6.7%)";
-            if (lblLegError is not null) lblLegError.Text = "ERROR : 32 (2.5%)";
+            dtpEnd.Value = DateTime.Now;
+            dtpStart.Value = DateTime.Now.AddDays(-30);
+            cmbLogLevel.Text = "All";
+            cmbModule.Text = "All";
+            cmbUser.Text = "All";
+            cmbAction.Text = "All";
+            txtKeyword.Text = string.Empty;
         }
 
-        private void PopulateLogGrid()
+        // BUILDS A SystemLogFilter FROM THE CURRENT STATE OF THE FILTER CONTROLS.
+        private SystemLogFilter BuildFilterFromControls()
+        {
+            var filter = new SystemLogFilter
+            {
+                DateFrom = dtpStart.Value.Date,
+                DateTo = dtpEnd.Value.Date,
+                Page = _currentPage,
+                PageSize = _pageSize
+            };
+
+            if (!string.Equals(cmbLogLevel.Text, "All", StringComparison.OrdinalIgnoreCase)
+                && Enum.TryParse<LogSeverity>(cmbLogLevel.Text, true, out var level))
+            {
+                filter.SeverityLevel = level;
+            }
+
+            if (!string.Equals(cmbModule.Text, "All", StringComparison.OrdinalIgnoreCase))
+                filter.ModuleName = cmbModule.Text;
+
+            if (!string.Equals(cmbUser.Text, "All", StringComparison.OrdinalIgnoreCase))
+                filter.UserName = cmbUser.Text;
+
+            if (!string.Equals(cmbAction.Text, "All", StringComparison.OrdinalIgnoreCase))
+                filter.ActionName = cmbAction.Text;
+
+            if (!string.IsNullOrWhiteSpace(txtKeyword.Text))
+                filter.Keyword = txtKeyword.Text.Trim();
+
+            return filter;
+        }
+
+        // LOADS REAL LOG DATA AND SUMMARY FROM SystemLogService, THEN REFRESHES ALL VISUALS.
+        public void LoadLogData()
+        {
+            var filter = BuildFilterFromControls();
+            var paged = _logService.GetLogs(filter);
+
+            _totalCount = paged.TotalCount;
+            _totalPages = Math.Max(1, paged.TotalPages);
+
+            // clamp if filter shrank the result set below the current page
+            if (_currentPage > _totalPages)
+            {
+                _currentPage = _totalPages;
+                filter.Page = _currentPage;
+                paged = _logService.GetLogs(filter);
+            }
+
+            _summary = _logService.GetSummary(filter);
+
+            gridData.Rows.Clear();
+            int no = (paged.Page - 1) * paged.PageSize + 1;
+            foreach (var log in paged.Items)
+            {
+                gridData.Rows.Add(
+                    no++,
+                    log.Timestamp.ToLocalTime().ToString("dd MMM yyyy hh:mm:ss tt"),
+                    log.SeverityLevel.ToString().ToUpperInvariant(),
+                    log.ModuleName,
+                    string.IsNullOrEmpty(log.UserName) ? "-" : log.UserName,
+                    log.ActionName,
+                    log.Message,
+                    string.IsNullOrEmpty(log.IPAddress) ? "-" : $"{log.IPAddress}   \u22ee");
+            }
+
+            UpdateLegendLabels();
+            UpdatePaginationUI(_totalCount, _totalPages);
+            pnlChartContainer?.Invalidate();
+            pnlLevelStats.Invalidate();
+            pnlModuleStats.Invalidate();
+        }
+
+        private void UpdateLegendLabels()
+        {
+            if (lblLegInfo is not null) lblLegInfo.Text = $"INFO : {_summary.InfoCount:N0} ({FormatPct(_summary.InfoCount, _summary.Total)})";
+            if (lblLegWarn is not null) lblLegWarn.Text = $"WARNING : {_summary.WarningCount:N0} ({FormatPct(_summary.WarningCount, _summary.Total)})";
+            if (lblLegError is not null) lblLegError.Text = $"ERROR : {_summary.ErrorCount:N0} ({FormatPct(_summary.ErrorCount, _summary.Total)})";
+        }
+
+        private static string FormatPct(int count, int total) => total == 0 ? "0.0%" : $"{count * 100.0 / total:0.0}%";
+
+        private static float Ratio(int count, int total) => total == 0 ? 0f : (float)count / total;
+
+        // ONE-TIME GRID COLUMN/STYLE SETUP. ROW DATA IS POPULATED SEPARATELY IN LoadLogData().
+        private void InitializeGridColumns()
         {
             gridData.Columns.Clear();
-            gridData.Rows.Clear();
 
             gridData.EnableHeadersVisualStyles = false;
             gridData.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
@@ -124,31 +182,11 @@ namespace AssemblyLineTester.Views.Pages
             SetColumnWidth(gridData, "Description", 260);
             SetColumnWidth(gridData, "IP", 130);
 
-            var filteredLogs = _allLogs.Where(l =>
-            {
-                if (cmbLogLevel.SelectedItem is string level && level != "All" && !string.Equals(l[2], level, StringComparison.OrdinalIgnoreCase)) return false;
-                if (cmbModule.SelectedItem is string module && module != "All" && !string.Equals(l[3], module, StringComparison.OrdinalIgnoreCase)) return false;
-                if (cmbUser.SelectedItem is string user && user != "All" && !string.Equals(l[4], user, StringComparison.OrdinalIgnoreCase)) return false;
-                if (cmbAction.SelectedItem is string action && action != "All" && !string.Equals(l[5], action, StringComparison.OrdinalIgnoreCase)) return false;
-                if (!string.IsNullOrWhiteSpace(txtKeyword.Text) && !l.Any(col => col.Contains(txtKeyword.Text, StringComparison.OrdinalIgnoreCase))) return false;
-                return true;
-            }).ToList();
 
-            int totalLogs = filteredLogs.Count;
-            int totalPages = (int)Math.Ceiling(totalLogs / (double)_pageSize);
-            if (totalPages == 0) totalPages = 1;
-            if (_currentPage > totalPages) _currentPage = totalPages;
-            if (_currentPage < 1) _currentPage = 1;
 
-            var pageLogs = filteredLogs.Skip((_currentPage - 1) * _pageSize).Take(_pageSize);
-            foreach (var log in pageLogs)
-            {
-                gridData.Rows.Add(log);
-            }
-
-            UpdatePaginationUI(totalLogs, totalPages);
         }
 
+        // BUILDS THE "Showing X to Y of Z" TEXT AND THE DYNAMIC PAGE-NUMBER BUTTONS.
         private void UpdatePaginationUI(int totalFiltered, int totalPages)
         {
             if (totalFiltered == 0)
@@ -165,10 +203,10 @@ namespace AssemblyLineTester.Views.Pages
             if (flpPages is null) return;
             flpPages.Controls.Clear();
 
-            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; PopulateLogGrid(); });
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; LoadLogData(); });
             flpPages.Controls.Add(btnFirst);
 
-            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; PopulateLogGrid(); } });
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; LoadLogData(); } });
             flpPages.Controls.Add(btnPrev);
 
             for (int p = 1; p <= totalPages; p++)
@@ -176,7 +214,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (p == 1 || p == totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
                 {
                     int pageNum = p;
-                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateLogGrid(); });
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; LoadLogData(); });
                     flpPages.Controls.Add(btnPage);
                 }
                 else if (p == _currentPage - 2 || p == _currentPage + 2)
@@ -186,10 +224,10 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; PopulateLogGrid(); } });
+            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; LoadLogData(); } });
             flpPages.Controls.Add(btnNext);
 
-            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; PopulateLogGrid(); });
+            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; LoadLogData(); });
             flpPages.Controls.Add(btnLast);
         }
 
@@ -454,15 +492,30 @@ namespace AssemblyLineTester.Views.Pages
             int y = (container.Height - size) / 2;
             var rect = new Rectangle(x, y, size, size);
 
-            // Doughnut: ~91% INFO (Blue), ~7% WARN (Amber), ~2% ERROR (Red)
-            using var penInfo = new Pen(Color.FromArgb(59, 130, 246), 18);
-            using var penWarn = new Pen(Color.FromArgb(245, 158, 11), 18);
-            using var penErr = new Pen(Color.FromArgb(239, 68, 68), 18);
-            e.Graphics.DrawArc(penInfo, rect, -90, 327);
-            e.Graphics.DrawArc(penWarn, rect, 237, 24);
-            e.Graphics.DrawArc(penErr, rect, 261, 9);
+            if (_summary.Total == 0)
+            {
+                using var penEmpty = new Pen(Color.FromArgb(226, 232, 240), 18);
+                e.Graphics.DrawArc(penEmpty, rect, -90, 359.9f);
+            }
+            else
+            {
+                float infoSweep = 360f * _summary.InfoCount / _summary.Total;
+                float warnSweep = 360f * _summary.WarningCount / _summary.Total;
+                float errSweep = 360f * _summary.ErrorCount / _summary.Total;
+                float start = -90f;
 
-            string text = "1,258\nTOTAL";
+                using var penInfo = new Pen(Color.FromArgb(59, 130, 246), 18);
+                using var penWarn = new Pen(Color.FromArgb(245, 158, 11), 18);
+                using var penErr = new Pen(Color.FromArgb(239, 68, 68), 18);
+
+                if (infoSweep > 0) e.Graphics.DrawArc(penInfo, rect, start, infoSweep);
+                start += infoSweep;
+                if (warnSweep > 0) e.Graphics.DrawArc(penWarn, rect, start, warnSweep);
+                start += warnSweep;
+                if (errSweep > 0) e.Graphics.DrawArc(penErr, rect, start, errSweep);
+            }
+
+            string text = $"{_summary.Total:N0}\nTOTAL";
             using var font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             using var brush = new SolidBrush(Color.FromArgb(30, 41, 59));
             using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
@@ -480,9 +533,15 @@ namespace AssemblyLineTester.Views.Pages
             int w = card.Width - (leftMargin * 2);
             if (w <= 0) return;
 
-            DrawStatRow(e.Graphics, leftMargin, startY, w, "INFO", "1,142 (90.8%)", 0.908f, Color.FromArgb(59, 130, 246));
-            DrawStatRow(e.Graphics, leftMargin, startY + rowStep, w, "WARNING", "84 (6.7%)", 0.067f, Color.FromArgb(245, 158, 11));
-            DrawStatRow(e.Graphics, leftMargin, startY + (rowStep * 2), w, "ERROR", "32 (2.5%)", 0.025f, Color.FromArgb(239, 68, 68));
+            DrawStatRow(e.Graphics, leftMargin, startY, w, "INFO",
+                $"{_summary.InfoCount:N0} ({FormatPct(_summary.InfoCount, _summary.Total)})",
+                Ratio(_summary.InfoCount, _summary.Total), Color.FromArgb(59, 130, 246));
+            DrawStatRow(e.Graphics, leftMargin, startY + rowStep, w, "WARNING",
+                $"{_summary.WarningCount:N0} ({FormatPct(_summary.WarningCount, _summary.Total)})",
+                Ratio(_summary.WarningCount, _summary.Total), Color.FromArgb(245, 158, 11));
+            DrawStatRow(e.Graphics, leftMargin, startY + (rowStep * 2), w, "ERROR",
+                $"{_summary.ErrorCount:N0} ({FormatPct(_summary.ErrorCount, _summary.Total)})",
+                Ratio(_summary.ErrorCount, _summary.Total), Color.FromArgb(239, 68, 68));
         }
 
         private void DrawStatRow(Graphics g, int x, int y, int width, string label, string val, float pct, Color barColor)
@@ -521,16 +580,21 @@ namespace AssemblyLineTester.Views.Pages
             int w = card.Width - (leftMargin * 2);
             if (w <= 0) return;
 
-            string[] names = ["Test Execution", "Communication", "Harness Database", "Database", "User Management", "System"];
-            string[] counts = ["542 (43%)", "318 (25%)", "185 (15%)", "124 (10%)", "56 (4%)", "33 (3%)"];
-            float[] pcts = [0.43f, 0.25f, 0.15f, 0.10f, 0.04f, 0.03f];
+            var topModules = _summary.CountByModule
+                .OrderByDescending(m => m.Value)
+                .Take(6)
+                .ToList();
+            if (topModules.Count == 0) return;
 
             int availableHeight = card.Height - startY - 20;
-            int rowStep = Math.Max(38, availableHeight / names.Length);
+            int rowStep = Math.Max(38, availableHeight / topModules.Count);
 
-            for (int i = 0; i < names.Length; i++)
+            for (int i = 0; i < topModules.Count; i++)
             {
-                DrawStatRow(e.Graphics, leftMargin, startY + (i * rowStep), w, names[i], counts[i], pcts[i], Color.FromArgb(99, 102, 241));
+                var (module, count) = (topModules[i].Key, topModules[i].Value);
+                DrawStatRow(e.Graphics, leftMargin, startY + (i * rowStep), w, module,
+                    $"{count:N0} ({FormatPct(count, _summary.Total)})",
+                    Ratio(count, _summary.Total), Color.FromArgb(99, 102, 241));
             }
         }
 
@@ -559,4 +623,3 @@ namespace AssemblyLineTester.Views.Pages
         }
     }
 }
-

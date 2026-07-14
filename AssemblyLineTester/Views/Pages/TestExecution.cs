@@ -1,52 +1,59 @@
+using AssemblyLineTester.Models.Dto;
+using AssemblyLineTester.Services;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
 using System.Windows.Forms;
+
+using System.Diagnostics;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class TestExecution : UserControl
     {
+        private readonly TestConfigFileService _configFileService = new();
+        private readonly InstrumentService _instrument = new();
+        private List<LiveTestDetailRowDto> _loadedRows = new();
+        private string _customTestText = string.Empty;
+        private double _continuityResistance ;
+
+
         public TestExecution()
         {
             InitializeComponent();
-            LoadDummyData();
+            SetupFilterDropdowns();
+            SetupGridLiveDetails();
             SetupDiagramPointers();
             btnLoadProgram.Click += BtnLoadProgram_Click;
         }
 
-        private void BtnLoadProgram_Click(object? sender, EventArgs e)
+        // Populates the filter dropdowns at the top of the page (Product Model, Type, Area, etc).
+        private void SetupFilterDropdowns()
         {
-            using var modal = new AssemblyLineTester.Views.Modals.AutomatedTestConfigModalForm();
-            modal.ShowDialog(this);
-        }
-
-        private void LoadDummyData()
-        {
-            // Populate ComboBox filters
+            cmbProductModel.Items.Clear();
             cmbProductModel.Items.AddRange(new object[] { "6060", "6070", "8080", "9090" });
             cmbProductModel.SelectedIndex = 0;
 
+            cmbProductType.Items.Clear();
             cmbProductType.Items.AddRange(new object[] { "AC", "DC", "Hybrid" });
             cmbProductType.SelectedIndex = 0;
 
+            cmbArea.Items.Clear();
             cmbArea.Items.AddRange(new object[] { "Engine Control", "Cabin Interior", "Chassis", "Dashboard" });
             cmbArea.SelectedIndex = 0;
 
+            cmbPartNumber.Items.Clear();
             cmbPartNumber.Items.AddRange(new object[] { "WH-ENG-001", "WH-ENG-002", "WH-CAB-005", "WH-CHS-010" });
             cmbPartNumber.SelectedIndex = 0;
 
+            cmbEcnNo.Items.Clear();
             cmbEcnNo.Items.AddRange(new object[] { "123.R001", "123.R002", "124.R000" });
             cmbEcnNo.SelectedIndex = 0;
-
-            // Setup Live Test Details DataGridView
-            SetupGridLiveDetails();
         }
 
+        // Sets up grid columns and styling only. No rows are added here -
+        // the grid stays empty until a config file is loaded via Load Program.
         private void SetupGridLiveDetails()
         {
             gridLiveDetails.Columns.Clear();
@@ -54,7 +61,6 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.Columns.Add("StepNo", "#");
             gridLiveDetails.Columns.Add("TestPoint", "Test Point");
             gridLiveDetails.Columns.Add("TestType", "Test Type");
-            gridLiveDetails.Columns.Add("Expected", "Expected Value");
             gridLiveDetails.Columns.Add("Measured", "Measured Value");
             gridLiveDetails.Columns.Add("Status", "Status");
 
@@ -62,7 +68,6 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.Columns["StepNo"]!.Width = 55;
             gridLiveDetails.Columns["TestPoint"]!.Width = 240;
             gridLiveDetails.Columns["TestType"]!.Width = 180;
-            gridLiveDetails.Columns["Expected"]!.Width = 240;
             gridLiveDetails.Columns["Measured"]!.Width = 240;
             gridLiveDetails.Columns["Status"]!.MinimumWidth = 140;
             gridLiveDetails.Columns["Status"]!.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
@@ -74,48 +79,165 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
             gridLiveDetails.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             gridLiveDetails.DefaultCellStyle.Font = new Font("Segoe UI", 9.2F);
+        }
 
-            // Add dummy test execution rows
-            object[][] rows = new object[][]
+        private void BtnLoadProgram_Click(object? sender, EventArgs e)
+        {
+            using var ofd = new OpenFileDialog
             {
-                new object[] { "1", "J1-01 ➔ J2-05", "Continuity", "< 1.00 Ω", "0.15 Ω", "PASS" },
-                new object[] { "2", "J1-02 ➔ J2-06", "Continuity", "< 1.00 Ω", "0.18 Ω", "PASS" },
-                new object[] { "3", "J1-03 ➔ J2-07", "Continuity", "< 1.00 Ω", "0.14 Ω", "PASS" },
-                new object[] { "4", "J1-04 ➔ GND", "Short Circuit", "> 10.0 MΩ", "> 500 MΩ", "PASS" },
-                new object[] { "5", "J1-05 ➔ GND", "Short Circuit", "> 10.0 MΩ", "> 500 MΩ", "PASS" },
-                new object[] { "6", "J1-10 ➔ J3-02", "Insulation", "> 100 MΩ", "450 MΩ", "PASS" },
-                new object[] { "7", "J1-11 ➔ J3-03", "Insulation", "> 100 MΩ", "480 MΩ", "PASS" },
-                new object[] { "8", "J1-23 ➔ J3-16", "Functional", "< 1.00 Ω", "0.23 Ω", "TESTING" },
-                new object[] { "9", "J1-24 ➔ J3-17", "Functional", "12.0 V ± 0.5 V", "Pending...", "PENDING" },
-                new object[] { "10", "J2-01 ➔ ECU-P1", "Functional", "5.0 V ± 0.2 V", "Pending...", "PENDING" },
-                new object[] { "11", "J2-02 ➔ ECU-P2", "Final Verify", "Signal OK", "Pending...", "PENDING" },
-                new object[] { "12", "SHIELD ➔ GND", "Final Verify", "< 0.50 Ω", "Pending...", "PENDING" }
+                Filter = "Wirelist/Text Files (*.txt;*.wir)|*.txt;*.wir|All Files (*.*)|*.*",
+                Title = "Select Test Program File"
             };
 
-            foreach (var r in rows)
-            {
-                int idx = gridLiveDetails.Rows.Add(r);
-                DataGridViewRow row = gridLiveDetails.Rows[idx];
-                string status = r[5]?.ToString() ?? "";
+            if (ofd.ShowDialog() != DialogResult.OK) return;
 
-                if (status == "PASS")
+            try
+            {
+                _customTestText = System.IO.File.ReadAllText(ofd.FileName);
+                Debug.WriteLine($"Nilai custom text saat ini: {_customTestText}");
+
+
+            }
+            catch (Exception ex)
+            {
+                _customTestText = string.Empty;
+                MessageBox.Show($"Failed to read file: {ex.Message}", "Load Program",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnStartTest_Click(object? sender, EventArgs e)
+        {
+            // 1. Connect to the instrument
+            bool isConnected = _instrument.Connect();
+            if (!isConnected)
+            {
+                MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string loadedProgramName = "1107061216";
+            string testProgramDetails = string.Empty;
+
+            // 2. Load the test program
+            if (!string.IsNullOrEmpty(_customTestText))
+            {
+                // Upload custom test text without saving to database (using empty string as testName)
+                var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
+                if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                 {
+                    _instrument.Disconnect();
+                    MessageBox.Show($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                loadedProgramName = "Custom Wirelist (Active)";
+                testProgramDetails = _customTestText;
+                _continuityResistance = _instrument.GetContinuityResistance();
+
+                Debug.WriteLine($"Nilai Continuity Resistance saat ini: {_continuityResistance}");
+            }
+            else
+            {
+                // Fallback: Fetch/load the specified test program "1107061216"
+                //var getTestResult = _instrument.GetTestProgram("1107061216");
+                //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
+                //{
+                //    testProgramDetails = getTestResult.Result;
+                //}
+            }
+
+            // 3. Run Single Test (Hipot=false, Shorts=true)
+            var testResult = _instrument.RunSingleTest(false, true);
+            if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+            {
+                _instrument.Disconnect();
+                MessageBox.Show($"Test run failed to execute. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Test Run Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 4. Get Measured Values
+            var measuredValuesResult = _instrument.GetMeasuredValues();
+            _loadedRows = new List<LiveTestDetailRowDto>();
+
+            if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
+            {
+                var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
+                if (list != null)
+                {
+                    int step = 1;
+                    foreach (var measurement in list)
+                    {
+                        var status = LiveTestStatus.Pending;
+                        string statusStr = measurement.Status1?.Trim() ?? "";
+                        if (measurement.Value1 <= _continuityResistance )
+                        {
+                            status = LiveTestStatus.Pass;
+                        }
+                        else 
+                        {
+                            status = LiveTestStatus.Fail;
+                        }
+
+                        _loadedRows.Add(new LiveTestDetailRowDto
+                        {
+                            StepNo = step++,
+                            NetId = measurement.Instruction ?? "",
+                            TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
+                            TestType = measurement.Instruction ?? "",
+                            MeasuredValue = Math.Round(measurement.Value1, 3),
+                            Status = status
+                        });
+                    }
+                }
+            }
+
+            // 5. Repopulate the GridView to show the results
+            PopulateLiveDetailsGrid(_loadedRows);
+
+            // 6. Disconnect after test run
+            _instrument.Disconnect();
+
+            // 7. Show summary MessageBox
+            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed 
+                ? "PASSED" 
+                : "FAILED or INCOMPLETE";
+
+        }
+
+        private void PopulateLiveDetailsGrid(List<LiveTestDetailRowDto> rows)
+        {
+            gridLiveDetails.Rows.Clear();
+
+            foreach (var row in rows)
+            {
+                int idx = gridLiveDetails.Rows.Add(
+                    row.StepNo.ToString(),
+                    row.TestPoint,
+                    row.TestType,
+                    row.MeasuredValue?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "",
+                    row.Status.ToString().ToUpperInvariant());
+
+                ApplyStatusStyle(gridLiveDetails.Rows[idx], row.Status);
+            }
+        }
+
+        private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)
+        {
+            switch (status)
+            {
+                case LiveTestStatus.Pass:
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(209, 231, 221);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(15, 81, 50);
-                    row.Cells["Status"].Style.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-                }
-                else if (status == "TESTING")
-                {
+                    break;
+                case LiveTestStatus.Testing:
                     row.DefaultCellStyle.BackColor = Color.FromArgb(255, 251, 235);
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(254, 240, 138);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(133, 77, 14);
-                    row.Cells["Status"].Style.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-                }
-                else if (status == "PENDING")
-                {
+                    break;
+                default: // Pending, Fail
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(241, 245, 249);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(100, 116, 139);
-                }
+                    break;
             }
         }
 
@@ -125,7 +247,7 @@ namespace AssemblyLineTester.Views.Pages
             picAreaDetail.Paint += PicAreaDetail_Paint;
             picHarnessConn.Paint += PicHarnessConn_Paint;
             pnlWiringPlaceholder.Paint += PnlWiringPlaceholder_Paint;
-            
+
             // Hide the mock placeholder text label so we can paint directly on the panel
             lblWiringMockText.Visible = false;
         }
@@ -160,19 +282,16 @@ namespace AssemblyLineTester.Views.Pages
             g.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle r = picAreaDetail.ClientRectangle;
 
-            // Background
             using (SolidBrush brush = new SolidBrush(Color.FromArgb(248, 250, 252)))
             {
                 g.FillRectangle(brush, r);
             }
 
-            // Draw a subtle border
             using (Pen borderPen = new Pen(Color.FromArgb(226, 232, 240), 1))
             {
                 g.DrawRectangle(borderPen, 0, 0, r.Width - 1, r.Height - 1);
             }
 
-            // Draw info rows in Area Detail card
             string[,] details = new string[,]
             {
                 { "🔧 Assembly Line:", "Assembly Line B" },
@@ -194,16 +313,13 @@ namespace AssemblyLineTester.Views.Pages
                     string key = details[i, 0];
                     string val = details[i, 1];
 
-                    // Draw key
                     g.DrawString(key, fKey, bKey, 30, startY + (i * rowHeight));
 
-                    // Draw val (with premium blue color for harness model)
                     using (Brush bVal = new SolidBrush(i == 2 ? Color.FromArgb(13, 110, 253) : Color.FromArgb(15, 23, 42)))
                     {
                         g.DrawString(val, fVal, bVal, 220, startY + (i * rowHeight));
                     }
 
-                    // Draw a separator line
                     if (i < 4)
                     {
                         using (Pen sepPen = new Pen(Color.FromArgb(241, 245, 249), 1))
@@ -240,13 +356,11 @@ namespace AssemblyLineTester.Views.Pages
             g.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle r = pnlWiringPlaceholder.ClientRectangle;
 
-            // Background
             using (SolidBrush brush = new SolidBrush(Color.FromArgb(248, 250, 252)))
             {
                 g.FillRectangle(brush, r);
             }
 
-            // Draw a subtle grid to look schematic
             using (Pen gridPen = new Pen(Color.FromArgb(241, 245, 249), 1))
             {
                 for (int x = 20; x < r.Width; x += 20)
@@ -255,7 +369,6 @@ namespace AssemblyLineTester.Views.Pages
                     g.DrawLine(gridPen, 0, y, r.Width, y);
             }
 
-            // Draw a smooth curved multi-wire harness cable bundle
             using (Pen cablePen = new Pen(Color.FromArgb(13, 110, 253), 5))
             {
                 using (Pen wireInnerPen = new Pen(Color.FromArgb(147, 197, 253), 1))
@@ -265,7 +378,6 @@ namespace AssemblyLineTester.Views.Pages
                     float endX = r.Width * 0.75f;
                     float endY = r.Height * 0.45f;
 
-                    // Stepped routing for standard schematic feel
                     PointF[] points = new PointF[]
                     {
                         new PointF(startX, startY),
@@ -277,7 +389,6 @@ namespace AssemblyLineTester.Views.Pages
                     };
                     g.DrawLines(cablePen, points);
 
-                    // Offset lines for multi-wire bundles
                     for (int i = -3; i <= 3; i += 3)
                     {
                         if (i == 0) continue;
@@ -291,7 +402,6 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            // Draw J1 Connector Node (circular plug style)
             RectangleF n1 = new RectangleF(r.Width * 0.25f - 40, r.Height * 0.45f - 40, 80, 80);
             using (SolidBrush connBrush = new SolidBrush(Color.FromArgb(30, 41, 59)))
             {
@@ -302,7 +412,6 @@ namespace AssemblyLineTester.Views.Pages
                 g.DrawEllipse(borderPen, n1);
             }
 
-            // Draw J3 Connector Node
             RectangleF n2 = new RectangleF(r.Width * 0.75f - 40, r.Height * 0.45f - 40, 80, 80);
             using (SolidBrush connBrush = new SolidBrush(Color.FromArgb(30, 41, 59)))
             {
@@ -313,7 +422,6 @@ namespace AssemblyLineTester.Views.Pages
                 g.DrawEllipse(borderPen, n2);
             }
 
-            // Draw connector node text labels
             using (Font f = new Font("Segoe UI", 11F, FontStyle.Bold))
             using (Brush textBrush = new SolidBrush(Color.White))
             {
@@ -322,7 +430,6 @@ namespace AssemblyLineTester.Views.Pages
                 g.DrawString("J3", f, textBrush, n2, sf);
             }
 
-            // Draw pin descriptions below nodes
             using (Font detailFont = new Font("Segoe UI", 8.5F, FontStyle.Regular))
             using (Brush darkGrayBrush = new SolidBrush(Color.FromArgb(100, 116, 139)))
             {
@@ -331,7 +438,6 @@ namespace AssemblyLineTester.Views.Pages
                 g.DrawString("Main Harness\n(24-Pin Female)", detailFont, darkGrayBrush, r.Width * 0.75f, r.Height * 0.45f + 45, sfTop);
             }
 
-            // Draw a stylish legend panel on bottom
             using (Font legendFont = new Font("Segoe UI", 9F, FontStyle.Bold))
             using (Brush greenBrush = new SolidBrush(Color.FromArgb(40, 167, 69)))
             using (Brush blueBrush = new SolidBrush(Color.FromArgb(13, 110, 253)))
@@ -340,5 +446,7 @@ namespace AssemblyLineTester.Views.Pages
                 g.DrawString("● Active Loop: J1-23 to J3-16", legendFont, blueBrush, 30, r.Height - 40);
             }
         }
+
+        
     }
 }

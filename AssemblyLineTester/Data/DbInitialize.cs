@@ -1,21 +1,21 @@
+using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Windows.Forms;
 
 namespace AssemblyLineTester.Data
 {
     /// Provides utility methods to initialize the application database at startup.
     public static class DbInitialize
     {
-        /// Ensures the SQLite database file exists, creates the schema, and seeds default records.
-        /// <returns>True if database initialization succeeded; otherwise false.</returns>
+        /// Applies any pending EF Core migrations to bring the database schema up to date,
+        /// creating the database file itself if it does not exist yet.
         public static bool Initialize()
         {
             try
             {
                 using (var db = new AppDbContext())
                 {
-                    db.Database.EnsureCreated();
+                    db.Database.Migrate();
                 }
                 return true;
             }
