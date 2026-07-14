@@ -43,7 +43,7 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            LastUsageDate = new DateTime(2026, 7, 13, 0, 0, 0, 0, DateTimeKind.Local),
+                            LastUsageDate = new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Local),
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,
                             RemainingMaintHours = 2160.0
