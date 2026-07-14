@@ -74,40 +74,11 @@ namespace AssemblyLineTester.Views.Pages
             lblStatusRunning = new Label();
             lblTestStatusTitle = new Label();
             tblRow2 = new TableLayoutPanel();
-            cardProgress = new Panel();
-            tblProgressCard = new TableLayoutPanel();
-            pnlSequenceSection = new Panel();
-            tblSteps = new TableLayoutPanel();
-            lblStep1 = new Label();
-            lblStep2 = new Label();
-            lblStep3 = new Label();
-            lblStep4 = new Label();
-            lblStep5 = new Label();
-            lblSequenceTitle = new Label();
-            pnlOverallStatsSection = new Panel();
-            lblProgressStats = new Label();
-            prgOverall = new ProgressBar();
-            lblPercent = new Label();
-            lblOverallProgressTitle = new Label();
-            cardCurrentPoint = new Panel();
-            tblCurrentPointDetails = new TableLayoutPanel();
-            lblExpectedKey = new Label();
-            lblExpectedVal = new Label();
-            lblMeasuredKey = new Label();
-            lblMeasuredVal = new Label();
-            lblResultKey = new Label();
-            lblResultVal = new Label();
-            lblPointsRoute = new Label();
-            lblCurrentPointTitle = new Label();
-            tblRow3 = new TableLayoutPanel();
             cardLiveDetails = new Panel();
             gridLiveDetails = new DataGridView();
             lblLiveDetailsTitle = new Label();
-            cardWiringDiagram = new Panel();
-            pnlWiringPlaceholder = new Panel();
-            lblWiringMockText = new Label();
-            lblWiringDiagramTitle = new Label();
-            tblSummaryNotes = new TableLayoutPanel();
+            pnlLiveDetailsHeader = new Panel();
+            btnViewWiringDiagram = new Button();
             cardTestSummary = new Panel();
             lblSummaryText = new Label();
             lblTestSummaryTitle = new Label();
@@ -132,19 +103,9 @@ namespace AssemblyLineTester.Views.Pages
             cardTestStatus.SuspendLayout();
             tblStatusLabels.SuspendLayout();
             tblRow2.SuspendLayout();
-            cardProgress.SuspendLayout();
-            tblProgressCard.SuspendLayout();
-            pnlSequenceSection.SuspendLayout();
-            tblSteps.SuspendLayout();
-            pnlOverallStatsSection.SuspendLayout();
-            cardCurrentPoint.SuspendLayout();
-            tblCurrentPointDetails.SuspendLayout();
-            tblRow3.SuspendLayout();
             cardLiveDetails.SuspendLayout();
+            pnlLiveDetailsHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridLiveDetails).BeginInit();
-            cardWiringDiagram.SuspendLayout();
-            pnlWiringPlaceholder.SuspendLayout();
-            tblSummaryNotes.SuspendLayout();
             cardTestSummary.SuspendLayout();
             cardNotes.SuspendLayout();
             SuspendLayout();
@@ -157,16 +118,14 @@ namespace AssemblyLineTester.Views.Pages
             tblMain.Controls.Add(pnlTopBar, 0, 0);
             tblMain.Controls.Add(tblRow1, 0, 1);
             tblMain.Controls.Add(tblRow2, 0, 2);
-            tblMain.Controls.Add(tblRow3, 0, 3);
             tblMain.Dock = DockStyle.Fill;
             tblMain.Location = new Point(0, 0);
             tblMain.MinimumSize = new Size(1500, 0);
             tblMain.Name = "tblMain";
-            tblMain.RowCount = 4;
+            tblMain.RowCount = 3;
             tblMain.RowStyles.Add(new RowStyle());
-            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 32F));
-            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 23F));
-            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 45F));
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 35F));
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 65F));
             tblMain.Size = new Size(2676, 1653);
             tblMain.TabIndex = 0;
             // 
@@ -231,7 +190,7 @@ namespace AssemblyLineTester.Views.Pages
             // pnlFilterCard
             // 
             pnlFilterCard.BackColor = Color.White;
-            pnlFilterCard.BorderStyle = BorderStyle.FixedSingle;
+            pnlFilterCard.BorderStyle = BorderStyle.None;
             pnlFilterCard.Controls.Add(tblFilters);
             pnlFilterCard.Dock = DockStyle.Fill;
             pnlFilterCard.Location = new Point(0, 0);
@@ -480,7 +439,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardMachineOverview
             // 
             cardMachineOverview.BackColor = Color.White;
-            cardMachineOverview.BorderStyle = BorderStyle.FixedSingle;
+            cardMachineOverview.BorderStyle = BorderStyle.None;
             cardMachineOverview.Controls.Add(picMachineOverview);
             cardMachineOverview.Controls.Add(lblMachineOverviewTitle);
             cardMachineOverview.Dock = DockStyle.Fill;
@@ -516,7 +475,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardAreaDetail
             // 
             cardAreaDetail.BackColor = Color.White;
-            cardAreaDetail.BorderStyle = BorderStyle.FixedSingle;
+            cardAreaDetail.BorderStyle = BorderStyle.None;
             cardAreaDetail.Controls.Add(picAreaDetail);
             cardAreaDetail.Controls.Add(lblAreaDetailTitle);
             cardAreaDetail.Dock = DockStyle.Fill;
@@ -546,7 +505,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardHarnessConn
             // 
             cardHarnessConn.BackColor = Color.White;
-            cardHarnessConn.BorderStyle = BorderStyle.FixedSingle;
+            cardHarnessConn.BorderStyle = BorderStyle.None;
             cardHarnessConn.Controls.Add(pnlHarnessImgContainer);
             cardHarnessConn.Controls.Add(lblHarnessConnTitle);
             cardHarnessConn.Dock = DockStyle.Fill;
@@ -586,7 +545,7 @@ namespace AssemblyLineTester.Views.Pages
             // picHarnessConn
             // 
             picHarnessConn.BackColor = Color.FromArgb(248, 250, 252);
-            picHarnessConn.BorderStyle = BorderStyle.FixedSingle;
+            picHarnessConn.BorderStyle = BorderStyle.None;
             picHarnessConn.Dock = DockStyle.Fill;
             picHarnessConn.Location = new Point(0, 0);
             picHarnessConn.Name = "picHarnessConn";
@@ -610,7 +569,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardTestStatus
             // 
             cardTestStatus.BackColor = Color.White;
-            cardTestStatus.BorderStyle = BorderStyle.FixedSingle;
+            cardTestStatus.BorderStyle = BorderStyle.None;
             cardTestStatus.Controls.Add(tblStatusLabels);
             cardTestStatus.Controls.Add(lblStatusRunning);
             cardTestStatus.Controls.Add(lblTestStatusTitle);
@@ -776,386 +735,33 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblRow2
             // 
-            tblRow2.ColumnCount = 2;
-            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
-            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
-            tblRow2.Controls.Add(cardProgress, 0, 0);
-            tblRow2.Controls.Add(cardCurrentPoint, 1, 0);
+            tblRow2.ColumnCount = 3;
+            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblRow2.Controls.Add(cardLiveDetails, 0, 0);
+            tblRow2.Controls.Add(cardTestSummary, 1, 0);
+            tblRow2.Controls.Add(cardNotes, 2, 0);
             tblRow2.Dock = DockStyle.Fill;
             tblRow2.Location = new Point(3, 643);
             tblRow2.Name = "tblRow2";
             tblRow2.RowCount = 1;
             tblRow2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblRow2.Size = new Size(2670, 336);
+            tblRow2.Size = new Size(2670, 1000);
             tblRow2.TabIndex = 2;
-            // 
-            // cardProgress
-            // 
-            cardProgress.BackColor = Color.White;
-            cardProgress.BorderStyle = BorderStyle.FixedSingle;
-            cardProgress.Controls.Add(tblProgressCard);
-            cardProgress.Dock = DockStyle.Fill;
-            cardProgress.Location = new Point(5, 5);
-            cardProgress.Margin = new Padding(5);
-            cardProgress.Name = "cardProgress";
-            cardProgress.Padding = new Padding(10);
-            cardProgress.Size = new Size(1859, 326);
-            cardProgress.TabIndex = 0;
-            // 
-            // tblProgressCard
-            // 
-            tblProgressCard.ColumnCount = 2;
-            tblProgressCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 72F));
-            tblProgressCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
-            tblProgressCard.Controls.Add(pnlSequenceSection, 0, 0);
-            tblProgressCard.Controls.Add(pnlOverallStatsSection, 1, 0);
-            tblProgressCard.Dock = DockStyle.Fill;
-            tblProgressCard.Location = new Point(10, 10);
-            tblProgressCard.Name = "tblProgressCard";
-            tblProgressCard.RowCount = 1;
-            tblProgressCard.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblProgressCard.Size = new Size(1837, 304);
-            tblProgressCard.TabIndex = 0;
-            // 
-            // pnlSequenceSection
-            // 
-            pnlSequenceSection.Controls.Add(tblSteps);
-            pnlSequenceSection.Controls.Add(lblSequenceTitle);
-            pnlSequenceSection.Dock = DockStyle.Fill;
-            pnlSequenceSection.Location = new Point(0, 0);
-            pnlSequenceSection.Margin = new Padding(0, 0, 10, 0);
-            pnlSequenceSection.Name = "pnlSequenceSection";
-            pnlSequenceSection.Size = new Size(1312, 304);
-            pnlSequenceSection.TabIndex = 0;
-            // 
-            // tblSteps
-            // 
-            tblSteps.ColumnCount = 5;
-            tblSteps.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tblSteps.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tblSteps.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tblSteps.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tblSteps.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tblSteps.Controls.Add(lblStep1, 0, 0);
-            tblSteps.Controls.Add(lblStep2, 1, 0);
-            tblSteps.Controls.Add(lblStep3, 2, 0);
-            tblSteps.Controls.Add(lblStep4, 3, 0);
-            tblSteps.Controls.Add(lblStep5, 4, 0);
-            tblSteps.Dock = DockStyle.Fill;
-            tblSteps.Location = new Point(0, 43);
-            tblSteps.Name = "tblSteps";
-            tblSteps.RowCount = 1;
-            tblSteps.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblSteps.Size = new Size(1312, 261);
-            tblSteps.TabIndex = 1;
-            // 
-            // lblStep1
-            // 
-            lblStep1.BackColor = Color.FromArgb(209, 231, 221);
-            lblStep1.Dock = DockStyle.Fill;
-            lblStep1.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblStep1.ForeColor = Color.FromArgb(15, 81, 50);
-            lblStep1.Location = new Point(3, 3);
-            lblStep1.Margin = new Padding(3);
-            lblStep1.Name = "lblStep1";
-            lblStep1.Size = new Size(256, 255);
-            lblStep1.TabIndex = 0;
-            lblStep1.Text = "✔ Continuity Test\r\n\r\n(00:01:42)";
-            lblStep1.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // lblStep2
-            // 
-            lblStep2.BackColor = Color.FromArgb(209, 231, 221);
-            lblStep2.Dock = DockStyle.Fill;
-            lblStep2.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblStep2.ForeColor = Color.FromArgb(15, 81, 50);
-            lblStep2.Location = new Point(265, 3);
-            lblStep2.Margin = new Padding(3);
-            lblStep2.Name = "lblStep2";
-            lblStep2.Size = new Size(256, 255);
-            lblStep2.TabIndex = 1;
-            lblStep2.Text = "✔ Short Circuit\r\n\r\n(00:01:35)";
-            lblStep2.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // lblStep3
-            // 
-            lblStep3.BackColor = Color.FromArgb(209, 231, 221);
-            lblStep3.Dock = DockStyle.Fill;
-            lblStep3.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblStep3.ForeColor = Color.FromArgb(15, 81, 50);
-            lblStep3.Location = new Point(527, 3);
-            lblStep3.Margin = new Padding(3);
-            lblStep3.Name = "lblStep3";
-            lblStep3.Size = new Size(256, 255);
-            lblStep3.TabIndex = 2;
-            lblStep3.Text = "✔ Insulation Test\r\n\r\n(00:01:28)";
-            lblStep3.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // lblStep4
-            // 
-            lblStep4.BackColor = Color.FromArgb(255, 243, 205);
-            lblStep4.Dock = DockStyle.Fill;
-            lblStep4.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblStep4.ForeColor = Color.FromArgb(102, 77, 3);
-            lblStep4.Location = new Point(789, 3);
-            lblStep4.Margin = new Padding(3);
-            lblStep4.Name = "lblStep4";
-            lblStep4.Size = new Size(256, 255);
-            lblStep4.TabIndex = 3;
-            lblStep4.Text = "⏳ Functional Test\r\n\r\nIn Progress\r\n\r\n(00:02:15)";
-            lblStep4.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // lblStep5
-            // 
-            lblStep5.BackColor = Color.FromArgb(226, 232, 240);
-            lblStep5.Dock = DockStyle.Fill;
-            lblStep5.Font = new Font("Segoe UI", 8.5F);
-            lblStep5.ForeColor = Color.FromArgb(71, 85, 105);
-            lblStep5.Location = new Point(1051, 3);
-            lblStep5.Margin = new Padding(3);
-            lblStep5.Name = "lblStep5";
-            lblStep5.Size = new Size(258, 255);
-            lblStep5.TabIndex = 4;
-            lblStep5.Text = "Final Verification\r\n(Pending)";
-            lblStep5.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // lblSequenceTitle
-            // 
-            lblSequenceTitle.Dock = DockStyle.Top;
-            lblSequenceTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblSequenceTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblSequenceTitle.Location = new Point(0, 0);
-            lblSequenceTitle.Name = "lblSequenceTitle";
-            lblSequenceTitle.Size = new Size(1312, 43);
-            lblSequenceTitle.TabIndex = 0;
-            lblSequenceTitle.Text = "TEST SEQUENCE & PROGRESS";
-            lblSequenceTitle.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // pnlOverallStatsSection
-            // 
-            pnlOverallStatsSection.Controls.Add(lblProgressStats);
-            pnlOverallStatsSection.Controls.Add(prgOverall);
-            pnlOverallStatsSection.Controls.Add(lblPercent);
-            pnlOverallStatsSection.Controls.Add(lblOverallProgressTitle);
-            pnlOverallStatsSection.Dock = DockStyle.Fill;
-            pnlOverallStatsSection.Location = new Point(1322, 0);
-            pnlOverallStatsSection.Margin = new Padding(0);
-            pnlOverallStatsSection.Name = "pnlOverallStatsSection";
-            pnlOverallStatsSection.Size = new Size(515, 304);
-            pnlOverallStatsSection.TabIndex = 1;
-            // 
-            // lblProgressStats
-            // 
-            lblProgressStats.Dock = DockStyle.Fill;
-            lblProgressStats.Font = new Font("Segoe UI", 9F);
-            lblProgressStats.ForeColor = Color.FromArgb(71, 85, 105);
-            lblProgressStats.Location = new Point(0, 155);
-            lblProgressStats.Name = "lblProgressStats";
-            lblProgressStats.Size = new Size(515, 149);
-            lblProgressStats.TabIndex = 3;
-            lblProgressStats.Text = "Total Steps: 5 | Completed: 2 | Remaining: 3";
-            lblProgressStats.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // prgOverall
-            // 
-            prgOverall.Dock = DockStyle.Top;
-            prgOverall.Location = new Point(0, 112);
-            prgOverall.Name = "prgOverall";
-            prgOverall.Size = new Size(515, 43);
-            prgOverall.TabIndex = 2;
-            prgOverall.Value = 24;
-            // 
-            // lblPercent
-            // 
-            lblPercent.Dock = DockStyle.Top;
-            lblPercent.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            lblPercent.ForeColor = Color.FromArgb(13, 110, 253);
-            lblPercent.Location = new Point(0, 43);
-            lblPercent.Name = "lblPercent";
-            lblPercent.Size = new Size(515, 69);
-            lblPercent.TabIndex = 1;
-            lblPercent.Text = "24%";
-            lblPercent.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // lblOverallProgressTitle
-            // 
-            lblOverallProgressTitle.Dock = DockStyle.Top;
-            lblOverallProgressTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblOverallProgressTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblOverallProgressTitle.Location = new Point(0, 0);
-            lblOverallProgressTitle.Name = "lblOverallProgressTitle";
-            lblOverallProgressTitle.Size = new Size(515, 43);
-            lblOverallProgressTitle.TabIndex = 0;
-            lblOverallProgressTitle.Text = "OVERALL PROGRESS";
-            lblOverallProgressTitle.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // cardCurrentPoint
-            // 
-            cardCurrentPoint.BackColor = Color.White;
-            cardCurrentPoint.BorderStyle = BorderStyle.FixedSingle;
-            cardCurrentPoint.Controls.Add(tblCurrentPointDetails);
-            cardCurrentPoint.Controls.Add(lblPointsRoute);
-            cardCurrentPoint.Controls.Add(lblCurrentPointTitle);
-            cardCurrentPoint.Dock = DockStyle.Fill;
-            cardCurrentPoint.Location = new Point(1874, 5);
-            cardCurrentPoint.Margin = new Padding(5);
-            cardCurrentPoint.Name = "cardCurrentPoint";
-            cardCurrentPoint.Padding = new Padding(10);
-            cardCurrentPoint.Size = new Size(791, 326);
-            cardCurrentPoint.TabIndex = 1;
-            // 
-            // tblCurrentPointDetails
-            // 
-            tblCurrentPointDetails.ColumnCount = 2;
-            tblCurrentPointDetails.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
-            tblCurrentPointDetails.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
-            tblCurrentPointDetails.Controls.Add(lblExpectedKey, 0, 0);
-            tblCurrentPointDetails.Controls.Add(lblExpectedVal, 1, 0);
-            tblCurrentPointDetails.Controls.Add(lblMeasuredKey, 0, 1);
-            tblCurrentPointDetails.Controls.Add(lblMeasuredVal, 1, 1);
-            tblCurrentPointDetails.Controls.Add(lblResultKey, 0, 2);
-            tblCurrentPointDetails.Controls.Add(lblResultVal, 1, 2);
-            tblCurrentPointDetails.Dock = DockStyle.Fill;
-            tblCurrentPointDetails.Location = new Point(10, 100);
-            tblCurrentPointDetails.Name = "tblCurrentPointDetails";
-            tblCurrentPointDetails.RowCount = 3;
-            tblCurrentPointDetails.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
-            tblCurrentPointDetails.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
-            tblCurrentPointDetails.RowStyles.Add(new RowStyle(SizeType.Percent, 33.34F));
-            tblCurrentPointDetails.Size = new Size(769, 214);
-            tblCurrentPointDetails.TabIndex = 2;
-            // 
-            // lblExpectedKey
-            // 
-            lblExpectedKey.AutoSize = true;
-            lblExpectedKey.Dock = DockStyle.Fill;
-            lblExpectedKey.Font = new Font("Segoe UI", 9F);
-            lblExpectedKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblExpectedKey.Location = new Point(3, 0);
-            lblExpectedKey.Name = "lblExpectedKey";
-            lblExpectedKey.Size = new Size(416, 71);
-            lblExpectedKey.TabIndex = 0;
-            lblExpectedKey.Text = "Expected Resistance:";
-            lblExpectedKey.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblExpectedVal
-            // 
-            lblExpectedVal.AutoSize = true;
-            lblExpectedVal.Dock = DockStyle.Fill;
-            lblExpectedVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblExpectedVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblExpectedVal.Location = new Point(425, 0);
-            lblExpectedVal.Name = "lblExpectedVal";
-            lblExpectedVal.Size = new Size(341, 71);
-            lblExpectedVal.TabIndex = 1;
-            lblExpectedVal.Text = "< 1.00 Ω";
-            lblExpectedVal.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblMeasuredKey
-            // 
-            lblMeasuredKey.AutoSize = true;
-            lblMeasuredKey.Dock = DockStyle.Fill;
-            lblMeasuredKey.Font = new Font("Segoe UI", 9F);
-            lblMeasuredKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblMeasuredKey.Location = new Point(3, 71);
-            lblMeasuredKey.Name = "lblMeasuredKey";
-            lblMeasuredKey.Size = new Size(416, 71);
-            lblMeasuredKey.TabIndex = 2;
-            lblMeasuredKey.Text = "Measured Resistance:";
-            lblMeasuredKey.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblMeasuredVal
-            // 
-            lblMeasuredVal.AutoSize = true;
-            lblMeasuredVal.Dock = DockStyle.Fill;
-            lblMeasuredVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblMeasuredVal.ForeColor = Color.FromArgb(40, 167, 69);
-            lblMeasuredVal.Location = new Point(425, 71);
-            lblMeasuredVal.Name = "lblMeasuredVal";
-            lblMeasuredVal.Size = new Size(341, 71);
-            lblMeasuredVal.TabIndex = 3;
-            lblMeasuredVal.Text = "0.23 Ω";
-            lblMeasuredVal.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblResultKey
-            // 
-            lblResultKey.AutoSize = true;
-            lblResultKey.Dock = DockStyle.Fill;
-            lblResultKey.Font = new Font("Segoe UI", 9F);
-            lblResultKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblResultKey.Location = new Point(3, 142);
-            lblResultKey.Name = "lblResultKey";
-            lblResultKey.Size = new Size(416, 72);
-            lblResultKey.TabIndex = 4;
-            lblResultKey.Text = "Result:";
-            lblResultKey.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblResultVal
-            // 
-            lblResultVal.AutoSize = true;
-            lblResultVal.Dock = DockStyle.Fill;
-            lblResultVal.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblResultVal.ForeColor = Color.FromArgb(40, 167, 69);
-            lblResultVal.Location = new Point(425, 142);
-            lblResultVal.Name = "lblResultVal";
-            lblResultVal.Size = new Size(341, 72);
-            lblResultVal.TabIndex = 5;
-            lblResultVal.Text = "PASS";
-            lblResultVal.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblPointsRoute
-            // 
-            lblPointsRoute.Dock = DockStyle.Top;
-            lblPointsRoute.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblPointsRoute.ForeColor = Color.FromArgb(30, 41, 59);
-            lblPointsRoute.Location = new Point(10, 53);
-            lblPointsRoute.Name = "lblPointsRoute";
-            lblPointsRoute.Size = new Size(769, 47);
-            lblPointsRoute.TabIndex = 1;
-            lblPointsRoute.Text = "Dari \"J1-23\"  ➔  Ke \"J3-16\"";
-            lblPointsRoute.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // lblCurrentPointTitle
-            // 
-            lblCurrentPointTitle.Dock = DockStyle.Top;
-            lblCurrentPointTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblCurrentPointTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblCurrentPointTitle.Location = new Point(10, 10);
-            lblCurrentPointTitle.Name = "lblCurrentPointTitle";
-            lblCurrentPointTitle.Size = new Size(769, 43);
-            lblCurrentPointTitle.TabIndex = 0;
-            lblCurrentPointTitle.Text = "CURRENT TEST POINT";
-            lblCurrentPointTitle.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // tblRow3
-            // 
-            tblRow3.ColumnCount = 3;
-            tblRow3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tblRow3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-            tblRow3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-            tblRow3.Controls.Add(cardLiveDetails, 0, 0);
-            tblRow3.Controls.Add(cardWiringDiagram, 1, 0);
-            tblRow3.Controls.Add(tblSummaryNotes, 2, 0);
-            tblRow3.Dock = DockStyle.Fill;
-            tblRow3.Location = new Point(3, 985);
-            tblRow3.Name = "tblRow3";
-            tblRow3.RowCount = 1;
-            tblRow3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblRow3.Size = new Size(2670, 665);
-            tblRow3.TabIndex = 3;
             // 
             // cardLiveDetails
             // 
             cardLiveDetails.BackColor = Color.White;
-            cardLiveDetails.BorderStyle = BorderStyle.FixedSingle;
+            cardLiveDetails.BorderStyle = BorderStyle.None;
             cardLiveDetails.Controls.Add(gridLiveDetails);
-            cardLiveDetails.Controls.Add(lblLiveDetailsTitle);
+            cardLiveDetails.Controls.Add(pnlLiveDetailsHeader);
             cardLiveDetails.Dock = DockStyle.Fill;
             cardLiveDetails.Location = new Point(5, 5);
             cardLiveDetails.Margin = new Padding(5);
             cardLiveDetails.Name = "cardLiveDetails";
             cardLiveDetails.Padding = new Padding(10);
-            cardLiveDetails.Size = new Size(1325, 655);
+            cardLiveDetails.Size = new Size(1325, 990);
             cardLiveDetails.TabIndex = 0;
             // 
             // gridLiveDetails
@@ -1171,89 +777,51 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.ReadOnly = true;
             gridLiveDetails.RowHeadersVisible = false;
             gridLiveDetails.RowHeadersWidth = 82;
-            gridLiveDetails.Size = new Size(1303, 571);
+            gridLiveDetails.Size = new Size(1303, 908);
             gridLiveDetails.TabIndex = 1;
+            // 
+            // pnlLiveDetailsHeader
+            // 
+            pnlLiveDetailsHeader.Controls.Add(btnViewWiringDiagram);
+            pnlLiveDetailsHeader.Controls.Add(lblLiveDetailsTitle);
+            pnlLiveDetailsHeader.Dock = DockStyle.Top;
+            pnlLiveDetailsHeader.Location = new Point(10, 10);
+            pnlLiveDetailsHeader.Name = "pnlLiveDetailsHeader";
+            pnlLiveDetailsHeader.Size = new Size(1303, 62);
+            pnlLiveDetailsHeader.TabIndex = 0;
+            // 
+            // btnViewWiringDiagram
+            // 
+            btnViewWiringDiagram.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnViewWiringDiagram.BackColor = Color.FromArgb(37, 99, 235);
+            btnViewWiringDiagram.Cursor = Cursors.Hand;
+            btnViewWiringDiagram.FlatAppearance.BorderSize = 0;
+            btnViewWiringDiagram.FlatStyle = FlatStyle.Flat;
+            btnViewWiringDiagram.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnViewWiringDiagram.ForeColor = Color.White;
+            btnViewWiringDiagram.Location = new Point(1108, 12);
+            btnViewWiringDiagram.Name = "btnViewWiringDiagram";
+            btnViewWiringDiagram.Size = new Size(185, 38);
+            btnViewWiringDiagram.TabIndex = 1;
+            btnViewWiringDiagram.Text = "🔌 Wiring Preview";
+            btnViewWiringDiagram.UseVisualStyleBackColor = false;
             // 
             // lblLiveDetailsTitle
             // 
-            lblLiveDetailsTitle.Dock = DockStyle.Top;
+            lblLiveDetailsTitle.Dock = DockStyle.Fill;
             lblLiveDetailsTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLiveDetailsTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLiveDetailsTitle.Location = new Point(10, 10);
+            lblLiveDetailsTitle.Location = new Point(0, 0);
             lblLiveDetailsTitle.Name = "lblLiveDetailsTitle";
             lblLiveDetailsTitle.Size = new Size(1303, 62);
             lblLiveDetailsTitle.TabIndex = 0;
             lblLiveDetailsTitle.Text = "LIVE TEST DETAILS";
             lblLiveDetailsTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // cardWiringDiagram
-            // 
-            cardWiringDiagram.BackColor = Color.White;
-            cardWiringDiagram.BorderStyle = BorderStyle.FixedSingle;
-            cardWiringDiagram.Controls.Add(pnlWiringPlaceholder);
-            cardWiringDiagram.Controls.Add(lblWiringDiagramTitle);
-            cardWiringDiagram.Dock = DockStyle.Fill;
-            cardWiringDiagram.Location = new Point(1340, 5);
-            cardWiringDiagram.Margin = new Padding(5);
-            cardWiringDiagram.Name = "cardWiringDiagram";
-            cardWiringDiagram.Padding = new Padding(10);
-            cardWiringDiagram.Size = new Size(657, 655);
-            cardWiringDiagram.TabIndex = 1;
-            // 
-            // pnlWiringPlaceholder
-            // 
-            pnlWiringPlaceholder.BackColor = Color.FromArgb(248, 250, 252);
-            pnlWiringPlaceholder.Controls.Add(lblWiringMockText);
-            pnlWiringPlaceholder.Dock = DockStyle.Fill;
-            pnlWiringPlaceholder.Location = new Point(10, 72);
-            pnlWiringPlaceholder.Name = "pnlWiringPlaceholder";
-            pnlWiringPlaceholder.Size = new Size(635, 571);
-            pnlWiringPlaceholder.TabIndex = 1;
-            // 
-            // lblWiringMockText
-            // 
-            lblWiringMockText.Dock = DockStyle.Fill;
-            lblWiringMockText.Font = new Font("Segoe UI", 9.5F);
-            lblWiringMockText.ForeColor = Color.FromArgb(100, 116, 139);
-            lblWiringMockText.Location = new Point(0, 0);
-            lblWiringMockText.Name = "lblWiringMockText";
-            lblWiringMockText.Size = new Size(635, 571);
-            lblWiringMockText.TabIndex = 0;
-            lblWiringMockText.Text = "J1 to J3 Visual Wiring Map Placeholder\r\n\r\nLegend:\r\n✔ Completed\r\n⏳ Testing\r\n⏳ Pending";
-            lblWiringMockText.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // lblWiringDiagramTitle
-            // 
-            lblWiringDiagramTitle.Dock = DockStyle.Top;
-            lblWiringDiagramTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblWiringDiagramTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblWiringDiagramTitle.Location = new Point(10, 10);
-            lblWiringDiagramTitle.Name = "lblWiringDiagramTitle";
-            lblWiringDiagramTitle.Size = new Size(635, 62);
-            lblWiringDiagramTitle.TabIndex = 0;
-            lblWiringDiagramTitle.Text = "WIRING DIAGRAM";
-            lblWiringDiagramTitle.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // tblSummaryNotes
-            // 
-            tblSummaryNotes.ColumnCount = 1;
-            tblSummaryNotes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblSummaryNotes.Controls.Add(cardTestSummary, 0, 0);
-            tblSummaryNotes.Controls.Add(cardNotes, 0, 1);
-            tblSummaryNotes.Dock = DockStyle.Fill;
-            tblSummaryNotes.Location = new Point(2002, 0);
-            tblSummaryNotes.Margin = new Padding(0);
-            tblSummaryNotes.Name = "tblSummaryNotes";
-            tblSummaryNotes.RowCount = 2;
-            tblSummaryNotes.RowStyles.Add(new RowStyle(SizeType.Percent, 60F));
-            tblSummaryNotes.RowStyles.Add(new RowStyle(SizeType.Percent, 40F));
-            tblSummaryNotes.Size = new Size(668, 665);
-            tblSummaryNotes.TabIndex = 2;
-            // 
             // cardTestSummary
             // 
             cardTestSummary.BackColor = Color.White;
-            cardTestSummary.BorderStyle = BorderStyle.FixedSingle;
+            cardTestSummary.BorderStyle = BorderStyle.None;
             cardTestSummary.Controls.Add(lblSummaryText);
             cardTestSummary.Controls.Add(lblTestSummaryTitle);
             cardTestSummary.Dock = DockStyle.Fill;
@@ -1290,7 +858,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardNotes
             // 
             cardNotes.BackColor = Color.White;
-            cardNotes.BorderStyle = BorderStyle.FixedSingle;
+            cardNotes.BorderStyle = BorderStyle.None;
             cardNotes.Controls.Add(txtNotes);
             cardNotes.Controls.Add(lblNotesTitle);
             cardNotes.Dock = DockStyle.Fill;
@@ -1303,7 +871,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // txtNotes
             // 
-            txtNotes.BorderStyle = BorderStyle.FixedSingle;
+            txtNotes.BorderStyle = BorderStyle.None;
             txtNotes.Dock = DockStyle.Fill;
             txtNotes.Font = new Font("Segoe UI", 9.5F);
             txtNotes.Location = new Point(10, 57);
@@ -1357,20 +925,9 @@ namespace AssemblyLineTester.Views.Pages
             tblStatusLabels.ResumeLayout(false);
             tblStatusLabels.PerformLayout();
             tblRow2.ResumeLayout(false);
-            cardProgress.ResumeLayout(false);
-            tblProgressCard.ResumeLayout(false);
-            pnlSequenceSection.ResumeLayout(false);
-            tblSteps.ResumeLayout(false);
-            pnlOverallStatsSection.ResumeLayout(false);
-            cardCurrentPoint.ResumeLayout(false);
-            tblCurrentPointDetails.ResumeLayout(false);
-            tblCurrentPointDetails.PerformLayout();
-            tblRow3.ResumeLayout(false);
             cardLiveDetails.ResumeLayout(false);
+            pnlLiveDetailsHeader.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)gridLiveDetails).EndInit();
-            cardWiringDiagram.ResumeLayout(false);
-            pnlWiringPlaceholder.ResumeLayout(false);
-            tblSummaryNotes.ResumeLayout(false);
             cardTestSummary.ResumeLayout(false);
             cardNotes.ResumeLayout(false);
             cardNotes.PerformLayout();
@@ -1426,40 +983,11 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Label lblStatusRunning;
         private System.Windows.Forms.Label lblTestStatusTitle;
         private System.Windows.Forms.TableLayoutPanel tblRow2;
-        private System.Windows.Forms.Panel cardProgress;
-        private System.Windows.Forms.TableLayoutPanel tblProgressCard;
-        private System.Windows.Forms.Panel pnlSequenceSection;
-        private System.Windows.Forms.TableLayoutPanel tblSteps;
-        private System.Windows.Forms.Label lblStep1;
-        private System.Windows.Forms.Label lblStep2;
-        private System.Windows.Forms.Label lblStep3;
-        private System.Windows.Forms.Label lblStep4;
-        private System.Windows.Forms.Label lblStep5;
-        private System.Windows.Forms.Label lblSequenceTitle;
-        private System.Windows.Forms.Panel pnlOverallStatsSection;
-        private System.Windows.Forms.Label lblProgressStats;
-        private System.Windows.Forms.ProgressBar prgOverall;
-        private System.Windows.Forms.Label lblPercent;
-        private System.Windows.Forms.Label lblOverallProgressTitle;
-        private System.Windows.Forms.Panel cardCurrentPoint;
-        private System.Windows.Forms.TableLayoutPanel tblCurrentPointDetails;
-        private System.Windows.Forms.Label lblExpectedKey;
-        private System.Windows.Forms.Label lblExpectedVal;
-        private System.Windows.Forms.Label lblMeasuredKey;
-        private System.Windows.Forms.Label lblMeasuredVal;
-        private System.Windows.Forms.Label lblResultKey;
-        private System.Windows.Forms.Label lblResultVal;
-        private System.Windows.Forms.Label lblPointsRoute;
-        private System.Windows.Forms.Label lblCurrentPointTitle;
-        private System.Windows.Forms.TableLayoutPanel tblRow3;
         private System.Windows.Forms.Panel cardLiveDetails;
+        private System.Windows.Forms.Panel pnlLiveDetailsHeader;
+        private System.Windows.Forms.Button btnViewWiringDiagram;
         private System.Windows.Forms.DataGridView gridLiveDetails;
         private System.Windows.Forms.Label lblLiveDetailsTitle;
-        private System.Windows.Forms.Panel cardWiringDiagram;
-        private System.Windows.Forms.Panel pnlWiringPlaceholder;
-        private System.Windows.Forms.Label lblWiringMockText;
-        private System.Windows.Forms.Label lblWiringDiagramTitle;
-        private System.Windows.Forms.TableLayoutPanel tblSummaryNotes;
         private System.Windows.Forms.Panel cardTestSummary;
         private System.Windows.Forms.Label lblSummaryText;
         private System.Windows.Forms.Label lblTestSummaryTitle;

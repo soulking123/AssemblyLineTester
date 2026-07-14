@@ -26,6 +26,7 @@ namespace AssemblyLineTester.Views.Pages
             SetupGridLiveDetails();
             SetupDiagramPointers();
             btnLoadProgram.Click += BtnLoadProgram_Click;
+            SetupEvents();
         }
 
         // Populates the filter dropdowns at the top of the page (Product Model, Type, Area, etc).
@@ -72,13 +73,9 @@ namespace AssemblyLineTester.Views.Pages
             gridLiveDetails.Columns["Status"]!.MinimumWidth = 140;
             gridLiveDetails.Columns["Status"]!.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
+            AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridLiveDetails);
             gridLiveDetails.RowTemplate.Height = 36;
             gridLiveDetails.ColumnHeadersHeight = 40;
-            gridLiveDetails.EnableHeadersVisualStyles = false;
-            gridLiveDetails.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
-            gridLiveDetails.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
-            gridLiveDetails.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            gridLiveDetails.DefaultCellStyle.Font = new Font("Segoe UI", 9.2F);
         }
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
@@ -145,6 +142,9 @@ namespace AssemblyLineTester.Views.Pages
                 //    testProgramDetails = getTestResult.Result;
                 //}
             }
+
+            Debug.WriteLine($"Active Program: {loadedProgramName}");
+            _ = testProgramDetails;
 
             // 3. Run Single Test (Hipot=false, Shorts=true)
             var testResult = _instrument.RunSingleTest(false, true);
@@ -246,10 +246,6 @@ namespace AssemblyLineTester.Views.Pages
             picMachineOverview.Paint += PicMachineOverview_Paint;
             picAreaDetail.Paint += PicAreaDetail_Paint;
             picHarnessConn.Paint += PicHarnessConn_Paint;
-            pnlWiringPlaceholder.Paint += PnlWiringPlaceholder_Paint;
-
-            // Hide the mock placeholder text label so we can paint directly on the panel
-            lblWiringMockText.Visible = false;
         }
 
         private void PicMachineOverview_Paint(object? sender, PaintEventArgs e)
@@ -268,11 +264,10 @@ namespace AssemblyLineTester.Views.Pages
                 g.DrawRectangle(pen, 20, 20, r.Width - 40, r.Height - 40);
             }
 
-            using (Font f = new Font("Segoe UI", 11F, FontStyle.Bold))
             using (Brush b = new SolidBrush(Color.FromArgb(71, 85, 105)))
             {
                 StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString("🖥️ Assembly Test Station #4\n[Online & Active]", f, b, r, sf);
+                g.DrawString("🖥️ Assembly Test Station #4\n[Online & Active]", AssemblyLineTester.Helpers.UIStyleHelper.Font11Bold, b, r, sf);
             }
         }
 
@@ -301,8 +296,6 @@ namespace AssemblyLineTester.Views.Pages
                 { "💻 Calibration Ver:", "ALT-ECU-v3.4.1" }
             };
 
-            using (Font fKey = new Font("Segoe UI", 9.5F, FontStyle.Bold))
-            using (Font fVal = new Font("Segoe UI", 9.5F, FontStyle.Regular))
             using (Brush bKey = new SolidBrush(Color.FromArgb(71, 85, 105)))
             {
                 float startY = 30;
@@ -313,11 +306,11 @@ namespace AssemblyLineTester.Views.Pages
                     string key = details[i, 0];
                     string val = details[i, 1];
 
-                    g.DrawString(key, fKey, bKey, 30, startY + (i * rowHeight));
+                    g.DrawString(key, AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, bKey, 30, startY + (i * rowHeight));
 
                     using (Brush bVal = new SolidBrush(i == 2 ? Color.FromArgb(13, 110, 253) : Color.FromArgb(15, 23, 42)))
                     {
-                        g.DrawString(val, fVal, bVal, 220, startY + (i * rowHeight));
+                        g.DrawString(val, AssemblyLineTester.Helpers.UIStyleHelper.Font95Regular, bVal, 220, startY + (i * rowHeight));
                     }
 
                     if (i < 4)
@@ -342,111 +335,38 @@ namespace AssemblyLineTester.Views.Pages
                 g.FillRectangle(brush, r);
             }
 
-            using (Font f = new Font("Segoe UI", 10F, FontStyle.Bold))
             using (Brush b = new SolidBrush(Color.FromArgb(51, 65, 85)))
             {
                 StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString("🔌 Connector Pinout: 24-Pin ECU Harness\nActive Pin: J1-23 ➔ J3-16", f, b, r, sf);
+                g.DrawString("🔌 Connector Pinout: 24-Pin ECU Harness\nActive Pin: J1-23 ➔ J3-16", AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold, b, r, sf);
             }
         }
 
-        private void PnlWiringPlaceholder_Paint(object? sender, PaintEventArgs e)
+        private void SetupEvents()
         {
-            Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            Rectangle r = pnlWiringPlaceholder.ClientRectangle;
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlFilterCard, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardMachineOverview, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardAreaDetail, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardHarnessConn, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardTestStatus, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardLiveDetails, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardTestSummary, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardNotes, 12, Color.FromArgb(34, 40, 49), 2.5f);
 
-            using (SolidBrush brush = new SolidBrush(Color.FromArgb(248, 250, 252)))
-            {
-                g.FillRectangle(brush, r);
-            }
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnLoadProgram, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnStartTest, 12, Color.FromArgb(56, 142, 60), Color.FromArgb(76, 175, 80), Color.FromArgb(46, 125, 50), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnStopTest, 12, Color.FromArgb(211, 47, 47), Color.FromArgb(239, 83, 80), Color.FromArgb(198, 40, 40), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewPinMap, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewWiringDiagram, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
 
-            using (Pen gridPen = new Pen(Color.FromArgb(241, 245, 249), 1))
-            {
-                for (int x = 20; x < r.Width; x += 20)
-                    g.DrawLine(gridPen, x, 0, x, r.Height);
-                for (int y = 20; y < r.Height; y += 20)
-                    g.DrawLine(gridPen, 0, y, r.Width, y);
-            }
-
-            using (Pen cablePen = new Pen(Color.FromArgb(13, 110, 253), 5))
-            {
-                using (Pen wireInnerPen = new Pen(Color.FromArgb(147, 197, 253), 1))
-                {
-                    float startX = r.Width * 0.25f;
-                    float startY = r.Height * 0.45f;
-                    float endX = r.Width * 0.75f;
-                    float endY = r.Height * 0.45f;
-
-                    PointF[] points = new PointF[]
-                    {
-                        new PointF(startX, startY),
-                        new PointF(startX + (endX - startX) * 0.3f, startY),
-                        new PointF(startX + (endX - startX) * 0.3f, startY + 60),
-                        new PointF(startX + (endX - startX) * 0.7f, startY + 60),
-                        new PointF(startX + (endX - startX) * 0.7f, endY),
-                        new PointF(endX, endY)
-                    };
-                    g.DrawLines(cablePen, points);
-
-                    for (int i = -3; i <= 3; i += 3)
-                    {
-                        if (i == 0) continue;
-                        PointF[] offsetPoints = new PointF[points.Length];
-                        for (int j = 0; j < points.Length; j++)
-                        {
-                            offsetPoints[j] = new PointF(points[j].X, points[j].Y + i);
-                        }
-                        g.DrawLines(wireInnerPen, offsetPoints);
-                    }
-                }
-            }
-
-            RectangleF n1 = new RectangleF(r.Width * 0.25f - 40, r.Height * 0.45f - 40, 80, 80);
-            using (SolidBrush connBrush = new SolidBrush(Color.FromArgb(30, 41, 59)))
-            {
-                g.FillEllipse(connBrush, n1);
-            }
-            using (Pen borderPen = new Pen(Color.FromArgb(71, 85, 105), 3))
-            {
-                g.DrawEllipse(borderPen, n1);
-            }
-
-            RectangleF n2 = new RectangleF(r.Width * 0.75f - 40, r.Height * 0.45f - 40, 80, 80);
-            using (SolidBrush connBrush = new SolidBrush(Color.FromArgb(30, 41, 59)))
-            {
-                g.FillEllipse(connBrush, n2);
-            }
-            using (Pen borderPen = new Pen(Color.FromArgb(71, 85, 105), 3))
-            {
-                g.DrawEllipse(borderPen, n2);
-            }
-
-            using (Font f = new Font("Segoe UI", 11F, FontStyle.Bold))
-            using (Brush textBrush = new SolidBrush(Color.White))
-            {
-                StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString("J1", f, textBrush, n1, sf);
-                g.DrawString("J3", f, textBrush, n2, sf);
-            }
-
-            using (Font detailFont = new Font("Segoe UI", 8.5F, FontStyle.Regular))
-            using (Brush darkGrayBrush = new SolidBrush(Color.FromArgb(100, 116, 139)))
-            {
-                StringFormat sfTop = new StringFormat { Alignment = StringAlignment.Center };
-                g.DrawString("ECU Input Plug\n(24-Pin Male)", detailFont, darkGrayBrush, r.Width * 0.25f, r.Height * 0.45f + 45, sfTop);
-                g.DrawString("Main Harness\n(24-Pin Female)", detailFont, darkGrayBrush, r.Width * 0.75f, r.Height * 0.45f + 45, sfTop);
-            }
-
-            using (Font legendFont = new Font("Segoe UI", 9F, FontStyle.Bold))
-            using (Brush greenBrush = new SolidBrush(Color.FromArgb(40, 167, 69)))
-            using (Brush blueBrush = new SolidBrush(Color.FromArgb(13, 110, 253)))
-            {
-                g.DrawString("● Connected: J1 ➔ J3 Active Route", legendFont, greenBrush, 30, r.Height - 65);
-                g.DrawString("● Active Loop: J1-23 to J3-16", legendFont, blueBrush, 30, r.Height - 40);
-            }
+            btnViewWiringDiagram.Click += BtnViewWiringDiagram_Click;
+            btnViewPinMap.Click += BtnViewWiringDiagram_Click;
         }
 
-        
+        private void BtnViewWiringDiagram_Click(object? sender, EventArgs e)
+        {
+            using var modal = new AssemblyLineTester.Views.Modals.WiringPreviewModalForm();
+            modal.ShowDialog(this);
+        }
     }
 }

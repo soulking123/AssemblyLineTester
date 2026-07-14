@@ -24,7 +24,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader = new Panel();
             lblCustomTitle = new Label();
             iconLogo = new IconPictureBox();
-            btnMinimize = new IconButton();
             btnMaximize = new IconButton();
             btnClose = new IconButton();
             pnlBodyContainer = new Panel();
@@ -86,7 +85,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
             pnlCustomHeader.Controls.Add(lblCustomTitle);
             pnlCustomHeader.Controls.Add(iconLogo);
-            pnlCustomHeader.Controls.Add(btnMinimize);
             pnlCustomHeader.Controls.Add(btnMaximize);
             pnlCustomHeader.Controls.Add(btnClose);
             pnlCustomHeader.Dock = DockStyle.Top;
@@ -124,23 +122,6 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.SizeMode = PictureBoxSizeMode.CenterImage;
             iconLogo.TabIndex = 0;
             iconLogo.TabStop = false;
-            // 
-            // btnMinimize
-            // 
-            btnMinimize.BackColor = Color.Transparent;
-            btnMinimize.Dock = DockStyle.Right;
-            btnMinimize.FlatAppearance.BorderSize = 0;
-            btnMinimize.FlatStyle = FlatStyle.Flat;
-            btnMinimize.IconChar = IconChar.WindowMinimize;
-            btnMinimize.IconColor = Color.FromArgb(203, 213, 225);
-            btnMinimize.IconFont = IconFont.Auto;
-            btnMinimize.IconSize = 20;
-            btnMinimize.Location = new Point(2225, 0);
-            btnMinimize.Margin = new Padding(0);
-            btnMinimize.Name = "btnMinimize";
-            btnMinimize.Size = new Size(56, 56);
-            btnMinimize.TabIndex = 2;
-            btnMinimize.UseVisualStyleBackColor = false;
             // 
             // btnMaximize
             // 
@@ -703,7 +684,6 @@ namespace AssemblyLineTester.Views.Modals
         private FontAwesome.Sharp.IconPictureBox iconLogo;
         private FontAwesome.Sharp.IconButton btnClose;
         private FontAwesome.Sharp.IconButton btnMaximize;
-        private FontAwesome.Sharp.IconButton btnMinimize;
         private System.Windows.Forms.Panel pnlBodyContainer;
         private Label lblCustomTitle;
     }
