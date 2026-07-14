@@ -37,13 +37,13 @@ namespace AssemblyLineTester.Views.Pages
             pnlLogDetail.Paint += PanelFilters_Paint;
 
             gridData.CellPainting += gridData_CellPainting;
-//<<<<<<< HEAD
+
             InitializeGridColumns();
 
             btnSearch.Click += (s, ev) => { _currentPage = 1; LoadLogData(); };
             btnReset.Click += (s, ev) => { ResetFilters(); _currentPage = 1; LoadLogData(); };
             btnRefresh.Click += (s, ev) => LoadLogData();
-//=======
+
 //            btnRefresh.Click += (s, ev) => { LoadDummyLogData(); };
 
 //            if (cmbLogLevel.Items.Count > 0) cmbLogLevel.SelectedIndex = 0;
@@ -62,7 +62,7 @@ namespace AssemblyLineTester.Views.Pages
 //                _currentPage = 1;
 //                PopulateLogGrid();
 //            };
-//>>>>>>> dashboard
+
         }
 
         protected override void OnLoad(EventArgs e)
@@ -206,8 +206,6 @@ namespace AssemblyLineTester.Views.Pages
             SetColumnWidth(gridData, "Action", 120);
             SetColumnWidth(gridData, "Description", 260);
             SetColumnWidth(gridData, "IP", 130);
-//<<<<<<< HEAD
-//=======
 
 //            var filteredLogs = _allLogs.Where(l =>
 //            {
@@ -232,7 +230,7 @@ namespace AssemblyLineTester.Views.Pages
 //            }
 
 //            UpdatePaginationUI(totalLogs, totalPages);
-//>>>>>>> dashboard
+
         }
 
         // BUILDS THE "Showing X to Y of Z" TEXT AND THE DYNAMIC PAGE-NUMBER BUTTONS.

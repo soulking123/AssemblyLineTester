@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260713013723_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20260714032606_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,7 +46,7 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            LastUsageDate = new DateTime(2026, 7, 13, 0, 0, 0, 0, DateTimeKind.Local),
+                            LastUsageDate = new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Local),
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,
                             RemainingMaintHours = 2160.0
@@ -156,6 +156,12 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("ConfigId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ConfigurationConfigId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("ExpectedValue")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("FromAddress")
                         .HasColumnType("INTEGER");
 
@@ -191,15 +197,17 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<double?>("Tolerance")
+                        .HasColumnType("REAL");
+
                     b.Property<double?>("UpperLimit")
                         .HasColumnType("REAL");
 
                     b.HasKey("NetConfigId");
 
-                    b.HasIndex("TestTypeId");
+                    b.HasIndex("ConfigurationConfigId");
 
-                    b.HasIndex("ConfigId", "SequenceNo")
-                        .IsUnique();
+                    b.HasIndex("TestTypeId");
 
                     b.ToTable("TestConfigNets");
                 });
@@ -239,8 +247,6 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("ConfigId");
-
-                    b.HasIndex("ConfigCode");
 
                     b.ToTable("TestConfigurations");
                 });
@@ -446,32 +452,92 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            DisplayName = "Continuity Test",
-                            TestTypeName = "Continuity Test"
+                            DisplayName = "4RESISTOR",
+                            TestTypeName = "4RESISTOR"
                         },
                         new
                         {
                             Id = 2,
-                            DisplayName = "Short Circuit Test",
-                            TestTypeName = "Short Circuit Test"
+                            DisplayName = "4WIRE",
+                            TestTypeName = "4WIRE"
                         },
                         new
                         {
                             Id = 3,
-                            DisplayName = "Insulation Test",
-                            TestTypeName = "Insulation Test"
+                            DisplayName = "CAPACITOR",
+                            TestTypeName = "CAPACITOR"
                         },
                         new
                         {
                             Id = 4,
-                            DisplayName = "Functional Test",
-                            TestTypeName = "Functional Test"
+                            DisplayName = "CLOSE",
+                            TestTypeName = "CLOSE"
                         },
                         new
                         {
                             Id = 5,
-                            DisplayName = "Final Verification",
-                            TestTypeName = "Final Verification"
+                            DisplayName = "COMMENT",
+                            TestTypeName = "COMMENT"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DisplayName = "DIODE",
+                            TestTypeName = "DIODE"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DisplayName = "LINK",
+                            TestTypeName = "LINK"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DisplayName = "LUA COMPONENT",
+                            TestTypeName = "LUA COMPONENT"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            DisplayName = "OPEN",
+                            TestTypeName = "OPEN"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            DisplayName = "PROBE",
+                            TestTypeName = "PROBE"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            DisplayName = "RESISTOR",
+                            TestTypeName = "RESISTOR"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            DisplayName = "SIGNATURE DIODE",
+                            TestTypeName = "SIGNATURE DIODE"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            DisplayName = "SIGNATURE WIRE",
+                            TestTypeName = "SIGNATURE WIRE"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            DisplayName = "TWISTED PAIR",
+                            TestTypeName = "TWISTED PAIR"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            DisplayName = "WIRE",
+                            TestTypeName = "WIRE"
                         });
                 });
 
@@ -812,14 +878,14 @@ namespace AssemblyLineTester.Migrations
                 {
                     b.HasOne("AssemblyLineTester.Models.TestConfiguration", "Configuration")
                         .WithMany("Nets")
-                        .HasForeignKey("ConfigId")
+                        .HasForeignKey("ConfigurationConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AssemblyLineTester.Models.TestType", "TestType")
                         .WithMany()
                         .HasForeignKey("TestTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Configuration");

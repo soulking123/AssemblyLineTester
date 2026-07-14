@@ -10,7 +10,6 @@ namespace AssemblyLineTester.Views.Pages
 {
     public partial class Reports : UserControl
     {
-//<<<<<<< HEAD
         private readonly TestReportService _reportService = new();
         private int _currentPage = 1;
         private readonly int _pageSize = 10;
@@ -20,9 +19,8 @@ namespace AssemblyLineTester.Views.Pages
         // The filter actually being displayed (list/summary/trend). Only changes when
         // the user clicks "Generate Report" (or "Reset"), NOT on every control change.
         private ReportFilter _appliedFilter = new();
-//=======
+
         private Chart chartTrend = null!;
-//>>>>>>> dashboard
 
         public Reports()
         {
@@ -48,8 +46,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void InitializeCustomStyles()
         {
-            //<<<<<<< HEAD
-            //=======
             // Create Chart programmatically to avoid WinForms Designer serialization issues
             chartTrend = new Chart
             {
@@ -59,13 +55,12 @@ namespace AssemblyLineTester.Views.Pages
             };
             cardTrend.Controls.Add(chartTrend);
             cardTrend.Controls.SetChildIndex(chartTrend, 0);
-//>>>>>>> dashboard
+
             if (cmbReportType.Items.Count > 0) cmbReportType.SelectedIndex = 0;
             if (cmbModel.Items.Count > 0) cmbModel.SelectedIndex = 0;
             if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
-//<<<<<<< HEAD
 
             // Plain date picker, no checkbox - dd/MM/yy format, user picks whenever they want.
             dtpStart.Format = DateTimePickerFormat.Custom;
@@ -113,12 +108,10 @@ namespace AssemblyLineTester.Views.Pages
             if (gridReports.Columns["colAction"] is { } colAction)
                 colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
-//=======
-//            if (dtpStart != null) dtpStart.Value = DateTime.Today.AddDays(-7);
-//            if (dtpEnd != null) dtpEnd.Value = DateTime.Today;
-//>>>>>>> dashboard
             gridReports.CellFormatting += GridReports_CellFormatting;
         }
+
+
 
         private void WireEvents()
         {
@@ -185,19 +178,20 @@ namespace AssemblyLineTester.Views.Pages
                 PageSize = _pageSize
             };
 
-            if (!string.Equals(cmbModel.Text, "All", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(cmbModel.Text, "All Models", StringComparison.OrdinalIgnoreCase))
                 filter.ProductModel = cmbModel.Text;
 
-            if (!string.Equals(cmbType.Text, "All", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(cmbType.Text, "All Types", StringComparison.OrdinalIgnoreCase))
                 filter.ProductType = cmbType.Text;
 
-            if (!string.Equals(cmbArea.Text, "All", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(cmbArea.Text, "All Areas", StringComparison.OrdinalIgnoreCase))
                 filter.Area = cmbArea.Text;
 
-            if (!string.Equals(cmbOperator.Text, "All", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(cmbOperator.Text)
+                && !string.Equals(cmbOperator.Text, "All Operators", StringComparison.OrdinalIgnoreCase))
                 filter.Operator = cmbOperator.Text;
 
-            if (!string.Equals(cmbResult.Text, "All", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(cmbResult.Text, "All Results", StringComparison.OrdinalIgnoreCase))
                 filter.Result = cmbResult.Text.ToUpperInvariant();
 
             if (!string.IsNullOrWhiteSpace(txtPartNumber.Text))

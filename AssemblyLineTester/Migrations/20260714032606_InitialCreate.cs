@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AssemblyLineTester.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -149,6 +149,7 @@ namespace AssemblyLineTester.Migrations
                     NetConfigId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ConfigId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ConfigurationConfigId = table.Column<int>(type: "INTEGER", nullable: false),
                     NetId = table.Column<string>(type: "TEXT", nullable: false),
                     SequenceNo = table.Column<int>(type: "INTEGER", nullable: false),
                     HarnessGroup = table.Column<string>(type: "TEXT", nullable: false),
@@ -159,14 +160,16 @@ namespace AssemblyLineTester.Migrations
                     TestTypeId = table.Column<int>(type: "INTEGER", nullable: false),
                     LowerLimit = table.Column<double>(type: "REAL", nullable: true),
                     UpperLimit = table.Column<double>(type: "REAL", nullable: true),
-                    MeasurementUnit = table.Column<string>(type: "TEXT", nullable: false)
+                    MeasurementUnit = table.Column<string>(type: "TEXT", nullable: false),
+                    ExpectedValue = table.Column<double>(type: "REAL", nullable: true),
+                    Tolerance = table.Column<double>(type: "REAL", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TestConfigNets", x => x.NetConfigId);
                     table.ForeignKey(
-                        name: "FK_TestConfigNets_TestConfigurations_ConfigId",
-                        column: x => x.ConfigId,
+                        name: "FK_TestConfigNets_TestConfigurations_ConfigurationConfigId",
+                        column: x => x.ConfigurationConfigId,
                         principalTable: "TestConfigurations",
                         principalColumn: "ConfigId",
                         onDelete: ReferentialAction.Cascade);
@@ -175,7 +178,7 @@ namespace AssemblyLineTester.Migrations
                         column: x => x.TestTypeId,
                         principalTable: "TestTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -281,7 +284,7 @@ namespace AssemblyLineTester.Migrations
             migrationBuilder.InsertData(
                 table: "MaintenanceStates",
                 columns: new[] { "Id", "LastUsageDate", "OperatingSecondsToday", "RemainingMaintDays", "RemainingMaintHours" },
-                values: new object[] { 1, new DateTime(2026, 7, 13, 0, 0, 0, 0, DateTimeKind.Local), 0.0, 180, 2160.0 });
+                values: new object[] { 1, new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Local), 0.0, 180, 2160.0 });
 
             migrationBuilder.InsertData(
                 table: "Roles",
@@ -301,11 +304,21 @@ namespace AssemblyLineTester.Migrations
                 columns: new[] { "Id", "DisplayName", "TestTypeName" },
                 values: new object[,]
                 {
-                    { 1, "Continuity Test", "Continuity Test" },
-                    { 2, "Short Circuit Test", "Short Circuit Test" },
-                    { 3, "Insulation Test", "Insulation Test" },
-                    { 4, "Functional Test", "Functional Test" },
-                    { 5, "Final Verification", "Final Verification" }
+                    { 1, "4RESISTOR", "4RESISTOR" },
+                    { 2, "4WIRE", "4WIRE" },
+                    { 3, "CAPACITOR", "CAPACITOR" },
+                    { 4, "CLOSE", "CLOSE" },
+                    { 5, "COMMENT", "COMMENT" },
+                    { 6, "DIODE", "DIODE" },
+                    { 7, "LINK", "LINK" },
+                    { 8, "LUA COMPONENT", "LUA COMPONENT" },
+                    { 9, "OPEN", "OPEN" },
+                    { 10, "PROBE", "PROBE" },
+                    { 11, "RESISTOR", "RESISTOR" },
+                    { 12, "SIGNATURE DIODE", "SIGNATURE DIODE" },
+                    { 13, "SIGNATURE WIRE", "SIGNATURE WIRE" },
+                    { 14, "TWISTED PAIR", "TWISTED PAIR" },
+                    { 15, "WIRE", "WIRE" }
                 });
 
             migrationBuilder.InsertData(
@@ -349,20 +362,14 @@ namespace AssemblyLineTester.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestConfigNets_ConfigId_SequenceNo",
+                name: "IX_TestConfigNets_ConfigurationConfigId",
                 table: "TestConfigNets",
-                columns: new[] { "ConfigId", "SequenceNo" },
-                unique: true);
+                column: "ConfigurationConfigId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TestConfigNets_TestTypeId",
                 table: "TestConfigNets",
                 column: "TestTypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TestConfigurations_ConfigCode",
-                table: "TestConfigurations",
-                column: "ConfigCode");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TestDetails_ReportId",

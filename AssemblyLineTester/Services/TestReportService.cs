@@ -9,9 +9,13 @@ namespace AssemblyLineTester.Services
 {
     public class TestReportService
     {
-        public static readonly string[] FixedTestTypeOrder =
+        // The full vendor-defined test type list. No more "fixed 5-step" assumption -
+        // a report can use any subset of these, in any quantity, per net.
+        private static readonly string[] AllTestTypeNames =
         {
-            "Continuity Test", "Short Circuit Test", "Insulation Test", "Functional Test", "Final Verification"
+            "4RESISTOR", "4WIRE", "CAPACITOR", "CLOSE", "COMMENT", "DIODE", "LINK",
+            "LUA COMPONENT", "OPEN", "PROBE", "RESISTOR", "SIGNATURE DIODE",
+            "SIGNATURE WIRE", "TWISTED PAIR", "WIRE"
         };
 
         public ReportSummary GetSummary(ReportFilter filter)
@@ -85,6 +89,9 @@ namespace AssemblyLineTester.Services
             };
         }
 
+        // TypeSummaries is now DYNAMIC (top 5 test types actually present in this report,
+        // ordered by count) instead of a fixed 5-item order - there's no canonical
+        // "5 steps" anymore since a report can use any mix of the 15 vendor test types.
         public ReportDetailDto? GetReportDetail(int reportId)
         {
             using var db = new AppDbContext();
@@ -93,24 +100,19 @@ namespace AssemblyLineTester.Services
 
             var details = db.TestDetails.Where(d => d.ReportId == reportId).ToList();
 
-            var groupedByType = details.GroupBy(d => d.TestTypeName).ToDictionary(g => g.Key, g => g.ToList());
-
-            var typeSummaries = FixedTestTypeOrder.Select(typeName =>
-            {
-                var list = groupedByType.TryGetValue(typeName, out var l) ? l : new List<TestDetail>();
-                int total = list.Count;
-                int pass = list.Count(d => d.Result);
-                int fail = total - pass;
-
-                return new TestTypeSummaryDto
+            var typeSummaries = details
+                .GroupBy(d => d.TestTypeName)
+                .Select(g => new TestTypeSummaryDto
                 {
-                    TestType = typeName,
-                    Total = total,
-                    Pass = pass,
-                    Fail = fail,
-                    PassRatePercent = total == 0 ? 100 : Math.Round(pass * 100.0 / total, 2)
-                };
-            }).ToList();
+                    TestType = g.Key,
+                    Total = g.Count(),
+                    Pass = g.Count(d => d.Result),
+                    Fail = g.Count(d => !d.Result),
+                    PassRatePercent = g.Count() == 0 ? 100 : Math.Round(g.Count(d => d.Result) * 100.0 / g.Count(), 2)
+                })
+                .OrderByDescending(s => s.Total)
+                .Take(5) // matches the 5 static rows in Reports.cs's preview panel (lblR1..lblR5)
+                .ToList();
 
             var detailDtos = details.Select(d => new TestDetailDto
             {
@@ -147,11 +149,9 @@ namespace AssemblyLineTester.Services
             };
         }
 
-        // TEMPORARY: SEEDS SAMPLE TEST REPORTS + DETAILS + STEPS. Shared by Reports page and Test History page.
-        // TEMPORARY: Seeds sample test reports + details + steps, spread evenly across
-        // the last 365 days (including today), so every Dashboard time-range option
-        // (Today/7d/30d/3mo/6mo/1yr) has visible data. Only runs once - skipped entirely
-        // once TestReports has any row. Replace with real data ingestion later.
+        // TEMPORARY: seeds sample data spread across the last 365 days.
+        // Each report now picks a RANDOM SUBSET of the 15 vendor test types per net,
+        // rather than following a fixed 5-step order.
         public void SeedSampleDataIfEmpty()
         {
             using (var db = new AppDbContext())
@@ -171,7 +171,6 @@ namespace AssemblyLineTester.Services
             var allDetails = new List<TestDetail>();
             var allSteps = new List<TestStep>();
 
-            // 365 days ending today, 1-5 reports per weekday, 0-1 on weekends (more realistic).
             for (int dayOffset = 364; dayOffset >= 0; dayOffset--)
             {
                 var day = DateTime.Today.AddDays(-dayOffset);
@@ -180,7 +179,7 @@ namespace AssemblyLineTester.Services
 
                 for (int n = 0; n < reportsToday; n++)
                 {
-                    var testStart = day.AddHours(7 + rnd.NextDouble() * 10); // spread within 07:00-17:00
+                    var testStart = day.AddHours(7 + rnd.NextDouble() * 10);
 
                     string model = productModels[rnd.Next(productModels.Length)];
                     string type = productTypes[rnd.Next(productTypes.Length)];
@@ -193,6 +192,7 @@ namespace AssemblyLineTester.Services
                     var status = statusRoll < 0.92 ? TestStatus.Completed
                         : statusRoll < 0.97 ? TestStatus.InProgress
                         : TestStatus.Stopped;
+
                     bool intendedPass = rnd.NextDouble() < 0.60;
 
                     var report = new TestReport
@@ -213,30 +213,25 @@ namespace AssemblyLineTester.Services
                         CreatedAt = testStart
                     };
 
-                    int stepsToRun = status == TestStatus.Completed
-                        ? FixedTestTypeOrder.Length
-                        : rnd.Next(1, FixedTestTypeOrder.Length);
+                    // Pick a random subset of 4-8 test types used by this report (out of 15).
+                    var usedTypes = AllTestTypeNames.OrderBy(_ => rnd.Next()).Take(rnd.Next(4, 9)).ToList();
 
                     int detailCount = 0;
                     int passCount = 0;
                     var cursor = testStart;
 
-                    int[] countsPerType = { rnd.Next(20, 35), rnd.Next(0, 5), rnd.Next(5, 12), rnd.Next(0, 8), rnd.Next(0, 6) };
-
-                    for (int t = 0; t < stepsToRun; t++)
+                    foreach (var testType in usedTypes)
                     {
-                        string testType = FixedTestTypeOrder[t];
-                        int count = countsPerType[t];
-                        int stepDurationSeconds = rnd.Next(20, 150);
+                        int netsForThisType = rnd.Next(3, 15);
+                        int stepDurationSeconds = rnd.Next(10, 90);
                         bool stepAllPassed = true;
 
-                        for (int i = 1; i <= count; i++)
+                        for (int i = 1; i <= netsForThisType; i++)
                         {
                             detailCount++;
                             bool forceFail = !intendedPass && rnd.NextDouble() < 0.15;
-                            bool isOpen = forceFail && rnd.NextDouble() < 0.3;
 
-                            var (measured, lower, upper, unit, result, errorDetail) = GenerateMeasurement(testType, forceFail, isOpen, rnd);
+                            var (measured, lower, upper, unit, result, errorDetail) = GenerateMeasurement(testType, forceFail, rnd);
                             if (result) passCount++;
                             else stepAllPassed = false;
 
@@ -261,7 +256,7 @@ namespace AssemblyLineTester.Services
                         allSteps.Add(new TestStep
                         {
                             Report = report,
-                            StepNo = t + 1,
+                            StepNo = allSteps.Count(s => s.Report == report) + 1,
                             TestTypeName = testType,
                             Result = stepAllPassed,
                             DurationSeconds = stepDurationSeconds
@@ -284,7 +279,7 @@ namespace AssemblyLineTester.Services
                         report.OverallResult = null;
                         report.EndDateTime = cursor;
                     }
-                    else // InProgress
+                    else
                     {
                         report.OverallResult = null;
                         report.EndDateTime = null;
@@ -303,39 +298,67 @@ namespace AssemblyLineTester.Services
             }
         }
 
+        // ASSUMPTION: unit/measurement behavior per vendor test type - confirm and adjust as needed.
+        // OPEN/CLOSE/LINK/PROBE/COMMENT/LUA COMPONENT are treated as non-measurement (logical/marker)
+        // test types with no numeric value, always evaluated as pass unless explicitly forced to fail.
         private static (double? measured, double? lower, double? upper, string unit, bool result, string? errorDetail)
-            GenerateMeasurement(string testType, bool forceFail, bool isOpen, Random rnd)
+            GenerateMeasurement(string testType, bool forceFail, Random rnd)
         {
             switch (testType)
             {
-                case "Continuity Test":
-                case "Short Circuit Test":
+                case "RESISTOR":
+                case "4RESISTOR":
+                    {
+                        double upper = 10.0;
+                        double val = forceFail ? Math.Round(upper + rnd.NextDouble() * 20, 2) : Math.Round(rnd.NextDouble() * 8, 2);
+                        bool pass = val <= upper;
+                        return (val, null, upper, "Ω", pass, pass ? null : "Resistance out of tolerance");
+                    }
+
+                case "WIRE":
+                case "4WIRE":
+                case "TWISTED PAIR":
+                case "SIGNATURE WIRE":
                     {
                         double upper = 1.0;
-                        if (isOpen) return (null, null, upper, "Ohm", false, "Open circuit detected - no continuity");
+                        if (forceFail && rnd.NextDouble() < 0.3)
+                            return (null, null, upper, "Ω", false, "Open circuit detected - no continuity");
+
                         double val = forceFail ? Math.Round(upper + rnd.NextDouble() * 5, 2) : Math.Round(rnd.NextDouble() * 0.9, 2);
                         bool pass = val <= upper;
-                        return (val, null, upper, "Ohm",
-                            pass, pass ? null : "Resistance exceeds limit - possible short or degraded connection");
+                        return (val, null, upper, "Ω", pass, pass ? null : "Resistance exceeds limit");
                     }
 
-                case "Insulation Test":
+                case "CAPACITOR":
                     {
-                        double lower = 500.0;
+                        double lower = 90.0, upper = 110.0; // e.g. nF, ±10% band
                         double val = forceFail
-                            ? Math.Round(rnd.NextDouble() * lower * 0.8, 1)
-                            : Math.Round(lower + rnd.NextDouble() * 1500, 1);
-                        bool pass = val >= lower;
-                        return (val, lower, null, "MOhm",
-                            pass, pass ? null : "Isolation resistance below minimum requirement");
+                            ? Math.Round(rnd.NextDouble() < 0.5 ? lower * 0.5 : upper * 1.5, 1)
+                            : Math.Round(lower + rnd.NextDouble() * (upper - lower), 1);
+                        bool pass = val >= lower && val <= upper;
+                        return (val, lower, upper, "nF", pass, pass ? null : "Capacitance out of tolerance band");
                     }
 
-                case "Functional Test":
-                case "Final Verification":
+                case "DIODE":
+                case "SIGNATURE DIODE":
+                    {
+                        double lower = 0.4, upper = 0.9; // forward voltage drop, V
+                        double val = forceFail
+                            ? Math.Round(rnd.NextDouble() < 0.5 ? 0 : 2.0, 2)
+                            : Math.Round(lower + rnd.NextDouble() * (upper - lower), 2);
+                        bool pass = val >= lower && val <= upper;
+                        return (val, lower, upper, "V", pass, pass ? null : "Forward voltage out of range - possible reversed/shorted diode");
+                    }
+
+                case "OPEN":
+                case "CLOSE":
+                case "LINK":
+                case "PROBE":
+                case "COMMENT":
+                case "LUA COMPONENT":
                     {
                         bool pass = !forceFail;
-                        double val = pass ? 1 : 0;
-                        return (val, 1, 1, "-", pass, pass ? null : "Functional check failed - output not as expected");
+                        return (null, null, null, "-", pass, pass ? null : $"{testType} check failed");
                     }
 
                 default:

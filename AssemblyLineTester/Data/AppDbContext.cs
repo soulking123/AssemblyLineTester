@@ -19,7 +19,6 @@ namespace AssemblyLineTester.Data
         public DbSet<TestConfiguration> TestConfigurations { get; set; } = null!;
         public DbSet<TestConfigNet> TestConfigNets { get; set; } = null!;
 
-
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -351,11 +350,21 @@ namespace AssemblyLineTester.Data
 
             // Seed initial test types
             modelBuilder.Entity<TestType>().HasData(
-                new TestType { Id = 1, TestTypeName = "Continuity Test", DisplayName = "Continuity Test" },
-                new TestType { Id = 2, TestTypeName = "Short Circuit Test", DisplayName = "Short Circuit Test" },
-                new TestType { Id = 3, TestTypeName = "Insulation Test", DisplayName = "Insulation Test" },
-                new TestType { Id = 4, TestTypeName = "Functional Test", DisplayName = "Functional Test" },
-                new TestType { Id = 5, TestTypeName = "Final Verification", DisplayName = "Final Verification" }
+                new TestType { Id = 1, TestTypeName = "4RESISTOR", DisplayName = "4RESISTOR" },
+                new TestType { Id = 2, TestTypeName = "4WIRE", DisplayName = "4WIRE" },
+                new TestType { Id = 3, TestTypeName = "CAPACITOR", DisplayName = "CAPACITOR" },
+                new TestType { Id = 4, TestTypeName = "CLOSE", DisplayName = "CLOSE" },
+                new TestType { Id = 5, TestTypeName = "COMMENT", DisplayName = "COMMENT" },
+                new TestType { Id = 6, TestTypeName = "DIODE", DisplayName = "DIODE" },
+                new TestType { Id = 7, TestTypeName = "LINK", DisplayName = "LINK" },
+                new TestType { Id = 8, TestTypeName = "LUA COMPONENT", DisplayName = "LUA COMPONENT" },
+                new TestType { Id = 9, TestTypeName = "OPEN", DisplayName = "OPEN" },
+                new TestType { Id = 10, TestTypeName = "PROBE", DisplayName = "PROBE" },
+                new TestType { Id = 11, TestTypeName = "RESISTOR", DisplayName = "RESISTOR" },
+                new TestType { Id = 12, TestTypeName = "SIGNATURE DIODE", DisplayName = "SIGNATURE DIODE" },
+                new TestType { Id = 13, TestTypeName = "SIGNATURE WIRE", DisplayName = "SIGNATURE WIRE" },
+                new TestType { Id = 14, TestTypeName = "TWISTED PAIR", DisplayName = "TWISTED PAIR" },
+                new TestType { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE" }
             );
 
             // Configure Report → TestStep relationship (One Report has many Test Steps)
@@ -392,29 +401,6 @@ namespace AssemblyLineTester.Data
                     RemainingMaintHours = 2160.0
                 }
             );
-
-            // Configure relationship between TestConfiguration and TestConfigNet
-            modelBuilder.Entity<TestConfigNet>()
-                .HasOne(n => n.Configuration)
-                .WithMany(c => c.Nets)
-                .HasForeignKey(n => n.ConfigId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Configure relationship between TestConfigNet and TestType
-            modelBuilder.Entity<TestConfigNet>()
-                .HasOne(n => n.TestType)
-                .WithMany()
-                .HasForeignKey(n => n.TestTypeId)
-                .OnDelete(DeleteBehavior.Restrict); 
-
-            // Create an index for faster search by ConfigCode
-            modelBuilder.Entity<TestConfiguration>()
-                .HasIndex(c => c.ConfigCode);
-
-            // Make SequenceNo unique within the same configuration
-            modelBuilder.Entity<TestConfigNet>()
-                .HasIndex(n => new { n.ConfigId, n.SequenceNo })
-                .IsUnique();
         }
     }
 }

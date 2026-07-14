@@ -26,7 +26,13 @@ namespace AssemblyLineTester.Models
         public TestType TestType { get; set; } = null!;
 
         public double? LowerLimit { get; set; }
+        
         public double? UpperLimit { get; set; }
-        public string MeasurementUnit { get; set; } = string.Empty; 
+
+        public string MeasurementUnit { get; set; } = string.Empty;
+        
+        public double? ExpectedValue { get; set; }
+        
+        public double? Tolerance { get; set; }
     }
 }
