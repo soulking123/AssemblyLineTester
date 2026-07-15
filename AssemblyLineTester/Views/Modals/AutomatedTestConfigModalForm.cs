@@ -101,16 +101,12 @@ namespace AssemblyLineTester.Views.Modals
             // Window control buttons
             btnClose.Click += (s, e) => Close();
             btnMaximize.Click += (s, e) => ToggleMaximize();
-            btnMinimize.Click += (s, e) => WindowState = FormWindowState.Minimized;
 
             btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(239, 68, 68); btnClose.IconColor = Color.White; };
             btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
 
             btnMaximize.MouseEnter += (s, e) => { btnMaximize.BackColor = Color.FromArgb(30, 41, 59); btnMaximize.IconColor = Color.White; };
             btnMaximize.MouseLeave += (s, e) => { btnMaximize.BackColor = Color.Transparent; btnMaximize.IconColor = Color.FromArgb(203, 213, 225); };
-
-            btnMinimize.MouseEnter += (s, e) => { btnMinimize.BackColor = Color.FromArgb(30, 41, 59); btnMinimize.IconColor = Color.White; };
-            btnMinimize.MouseLeave += (s, e) => { btnMinimize.BackColor = Color.Transparent; btnMinimize.IconColor = Color.FromArgb(203, 213, 225); };
 
             // Window dragging via title bar
             pnlCustomHeader.MouseDown += TitleBar_MouseDown;
@@ -183,7 +179,7 @@ namespace AssemblyLineTester.Views.Modals
             {
                 Point pt = PointToClient(Cursor.Position);
                 int border = 6;
-                bool overButtons = pt.X >= btnMinimize.Left && pt.Y <= pnlCustomHeader.Height;
+                bool overButtons = pt.X >= btnMaximize.Left && pt.Y <= pnlCustomHeader.Height;
 
                 if (overButtons)
                 {

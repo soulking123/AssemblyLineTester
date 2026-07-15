@@ -189,7 +189,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardTester
             // 
             cardTester.BackColor = Color.White;
-            cardTester.BorderStyle = BorderStyle.FixedSingle;
+            cardTester.BorderStyle = BorderStyle.None;
             cardTester.Controls.Add(lblTesterSub);
             cardTester.Controls.Add(lblTesterStatus);
             cardTester.Controls.Add(lblTesterTitle);
@@ -240,7 +240,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardMachine
             // 
             cardMachine.BackColor = Color.White;
-            cardMachine.BorderStyle = BorderStyle.FixedSingle;
+            cardMachine.BorderStyle = BorderStyle.None;
             cardMachine.Controls.Add(lblMachineSub);
             cardMachine.Controls.Add(lblMachineStatus);
             cardMachine.Controls.Add(lblMachineTitle);
@@ -291,7 +291,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardDatabase
             // 
             cardDatabase.BackColor = Color.White;
-            cardDatabase.BorderStyle = BorderStyle.FixedSingle;
+            cardDatabase.BorderStyle = BorderStyle.None;
             cardDatabase.Controls.Add(lblDatabaseSub);
             cardDatabase.Controls.Add(lblDatabaseStatus);
             cardDatabase.Controls.Add(lblDatabaseTitle);
@@ -342,7 +342,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardActiveProg
             // 
             cardActiveProg.BackColor = Color.White;
-            cardActiveProg.BorderStyle = BorderStyle.FixedSingle;
+            cardActiveProg.BorderStyle = BorderStyle.None;
             cardActiveProg.Controls.Add(btnChangeProg);
             cardActiveProg.Controls.Add(picHarness);
             cardActiveProg.Controls.Add(lblProgDetails);
@@ -375,7 +375,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             picHarness.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             picHarness.BackColor = Color.FromArgb(248, 250, 252);
-            picHarness.BorderStyle = BorderStyle.FixedSingle;
+            picHarness.BorderStyle = BorderStyle.None;
             picHarness.Location = new Point(592, 24);
             picHarness.Margin = new Padding(5);
             picHarness.Name = "picHarness";
@@ -427,7 +427,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardSummary
             // 
             cardSummary.BackColor = Color.White;
-            cardSummary.BorderStyle = BorderStyle.FixedSingle;
+            cardSummary.BorderStyle = BorderStyle.None;
             cardSummary.Controls.Add(tblCharts);
             cardSummary.Controls.Add(tblKpi);
             cardSummary.Controls.Add(cmbTimeRange);
@@ -501,7 +501,7 @@ namespace AssemblyLineTester.Views.Pages
             // kpiTotalTested
             // 
             kpiTotalTested.BackColor = Color.FromArgb(248, 250, 252);
-            kpiTotalTested.BorderStyle = BorderStyle.FixedSingle;
+            kpiTotalTested.BorderStyle = BorderStyle.None;
             kpiTotalTested.Controls.Add(lblTotalTestedVal);
             kpiTotalTested.Controls.Add(lblTotalTestedTitle);
             kpiTotalTested.Dock = DockStyle.Fill;
@@ -538,7 +538,7 @@ namespace AssemblyLineTester.Views.Pages
             // kpiPass
             // 
             kpiPass.BackColor = Color.FromArgb(248, 250, 252);
-            kpiPass.BorderStyle = BorderStyle.FixedSingle;
+            kpiPass.BorderStyle = BorderStyle.None;
             kpiPass.Controls.Add(lblPassVal);
             kpiPass.Controls.Add(lblPassTitle);
             kpiPass.Dock = DockStyle.Fill;
@@ -575,7 +575,7 @@ namespace AssemblyLineTester.Views.Pages
             // kpiFail
             // 
             kpiFail.BackColor = Color.FromArgb(248, 250, 252);
-            kpiFail.BorderStyle = BorderStyle.FixedSingle;
+            kpiFail.BorderStyle = BorderStyle.None;
             kpiFail.Controls.Add(lblFailVal);
             kpiFail.Controls.Add(lblFailTitle);
             kpiFail.Dock = DockStyle.Fill;
@@ -612,7 +612,7 @@ namespace AssemblyLineTester.Views.Pages
             // kpiYield
             // 
             kpiYield.BackColor = Color.FromArgb(248, 250, 252);
-            kpiYield.BorderStyle = BorderStyle.FixedSingle;
+            kpiYield.BorderStyle = BorderStyle.None;
             kpiYield.Controls.Add(lblYieldVal);
             kpiYield.Controls.Add(lblYieldTitle);
             kpiYield.Dock = DockStyle.Fill;
@@ -649,7 +649,7 @@ namespace AssemblyLineTester.Views.Pages
             // kpiCycleTime
             // 
             kpiCycleTime.BackColor = Color.FromArgb(248, 250, 252);
-            kpiCycleTime.BorderStyle = BorderStyle.FixedSingle;
+            kpiCycleTime.BorderStyle = BorderStyle.None;
             kpiCycleTime.Controls.Add(lblCycleTimeVal);
             kpiCycleTime.Controls.Add(lblCycleTimeTitle);
             kpiCycleTime.Dock = DockStyle.Fill;
@@ -711,7 +711,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardHistory
             // 
             cardHistory.BackColor = Color.White;
-            cardHistory.BorderStyle = BorderStyle.FixedSingle;
+            cardHistory.BorderStyle = BorderStyle.None;
             cardHistory.Controls.Add(gridRecent);
             cardHistory.Controls.Add(lnkViewAll);
             cardHistory.Controls.Add(lblRecentTitle);
@@ -798,7 +798,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardModules
             // 
             cardModules.BackColor = Color.White;
-            cardModules.BorderStyle = BorderStyle.FixedSingle;
+            cardModules.BorderStyle = BorderStyle.None;
             cardModules.Controls.Add(tblModules);
             cardModules.Controls.Add(lblModulesTitle);
             cardModules.Dock = DockStyle.Fill;
@@ -984,7 +984,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardOperatingTime
             // 
             cardOperatingTime.BackColor = Color.White;
-            cardOperatingTime.BorderStyle = BorderStyle.FixedSingle;
+            cardOperatingTime.BorderStyle = BorderStyle.None;
             cardOperatingTime.Controls.Add(lblOpTimeSub);
             cardOperatingTime.Controls.Add(lblOpTimeVal);
             cardOperatingTime.Controls.Add(lblOpTimeTitle);
@@ -1035,7 +1035,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardMaintenance
             // 
             cardMaintenance.BackColor = Color.White;
-            cardMaintenance.BorderStyle = BorderStyle.FixedSingle;
+            cardMaintenance.BorderStyle = BorderStyle.None;
             cardMaintenance.Controls.Add(lblMaintSub);
             cardMaintenance.Controls.Add(lblMaintVal);
             cardMaintenance.Controls.Add(lblMaintTitle);

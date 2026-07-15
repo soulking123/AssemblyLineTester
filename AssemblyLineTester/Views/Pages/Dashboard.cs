@@ -2,6 +2,7 @@ using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -25,6 +26,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private void InitializeCustomStyles()
         {
+            SetupEvents();
+
             // cmbTimeRange only has "Today" in the Designer - expand it here without touching the Designer file.
             cmbTimeRange.Items.Clear();
             cmbTimeRange.Items.AddRange(new object[]
@@ -35,33 +38,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbTimeRange.SelectedIndexChanged += CmbTimeRange_SelectedIndexChanged;
 
             // DataGridView Modern Styling
-            gridRecent.BorderStyle = BorderStyle.None;
-            gridRecent.BackgroundColor = Color.White;
-            gridRecent.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            gridRecent.GridColor = Color.FromArgb(241, 245, 249);
-            gridRecent.RowHeadersVisible = false;
-            gridRecent.AllowUserToAddRows = false;
-            gridRecent.AllowUserToDeleteRows = false;
-            gridRecent.ReadOnly = true;
-            gridRecent.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridRecent.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            gridRecent.EnableHeadersVisualStyles = false;
-
-            // Header Style
-            gridRecent.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
-            gridRecent.ColumnHeadersDefaultCellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
-            gridRecent.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(248, 250, 252);
-            gridRecent.ColumnHeadersDefaultCellStyle.Padding = new Padding(8);
-            gridRecent.ColumnHeadersHeight = 40;
-
-            // Row Style
-            gridRecent.DefaultCellStyle.BackColor = Color.White;
-            gridRecent.DefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
-            gridRecent.DefaultCellStyle.SelectionBackColor = Color.FromArgb(241, 245, 249);
-            gridRecent.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 41, 59);
-            gridRecent.DefaultCellStyle.Padding = new Padding(6);
-            gridRecent.RowTemplate.Height = 36;
-
+            AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridRecent);
             gridRecent.CellFormatting += GridRecent_CellFormatting;
 
             // Attach PostPaint for center text in Doughnut Chart
@@ -306,19 +283,19 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     e.CellStyle.BackColor = Color.FromArgb(220, 252, 231);
                     e.CellStyle.ForeColor = Color.FromArgb(22, 101, 52);
-                    e.CellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
+                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold;
                 }
                 else if (val == "FAIL")
                 {
                     e.CellStyle.BackColor = Color.FromArgb(254, 226, 226);
                     e.CellStyle.ForeColor = Color.FromArgb(153, 27, 27);
-                    e.CellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
+                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold;
                 }
                 else
                 {
                     e.CellStyle.BackColor = Color.FromArgb(241, 245, 249);
                     e.CellStyle.ForeColor = Color.FromArgb(100, 116, 139);
-                    e.CellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
+                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold;
                 }
             }
         }
@@ -330,8 +307,6 @@ namespace AssemblyLineTester.Views.Pages
                 string numText = _totalFailForChart.ToString();
                 string subText = "TOTAL FAIL";
 
-                using Font fontNum = new("Segoe UI", 22F, FontStyle.Bold);
-                using Font fontSub = new("Segoe UI", 8.5F, FontStyle.Bold);
                 using SolidBrush brushNum = new(Color.FromArgb(30, 41, 59));
                 using SolidBrush brushSub = new(Color.FromArgb(100, 116, 139));
                 using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
@@ -340,8 +315,8 @@ namespace AssemblyLineTester.Views.Pages
                 float centerX = chartRect.Left + (chartRect.Width * 0.50f);
                 float centerY = chartRect.Top + (chartRect.Height * 0.5f);
 
-                e.ChartGraphics.Graphics.DrawString(numText, fontNum, brushNum, centerX, centerY - 14, sf);
-                e.ChartGraphics.Graphics.DrawString(subText, fontSub, brushSub, centerX, centerY + 16, sf);
+                e.ChartGraphics.Graphics.DrawString(numText, AssemblyLineTester.Helpers.UIStyleHelper.Font22Bold, brushNum, centerX, centerY - 14, sf);
+                e.ChartGraphics.Graphics.DrawString(subText, AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold, brushSub, centerX, centerY + 16, sf);
             }
         }
 
@@ -367,6 +342,20 @@ namespace AssemblyLineTester.Views.Pages
             lblMaintSub.Text = $"Or {currentRemainingHours:N1} Hours";
         }
 
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            base.OnVisibleChanged(e);
+            if (!this.Visible && _uiRefreshTimer != null)
+            {
+                _uiRefreshTimer.Stop();
+            }
+            else if (this.Visible && _uiRefreshTimer != null)
+            {
+                _uiRefreshTimer.Start();
+                UpdateMaintenanceLabels();
+            }
+        }
+
         protected override void OnHandleDestroyed(EventArgs e)
         {
             if (_uiRefreshTimer != null)
@@ -376,6 +365,32 @@ namespace AssemblyLineTester.Views.Pages
                 _uiRefreshTimer = null;
             }
             base.OnHandleDestroyed(e);
+        }
+
+        private void SetupEvents()
+        {
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardTester, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardMachine, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardDatabase, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardActiveProg, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardSummary, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardHistory, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardModules, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardOperatingTime, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardMaintenance, 12, Color.FromArgb(34, 40, 49), 2.5f);
+
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiTotalTested, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiPass, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiFail, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiYield, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiCycleTime, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(picHarness, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod1, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod2, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod3, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod4, 8, Color.FromArgb(148, 163, 184), 1.5f);
+
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnChangeProg, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
         }
     }
 }

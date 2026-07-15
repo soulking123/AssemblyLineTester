@@ -69,32 +69,11 @@ namespace AssemblyLineTester.Views.Pages
             dtpStart.Value = DateTime.Now.AddDays(-30);
             dtpEnd.Value = DateTime.Now;
 
-            gridReports.BorderStyle = BorderStyle.None;
-            gridReports.BackgroundColor = Color.White;
-            gridReports.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            gridReports.GridColor = Color.FromArgb(241, 245, 249);
-            gridReports.RowHeadersVisible = false;
-            gridReports.AllowUserToAddRows = false;
-            gridReports.AllowUserToDeleteRows = false;
-            gridReports.ReadOnly = true;
-            gridReports.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridReports.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            gridReports.EnableHeadersVisualStyles = false;
-
-            gridReports.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
-            gridReports.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
-            gridReports.ColumnHeadersDefaultCellStyle.Font = new("Segoe UI", 9F, FontStyle.Bold);
-            gridReports.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(248, 250, 252);
-            gridReports.ColumnHeadersDefaultCellStyle.Padding = new(8, 4, 8, 4);
-            gridReports.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridReports);
             gridReports.ColumnHeadersHeight = 48;
-
-            gridReports.DefaultCellStyle.BackColor = Color.White;
-            gridReports.DefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
-            gridReports.DefaultCellStyle.SelectionBackColor = Color.FromArgb(241, 245, 249);
-            gridReports.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 41, 59);
-            gridReports.DefaultCellStyle.Padding = new(6);
-            gridReports.RowTemplate.Height = 48;
+            gridReports.RowTemplate.Height = 44;
+            gridReports.ColumnHeadersDefaultCellStyle.Padding = new Padding(10, 4, 10, 4);
+            gridReports.DefaultCellStyle.Padding = new Padding(8, 4, 8, 4);
 
             if (gridReports.Columns["colNo"] is { } colNo)
                 colNo.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -235,12 +214,12 @@ namespace AssemblyLineTester.Views.Pages
             ChartArea areaTrend = new("TrendArea") { BackColor = Color.White };
             areaTrend.AxisX.MajorGrid.Enabled = false;
             areaTrend.AxisX.Interval = 1;
-            areaTrend.AxisX.LabelStyle.Font = new("Segoe UI", 8.5F);
+            areaTrend.AxisX.LabelStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85;
             areaTrend.AxisX.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaTrend.AxisX.LineColor = Color.FromArgb(226, 232, 240);
 
             areaTrend.AxisY.MajorGrid.LineColor = Color.FromArgb(241, 245, 249);
-            areaTrend.AxisY.LabelStyle.Font = new("Segoe UI", 8.5F);
+            areaTrend.AxisY.LabelStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85;
             areaTrend.AxisY.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
             areaTrend.AxisY.LineColor = Color.Transparent;
             areaTrend.AxisY.Minimum = 0;
@@ -250,7 +229,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 Docking = Docking.Top,
                 Alignment = StringAlignment.Center,
-                Font = new("Segoe UI", 8.5F, FontStyle.Bold)
+                Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold
             };
             chartTrend.Legends.Add(legTrend);
 
@@ -327,6 +306,7 @@ namespace AssemblyLineTester.Views.Pages
                     $"{r.SizeKb:N0} KB",
                     "View / Export");
                 gridReports.Rows[rowIdx].Tag = r.ReportId;
+                gridReports.Rows[rowIdx].Height = gridReports.RowTemplate.Height;
             }
 
             UpdatePaginationUI(result.TotalCount);
@@ -467,196 +447,50 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     e.CellStyle.BackColor = Color.FromArgb(224, 242, 254);
                     e.CellStyle.ForeColor = Color.FromArgb(3, 105, 161);
-                    e.CellStyle.Font = new("Segoe UI", 8.5F, FontStyle.Bold);
+                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
                 }
                 else
                 {
                     e.CellStyle.BackColor = Color.FromArgb(241, 245, 249);
                     e.CellStyle.ForeColor = Color.FromArgb(51, 65, 85);
-                    e.CellStyle.Font = new("Segoe UI", 8.5F, FontStyle.Bold);
+                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
                 }
             }
             else if (colName == "colAction")
             {
                 e.CellStyle.ForeColor = Color.FromArgb(37, 99, 235);
-                e.CellStyle.Font = new("Segoe UI", 8.5F, FontStyle.Bold);
+                e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
             }
         }
 
         private void SetupEvents()
         {
-            SetupCardRoundedEdges(cardFilters, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            SetupCardRoundedEdges(cardTrend, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            SetupCardRoundedEdges(cardReportList, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardFilters, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardTrend, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardReportList, 12, Color.FromArgb(34, 40, 49), 2.5f);
 
-            SetupCardRoundedEdges(pnlSumTotal, 10, Color.FromArgb(34, 40, 49), 2.5f);
-            SetupCardRoundedEdges(pnlSumPass, 10, Color.FromArgb(34, 40, 49), 2.5f);
-            SetupCardRoundedEdges(pnlSumFail, 10, Color.FromArgb(34, 40, 49), 2.5f);
-            SetupCardRoundedEdges(pnlSumProg, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumTotal, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumPass, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumFail, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumProg, 10, Color.FromArgb(34, 40, 49), 2.5f);
 
-            SetupCardRoundedEdges(pnlPreviewContainer, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            SetupCardRoundedEdges(cardPaper, 10, Color.FromArgb(34, 40, 49), 2.5f);
-            SetupCardRoundedEdges(pnlGenInfoBox, 8, Color.FromArgb(34, 40, 49), 2.5f);
-            SetupCardRoundedEdges(pnlNotesCard, 8, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlPreviewContainer, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardPaper, 10, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlGenInfoBox, 8, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlNotesCard, 8, Color.FromArgb(34, 40, 49), 2.5f);
 
-            SetupButtonRoundedEdges(btnGenerate, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnGenerate, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
 
-            SetupButtonRoundedEdges(btnExportPDF, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            SetupButtonRoundedEdges(btnExportExcel, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            SetupButtonRoundedEdges(btnPrint, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportPDF, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportExcel, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPrint, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
 
-            SetupButtonRoundedEdges(btnPageFirst, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            SetupButtonRoundedEdges(btnPagePrev, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            SetupButtonRoundedEdges(btnPage1, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            SetupButtonRoundedEdges(btnPage2, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            SetupButtonRoundedEdges(btnPageDots, 8, Color.FromArgb(248, 250, 252), Color.FromArgb(248, 250, 252), Color.FromArgb(248, 250, 252), Color.Transparent);
-            SetupButtonRoundedEdges(btnPageNext, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            SetupButtonRoundedEdges(btnPageLast, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-        }
-
-        private static void SetupCardRoundedEdges(Control card, int radius, Color borderColor, float borderWidth = 2.5f)
-        {
-            if (card is TableLayoutPanel || card.Padding.Left < 4 || card.Padding.Top < 4 || card.Padding.Right < 4 || card.Padding.Bottom < 4)
-            {
-                card.Padding = new Padding(
-                    Math.Max(card.Padding.Left, 4),
-                    Math.Max(card.Padding.Top, 4),
-                    Math.Max(card.Padding.Right, 4),
-                    Math.Max(card.Padding.Bottom, 4)
-                );
-            }
-
-            card.Paint += (s, e) =>
-            {
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                Color parentBg = card.Parent?.BackColor != null && card.Parent.BackColor != Color.Transparent
-                    ? card.Parent.BackColor
-                    : Color.FromArgb(244, 245, 247);
-
-                using (var parentBrush = new SolidBrush(parentBg))
-                {
-                    e.Graphics.FillRectangle(parentBrush, 0, 0, card.Width, card.Height);
-                }
-
-                var rectOuter = new Rectangle(0, 0, card.Width, card.Height);
-                using var pathOuter = GetRoundedPath(rectOuter, radius);
-                using (var cardBrush = new SolidBrush(card.BackColor))
-                {
-                    e.Graphics.FillPath(cardBrush, pathOuter);
-                }
-
-                var rectBorder = new Rectangle(1, 1, card.Width - 3, card.Height - 3);
-                using var pathBorder = GetRoundedPath(rectBorder, radius);
-                using var pen = new Pen(borderColor, borderWidth);
-                e.Graphics.DrawPath(pen, pathBorder);
-            };
-
-            card.Resize += (s, e) =>
-            {
-                if (card.Width > 0 && card.Height > 0)
-                {
-                    var oldRegion = card.Region;
-                    card.Region = new Region(GetRoundedPath(new Rectangle(0, 0, card.Width, card.Height), radius));
-                    oldRegion?.Dispose();
-                    card.Invalidate();
-                }
-            };
-
-            if (card.Width > 0 && card.Height > 0)
-            {
-                card.Region = new Region(GetRoundedPath(new Rectangle(0, 0, card.Width, card.Height), radius));
-            }
-        }
-
-        private static void SetupButtonRoundedEdges(Button btn, int radius, Color normColor, Color hoverColor, Color pressColor, Color borderColor)
-        {
-            btn.FlatStyle = FlatStyle.Flat;
-            btn.FlatAppearance.BorderSize = 0;
-            btn.BackColor = normColor;
-            btn.Cursor = Cursors.Hand;
-
-            btn.MouseEnter += (s, e) => { btn.BackColor = hoverColor; btn.Invalidate(); };
-            btn.MouseLeave += (s, e) => { btn.BackColor = normColor; btn.Invalidate(); };
-            btn.MouseDown += (s, e) => { btn.BackColor = pressColor; btn.Invalidate(); };
-            btn.MouseUp += (s, e) => { btn.BackColor = hoverColor; btn.Invalidate(); };
-
-            btn.Paint += (s, e) =>
-            {
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                Color parentBg = btn.Parent?.BackColor != null && btn.Parent.BackColor != Color.Transparent
-                    ? btn.Parent.BackColor
-                    : Color.White;
-
-                using (var parentBrush = new SolidBrush(parentBg))
-                {
-                    e.Graphics.FillRectangle(parentBrush, 0, 0, btn.Width, btn.Height);
-                }
-
-                var rectOuter = new Rectangle(0, 0, btn.Width, btn.Height);
-                using var pathOuter = GetRoundedPath(rectOuter, radius);
-                using (var brush = new SolidBrush(btn.BackColor))
-                {
-                    e.Graphics.FillPath(brush, pathOuter);
-                }
-
-                if (borderColor != Color.Transparent)
-                {
-                    var rectBorder = new Rectangle(1, 1, btn.Width - 3, btn.Height - 3);
-                    using var pathBorder = GetRoundedPath(rectBorder, radius);
-                    using var pen = new Pen(borderColor, 1.5f);
-                    e.Graphics.DrawPath(pen, pathBorder);
-                }
-
-                TextRenderer.DrawText(
-                    e.Graphics,
-                    btn.Text,
-                    btn.Font,
-                    rectOuter,
-                    btn.ForeColor,
-                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak
-                );
-            };
-
-            btn.Resize += (s, e) =>
-            {
-                if (btn.Width > 0 && btn.Height > 0)
-                {
-                    var oldRegion = btn.Region;
-                    btn.Region = new Region(GetRoundedPath(new Rectangle(0, 0, btn.Width, btn.Height), radius));
-                    oldRegion?.Dispose();
-                    btn.Invalidate();
-                }
-            };
-
-            if (btn.Width > 0 && btn.Height > 0)
-            {
-                btn.Region = new Region(GetRoundedPath(new Rectangle(0, 0, btn.Width, btn.Height), radius));
-            }
-        }
-
-        private static GraphicsPath GetRoundedPath(Rectangle rect, int radius)
-        {
-            GraphicsPath path = new();
-            int d = radius * 2;
-            if (rect.Width <= 0 || rect.Height <= 0)
-            {
-                path.AddRectangle(rect);
-                return path;
-            }
-            if (d > rect.Width) d = rect.Width;
-            if (d > rect.Height) d = rect.Height;
-
-            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
-            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
-            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
-            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
-            path.CloseFigure();
-            return path;
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPageFirst, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPagePrev, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPage1, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPage2, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPageLast, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
         }
     }
 }

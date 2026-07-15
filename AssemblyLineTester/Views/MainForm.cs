@@ -13,20 +13,18 @@ namespace AssemblyLineTester.Views
 
         public bool IsLoggingOut { get; private set; } = false;
 
-        private readonly TestHistory pageTestHistory = new();
-        private readonly SystemLog pageSystemLog = new();
-        private readonly HarnessDatabase pageHarnessDb = new();
-        private readonly Dashboard pageDashboard = new();
-        private readonly TestExecution pageTestExecution = new();
-        private readonly Reports pageReports = new();
-        private readonly Settings pageSettings = new();
-        //private readonly UserManagement pageUserManagement = new();
-        private readonly UserManagement pageUserManagement;
+        private TestHistory? pageTestHistory;
+        private SystemLog? pageSystemLog;
+        private HarnessDatabase? pageHarnessDb;
+        private Dashboard? pageDashboard;
+        private TestExecution? pageTestExecution;
+        private Reports? pageReports;
+        private Settings? pageSettings;
+        private UserManagement? pageUserManagement;
 
         /// Initializes a new instance of the MainForm class.
         public MainForm()
         {
-            pageUserManagement = new UserManagement(_userService);
             InitializeComponent();
 
             // Load CAT logo image into sidebar menu header
@@ -80,7 +78,7 @@ namespace AssemblyLineTester.Views
 
             this.Resize += MainForm_Resize;
 
-            SetActiveMenu(btnDashboard, pageDashboard);
+            SetActiveMenu(btnDashboard, GetOrInitPage("btnDashboard"));
         }
 
         private void InitializeUserInfo()
@@ -159,23 +157,27 @@ namespace AssemblyLineTester.Views
         }
 
         // IDE1006 FIX: Huruf awal kapital (PascalCase)
+        private UserControl? GetOrInitPage(string buttonName)
+        {
+            return buttonName switch
+            {
+                "btnDashboard" => pageDashboard ??= new Dashboard(),
+                "btnTestExecution" => pageTestExecution ??= new TestExecution(),
+                "btnHarnessDatabase" => pageHarnessDb ??= new HarnessDatabase(),
+                "btnTestHistory" => pageTestHistory ??= new TestHistory(),
+                "btnReports" => pageReports ??= new Reports(),
+                "btnSystemLog" => pageSystemLog ??= new SystemLog(),
+                "btnSettings" => pageSettings ??= new Settings(),
+                "btnUserManagement" => pageUserManagement ??= new UserManagement(_userService),
+                _ => null
+            };
+        }
+
         private void BtnMenu_Click(object sender, EventArgs e)
         {
             if (sender is not AssemblyLineTester.Views.Controls.MenuButton clickedButton) return;
 
-            UserControl? targetPage = clickedButton.Name switch
-            {
-                "btnDashboard" => pageDashboard,
-                "btnTestExecution" => pageTestExecution,
-                "btnHarnessDatabase" => pageHarnessDb,
-                "btnTestHistory" => pageTestHistory,
-                "btnReports" => pageReports,
-                "btnSystemLog" => pageSystemLog,
-                "btnSettings" => pageSettings,
-                "btnUserManagement" => pageUserManagement,
-                _ => null
-            };
-
+            UserControl? targetPage = GetOrInitPage(clickedButton.Name);
             SetActiveMenu(clickedButton, targetPage);
         }
 
@@ -195,6 +197,7 @@ namespace AssemblyLineTester.Views
             }
 
             if (pnlContent == null) return;
+            pnlContent.SuspendLayout();
             pnlContent.Controls.Clear();
             if (activePage != null)
             {
@@ -206,7 +209,7 @@ namespace AssemblyLineTester.Views
                 Label lblPlaceholder = new Label
                 {
                     Text = $"{activeBtn.FullText.Trim()} (Under Construction)",
-                    Font = new Font("Segoe UI", 16F, FontStyle.Bold),
+                    Font = AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold,
                     ForeColor = Color.FromArgb(100, 116, 139),
                     Dock = DockStyle.Fill,
                     TextAlign = ContentAlignment.MiddleCenter,
@@ -214,6 +217,7 @@ namespace AssemblyLineTester.Views
                 };
                 pnlContent.Controls.Add(lblPlaceholder);
             }
+            pnlContent.ResumeLayout(true);
         }
 
         // IDE1006 FIX: Huruf awal kapital (PascalCase)
