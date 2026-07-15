@@ -341,9 +341,9 @@ namespace AssemblyLineTester.Views.Pages
                     string clean = input.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
                     if (double.TryParse(clean, out double val))
                     {
-                        if (val > 10.0 || val < -10.0)
+                        if (val > 100.0 || val < -100.0)
                         {
-                            MessageBox.Show("Tolerance must be limited from -10% to 10% only.", "Tolerance Limit Exceeded", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show("Tolerance must be limited between -100% and +100%.", "Tolerance Limit Exceeded", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
                     }
                 }
@@ -424,8 +424,8 @@ namespace AssemblyLineTester.Views.Pages
             string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
             if (double.TryParse(clean, out double val))
             {
-                if (val > 10.0) val = 10.0;
-                if (val < -10.0) val = -10.0;
+                if (val > 100.0) val = 100.0;
+                if (val < -100.0) val = -100.0;
 
                 string numStr = FormatLimit(Math.Abs(val));
                 if (tolStr.Contains("±") || (!tolStr.StartsWith("-") && !tolStr.StartsWith("+")))
