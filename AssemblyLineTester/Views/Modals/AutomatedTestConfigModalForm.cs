@@ -1,11 +1,14 @@
+using AssemblyLineTester.Models;
+using AssemblyLineTester.Services;
+using FontAwesome.Sharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using FontAwesome.Sharp;
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -15,6 +18,7 @@ namespace AssemblyLineTester.Views.Modals
         private readonly List<DiagramNode> leftNodes = [];
         private readonly List<DiagramNode> rightNodes = [];
         private readonly List<DiagramConnection> connections = [];
+        private readonly TestConfigService _configService = new();
 
         private class DiagramNode
         {
@@ -40,9 +44,10 @@ namespace AssemblyLineTester.Views.Modals
         public AutomatedTestConfigModalForm()
         {
             InitializeComponent();
-            LoadConfigInfoData();
+            txtConfigName.Text = "Main Harness Test";
+            txtProductModel.Text = "6060";
             SetupEvents();
-            LoadDefaultData();
+            //LoadDefaultData();
             UpdateTotalNetCount();
             UpdateDiagramSize();
             ApplyFormRounding();
@@ -128,10 +133,6 @@ namespace AssemblyLineTester.Views.Modals
                 {
                     gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
                 }
-                if (gridConfigInfo.IsCurrentCellInEditMode || gridConfigInfo.IsCurrentCellDirty)
-                {
-                    gridConfigInfo.EndEdit(DataGridViewDataErrorContexts.Commit);
-                }
                 ActiveControl = pnlCustomHeader;
                 ValidateChildren();
 
@@ -145,10 +146,6 @@ namespace AssemblyLineTester.Views.Modals
             if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
             {
                 gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
-            }
-            if (gridConfigInfo.IsCurrentCellInEditMode || gridConfigInfo.IsCurrentCellDirty)
-            {
-                gridConfigInfo.EndEdit(DataGridViewDataErrorContexts.Commit);
             }
             ActiveControl = pnlCustomHeader;
             ValidateChildren();
@@ -239,22 +236,7 @@ namespace AssemblyLineTester.Views.Modals
             }
         }
 
-        private void LoadConfigInfoData()
-        {
-            gridConfigInfo.Rows.Clear();
 
-            string[][] configData =
-            [
-                ["Main Harness Test", "6060", "Standard continuity and resistance test configuration"],
-                ["ECM Connector Validation", "6070", "ECM main connector verification for capacitance and voltage"],
-                ["Final Assembly Check", "8080", "Complete assembly line functional test suite"]
-            ];
-
-            foreach (string[] row in configData)
-            {
-                gridConfigInfo.Rows.Add(row[0], row[1], row[2]);
-            }
-        }
 
         private void LoadDefaultData()
         {
@@ -371,12 +353,99 @@ namespace AssemblyLineTester.Views.Modals
 
         private void BtnExport_Click(object? sender, EventArgs e)
         {
+            if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
+            {
+                gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
+            }
+
+            var config = new TestConfiguration
+            {
+                ConfigName = txtConfigName.Text.Trim(),
+                ProductModel = txtProductModel.Text.Trim(),
+                ConfigCode = "CFG-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                CreatedBy = SessionManager.CurrentUser?.Username ?? "System",
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true,
+                Nets = new List<TestConfigNet>()
+            };
+
+            foreach (DataGridViewRow row in gridConfig.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                // Safely parse double values
+                double? ParseDouble(string cellName)
+                {
+                    var val = row.Cells[cellName].Value?.ToString();
+                    return double.TryParse(val, out double res) ? res : (double?)null;
+                }
+
+                // Safely parse integer values
+                int ParseInt(string cellName)
+                {
+                    var val = row.Cells[cellName].Value?.ToString();
+                    return int.TryParse(val, out int res) ? res : 0;
+                }
+
+                var net = new TestConfigNet
+                {
+                    SequenceNo = ParseInt("colNo"),
+                    NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
+                    HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
+
+                    FromAddress = ParseInt("colFromAddr"),
+                    FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
+
+                    ToAddress = ParseInt("colToAddr"),
+                    ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
+
+                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
+                    LowerLimit = ParseDouble("colLowerLimit"),
+                    UpperLimit = ParseDouble("colUpperLimit"),
+
+                    // Dynamic TestTypeId mapping
+                    TestTypeId = (row.Cells["colTestType"].Value?.ToString() == "Resistance") ? 11 : 15 // 11 = RESISTOR, 15 = WIRE
+                };
+
+                config.Nets.Add(net);
+            }
+
+            // Save to database using service
+            try
+            {
+                _configService.SaveConfig(config);
+                _configService.SetActiveConfig(config.ConfigName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to save to database: {ex.Message}", "Database Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Pretty print to debug console
+            var options = new System.Text.Json.JsonSerializerOptions 
+            { 
+                WriteIndented = true,
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            };
+            string json = System.Text.Json.JsonSerializer.Serialize(config, options);
+            System.Diagnostics.Debug.WriteLine(json);
+
+            // Export to file
             using SaveFileDialog sfd = new();
             sfd.Filter = "JSON Config (*.json)|*.json|CSV Config (*.csv)|*.csv";
             sfd.FileName = "AutomatedTestConfig.json";
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                MessageBox.Show("Configuration exported successfully!", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                try
+                {
+                    System.IO.File.WriteAllText(sfd.FileName, json);
+                    MessageBox.Show("Configuration saved to database and exported successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to save JSON file: {ex.Message}", "File Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

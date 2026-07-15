@@ -42,10 +42,11 @@ namespace AssemblyLineTester.Views.Modals
             colLowerLimit = new DataGridViewTextBoxColumn();
             colUpperLimit = new DataGridViewTextBoxColumn();
             colUnit = new DataGridViewComboBoxColumn();
-            gridConfigInfo = new DataGridView();
-            colConfigName = new DataGridViewTextBoxColumn();
-            colProductModel = new DataGridViewTextBoxColumn();
-            colDescription = new DataGridViewTextBoxColumn();
+            pnlConfigFields = new Panel();
+            lblConfigName = new Label();
+            txtConfigName = new TextBox();
+            lblProductModel = new Label();
+            txtProductModel = new TextBox();
             pnlConfigInfoHeader = new Panel();
             lblConfigInfoHeader = new Label();
             pnlButtons = new Panel();
@@ -71,7 +72,7 @@ namespace AssemblyLineTester.Views.Modals
             splitContainerMain.SuspendLayout();
             pnlTopBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridConfig).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)gridConfigInfo).BeginInit();
+
             pnlConfigInfoHeader.SuspendLayout();
             pnlButtons.SuspendLayout();
             pnlHeaderTop.SuspendLayout();
@@ -209,7 +210,7 @@ namespace AssemblyLineTester.Views.Modals
             splitContainerMain.Panel2.Controls.Add(pnlBottomBox);
             splitContainerMain.Panel2MinSize = 200;
             splitContainerMain.Size = new Size(2363, 1342);
-            splitContainerMain.SplitterDistance = 646;
+            splitContainerMain.SplitterDistance = 850;
             splitContainerMain.SplitterWidth = 13;
             splitContainerMain.TabIndex = 0;
             // 
@@ -218,7 +219,7 @@ namespace AssemblyLineTester.Views.Modals
             pnlTopBox.BackColor = Color.White;
             pnlTopBox.BorderStyle = BorderStyle.FixedSingle;
             pnlTopBox.Controls.Add(gridConfig);
-            pnlTopBox.Controls.Add(gridConfigInfo);
+            pnlTopBox.Controls.Add(pnlConfigFields);
             pnlTopBox.Controls.Add(pnlConfigInfoHeader);
             pnlTopBox.Controls.Add(pnlButtons);
             pnlTopBox.Controls.Add(pnlHeaderTop);
@@ -332,55 +333,53 @@ namespace AssemblyLineTester.Views.Modals
             colUnit.MinimumWidth = 100;
             colUnit.Name = "colUnit";
             // 
-            // gridConfigInfo
             // 
-            gridConfigInfo.AllowUserToAddRows = false;
-            gridConfigInfo.AllowUserToDeleteRows = false;
-            gridConfigInfo.AllowUserToResizeRows = false;
-            gridConfigInfo.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            gridConfigInfo.BackgroundColor = Color.White;
-            gridConfigInfo.BorderStyle = BorderStyle.None;
-            gridConfigInfo.ColumnHeadersHeight = 40;
-            gridConfigInfo.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridConfigInfo.Columns.AddRange(new DataGridViewColumn[] { colConfigName, colProductModel, colDescription });
-            gridConfigInfo.Dock = DockStyle.Top;
-            gridConfigInfo.EditMode = DataGridViewEditMode.EditProgrammatically;
-            gridConfigInfo.EnableHeadersVisualStyles = false;
-            gridConfigInfo.Location = new Point(0, 218);
-            gridConfigInfo.Margin = new Padding(5);
-            gridConfigInfo.MultiSelect = false;
-            gridConfigInfo.Name = "gridConfigInfo";
-            gridConfigInfo.ReadOnly = true;
-            gridConfigInfo.RowHeadersVisible = false;
-            gridConfigInfo.RowHeadersWidth = 82;
-            gridConfigInfo.RowTemplate.Height = 35;
-            gridConfigInfo.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridConfigInfo.Size = new Size(2361, 150);
-            gridConfigInfo.TabIndex = 4;
+            // pnlConfigFields
             // 
-            // colConfigName
+            pnlConfigFields.BackColor = Color.White;
+            pnlConfigFields.Controls.Add(lblConfigName);
+            pnlConfigFields.Controls.Add(txtConfigName);
+            pnlConfigFields.Controls.Add(lblProductModel);
+            pnlConfigFields.Controls.Add(txtProductModel);
+            pnlConfigFields.Dock = DockStyle.Top;
+            pnlConfigFields.Location = new Point(0, 218);
+            pnlConfigFields.Name = "pnlConfigFields";
+            pnlConfigFields.Size = new Size(2361, 80);
+            pnlConfigFields.TabIndex = 4;
             // 
-            colConfigName.FillWeight = 120F;
-            colConfigName.HeaderText = "Config Name";
-            colConfigName.MinimumWidth = 150;
-            colConfigName.Name = "colConfigName";
-            colConfigName.ReadOnly = true;
+            // lblConfigName
             // 
-            // colProductModel
+            lblConfigName.AutoSize = true;
+            lblConfigName.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblConfigName.Location = new Point(20, 22);
+            lblConfigName.Name = "lblConfigName";
+            lblConfigName.Size = new Size(110, 25);
+            lblConfigName.Text = "Config Name:";
             // 
-            colProductModel.FillWeight = 80F;
-            colProductModel.HeaderText = "Product Model";
-            colProductModel.MinimumWidth = 120;
-            colProductModel.Name = "colProductModel";
-            colProductModel.ReadOnly = true;
+            // txtConfigName
             // 
-            // colDescription
+            txtConfigName.Font = new Font("Segoe UI", 9.5F);
+            txtConfigName.Location = new Point(220, 18);
+            txtConfigName.Name = "txtConfigName";
+            txtConfigName.Size = new Size(350, 33);
+            txtConfigName.TabIndex = 0;
             // 
-            colDescription.FillWeight = 200F;
-            colDescription.HeaderText = "Description";
-            colDescription.MinimumWidth = 200;
-            colDescription.Name = "colDescription";
-            colDescription.ReadOnly = true;
+            // lblProductModel
+            // 
+            lblProductModel.AutoSize = true;
+            lblProductModel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblProductModel.Location = new Point(620, 22);
+            lblProductModel.Name = "lblProductModel";
+            lblProductModel.Size = new Size(125, 25);
+            lblProductModel.Text = "Product Model:";
+            // 
+            // txtProductModel
+            // 
+            txtProductModel.Font = new Font("Segoe UI", 9.5F);
+            txtProductModel.Location = new Point(810, 18);
+            txtProductModel.Name = "txtProductModel";
+            txtProductModel.Size = new Size(200, 33);
+            txtProductModel.TabIndex = 1;
             // 
             // pnlConfigInfoHeader
             // 
@@ -651,7 +650,7 @@ namespace AssemblyLineTester.Views.Modals
             splitContainerMain.ResumeLayout(false);
             pnlTopBox.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)gridConfig).EndInit();
-            ((System.ComponentModel.ISupportInitialize)gridConfigInfo).EndInit();
+
             pnlConfigInfoHeader.ResumeLayout(false);
             pnlButtons.ResumeLayout(false);
             pnlHeaderTop.ResumeLayout(false);
@@ -695,10 +694,11 @@ namespace AssemblyLineTester.Views.Modals
         private System.Windows.Forms.DataGridViewComboBoxColumn colUnit;
         private System.Windows.Forms.Panel pnlConfigInfoHeader;
         private System.Windows.Forms.Label lblConfigInfoHeader;
-        private System.Windows.Forms.DataGridView gridConfigInfo;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colConfigName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colProductModel;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colDescription;
+        private System.Windows.Forms.Panel pnlConfigFields;
+        private System.Windows.Forms.Label lblConfigName;
+        private System.Windows.Forms.TextBox txtConfigName;
+        private System.Windows.Forms.Label lblProductModel;
+        private System.Windows.Forms.TextBox txtProductModel;
         private System.Windows.Forms.Panel pnlCustomHeader;
         private FontAwesome.Sharp.IconPictureBox iconLogo;
         private FontAwesome.Sharp.IconButton btnClose;

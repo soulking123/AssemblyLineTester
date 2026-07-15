@@ -12,7 +12,6 @@ namespace AssemblyLineTester.Views.Pages
 {
     public partial class TestExecution : UserControl
     {
-        private readonly TestConfigFileService _configFileService = new();
         private readonly InstrumentService _instrument = new();
         private List<LiveTestDetailRowDto> _loadedRows = new();
         private string _customTestText = string.Empty;
@@ -26,6 +25,36 @@ namespace AssemblyLineTester.Views.Pages
             SetupGridLiveDetails();
             SetupDiagramPointers();
             btnLoadProgram.Click += BtnLoadProgram_Click;
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                var configService = new TestConfigService();
+                var activeConfig = configService.GetActiveConfig();
+                //_customTestText = configService.ConvertToProgramText(activeConfig);
+                //Debug.WriteLine(_customTestText);
+
+
+                //if (activeConfig != null)
+                //{
+                //    var options = new System.Text.Json.JsonSerializerOptions
+                //    {
+                //        WriteIndented = true,
+                //        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+                //    };
+                //    string json = System.Text.Json.JsonSerializer.Serialize(activeConfig, options);
+                //    Debug.WriteLine("=== Active Config Found on Startup ===");
+                //    Debug.WriteLine(json);
+                //}
+                //else
+                //{
+                //    Debug.WriteLine("=== No Active Config Found on Startup ===");
+                //}
+            }
         }
 
         // Populates the filter dropdowns at the top of the page (Product Model, Type, Area, etc).
@@ -83,27 +112,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
         {
-            using var ofd = new OpenFileDialog
-            {
-                Filter = "Wirelist/Text Files (*.txt;*.wir)|*.txt;*.wir|All Files (*.*)|*.*",
-                Title = "Select Test Program File"
-            };
-
-            if (ofd.ShowDialog() != DialogResult.OK) return;
-
-            try
-            {
-                _customTestText = System.IO.File.ReadAllText(ofd.FileName);
-                Debug.WriteLine($"Nilai custom text saat ini: {_customTestText}");
-
-
-            }
-            catch (Exception ex)
-            {
-                _customTestText = string.Empty;
-                MessageBox.Show($"Failed to read file: {ex.Message}", "Load Program",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            using var modal = new Views.Modals.AutomatedTestConfigModalForm();
+            modal.ShowDialog(this);
         }
 
         private void btnStartTest_Click(object? sender, EventArgs e)
@@ -120,6 +130,7 @@ namespace AssemblyLineTester.Views.Pages
             string testProgramDetails = string.Empty;
 
             // 2. Load the test program
+            Debug.WriteLine(_customTestText);
             if (!string.IsNullOrEmpty(_customTestText))
             {
                 // Upload custom test text without saving to database (using empty string as testName)
