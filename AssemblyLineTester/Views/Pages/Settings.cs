@@ -13,6 +13,7 @@ namespace AssemblyLineTester.Views.Pages
     {
         private TableLayoutPanel? tblUcContainer;
         private Label? lblUnderConstructionTitle;
+        private SettingsTestParametersPage? testParametersPage;
 
         public Settings()
         {
@@ -184,6 +185,14 @@ namespace AssemblyLineTester.Views.Pages
             tblUcContainer.Controls.Add(cardUc, 1, 1);
 
             tblMain.Controls.Add(tblUcContainer, 0, 2);
+
+            testParametersPage = new SettingsTestParametersPage
+            {
+                Dock = DockStyle.Fill,
+                Visible = false,
+                Margin = new Padding(0)
+            };
+            tblMain.Controls.Add(testParametersPage, 0, 2);
         }
 
         private void Tab_Click(Label clickedLabel, EventArgs e)
@@ -218,11 +227,19 @@ namespace AssemblyLineTester.Views.Pages
                 if (clickedLabel == lblTabGen)
                 {
                     tblContent.Visible = true;
+                    if (testParametersPage != null) testParametersPage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
+                }
+                else if (clickedLabel == lblTabTest)
+                {
+                    tblContent.Visible = false;
+                    if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    if (testParametersPage != null) testParametersPage.Visible = true;
                 }
                 else
                 {
                     tblContent.Visible = false;
+                    if (testParametersPage != null) testParametersPage.Visible = false;
                     if (tblUcContainer != null && lblUnderConstructionTitle != null)
                     {
                         lblUnderConstructionTitle.Text = $"{clickedLabel.Text.Trim()} — Under Construction";

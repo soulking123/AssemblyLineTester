@@ -1,24 +1,19 @@
-using AssemblyLineTester.Models;
-using AssemblyLineTester.Services;
-using FontAwesome.Sharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using FontAwesome.Sharp;
 
-namespace AssemblyLineTester.Views.Modals
+namespace AssemblyLineTester.Views.Pages
 {
-    public partial class AutomatedTestConfigModalForm : Form
+    public partial class SettingsTestParametersPage : UserControl
     {
         private readonly HashSet<int> highlightedRows = [];
         private readonly List<DiagramNode> leftNodes = [];
         private readonly List<DiagramNode> rightNodes = [];
         private readonly List<DiagramConnection> connections = [];
-        private readonly TestConfigService _configService = new();
 
         private class DiagramNode
         {
@@ -41,39 +36,27 @@ namespace AssemblyLineTester.Views.Modals
             public DiagramNode RightNode { get; set; } = null!;
         }
 
-        public AutomatedTestConfigModalForm()
+        public SettingsTestParametersPage()
         {
             InitializeComponent();
-            txtConfigName.Text = "Main Harness Test";
-            txtProductModel.Text = "6060";
             SetupEvents();
-            //LoadDefaultData();
-            UpdateTotalNetCount();
-            UpdateDiagramSize();
-            ApplyFormRounding();
-        }
-
-        protected override void OnResize(EventArgs e)
-        {
-            base.OnResize(e);
-            ApplyFormRounding();
-        }
-
-        private void ApplyFormRounding()
-        {
-            if (Width <= 0 || Height <= 0) return;
-            int radius = 24;
-            Rectangle rect = new Rectangle(0, 0, Width, Height);
-            using (var path = new System.Drawing.Drawing2D.GraphicsPath())
+            if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
             {
-                int d = radius * 2;
-                path.StartFigure();
-                path.AddArc(rect.X, rect.Y, d, d, 180, 90);
-                path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
-                path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
-                path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
-                path.CloseFigure();
-                this.Region = new Region(path);
+                LoadDefaultData();
+                UpdateTotalNetCount();
+                UpdateDiagramSize();
+            }
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                LoadDefaultData();
+                UpdateTotalNetCount();
+                UpdateDiagramSize();
+                picPreview.Invalidate();
             }
         }
 
@@ -86,115 +69,22 @@ namespace AssemblyLineTester.Views.Modals
             btnExport.Click += BtnExport_Click;
 
             gridConfig.CellValueChanged += GridConfig_CellValueChanged;
+            gridConfig.CellValidating += GridConfig_CellValidating;
             gridConfig.RowsRemoved += GridConfig_RowsChanged;
             gridConfig.RowsAdded += GridConfig_RowsChanged;
             gridConfig.CurrentCellDirtyStateChanged += GridConfig_CurrentCellDirtyStateChanged;
             gridConfig.EditingControlShowing += GridConfig_EditingControlShowing;
             gridConfig.DataError += (s, e) => { e.ThrowException = false; };
             gridConfig.CellClick += GridConfig_CellClick;
+            gridConfig.Leave += GridConfig_Leave;
+
+            txtConnectionResistance.TextChanged += (s, e) => RecalculateAllRows();
 
             picPreview.Paint += PicPreview_Paint;
             picPreview.MouseDown += PicPreview_MouseDown;
             picPreview.Resize += (s, e) => picPreview.Invalidate();
             pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
-
-            // Window control buttons
-            btnClose.Click += (s, e) => Close();
-            btnMaximize.Click += (s, e) => ToggleMaximize();
-
-            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(239, 68, 68); btnClose.IconColor = Color.White; };
-            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
-
-            btnMaximize.MouseEnter += (s, e) => { btnMaximize.BackColor = Color.FromArgb(30, 41, 59); btnMaximize.IconColor = Color.White; };
-            btnMaximize.MouseLeave += (s, e) => { btnMaximize.BackColor = Color.Transparent; btnMaximize.IconColor = Color.FromArgb(203, 213, 225); };
-
-            // Window dragging via title bar
-            pnlCustomHeader.MouseDown += TitleBar_MouseDown;
-            iconLogo.MouseDown += TitleBar_MouseDown;
-
-            pnlCustomHeader.DoubleClick += (s, e) => ToggleMaximize();
-            iconLogo.DoubleClick += (s, e) => ToggleMaximize();
-        }
-
-        [DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
-
-        private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left && e.Clicks == 1)
-            {
-                if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
-                {
-                    gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
-                }
-                ActiveControl = pnlCustomHeader;
-                ValidateChildren();
-
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
-            }
-        }
-
-        private void ToggleMaximize()
-        {
-            if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
-            {
-                gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
-            }
-            ActiveControl = pnlCustomHeader;
-            ValidateChildren();
-
-            if (WindowState == FormWindowState.Maximized)
-            {
-                WindowState = FormWindowState.Normal;
-                btnMaximize.IconChar = IconChar.WindowMaximize;
-                Padding = new Padding(1);
-            }
-            else
-            {
-                MaximizedBounds = Screen.FromHandle(Handle).WorkingArea;
-                WindowState = FormWindowState.Maximized;
-                btnMaximize.IconChar = IconChar.WindowRestore;
-                Padding = new Padding(0);
-            }
-        }
-
-        protected override void WndProc(ref Message m)
-        {
-            const int WM_NCHITTEST = 0x0084;
-            const int HTLEFT = 10;
-            const int HTRIGHT = 11;
-            const int HTTOP = 12;
-            const int HTTOPLEFT = 13;
-            const int HTTOPRIGHT = 14;
-            const int HTBOTTOM = 15;
-            const int HTBOTTOMLEFT = 16;
-            const int HTBOTTOMRIGHT = 17;
-
-            base.WndProc(ref m);
-
-            if (m.Msg == WM_NCHITTEST && (int)m.Result == 1 && WindowState == FormWindowState.Normal)
-            {
-                Point pt = PointToClient(Cursor.Position);
-                int border = 6;
-                bool overButtons = pt.X >= btnMaximize.Left && pt.Y <= pnlCustomHeader.Height;
-
-                if (overButtons)
-                {
-                    return;
-                }
-
-                if (pt.X <= border && pt.Y <= border) m.Result = (IntPtr)HTTOPLEFT;
-                else if (pt.X >= ClientSize.Width - border && pt.Y <= border) m.Result = (IntPtr)HTTOPRIGHT;
-                else if (pt.X <= border && pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOMLEFT;
-                else if (pt.X >= ClientSize.Width - border && pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOMRIGHT;
-                else if (pt.X <= border) m.Result = (IntPtr)HTLEFT;
-                else if (pt.X >= ClientSize.Width - border) m.Result = (IntPtr)HTRIGHT;
-                else if (pt.Y <= border) m.Result = (IntPtr)HTTOP;
-                else if (pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOM;
-            }
+            splitContainerMain.SplitterMoved += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
         }
 
         private static string[] GetUnitsForTestType(string testType)
@@ -233,7 +123,6 @@ namespace AssemblyLineTester.Views.Modals
         }
 
 
-
         private void LoadDefaultData()
         {
             gridConfig.Rows.Clear();
@@ -241,18 +130,19 @@ namespace AssemblyLineTester.Views.Modals
 
             string[] defaultRows =
             [
-                "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|Resistance|0|5|Ω",
-                "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|Resistance|0|5|Ω",
-                "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|Capacitance|0|100|μF",
-                "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|Resistance|0|5|Ω"
+                "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|Resistance|0|5|2.5|±5%|Ω",
+                "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|Resistance|0|5|2.5|±5%|Ω",
+                "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|Capacitance|0|100|50|±10%|μF",
+                "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|Resistance|0|5|2.5|±5%|Ω"
             ];
 
             foreach (string rowStr in defaultRows)
             {
                 string[] parts = rowStr.Split('|');
-                int idx = gridConfig.Rows.Add(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9], parts[10]);
+                int idx = gridConfig.Rows.Add(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9], parts[10], parts[11], parts[12]);
                 UpdateRowUnitDropdown(idx);
-                gridConfig.Rows[idx].Cells["colUnit"].Value = parts[10];
+                gridConfig.Rows[idx].Cells["colUnit"].Value = parts[12];
+                RecalculateRowLimits(gridConfig.Rows[idx]);
             }
 
             RenumberRows();
@@ -277,11 +167,10 @@ namespace AssemblyLineTester.Views.Modals
         private void UpdateDiagramSize()
         {
             int rowCount = gridConfig.Rows.Count;
-            // Guarantee at least 55 pixels per row so 60 connections never overlap or squish!
             float minRowSpacing = 55f;
             int reqHeight = (int)(60 + Math.Max(rowCount, 1) * minRowSpacing + 60);
             int finalHeight = Math.Max(pnlPreviewScroll.ClientSize.Height, reqHeight);
-            int finalWidth = Math.Max(pnlPreviewScroll.ClientSize.Width - (reqHeight > pnlPreviewScroll.ClientSize.Height ? 25 : 0), 1000);
+            int finalWidth = Math.Max(pnlPreviewScroll.ClientSize.Width - (reqHeight > pnlPreviewScroll.ClientSize.Height ? 25 : 0), 500);
 
             if (picPreview.Width != finalWidth || picPreview.Height != finalHeight)
             {
@@ -292,8 +181,9 @@ namespace AssemblyLineTester.Views.Modals
         private void BtnAdd_Click(object? sender, EventArgs e)
         {
             int newIdx = gridConfig.Rows.Count + 1;
-            int idx = gridConfig.Rows.Add(newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply", "0", $"X1-0{newIdx}", "0", $"Y1-0{newIdx}", "Resistance", "0", "5", "Ω");
+            int idx = gridConfig.Rows.Add(newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply", "0", $"X1-0{newIdx}", "0", $"Y1-0{newIdx}", "Resistance", "0", "5", "2.5", "±5%", "Ω");
             UpdateRowUnitDropdown(idx);
+            RecalculateRowLimits(gridConfig.Rows[idx]);
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
@@ -349,99 +239,12 @@ namespace AssemblyLineTester.Views.Modals
 
         private void BtnExport_Click(object? sender, EventArgs e)
         {
-            if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
-            {
-                gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
-            }
-
-            var config = new TestConfiguration
-            {
-                ConfigName = txtConfigName.Text.Trim(),
-                ProductModel = txtProductModel.Text.Trim(),
-                ConfigCode = "CFG-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-                CreatedBy = SessionManager.CurrentUser?.Username ?? "System",
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true,
-                Nets = new List<TestConfigNet>()
-            };
-
-            foreach (DataGridViewRow row in gridConfig.Rows)
-            {
-                if (row.IsNewRow) continue;
-
-                // Safely parse double values
-                double? ParseDouble(string cellName)
-                {
-                    var val = row.Cells[cellName].Value?.ToString();
-                    return double.TryParse(val, out double res) ? res : (double?)null;
-                }
-
-                // Safely parse integer values
-                int ParseInt(string cellName)
-                {
-                    var val = row.Cells[cellName].Value?.ToString();
-                    return int.TryParse(val, out int res) ? res : 0;
-                }
-
-                var net = new TestConfigNet
-                {
-                    SequenceNo = ParseInt("colNo"),
-                    NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
-                    HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
-
-                    FromAddress = ParseInt("colFromAddr"),
-                    FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
-
-                    ToAddress = ParseInt("colToAddr"),
-                    ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
-
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
-                    LowerLimit = ParseDouble("colLowerLimit"),
-                    UpperLimit = ParseDouble("colUpperLimit"),
-
-                    // Dynamic TestTypeId mapping
-                    TestTypeId = (row.Cells["colTestType"].Value?.ToString() == "Resistance") ? 11 : 15 // 11 = RESISTOR, 15 = WIRE
-                };
-
-                config.Nets.Add(net);
-            }
-
-            // Save to database using service
-            try
-            {
-                _configService.SaveConfig(config);
-                _configService.SetActiveConfig(config.ConfigName);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to save to database: {ex.Message}", "Database Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // Pretty print to debug console
-            var options = new System.Text.Json.JsonSerializerOptions 
-            { 
-                WriteIndented = true,
-                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
-            };
-            string json = System.Text.Json.JsonSerializer.Serialize(config, options);
-            System.Diagnostics.Debug.WriteLine(json);
-
-            // Export to file
             using SaveFileDialog sfd = new();
             sfd.Filter = "JSON Config (*.json)|*.json|CSV Config (*.csv)|*.csv";
             sfd.FileName = "AutomatedTestConfig.json";
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                try
-                {
-                    System.IO.File.WriteAllText(sfd.FileName, json);
-                    MessageBox.Show("Configuration saved to database and exported successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Failed to save JSON file: {ex.Message}", "File Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                MessageBox.Show("Configuration exported successfully!", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -451,6 +254,20 @@ namespace AssemblyLineTester.Views.Modals
                (gridConfig.CurrentCell is DataGridViewComboBoxCell || gridConfig.CurrentCell is DataGridViewCheckBoxCell))
             {
                 gridConfig.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            }
+        }
+
+        private void GridConfig_Leave(object? sender, EventArgs e)
+        {
+            CommitGridIfDirty();
+        }
+
+        private void CommitGridIfDirty()
+        {
+            if (gridConfig.IsCurrentCellInEditMode || gridConfig.IsCurrentCellDirty)
+            {
+                gridConfig.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                gridConfig.EndEdit(DataGridViewDataErrorContexts.Commit);
             }
         }
 
@@ -484,14 +301,156 @@ namespace AssemblyLineTester.Views.Modals
 
         private void GridConfig_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
         {
-            var colTestType = gridConfig.Columns["colTestType"];
-            if (e.RowIndex >= 0 && colTestType != null && e.ColumnIndex == colTestType.Index)
+            if (e.RowIndex >= 0 && e.RowIndex < gridConfig.Rows.Count)
             {
-                UpdateRowUnitDropdown(e.RowIndex);
+                var colTestType = gridConfig.Columns["colTestType"];
+                var colExpected = gridConfig.Columns["colExpectedValue"];
+                var colTolerance = gridConfig.Columns["colTolerance"];
+
+                if (colTestType != null && e.ColumnIndex == colTestType.Index)
+                {
+                    UpdateRowUnitDropdown(e.RowIndex);
+                    RecalculateRowLimits(gridConfig.Rows[e.RowIndex]);
+                }
+                else if ((colExpected != null && e.ColumnIndex == colExpected.Index) ||
+                         (colTolerance != null && e.ColumnIndex == colTolerance.Index))
+                {
+                    RecalculateRowLimits(gridConfig.Rows[e.RowIndex]);
+                }
             }
             UpdateTotalNetCount();
             UpdateDiagramSize();
             picPreview.Invalidate();
+        }
+
+        private void GridConfig_CellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= gridConfig.Rows.Count) return;
+            var row = gridConfig.Rows[e.RowIndex];
+            if (row.IsNewRow) return;
+
+            var colTolerance = gridConfig.Columns["colTolerance"];
+            if (colTolerance != null && e.ColumnIndex == colTolerance.Index)
+            {
+                string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
+                if (testType.Equals("Continuity", StringComparison.OrdinalIgnoreCase)) return;
+
+                string input = e.FormattedValue?.ToString() ?? "";
+                if (!string.IsNullOrWhiteSpace(input) && input != "-")
+                {
+                    string clean = input.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
+                    if (double.TryParse(clean, out double val))
+                    {
+                        if (val > 10.0 || val < -10.0)
+                        {
+                            MessageBox.Show("Tolerance must be limited from -10% to 10% only.", "Tolerance Limit Exceeded", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void RecalculateAllRows()
+        {
+            foreach (DataGridViewRow row in gridConfig.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    RecalculateRowLimits(row);
+                }
+            }
+        }
+
+        private void RecalculateRowLimits(DataGridViewRow row)
+        {
+            if (row == null || row.IsNewRow) return;
+
+            string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
+
+            if (testType.Equals("Continuity", StringComparison.OrdinalIgnoreCase))
+            {
+                row.Cells["colExpectedValue"].Value = "0";
+                row.Cells["colExpectedValue"].ReadOnly = true;
+
+                row.Cells["colTolerance"].Value = "-";
+                row.Cells["colTolerance"].ReadOnly = true;
+
+                row.Cells["colLowerLimit"].Value = "0";
+                row.Cells["colUpperLimit"].Value = txtConnectionResistance.Text?.Trim() ?? "0";
+            }
+            else
+            {
+                row.Cells["colExpectedValue"].ReadOnly = false;
+                row.Cells["colTolerance"].ReadOnly = false;
+
+                string expStr = row.Cells["colExpectedValue"].Value?.ToString() ?? "0";
+                string tolStr = row.Cells["colTolerance"].Value?.ToString() ?? "±0%";
+
+                if (double.TryParse(expStr, out double expectedVal))
+                {
+                    (double minTolPct, double maxTolPct, string formattedTol) = ParseClampAndFormatTolerance(tolStr);
+                    
+                    if (row.Cells["colTolerance"].Value?.ToString() != formattedTol)
+                    {
+                        row.Cells["colTolerance"].Value = formattedTol;
+                    }
+
+                    double lower = expectedVal * (1.0 + (minTolPct / 100.0));
+                    double upper = expectedVal * (1.0 + (maxTolPct / 100.0));
+
+                    if (lower > upper)
+                    {
+                        (lower, upper) = (upper, lower);
+                    }
+
+                    row.Cells["colLowerLimit"].Value = FormatLimit(lower);
+                    row.Cells["colUpperLimit"].Value = FormatLimit(upper);
+                }
+                else
+                {
+                    row.Cells["colLowerLimit"].Value = "0";
+                    row.Cells["colUpperLimit"].Value = "0";
+                }
+            }
+        }
+
+        private static (double minTolPct, double maxTolPct, string formattedTol) ParseClampAndFormatTolerance(string tolStr)
+        {
+            if (string.IsNullOrWhiteSpace(tolStr) || tolStr == "-")
+            {
+                return (0, 0, "±0%");
+            }
+
+            string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
+            if (double.TryParse(clean, out double val))
+            {
+                if (val > 10.0) val = 10.0;
+                if (val < -10.0) val = -10.0;
+
+                string numStr = FormatLimit(Math.Abs(val));
+                if (tolStr.Contains("±") || (!tolStr.StartsWith("-") && !tolStr.StartsWith("+")))
+                {
+                    return (-Math.Abs(val), Math.Abs(val), $"±{numStr}%");
+                }
+                else if (tolStr.StartsWith("-"))
+                {
+                    return (-Math.Abs(val), 0, $"-{numStr}%");
+                }
+                else if (tolStr.StartsWith("+"))
+                {
+                    return (0, Math.Abs(val), $"+{numStr}%");
+                }
+            }
+            return (0, 0, "±0%");
+        }
+
+        private static string FormatLimit(double val)
+        {
+            if (Math.Abs(val - Math.Round(val)) < 1e-6)
+            {
+                return ((long)Math.Round(val)).ToString();
+            }
+            return val.ToString("0.###");
         }
 
         private void GridConfig_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -522,7 +481,7 @@ namespace AssemblyLineTester.Views.Modals
                 DataGridViewRow row = gridConfig.Rows[i];
                 if (highlightedRows.Contains(i))
                 {
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(254, 249, 195); // Soft yellow/golden highlight
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(254, 249, 195);
                     row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(253, 224, 71);
                     row.DefaultCellStyle.SelectionForeColor = Color.Black;
                 }
@@ -539,7 +498,6 @@ namespace AssemblyLineTester.Views.Modals
         {
             PointF pt = e.Location;
 
-            // Check nodes first (prioritize highlighted nodes on top!)
             foreach (var node in leftNodes.Concat(rightNodes).OrderByDescending(n => highlightedRows.Contains(n.RowIndex)))
             {
                 if (IsPointInRect(pt, node.NodeRect) || IsPointInRect(pt, node.LabelRect))
@@ -549,7 +507,6 @@ namespace AssemblyLineTester.Views.Modals
                 }
             }
 
-            // Check connection curves (prioritize highlighted curves on top!)
             foreach (var conn in connections.OrderByDescending(c => highlightedRows.Contains(c.RowIndex)))
             {
                 if (IsPointNearBezier(pt, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint, 12f))
@@ -598,11 +555,9 @@ namespace AssemblyLineTester.Views.Modals
 
             Rectangle r = picPreview.ClientRectangle;
 
-            // Draw clean background
             using SolidBrush bgBrush = new(Color.FromArgb(248, 250, 252));
             g.FillRectangle(bgBrush, r);
 
-            // Draw schematic grid dots
             using SolidBrush dotBrush = new(Color.FromArgb(226, 232, 240));
             for (int x = 20; x < r.Width; x += 25)
             {
@@ -621,7 +576,6 @@ namespace AssemblyLineTester.Views.Modals
 
             float availHeight = r.Height - 100;
             float startY = 50f;
-            // Guarantee at least 55 pixels per row so 60 connections never overlap!
             float rowSpacing = Math.Max(55f, availHeight / Math.Max(rowCount, 1));
 
             List<DiagramNode> rawLeftNodes = [];
@@ -654,7 +608,6 @@ namespace AssemblyLineTester.Views.Modals
                 rawRightNodes.Add(rNode);
             }
 
-            // Sort left nodes ascending by address so the smallest address is always at the top!
             var sortedLeftNodes = rawLeftNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
             for (int idx = 0; idx < sortedLeftNodes.Count; idx++)
             {
@@ -665,7 +618,6 @@ namespace AssemblyLineTester.Views.Modals
                 leftNodes.Add(lNode);
             }
 
-            // Sort right nodes ascending by address so the smallest address is always at the top!
             var sortedRightNodes = rawRightNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
             for (int idx = 0; idx < sortedRightNodes.Count; idx++)
             {
@@ -676,7 +628,6 @@ namespace AssemblyLineTester.Views.Modals
                 rightNodes.Add(rNode);
             }
 
-            // Build connection paths
             for (int i = 0; i < rowCount; i++)
             {
                 var lNode = leftNodes.FirstOrDefault(n => n.RowIndex == i);
@@ -701,7 +652,6 @@ namespace AssemblyLineTester.Views.Modals
                 }
             }
 
-            // PASS 1: Draw UNHIGHLIGHTED lines (bottom of visual stack)
             using Pen normalPen = new(Color.FromArgb(14, 165, 233), 3f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
             using Pen darkPen = new(Color.FromArgb(15, 23, 42), 3f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
             foreach (var conn in connections)
@@ -718,7 +668,6 @@ namespace AssemblyLineTester.Views.Modals
             using StringFormat sfLabel = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap, Trimming = StringTrimming.EllipsisCharacter };
             using StringFormat sfAddr = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.NoClip };
 
-            // PASS 2: Draw UNHIGHLIGHTED nodes and labels
             foreach (var node in leftNodes.Concat(rightNodes))
             {
                 if (!highlightedRows.Contains(node.RowIndex))
@@ -727,7 +676,6 @@ namespace AssemblyLineTester.Views.Modals
                 }
             }
 
-            // PASS 3: Draw HIGHLIGHTED lines (on top of unhighlighted lines & unhighlighted nodes!)
             using Pen glowPen = new(Color.FromArgb(254, 240, 138), 11f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
             using Pen innerPen = new(Color.FromArgb(13, 110, 253), 3.5f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
             foreach (var conn in connections)
@@ -739,7 +687,6 @@ namespace AssemblyLineTester.Views.Modals
                 }
             }
 
-            // PASS 4: Draw HIGHLIGHTED nodes and labels (on the absolute front/top of EVERYTHING!)
             foreach (var node in leftNodes.Concat(rightNodes))
             {
                 if (highlightedRows.Contains(node.RowIndex))
