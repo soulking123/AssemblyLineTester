@@ -239,7 +239,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void ShowEditConfigsDialog()
         {
-            var configs = _configService.GetAllConfigurations();
+            // Initial fetch - service handles ordering (most recent first)
 
             using Form dlg = new()
             {
@@ -249,6 +249,18 @@ namespace AssemblyLineTester.Views.Pages
                 StartPosition = FormStartPosition.CenterParent,
                 FormBorderStyle = FormBorderStyle.Sizable
             };
+
+            // Top panel: search controls
+            var topPanel = new Panel() { Dock = DockStyle.Top, Height = 48, Padding = new Padding(8) };
+            var lblSearch = new Label() { Text = "Search by Config Name:", AutoSize = true, Left = 8, Top = 14 };
+            var txtSearch = new TextBox() { Left = 170, Top = 10, Width = 360 };
+            var btnSearchBox = new Button() { Text = "Search", Left = 540, Top = 8, Width = 80, Height = 30 };
+            var btnClearBox = new Button() { Text = "Clear", Left = 628, Top = 8, Width = 80, Height = 30 };
+
+            topPanel.Controls.Add(lblSearch);
+            topPanel.Controls.Add(txtSearch);
+            topPanel.Controls.Add(btnSearchBox);
+            topPanel.Controls.Add(btnClearBox);
 
             var grid = new DataGridView()
             {
@@ -267,11 +279,18 @@ namespace AssemblyLineTester.Views.Pages
             grid.Columns.Add("IsActive", "Active");
             grid.Columns.Add("NetCount", "Nets");
 
-            foreach (var c in configs)
+            void PopulateGrid(IEnumerable<TestConfiguration> list)
             {
-                int idx = grid.Rows.Add(c.ConfigName, c.ProductModel, c.CreatedAt.ToString("g"), c.UpdatedAt?.ToString("g") ?? "-", c.IsActive ? "Yes" : "No", c.Nets?.Count ?? 0);
-                grid.Rows[idx].Tag = c.ConfigName;
+                grid.Rows.Clear();
+                foreach (var c in list)
+                {
+                    int idx = grid.Rows.Add(c.ConfigName, c.ProductModel, c.CreatedAt.ToString("g"), c.UpdatedAt?.ToString("g") ?? "-", c.IsActive ? "Yes" : "No", c.Nets?.Count ?? 0);
+                    grid.Rows[idx].Tag = c.ConfigName;
+                }
             }
+
+            // initial population (fetch from DB, ordered by UpdatedAt/CreatedAt desc)
+            PopulateGrid(_configService.GetConfigurations(null));
 
             var btnPanel = new Panel() { Dock = DockStyle.Bottom, Height = 56 };
             var btnLoad = new Button() { Text = "Load", Width = 100, Height = 36, Left = 8, Top = 10 }; 
@@ -343,6 +362,7 @@ namespace AssemblyLineTester.Views.Pages
 
             dlg.Controls.Add(grid);
             dlg.Controls.Add(btnPanel);
+            dlg.Controls.Add(topPanel);
 
             // double-click to load
             grid.CellDoubleClick += (s, e) =>
@@ -352,6 +372,36 @@ namespace AssemblyLineTester.Views.Pages
                     grid.ClearSelection();
                     grid.Rows[e.RowIndex].Selected = true;
                     btnLoad.PerformClick();
+                }
+            };
+
+            // Search behaviour: perform DB-side filtered fetch for maintainability and performance
+            btnSearchBox.Click += (s, e) =>
+            {
+                string q = txtSearch.Text?.Trim() ?? "";
+                if (string.IsNullOrEmpty(q))
+                {
+                    PopulateGrid(_configService.GetConfigurations(null));
+                }
+                else
+                {
+                    PopulateGrid(_configService.GetConfigurations(q));
+                }
+            };
+
+            btnClearBox.Click += (s, e) =>
+            {
+                txtSearch.Text = "";
+                PopulateGrid(_configService.GetConfigurations(null));
+            };
+
+            txtSearch.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    btnSearchBox.PerformClick();
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
                 }
             };
 

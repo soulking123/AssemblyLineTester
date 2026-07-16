@@ -50,6 +50,9 @@ namespace AssemblyLineTester.Services
                 }
                 else
                 {
+                    // Ensure CreatedAt/UpdatedAt are set for new configs
+                    config.CreatedAt = DateTime.UtcNow;
+                    config.UpdatedAt = DateTime.UtcNow;
                     db.TestConfigurations.Add(config);
                 }
 
@@ -122,12 +125,33 @@ namespace AssemblyLineTester.Services
 
         public List<TestConfiguration> GetAllConfigurations()
         {
+            return GetConfigurations(null);
+        }
+
+        /// <summary>
+        /// Retrieve configurations optionally filtered by config name (case-insensitive)
+        /// and ordered by most-recently updated (or created) first.
+        /// This performs filtering at the database level for efficiency.
+        /// </summary>
+        public List<TestConfiguration> GetConfigurations(string? configNameFilter)
+        {
             using var db = new AppDbContext();
-            return db.TestConfigurations
+            var q = db.TestConfigurations
                 .Include(c => c.Nets)
                 .ThenInclude(n => n.TestType)
-                .OrderByDescending(c => c.CreatedAt)
-                .ToList();
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(configNameFilter))
+            {
+                string key = configNameFilter.Trim().ToUpperInvariant();
+                // Use ToUpper + Contains so EF Core can translate to SQL UPPER(...) LIKE ...
+                q = q.Where(c => c.ConfigName != null && c.ConfigName.ToUpper().Contains(key));
+            }
+
+            // Order by UpdatedAt if available, otherwise by CreatedAt. Newest first.
+            q = q.OrderByDescending(c => (c.UpdatedAt ?? c.CreatedAt));
+
+            return q.ToList();
         }
 
         public bool DeleteConfiguration(string configName)
