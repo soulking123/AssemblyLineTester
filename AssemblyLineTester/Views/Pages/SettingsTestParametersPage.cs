@@ -8,16 +8,20 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
+using AssemblyLineTester.Models;
+using AssemblyLineTester.Models.Dto;
+using System.Linq;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class SettingsTestParametersPage : UserControl
     {
-        private readonly HashSet<int> highlightedRows = [];
-        private readonly List<DiagramNode> leftNodes = [];
-        private readonly List<DiagramNode> rightNodes = [];
-        private readonly List<DiagramConnection> connections = [];
-        private readonly TestConfigService _configService = new();
+        private readonly HashSet<int> highlightedRows = new();
+        private readonly List<DiagramNode> leftNodes = new();
+        private readonly List<DiagramNode> rightNodes = new();
+        private readonly List<DiagramConnection> connections = new();
+        private readonly TestConfigService _configService = new TestConfigService();
+        private string? _loadedConfigName = null;
 
         private class DiagramNode
         {
@@ -38,18 +42,6 @@ namespace AssemblyLineTester.Views.Pages
             public PointF Control2 { get; set; }
             public DiagramNode LeftNode { get; set; } = null!;
             public DiagramNode RightNode { get; set; } = null!;
-        }
-
-        public SettingsTestParametersPage()
-        {
-            InitializeComponent();
-            SetupEvents();
-            if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
-            {
-                LoadDefaultData();
-                UpdateTotalNetCount();
-                UpdateDiagramSize();
-            }
         }
 
         protected override void OnLoad(EventArgs e)
@@ -91,20 +83,7 @@ namespace AssemblyLineTester.Views.Pages
             splitContainerMain.SplitterMoved += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
         }
 
-        private static string[] GetUnitsForTestType(string testType)
-        {
-            return testType switch
-            {
-                "Resistance" => ["Ω", "mΩ", "kΩ", "MΩ", "GΩ"],
-                "Capacitance" => ["F", "μF", "nF", "pF"],
-                "Voltage" => ["V", "mV", "kV"],
-                "Continuity" => ["Ω", "mΩ"],
-                "Insulation" => ["MΩ", "GΩ", "kΩ", "Ω"],
-                "Short Circuit" => ["MΩ", "GΩ", "kΩ", "Ω"],
-                "Functional" => ["V", "mV", "A", "mA", "Ω", "Hz", "ms"],
-                _ => ["Ω", "mΩ", "kΩ", "MΩ", "GΩ", "F", "μF", "nF", "pF", "V", "mV", "kV", "A", "mA", "Hz", "ms"]
-            };
-        }
+        private static string[] GetUnitsForTestType(string testType) => UnitConversionHelper.GetUnitsForTestType(testType);
 
         private void UpdateRowUnitDropdown(int rowIndex)
         {
@@ -126,6 +105,29 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        public SettingsTestParametersPage()
+        {
+            InitializeComponent();
+            SetupEvents();
+            if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
+            {
+                LoadTestTypeColumnItems();
+                LoadDefaultData();
+                UpdateTotalNetCount();
+                UpdateDiagramSize();
+            }
+        }
+
+        private void LoadTestTypeColumnItems()
+        {
+            var names = _configService.GetTestTypeNames();
+
+            if (gridConfig.Columns["colTestType"] is DataGridViewComboBoxColumn testTypeCol)
+            {
+                testTypeCol.Items.Clear();
+                testTypeCol.Items.AddRange(names.Cast<object>().ToArray());
+            }
+        }
 
         private void LoadDefaultData()
         {
@@ -233,100 +235,312 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnImport_Click(object? sender, EventArgs e)
         {
-            using OpenFileDialog ofd = new();
-            ofd.Filter = "Config Files (*.json;*.xml;*.csv)|*.json;*.xml;*.csv|All Files (*.*)|*.*";
-            if (ofd.ShowDialog() == DialogResult.OK)
+            // Open the Edit Config modal (lists saved configurations from DB)
+            ShowEditConfigsDialog();
+        }
+
+        private void ShowEditConfigsDialog()
+        {
+            var configs = _configService.GetAllConfigurations();
+
+            using Form dlg = new()
             {
-                MessageBox.Show("Configuration file imported successfully!", "Import Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Text = "Edit Config",
+                Width = 900,
+                Height = 520,
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.Sizable
+            };
+
+            var grid = new DataGridView()
+            {
+                Dock = DockStyle.Fill,
+                ReadOnly = true,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+            };
+
+            grid.Columns.Add("ConfigName", "Config Name");
+            grid.Columns.Add("ProductModel", "Product Model");
+            grid.Columns.Add("CreatedAt", "Created At");
+            grid.Columns.Add("UpdatedAt", "Updated At");
+            grid.Columns.Add("IsActive", "Active");
+            grid.Columns.Add("NetCount", "Nets");
+
+            foreach (var c in configs)
+            {
+                int idx = grid.Rows.Add(c.ConfigName, c.ProductModel, c.CreatedAt.ToString("g"), c.UpdatedAt?.ToString("g") ?? "-", c.IsActive ? "Yes" : "No", c.Nets?.Count ?? 0);
+                grid.Rows[idx].Tag = c.ConfigName;
             }
+
+            var btnPanel = new Panel() { Dock = DockStyle.Bottom, Height = 56 };
+            var btnLoad = new Button() { Text = "Load", Width = 100, Height = 36, Left = 8, Top = 10 }; 
+            var btnDelete = new Button() { Text = "Delete", Width = 100, Height = 36, Left = 116, Top = 10 };
+            var btnClose = new Button() { Text = "Close", Width = 100, Height = 36, Left = 224, Top = 10 };
+
+            btnLoad.Click += (s, e) =>
+            {
+                if (grid.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Please select a configuration to load.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
+                var cfg = _configService.GetConfigurationByName(name);
+                if (cfg == null)
+                {
+                    MessageBox.Show("Selected configuration could not be loaded (it may have been deleted).", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                LoadConfigurationIntoGrid(cfg);
+                dlg.Close();
+            };
+
+            btnDelete.Click += (s, e) =>
+            {
+                if (grid.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Please select a configuration to delete.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
+                if (MessageBox.Show($"Delete configuration '{name}'? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    return;
+
+                try
+                {
+                    bool ok = _configService.DeleteConfiguration(name);
+                    if (ok)
+                    {
+                        // remove row and refresh
+                        grid.Rows.Remove(grid.SelectedRows[0]);
+                        MessageBox.Show("Configuration deleted.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // if the deleted config was loaded in the editor, clear loaded state
+                        if (string.Equals(_loadedConfigName, name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            _loadedConfigName = null;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to delete configuration.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error deleting configuration:\n{ex.Message}", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            btnClose.Click += (s, e) => dlg.Close();
+
+            btnPanel.Controls.Add(btnLoad);
+            btnPanel.Controls.Add(btnDelete);
+            btnPanel.Controls.Add(btnClose);
+
+            dlg.Controls.Add(grid);
+            dlg.Controls.Add(btnPanel);
+
+            // double-click to load
+            grid.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex >= 0)
+                {
+                    grid.ClearSelection();
+                    grid.Rows[e.RowIndex].Selected = true;
+                    btnLoad.PerformClick();
+                }
+            };
+
+            dlg.ShowDialog(this);
+        }
+
+        private void LoadConfigurationIntoGrid(TestConfiguration config)
+        {
+            if (config == null) return;
+
+            gridConfig.Rows.Clear();
+            highlightedRows.Clear();
+
+            txtConfigName.Text = config.ConfigName;
+            txtProductModel.Text = config.ProductModel;
+
+            foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
+            {
+                string testTypeName = net.TestType?.TestTypeName ?? "";
+                string expected = net.ExpectedValue.HasValue ? FormatLimit(net.ExpectedValue.Value) : "0";
+                string tolerance = net.Tolerance.HasValue ? $"±{FormatLimit(net.Tolerance.Value)}%" : "±0%";
+
+                int idx = gridConfig.Rows.Add(
+                    net.SequenceNo.ToString(),
+                    net.NetId,
+                    net.HarnessGroup,
+                    net.FromAddress.ToString(),
+                    net.FromLabel,
+                    net.ToAddress.ToString(),
+                    net.ToLabel,
+                    testTypeName,
+                    FormatLimit(net.LowerLimit ?? 0),
+                    FormatLimit(net.UpperLimit ?? 0),
+                    expected,
+                    tolerance,
+                    net.MeasurementUnit ?? "");
+
+                UpdateRowUnitDropdown(idx);
+                gridConfig.Rows[idx].Cells["colUnit"].Value = net.MeasurementUnit ?? "";
+                RecalculateRowLimits(gridConfig.Rows[idx]);
+            }
+
+            RenumberRows();
+            UpdateTotalNetCount();
+            UpdateDiagramSize();
+            picPreview.Invalidate();
+
+            _loadedConfigName = config.ConfigName;
+        }
+
+        private static (string expected, string tolerance) DeriveExpectedAndTolerance(double? lower, double? upper)
+        {
+            if (!lower.HasValue && !upper.HasValue) return ("0", "±0%");
+            if (lower.HasValue && upper.HasValue)
+            {
+                double mid = (lower.Value + upper.Value) / 2.0;
+                double tolPct = mid == 0 ? 0 : Math.Abs((upper.Value - mid) / mid * 100.0);
+                return (FormatLimit(mid), $"±{FormatLimit(tolPct)}%");
+            }
+            double val = lower ?? upper!.Value;
+            return (FormatLimit(val), "±0%");
         }
 
         private void BtnExport_Click(object? sender, EventArgs e)
         {
-            //using SaveFileDialog sfd = new();
-            //sfd.Filter = "JSON Config (*.json)|*.json|CSV Config (*.csv)|*.csv";
-            //sfd.FileName = "AutomatedTestConfig.json";
-            //if (sfd.ShowDialog() == DialogResult.OK)
+            //double conectionResistance = double.Parse(txtConnectionResistance.Text.Trim());
+            //double insulationResistance = double.Parse(txtInsulationResistance.Text.Trim());
+
+            //var config = new TestConfiguration
             //{
-            //    MessageBox.Show("Configuration exported successfully!", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //    ConfigName = txtConfigName.Text.Trim(),
+            //    ProductModel = txtProductModel.Text.Trim(),
+            //    ConfigCode = "CFG-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+            //    CreatedBy = SessionManager.CurrentUser?.Username ?? "System",
+            //    CreatedAt = DateTime.UtcNow,
+            //    IsActive = true,
+            //    Nets = new List<TestConfigNet>()
             //};
-            double conectionResistance = double.Parse(txtConnectionResistance.Text.Trim());
-            double insulationResistance = double.Parse(txtInsulationResistance.Text.Trim());
 
-            var config = new TestConfiguration
+            //foreach (DataGridViewRow row in gridConfig.Rows)
+            //{
+            //    if (row.IsNewRow) continue;
+
+            //    // Safely parse double values
+            //    double? ParseDouble(string cellName)
+            //    {
+            //        var val = row.Cells[cellName].Value?.ToString();
+            //        return double.TryParse(val, out double res) ? res : (double?)null;
+            //    }
+
+            //    // Safely parse integer values
+            //    int ParseInt(string cellName)
+            //    {
+            //        var val = row.Cells[cellName].Value?.ToString();
+            //        return int.TryParse(val, out int res) ? res : 0;
+            //    }
+
+            //    var net = new TestConfigNet
+            //    {
+            //        SequenceNo = ParseInt("colNo"),
+            //        NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
+            //        HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
+
+            //        FromAddress = ParseInt("colFromAddr"),
+            //        FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
+
+            //        ToAddress = ParseInt("colToAddr"),
+            //        ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
+
+            //        MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
+            //        LowerLimit = ParseDouble("colLowerLimit"),
+            //        UpperLimit = ParseDouble("colUpperLimit"),
+
+            //        // Dynamic TestTypeId mapping
+            //        TestTypeId = (row.Cells["colTestType"].Value?.ToString() == "Resistance") ? 11 : 15 // 11 = RESISTOR, 15 = WIRE
+            //    };
+
+            //    config.Nets.Add(net);
+            //}
+            //try
+            //{
+            //    _configService.SaveConfig(config);
+            //    _configService.SetActiveConfig(config.ConfigName);
+
+            //    var options = new System.Text.Json.JsonSerializerOptions
+            //    {
+            //        WriteIndented = true,
+            //        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            //    };
+            //    // 2. Convert the object to a JSON string
+            //    string json = System.Text.Json.JsonSerializer.Serialize(config, options);
+            //    // 3. Print the JSON string to your Debug console
+            //    Debug.WriteLine($"Instance:\n{json}");
+
+            //    string customText = _configService.ConvertToProgramText(config);
+            //    Debug.WriteLine($"Program Text:\n{customText}");
+
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show($"Error saving configuration: {ex.Message}", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+
+            // Save current grid configuration to the database.
+            var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
+            if (config == null)
             {
-                ConfigName = txtConfigName.Text.Trim(),
-                ProductModel = txtProductModel.Text.Trim(),
-                ConfigCode = "CFG-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-                CreatedBy = SessionManager.CurrentUser?.Username ?? "System",
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true,
-                Nets = new List<TestConfigNet>()
-            };
-
-            foreach (DataGridViewRow row in gridConfig.Rows)
-            {
-                if (row.IsNewRow) continue;
-
-                // Safely parse double values
-                double? ParseDouble(string cellName)
-                {
-                    var val = row.Cells[cellName].Value?.ToString();
-                    return double.TryParse(val, out double res) ? res : (double?)null;
-                }
-
-                // Safely parse integer values
-                int ParseInt(string cellName)
-                {
-                    var val = row.Cells[cellName].Value?.ToString();
-                    return int.TryParse(val, out int res) ? res : 0;
-                }
-
-                var net = new TestConfigNet
-                {
-                    SequenceNo = ParseInt("colNo"),
-                    NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
-                    HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
-
-                    FromAddress = ParseInt("colFromAddr"),
-                    FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
-
-                    ToAddress = ParseInt("colToAddr"),
-                    ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
-
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
-                    LowerLimit = ParseDouble("colLowerLimit"),
-                    UpperLimit = ParseDouble("colUpperLimit"),
-
-                    // Dynamic TestTypeId mapping
-                    TestTypeId = (row.Cells["colTestType"].Value?.ToString() == "Resistance") ? 11 : 15 // 11 = RESISTOR, 15 = WIRE
-                };
-
-                config.Nets.Add(net);
+                MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
+
+            if (string.IsNullOrWhiteSpace(config.ConfigName))
+            {
+                MessageBox.Show("Config Name is required.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var existing = _configService.GetConfigurationByName(config.ConfigName);
+
             try
             {
-                _configService.SaveConfig(config);
-                _configService.SetActiveConfig(config.ConfigName);
-
-                var options = new System.Text.Json.JsonSerializerOptions
+                if (existing != null)
                 {
-                    WriteIndented = true,
-                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
-                };
-                // 2. Convert the object to a JSON string
-                string json = System.Text.Json.JsonSerializer.Serialize(config, options);
-                // 3. Print the JSON string to your Debug console
-                Debug.WriteLine($"Instance:\n{json}");
+                    // Allow overwrite only when the user explicitly loaded this config for editing
+                    if (!string.IsNullOrWhiteSpace(_loadedConfigName) && string.Equals(_loadedConfigName, config.ConfigName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var res = MessageBox.Show($"Overwrite existing configuration '{config.ConfigName}'?", "Confirm Overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (res != DialogResult.Yes) return;
 
-                string customText = _configService.ConvertToProgramText(config);
-                Debug.WriteLine($"Program Text:\n{customText}");
+                        _configService.SaveConfig(config);
+                        _loadedConfigName = config.ConfigName;
+                        MessageBox.Show("Configuration overwritten successfully.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
 
+                    MessageBox.Show("A configuration with the same name already exists. Load it from Edit Config to overwrite or choose a different name.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // New config
+                _configService.SaveConfig(config);
+                _loadedConfigName = config.ConfigName;
+                MessageBox.Show("Configuration saved successfully.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving configuration: {ex.Message}", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                MessageBox.Show($"Failed to save configuration:\n{ex.Message}", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -405,8 +619,11 @@ namespace AssemblyLineTester.Views.Pages
             picPreview.Invalidate();
         }
 
+        private static readonly string[] ContinuityLikeTypes = TestConfigService.ContinuityLikeTestTypes;
+
         private void GridConfig_CellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
         {
+
             if (e.RowIndex < 0 || e.RowIndex >= gridConfig.Rows.Count) return;
             var row = gridConfig.Rows[e.RowIndex];
             if (row.IsNewRow) return;
@@ -415,7 +632,7 @@ namespace AssemblyLineTester.Views.Pages
             if (colTolerance != null && e.ColumnIndex == colTolerance.Index)
             {
                 string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
-                if (testType.Equals("Continuity", StringComparison.OrdinalIgnoreCase)) return;
+                if (ContinuityLikeTypes.Contains(testType, StringComparer.OrdinalIgnoreCase)) return;
 
                 string input = e.FormattedValue?.ToString() ?? "";
                 if (!string.IsNullOrWhiteSpace(input) && input != "-")
@@ -449,7 +666,7 @@ namespace AssemblyLineTester.Views.Pages
 
             string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
 
-            if (testType.Equals("Continuity", StringComparison.OrdinalIgnoreCase))
+            if (testType.Equals("Wire", StringComparison.OrdinalIgnoreCase))
             {
                 row.Cells["colExpectedValue"].Value = "0";
                 row.Cells["colExpectedValue"].ReadOnly = true;
@@ -660,8 +877,8 @@ namespace AssemblyLineTester.Views.Pages
             float startY = 50f;
             float rowSpacing = Math.Max(55f, availHeight / Math.Max(rowCount, 1));
 
-            List<DiagramNode> rawLeftNodes = [];
-            List<DiagramNode> rawRightNodes = [];
+            List<DiagramNode> rawLeftNodes = new List<DiagramNode>();
+            List<DiagramNode> rawRightNodes = new List<DiagramNode>();
 
             for (int i = 0; i < rowCount; i++)
             {
@@ -817,6 +1034,68 @@ namespace AssemblyLineTester.Views.Pages
 
             g.FillPath(brush, path);
             g.DrawPath(pen, path);
+        }
+
+        private TestConfiguration? BuildConfigurationFromGrid(string configName, string productModel, string? description)
+        {
+            var nets = new List<TestConfigNet>();
+
+            for (int i = 0; i < gridConfig.Rows.Count; i++)
+            {
+                var row = gridConfig.Rows[i];
+                if (row.IsNewRow) continue;
+
+                if (!int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int fromAddr))
+                {
+                    MessageBox.Show($"Row {i + 1}: Net-From Address must be a number.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return null;
+                }
+                if (!int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toAddr))
+                {
+                    MessageBox.Show($"Row {i + 1}: Net-To Address must be a number.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return null;
+                }
+
+                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), out double expected);
+                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), out double lower);
+                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), out double upper);
+
+                string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
+                var tt = _configService.GetTestTypeByName(testTypeName);
+                nets.Add(new TestConfigNet
+                {
+                    SequenceNo = i + 1,
+                    NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
+                    HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
+                    FromAddress = fromAddr,
+                    FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
+                    ToAddress = toAddr,
+                    ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
+                    // Resolve TestType from DB to avoid attaching transient entities to EF context
+                    TestTypeId = tt?.Id ?? 0,
+                    TestType = null,
+                    ExpectedValue = expected,
+                    LowerLimit = lower,
+                    UpperLimit = upper,
+                    Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
+                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "" // raw unit as entered - SaveConfig() converts this to base unit
+                });
+            }
+
+            return new TestConfiguration
+            {
+                ConfigName = configName,
+                ProductModel = productModel,
+                Description = description,
+                Nets = nets
+            };
+        }
+
+        private static double? ParseTolerancePercent(string? tolStr)
+        {
+            if (string.IsNullOrWhiteSpace(tolStr) || tolStr == "-") return null;
+            string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
+            return double.TryParse(clean, out double val) ? val : null;
         }
     }
 }

@@ -618,7 +618,7 @@ namespace AssemblyLineTester.Views.Pages
             btnExport.PressedBackColor = Color.FromArgb(100, 116, 139);
             btnExport.Size = new Size(183, 44);
             btnExport.TabIndex = 5;
-            btnExport.Text = "Export Config";
+            btnExport.Text = "Save Config";
             btnExport.UseVisualStyleBackColor = false;
             // 
             // btnReset
@@ -656,7 +656,7 @@ namespace AssemblyLineTester.Views.Pages
             btnImport.PressedBackColor = Color.FromArgb(100, 116, 139);
             btnImport.Size = new Size(184, 44);
             btnImport.TabIndex = 3;
-            btnImport.Text = "Import Config";
+            btnImport.Text = "Edit Config";
             btnImport.UseVisualStyleBackColor = false;
             // 
             // pnlHeaderTop

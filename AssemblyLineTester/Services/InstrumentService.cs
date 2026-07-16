@@ -15,50 +15,60 @@ namespace AssemblyLineTester.Services
 
         private static readonly CtaService _service = new();
         private static short _connectionId = -1;
+        private static readonly object _lockObj = new();
 
         public bool IsConnected => _connectionId != -1;
         public short ConnectionId => _connectionId;
 
         public bool Connect()
         {
-            try
+            lock (_lockObj)
             {
-                var connectionResult = _service.Connect(ServerIPandPort, UserName, Password);
-                if (connectionResult.DllCallResult == CtaCommandResultCode.Success)
+                try
                 {
-                    _connectionId = connectionResult.FunctionResult;
-                    return true;
+                    var connectionResult = _service.Connect(ServerIPandPort, UserName, Password);
+                    if (connectionResult.DllCallResult == CtaCommandResultCode.Success)
+                    {
+                        _connectionId = connectionResult.FunctionResult;
+                        return true;
+                    }
+                    _connectionId = -1;
+                    return false;
                 }
-                _connectionId = -1;
-                return false;
-            }
-            catch
-            {
-                _connectionId = -1;
-                return false;
+                catch
+                {
+                    _connectionId = -1;
+                    return false;
+                }
             }
         }
 
         public void Disconnect()
         {
-            if (_connectionId != -1)
+            lock (_lockObj)
             {
-                short idToDisconnect = _connectionId;
-                _connectionId = -1; // Reset memory state instantly
-
-                // Run native DLL disconnect in a fire-and-forget background task
-                // so it doesn't block the calling monitoring loop thread
-                System.Threading.Tasks.Task.Run(() =>
+                if (_connectionId != -1)
                 {
-                    try
+                    short idToDisconnect = _connectionId;
+                    _connectionId = -1; // Reset memory state instantly
+
+                    // Run native DLL disconnect in a fire-and-forget background task
+                    // so it doesn't block the calling monitoring loop thread
+                    System.Threading.Tasks.Task.Run(() =>
                     {
-                        _service.Disconnect(idToDisconnect, false);
-                    }
-                    catch
-                    {
-                        // Ignore exceptions on dead socket disconnects
-                    }
-                });
+                        lock (_lockObj)
+                        {
+                            try
+                            {
+                                _service.Disconnect(idToDisconnect, false);
+                            }
+                            catch
+                            {
+                                // Ignore exceptions on dead socket disconnects
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -106,26 +116,25 @@ namespace AssemblyLineTester.Services
             {
                 var checkTask = System.Threading.Tasks.Task.Run(() =>
                 {
-                    try
+                    lock (_lockObj)
                     {
-                        // 1. Verify CTA Server is ready to receive commands
-                        var readyRes = _service.ServerReady(_connectionId);
-                        //Debug.WriteLine($"ctaServerReady = {readyRes.FunctionResult}"); 
+                        try
+                        {
+                            // 1. Verify CTA Server is ready to receive commands
+                            var readyRes = _service.ServerReady(_connectionId);
+                            if (readyRes == null || readyRes.DllCallResult != CtaCommandResultCode.Success || !readyRes.FunctionResult)
+                            {
+                                return false;
+                            }
 
-
-                        if (readyRes == null || readyRes.DllCallResult != CtaCommandResultCode.Success || !readyRes.FunctionResult)
+                            // 2. Verify hardware connectivity by querying server information
+                            var infoRes = _service.GetServerInformation(_connectionId);
+                            return infoRes != null && infoRes.DllCallResult == CtaCommandResultCode.Success && !string.IsNullOrWhiteSpace(infoRes.Result);
+                        }
+                        catch
                         {
                             return false;
                         }
-
-                        // 2. Verify hardware connectivity by querying server information
-                        var infoRes = _service.GetServerInformation(_connectionId);
-                        //Debug.WriteLine(infoRes.Result);
-                        return infoRes != null && infoRes.DllCallResult == CtaCommandResultCode.Success && !string.IsNullOrWhiteSpace(infoRes.Result);
-                    }
-                    catch
-                    {
-                        return false;
                     }
                 });
 
@@ -158,92 +167,107 @@ namespace AssemblyLineTester.Services
         public CtaStringResult GetTestProgram(string testName)
         {
             if (!IsConnected) return null!;
-            try
+            lock (_lockObj)
             {
-                return _service.GetTest(_connectionId, testName);
-            }
-            catch
-            {
-                return null!;
+                try
+                {
+                    return _service.GetTest(_connectionId, testName);
+                }
+                catch
+                {
+                    return null!;
+                }
             }
         }
 
         public double GetContinuityResistance()
         {
             if (!IsConnected) return 0.0;
-            try
+            lock (_lockObj)
             {
-                var result = _service.GetParameters(_connectionId);
-                if (result == null || result.DllCallResult != CtaCommandResultCode.Success || string.IsNullOrEmpty(result.Result))
+                try
                 {
-                    return 0.0;
-                }
-
-                var lines = result.Result.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var line in lines)
-                {
-                    if (line.Contains("CONNECTION RESIS", StringComparison.OrdinalIgnoreCase))
+                    var result = _service.GetParameters(_connectionId);
+                    if (result == null || result.DllCallResult != CtaCommandResultCode.Success || string.IsNullOrEmpty(result.Result))
                     {
-                        string valuePart = line.Replace("CONNECTION RESIS", "", StringComparison.OrdinalIgnoreCase).Trim();
-                        string numericStr = string.Empty;
-                        foreach (char c in valuePart)
-                        {
-                            if (char.IsDigit(c) || c == '.' || c == '-' || c == '+')
-                            {
-                                numericStr += c;
-                            }
-                        }
+                        return 0.0;
+                    }
 
-                        if (double.TryParse(numericStr, System.Globalization.CultureInfo.InvariantCulture, out double val))
+                    var lines = result.Result.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var line in lines)
+                    {
+                        if (line.Contains("CONNECTION RESIS", StringComparison.OrdinalIgnoreCase))
                         {
-                            return val;
+                            string valuePart = line.Replace("CONNECTION RESIS", "", StringComparison.OrdinalIgnoreCase).Trim();
+                            string numericStr = string.Empty;
+                            foreach (char c in valuePart)
+                            {
+                                if (char.IsDigit(c) || c == '.' || c == '-' || c == '+')
+                                {
+                                    numericStr += c;
+                                }
+                            }
+
+                            if (double.TryParse(numericStr, System.Globalization.CultureInfo.InvariantCulture, out double val))
+                            {
+                                return val;
+                            }
                         }
                     }
                 }
+                catch
+                {
+                    // Suppress exceptions
+                }
+                return 0.0;
             }
-            catch
-            {
-                // Suppress exceptions
-            }
-            return 0.0;
         }
 
         public CtaCommandResultCode PutTestProgram(string testName, string testText, bool setAsActive = true)
         {
             if (!IsConnected) return (CtaCommandResultCode)(-1);
-            try
+            lock (_lockObj)
             {
-                return _service.PutTest(_connectionId, testName, testText, setAsActive);
-            }
-            catch
-            {
-                return (CtaCommandResultCode)(-2);
+                try
+                {
+                    return _service.PutTest(_connectionId, testName, testText, setAsActive);
+                }
+                catch
+                {
+                    return (CtaCommandResultCode)(-2);
+                }
             }
         }
 
         public CtaTestResult RunSingleTest(bool runHipot, bool runShorts)
         {
             if (!IsConnected) return null!;
-            try
+            lock (_lockObj)
             {
-                return _service.SingleTest(_connectionId, runHipot, runShorts);
-            }
-            catch
-            {
-                return null!;
+                try
+                {
+                    return _service.SingleTest(_connectionId, runHipot, runShorts);
+                }
+                catch
+                {
+                    return null!;
+                }
             }
         }
 
         public DllDualValueReturnObject<CtaMeasuredValuesResult> GetMeasuredValues()
         {
             if (!IsConnected) return null!;
-            try
+            lock (_lockObj)
             {
-                return _service.GetMeasuredValues(_connectionId);
-            }
-            catch
-            {
-                return null!;
+                try
+                {
+                    return _service.GetMeasuredValues(_connectionId);
+                }
+                catch
+                {
+                    return null!;
+                }
             }
         }
 
@@ -253,13 +277,16 @@ namespace AssemblyLineTester.Services
         public CtaStringResult GetServerInformation()
         {
             if (!IsConnected) return null!;
-            try
+            lock (_lockObj)
             {
-                return _service.GetServerInformation(_connectionId);
-            }
-            catch
-            {
-                return null!;
+                try
+                {
+                    return _service.GetServerInformation(_connectionId);
+                }
+                catch
+                {
+                    return null!;
+                }
             }
         }
     }
