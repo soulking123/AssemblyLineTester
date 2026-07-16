@@ -1,5 +1,7 @@
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Data;
+using AssemblyLineTester.Views.Modals;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -398,6 +400,7 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod4, 8, Color.FromArgb(148, 163, 184), 1.5f);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnChangeProg, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            btnChangeProg.Click += BtnChangeProg_Click;
 
             // Subscribe to status changes globally
             InstrumentService.OnConnectionStatusChanged += InstrumentService_OnConnectionStatusChanged;
@@ -427,6 +430,33 @@ namespace AssemblyLineTester.Views.Pages
             else
             {
                 SetTesterOfflineUI();
+            }
+        }
+
+        private void BtnChangeProg_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                using var db = new AppDbContext();
+                using var modal = new SelectTestConfigModalForm(db);
+                if (modal.ShowDialog() == DialogResult.OK)
+                {
+                    var selectedConfig = modal.SelectedConfiguration;
+                    if (selectedConfig != null)
+                    {
+                        var configService = new TestConfigService();
+                        configService.SetActiveConfig(selectedConfig.ConfigName);
+
+                        // Reload display
+                        LoadActiveProgram();
+
+                        MessageBox.Show($"Successfully changed active program to: {selectedConfig.ConfigName}", "Change Program", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening program selector: {ex.Message}", "Change Program Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

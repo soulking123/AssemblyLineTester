@@ -1,0 +1,157 @@
+using System;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+using AssemblyLineTester.Data;
+using AssemblyLineTester.Models;
+
+namespace AssemblyLineTester.Views.Modals
+{
+    public partial class SelectTestConfigModalForm : Form
+    {
+        private readonly AppDbContext _db;
+        public TestConfiguration? SelectedConfiguration { get; private set; }
+
+        public SelectTestConfigModalForm(AppDbContext db)
+        {
+            _db = db;
+            InitializeComponent();
+
+            btnClose.Click += (s, e) => this.Close();
+            btnCancel.Click += (s, e) => this.Close();
+            btnSelect.Click += BtnSelect_Click;
+            gridConfigs.CellDoubleClick += GridConfigs_CellDoubleClick;
+
+            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
+            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
+
+            pnlCustomHeader.MouseDown += TitleBar_MouseDown;
+            iconLogo.MouseDown += TitleBar_MouseDown;
+
+            LoadConfigurations();
+            ApplyFormRounding();
+        }
+
+        private void LoadConfigurations()
+        {
+            try
+            {
+                var list = _db.TestConfigurations
+                    .OrderByDescending(c => c.UpdatedAt ?? c.CreatedAt)
+                    .Select(c => new
+                    {
+                        c.ConfigId,
+                        ConfigName = c.ConfigName,
+                        ProductModel = c.ProductModel,
+                        LastUpdate = (c.UpdatedAt ?? c.CreatedAt).ToString("yyyy-MM-dd HH:mm:ss")
+                    })
+                    .ToList();
+
+                gridConfigs.DataSource = list;
+
+                // Style Grid Columns
+                if (gridConfigs.Columns["ConfigId"] != null)
+                {
+                    gridConfigs.Columns["ConfigId"].Visible = false;
+                }
+
+                if (gridConfigs.Columns["ConfigName"] != null)
+                {
+                    gridConfigs.Columns["ConfigName"].HeaderText = "Configuration Name";
+                }
+
+                if (gridConfigs.Columns["ProductModel"] != null)
+                {
+                    gridConfigs.Columns["ProductModel"].HeaderText = "Product Model";
+                }
+
+                if (gridConfigs.Columns["LastUpdate"] != null)
+                {
+                    gridConfigs.Columns["LastUpdate"].HeaderText = "Last Update";
+                }
+
+                // Grid Styling to match modern look
+                gridConfigs.EnableHeadersVisualStyles = false;
+                gridConfigs.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(30, 41, 59);
+                gridConfigs.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+                gridConfigs.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                gridConfigs.DefaultCellStyle.BackColor = Color.FromArgb(15, 23, 42);
+                gridConfigs.DefaultCellStyle.ForeColor = Color.FromArgb(241, 245, 249);
+                gridConfigs.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+                gridConfigs.DefaultCellStyle.SelectionBackColor = Color.FromArgb(250, 204, 21);
+                gridConfigs.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 41, 59);
+                gridConfigs.GridColor = Color.FromArgb(33, 41, 54);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading configurations: {ex.Message}", "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void BtnSelect_Click(object? sender, EventArgs e)
+        {
+            ConfirmSelection();
+        }
+
+        private void GridConfigs_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                ConfirmSelection();
+            }
+        }
+
+        private void ConfirmSelection()
+        {
+            if (gridConfigs.CurrentRow != null)
+            {
+                int configId = Convert.ToInt32(gridConfigs.CurrentRow.Cells["ConfigId"].Value);
+                SelectedConfiguration = _db.TestConfigurations.FirstOrDefault(c => c.ConfigId == configId);
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Please select a test configuration from the list.", "Selection Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ApplyFormRounding();
+        }
+
+        private void ApplyFormRounding()
+        {
+            if (Width <= 0 || Height <= 0) return;
+            int radius = 16;
+            Rectangle rect = new Rectangle(0, 0, Width, Height);
+            using (var path = new System.Drawing.Drawing2D.GraphicsPath())
+            {
+                int d = radius * 2;
+                path.StartFigure();
+                path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+                path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+                path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+                path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+                path.CloseFigure();
+                this.Region = new Region(path);
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+        private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && e.Clicks == 1)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, 0xA1, 0x2, 0);
+            }
+        }
+    }
+}
