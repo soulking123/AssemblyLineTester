@@ -109,8 +109,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
         {
-            using var modal = new Views.Modals.AutomatedTestConfigModalForm();
-            modal.ShowDialog(this);
+            //using var modal = new Views.Modals.AutomatedTestConfigModalForm();
+            //modal.ShowDialog(this);
         }
 
         private void btnStartTest_Click(object? sender, EventArgs e)
