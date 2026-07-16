@@ -36,8 +36,10 @@ namespace AssemblyLineTester.Views.Pages
             {
                 var configService = new TestConfigService();
                 var activeConfig = configService.GetActiveConfig();
-                //_customTestText = configService.ConvertToProgramText(activeConfig);
-                //Debug.WriteLine(_customTestText);
+                _customTestText = configService.ConvertToProgramText(activeConfig);
+                Debug.WriteLine(_customTestText);
+
+
 
 
                 //if (activeConfig != null)
@@ -109,8 +111,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
         {
-            using var modal = new Views.Modals.AutomatedTestConfigModalForm();
-            modal.ShowDialog(this);
         }
 
         private void btnStartTest_Click(object? sender, EventArgs e)
@@ -146,6 +146,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             else
             {
+                Debug.WriteLine("error syntax");
                 // Fallback: Fetch/load the specified test program "1107061216"
                 //var getTestResult = _instrument.GetTestProgram("1107061216");
                 //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
@@ -154,10 +155,10 @@ namespace AssemblyLineTester.Views.Pages
                 //}
             }
 
-            Debug.WriteLine($"Active Program: {loadedProgramName}");
-            _ = testProgramDetails;
+            //Debug.WriteLine($"Active Program: {loadedProgramName}");
+            //_ = testProgramDetails;
 
-            // 3. Run Single Test (Hipot=false, Shorts=true)
+            //3.Run Single Test(Hipot= false, Shorts= true)
             var testResult = _instrument.RunSingleTest(false, true);
             if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
             {
@@ -180,11 +181,11 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         var status = LiveTestStatus.Pending;
                         string statusStr = measurement.Status1?.Trim() ?? "";
-                        if (measurement.Value1 <= _continuityResistance )
+                        if (measurement.Value1 <= _continuityResistance)
                         {
                             status = LiveTestStatus.Pass;
                         }
-                        else 
+                        else
                         {
                             status = LiveTestStatus.Fail;
                         }
@@ -202,15 +203,16 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            // 5. Repopulate the GridView to show the results
-            PopulateLiveDetailsGrid(_loadedRows);
+            //5.Repopulate the GridView to show the results
+
+           PopulateLiveDetailsGrid(_loadedRows);
 
             // 6. Disconnect after test run
             _instrument.Disconnect();
 
             // 7. Show summary MessageBox
-            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed 
-                ? "PASSED" 
+            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
+                ? "PASSED"
                 : "FAILED or INCOMPLETE";
 
         }

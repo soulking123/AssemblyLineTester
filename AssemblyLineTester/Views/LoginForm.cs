@@ -6,13 +6,30 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace AssemblyLineTester.Views
 {
     public partial class LoginForm : Form
     {
+        private readonly InstrumentService _instrument = new();
         public LoginForm()
         {
+            try
+            {
+                var processes = System.Diagnostics.Process.GetProcessesByName("easywire");
+                foreach (var process in processes)
+                {
+                    process.Kill();
+                    process.WaitForExit(3000); // Wait up to 3 seconds for it to fully exit and release locks
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error ending easywire process: {ex.Message}");
+            }
+
+            _instrument.Connect();
             InitializeComponent();
 
             // Load CAT logo image
@@ -202,9 +219,22 @@ namespace AssemblyLineTester.Views
                     // update last login timestamp, save the logged-in user to the session, and close login form
                     if (isCorrect)
                     {
+
+                        _instrument.Connect();
                         // Update LastLogin field and persist to SQLite database
                         user.LastLogin = DateTime.Now;
                         db.SaveChanges();
+
+                        //bool isConnected = _instrument.Connect();
+                        //if (!isConnected)
+                        //{
+                        //    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        //    return;
+                        //}
+                        //Debug.WriteLine($"Bool : {isConnected}");
+
+                        // Start global instrument connection status monitoring
+                        InstrumentService.StartMonitoring();
 
                         // Save the logged-in user in memory
                         SessionManager.SetSession(user);
@@ -218,6 +248,7 @@ namespace AssemblyLineTester.Views
                         dashboard.FormClosed += (s, args) => 
                         {
                             MaintenanceService.StopTrackingAndSave();
+                            InstrumentService.StopMonitoring(); // Stop monitoring
                             if (dashboard.IsLoggingOut)
                             {
                                 SessionManager.ClearSession();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CtaDotNet.Services;
 using CtaDotNet.Models;
 using CtaDotNet.Enums;
+using System.Diagnostics;
 
 namespace AssemblyLineTester.Services
 {
@@ -12,8 +13,8 @@ namespace AssemblyLineTester.Services
         private const string UserName = "User1";
         private const string Password = "";
 
-        private readonly CtaService _service = new();
-        private short _connectionId = -1;
+        private static readonly CtaService _service = new();
+        private static short _connectionId = -1;
 
         public bool IsConnected => _connectionId != -1;
         public short ConnectionId => _connectionId;
@@ -42,20 +43,118 @@ namespace AssemblyLineTester.Services
         {
             if (_connectionId != -1)
             {
-                try
+                short idToDisconnect = _connectionId;
+                _connectionId = -1; // Reset memory state instantly
+
+                // Run native DLL disconnect in a fire-and-forget background task
+                // so it doesn't block the calling monitoring loop thread
+                System.Threading.Tasks.Task.Run(() =>
                 {
-                    _service.Disconnect(_connectionId, false);
-                }
-                finally
-                {
-                    _connectionId = -1;
-                }
+                    try
+                    {
+                        _service.Disconnect(idToDisconnect, false);
+                    }
+                    catch
+                    {
+                        // Ignore exceptions on dead socket disconnects
+                    }
+                });
             }
         }
 
-        /// <summary>
-        /// Retrieves the configuration/wiring details of a test program.
-        /// </summary>
+        public static bool IsOnline { get; private set; }
+        public static event Action<bool>? OnConnectionStatusChanged;
+        private static System.Threading.CancellationTokenSource? _monitorCts;
+
+        public static void StartMonitoring()
+        {
+            _monitorCts?.Cancel();
+            _monitorCts = new System.Threading.CancellationTokenSource();
+            var token = _monitorCts.Token;
+
+            System.Threading.Tasks.Task.Run(async () =>
+            {
+                var service = new InstrumentService();
+                while (!token.IsCancellationRequested)
+                {
+                    bool currentStatus = await service.CheckConnectionStatusAsync();
+
+                    if (currentStatus != IsOnline)
+                    {
+                        IsOnline = currentStatus;
+                        OnConnectionStatusChanged?.Invoke(IsOnline);
+                    }
+
+                    await System.Threading.Tasks.Task.Delay(3000, token);
+                }
+            }, token);
+        }
+
+        public static void StopMonitoring()
+        {
+            _monitorCts?.Cancel();
+        }
+
+        public async System.Threading.Tasks.Task<bool> CheckConnectionStatusAsync()
+        {
+            if (_connectionId == -1)
+            {
+                // Return offline immediately without attempting to connect
+                return false;
+            }
+            try
+            {
+                var checkTask = System.Threading.Tasks.Task.Run(() =>
+                {
+                    try
+                    {
+                        // 1. Verify CTA Server is ready to receive commands
+                        var readyRes = _service.ServerReady(_connectionId);
+                        //Debug.WriteLine($"ctaServerReady = {readyRes.FunctionResult}"); 
+
+
+                        if (readyRes == null || readyRes.DllCallResult != CtaCommandResultCode.Success || !readyRes.FunctionResult)
+                        {
+                            return false;
+                        }
+
+                        // 2. Verify hardware connectivity by querying server information
+                        var infoRes = _service.GetServerInformation(_connectionId);
+                        //Debug.WriteLine(infoRes.Result);
+                        return infoRes != null && infoRes.DllCallResult == CtaCommandResultCode.Success && !string.IsNullOrWhiteSpace(infoRes.Result);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                });
+
+                var completedTask = await System.Threading.Tasks.Task.WhenAny(checkTask, System.Threading.Tasks.Task.Delay(2000));
+
+                if (completedTask == checkTask)
+                {
+                    bool isReady = await checkTask;
+                    if (!isReady)
+                    {
+                        Disconnect();
+                        return false;
+                    }
+                    return true;
+                }
+                else
+                {
+                    // Timeout! USB probably unplugged
+                    Disconnect();
+                    return false;
+                }
+            }
+            catch
+            {
+                Disconnect();
+                return false;
+            }
+        }
+
         public CtaStringResult GetTestProgram(string testName)
         {
             if (!IsConnected) return null!;
@@ -69,9 +168,6 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Retrieves the connection resistance limit from the active test parameters as a double.
-        /// </summary>
         public double GetContinuityResistance()
         {
             if (!IsConnected) return 0.0;
@@ -112,9 +208,6 @@ namespace AssemblyLineTester.Services
             return 0.0;
         }
 
-        /// <summary>
-        /// Uploads/loads a custom test program to the tester.
-        /// </summary>
         public CtaCommandResultCode PutTestProgram(string testName, string testText, bool setAsActive = true)
         {
             if (!IsConnected) return (CtaCommandResultCode)(-1);
@@ -128,9 +221,6 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Executes a single test run on the instrument.
-        /// </summary>
         public CtaTestResult RunSingleTest(bool runHipot, bool runShorts)
         {
             if (!IsConnected) return null!;
@@ -144,15 +234,28 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Retrieves the real-time measured values from the last test run.
-        /// </summary>
         public DllDualValueReturnObject<CtaMeasuredValuesResult> GetMeasuredValues()
         {
             if (!IsConnected) return null!;
             try
             {
                 return _service.GetMeasuredValues(_connectionId);
+            }
+            catch
+            {
+                return null!;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves system information from the connected CTA Server.
+        /// </summary>
+        public CtaStringResult GetServerInformation()
+        {
+            if (!IsConnected) return null!;
+            try
+            {
+                return _service.GetServerInformation(_connectionId);
             }
             catch
             {
