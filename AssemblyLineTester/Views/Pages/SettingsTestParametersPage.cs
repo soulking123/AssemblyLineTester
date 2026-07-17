@@ -1,19 +1,25 @@
+using AssemblyLineTester.Services;
+using FontAwesome.Sharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
-using FontAwesome.Sharp;
+using AssemblyLineTester.Models;
+using AssemblyLineTester.Models.Dto;
+using System.Linq;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class SettingsTestParametersPage : UserControl
     {
-        private readonly HashSet<int> highlightedRows = [];
-        private readonly List<DiagramNode> leftNodes = [];
-        private readonly List<DiagramNode> rightNodes = [];
-        private readonly List<DiagramConnection> connections = [];
+        private readonly HashSet<int> highlightedRows = new();
+        private readonly List<DiagramNode> leftNodes = new();
+        private readonly List<DiagramNode> rightNodes = new();
+        private readonly List<DiagramConnection> connections = new();
+        private readonly TestConfigService _configService = new TestConfigService();
+        private string? _loadedConfigName = null;
 
         private class DiagramNode
         {
@@ -36,36 +42,15 @@ namespace AssemblyLineTester.Views.Pages
             public DiagramNode RightNode { get; set; } = null!;
         }
 
-        private bool isLoaded = false;
-        private bool isPopulatingData = false;
-
-        public SettingsTestParametersPage()
-        {
-            InitializeComponent();
-            EnableDoubleBuffering();
-            SetupEvents();
-        }
-
-        private void EnableDoubleBuffering()
-        {
-            try
-            {
-                this.DoubleBuffered = true;
-                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(gridConfig, true, null);
-                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(splitContainerMain, true, null);
-                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(picPreview, true, null);
-            }
-            catch { /* ignore */ }
-        }
-
-        protected override async void OnLoad(EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            if (isLoaded) return;
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                isLoaded = true;
-                await LoadDefaultDataAsync();
+                LoadDefaultData();
+                UpdateTotalNetCount();
+                UpdateDiagramSize();
+                picPreview.Invalidate();
             }
         }
 
@@ -96,20 +81,7 @@ namespace AssemblyLineTester.Views.Pages
             splitContainerMain.SplitterMoved += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
         }
 
-        private static string[] GetUnitsForTestType(string testType)
-        {
-            return testType switch
-            {
-                "Resistance" => ["Ω", "mΩ", "kΩ", "MΩ", "GΩ"],
-                "Capacitance" => ["F", "μF", "nF", "pF"],
-                "Voltage" => ["V", "mV", "kV"],
-                "Continuity" => ["Ω", "mΩ"],
-                "Insulation" => ["MΩ", "GΩ", "kΩ", "Ω"],
-                "Short Circuit" => ["MΩ", "GΩ", "kΩ", "Ω"],
-                "Functional" => ["V", "mV", "A", "mA", "Ω", "Hz", "ms"],
-                _ => ["Ω", "mΩ", "kΩ", "MΩ", "GΩ", "F", "μF", "nF", "pF", "V", "mV", "kV", "A", "mA", "Hz", "ms"]
-            };
-        }
+        private static string[] GetUnitsForTestType(string testType) => UnitConversionHelper.GetUnitsForTestType(testType);
 
         private void UpdateRowUnitDropdown(int rowIndex)
         {
@@ -131,43 +103,82 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-
-        private async System.Threading.Tasks.Task LoadDefaultDataAsync()
+        public SettingsTestParametersPage()
         {
-            isPopulatingData = true;
+            InitializeComponent();
+            EnableDoubleBuffering();
+            SetupEvents();
+            if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
+            {
+                LoadTestTypeColumnItems();
+                LoadDefaultData();
+                UpdateTotalNetCount();
+                UpdateDiagramSize();
+            }
+        }
+
+        private void EnableDoubleBuffering()
+        {
             try
             {
-                gridConfig.Rows.Clear();
-                highlightedRows.Clear();
-
-                await System.Threading.Tasks.Task.Delay(15);
-
-                string[] defaultRows =
-                [
-                    "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|Resistance|0|5|2.5|±5%|Ω",
-                    "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|Resistance|0|5|2.5|±5%|Ω",
-                    "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|Capacitance|0|100|50|±10%|μF",
-                    "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|Resistance|0|5|2.5|±5%|Ω"
-                ];
-
-                gridConfig.SuspendLayout();
-                foreach (string rowStr in defaultRows)
-                {
-                    string[] parts = rowStr.Split('|');
-                    int idx = gridConfig.Rows.Add(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9], parts[10], parts[11], parts[12]);
-                    UpdateRowUnitDropdown(idx);
-                    gridConfig.Rows[idx].Cells["colUnit"].Value = parts[12];
-                    RecalculateRowLimits(gridConfig.Rows[idx]);
-                }
-
-                RenumberRows();
-                gridConfig.ResumeLayout(true);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(gridConfig, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(splitContainerMain, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(picPreview, true, null);
+                EnableDoubleBufferingRecursive(this);
             }
-            finally
+            catch { /* ignore */ }
+        }
+
+        private static void EnableDoubleBufferingRecursive(Control control)
+        {
+            if (control is TableLayoutPanel || control is Panel || control is FlowLayoutPanel || control is SplitContainer)
             {
-                isPopulatingData = false;
+                try
+                {
+                    typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(control, true, null);
+                }
+                catch { /* ignore */ }
+            }
+            foreach (Control child in control.Controls)
+            {
+                EnableDoubleBufferingRecursive(child);
+            }
+        }
+
+        private void LoadTestTypeColumnItems()
+        {
+            var names = _configService.GetTestTypeNames();
+
+            if (gridConfig.Columns["colTestType"] is DataGridViewComboBoxColumn testTypeCol)
+            {
+                testTypeCol.Items.Clear();
+                testTypeCol.Items.AddRange(names.Cast<object>().ToArray());
+            }
+        }
+
+        private void LoadDefaultData()
+        {
+            gridConfig.Rows.Clear();
+            highlightedRows.Clear();
+
+            string[] defaultRows =
+            [
+                "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|Resistance|0|5|2.5|±5%|Ω",
+                "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|Resistance|0|5|2.5|±5%|Ω",
+                "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|Capacitance|0|100|50|±10%|μF",
+                "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|Resistance|0|5|2.5|±5%|Ω"
+            ];
+
+            foreach (string rowStr in defaultRows)
+            {
+                string[] parts = rowStr.Split('|');
+                int idx = gridConfig.Rows.Add(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9], parts[10], parts[11], parts[12]);
+                UpdateRowUnitDropdown(idx);
+                gridConfig.Rows[idx].Cells["colUnit"].Value = parts[12];
+                RecalculateRowLimits(gridConfig.Rows[idx]);
             }
 
+            RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
             picPreview.Invalidate();
@@ -251,22 +262,126 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnImport_Click(object? sender, EventArgs e)
         {
-            using OpenFileDialog ofd = new();
-            ofd.Filter = "Config Files (*.json;*.xml;*.csv)|*.json;*.xml;*.csv|All Files (*.*)|*.*";
-            if (ofd.ShowDialog() == DialogResult.OK)
+            // Open the Edit Config modal (lists saved configurations from DB)
+            ShowEditConfigsDialog();
+        }
+
+        private void ShowEditConfigsDialog()
+        {
+            using var dlg = new AssemblyLineTester.Views.Modals.EditConfigsModalForm(_configService, _loadedConfigName);
+            if (dlg.ShowDialog(this) == DialogResult.OK && dlg.SelectedConfiguration != null)
             {
-                MessageBox.Show("Configuration file imported successfully!", "Import Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadConfigurationIntoGrid(dlg.SelectedConfiguration);
             }
+            if (dlg.DeletedLoadedConfig)
+            {
+                _loadedConfigName = null;
+            }
+        }
+
+        private void LoadConfigurationIntoGrid(TestConfiguration config)
+        {
+            if (config == null) return;
+
+            gridConfig.Rows.Clear();
+            highlightedRows.Clear();
+
+            txtConfigName.Text = config.ConfigName;
+            txtProductModel.Text = config.ProductModel;
+
+            foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
+            {
+                string testTypeName = net.TestType?.TestTypeName ?? "";
+                string expected = net.ExpectedValue.HasValue ? FormatLimit(net.ExpectedValue.Value) : "0";
+                string tolerance = net.Tolerance.HasValue ? $"±{FormatLimit(net.Tolerance.Value)}%" : "±0%";
+
+                int idx = gridConfig.Rows.Add(
+                    net.SequenceNo.ToString(),
+                    net.NetId,
+                    net.HarnessGroup,
+                    net.FromAddress.ToString(),
+                    net.FromLabel,
+                    net.ToAddress.ToString(),
+                    net.ToLabel,
+                    testTypeName,
+                    FormatLimit(net.LowerLimit ?? 0),
+                    FormatLimit(net.UpperLimit ?? 0),
+                    expected,
+                    tolerance,
+                    net.MeasurementUnit ?? "");
+
+                UpdateRowUnitDropdown(idx);
+                gridConfig.Rows[idx].Cells["colUnit"].Value = net.MeasurementUnit ?? "";
+                RecalculateRowLimits(gridConfig.Rows[idx]);
+            }
+
+            RenumberRows();
+            UpdateTotalNetCount();
+            UpdateDiagramSize();
+            picPreview.Invalidate();
+
+            _loadedConfigName = config.ConfigName;
+        }
+
+        private static (string expected, string tolerance) DeriveExpectedAndTolerance(double? lower, double? upper)
+        {
+            if (!lower.HasValue && !upper.HasValue) return ("0", "±0%");
+            if (lower.HasValue && upper.HasValue)
+            {
+                double mid = (lower.Value + upper.Value) / 2.0;
+                double tolPct = mid == 0 ? 0 : Math.Abs((upper.Value - mid) / mid * 100.0);
+                return (FormatLimit(mid), $"±{FormatLimit(tolPct)}%");
+            }
+            double val = lower ?? upper!.Value;
+            return (FormatLimit(val), "±0%");
         }
 
         private void BtnExport_Click(object? sender, EventArgs e)
         {
-            using SaveFileDialog sfd = new();
-            sfd.Filter = "JSON Config (*.json)|*.json|CSV Config (*.csv)|*.csv";
-            sfd.FileName = "AutomatedTestConfig.json";
-            if (sfd.ShowDialog() == DialogResult.OK)
+            // Save current grid configuration to the database.
+            var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
+            if (config == null)
             {
-                MessageBox.Show("Configuration exported successfully!", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(config.ConfigName))
+            {
+                MessageBox.Show("Config Name is required.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var existing = _configService.GetConfigurationByName(config.ConfigName);
+
+            try
+            {
+                if (existing != null)
+                {
+                    // Allow overwrite only when the user explicitly loaded this config for editing
+                    if (!string.IsNullOrWhiteSpace(_loadedConfigName) && string.Equals(_loadedConfigName, config.ConfigName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var res = MessageBox.Show($"Overwrite existing configuration '{config.ConfigName}'?", "Confirm Overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (res != DialogResult.Yes) return;
+
+                        _configService.SaveConfig(config);
+                        _loadedConfigName = config.ConfigName;
+                        MessageBox.Show("Configuration overwritten successfully.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    MessageBox.Show("A configuration with the same name already exists. Load it from Edit Config to overwrite or choose a different name.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // New config
+                _configService.SaveConfig(config);
+                _loadedConfigName = config.ConfigName;
+                MessageBox.Show("Configuration saved successfully.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to save configuration:\n{ex.Message}", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -316,7 +431,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_RowsChanged(object? sender, EventArgs e)
         {
-            if (isPopulatingData) return;
             UpdateTotalNetCount();
             UpdateDiagramSize();
             picPreview.Invalidate();
@@ -324,7 +438,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
         {
-            if (isPopulatingData) return;
             if (e.RowIndex >= 0 && e.RowIndex < gridConfig.Rows.Count)
             {
                 var colTestType = gridConfig.Columns["colTestType"];
@@ -347,8 +460,11 @@ namespace AssemblyLineTester.Views.Pages
             picPreview.Invalidate();
         }
 
+        private static readonly string[] ContinuityLikeTypes = TestConfigService.ContinuityLikeTestTypes;
+
         private void GridConfig_CellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
         {
+
             if (e.RowIndex < 0 || e.RowIndex >= gridConfig.Rows.Count) return;
             var row = gridConfig.Rows[e.RowIndex];
             if (row.IsNewRow) return;
@@ -357,7 +473,7 @@ namespace AssemblyLineTester.Views.Pages
             if (colTolerance != null && e.ColumnIndex == colTolerance.Index)
             {
                 string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
-                if (testType.Equals("Continuity", StringComparison.OrdinalIgnoreCase)) return;
+                if (ContinuityLikeTypes.Contains(testType, StringComparer.OrdinalIgnoreCase)) return;
 
                 string input = e.FormattedValue?.ToString() ?? "";
                 if (!string.IsNullOrWhiteSpace(input) && input != "-")
@@ -602,8 +718,8 @@ namespace AssemblyLineTester.Views.Pages
             float startY = 50f;
             float rowSpacing = Math.Max(55f, availHeight / Math.Max(rowCount, 1));
 
-            List<DiagramNode> rawLeftNodes = [];
-            List<DiagramNode> rawRightNodes = [];
+            List<DiagramNode> rawLeftNodes = new List<DiagramNode>();
+            List<DiagramNode> rawRightNodes = new List<DiagramNode>();
 
             for (int i = 0; i < rowCount; i++)
             {
@@ -759,6 +875,68 @@ namespace AssemblyLineTester.Views.Pages
 
             g.FillPath(brush, path);
             g.DrawPath(pen, path);
+        }
+
+        private TestConfiguration? BuildConfigurationFromGrid(string configName, string productModel, string? description)
+        {
+            var nets = new List<TestConfigNet>();
+
+            for (int i = 0; i < gridConfig.Rows.Count; i++)
+            {
+                var row = gridConfig.Rows[i];
+                if (row.IsNewRow) continue;
+
+                if (!int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int fromAddr))
+                {
+                    MessageBox.Show($"Row {i + 1}: Net-From Address must be a number.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return null;
+                }
+                if (!int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toAddr))
+                {
+                    MessageBox.Show($"Row {i + 1}: Net-To Address must be a number.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return null;
+                }
+
+                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), out double expected);
+                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), out double lower);
+                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), out double upper);
+
+                string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
+                var tt = _configService.GetTestTypeByName(testTypeName);
+                nets.Add(new TestConfigNet
+                {
+                    SequenceNo = i + 1,
+                    NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
+                    HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
+                    FromAddress = fromAddr,
+                    FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
+                    ToAddress = toAddr,
+                    ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
+                    // Resolve TestType from DB to avoid attaching transient entities to EF context
+                    TestTypeId = tt?.Id ?? 0,
+                    TestType = null,
+                    ExpectedValue = expected,
+                    LowerLimit = lower,
+                    UpperLimit = upper,
+                    Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
+                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "" // raw unit as entered - SaveConfig() converts this to base unit
+                });
+            }
+
+            return new TestConfiguration
+            {
+                ConfigName = configName,
+                ProductModel = productModel,
+                Description = description,
+                Nets = nets
+            };
+        }
+
+        private static double? ParseTolerancePercent(string? tolStr)
+        {
+            if (string.IsNullOrWhiteSpace(tolStr) || tolStr == "-") return null;
+            string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
+            return double.TryParse(clean, out double val) ? val : null;
         }
     }
 }

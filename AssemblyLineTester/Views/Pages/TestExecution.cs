@@ -2,11 +2,12 @@ using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
-
-using System.Diagnostics;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -34,27 +35,25 @@ namespace AssemblyLineTester.Views.Pages
 
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                var configService = new TestConfigService();
-                var activeConfig = configService.GetActiveConfig();
-                //_customTestText = configService.ConvertToProgramText(activeConfig);
-                //Debug.WriteLine(_customTestText);
-
-
-                //if (activeConfig != null)
-                //{
-                //    var options = new System.Text.Json.JsonSerializerOptions
-                //    {
-                //        WriteIndented = true,
-                //        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
-                //    };
-                //    string json = System.Text.Json.JsonSerializer.Serialize(activeConfig, options);
-                //    Debug.WriteLine("=== Active Config Found on Startup ===");
-                //    Debug.WriteLine(json);
-                //}
-                //else
-                //{
-                //    Debug.WriteLine("=== No Active Config Found on Startup ===");
-                //}
+                try
+                {
+                    var configService = new TestConfigService();
+                    var activeConfig = configService.GetActiveConfig();
+                    if (activeConfig != null)
+                    {
+                        _customTestText = configService.ConvertToProgramText(activeConfig);
+                        var resNet = activeConfig.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
+                        if (resNet != null && resNet.UpperLimit.HasValue)
+                        {
+                            _continuityResistance = resNet.UpperLimit.Value;
+                        }
+                        Debug.WriteLine($"Loaded active config on startup: {activeConfig.ConfigName}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error loading active config on startup: {ex.Message}");
+                }
             }
         }
 
@@ -109,15 +108,61 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
         {
-            using var ofd = new OpenFileDialog
+            var configService = new TestConfigService();
+            using var dlg = new AssemblyLineTester.Views.Modals.LoadProgramModalForm(configService);
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                Title = "Select Test Program Configuration",
-                Filter = "Test Program Files (*.json;*.xml;*.txt)|*.json;*.xml;*.txt|All Files (*.*)|*.*",
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-            };
-            if (ofd.ShowDialog(this) == DialogResult.OK)
-            {
-                MessageBox.Show($"Loaded test program configuration:\n{ofd.FileName}", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (dlg.SelectedConfiguration != null)
+                {
+                    configService.SetActiveConfig(dlg.SelectedConfiguration.ConfigName);
+                    _customTestText = configService.ConvertToProgramText(dlg.SelectedConfiguration);
+                    var resNet = dlg.SelectedConfiguration.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
+                    if (resNet != null && resNet.UpperLimit.HasValue)
+                    {
+                        _continuityResistance = resNet.UpperLimit.Value;
+                    }
+
+                    MessageBox.Show($"Test program configuration '{dlg.SelectedConfiguration.ConfigName}' loaded successfully and set as Active.", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Debug.WriteLine($"Loaded program from DB: {dlg.SelectedConfiguration.ConfigName}\n{_customTestText}");
+                }
+                else if (!string.IsNullOrEmpty(dlg.LoadedFilePath))
+                {
+                    try
+                    {
+                        if (dlg.LoadedFilePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var netsDto = configService.LoadConfigFile(dlg.LoadedFilePath);
+                            var tempConfig = new Models.TestConfiguration
+                            {
+                                ConfigName = System.IO.Path.GetFileNameWithoutExtension(dlg.LoadedFilePath),
+                                Nets = netsDto.Select((d, idx) => new Models.TestConfigNet
+                                {
+                                    SequenceNo = idx + 1,
+                                    FromAddress = d.FromAddress,
+                                    ToAddress = d.ToAddress,
+                                    UpperLimit = d.UpperLimit
+                                }).ToList()
+                            };
+                            _customTestText = configService.ConvertToProgramText(tempConfig);
+                            var resNet = tempConfig.Nets.FirstOrDefault(n => n.UpperLimit.HasValue);
+                            if (resNet != null && resNet.UpperLimit.HasValue)
+                            {
+                                _continuityResistance = resNet.UpperLimit.Value;
+                            }
+                        }
+                        else
+                        {
+                            _customTestText = System.IO.File.ReadAllText(dlg.LoadedFilePath);
+                        }
+
+                        MessageBox.Show($"Loaded test program file:\n{dlg.LoadedFilePath}", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Debug.WriteLine($"Loaded program from file: {dlg.LoadedFilePath}\n{_customTestText}");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error loading file '{dlg.LoadedFilePath}':\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
 

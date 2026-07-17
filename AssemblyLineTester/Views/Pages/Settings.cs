@@ -21,6 +21,7 @@ namespace AssemblyLineTester.Views.Pages
         public Settings()
         {
             InitializeComponent();
+            SetupInteractiveTabs();
             EnableDoubleBuffering();
             if (cmbLang.Items.Count > 0) cmbLang.SelectedIndex = 0;
             if (cmbDateFormat.Items.Count > 0) cmbDateFormat.SelectedIndex = 0;
@@ -39,12 +40,25 @@ namespace AssemblyLineTester.Views.Pages
             try
             {
                 this.DoubleBuffered = true;
-                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(tblMain, true, null);
-                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(tblContent, true, null);
-                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(flpTabs, true, null);
-                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(tblLeftColumn, true, null);
+                EnableDoubleBufferingRecursive(this);
             }
             catch { /* ignore */ }
+        }
+
+        private static void EnableDoubleBufferingRecursive(Control control)
+        {
+            if (control is TableLayoutPanel || control is Panel || control is FlowLayoutPanel || control is SplitContainer)
+            {
+                try
+                {
+                    typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(control, true, null);
+                }
+                catch { /* ignore */ }
+            }
+            foreach (Control child in control.Controls)
+            {
+                EnableDoubleBufferingRecursive(child);
+            }
         }
 
         protected override void OnLoad(EventArgs e)
@@ -54,17 +68,6 @@ namespace AssemblyLineTester.Views.Pages
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
                 isLoaded = true;
-                this.SuspendLayout();
-                tblMain.SuspendLayout();
-                try
-                {
-                    SetupInteractiveTabs();
-                }
-                finally
-                {
-                    tblMain.ResumeLayout(true);
-                    this.ResumeLayout(true);
-                }
             }
         }
 
