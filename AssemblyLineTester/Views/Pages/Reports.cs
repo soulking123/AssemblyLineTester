@@ -186,7 +186,35 @@ namespace AssemblyLineTester.Views.Pages
                     }
                 }
             };
-            btnExportExcel.Click += (s, e) => MessageBox.Show("Export Excel belum diimplementasikan.", "Info");
+            btnExportExcel.Click += (s, e) =>
+            {
+                if (_selectedReportId is null)
+                {
+                    MessageBox.Show("Please select a report to export.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using var sfd = new SaveFileDialog()
+                {
+                    Filter = "Excel files (*.xlsx)|*.xlsx",
+                    FileName = $"Report_{_selectedReportId}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                    Title = "Save report as Excel"
+                };
+
+                if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(sfd.FileName))
+                {
+                    try
+                    {
+                        var exporter = new AssemblyLineTester.Services.ReportExportService();
+                        exporter.ExportReportToExcel(_selectedReportId.Value, sfd.FileName);
+                        MessageBox.Show("Excel exported successfully.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to export Excel:\n{ex.Message}", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            };
             btnPrint.Click += (s, e) => MessageBox.Show("Print belum diimplementasikan.", "Info");
         }
 

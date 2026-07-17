@@ -17,7 +17,8 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="PdfSharp" Version="1.50.5147" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+		<!-- System.Text.Encoding.CodePages removed - not referenced by code. -->
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="WinForms.DataVisualization" Version="1.10.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
@@ -28,6 +29,11 @@
 		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
 		<PackageReference Include="FontAwesome.Sharp" Version="6.6.0" />
 	</ItemGroup>
+
+	<!-- Suppress known compatibility warning for PdfSharp (targets .NET Framework). Replace with a .NET 10 compatible PDF library when convenient. -->
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);NU1701</NoWarn>
+	</PropertyGroup>
 
 
   <ItemGroup>

@@ -13,9 +13,7 @@ namespace AssemblyLineTester.Services
 {
     public class TestReportService
     {
-        // The full vendor-defined test type list. No more "fixed 5-step" assumption -
-        // a report can use any subset of these, in any quantity, per net.
-
+        // Type Names for Report 
         private static readonly string[] AllTestTypeNames =
         {
             "4RESISTOR", "4WIRE", "CAPACITOR", "CLOSE", "COMMENT", "DIODE", "LINK",
@@ -64,10 +62,29 @@ namespace AssemblyLineTester.Services
             return null;
         }
 
+        // Truncate text with ellipsis 
+        private static string Ellipsize(XGraphics g, string? text, XFont font, double maxWidth)
+        {
+            if (string.IsNullOrEmpty(text)) return "-";
+            // quick check
+            var m = g.MeasureString(text, font);
+            if (m.Width <= maxWidth) return text;
+
+            const string ell = "...";
+            int lo = 0, hi = text.Length;
+            while (lo < hi)
+            {
+                int mid = (lo + hi + 1) / 2;
+                string cand = text.Substring(0, mid) + ell;
+                if (g.MeasureString(cand, font).Width <= maxWidth) lo = mid; else hi = mid - 1;
+            }
+            if (lo <= 0) return ell;
+            return text.Substring(0, lo) + (lo < text.Length ? ell : "");
+        }
+
         private double DrawPageHeader(XGraphics g, PdfPage page, ReportDetailDto detail, int pageIndex, int totalPages, string logoPath, double margin)
         {
             double y = margin;
-            double logoW = 80;
             // increase header logo height so it's more prominent
             double logoH = 45;
             var titleFont = new XFont("Arial", 14, XFontStyle.Bold);
@@ -151,8 +168,7 @@ namespace AssemblyLineTester.Services
             double margin = 40;
             double y = margin;
 
-            // --- Page 1: General information + Summary + Result box ---
-            // Draw consistent header for page 1 (no page count yet)
+            // --- Page 1: General information + Summary + Result box
             y = DrawPageHeader(gfx, page, detail, 0, 0, logoPath, margin);
 
             // Page 1: write title 'GENERAL INFORMATION' then the general information table
@@ -192,7 +208,7 @@ namespace AssemblyLineTester.Services
             double curY = infoStartY;
             foreach (var r in infoRows)
             {
-                // draw label (fixed width)
+                // draw label 
                 gfx.DrawString(r.Label, fontBold, XBrushes.Black, new XRect(infoStartX + 6, curY, labelColW - 6, infoRowH), XStringFormats.CenterLeft);
                 // draw colon in its own centered column
                 gfx.DrawString(":", fontBold, XBrushes.Black, new XRect(infoStartX + labelColW, curY, colonColW, infoRowH), XStringFormats.Center);
@@ -245,7 +261,8 @@ namespace AssemblyLineTester.Services
             {
                 tx = tableX;
                 gfx.DrawRectangle(XPens.LightGray, tx, y, colWidths[0], rowH);
-                gfx.DrawString(s.TestType, font, XBrushes.Black, new XRect(tx + 6, y, colWidths[0] - 10, rowH), XStringFormats.CenterLeft);
+                var typeText = Ellipsize(gfx, s.TestType, font, colWidths[0] - 12);
+                gfx.DrawString(typeText, font, XBrushes.Black, new XRect(tx + 6, y, colWidths[0] - 10, rowH), XStringFormats.CenterLeft);
                 tx += colWidths[0];
                 gfx.DrawRectangle(XPens.LightGray, tx, y, colWidths[1], rowH);
                 gfx.DrawString(s.Total.ToString(), font, XBrushes.Black, new XRect(tx, y, colWidths[1], rowH), XStringFormats.Center);
@@ -404,14 +421,32 @@ namespace AssemblyLineTester.Services
                 // draw cells
                 g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[0], dRowH); g2.DrawString(idx.ToString(), font, XBrushes.Black, new XRect(dx, y2 + 3, dCols[0], dRowH), XStringFormats.Center); dx += dCols[0];
 
-                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[1], dRowH); g2.DrawString(d.NetId + " - " + d.HarnessGroup, font, XBrushes.Black, new XRect(dx + 3, y2 + 3, dCols[1] - 6, dRowH), XStringFormats.TopLeft); dx += dCols[1];
-                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[2], dRowH); g2.DrawString(d.FromPin, font, XBrushes.Black, new XRect(dx + 3, y2 + 3, dCols[2] - 6, dRowH), XStringFormats.TopLeft); dx += dCols[2];
-                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[3], dRowH); g2.DrawString(d.ToPin, font, XBrushes.Black, new XRect(dx + 3, y2 + 3, dCols[3] - 6, dRowH), XStringFormats.TopLeft); dx += dCols[3];
-                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[4], dRowH); g2.DrawString(d.TestType, font, XBrushes.Black, new XRect(dx + 3, y2 + 3, dCols[4] - 6, dRowH), XStringFormats.TopLeft); dx += dCols[4];
+                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[1], dRowH);
+                var netHarness = Ellipsize(g2, d.NetId + " - " + d.HarnessGroup, font, dCols[1] - 12);
+                g2.DrawString(netHarness, font, XBrushes.Black, new XRect(dx + 3, y2, dCols[1] - 6, dRowH), XStringFormats.CenterLeft);
+                dx += dCols[1];
+
+                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[2], dRowH);
+                var fromText = Ellipsize(g2, d.FromPin, font, dCols[2] - 12);
+                g2.DrawString(fromText, font, XBrushes.Black, new XRect(dx + 3, y2, dCols[2] - 6, dRowH), XStringFormats.CenterLeft);
+                dx += dCols[2];
+
+                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[3], dRowH);
+                var toText = Ellipsize(g2, d.ToPin, font, dCols[3] - 12);
+                g2.DrawString(toText, font, XBrushes.Black, new XRect(dx + 3, y2, dCols[3] - 6, dRowH), XStringFormats.CenterLeft);
+                dx += dCols[3];
+
+                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[4], dRowH);
+                var testTypeText = Ellipsize(g2, d.TestType, font, dCols[4] - 12);
+                g2.DrawString(testTypeText, font, XBrushes.Black, new XRect(dx + 3, y2, dCols[4] - 6, dRowH), XStringFormats.CenterLeft);
+                dx += dCols[4];
 
                 g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[5], dRowH); g2.DrawString(lowerStr, font, XBrushes.Black, new XRect(dx, y2 + 3, dCols[5], dRowH), XStringFormats.Center); dx += dCols[5];
                 g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[6], dRowH); g2.DrawString(upperStr, font, XBrushes.Black, new XRect(dx, y2 + 3, dCols[6], dRowH), XStringFormats.Center); dx += dCols[6];
-                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[7], dRowH); g2.DrawString(measuredStr, font, XBrushes.Black, new XRect(dx + 3, y2 + 3, dCols[7] - 6, dRowH), XStringFormats.Center); dx += dCols[7];
+                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[7], dRowH);
+                var measuredText = Ellipsize(g2, measuredStr, font, dCols[7] - 12);
+                g2.DrawString(measuredText, font, XBrushes.Black, new XRect(dx + 3, y2, dCols[7] - 6, dRowH), XStringFormats.Center);
+                dx += dCols[7];
                 g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[8], dRowH); g2.DrawString(tolStr, font, XBrushes.Black, new XRect(dx, y2 + 3, dCols[8], dRowH), XStringFormats.Center); dx += dCols[8];
 
                 var rrect = new XRect(dx, y2, dCols[9], dRowH);
@@ -441,7 +476,6 @@ namespace AssemblyLineTester.Services
             }
 
             // Draw per-page header meta and footer (page numbers) now that we know total pages
-            // Dispose any existing XGraphics objects we created earlier to allow creating new ones per page
             try { gfx.Dispose(); } catch { }
             try { g2.Dispose(); } catch { }
             int totalPages = doc.Pages.Count;

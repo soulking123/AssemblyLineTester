@@ -1043,7 +1043,6 @@ namespace AssemblyLineTester.Views.Pages
                     ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
                     // Resolve TestType from DB to avoid attaching transient entities to EF context
                     TestTypeId = tt?.Id ?? 0,
-                    TestType = null,
                     ExpectedValue = expected,
                     LowerLimit = lower,
                     UpperLimit = upper,
