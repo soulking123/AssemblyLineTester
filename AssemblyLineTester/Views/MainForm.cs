@@ -198,14 +198,23 @@ namespace AssemblyLineTester.Views
 
             if (pnlContent == null) return;
             pnlContent.SuspendLayout();
-            pnlContent.Controls.Clear();
             if (activePage != null)
             {
-                activePage.Dock = DockStyle.Fill;
-                pnlContent.Controls.Add(activePage);
+                if (!pnlContent.Controls.Contains(activePage))
+                {
+                    activePage.Dock = DockStyle.Fill;
+                    pnlContent.Controls.Add(activePage);
+                }
+                foreach (Control c in pnlContent.Controls)
+                {
+                    if (c != activePage && c.Visible) c.Visible = false;
+                }
+                if (!activePage.Visible) activePage.Visible = true;
+                activePage.BringToFront();
             }
             else
             {
+                pnlContent.Controls.Clear();
                 Label lblPlaceholder = new Label
                 {
                     Text = $"{activeBtn.FullText.Trim()} (Under Construction)",

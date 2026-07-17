@@ -1138,7 +1138,7 @@ namespace AssemblyLineTester.Views.Pages
             // gridUsers
             // 
             gridUsers.BackgroundColor = Color.White;
-            gridUsers.BorderStyle = BorderStyle.None;
+            gridUsers.BorderStyle = BorderStyle.FixedSingle;
             gridUsers.ColumnHeadersHeight = 46;
             gridUsers.Dock = DockStyle.Fill;
             gridUsers.Location = new Point(0, 45);

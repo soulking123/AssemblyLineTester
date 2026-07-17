@@ -36,27 +36,36 @@ namespace AssemblyLineTester.Views.Pages
             public DiagramNode RightNode { get; set; } = null!;
         }
 
+        private bool isLoaded = false;
+        private bool isPopulatingData = false;
+
         public SettingsTestParametersPage()
         {
             InitializeComponent();
+            EnableDoubleBuffering();
             SetupEvents();
-            if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
-            {
-                LoadDefaultData();
-                UpdateTotalNetCount();
-                UpdateDiagramSize();
-            }
         }
 
-        protected override void OnLoad(EventArgs e)
+        private void EnableDoubleBuffering()
+        {
+            try
+            {
+                this.DoubleBuffered = true;
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(gridConfig, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(splitContainerMain, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(picPreview, true, null);
+            }
+            catch { /* ignore */ }
+        }
+
+        protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            if (isLoaded) return;
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                LoadDefaultData();
-                UpdateTotalNetCount();
-                UpdateDiagramSize();
-                picPreview.Invalidate();
+                isLoaded = true;
+                await LoadDefaultDataAsync();
             }
         }
 
@@ -123,29 +132,42 @@ namespace AssemblyLineTester.Views.Pages
         }
 
 
-        private void LoadDefaultData()
+        private async System.Threading.Tasks.Task LoadDefaultDataAsync()
         {
-            gridConfig.Rows.Clear();
-            highlightedRows.Clear();
-
-            string[] defaultRows =
-            [
-                "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|Resistance|0|5|2.5|±5%|Ω",
-                "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|Resistance|0|5|2.5|±5%|Ω",
-                "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|Capacitance|0|100|50|±10%|μF",
-                "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|Resistance|0|5|2.5|±5%|Ω"
-            ];
-
-            foreach (string rowStr in defaultRows)
+            isPopulatingData = true;
+            try
             {
-                string[] parts = rowStr.Split('|');
-                int idx = gridConfig.Rows.Add(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9], parts[10], parts[11], parts[12]);
-                UpdateRowUnitDropdown(idx);
-                gridConfig.Rows[idx].Cells["colUnit"].Value = parts[12];
-                RecalculateRowLimits(gridConfig.Rows[idx]);
+                gridConfig.Rows.Clear();
+                highlightedRows.Clear();
+
+                await System.Threading.Tasks.Task.Delay(15);
+
+                string[] defaultRows =
+                [
+                    "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|Resistance|0|5|2.5|±5%|Ω",
+                    "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|Resistance|0|5|2.5|±5%|Ω",
+                    "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|Capacitance|0|100|50|±10%|μF",
+                    "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|Resistance|0|5|2.5|±5%|Ω"
+                ];
+
+                gridConfig.SuspendLayout();
+                foreach (string rowStr in defaultRows)
+                {
+                    string[] parts = rowStr.Split('|');
+                    int idx = gridConfig.Rows.Add(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9], parts[10], parts[11], parts[12]);
+                    UpdateRowUnitDropdown(idx);
+                    gridConfig.Rows[idx].Cells["colUnit"].Value = parts[12];
+                    RecalculateRowLimits(gridConfig.Rows[idx]);
+                }
+
+                RenumberRows();
+                gridConfig.ResumeLayout(true);
+            }
+            finally
+            {
+                isPopulatingData = false;
             }
 
-            RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
             picPreview.Invalidate();
@@ -294,6 +316,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_RowsChanged(object? sender, EventArgs e)
         {
+            if (isPopulatingData) return;
             UpdateTotalNetCount();
             UpdateDiagramSize();
             picPreview.Invalidate();
@@ -301,6 +324,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
         {
+            if (isPopulatingData) return;
             if (e.RowIndex >= 0 && e.RowIndex < gridConfig.Rows.Count)
             {
                 var colTestType = gridConfig.Columns["colTestType"];

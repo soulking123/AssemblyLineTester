@@ -14,10 +14,14 @@ namespace AssemblyLineTester.Views.Pages
         private TableLayoutPanel? tblUcContainer;
         private Label? lblUnderConstructionTitle;
         private SettingsTestParametersPage? testParametersPage;
+        private Panel? pnlPageContainer;
+        private Label? activeTabLabel;
+        private bool isLoaded = false;
 
         public Settings()
         {
             InitializeComponent();
+            EnableDoubleBuffering();
             if (cmbLang.Items.Count > 0) cmbLang.SelectedIndex = 0;
             if (cmbDateFormat.Items.Count > 0) cmbDateFormat.SelectedIndex = 0;
             if (cmbTimeFormat.Items.Count > 0) cmbTimeFormat.SelectedIndex = 0;
@@ -30,53 +34,47 @@ namespace AssemblyLineTester.Views.Pages
             SetupEvents();
         }
 
+        private void EnableDoubleBuffering()
+        {
+            try
+            {
+                this.DoubleBuffered = true;
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(tblMain, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(tblContent, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(flpTabs, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(tblLeftColumn, true, null);
+            }
+            catch { /* ignore */ }
+        }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            if (isLoaded) return;
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                SetupInteractiveTabs();
-                AdjustCardLayouts();
-            }
-        }
-
-        private void AdjustCardLayouts()
-        {
-            TableLayoutPanel[] cards = [tblGenCard, tblTestCard, tblFileCard, tblAppCard];
-            foreach (var card in cards)
-            {
-                if (card is not null)
+                isLoaded = true;
+                this.SuspendLayout();
+                tblMain.SuspendLayout();
+                try
                 {
-                    FixMiniTables(card);
+                    SetupInteractiveTabs();
+                }
+                finally
+                {
+                    tblMain.ResumeLayout(true);
+                    this.ResumeLayout(true);
                 }
             }
         }
 
-        private void FixMiniTables(Control parent)
-        {
-            foreach (Control ctrl in parent.Controls)
-            {
-                if (ctrl is TableLayoutPanel tbl && tbl.RowCount == 2 && tbl.Controls.Count >= 2)
-                {
-                    tbl.AutoSize = true;
-                    tbl.Margin = new Padding(6, 2, 6, 2);
-                    if (tbl.RowStyles.Count >= 2)
-                    {
-                        tbl.RowStyles[0] = new RowStyle(SizeType.AutoSize);
-                        tbl.RowStyles[1] = new RowStyle(SizeType.AutoSize);
-                    }
-                }
-                if (ctrl.HasChildren)
-                {
-                    FixMiniTables(ctrl);
-                }
-            }
-        }
 
 
         private void SetupInteractiveTabs()
         {
             Label[] tabLabels = [lblTabGen, lblTabTest, lblTabHw, lblTabUsers, lblTabNotif, lblTabBackup, lblTabSysInfo];
+
+            activeTabLabel = lblTabGen;
 
             // Setup General Tab click handler
             lblTabGen.Cursor = Cursors.Hand;
@@ -84,36 +82,43 @@ namespace AssemblyLineTester.Views.Pages
             lblTabGen.Click += (s, ev) => Tab_Click(lblTabGen, ev);
             tabGeneral.Click += (s, ev) => Tab_Click(lblTabGen, ev);
 
-            // Dynamically wrap other tab labels in TableLayoutPanel containers so they can host the yellow indicator line
-            foreach (Label lbl in tabLabels)
+            flpTabs.SuspendLayout();
+            try
             {
-                if (lbl == lblTabGen) continue;
-
-                lbl.Cursor = Cursors.Hand;
-                int idx = flpTabs.Controls.IndexOf(lbl);
-                if (idx < 0) continue;
-
-                TableLayoutPanel tblTab = new TableLayoutPanel
+                foreach (Label lbl in tabLabels)
                 {
-                    AutoSize = true,
-                    ColumnCount = 1,
-                    RowCount = 2,
-                    Margin = lbl.Margin,
-                    Cursor = Cursors.Hand
-                };
-                tblTab.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-                tblTab.RowStyles.Add(new RowStyle(SizeType.Absolute, 56F));
-                tblTab.RowStyles.Add(new RowStyle(SizeType.Absolute, 5F));
-
-                lbl.Margin = new Padding(0, 13, 0, 0); // Reset inner cell margin
-                flpTabs.Controls.RemoveAt(idx);
-                tblTab.Controls.Add(lbl, 0, 0);
-                flpTabs.Controls.Add(tblTab);
-                flpTabs.Controls.SetChildIndex(tblTab, idx);
-
-                lbl.Click += (s, ev) => Tab_Click(lbl, ev);
-                tblTab.Click += (s, ev) => Tab_Click(lbl, ev);
+                    if (lbl == lblTabGen) continue;
+                    lbl.Cursor = Cursors.Hand;
+                    lbl.Click += (s, ev) => Tab_Click(lbl, ev);
+                    lbl.Paint += (s, ev) =>
+                    {
+                        if (lbl == activeTabLabel)
+                        {
+                            using var brush = new SolidBrush(Color.FromArgb(245, 158, 11));
+                            ev.Graphics.FillRectangle(brush, 0, lbl.Height - 6, lbl.Width, 6);
+                        }
+                    };
+                }
             }
+            finally
+            {
+                flpTabs.ResumeLayout(true);
+            }
+
+            // Create page container to isolate Z-order and eliminate multiple controls occupying the same TableLayoutPanel cell
+            pnlPageContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(0),
+                BackColor = Color.FromArgb(244, 245, 247)
+            };
+
+            if (tblMain.Controls.Contains(tblContent))
+            {
+                tblMain.Controls.Remove(tblContent);
+            }
+            tblContent.Dock = DockStyle.Fill;
+            pnlPageContainer.Controls.Add(tblContent);
 
             // Build Under Construction panel container
             tblUcContainer = new TableLayoutPanel
@@ -184,23 +189,19 @@ namespace AssemblyLineTester.Views.Pages
             cardUc.Controls.Add(tblUcCardContent);
             tblUcContainer.Controls.Add(cardUc, 1, 1);
 
-            tblMain.Controls.Add(tblUcContainer, 0, 2);
-
-            testParametersPage = new SettingsTestParametersPage
-            {
-                Dock = DockStyle.Fill,
-                Visible = false,
-                Margin = new Padding(0)
-            };
-            tblMain.Controls.Add(testParametersPage, 0, 2);
+            pnlPageContainer.Controls.Add(tblUcContainer);
+            tblMain.Controls.Add(pnlPageContainer, 0, 2);
         }
 
         private void Tab_Click(Label clickedLabel, EventArgs e)
         {
-            tblMain.SuspendLayout();
+            if (pnlPageContainer == null) return;
+            pnlPageContainer.SuspendLayout();
+            flpTabs.SuspendLayout();
             try
             {
                 Label[] tabLabels = [lblTabGen, lblTabTest, lblTabHw, lblTabUsers, lblTabNotif, lblTabBackup, lblTabSysInfo];
+                activeTabLabel = clickedLabel;
 
                 // Reset visual states of all tabs
                 foreach (Label lbl in tabLabels)
@@ -213,20 +214,18 @@ namespace AssemblyLineTester.Views.Pages
                 clickedLabel.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Bold;
                 clickedLabel.ForeColor = Color.FromArgb(30, 41, 59);
 
-                // Move bottom yellow indicator line
-                if (clickedLabel.Parent is TableLayoutPanel parentTbl)
+                // Move bottom yellow indicator for General tab vs others
+                if (pnlTabIndicator != null)
                 {
-                    if (pnlTabIndicator.Parent != null)
-                    {
-                        pnlTabIndicator.Parent.Controls.Remove(pnlTabIndicator);
-                    }
-                    parentTbl.Controls.Add(pnlTabIndicator, 0, 1);
+                    pnlTabIndicator.Visible = (clickedLabel == lblTabGen);
                 }
+                flpTabs.Invalidate(true);
 
-                // Switch content view
+                // Switch content view cleanly inside pnlPageContainer
                 if (clickedLabel == lblTabGen)
                 {
                     tblContent.Visible = true;
+                    tblContent.BringToFront();
                     if (testParametersPage != null) testParametersPage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
                 }
@@ -234,7 +233,18 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
-                    if (testParametersPage != null) testParametersPage.Visible = true;
+                    if (testParametersPage == null)
+                    {
+                        testParametersPage = new SettingsTestParametersPage
+                        {
+                            Dock = DockStyle.Fill,
+                            Visible = true,
+                            Margin = new Padding(0)
+                        };
+                        pnlPageContainer.Controls.Add(testParametersPage);
+                    }
+                    testParametersPage.Visible = true;
+                    testParametersPage.BringToFront();
                 }
                 else
                 {
@@ -244,12 +254,14 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         lblUnderConstructionTitle.Text = $"{clickedLabel.Text.Trim()} — Under Construction";
                         tblUcContainer.Visible = true;
+                        tblUcContainer.BringToFront();
                     }
                 }
             }
             finally
             {
-                tblMain.ResumeLayout(true);
+                flpTabs.ResumeLayout(true);
+                pnlPageContainer.ResumeLayout(true);
             }
         }
 

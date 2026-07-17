@@ -376,9 +376,9 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.Columns.Clear();
 
             gridUsers.BackgroundColor = Color.White;
-            gridUsers.BorderStyle = BorderStyle.None;
-            gridUsers.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            gridUsers.GridColor = Color.FromArgb(241, 245, 249);
+            gridUsers.BorderStyle = BorderStyle.FixedSingle;
+            gridUsers.CellBorderStyle = DataGridViewCellBorderStyle.Single;
+            gridUsers.GridColor = Color.FromArgb(203, 213, 225);
             gridUsers.RowHeadersVisible = false;
             gridUsers.AllowUserToAddRows = false;
             gridUsers.AllowUserToDeleteRows = false;
@@ -440,7 +440,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridUsers.Columns[e.ColumnIndex].Name == "colStatus" && e.Value is not null && e.Graphics is not null)
             {
-                e.Paint(e.ClipBounds, DataGridViewPaintParts.Background | DataGridViewPaintParts.SelectionBackground);
+                e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
                 
                 string status = e.Value.ToString() ?? "";
                 Color pillColor = status == "Active" ? Color.FromArgb(220, 252, 231) : (status == "Locked" ? Color.FromArgb(254, 226, 226) : Color.FromArgb(226, 232, 240));

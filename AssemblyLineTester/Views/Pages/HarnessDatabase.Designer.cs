@@ -161,15 +161,14 @@ namespace AssemblyLineTester.Views.Pages
             // lblListTitle
             // 
             lblListTitle.AutoSize = true;
-            lblListTitle.BorderStyle = BorderStyle.None;
             lblListTitle.Dock = DockStyle.Fill;
             lblListTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblListTitle.ForeColor = Color.FromArgb(15, 23, 42);
-            lblListTitle.Location = new Point(0, 0);
+            lblListTitle.Location = new Point(4, 4);
             lblListTitle.Margin = new Padding(0);
             lblListTitle.Name = "lblListTitle";
             lblListTitle.Padding = new Padding(26, 0, 0, 0);
-            lblListTitle.Size = new Size(1923, 80);
+            lblListTitle.Size = new Size(1915, 80);
             lblListTitle.TabIndex = 0;
             lblListTitle.Text = "HARNESS LIST (Total: 58)";
             lblListTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -178,11 +177,9 @@ namespace AssemblyLineTester.Views.Pages
             // 
             dataGridViewList.AllowUserToAddRows = false;
             dataGridViewList.AllowUserToDeleteRows = false;
-            dataGridViewList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridViewList.BackgroundColor = Color.White;
             dataGridViewList.BorderStyle = BorderStyle.None;
-            dataGridViewList.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            dataGridViewList.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dataGridViewList.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 250, 252);
             dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
@@ -203,8 +200,8 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewList.DefaultCellStyle = dataGridViewCellStyle2;
             dataGridViewList.Dock = DockStyle.Fill;
             dataGridViewList.EnableHeadersVisualStyles = false;
-            dataGridViewList.GridColor = Color.FromArgb(241, 245, 249);
-            dataGridViewList.Location = new Point(26, 80);
+            dataGridViewList.GridColor = Color.FromArgb(203, 213, 225);
+            dataGridViewList.Location = new Point(30, 84);
             dataGridViewList.Margin = new Padding(26, 0, 26, 0);
             dataGridViewList.Name = "dataGridViewList";
             dataGridViewList.ReadOnly = true;
@@ -212,7 +209,7 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewList.RowHeadersWidth = 82;
             dataGridViewList.RowTemplate.Height = 36;
             dataGridViewList.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridViewList.Size = new Size(1871, 2621);
+            dataGridViewList.Size = new Size(1863, 2613);
             dataGridViewList.TabIndex = 1;
             // 
             // colNo
@@ -222,6 +219,7 @@ namespace AssemblyLineTester.Views.Pages
             colNo.MinimumWidth = 35;
             colNo.Name = "colNo";
             colNo.ReadOnly = true;
+            colNo.Width = 200;
             // 
             // colProductModel
             // 
@@ -230,6 +228,7 @@ namespace AssemblyLineTester.Views.Pages
             colProductModel.MinimumWidth = 65;
             colProductModel.Name = "colProductModel";
             colProductModel.ReadOnly = true;
+            colProductModel.Width = 200;
             // 
             // colProductType
             // 
@@ -238,6 +237,7 @@ namespace AssemblyLineTester.Views.Pages
             colProductType.MinimumWidth = 60;
             colProductType.Name = "colProductType";
             colProductType.ReadOnly = true;
+            colProductType.Width = 200;
             // 
             // colArea
             // 
@@ -246,6 +246,7 @@ namespace AssemblyLineTester.Views.Pages
             colArea.MinimumWidth = 160;
             colArea.Name = "colArea";
             colArea.ReadOnly = true;
+            colArea.Width = 200;
             // 
             // colPartNumber
             // 
@@ -254,6 +255,7 @@ namespace AssemblyLineTester.Views.Pages
             colPartNumber.MinimumWidth = 130;
             colPartNumber.Name = "colPartNumber";
             colPartNumber.ReadOnly = true;
+            colPartNumber.Width = 200;
             // 
             // colEcnNo
             // 
@@ -262,6 +264,7 @@ namespace AssemblyLineTester.Views.Pages
             colEcnNo.MinimumWidth = 75;
             colEcnNo.Name = "colEcnNo";
             colEcnNo.ReadOnly = true;
+            colEcnNo.Width = 200;
             // 
             // colRevision
             // 
@@ -270,6 +273,7 @@ namespace AssemblyLineTester.Views.Pages
             colRevision.MinimumWidth = 45;
             colRevision.Name = "colRevision";
             colRevision.ReadOnly = true;
+            colRevision.Width = 200;
             // 
             // colStatus
             // 
@@ -278,6 +282,7 @@ namespace AssemblyLineTester.Views.Pages
             colStatus.MinimumWidth = 75;
             colStatus.Name = "colStatus";
             colStatus.ReadOnly = true;
+            colStatus.Width = 200;
             // 
             // colLastUpdated
             // 
@@ -286,6 +291,7 @@ namespace AssemblyLineTester.Views.Pages
             colLastUpdated.MinimumWidth = 90;
             colLastUpdated.Name = "colLastUpdated";
             colLastUpdated.ReadOnly = true;
+            colLastUpdated.Width = 200;
             // 
             // tblPagination
             // 
@@ -295,12 +301,12 @@ namespace AssemblyLineTester.Views.Pages
             tblPagination.Controls.Add(flpPages, 0, 0);
             tblPagination.Controls.Add(flpShowEntries, 1, 0);
             tblPagination.Dock = DockStyle.Fill;
-            tblPagination.Location = new Point(26, 2701);
+            tblPagination.Location = new Point(30, 2697);
             tblPagination.Margin = new Padding(26, 0, 26, 0);
             tblPagination.Name = "tblPagination";
             tblPagination.RowCount = 1;
             tblPagination.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblPagination.Size = new Size(1871, 114);
+            tblPagination.Size = new Size(1863, 114);
             tblPagination.TabIndex = 2;
             // 
             // flpPages
@@ -309,7 +315,7 @@ namespace AssemblyLineTester.Views.Pages
             flpPages.Location = new Point(0, 0);
             flpPages.Margin = new Padding(0);
             flpPages.Name = "flpPages";
-            flpPages.Size = new Size(1122, 114);
+            flpPages.Size = new Size(838, 114);
             flpPages.TabIndex = 0;
             // 
             // flpShowEntries
@@ -319,10 +325,10 @@ namespace AssemblyLineTester.Views.Pages
             flpShowEntries.Controls.Add(lblShowEntries1);
             flpShowEntries.Dock = DockStyle.Fill;
             flpShowEntries.FlowDirection = FlowDirection.RightToLeft;
-            flpShowEntries.Location = new Point(1122, 0);
+            flpShowEntries.Location = new Point(838, 0);
             flpShowEntries.Margin = new Padding(0);
             flpShowEntries.Name = "flpShowEntries";
-            flpShowEntries.Size = new Size(749, 114);
+            flpShowEntries.Size = new Size(1025, 114);
             flpShowEntries.TabIndex = 1;
             flpShowEntries.WrapContents = false;
             // 
@@ -331,7 +337,7 @@ namespace AssemblyLineTester.Views.Pages
             lblShowEntries2.AutoSize = true;
             lblShowEntries2.Font = new Font("Segoe UI", 9F);
             lblShowEntries2.ForeColor = Color.FromArgb(71, 85, 105);
-            lblShowEntries2.Location = new Point(663, 19);
+            lblShowEntries2.Location = new Point(939, 19);
             lblShowEntries2.Margin = new Padding(6, 19, 0, 0);
             lblShowEntries2.Name = "lblShowEntries2";
             lblShowEntries2.Size = new Size(86, 32);
@@ -344,7 +350,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbShowEntries.Font = new Font("Segoe UI", 9F);
             cmbShowEntries.FormattingEnabled = true;
             cmbShowEntries.Items.AddRange(new object[] { "10", "25", "50" });
-            cmbShowEntries.Location = new Point(553, 13);
+            cmbShowEntries.Location = new Point(829, 13);
             cmbShowEntries.Margin = new Padding(6, 13, 6, 0);
             cmbShowEntries.Name = "cmbShowEntries";
             cmbShowEntries.Size = new Size(98, 40);
@@ -355,7 +361,7 @@ namespace AssemblyLineTester.Views.Pages
             lblShowEntries1.AutoSize = true;
             lblShowEntries1.Font = new Font("Segoe UI", 9F);
             lblShowEntries1.ForeColor = Color.FromArgb(71, 85, 105);
-            lblShowEntries1.Location = new Point(469, 19);
+            lblShowEntries1.Location = new Point(745, 19);
             lblShowEntries1.Margin = new Padding(0, 19, 6, 0);
             lblShowEntries1.Name = "lblShowEntries1";
             lblShowEntries1.Size = new Size(72, 32);
@@ -725,6 +731,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblTestSummaryContent
             // 
+            tblTestSummaryContent.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             tblTestSummaryContent.ColumnCount = 2;
             tblTestSummaryContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
             tblTestSummaryContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));

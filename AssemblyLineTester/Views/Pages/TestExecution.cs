@@ -109,8 +109,16 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
         {
-            using var modal = new Views.Modals.AutomatedTestConfigModalForm();
-            modal.ShowDialog(this);
+            using var ofd = new OpenFileDialog
+            {
+                Title = "Select Test Program Configuration",
+                Filter = "Test Program Files (*.json;*.xml;*.txt)|*.json;*.xml;*.txt|All Files (*.*)|*.*",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
+            if (ofd.ShowDialog(this) == DialogResult.OK)
+            {
+                MessageBox.Show($"Loaded test program configuration:\n{ofd.FileName}", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void btnStartTest_Click(object? sender, EventArgs e)
@@ -367,11 +375,46 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnLoadProgram, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnStartTest, 12, Color.FromArgb(56, 142, 60), Color.FromArgb(76, 175, 80), Color.FromArgb(46, 125, 50), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnStopTest, 12, Color.FromArgb(211, 47, 47), Color.FromArgb(239, 83, 80), Color.FromArgb(198, 40, 40), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSaveReport, 12, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewPinMap, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewWiringDiagram, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
 
             btnViewWiringDiagram.Click += BtnViewWiringDiagram_Click;
             btnViewPinMap.Click += BtnViewWiringDiagram_Click;
+            btnSaveReport.Click += BtnSaveReport_Click;
+        }
+
+        private void BtnSaveReport_Click(object? sender, EventArgs e)
+        {
+            if (_loadedRows == null || _loadedRows.Count == 0)
+            {
+                if (MessageBox.Show("No active test data in grid. Do you want to open the save report modal anyway?", "No Test Results", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                {
+                    return;
+                }
+            }
+
+            bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
+            string overallResult = allPass ? "PASS" : "FAIL";
+
+            using var modal = new AssemblyLineTester.Views.Modals.SaveTestReportModalForm(
+                cmbProductModel.Text,
+                cmbEcnNo.Text,
+                cmbProductType.Text,
+                "1.0",
+                cmbArea.Text,
+                "OP-402",
+                cmbPartNumber.Text,
+                $"SN-{DateTime.Now:HHmmss}",
+                overallResult,
+                DateTime.Now,
+                _loadedRows ?? new List<LiveTestDetailRowDto>()
+            );
+
+            if (modal.ShowDialog(this) == DialogResult.OK)
+            {
+                MessageBox.Show("Test Report saved successfully to the database!\nIt can now be viewed in Reports and Test History.", "Report Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void BtnViewWiringDiagram_Click(object? sender, EventArgs e)
