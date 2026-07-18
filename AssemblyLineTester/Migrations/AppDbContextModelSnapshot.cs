@@ -997,7 +997,7 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("ConfigId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ConfigurationConfigId")
+                    b.Property<int?>("ConfigurationConfigId")
                         .HasColumnType("INTEGER");
 
                     b.Property<double?>("ExpectedValue")
@@ -1730,9 +1730,7 @@ namespace AssemblyLineTester.Migrations
                 {
                     b.HasOne("AssemblyLineTester.Models.TestConfiguration", "Configuration")
                         .WithMany("Nets")
-                        .HasForeignKey("ConfigurationConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ConfigurationConfigId");
 
                     b.HasOne("AssemblyLineTester.Models.TestType", "TestType")
                         .WithMany()

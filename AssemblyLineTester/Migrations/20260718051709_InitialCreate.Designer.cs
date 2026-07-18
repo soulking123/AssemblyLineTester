@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260717073752_AddRolePermissionsTable")]
-    partial class AddRolePermissionsTable
+    [Migration("20260718051709_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,7 +46,7 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            LastUsageDate = new DateTime(2026, 7, 17, 0, 0, 0, 0, DateTimeKind.Local),
+                            LastUsageDate = new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Local),
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,
                             RemainingMaintHours = 2160.0
@@ -1000,7 +1000,7 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("ConfigId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ConfigurationConfigId")
+                    b.Property<int?>("ConfigurationConfigId")
                         .HasColumnType("INTEGER");
 
                     b.Property<double?>("ExpectedValue")
@@ -1733,9 +1733,7 @@ namespace AssemblyLineTester.Migrations
                 {
                     b.HasOne("AssemblyLineTester.Models.TestConfiguration", "Configuration")
                         .WithMany("Nets")
-                        .HasForeignKey("ConfigurationConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ConfigurationConfigId");
 
                     b.HasOne("AssemblyLineTester.Models.TestType", "TestType")
                         .WithMany()
