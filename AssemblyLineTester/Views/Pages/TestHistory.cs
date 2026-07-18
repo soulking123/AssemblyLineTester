@@ -35,7 +35,6 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                _reportService.SeedSampleDataIfEmpty();
                 if (cmbPageSize.Items.Count > 0) cmbPageSize.SelectedIndex = 0;
 
                 ResetFilterControls();
@@ -101,7 +100,8 @@ namespace AssemblyLineTester.Views.Pages
             {
                 ResetFilterControls();
                 GoToPage(1);
-            };
+            }
+            ;
 
             cmbPageSize.SelectedIndexChanged += (s, ev) =>
             {
@@ -416,6 +416,34 @@ namespace AssemblyLineTester.Views.Pages
 
             btnViewReport.Enabled = true;
             PopulateStepsGrid(detail.Steps);
+
+            // Enable delete button when a detail is loaded
+            btnDeleteHistory.Enabled = true;
+        }
+
+        private void BtnDeleteHistory_Click(object? sender, EventArgs e)
+        {
+            if (gridData.CurrentRow == null || gridData.CurrentRow.Tag is not int reportId)
+            {
+                MessageBox.Show("Please select a history item to delete.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("Delete this test history and its steps? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                return;
+
+            bool ok = _historyService.DeleteHistory(reportId);
+            if (ok)
+            {
+                MessageBox.Show("History deleted.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadHistoryData();
+                ClearDetailPanel();
+                btnDeleteHistory.Enabled = false;
+            }
+            else
+            {
+                MessageBox.Show("Failed to delete history.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void ClearDetailPanel()

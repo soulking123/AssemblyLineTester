@@ -109,6 +109,7 @@ namespace AssemblyLineTester.Views.Pages
             lblDtOpV = new Label();
             flpDetailFooter = new FlowLayoutPanel();
             btnViewReport = new Button();
+            btnDeleteHistory = new Button();
             pnlSummary = new Panel();
             tblSummaryContent = new TableLayoutPanel();
             lblSummaryTitle = new Label();
@@ -127,6 +128,7 @@ namespace AssemblyLineTester.Views.Pages
             tblStepsContent = new TableLayoutPanel();
             lblStepsTitle = new Label();
             gridSteps = new DataGridView();
+            // btnDeleteHistory will be instantiated later where its properties and event handler are configured
             pnlTop.SuspendLayout();
             pnlFilterCard.SuspendLayout();
             tblFilterInner.SuspendLayout();
@@ -1173,6 +1175,25 @@ namespace AssemblyLineTester.Views.Pages
             // flpDetailFooter
             // 
             flpDetailFooter.Controls.Add(btnViewReport);
+            // btnDeleteHistory will be added after btnViewReport
+            // btnDeleteHistory
+            btnDeleteHistory = new Button();
+            btnDeleteHistory.BackColor = Color.FromArgb(254, 242, 242);
+            btnDeleteHistory.Cursor = Cursors.Hand;
+            btnDeleteHistory.FlatAppearance.BorderColor = Color.FromArgb(254, 202, 202);
+            btnDeleteHistory.FlatStyle = FlatStyle.Flat;
+            btnDeleteHistory.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnDeleteHistory.ForeColor = Color.FromArgb(239, 68, 68);
+            btnDeleteHistory.Location = new Point(0, 0);
+            btnDeleteHistory.Margin = new Padding(0, 0, 8, 0);
+            btnDeleteHistory.Name = "btnDeleteHistory";
+            btnDeleteHistory.Size = new Size(220, 52);
+            btnDeleteHistory.TabIndex = 1;
+            btnDeleteHistory.Text = "🗑 Delete History";
+            btnDeleteHistory.UseVisualStyleBackColor = false;
+            btnDeleteHistory.Enabled = false;
+            btnDeleteHistory.Click += BtnDeleteHistory_Click;
+            flpDetailFooter.Controls.Add(btnDeleteHistory);
             flpDetailFooter.Dock = DockStyle.Fill;
             flpDetailFooter.FlowDirection = FlowDirection.RightToLeft;
             flpDetailFooter.Location = new Point(0, 392);
@@ -1649,6 +1670,7 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.FlowLayoutPanel flpDetailFooter;
 
         private System.Windows.Forms.Button btnViewReport;
+        private System.Windows.Forms.Button btnDeleteHistory;
 
         private System.Windows.Forms.Panel pnlSummary;
 

@@ -43,6 +43,46 @@ namespace AssemblyLineTester.Services
             };
         }
 
+        // Deletes a report and all its details/steps (cascade delete via FK).
+        public void DeleteReport(int reportId)
+        {
+            using var db = new AppDbContext();
+            var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId);
+            if (report is null) return;
+
+            db.TestReports.Remove(report);
+            db.SaveChanges();
+        }
+
+        // Updates the editable header fields of an existing report. Does NOT touch
+        // TestDetails/TestSteps - those are execution results and stay immutable.
+        public void UpdateReportHeader(
+            int reportId, string productModel, string productType, string area,
+            string ecnNumber, string revision, string partNumber, string serialNumber,
+            string operatorName, string overallResultStr)
+        {
+            using var db = new AppDbContext();
+            var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId)
+                ?? throw new InvalidOperationException($"Report {reportId} not found.");
+
+            report.ProductModel = productModel;
+            report.ProductType = productType;
+            report.Area = area;
+            report.ECNNumber = ecnNumber;
+            report.Revision = revision;
+            report.PartNumber = partNumber;
+            report.SerialNumber = serialNumber;
+            report.Operator = operatorName;
+
+            if (Enum.TryParse<TestResult>(overallResultStr, true, out var result))
+            {
+                report.OverallResult = result;
+                report.FailCount = result == TestResult.Fail ? Math.Max(report.FailCount, 1) : 0;
+            }
+
+            db.SaveChanges();
+        }
+
         private static double? ParseLeadingNumber(string? s)
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
@@ -283,7 +323,7 @@ namespace AssemblyLineTester.Services
             }
 
             tx = tableX;
-            var totalBg = hdrBg; 
+            var totalBg = hdrBg;
             for (int i = 0; i < colWidths.Length; i++)
             {
                 gfx.DrawRectangle(totalBg, tx, y, colWidths[i], rowH);
@@ -604,218 +644,6 @@ namespace AssemblyLineTester.Services
                 TypeSummaries = typeSummaries,
                 Details = detailDtos
             };
-        }
-
-        public void SeedSampleDataIfEmpty()
-        {
-            using (var db = new AppDbContext())
-            {
-                if (db.TestReports.Any()) return;
-            }
-
-            var rnd = new Random(2026);
-
-            string[] productModels = { "6060", "6070", "EXC-450-MainHarness_Rev3" };
-            string[] productTypes = { "AC", "DC" };
-            string[] areas = { "Engine Control", "Power Distribution", "Cab Electrical" };
-            string[] operators = { "Fally", "B. Santoso", "Doni Pratama", "Rian Hidayat" };
-            string[] colors = { "Red", "Black", "Blue", "Green", "Yellow", "White", "Orange", "Brown", "Gray", "Violet" };
-
-            var reports = new List<TestReport>();
-            var allDetails = new List<TestDetail>();
-            var allSteps = new List<TestStep>();
-
-            for (int dayOffset = 364; dayOffset >= 0; dayOffset--)
-            {
-                var day = DateTime.Today.AddDays(-dayOffset);
-                bool isWeekend = day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
-                int reportsToday = isWeekend ? rnd.Next(0, 2) : rnd.Next(1, 6);
-
-                for (int n = 0; n < reportsToday; n++)
-                {
-                    var testStart = day.AddHours(7 + rnd.NextDouble() * 10);
-
-                    string model = productModels[rnd.Next(productModels.Length)];
-                    string type = productTypes[rnd.Next(productTypes.Length)];
-                    string area = areas[rnd.Next(areas.Length)];
-                    string oper = operators[rnd.Next(operators.Length)];
-                    string partNumber = $"WH-ENG-{rnd.Next(1, 20):000}";
-                    string serialNumber = $"SN{rnd.Next(10000, 99999)}";
-
-                    double statusRoll = rnd.NextDouble();
-                    var status = statusRoll < 0.92 ? TestStatus.Completed
-                        : statusRoll < 0.97 ? TestStatus.InProgress
-                        : TestStatus.Stopped;
-
-                    bool intendedPass = rnd.NextDouble() < 0.60;
-
-                    var report = new TestReport
-                    {
-                        ReportNumber = $"TR-{testStart:yyyyMMdd-HHmmss}",
-                        ProductModel = model,
-                        ProductType = type,
-                        Area = area,
-                        ECNNumber = $"12{rnd.Next(1, 9)}.R00{rnd.Next(1, 3)}",
-                        Revision = "A",
-                        PartNumber = partNumber,
-                        SerialNumber = serialNumber,
-                        Operator = oper,
-                        TesterModel = "ALT-2000",
-                        TestDateTime = testStart,
-                        Status = status,
-                        OverallResult = null,
-                        CreatedAt = testStart
-                    };
-
-                    // Pick a random subset of 4-8 test types used by this report (out of 15).
-                    var usedTypes = AllTestTypeNames.OrderBy(_ => rnd.Next()).Take(rnd.Next(4, 9)).ToList();
-
-                    int detailCount = 0;
-                    int passCount = 0;
-                    var cursor = testStart;
-
-                    foreach (var testType in usedTypes)
-                    {
-                        int netsForThisType = rnd.Next(3, 15);
-                        int stepDurationSeconds = rnd.Next(10, 90);
-                        bool stepAllPassed = true;
-
-                        for (int i = 1; i <= netsForThisType; i++)
-                        {
-                            detailCount++;
-                            bool forceFail = !intendedPass && rnd.NextDouble() < 0.15;
-
-                            var (measured, lower, upper, unit, result, errorDetail) = GenerateMeasurement(testType, forceFail, rnd);
-                            if (result) passCount++;
-                            else stepAllPassed = false;
-
-                            allDetails.Add(new TestDetail
-                            {
-                                Report = report,
-                                NetId = $"N{detailCount:000}",
-                                HarnessGroup = $"{area} Connector",
-                                FromPin = $"J{rnd.Next(1, 9)}-{rnd.Next(1, 20)}",
-                                ToPin = $"J{rnd.Next(9, 13)}-{rnd.Next(1, 20)}",
-                                Color = colors[rnd.Next(colors.Length)],
-                                TestTypeName = testType,
-                                MeasuredValue = measured,
-                                LowerLimit = lower,
-                                UpperLimit = upper,
-                                Unit = unit,
-                                Result = result,
-                                ErrorDetail = errorDetail
-                            });
-                        }
-
-                        allSteps.Add(new TestStep
-                        {
-                            Report = report,
-                            StepNo = allSteps.Count(s => s.Report == report) + 1,
-                            TestTypeName = testType,
-                            Result = stepAllPassed,
-                            DurationSeconds = stepDurationSeconds
-                        });
-
-                        cursor = cursor.AddSeconds(stepDurationSeconds);
-                    }
-
-                    report.TotalNets = detailCount;
-                    report.PassCount = passCount;
-                    report.FailCount = detailCount - passCount;
-
-                    if (status == TestStatus.Completed)
-                    {
-                        report.OverallResult = report.FailCount == 0 ? TestResult.Pass : TestResult.Fail;
-                        report.EndDateTime = cursor;
-                    }
-                    else if (status == TestStatus.Stopped)
-                    {
-                        report.OverallResult = null;
-                        report.EndDateTime = cursor;
-                    }
-                    else
-                    {
-                        report.OverallResult = null;
-                        report.EndDateTime = null;
-                    }
-
-                    reports.Add(report);
-                }
-            }
-
-            using (var db = new AppDbContext())
-            {
-                db.TestReports.AddRange(reports);
-                db.TestDetails.AddRange(allDetails);
-                db.TestSteps.AddRange(allSteps);
-                db.SaveChanges();
-            }
-        }
-
-
-        private static (double? measured, double? lower, double? upper, string unit, bool result, string? errorDetail)
-        GenerateMeasurement(string testType, bool forceFail, Random rnd)
-        {
-            switch (testType)
-            {
-                case "RESISTOR":
-                case "4RESISTOR":
-                    {
-                        double upper = 10.0;
-                        double val = forceFail ? Math.Round(upper + rnd.NextDouble() * 20, 2) : Math.Round(rnd.NextDouble() * 8, 2);
-                        bool pass = val <= upper;
-                        return (val, null, upper, "Ω", pass, pass ? null : "Resistance out of tolerance");
-                    }
-
-                case "WIRE":
-                case "4WIRE":
-                case "TWISTED PAIR":
-                case "SIGNATURE WIRE":
-                    {
-                        double upper = 1.0;
-                        if (forceFail && rnd.NextDouble() < 0.3)
-                            return (null, null, upper, "Ω", false, "Open circuit detected - no continuity");
-
-                        double val = forceFail ? Math.Round(upper + rnd.NextDouble() * 5, 2) : Math.Round(rnd.NextDouble() * 0.9, 2);
-                        bool pass = val <= upper;
-                        return (val, null, upper, "Ω", pass, pass ? null : "Resistance exceeds limit");
-                    }
-
-                case "CAPACITOR":
-                    {
-                        double lower = 90.0, upper = 110.0; // e.g. nF, ±10% band
-                        double val = forceFail
-                            ? Math.Round(rnd.NextDouble() < 0.5 ? lower * 0.5 : upper * 1.5, 1)
-                            : Math.Round(lower + rnd.NextDouble() * (upper - lower), 1);
-                        bool pass = val >= lower && val <= upper;
-                        return (val, lower, upper, "nF", pass, pass ? null : "Capacitance out of tolerance band");
-                    }
-
-                case "DIODE":
-                case "SIGNATURE DIODE":
-                    {
-                        double lower = 0.4, upper = 0.9; // forward voltage drop, V
-                        double val = forceFail
-                            ? Math.Round(rnd.NextDouble() < 0.5 ? 0 : 2.0, 2)
-                            : Math.Round(lower + rnd.NextDouble() * (upper - lower), 2);
-                        bool pass = val >= lower && val <= upper;
-                        return (val, lower, upper, "V", pass, pass ? null : "Forward voltage out of range - possible reversed/shorted diode");
-                    }
-
-                case "OPEN":
-                case "CLOSE":
-                case "LINK":
-                case "PROBE":
-                case "COMMENT":
-                case "LUA COMPONENT":
-                    {
-                        bool pass = !forceFail;
-                        return (null, null, null, "-", pass, pass ? null : $"{testType} check failed");
-                    }
-
-                default:
-                    return (null, null, null, "-", true, null);
-            }
         }
 
         public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr)

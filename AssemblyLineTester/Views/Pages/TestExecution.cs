@@ -114,39 +114,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
         {
-            //<<<<<<< HEAD
-            //            try
-            //            {
-            //                using var db = new AppDbContext();
-            //                using var modal = new Views.Modals.SelectTestConfigModalForm(db);
-            //                if (modal.ShowDialog(this) == DialogResult.OK)
-            //                {
-            //                    var selectedConfig = modal.SelectedConfiguration;
-            //                    if (selectedConfig != null)
-            //                    {
-            //                        var configService = new TestConfigService();
-            //                        configService.SetActiveConfig(selectedConfig.ConfigName);
-
-            //                        // Cache the converted wirelist program text
-            //                        _customTestText = configService.ConvertToProgramText(selectedConfig);
-
-
-            //                        // Update page header title
-            //                        lblPageHeader.Text = $"TEST EXECUTION - {selectedConfig.ConfigName}";
-
-
-            //                        _customTestText = configService.ConvertToProgramText(selectedConfig);
-
-
-            //                        MessageBox.Show($"Successfully loaded and activated test program: {selectedConfig.ConfigName}", "Load Program", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //                    }
-            //                }
-            //            }
-            //            catch (Exception ex)
-            //            {
-            //                MessageBox.Show($"Error loading program: {ex.Message}", "Load Program Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //            }
-            //=======
             var configService = new TestConfigService();
             using var dlg = new AssemblyLineTester.Views.Modals.LoadProgramModalForm(configService);
             if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -203,7 +170,6 @@ namespace AssemblyLineTester.Views.Pages
                     }
                 }
             }
-            //>>>>>>> d9a451d0cb542e65d9cf94d7f3ce08d6e9266a92
         }
 
 

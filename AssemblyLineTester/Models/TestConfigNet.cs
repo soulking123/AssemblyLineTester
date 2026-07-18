@@ -22,8 +22,9 @@ namespace AssemblyLineTester.Models
         public int ToAddress { get; set; }                                  // 0,1,2,3,4
         public string ToLabel { get; set; } = string.Empty;                 // Y1=01
 
-        public int TestTypeId { get; set; }                                 // 
-        public TestType TestType { get; set; } = null!;
+        public int TestTypeId { get; set; }                                 
+
+        public TestType? TestType { get; set; }
 
         public double? LowerLimit { get; set; }                             //0
         
