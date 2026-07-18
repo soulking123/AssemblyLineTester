@@ -1,13 +1,15 @@
+using AssemblyLineTester.Data;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
-using AssemblyLineTester.Data;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
-
-using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -42,12 +44,20 @@ namespace AssemblyLineTester.Views.Pages
                 var activeConfig = configService.GetActiveConfig();
                 if (activeConfig != null)
                 {
+
                     _customTestText = configService.ConvertToProgramText(activeConfig);
                     lblPageHeader.Text = $"TEST EXECUTION - {activeConfig.ConfigName}";
+                    var resNet = activeConfig.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
+                    if (resNet != null && resNet.UpperLimit.HasValue)
+                    {
+                        _continuityResistance = resNet.UpperLimit.Value;
+                    }
+                    Debug.WriteLine($"Loaded active config on startup: {activeConfig.ConfigName}");
                 }
                 else
                 {
                     lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
+                    
                 }
             }
         }
@@ -104,34 +114,96 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
         {
-            try
-            {
-                using var db = new AppDbContext();
-                using var modal = new Views.Modals.SelectTestConfigModalForm(db);
-                if (modal.ShowDialog(this) == DialogResult.OK)
-                {
-                    var selectedConfig = modal.SelectedConfiguration;
-                    if (selectedConfig != null)
-                    {
-                        var configService = new TestConfigService();
-                        configService.SetActiveConfig(selectedConfig.ConfigName);
+//<<<<<<< HEAD
+//            try
+//            {
+//                using var db = new AppDbContext();
+//                using var modal = new Views.Modals.SelectTestConfigModalForm(db);
+//                if (modal.ShowDialog(this) == DialogResult.OK)
+//                {
+//                    var selectedConfig = modal.SelectedConfiguration;
+//                    if (selectedConfig != null)
+//                    {
+//                        var configService = new TestConfigService();
+//                        configService.SetActiveConfig(selectedConfig.ConfigName);
 
-                        // Cache the converted wirelist program text
-                        _customTestText = configService.ConvertToProgramText(selectedConfig);
+//                        // Cache the converted wirelist program text
+//                        _customTestText = configService.ConvertToProgramText(selectedConfig);
 
-                        // Update page header title
-                        lblPageHeader.Text = $"TEST EXECUTION - {selectedConfig.ConfigName}";
 
-                        _customTestText = configService.ConvertToProgramText(selectedConfig);
+//                        // Update page header title
+//                        lblPageHeader.Text = $"TEST EXECUTION - {selectedConfig.ConfigName}";
 
-                        MessageBox.Show($"Successfully loaded and activated test program: {selectedConfig.ConfigName}", "Load Program", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error loading program: {ex.Message}", "Load Program Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+
+//                        _customTestText = configService.ConvertToProgramText(selectedConfig);
+
+
+//                        MessageBox.Show($"Successfully loaded and activated test program: {selectedConfig.ConfigName}", "Load Program", MessageBoxButtons.OK, MessageBoxIcon.Information);
+//                    }
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//                MessageBox.Show($"Error loading program: {ex.Message}", "Load Program Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+//            }
+//=======
+//            var configService = new TestConfigService();
+//            using var dlg = new AssemblyLineTester.Views.Modals.LoadProgramModalForm(configService);
+//            if (dlg.ShowDialog(this) == DialogResult.OK)
+//            {
+//                if (dlg.SelectedConfiguration != null)
+//                {
+//                    configService.SetActiveConfig(dlg.SelectedConfiguration.ConfigName);
+//                    _customTestText = configService.ConvertToProgramText(dlg.SelectedConfiguration);
+//                    var resNet = dlg.SelectedConfiguration.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
+//                    if (resNet != null && resNet.UpperLimit.HasValue)
+//                    {
+//                        _continuityResistance = resNet.UpperLimit.Value;
+//                    }
+
+//                    MessageBox.Show($"Test program configuration '{dlg.SelectedConfiguration.ConfigName}' loaded successfully and set as Active.", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
+//                    Debug.WriteLine($"Loaded program from DB: {dlg.SelectedConfiguration.ConfigName}\n{_customTestText}");
+//                }
+//                else if (!string.IsNullOrEmpty(dlg.LoadedFilePath))
+//                {
+//                    try
+//                    {
+//                        if (dlg.LoadedFilePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+//                        {
+//                            var netsDto = configService.LoadConfigFile(dlg.LoadedFilePath);
+//                            var tempConfig = new Models.TestConfiguration
+//                            {
+//                                ConfigName = System.IO.Path.GetFileNameWithoutExtension(dlg.LoadedFilePath),
+//                                Nets = netsDto.Select((d, idx) => new Models.TestConfigNet
+//                                {
+//                                    SequenceNo = idx + 1,
+//                                    FromAddress = d.FromAddress,
+//                                    ToAddress = d.ToAddress,
+//                                    UpperLimit = d.UpperLimit
+//                                }).ToList()
+//                            };
+//                            _customTestText = configService.ConvertToProgramText(tempConfig);
+//                            var resNet = tempConfig.Nets.FirstOrDefault(n => n.UpperLimit.HasValue);
+//                            if (resNet != null && resNet.UpperLimit.HasValue)
+//                            {
+//                                _continuityResistance = resNet.UpperLimit.Value;
+//                            }
+//                        }
+//                        else
+//                        {
+//                            _customTestText = System.IO.File.ReadAllText(dlg.LoadedFilePath);
+//                        }
+
+//                        MessageBox.Show($"Loaded test program file:\n{dlg.LoadedFilePath}", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
+//                        Debug.WriteLine($"Loaded program from file: {dlg.LoadedFilePath}\n{_customTestText}");
+//                    }
+//                    catch (Exception ex)
+//                    {
+//                        MessageBox.Show($"Error loading file '{dlg.LoadedFilePath}':\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+//                    }
+//                }
+//            }
+//>>>>>>> d9a451d0cb542e65d9cf94d7f3ce08d6e9266a92
         }
 
 
@@ -263,7 +335,8 @@ namespace AssemblyLineTester.Views.Pages
         private void btnStartTest_Click(object? sender, EventArgs e)
         {
             // 1. Temporarily pause background monitoring to prevent concurrent socket calls
-            InstrumentService.StopMonitoring();
+            //InstrumentService.StopMonitoring();
+            //_configService.GetConfigurationByName(name);
 
             try
             {
@@ -279,9 +352,12 @@ namespace AssemblyLineTester.Views.Pages
             string testProgramDetails = string.Empty;
 
             // 2. Load the test program
-            //Debug.WriteLine(_customTestText);
+            //Debug.WriteLine(_customTestText);.
 
-            Debug.WriteLine("Convert to Tesxt");
+             var activeConfig = _configService.GetActiveConfig();
+             _customTestText = _configService.ConvertToProgramText(activeConfig);
+
+                Debug.WriteLine("Convert to Tesxt");
             if (!string.IsNullOrEmpty(_customTestText))
             {
                 // Upload custom test text without saving to database (using empty string as testName)
@@ -348,12 +424,30 @@ namespace AssemblyLineTester.Views.Pages
                             status = LiveTestStatus.Fail;
                         }
 
+                        string rowTestType = "WIRE";
+                        if (!string.IsNullOrEmpty(measurement.Instruction))
+                        {
+                            string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
+                            if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
+                            {
+                                rowTestType = "WIRE";
+                            }
+                            else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
+                            {
+                                rowTestType = "OPEN";
+                            }
+                            else
+                            {
+                                rowTestType = measurement.Instruction;
+                            }
+                        }
+
                         _loadedRows.Add(new LiveTestDetailRowDto
                         {
                             StepNo = step++,
                             NetId = measurement.Instruction ?? "",
                             TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
-                            TestType = measurement.Instruction ?? "",
+                            TestType = rowTestType,
                             MeasuredValue = Math.Round(measurement.Value1, 3),
                             Status = status
                         });
@@ -367,9 +461,6 @@ namespace AssemblyLineTester.Views.Pages
 
             PopulateLiveDetailsGrid(_loadedRows);
 
-            // 6. Disconnect after test run
-            //_instrument.Disconnect();
-
             // 7. Show summary MessageBox
             string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
                 ? "PASSED"
@@ -379,13 +470,16 @@ namespace AssemblyLineTester.Views.Pages
             finally
             {
                 // 3. Resume background monitoring
-                InstrumentService.StartMonitoring();
+                //InstrumentService.StartMonitoring();
             }
         }
 
         private void PopulateLiveDetailsGrid(List<LiveTestDetailRowDto> rows)
         {
+
             gridLiveDetails.Rows.Clear();
+
+            Debug.WriteLine("Update Grid 2");
 
             foreach (var row in rows)
             {
@@ -397,7 +491,12 @@ namespace AssemblyLineTester.Views.Pages
                     row.Status.ToString().ToUpperInvariant());
 
                 ApplyStatusStyle(gridLiveDetails.Rows[idx], row.Status);
+
+                Debug.WriteLine(row.MeasuredValue);
             }
+
+            Debug.WriteLine("Update Grid 3");
+            gridLiveDetails.Refresh();
         }
 
         private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)
@@ -535,11 +634,46 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnLoadProgram, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnStartTest, 12, Color.FromArgb(56, 142, 60), Color.FromArgb(76, 175, 80), Color.FromArgb(46, 125, 50), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnStopTest, 12, Color.FromArgb(211, 47, 47), Color.FromArgb(239, 83, 80), Color.FromArgb(198, 40, 40), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSaveReport, 12, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewPinMap, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewWiringDiagram, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
 
             btnViewWiringDiagram.Click += BtnViewWiringDiagram_Click;
             btnViewPinMap.Click += BtnViewWiringDiagram_Click;
+            btnSaveReport.Click += BtnSaveReport_Click;
+        }
+
+        private void BtnSaveReport_Click(object? sender, EventArgs e)
+        {
+            if (_loadedRows == null || _loadedRows.Count == 0)
+            {
+                if (MessageBox.Show("No active test data in grid. Do you want to open the save report modal anyway?", "No Test Results", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                {
+                    return;
+                }
+            }
+
+            bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
+            string overallResult = allPass ? "PASS" : "FAIL";
+
+            using var modal = new AssemblyLineTester.Views.Modals.SaveTestReportModalForm(
+                cmbProductModel.Text,
+                cmbEcnNo.Text,
+                cmbProductType.Text,
+                "1.0",
+                cmbArea.Text,
+                "OP-402",
+                cmbPartNumber.Text,
+                $"SN-{DateTime.Now:HHmmss}",
+                overallResult,
+                DateTime.Now,
+                _loadedRows ?? new List<LiveTestDetailRowDto>()
+            );
+
+            if (modal.ShowDialog(this) == DialogResult.OK)
+            {
+                MessageBox.Show("Test Report saved successfully to the database!\nIt can now be viewed in Reports and Test History.", "Report Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void BtnViewWiringDiagram_Click(object? sender, EventArgs e)

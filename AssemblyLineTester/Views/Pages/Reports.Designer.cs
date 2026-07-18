@@ -1032,9 +1032,9 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.AllowUserToOrderColumns = true;
             gridReports.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             gridReports.BackgroundColor = Color.White;
-            gridReports.BorderStyle = BorderStyle.None;
-            gridReports.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            gridReports.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            gridReports.BorderStyle = BorderStyle.FixedSingle;
+            gridReports.CellBorderStyle = DataGridViewCellBorderStyle.Single;
+            gridReports.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 250, 252);
             dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -1058,10 +1058,11 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.DefaultCellStyle = dataGridViewCellStyle7;
             gridReports.Dock = DockStyle.Fill;
             gridReports.EnableHeadersVisualStyles = false;
-            gridReports.GridColor = Color.FromArgb(241, 245, 249);
-            gridReports.Location = new Point(0, 32);
-            gridReports.Margin = new Padding(0, 6, 0, 6);
-            gridReports.MinimumSize = new Size(269, 164);
+
+            gridReports.GridColor = Color.FromArgb(203, 213, 225);
+            gridReports.Location = new Point(0, 69);
+            gridReports.Margin = new Padding(0, 13, 0, 13);
+            gridReports.MinimumSize = new Size(500, 350);
             gridReports.Name = "gridReports";
             gridReports.ReadOnly = true;
             gridReports.RowHeadersVisible = false;

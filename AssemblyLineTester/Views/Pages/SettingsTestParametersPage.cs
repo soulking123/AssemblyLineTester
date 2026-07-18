@@ -1,4 +1,4 @@
-using AssemblyLineTester.Models;
+
 using AssemblyLineTester.Services;
 using FontAwesome.Sharp;
 using System;
@@ -108,6 +108,7 @@ namespace AssemblyLineTester.Views.Pages
         public SettingsTestParametersPage()
         {
             InitializeComponent();
+            EnableDoubleBuffering();
             SetupEvents();
             if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
             {
@@ -117,7 +118,33 @@ namespace AssemblyLineTester.Views.Pages
                 UpdateDiagramSize();
             }
         }
+        private void EnableDoubleBuffering()
+        {
+            try
+            {
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(gridConfig, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(splitContainerMain, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(picPreview, true, null);
+                EnableDoubleBufferingRecursive(this);
+            }
+            catch { /* ignore */ }
+        }
 
+        private static void EnableDoubleBufferingRecursive(Control control)
+        {
+            if (control is TableLayoutPanel || control is Panel || control is FlowLayoutPanel || control is SplitContainer)
+            {
+                try
+                {
+                    typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(control, true, null);
+                }
+                catch { /* ignore */ }
+            }
+            foreach (Control child in control.Controls)
+            {
+                EnableDoubleBufferingRecursive(child);
+            }
+        }
         private void LoadTestTypeColumnItems()
         {
             var names = _configService.GetTestTypeNames();
@@ -241,123 +268,132 @@ namespace AssemblyLineTester.Views.Pages
 
         private void ShowEditConfigsDialog()
         {
-            var configs = _configService.GetAllConfigurations();
+            //var configs = _configService.GetAllConfigurations();
 
-            using Form dlg = new()
+            //using Form dlg = new()
+            //{
+            //    Text = "Edit Config",
+            //    Width = 900,
+            //    Height = 520,
+            //    StartPosition = FormStartPosition.CenterParent,
+            //    FormBorderStyle = FormBorderStyle.Sizable
+            //};
+
+            //var grid = new DataGridView()
+            //{
+            //    Dock = DockStyle.Fill,
+            //    ReadOnly = true,
+            //    SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+            //    AllowUserToAddRows = false,
+            //    AllowUserToDeleteRows = false,
+            //    AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+            //};
+
+            //grid.Columns.Add("ConfigName", "Config Name");
+            //grid.Columns.Add("ProductModel", "Product Model");
+            //grid.Columns.Add("CreatedAt", "Created At");
+            //grid.Columns.Add("UpdatedAt", "Updated At");
+            //grid.Columns.Add("IsActive", "Active");
+            //grid.Columns.Add("NetCount", "Nets");
+
+            //foreach (var c in configs)
+            //{
+            //    int idx = grid.Rows.Add(c.ConfigName, c.ProductModel, c.CreatedAt.ToString("g"), c.UpdatedAt?.ToString("g") ?? "-", c.IsActive ? "Yes" : "No", c.Nets?.Count ?? 0);
+            //    grid.Rows[idx].Tag = c.ConfigName;
+            //}
+
+            //var btnPanel = new Panel() { Dock = DockStyle.Bottom, Height = 56 };
+            //var btnLoad = new Button() { Text = "Load", Width = 100, Height = 36, Left = 8, Top = 10 }; 
+            //var btnDelete = new Button() { Text = "Delete", Width = 100, Height = 36, Left = 116, Top = 10 };
+            //var btnClose = new Button() { Text = "Close", Width = 100, Height = 36, Left = 224, Top = 10 };
+
+            //btnLoad.Click += (s, e) =>
+            //{
+            //    if (grid.SelectedRows.Count == 0)
+            //    {
+            //        MessageBox.Show("Please select a configuration to load.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //        return;
+            //    }
+
+            //    string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
+            //    var cfg = _configService.GetConfigurationByName(name);
+            //    if (cfg == null)
+            //    {
+            //        MessageBox.Show("Selected configuration could not be loaded (it may have been deleted).", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //        return;
+            //    }
+
+            //    LoadConfigurationIntoGrid(cfg);
+            //    dlg.Close();
+            //};
+
+            //btnDelete.Click += (s, e) =>
+            //{
+            //    if (grid.SelectedRows.Count == 0)
+            //    {
+            //        MessageBox.Show("Please select a configuration to delete.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //        return;
+            //    }
+
+            //    string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
+            //    if (MessageBox.Show($"Delete configuration '{name}'? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+            //        return;
+
+            //    try
+            //    {
+            //        bool ok = _configService.DeleteConfiguration(name);
+            //        if (ok)
+            //        {
+            //            // remove row and refresh
+            //            grid.Rows.Remove(grid.SelectedRows[0]);
+            //            MessageBox.Show("Configuration deleted.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //            // if the deleted config was loaded in the editor, clear loaded state
+            //            if (string.Equals(_loadedConfigName, name, StringComparison.OrdinalIgnoreCase))
+            //            {
+            //                _loadedConfigName = null;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            MessageBox.Show("Failed to delete configuration.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        MessageBox.Show($"Error deleting configuration:\n{ex.Message}", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    }
+            //};
+
+            //btnClose.Click += (s, e) => dlg.Close();
+
+            //btnPanel.Controls.Add(btnLoad);
+            //btnPanel.Controls.Add(btnDelete);
+            //btnPanel.Controls.Add(btnClose);
+
+            //dlg.Controls.Add(grid);
+            //dlg.Controls.Add(btnPanel);
+
+            //// double-click to load
+            //grid.CellDoubleClick += (s, e) =>
+            //{
+            //    if (e.RowIndex >= 0)
+            //    {
+            //        grid.ClearSelection();
+            //        grid.Rows[e.RowIndex].Selected = true;
+            //        btnLoad.PerformClick();
+            //    }
+            //};
+
+            //dlg.ShowDialog(this);
+            using var dlg = new AssemblyLineTester.Views.Modals.EditConfigsModalForm(_configService, _loadedConfigName);
+            if (dlg.ShowDialog(this) == DialogResult.OK && dlg.SelectedConfiguration != null)
             {
-                Text = "Edit Config",
-                Width = 900,
-                Height = 520,
-                StartPosition = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.Sizable
-            };
-
-            var grid = new DataGridView()
-            {
-                Dock = DockStyle.Fill,
-                ReadOnly = true,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                AllowUserToAddRows = false,
-                AllowUserToDeleteRows = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-            };
-
-            grid.Columns.Add("ConfigName", "Config Name");
-            grid.Columns.Add("ProductModel", "Product Model");
-            grid.Columns.Add("CreatedAt", "Created At");
-            grid.Columns.Add("UpdatedAt", "Updated At");
-            grid.Columns.Add("IsActive", "Active");
-            grid.Columns.Add("NetCount", "Nets");
-
-            foreach (var c in configs)
-            {
-                int idx = grid.Rows.Add(c.ConfigName, c.ProductModel, c.CreatedAt.ToString("g"), c.UpdatedAt?.ToString("g") ?? "-", c.IsActive ? "Yes" : "No", c.Nets?.Count ?? 0);
-                grid.Rows[idx].Tag = c.ConfigName;
+                LoadConfigurationIntoGrid(dlg.SelectedConfiguration);
             }
-
-            var btnPanel = new Panel() { Dock = DockStyle.Bottom, Height = 56 };
-            var btnLoad = new Button() { Text = "Load", Width = 100, Height = 36, Left = 8, Top = 10 }; 
-            var btnDelete = new Button() { Text = "Delete", Width = 100, Height = 36, Left = 116, Top = 10 };
-            var btnClose = new Button() { Text = "Close", Width = 100, Height = 36, Left = 224, Top = 10 };
-
-            btnLoad.Click += (s, e) =>
+            if (dlg.DeletedLoadedConfig)
             {
-                if (grid.SelectedRows.Count == 0)
-                {
-                    MessageBox.Show("Please select a configuration to load.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
-                var cfg = _configService.GetConfigurationByName(name);
-                if (cfg == null)
-                {
-                    MessageBox.Show("Selected configuration could not be loaded (it may have been deleted).", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                LoadConfigurationIntoGrid(cfg);
-                dlg.Close();
-            };
-
-            btnDelete.Click += (s, e) =>
-            {
-                if (grid.SelectedRows.Count == 0)
-                {
-                    MessageBox.Show("Please select a configuration to delete.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
-                if (MessageBox.Show($"Delete configuration '{name}'? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                    return;
-
-                try
-                {
-                    bool ok = _configService.DeleteConfiguration(name);
-                    if (ok)
-                    {
-                        // remove row and refresh
-                        grid.Rows.Remove(grid.SelectedRows[0]);
-                        MessageBox.Show("Configuration deleted.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        // if the deleted config was loaded in the editor, clear loaded state
-                        if (string.Equals(_loadedConfigName, name, StringComparison.OrdinalIgnoreCase))
-                        {
-                            _loadedConfigName = null;
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Failed to delete configuration.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error deleting configuration:\n{ex.Message}", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            };
-
-            btnClose.Click += (s, e) => dlg.Close();
-
-            btnPanel.Controls.Add(btnLoad);
-            btnPanel.Controls.Add(btnDelete);
-            btnPanel.Controls.Add(btnClose);
-
-            dlg.Controls.Add(grid);
-            dlg.Controls.Add(btnPanel);
-
-            // double-click to load
-            grid.CellDoubleClick += (s, e) =>
-            {
-                if (e.RowIndex >= 0)
-                {
-                    grid.ClearSelection();
-                    grid.Rows[e.RowIndex].Selected = true;
-                    btnLoad.PerformClick();
-                }
-            };
-
-            dlg.ShowDialog(this);
+                _loadedConfigName = null;
+            }
         }
 
         private void LoadConfigurationIntoGrid(TestConfiguration config)
@@ -496,7 +532,6 @@ namespace AssemblyLineTester.Views.Pages
             //{
             //    MessageBox.Show($"Error saving configuration: {ex.Message}", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
             //    return;
-
             // Save current grid configuration to the database.
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
             if (config == null)

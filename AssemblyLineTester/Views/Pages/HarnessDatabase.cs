@@ -35,25 +35,59 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
+                dataGridViewList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+                dataGridViewList.ScrollBars = ScrollBars.Both;
+
+                foreach (DataGridViewColumn col in dataGridViewList.Columns)
+                {
+                    col.Resizable = DataGridViewTriState.True;
+                }
+
                 if (dataGridViewList.Columns["colNo"] is DataGridViewColumn colNo)
                 {
-                    colNo.MinimumWidth = 55;
-                    colNo.FillWeight = 45F;
+                    colNo.MinimumWidth = 50;
+                    colNo.Width = 60;
                 }
                 if (dataGridViewList.Columns["colProductModel"] is DataGridViewColumn colProductModel)
                 {
-                    colProductModel.MinimumWidth = 85;
-                    colProductModel.FillWeight = 80F;
+                    colProductModel.MinimumWidth = 95;
+                    colProductModel.Width = 115;
+                }
+                if (dataGridViewList.Columns["colProductType"] is DataGridViewColumn colProductType)
+                {
+                    colProductType.MinimumWidth = 90;
+                    colProductType.Width = 105;
+                }
+                if (dataGridViewList.Columns["colArea"] is DataGridViewColumn colArea)
+                {
+                    colArea.MinimumWidth = 170;
+                    colArea.Width = 220;
+                }
+                if (dataGridViewList.Columns["colPartNumber"] is DataGridViewColumn colPartNumber)
+                {
+                    colPartNumber.MinimumWidth = 145;
+                    colPartNumber.Width = 175;
                 }
                 if (dataGridViewList.Columns["colEcnNo"] is DataGridViewColumn colEcnNo)
                 {
-                    colEcnNo.MinimumWidth = 95;
-                    colEcnNo.FillWeight = 90F;
+                    colEcnNo.MinimumWidth = 105;
+                    colEcnNo.Width = 125;
+                }
+                if (dataGridViewList.Columns["colRevision"] is DataGridViewColumn colRevision)
+                {
+                    colRevision.MinimumWidth = 55;
+                    colRevision.Width = 65;
+                }
+                if (dataGridViewList.Columns["colStatus"] is DataGridViewColumn colStatus)
+                {
+                    colStatus.MinimumWidth = 90;
+                    colStatus.Width = 115;
                 }
                 if (dataGridViewList.Columns["colLastUpdated"] is DataGridViewColumn colLastUpdated)
                 {
-                    colLastUpdated.MinimumWidth = 120;
-                    colLastUpdated.FillWeight = 110F;
+                    colLastUpdated.MinimumWidth = 140;
+                    colLastUpdated.Width = 160;
+                    colLastUpdated.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 }
             }
         }
@@ -78,7 +112,7 @@ namespace AssemblyLineTester.Views.Pages
             if (e.Graphics == null) return;
             if (e.RowIndex >= 0 && dataGridViewList.Columns[e.ColumnIndex].Name == "colStatus")
             {
-                e.PaintBackground(e.ClipBounds, true);
+                e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
                 string val = e.Value?.ToString() ?? "";
                 if (!string.IsNullOrEmpty(val))
                 {

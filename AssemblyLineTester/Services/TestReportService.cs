@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AssemblyLineTester.Data;
@@ -364,6 +364,84 @@ namespace AssemblyLineTester.Services
                 default:
                     return (null, null, null, "-", true, null);
             }
+        }
+
+        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr)
+        {
+            using var db = new AppDbContext();
+
+            bool isPass = string.Equals(overallResultStr, "PASS", StringComparison.OrdinalIgnoreCase);
+            int passCount = rows != null ? rows.Count(r => r.Status == LiveTestStatus.Pass) : 0;
+            int totalCount = rows != null ? rows.Count : 0;
+            int failCount = totalCount - passCount;
+
+            var report = new TestReport
+            {
+                ReportNumber = $"TR-{DateTime.Now:yyyyMMdd-HHmmss}",
+                ProductModel = productModel ?? "",
+                ProductType = productType ?? "",
+                Area = area ?? "",
+                ECNNumber = ecnNumber ?? "",
+                Revision = string.IsNullOrEmpty(revision) ? "1.0" : revision,
+                PartNumber = partNumber ?? "",
+                SerialNumber = string.IsNullOrEmpty(serialNumber) ? $"SN-{DateTime.Now:HHmmss}" : serialNumber,
+                Operator = string.IsNullOrEmpty(operatorName) ? "OP-402" : operatorName,
+                TesterModel = "ALT-2000",
+                TestDateTime = testDateTime == default ? DateTime.Now : testDateTime,
+                EndDateTime = DateTime.Now,
+                TotalNets = totalCount,
+                PassCount = passCount,
+                FailCount = failCount,
+                Status = TestStatus.Completed,
+                OverallResult = isPass ? TestResult.Pass : TestResult.Fail,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            db.TestReports.Add(report);
+            db.SaveChanges();
+
+            if (rows != null && rows.Count > 0)
+            {
+                var details = new List<TestDetail>();
+                var steps = new List<TestStep>();
+
+                int stepCount = 1;
+                foreach (var r in rows)
+                {
+                    bool rowPass = r.Status == LiveTestStatus.Pass;
+                    details.Add(new TestDetail
+                    {
+                        ReportId = report.ReportId,
+                        NetId = r.NetId ?? $"N{stepCount:000}",
+                        HarnessGroup = $"{area} Connector",
+                        FromPin = string.IsNullOrEmpty(r.TestPoint) ? "-" : r.TestPoint,
+                        ToPin = "-",
+                        Color = "Red",
+                        TestTypeName = "WIRE",
+                        MeasuredValue = r.MeasuredValue,
+                        LowerLimit = null,
+                        UpperLimit = null,
+                        Unit = "Ω",
+                        Result = rowPass,
+                        ErrorDetail = rowPass ? null : "Measurement out of limits"
+                    });
+
+                    steps.Add(new TestStep
+                    {
+                        ReportId = report.ReportId,
+                        StepNo = stepCount++,
+                        TestTypeName = "WIRE",
+                        Result = rowPass,
+                        DurationSeconds = 2
+                    });
+                }
+
+                db.TestDetails.AddRange(details);
+                db.TestSteps.AddRange(steps);
+                db.SaveChanges();
+            }
+
+            return report.ReportId;
         }
 
         private static double EstimateSizeKb(int totalNets) => Math.Round(300 + (totalNets * 8) / 1024.0, 2);

@@ -20,376 +20,400 @@ namespace AssemblyLineTester.Views.Modals
 
         private void InitializeComponent()
         {
-            this.pnlCustomHeader = new System.Windows.Forms.Panel();
-            this.lblCustomTitle = new System.Windows.Forms.Label();
-            this.iconLogo = new FontAwesome.Sharp.IconPictureBox();
-            this.btnClose = new FontAwesome.Sharp.IconButton();
-            this.pnlHeader = new System.Windows.Forms.Panel();
-            this.lblSubtitle = new System.Windows.Forms.Label();
-            this.lblTitle = new System.Windows.Forms.Label();
-            this.lblUsername = new System.Windows.Forms.Label();
-            this.txtUsername = new System.Windows.Forms.TextBox();
-            this.lblCompanyId = new System.Windows.Forms.Label();
-            this.txtCompanyId = new System.Windows.Forms.TextBox();
-            this.lblFullName = new System.Windows.Forms.Label();
-            this.txtFullName = new System.Windows.Forms.TextBox();
-            this.lblPassword = new System.Windows.Forms.Label();
-            this.txtPassword = new System.Windows.Forms.TextBox();
-            this.lblConfirmPassword = new System.Windows.Forms.Label();
-            this.txtConfirmPassword = new System.Windows.Forms.TextBox();
-            this.lblRole = new System.Windows.Forms.Label();
-            this.cmbRole = new System.Windows.Forms.ComboBox();
-            this.lblDepartment = new System.Windows.Forms.Label();
-            this.cmbDepartment = new System.Windows.Forms.ComboBox();
-            this.lblStatus = new System.Windows.Forms.Label();
-            this.cmbStatus = new System.Windows.Forms.ComboBox();
-            this.pnlFooter = new System.Windows.Forms.Panel();
-            this.btnCancel = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.btnSave = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.pnlCustomHeader.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.iconLogo)).BeginInit();
-            this.pnlHeader.SuspendLayout();
-            this.pnlFooter.SuspendLayout();
-            this.SuspendLayout();
+            pnlCustomHeader = new Panel();
+            lblCustomTitle = new Label();
+            iconLogo = new FontAwesome.Sharp.IconPictureBox();
+            btnClose = new FontAwesome.Sharp.IconButton();
+            pnlHeader = new Panel();
+            lblSubtitle = new Label();
+            lblTitle = new Label();
+            lblUsername = new Label();
+            txtUsername = new TextBox();
+            lblCompanyId = new Label();
+            txtCompanyId = new TextBox();
+            lblFullName = new Label();
+            txtFullName = new TextBox();
+            lblPassword = new Label();
+            txtPassword = new TextBox();
+            lblConfirmPassword = new Label();
+            txtConfirmPassword = new TextBox();
+            lblRole = new Label();
+            cmbRole = new ComboBox();
+            lblDepartment = new Label();
+            cmbDepartment = new ComboBox();
+            lblStatus = new Label();
+            cmbStatus = new ComboBox();
+            pnlFooter = new Panel();
+            btnCancel = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnSave = new AssemblyLineTester.Views.Controls.RoundedButton();
+            pnlCustomHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)iconLogo).BeginInit();
+            pnlHeader.SuspendLayout();
+            pnlFooter.SuspendLayout();
+            SuspendLayout();
             // 
             // pnlCustomHeader
             // 
-            this.pnlCustomHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(40)))), ((int)(((byte)(49)))));
-            this.pnlCustomHeader.Controls.Add(this.lblCustomTitle);
-            this.pnlCustomHeader.Controls.Add(this.iconLogo);
-            this.pnlCustomHeader.Controls.Add(this.btnClose);
-            this.pnlCustomHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlCustomHeader.Location = new System.Drawing.Point(0, 0);
-            this.pnlCustomHeader.Name = "pnlCustomHeader";
-            this.pnlCustomHeader.Size = new System.Drawing.Size(580, 50);
-            this.pnlCustomHeader.TabIndex = 0;
+            pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
+            pnlCustomHeader.Controls.Add(lblCustomTitle);
+            pnlCustomHeader.Controls.Add(iconLogo);
+            pnlCustomHeader.Controls.Add(btnClose);
+            pnlCustomHeader.Dock = DockStyle.Top;
+            pnlCustomHeader.Location = new Point(0, 0);
+            pnlCustomHeader.Margin = new Padding(5, 5, 5, 5);
+            pnlCustomHeader.Name = "pnlCustomHeader";
+            pnlCustomHeader.Size = new Size(942, 80);
+            pnlCustomHeader.TabIndex = 0;
             // 
             // lblCustomTitle
             // 
-            this.lblCustomTitle.AutoSize = true;
-            this.lblCustomTitle.Font = new System.Drawing.Font("Segoe UI", 11.5F, System.Drawing.FontStyle.Bold);
-            this.lblCustomTitle.ForeColor = System.Drawing.Color.White;
-            this.lblCustomTitle.Location = new System.Drawing.Point(55, 14);
-            this.lblCustomTitle.Name = "lblCustomTitle";
-            this.lblCustomTitle.Size = new System.Drawing.Size(154, 21);
-            this.lblCustomTitle.TabIndex = 1;
-            this.lblCustomTitle.Text = "ADD SYSTEM USER";
+            lblCustomTitle.AutoSize = true;
+            lblCustomTitle.Font = new Font("Segoe UI", 11.5F, FontStyle.Bold);
+            lblCustomTitle.ForeColor = Color.White;
+            lblCustomTitle.Location = new Point(89, 22);
+            lblCustomTitle.Margin = new Padding(5, 0, 5, 0);
+            lblCustomTitle.Name = "lblCustomTitle";
+            lblCustomTitle.Size = new Size(298, 42);
+            lblCustomTitle.TabIndex = 1;
+            lblCustomTitle.Text = "ADD SYSTEM USER";
             // 
             // iconLogo
             // 
-            this.iconLogo.BackColor = System.Drawing.Color.Transparent;
-            this.iconLogo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(189)))), ((int)(((byte)(248)))));
-            this.iconLogo.IconChar = FontAwesome.Sharp.IconChar.UserPlus;
-            this.iconLogo.IconColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(189)))), ((int)(((byte)(248)))));
-            this.iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.iconLogo.IconSize = 32;
-            this.iconLogo.Location = new System.Drawing.Point(15, 9);
-            this.iconLogo.Name = "iconLogo";
-            this.iconLogo.Size = new System.Drawing.Size(32, 32);
-            this.iconLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.iconLogo.TabIndex = 0;
-            this.iconLogo.TabStop = false;
+            iconLogo.BackColor = Color.Transparent;
+            iconLogo.ForeColor = Color.FromArgb(56, 189, 248);
+            iconLogo.IconChar = FontAwesome.Sharp.IconChar.UserPlus;
+            iconLogo.IconColor = Color.FromArgb(56, 189, 248);
+            iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            iconLogo.IconSize = 51;
+            iconLogo.Location = new Point(24, 14);
+            iconLogo.Margin = new Padding(5, 5, 5, 5);
+            iconLogo.Name = "iconLogo";
+            iconLogo.Size = new Size(52, 51);
+            iconLogo.SizeMode = PictureBoxSizeMode.CenterImage;
+            iconLogo.TabIndex = 0;
+            iconLogo.TabStop = false;
             // 
             // btnClose
             // 
-            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClose.BackColor = System.Drawing.Color.Transparent;
-            this.btnClose.FlatAppearance.BorderSize = 0;
-            this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnClose.IconChar = FontAwesome.Sharp.IconChar.Close;
-            this.btnClose.IconColor = System.Drawing.Color.FromArgb(((int)(((byte)(203)))), ((int)(((byte)(213)))), ((int)(((byte)(225)))));
-            this.btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.btnClose.IconSize = 24;
-            this.btnClose.Location = new System.Drawing.Point(530, 0);
-            this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(50, 50);
-            this.btnClose.TabIndex = 2;
-            this.btnClose.UseVisualStyleBackColor = false;
+            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnClose.BackColor = Color.Transparent;
+            btnClose.FlatAppearance.BorderSize = 0;
+            btnClose.FlatStyle = FlatStyle.Flat;
+            btnClose.IconChar = FontAwesome.Sharp.IconChar.Close;
+            btnClose.IconColor = Color.FromArgb(203, 213, 225);
+            btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnClose.IconSize = 24;
+            btnClose.Location = new Point(861, 0);
+            btnClose.Margin = new Padding(5, 5, 5, 5);
+            btnClose.Name = "btnClose";
+            btnClose.Size = new Size(81, 80);
+            btnClose.TabIndex = 2;
+            btnClose.UseVisualStyleBackColor = false;
             // 
             // pnlHeader
             // 
-            this.pnlHeader.BackColor = System.Drawing.Color.White;
-            this.pnlHeader.Controls.Add(this.lblSubtitle);
-            this.pnlHeader.Controls.Add(this.lblTitle);
-            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlHeader.Location = new System.Drawing.Point(0, 50);
-            this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(580, 85);
-            this.pnlHeader.TabIndex = 0;
+            pnlHeader.BackColor = Color.White;
+            pnlHeader.Controls.Add(lblSubtitle);
+            pnlHeader.Controls.Add(lblTitle);
+            pnlHeader.Dock = DockStyle.Top;
+            pnlHeader.Location = new Point(0, 80);
+            pnlHeader.Margin = new Padding(5, 5, 5, 5);
+            pnlHeader.Name = "pnlHeader";
+            pnlHeader.Size = new Size(942, 136);
+            pnlHeader.TabIndex = 0;
             // 
             // lblSubtitle
             // 
-            this.lblSubtitle.AutoSize = true;
-            this.lblSubtitle.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.lblSubtitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-            this.lblSubtitle.Location = new System.Drawing.Point(32, 48);
-            this.lblSubtitle.Name = "lblSubtitle";
-            this.lblSubtitle.Size = new System.Drawing.Size(325, 21);
-            this.lblSubtitle.TabIndex = 1;
-            this.lblSubtitle.Text = "Create a new account and assign role access.";
+            lblSubtitle.AutoSize = true;
+            lblSubtitle.Font = new Font("Segoe UI", 9.5F);
+            lblSubtitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblSubtitle.Location = new Point(52, 77);
+            lblSubtitle.Margin = new Padding(5, 0, 5, 0);
+            lblSubtitle.Name = "lblSubtitle";
+            lblSubtitle.Size = new Size(528, 36);
+            lblSubtitle.TabIndex = 1;
+            lblSubtitle.Text = "Create a new account and assign role access.";
             // 
             // lblTitle
             // 
-            this.lblTitle.AutoSize = true;
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
-            this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-            this.lblTitle.Location = new System.Drawing.Point(30, 15);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(215, 35);
-            this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "Add System User";
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.FromArgb(30, 41, 59);
+            lblTitle.Location = new Point(49, 24);
+            lblTitle.Margin = new Padding(5, 0, 5, 0);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(344, 54);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "Add System User";
             // 
             // lblUsername
             // 
-            this.lblUsername.AutoSize = true;
-            this.lblUsername.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblUsername.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblUsername.Location = new System.Drawing.Point(35, 160);
-            this.lblUsername.Name = "lblUsername";
-            this.lblUsername.Size = new System.Drawing.Size(96, 21);
-            this.lblUsername.TabIndex = 1;
-            this.lblUsername.Text = "Username *";
+            lblUsername.AutoSize = true;
+            lblUsername.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblUsername.ForeColor = Color.FromArgb(51, 65, 85);
+            lblUsername.Location = new Point(57, 256);
+            lblUsername.Margin = new Padding(5, 0, 5, 0);
+            lblUsername.Name = "lblUsername";
+            lblUsername.Size = new Size(156, 36);
+            lblUsername.TabIndex = 1;
+            lblUsername.Text = "Username *";
             // 
             // txtUsername
             // 
-            this.txtUsername.Font = new System.Drawing.Font("Segoe UI", 10.5F);
-            this.txtUsername.Location = new System.Drawing.Point(35, 185);
-            this.txtUsername.Name = "txtUsername";
-            this.txtUsername.Size = new System.Drawing.Size(240, 31);
-            this.txtUsername.TabIndex = 2;
+            txtUsername.Font = new Font("Segoe UI", 10.5F);
+            txtUsername.Location = new Point(57, 296);
+            txtUsername.Margin = new Padding(5, 5, 5, 5);
+            txtUsername.Name = "txtUsername";
+            txtUsername.Size = new Size(388, 45);
+            txtUsername.TabIndex = 2;
             // 
             // lblCompanyId
             // 
-            this.lblCompanyId.AutoSize = true;
-            this.lblCompanyId.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblCompanyId.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblCompanyId.Location = new System.Drawing.Point(305, 160);
-            this.lblCompanyId.Name = "lblCompanyId";
-            this.lblCompanyId.Size = new System.Drawing.Size(103, 21);
-            this.lblCompanyId.TabIndex = 3;
-            this.lblCompanyId.Text = "Company ID";
+            lblCompanyId.AutoSize = true;
+            lblCompanyId.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblCompanyId.ForeColor = Color.FromArgb(51, 65, 85);
+            lblCompanyId.Location = new Point(496, 256);
+            lblCompanyId.Margin = new Padding(5, 0, 5, 0);
+            lblCompanyId.Name = "lblCompanyId";
+            lblCompanyId.Size = new Size(165, 36);
+            lblCompanyId.TabIndex = 3;
+            lblCompanyId.Text = "Company ID";
             // 
             // txtCompanyId
             // 
-            this.txtCompanyId.Font = new System.Drawing.Font("Segoe UI", 10.5F);
-            this.txtCompanyId.Location = new System.Drawing.Point(305, 185);
-            this.txtCompanyId.Name = "txtCompanyId";
-            this.txtCompanyId.Size = new System.Drawing.Size(240, 31);
-            this.txtCompanyId.TabIndex = 4;
+            txtCompanyId.Font = new Font("Segoe UI", 10.5F);
+            txtCompanyId.Location = new Point(496, 296);
+            txtCompanyId.Margin = new Padding(5, 5, 5, 5);
+            txtCompanyId.Name = "txtCompanyId";
+            txtCompanyId.Size = new Size(388, 45);
+            txtCompanyId.TabIndex = 4;
             // 
             // lblFullName
             // 
-            this.lblFullName.AutoSize = true;
-            this.lblFullName.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblFullName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblFullName.Location = new System.Drawing.Point(35, 235);
-            this.lblFullName.Name = "lblFullName";
-            this.lblFullName.Size = new System.Drawing.Size(99, 21);
-            this.lblFullName.TabIndex = 5;
-            this.lblFullName.Text = "Full Name *";
+            lblFullName.AutoSize = true;
+            lblFullName.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblFullName.ForeColor = Color.FromArgb(51, 65, 85);
+            lblFullName.Location = new Point(57, 376);
+            lblFullName.Margin = new Padding(5, 0, 5, 0);
+            lblFullName.Name = "lblFullName";
+            lblFullName.Size = new Size(158, 36);
+            lblFullName.TabIndex = 5;
+            lblFullName.Text = "Full Name *";
             // 
             // txtFullName
             // 
-            this.txtFullName.Font = new System.Drawing.Font("Segoe UI", 10.5F);
-            this.txtFullName.Location = new System.Drawing.Point(35, 260);
-            this.txtFullName.Name = "txtFullName";
-            this.txtFullName.Size = new System.Drawing.Size(510, 31);
-            this.txtFullName.TabIndex = 6;
+            txtFullName.Font = new Font("Segoe UI", 10.5F);
+            txtFullName.Location = new Point(57, 416);
+            txtFullName.Margin = new Padding(5, 5, 5, 5);
+            txtFullName.Name = "txtFullName";
+            txtFullName.Size = new Size(826, 45);
+            txtFullName.TabIndex = 6;
             // 
             // lblPassword
             // 
-            this.lblPassword.AutoSize = true;
-            this.lblPassword.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblPassword.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblPassword.Location = new System.Drawing.Point(35, 310);
-            this.lblPassword.Name = "lblPassword";
-            this.lblPassword.Size = new System.Drawing.Size(93, 21);
-            this.lblPassword.TabIndex = 7;
-            this.lblPassword.Text = "Password *";
+            lblPassword.AutoSize = true;
+            lblPassword.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblPassword.ForeColor = Color.FromArgb(51, 65, 85);
+            lblPassword.Location = new Point(57, 496);
+            lblPassword.Margin = new Padding(5, 0, 5, 0);
+            lblPassword.Name = "lblPassword";
+            lblPassword.Size = new Size(148, 36);
+            lblPassword.TabIndex = 7;
+            lblPassword.Text = "Password *";
             // 
             // txtPassword
             // 
-            this.txtPassword.Font = new System.Drawing.Font("Segoe UI", 10.5F);
-            this.txtPassword.Location = new System.Drawing.Point(35, 335);
-            this.txtPassword.Name = "txtPassword";
-            this.txtPassword.Size = new System.Drawing.Size(240, 31);
-            this.txtPassword.TabIndex = 8;
-            this.txtPassword.UseSystemPasswordChar = true;
+            txtPassword.Font = new Font("Segoe UI", 10.5F);
+            txtPassword.Location = new Point(57, 536);
+            txtPassword.Margin = new Padding(5, 5, 5, 5);
+            txtPassword.Name = "txtPassword";
+            txtPassword.Size = new Size(388, 45);
+            txtPassword.TabIndex = 8;
+            txtPassword.UseSystemPasswordChar = true;
             // 
             // lblConfirmPassword
             // 
-            this.lblConfirmPassword.AutoSize = true;
-            this.lblConfirmPassword.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblConfirmPassword.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblConfirmPassword.Location = new System.Drawing.Point(305, 310);
-            this.lblConfirmPassword.Name = "lblConfirmPassword";
-            this.lblConfirmPassword.Size = new System.Drawing.Size(160, 21);
-            this.lblConfirmPassword.TabIndex = 9;
-            this.lblConfirmPassword.Text = "Confirm Password *";
+            lblConfirmPassword.AutoSize = true;
+            lblConfirmPassword.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblConfirmPassword.ForeColor = Color.FromArgb(51, 65, 85);
+            lblConfirmPassword.Location = new Point(496, 496);
+            lblConfirmPassword.Margin = new Padding(5, 0, 5, 0);
+            lblConfirmPassword.Name = "lblConfirmPassword";
+            lblConfirmPassword.Size = new Size(254, 36);
+            lblConfirmPassword.TabIndex = 9;
+            lblConfirmPassword.Text = "Confirm Password *";
             // 
             // txtConfirmPassword
             // 
-            this.txtConfirmPassword.Font = new System.Drawing.Font("Segoe UI", 10.5F);
-            this.txtConfirmPassword.Location = new System.Drawing.Point(305, 335);
-            this.txtConfirmPassword.Name = "txtConfirmPassword";
-            this.txtConfirmPassword.Size = new System.Drawing.Size(240, 31);
-            this.txtConfirmPassword.TabIndex = 10;
-            this.txtConfirmPassword.UseSystemPasswordChar = true;
+            txtConfirmPassword.Font = new Font("Segoe UI", 10.5F);
+            txtConfirmPassword.Location = new Point(496, 536);
+            txtConfirmPassword.Margin = new Padding(5, 5, 5, 5);
+            txtConfirmPassword.Name = "txtConfirmPassword";
+            txtConfirmPassword.Size = new Size(388, 45);
+            txtConfirmPassword.TabIndex = 10;
+            txtConfirmPassword.UseSystemPasswordChar = true;
             // 
             // lblRole
             // 
-            this.lblRole.AutoSize = true;
-            this.lblRole.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblRole.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblRole.Location = new System.Drawing.Point(35, 385);
-            this.lblRole.Name = "lblRole";
-            this.lblRole.Size = new System.Drawing.Size(56, 21);
-            this.lblRole.TabIndex = 11;
-            this.lblRole.Text = "Role *";
+            lblRole.AutoSize = true;
+            lblRole.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblRole.ForeColor = Color.FromArgb(51, 65, 85);
+            lblRole.Location = new Point(57, 616);
+            lblRole.Margin = new Padding(5, 0, 5, 0);
+            lblRole.Name = "lblRole";
+            lblRole.Size = new Size(87, 36);
+            lblRole.TabIndex = 11;
+            lblRole.Text = "Role *";
             // 
             // cmbRole
             // 
-            this.cmbRole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbRole.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.cmbRole.FormattingEnabled = true;
-            this.cmbRole.Location = new System.Drawing.Point(35, 410);
-            this.cmbRole.Name = "cmbRole";
-            this.cmbRole.Size = new System.Drawing.Size(240, 31);
-            this.cmbRole.TabIndex = 12;
+            cmbRole.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbRole.Font = new Font("Segoe UI", 10F);
+            cmbRole.FormattingEnabled = true;
+            cmbRole.Location = new Point(57, 656);
+            cmbRole.Margin = new Padding(5, 5, 5, 5);
+            cmbRole.Name = "cmbRole";
+            cmbRole.Size = new Size(388, 45);
+            cmbRole.TabIndex = 12;
             // 
             // lblDepartment
             // 
-            this.lblDepartment.AutoSize = true;
-            this.lblDepartment.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblDepartment.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblDepartment.Location = new System.Drawing.Point(305, 385);
-            this.lblDepartment.Name = "lblDepartment";
-            this.lblDepartment.Size = new System.Drawing.Size(114, 21);
-            this.lblDepartment.TabIndex = 13;
-            this.lblDepartment.Text = "Department *";
+            lblDepartment.AutoSize = true;
+            lblDepartment.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblDepartment.ForeColor = Color.FromArgb(51, 65, 85);
+            lblDepartment.Location = new Point(496, 616);
+            lblDepartment.Margin = new Padding(5, 0, 5, 0);
+            lblDepartment.Name = "lblDepartment";
+            lblDepartment.Size = new Size(182, 36);
+            lblDepartment.TabIndex = 13;
+            lblDepartment.Text = "Department *";
             // 
             // cmbDepartment
             // 
-            this.cmbDepartment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbDepartment.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.cmbDepartment.FormattingEnabled = true;
-            this.cmbDepartment.Location = new System.Drawing.Point(305, 410);
-            this.cmbDepartment.Name = "cmbDepartment";
-            this.cmbDepartment.Size = new System.Drawing.Size(240, 31);
-            this.cmbDepartment.TabIndex = 14;
+            cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbDepartment.Font = new Font("Segoe UI", 10F);
+            cmbDepartment.FormattingEnabled = true;
+            cmbDepartment.Location = new Point(496, 656);
+            cmbDepartment.Margin = new Padding(5, 5, 5, 5);
+            cmbDepartment.Name = "cmbDepartment";
+            cmbDepartment.Size = new Size(388, 45);
+            cmbDepartment.TabIndex = 14;
             // 
             // lblStatus
             // 
-            this.lblStatus.AutoSize = true;
-            this.lblStatus.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblStatus.Location = new System.Drawing.Point(35, 460);
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(69, 21);
-            this.lblStatus.TabIndex = 15;
-            this.lblStatus.Text = "Status *";
+            lblStatus.AutoSize = true;
+            lblStatus.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblStatus.ForeColor = Color.FromArgb(51, 65, 85);
+            lblStatus.Location = new Point(57, 736);
+            lblStatus.Margin = new Padding(5, 0, 5, 0);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(109, 36);
+            lblStatus.TabIndex = 15;
+            lblStatus.Text = "Status *";
             // 
             // cmbStatus
             // 
-            this.cmbStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbStatus.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.cmbStatus.FormattingEnabled = true;
-            this.cmbStatus.Location = new System.Drawing.Point(35, 485);
-            this.cmbStatus.Name = "cmbStatus";
-            this.cmbStatus.Size = new System.Drawing.Size(240, 31);
-            this.cmbStatus.TabIndex = 16;
+            cmbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbStatus.Font = new Font("Segoe UI", 10F);
+            cmbStatus.FormattingEnabled = true;
+            cmbStatus.Location = new Point(57, 776);
+            cmbStatus.Margin = new Padding(5, 5, 5, 5);
+            cmbStatus.Name = "cmbStatus";
+            cmbStatus.Size = new Size(388, 45);
+            cmbStatus.TabIndex = 16;
             // 
             // pnlFooter
             // 
-            this.pnlFooter.BackColor = System.Drawing.Color.White;
-            this.pnlFooter.Controls.Add(this.btnCancel);
-            this.pnlFooter.Controls.Add(this.btnSave);
-            this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlFooter.Location = new System.Drawing.Point(0, 550);
-            this.pnlFooter.Name = "pnlFooter";
-            this.pnlFooter.Size = new System.Drawing.Size(580, 80);
-            this.pnlFooter.TabIndex = 17;
+            pnlFooter.BackColor = Color.FromArgb(34, 40, 49);
+            pnlFooter.Controls.Add(btnCancel);
+            pnlFooter.Controls.Add(btnSave);
+            pnlFooter.Dock = DockStyle.Bottom;
+            pnlFooter.Location = new Point(0, 880);
+            pnlFooter.Margin = new Padding(5, 5, 5, 5);
+            pnlFooter.Name = "pnlFooter";
+            pnlFooter.Size = new Size(942, 128);
+            pnlFooter.TabIndex = 17;
             // 
             // btnCancel
             // 
-            this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(245)))), ((int)(((byte)(249)))));
-            this.btnCancel.BorderRadius = 20;
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(203)))), ((int)(((byte)(213)))), ((int)(((byte)(225)))));
-            this.btnCancel.FlatAppearance.BorderSize = 0;
-            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.btnCancel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-            this.btnCancel.HoverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(232)))), ((int)(((byte)(240)))));
-            this.btnCancel.Location = new System.Drawing.Point(325, 18);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.NormalBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(245)))), ((int)(((byte)(249)))));
-            this.btnCancel.PressedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(203)))), ((int)(((byte)(213)))), ((int)(((byte)(225)))));
-            this.btnCancel.Size = new System.Drawing.Size(105, 44);
-            this.btnCancel.TabIndex = 0;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = false;
+            btnCancel.BackColor = Color.FromArgb(241, 245, 249);
+            btnCancel.BorderRadius = 20;
+            btnCancel.DialogResult = DialogResult.Cancel;
+            btnCancel.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnCancel.FlatAppearance.BorderSize = 0;
+            btnCancel.FlatStyle = FlatStyle.Flat;
+            btnCancel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnCancel.ForeColor = Color.FromArgb(71, 85, 105);
+            btnCancel.HoverBackColor = Color.FromArgb(226, 232, 240);
+            btnCancel.Location = new Point(528, 29);
+            btnCancel.Margin = new Padding(5, 5, 5, 5);
+            btnCancel.Name = "btnCancel";
+            btnCancel.NormalBackColor = Color.FromArgb(241, 245, 249);
+            btnCancel.PressedBackColor = Color.FromArgb(203, 213, 225);
+            btnCancel.Size = new Size(171, 70);
+            btnCancel.TabIndex = 0;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = false;
             // 
             // btnSave
             // 
-            this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(204)))), ((int)(((byte)(21)))));
-            this.btnSave.BorderRadius = 20;
-            this.btnSave.FlatAppearance.BorderSize = 0;
-            this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.btnSave.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.btnSave.HoverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(216)))), ((int)(((byte)(53)))));
-            this.btnSave.Location = new System.Drawing.Point(440, 18);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.NormalBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(204)))), ((int)(((byte)(21)))));
-            this.btnSave.PressedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(186)))), ((int)(((byte)(10)))));
-            this.btnSave.Size = new System.Drawing.Size(105, 44);
-            this.btnSave.TabIndex = 1;
-            this.btnSave.Text = "Create User";
-            this.btnSave.UseVisualStyleBackColor = false;
+            btnSave.BackColor = Color.FromArgb(250, 204, 21);
+            btnSave.BorderRadius = 20;
+            btnSave.FlatAppearance.BorderSize = 0;
+            btnSave.FlatStyle = FlatStyle.Flat;
+            btnSave.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnSave.ForeColor = Color.FromArgb(15, 23, 42);
+            btnSave.Location = new Point(715, 29);
+            btnSave.Margin = new Padding(5, 5, 5, 5);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(171, 70);
+            btnSave.TabIndex = 1;
+            btnSave.Text = "Create User";
+            btnSave.UseVisualStyleBackColor = false;
             // 
             // AddUserModalForm
             // 
-            this.AcceptButton = this.btnSave;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-            this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(580, 630);
-            this.Controls.Add(this.pnlFooter);
-            this.Controls.Add(this.cmbStatus);
-            this.Controls.Add(this.lblStatus);
-            this.Controls.Add(this.cmbDepartment);
-            this.Controls.Add(this.lblDepartment);
-            this.Controls.Add(this.cmbRole);
-            this.Controls.Add(this.lblRole);
-            this.Controls.Add(this.txtConfirmPassword);
-            this.Controls.Add(this.lblConfirmPassword);
-            this.Controls.Add(this.txtPassword);
-            this.Controls.Add(this.lblPassword);
-            this.Controls.Add(this.txtFullName);
-            this.Controls.Add(this.lblFullName);
-            this.Controls.Add(this.txtCompanyId);
-            this.Controls.Add(this.lblCompanyId);
-            this.Controls.Add(this.txtUsername);
-            this.Controls.Add(this.lblUsername);
-            this.Controls.Add(this.pnlHeader);
-            this.Controls.Add(this.pnlCustomHeader);
-            this.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "AddUserModalForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Add New System User";
-            this.pnlCustomHeader.ResumeLayout(false);
-            this.pnlCustomHeader.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.iconLogo)).EndInit();
-            this.pnlHeader.ResumeLayout(false);
-            this.pnlHeader.PerformLayout();
-            this.pnlFooter.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AcceptButton = btnSave;
+            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(248, 250, 252);
+            CancelButton = btnCancel;
+            ClientSize = new Size(942, 1008);
+            Controls.Add(pnlFooter);
+            Controls.Add(cmbStatus);
+            Controls.Add(lblStatus);
+            Controls.Add(cmbDepartment);
+            Controls.Add(lblDepartment);
+            Controls.Add(cmbRole);
+            Controls.Add(lblRole);
+            Controls.Add(txtConfirmPassword);
+            Controls.Add(lblConfirmPassword);
+            Controls.Add(txtPassword);
+            Controls.Add(lblPassword);
+            Controls.Add(txtFullName);
+            Controls.Add(lblFullName);
+            Controls.Add(txtCompanyId);
+            Controls.Add(lblCompanyId);
+            Controls.Add(txtUsername);
+            Controls.Add(lblUsername);
+            Controls.Add(pnlHeader);
+            Controls.Add(pnlCustomHeader);
+            Font = new Font("Segoe UI", 9F);
+            FormBorderStyle = FormBorderStyle.None;
+            Margin = new Padding(5, 5, 5, 5);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "AddUserModalForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Add New System User";
+            pnlCustomHeader.ResumeLayout(false);
+            pnlCustomHeader.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)iconLogo).EndInit();
+            pnlHeader.ResumeLayout(false);
+            pnlHeader.PerformLayout();
+            pnlFooter.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
