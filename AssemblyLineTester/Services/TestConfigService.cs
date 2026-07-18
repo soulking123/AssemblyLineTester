@@ -67,7 +67,7 @@ namespace AssemblyLineTester.Services
         private static void NormalizeNetUnits(TestConfigNet net)
         {
             // Determine the test type name to use for unit conversion.
-            string testTypeName = net.TestType?.TestTypeName;
+            string? testTypeName = net.TestType?.TestTypeName;
             if (string.IsNullOrWhiteSpace(testTypeName) && net.TestTypeId != 0)
             {
                 using var db = new AppDbContext();

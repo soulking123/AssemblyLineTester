@@ -9,6 +9,7 @@ namespace AssemblyLineTester.Data
     {
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
+        public DbSet<RolePermission> RolePermissions { get; set; } = null!;
         public DbSet<UserStatus> UserStatuses { get; set; } = null!;
         public DbSet<MaintenanceState> MaintenanceStates { get; set; } = null!;
         public DbSet<SystemLog> SystemLogs { get; set; } = null!;
@@ -401,6 +402,93 @@ namespace AssemblyLineTester.Data
                     RemainingMaintHours = 2160.0
                 }
             );
+
+            // Configure RolePermission entity and unique index
+            modelBuilder.Entity<RolePermission>()
+                .HasIndex(rp => new { rp.RoleId, rp.PermissionKey })
+                .IsUnique();
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());
+        }
+
+        private static RolePermission[] GetInitialRolePermissions()
+        {
+            var defs = new[]
+            {
+                ("Page.Dashboard", "Page Access", "Access Dashboard Page"),
+                ("Page.TestExecution", "Page Access", "Access Test Execution Page"),
+                ("Page.HarnessDatabase", "Page Access", "Access Harness Database Page"),
+                ("Page.TestHistory", "Page Access", "Access Test History Page"),
+                ("Page.Reports", "Page Access", "Access Reports Page"),
+                ("Page.SystemLog", "Page Access", "Access System Log Page"),
+                ("Page.Settings", "Page Access", "Access Settings Page"),
+                ("Page.UserManagement", "Page Access", "Access User Management Page"),
+                ("Action.TestExecution.Run", "Test Operations", "Start and Run Testing Operations"),
+                ("Action.TestConfig.Edit", "Test Operations", "Add and Edit Test Parameters & Harness Specs"),
+                ("Action.Instruments.Calibrate", "Test Operations", "Calibrate and Configure Hardware Instruments"),
+                ("Action.UserManagement.Edit", "System & Logs", "Add, Edit, and Manage System User Accounts"),
+                ("Action.Reports.Export", "System & Logs", "Export and Print Test Reports & Analytics"),
+                ("Action.SystemLog.Clear", "System & Logs", "Clear and Purge System Activity Logs"),
+                ("Action.Database.Backup", "System & Logs", "Create and Restore Database Backups")
+            };
+
+            var list = new List<RolePermission>();
+            int idCounter = 1;
+
+            for (int roleId = 1; roleId <= 6; roleId++)
+            {
+                foreach (var (key, group, desc) in defs)
+                {
+                    bool granted = false;
+                    if (roleId == 1) // Administrator
+                    {
+                        granted = true;
+                    }
+                    else if (roleId == 2) // Operator
+                    {
+                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.TestHistory" or "Action.TestExecution.Run")
+                            granted = true;
+                    }
+                    else if (roleId == 3) // Engineer
+                    {
+                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.TestConfig.Edit" or "Action.Instruments.Calibrate" or "Action.Reports.Export")
+                            granted = true;
+                    }
+                    else if (roleId == 4) // Technician
+                    {
+                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.Instruments.Calibrate" or "Action.Reports.Export")
+                            granted = true;
+                    }
+                    else if (roleId == 5) // Quality
+                    {
+                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Action.Reports.Export")
+                            granted = true;
+                    }
+                    else if (roleId == 6) // Supervisor
+                    {
+                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Action.TestExecution.Run" or "Action.Reports.Export")
+                            granted = true;
+                    }
+
+                    list.Add(new RolePermission
+                    {
+                        Id = idCounter++,
+                        RoleId = roleId,
+                        PermissionKey = key,
+                        PermissionGroup = group,
+                        Description = desc,
+                        IsGranted = granted
+                    });
+                }
+            }
+
+            return list.ToArray();
         }
     }
 }

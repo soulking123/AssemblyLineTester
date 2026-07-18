@@ -63,6 +63,14 @@ namespace AssemblyLineTester.Views.Controls
         private bool ShouldSerializePressedBackColor() => pressedBackColor != Color.FromArgb(234, 186, 10);
         private void ResetPressedBackColor() => PressedBackColor = Color.FromArgb(234, 186, 10);
 
+        [Category("Appearance")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public Color HoverForeColor { get; set; } = Color.Empty;
+
+        [Category("Appearance")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public Color PressedForeColor { get; set; } = Color.Empty;
+
         public RoundedButton()
         {
             FlatStyle = FlatStyle.Flat;
@@ -130,18 +138,21 @@ namespace AssemblyLineTester.Views.Controls
             return path;
         }
 
+        private Color GetParentBackColor()
+        {
+            Control parent = this.Parent;
+            while (parent != null && parent.BackColor == Color.Transparent)
+            {
+                parent = parent.Parent;
+            }
+            return parent != null ? parent.BackColor : SystemColors.Control;
+        }
+
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
-            if (Parent != null && Parent.BackColor != Color.Transparent)
+            using (Brush parentBrush = new SolidBrush(GetParentBackColor()))
             {
-                using (Brush parentBrush = new SolidBrush(Parent.BackColor))
-                {
-                    pevent.Graphics.FillRectangle(parentBrush, ClientRectangle);
-                }
-            }
-            else
-            {
-                base.OnPaintBackground(pevent);
+                pevent.Graphics.FillRectangle(parentBrush, ClientRectangle);
             }
         }
 
@@ -167,16 +178,9 @@ namespace AssemblyLineTester.Views.Controls
             }
 
             // Clear background with parent's backcolor for smooth anti-aliased rounded corners
-            if (Parent != null && Parent.BackColor != Color.Transparent)
+            using (Brush parentBrush = new SolidBrush(GetParentBackColor()))
             {
-                using (Brush parentBrush = new SolidBrush(Parent.BackColor))
-                {
-                    pevent.Graphics.FillRectangle(parentBrush, 0, 0, Width, Height);
-                }
-            }
-            else
-            {
-                pevent.Graphics.Clear(Color.Transparent);
+                pevent.Graphics.FillRectangle(parentBrush, 0, 0, Width, Height);
             }
 
             // Draw rounded pill surface
@@ -186,14 +190,38 @@ namespace AssemblyLineTester.Views.Controls
                 pevent.Graphics.FillPath(surfaceBrush, pathSurface);
             }
 
+            // Determine text color
+            Color currentForeColor = ForeColor;
+            if (isPressed && PressedForeColor != Color.Empty)
+            {
+                currentForeColor = PressedForeColor;
+            }
+            else if (isHovered && HoverForeColor != Color.Empty)
+            {
+                currentForeColor = HoverForeColor;
+            }
+            else if (!Enabled)
+            {
+                currentForeColor = Color.Gray;
+            }
+
             // Draw button text
+            var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis;
+            // RoundedButton aligns text based on its TextAlign property.
+            if (TextAlign == ContentAlignment.MiddleLeft || TextAlign == ContentAlignment.TopLeft || TextAlign == ContentAlignment.BottomLeft)
+                flags |= TextFormatFlags.Left;
+            else if (TextAlign == ContentAlignment.MiddleRight || TextAlign == ContentAlignment.TopRight || TextAlign == ContentAlignment.BottomRight)
+                flags |= TextFormatFlags.Right;
+            else
+                flags |= TextFormatFlags.HorizontalCenter;
+                
             TextRenderer.DrawText(
                 pevent.Graphics,
                 Text,
                 Font,
                 ClientRectangle,
-                ForeColor,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis
+                currentForeColor,
+                flags
             );
         }
     }

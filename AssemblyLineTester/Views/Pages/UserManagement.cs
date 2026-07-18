@@ -37,6 +37,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterDept.SelectedIndexChanged += FilterChanged;
             btnRefresh.Click += BtnRefresh_Click;
             btnAddUser.Click += BtnAddUser_Click;
+            btnManageRolePermissions.Click += BtnManageRolePermissions_Click;
 
             gridUsers.CellFormatting += GridUsers_CellFormatting;
             gridUsers.CellPainting += GridUsers_CellPainting;
@@ -535,8 +536,20 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddUser, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnManageRolePermissions, 10, Color.FromArgb(59, 130, 246), Color.FromArgb(37, 99, 235), Color.FromArgb(29, 78, 216), Color.Transparent);
         }
 
-
+        private void BtnManageRolePermissions_Click(object? sender, EventArgs e)
+        {
+            var mainForm = this.FindForm() as MainForm;
+            if (mainForm != null)
+            {
+                mainForm.OpenRolePermissionsSettings();
+            }
+            else
+            {
+                MessageBox.Show("Please navigate to Settings -> Users and Roles to configure permissions.", "Role Permissions", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
     }
 }

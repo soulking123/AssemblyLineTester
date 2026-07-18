@@ -38,6 +38,7 @@ namespace AssemblyLineTester.Views.Pages
             btnSearch.Click += (s, ev) => { _currentPage = 1; LoadLogData(); };
             btnReset.Click += (s, ev) => { ResetFilters(); _currentPage = 1; LoadLogData(); };
             btnRefresh.Click += (s, ev) => LoadLogData();
+            btnExport.Click += (s, ev) => { if (!SessionManager.HasPermission("Action.SystemLog.Clear")) { MessageBox.Show("You do not have permission to clear/export system logs.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Log export functionality under construction.", "Info"); };
         }
 
         protected override void OnLoad(EventArgs e)
