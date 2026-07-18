@@ -87,6 +87,7 @@ namespace AssemblyLineTester.Views.Pages
             flpActionButtons = new FlowLayoutPanel();
             btnExport = new Button();
             btnRefresh = new Button();
+            btnManageRolePermissions = new Button();
             btnAddUser = new Button();
             tblContentRow = new TableLayoutPanel();
             tblDetailsColumn = new TableLayoutPanel();
@@ -1000,6 +1001,7 @@ namespace AssemblyLineTester.Views.Pages
             flpActionButtons.AutoSize = true;
             flpActionButtons.Controls.Add(btnExport);
             flpActionButtons.Controls.Add(btnRefresh);
+            flpActionButtons.Controls.Add(btnManageRolePermissions);
             flpActionButtons.Controls.Add(btnAddUser);
             flpActionButtons.FlowDirection = FlowDirection.LeftToRight;
             flpActionButtons.Location = new Point(1300, 30);
@@ -1056,6 +1058,22 @@ namespace AssemblyLineTester.Views.Pages
             btnAddUser.TabIndex = 2;
             btnAddUser.Text = "+ Add New User";
             btnAddUser.UseVisualStyleBackColor = false;
+            // 
+            // btnManageRolePermissions
+            // 
+            btnManageRolePermissions.BackColor = Color.FromArgb(59, 130, 246);
+            btnManageRolePermissions.Cursor = Cursors.Hand;
+            btnManageRolePermissions.FlatAppearance.BorderSize = 0;
+            btnManageRolePermissions.FlatStyle = FlatStyle.Flat;
+            btnManageRolePermissions.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            btnManageRolePermissions.ForeColor = Color.White;
+            btnManageRolePermissions.Location = new Point(100, 0);
+            btnManageRolePermissions.Margin = new Padding(0, 0, 10, 0);
+            btnManageRolePermissions.Name = "btnManageRolePermissions";
+            btnManageRolePermissions.Size = new Size(185, 46);
+            btnManageRolePermissions.TabIndex = 3;
+            btnManageRolePermissions.Text = "👑 Manage Role Permissions";
+            btnManageRolePermissions.UseVisualStyleBackColor = false;
             // 
             // tblContentRow
             // 
@@ -2046,6 +2064,7 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.ComboBox cmbFilterRole;
         private System.Windows.Forms.ComboBox cmbFilterDept;
         private System.Windows.Forms.FlowLayoutPanel flpActionButtons;
+        private System.Windows.Forms.Button btnManageRolePermissions;
         private System.Windows.Forms.Button btnAddUser;
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.Button btnRefresh;

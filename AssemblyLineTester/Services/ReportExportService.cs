@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using ClosedXML.Excel;
+using System.Linq;
 using AssemblyLineTester.Models.Dto;
 
 namespace AssemblyLineTester.Services

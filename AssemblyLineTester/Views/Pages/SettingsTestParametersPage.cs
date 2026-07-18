@@ -73,6 +73,13 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.DataError += (s, e) => { e.ThrowException = false; };
             gridConfig.CellClick += GridConfig_CellClick;
             gridConfig.Leave += GridConfig_Leave;
+            gridConfig.CellBeginEdit += (s, e) => {
+                if (!SessionManager.HasPermission("Action.TestConfig.Edit"))
+                {
+                    e.Cancel = true;
+                    MessageBox.Show("You do not have permission to edit test parameter configurations.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            };
 
             txtConnectionResistance.TextChanged += (s, e) => RecalculateAllRows();
 
@@ -221,8 +228,19 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        private bool CheckEditPermission()
+        {
+            if (!SessionManager.HasPermission("Action.TestConfig.Edit"))
+            {
+                MessageBox.Show("You do not have permission to edit test parameter configurations.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
         private void BtnAdd_Click(object? sender, EventArgs e)
         {
+            if (!CheckEditPermission()) return;
             int newIdx = gridConfig.Rows.Count + 1;
             int idx = gridConfig.Rows.Add(newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply", "0", $"X1-0{newIdx}", "0", $"Y1-0{newIdx}", "Resistance", "0", "5", "2.5", "±5%", "Ω");
             UpdateRowUnitDropdown(idx);
@@ -235,6 +253,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnRemove_Click(object? sender, EventArgs e)
         {
+            if (!CheckEditPermission()) return;
             if (gridConfig.SelectedRows.Count > 0)
             {
                 foreach (DataGridViewRow row in gridConfig.SelectedRows)
@@ -260,6 +279,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnReset_Click(object? sender, EventArgs e)
         {
+            if (!CheckEditPermission()) return;
             if (MessageBox.Show("Are you sure you want to delete all rows and reset the configuration?", "Confirm Reset", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 gridConfig.Rows.Clear();
@@ -272,6 +292,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnImport_Click(object? sender, EventArgs e)
         {
+            if (!CheckEditPermission()) return;
             // Open the Edit Config modal (lists saved configurations from DB)
             ShowEditConfigsDialog();
         }

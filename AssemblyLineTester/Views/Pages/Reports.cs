@@ -12,6 +12,7 @@ namespace AssemblyLineTester.Views.Pages
     public partial class Reports : UserControl
     {
         private readonly TestReportService _reportService = new();
+        private readonly ReportExportService _exportService = new();
         private int _currentPage = 1;
         private readonly int _pageSize = 10;
         private int _totalPages = 1;
@@ -32,13 +33,13 @@ namespace AssemblyLineTester.Views.Pages
         private TextBox _txtEditRev = null!, _txtEditPart = null!, _txtEditSn = null!, _txtEditOp = null!;
         private ComboBox _cmbEditResult = null!;
 
+
         public Reports()
         {
             InitializeComponent();
             this.Load += Reports_Load;
             this.VisibleChanged += Reports_VisibleChanged;
             SetupEditableReportFields();
-            WireEvents();
         }
 
         private void Reports_Load(object? sender, EventArgs e)
@@ -339,6 +340,85 @@ namespace AssemblyLineTester.Views.Pages
             btnPageNext.Click += (s, e) => GoToPage(_currentPage + 1);
             btnPageLast.Click += (s, e) => GoToPage(_totalPages);
 
+            btnExportPDF.Click += (s, e) =>
+            {
+                if (!SessionManager.HasPermission("Action.Reports.Export"))
+                {
+                    MessageBox.Show("You do not have permission to export reports.",
+                        "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (_selectedReportId is null)
+                {
+                    MessageBox.Show("Please select a report first.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using SaveFileDialog sfd = new()
+                {
+                    Filter = "PDF File (*.pdf)|*.pdf",
+                    FileName = $"Report_{_selectedReportId}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
+                };
+                if (sfd.ShowDialog() != DialogResult.OK) return;
+
+                try
+                {
+                    _reportService.GenerateReportPdf(_selectedReportId.Value, sfd.FileName);
+                    MessageBox.Show("Report exported to PDF successfully.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to export PDF:\n{ex.Message}", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            btnExportExcel.Click += (s, e) =>
+            {
+                if (!SessionManager.HasPermission("Action.Reports.Export"))
+                {
+                    MessageBox.Show("You do not have permission to export reports.",
+                        "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (_selectedReportId is null)
+                {
+                    MessageBox.Show("Please select a report first.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using SaveFileDialog sfd = new()
+                {
+                    Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                    FileName = $"Report_{_selectedReportId}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
+                };
+                if (sfd.ShowDialog() != DialogResult.OK) return;
+
+                try
+                {
+                    _exportService.ExportReportToExcel(_selectedReportId.Value, sfd.FileName);
+                    MessageBox.Show("Report exported to Excel successfully.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to export Excel:\n{ex.Message}", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            btnPrint.Click += (s, e) =>
+            {
+                if (!SessionManager.HasPermission("Action.Reports.Export"))
+                {
+                    MessageBox.Show("You do not have permission to export reports.",
+                        "Access Denied",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                MessageBox.Show("Print belum diimplementasikan.", "Info");
+            };
         }
 
         private void ResetFilterControls()

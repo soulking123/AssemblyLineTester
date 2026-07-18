@@ -109,6 +109,850 @@ namespace AssemblyLineTester.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AssemblyLineTester.Models.RolePermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsGranted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PermissionGroup")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PermissionKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId", "PermissionKey")
+                        .IsUnique();
+
+                    b.ToTable("RolePermissions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Dashboard",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestExecution",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Access Harness Database Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Access Reports Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Access System Log Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Access Settings Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Access User Management Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Description = "Create and Restore Database Backups",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Database.Backup",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Dashboard",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestExecution",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Description = "Access Harness Database Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Description = "Access Reports Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Description = "Access System Log Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Description = "Access Settings Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Description = "Access User Management Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 28,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 29,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 30,
+                            Description = "Create and Restore Database Backups",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Database.Backup",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 31,
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Dashboard",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 32,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestExecution",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 33,
+                            Description = "Access Harness Database Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 34,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 35,
+                            Description = "Access Reports Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 36,
+                            Description = "Access System Log Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 37,
+                            Description = "Access Settings Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 38,
+                            Description = "Access User Management Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 39,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 40,
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 41,
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 42,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 43,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 44,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 45,
+                            Description = "Create and Restore Database Backups",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Database.Backup",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 46,
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Dashboard",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 47,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestExecution",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 48,
+                            Description = "Access Harness Database Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 49,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 50,
+                            Description = "Access Reports Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 51,
+                            Description = "Access System Log Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 52,
+                            Description = "Access Settings Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 53,
+                            Description = "Access User Management Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 54,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 55,
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 56,
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 57,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 58,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 59,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 60,
+                            Description = "Create and Restore Database Backups",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Database.Backup",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 61,
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Dashboard",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 62,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestExecution",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 63,
+                            Description = "Access Harness Database Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 64,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 65,
+                            Description = "Access Reports Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 66,
+                            Description = "Access System Log Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 67,
+                            Description = "Access Settings Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 68,
+                            Description = "Access User Management Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 69,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 70,
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 71,
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 72,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 73,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 74,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 75,
+                            Description = "Create and Restore Database Backups",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Database.Backup",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 76,
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Dashboard",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 77,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestExecution",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 78,
+                            Description = "Access Harness Database Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 79,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 80,
+                            Description = "Access Reports Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 81,
+                            Description = "Access System Log Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 82,
+                            Description = "Access Settings Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 83,
+                            Description = "Access User Management Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 84,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 85,
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 86,
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 87,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 88,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 89,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 90,
+                            Description = "Create and Restore Database Backups",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Database.Backup",
+                            RoleId = 6
+                        });
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.SystemLog", b =>
                 {
                     b.Property<int>("Id")
@@ -153,7 +997,7 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("ConfigId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ConfigurationConfigId")
+                    b.Property<int?>("ConfigurationConfigId")
                         .HasColumnType("INTEGER");
 
                     b.Property<double?>("ExpectedValue")
@@ -871,13 +1715,22 @@ namespace AssemblyLineTester.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AssemblyLineTester.Models.RolePermission", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.TestConfigNet", b =>
                 {
                     b.HasOne("AssemblyLineTester.Models.TestConfiguration", "Configuration")
                         .WithMany("Nets")
-                        .HasForeignKey("ConfigurationConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ConfigurationConfigId");
 
                     b.HasOne("AssemblyLineTester.Models.TestType", "TestType")
                         .WithMany()
@@ -947,6 +1800,11 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.Role", b =>
+                {
+                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.TestConfiguration", b =>
