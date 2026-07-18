@@ -284,7 +284,7 @@ namespace AssemblyLineTester.Migrations
             migrationBuilder.InsertData(
                 table: "MaintenanceStates",
                 columns: new[] { "Id", "LastUsageDate", "OperatingSecondsToday", "RemainingMaintDays", "RemainingMaintHours" },
-                values: new object[] { 1, new DateTime(2026, 7, 15, 0, 0, 0, 0, DateTimeKind.Local), 0.0, 180, 2160.0 });
+                values: new object[] { 1, new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Local), 0.0, 180, 2160.0 });
 
             migrationBuilder.InsertData(
                 table: "Roles",

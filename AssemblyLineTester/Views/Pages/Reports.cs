@@ -22,10 +22,22 @@ namespace AssemblyLineTester.Views.Pages
         private ReportFilter _appliedFilter = new();
         private Chart chartTrend = null!;
 
+        // --- Report Edit/Delete feature ---
+        private bool _isEditingReport;
+        private Button _btnEditReport = null!;
+        private Button _btnDeleteReport = null!;
+        private Button _btnSaveReportEdit = null!;
+        private Button _btnCancelReportEdit = null!;
+        private TextBox _txtEditModel = null!, _txtEditType = null!, _txtEditArea = null!, _txtEditEcn = null!;
+        private TextBox _txtEditRev = null!, _txtEditPart = null!, _txtEditSn = null!, _txtEditOp = null!;
+        private ComboBox _cmbEditResult = null!;
+
         public Reports()
         {
             InitializeComponent();
             this.Load += Reports_Load;
+            SetupEditableReportFields();
+            WireEvents();
         }
 
         private void Reports_Load(object? sender, EventArgs e)
@@ -36,8 +48,6 @@ namespace AssemblyLineTester.Views.Pages
             }
             InitializeCustomStyles();
             WireEvents();
-
-            _reportService.SeedSampleDataIfEmpty();
 
             // No filter applied yet -> show everything.
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
@@ -89,7 +99,194 @@ namespace AssemblyLineTester.Views.Pages
             SetupEvents();
         }
 
+        private void SetupEditableReportFields()
+        {
+            try
+            {
+                _btnEditReport = CreateActionButton("Edit", Color.FromArgb(37, 99, 235));
+                _btnDeleteReport = CreateActionButton("Delete", Color.FromArgb(220, 38, 38));
+                _btnSaveReportEdit = CreateActionButton("Save", Color.FromArgb(22, 163, 74));
+                _btnCancelReportEdit = CreateActionButton("Cancel", Color.FromArgb(100, 116, 139));
 
+                flpPreviewButtons.Controls.Add(_btnEditReport, 3, 0);
+                flpPreviewButtons.Controls.Add(_btnDeleteReport, 4, 0);
+                flpPreviewButtons.Controls.Add(_btnSaveReportEdit, 5, 0);
+                flpPreviewButtons.Controls.Add(_btnCancelReportEdit, 6, 0);
+
+                _btnSaveReportEdit.Visible = false;
+                _btnCancelReportEdit.Visible = false;
+
+                _txtEditModel = CreateOverlayTextBox(lblGenModelVal);
+                _txtEditType = CreateOverlayTextBox(lblGenTypeVal);
+                _txtEditArea = CreateOverlayTextBox(lblGenAreaVal);
+                _txtEditEcn = CreateOverlayTextBox(lblGenEcnVal);
+                _txtEditRev = CreateOverlayTextBox(lblGenRevVal);
+                _txtEditPart = CreateOverlayTextBox(lblGenPartVal);
+                _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
+                _txtEditOp = CreateOverlayTextBox(lblGenOpVal);
+
+                _cmbEditResult = new ComboBox
+                {
+                    Location = lblGenResVal.Location,
+                    Size = lblGenResVal.Size,
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    Visible = false,
+                    Font = lblGenResVal.Font
+                };
+                _cmbEditResult.Items.AddRange(new object[] { "PASS", "FAIL" });
+                lblGenResVal.Parent!.Controls.Add(_cmbEditResult);
+                _cmbEditResult.BringToFront();
+
+                _btnEditReport.Click += (s, e) => EnterEditMode();
+                _btnSaveReportEdit.Click += (s, e) => SaveReportEdit();
+                _btnCancelReportEdit.Click += (s, e) => ExitEditMode(refresh: true);
+
+                _btnDeleteReport.Click += (s, e) =>
+                {
+                    if (_selectedReportId is null)
+                    {
+                        MessageBox.Show("Please select a report to delete.", "Delete Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    var confirm = MessageBox.Show(
+                        "This will permanently delete the report and all its test details. Continue?",
+                        "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (confirm != DialogResult.Yes) return;
+
+                    _reportService.DeleteReport(_selectedReportId.Value);
+                    _selectedReportId = null;
+                    ClearPreview();
+                    LoadReportsGrid(_appliedFilter);
+                };
+            }
+            catch (Exception ex)
+            {
+                // If this fires, it tells you EXACTLY which control name doesn't exist -
+                // fix the mismatched name and rebuild.
+                MessageBox.Show($"SetupEditableReportFields failed:\n{ex.Message}", "Setup Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+        private static TextBox CreateOverlayTextBox(Label sourceLabel)
+        {
+            var tb = new TextBox
+            {
+                Location = sourceLabel.Location,
+                Size = sourceLabel.Size,
+                Font = sourceLabel.Font,
+                Visible = false
+            };
+            sourceLabel.Parent!.Controls.Add(tb);
+            tb.BringToFront();
+            return tb;
+        }
+
+        private void EnterEditMode()
+        {
+            if (_selectedReportId is null)
+            {
+                MessageBox.Show("Please select a report to edit.", "Edit Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            _isEditingReport = true;
+
+            _txtEditModel.Text = lblGenModelVal.Text;
+            _txtEditType.Text = lblGenTypeVal.Text;
+            _txtEditArea.Text = lblGenAreaVal.Text;
+            _txtEditEcn.Text = lblGenEcnVal.Text;
+            _txtEditRev.Text = lblGenRevVal.Text;
+            _txtEditPart.Text = lblGenPartVal.Text;
+            _txtEditSn.Text = lblGenSnVal.Text;
+            _txtEditOp.Text = lblGenOpVal.Text;
+            _cmbEditResult.SelectedItem = lblGenResVal.Text.ToUpperInvariant() == "PASS" ? "PASS" : "FAIL";
+
+            ToggleEditControls(showTextboxes: true);
+
+            _btnEditReport.Visible = false;
+            _btnDeleteReport.Visible = false;
+            _btnSaveReportEdit.Visible = true;
+            _btnCancelReportEdit.Visible = true;
+        }
+
+        private void ExitEditMode(bool refresh)
+        {
+            _isEditingReport = false;
+            ToggleEditControls(showTextboxes: false);
+
+            _btnEditReport.Visible = true;
+            _btnDeleteReport.Visible = true;
+            _btnSaveReportEdit.Visible = false;
+            _btnCancelReportEdit.Visible = false;
+
+            if (refresh && _selectedReportId.HasValue)
+            {
+                LoadPreview(_selectedReportId.Value);
+            }
+        }
+
+        private void ToggleEditControls(bool showTextboxes)
+        {
+            lblGenModelVal.Visible = lblGenTypeVal.Visible = lblGenAreaVal.Visible = !showTextboxes;
+            lblGenEcnVal.Visible = lblGenRevVal.Visible = lblGenPartVal.Visible = !showTextboxes;
+            lblGenSnVal.Visible = lblGenOpVal.Visible = lblGenResVal.Visible = !showTextboxes;
+
+            _txtEditModel.Visible = _txtEditType.Visible = _txtEditArea.Visible = showTextboxes;
+            _txtEditEcn.Visible = _txtEditRev.Visible = _txtEditPart.Visible = showTextboxes;
+            _txtEditSn.Visible = _txtEditOp.Visible = showTextboxes;
+            _cmbEditResult.Visible = showTextboxes;
+        }
+
+        private void SaveReportEdit()
+        {
+            if (_selectedReportId is null) return;
+
+            if (string.IsNullOrWhiteSpace(_txtEditSn.Text))
+            {
+                MessageBox.Show("Serial Number cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                _reportService.UpdateReportHeader(
+                    _selectedReportId.Value,
+                    _txtEditModel.Text.Trim(),
+                    _txtEditType.Text.Trim(),
+                    _txtEditArea.Text.Trim(),
+                    _txtEditEcn.Text.Trim(),
+                    _txtEditRev.Text.Trim(),
+                    _txtEditPart.Text.Trim(),
+                    _txtEditSn.Text.Trim(),
+                    _txtEditOp.Text.Trim(),
+                    _cmbEditResult.SelectedItem?.ToString() ?? "PASS");
+
+                ExitEditMode(refresh: true);
+                LoadReportsGrid(_appliedFilter);
+                MessageBox.Show("Report updated successfully.", "Edit Report", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to update report:\n{ex.Message}", "Edit Report", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private static Button CreateActionButton(string text, Color backColor)
+        {
+            return new Button
+            {
+                Text = text,
+                BackColor = backColor,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(64, 30),
+                Margin = new Padding(3, 2, 0, 0),
+                Font = new Font("Segoe UI", 7.5F, FontStyle.Bold),
+                UseVisualStyleBackColor = false
+            };
+        }
 
         private void WireEvents()
         {
@@ -113,6 +310,8 @@ namespace AssemblyLineTester.Views.Pages
 
             gridReports.SelectionChanged += (s, e) =>
             {
+                if (_isEditingReport) return;
+
                 if (gridReports.CurrentRow?.Tag is int reportId)
                 {
                     _selectedReportId = reportId;
@@ -127,98 +326,8 @@ namespace AssemblyLineTester.Views.Pages
             btnPageNext.Click += (s, e) => GoToPage(_currentPage + 1);
             btnPageLast.Click += (s, e) => GoToPage(_totalPages);
 
-            btnExportPDF.Click += (s, e) =>
-            {
-                if (_selectedReportId is null)
-                {
-                    MessageBox.Show("Please select a report to export.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                using var sfd = new SaveFileDialog()
-                {
-                    Filter = "PDF files (*.pdf)|*.pdf",
-                    FileName = $"Report_{DateTime.Now:yyyyMMdd_HHmmss}.pdf",
-                    Title = "Save report as PDF"
-                };
-
-                if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(sfd.FileName))
-                {
-                    try
-                    {
-                        _reportService.GenerateReportPdf(_selectedReportId.Value, sfd.FileName);
-                        MessageBox.Show("PDF exported successfully.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Failed to export PDF:\n{ex.Message}", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            };
-
-            // Allow clicking the Action column to export directly
-            gridReports.CellClick += (s, e) =>
-            {
-                if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridReports.Columns[e.ColumnIndex].Name == "colAction")
-                {
-                    var tag = gridReports.Rows[e.RowIndex].Tag;
-                    if (tag is int rid)
-                    {
-                        using var sfd = new SaveFileDialog()
-                        {
-                            Filter = "PDF files (*.pdf)|*.pdf",
-                            FileName = $"Report_{rid}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf",
-                            Title = "Save report as PDF"
-                        };
-
-                        if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(sfd.FileName))
-                        {
-                            try
-                            {
-                                _reportService.GenerateReportPdf(rid, sfd.FileName);
-                                MessageBox.Show("PDF exported successfully.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show($"Failed to export PDF:\n{ex.Message}", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-                        }
-                    }
-                }
-            };
-            btnExportExcel.Click += (s, e) =>
-            {
-                if (_selectedReportId is null)
-                {
-                    MessageBox.Show("Please select a report to export.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                using var sfd = new SaveFileDialog()
-                {
-                    Filter = "Excel files (*.xlsx)|*.xlsx",
-                    FileName = $"Report_{_selectedReportId}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
-                    Title = "Save report as Excel"
-                };
-
-                if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(sfd.FileName))
-                {
-                    try
-                    {
-                        var exporter = new AssemblyLineTester.Services.ReportExportService();
-                        exporter.ExportReportToExcel(_selectedReportId.Value, sfd.FileName);
-                        MessageBox.Show("Excel exported successfully.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Failed to export Excel:\n{ex.Message}", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            };
-            btnPrint.Click += (s, e) => MessageBox.Show("Print belum diimplementasikan.", "Info");
         }
 
-        // RESETS THE FILTER CONTROLS ONLY (visual state) - does NOT apply/render anything by itself.
         private void ResetFilterControls()
         {
             dtpStart.Value = DateTime.Now.AddDays(-30);
@@ -231,8 +340,6 @@ namespace AssemblyLineTester.Views.Pages
             txtPartNumber.Text = string.Empty;
         }
 
-        // READS THE CURRENT (possibly unsaved/unapplied) CONTROL VALUES INTO A FILTER OBJECT.
-        // Only called when the user explicitly clicks "Generate Report".
         private ReportFilter BuildFilterFromControls()
         {
             var filter = new ReportFilter
@@ -264,7 +371,6 @@ namespace AssemblyLineTester.Views.Pages
             return filter;
         }
 
-        // RENDERS SUMMARY + TREND + GRID FOR THE GIVEN (ALREADY-APPLIED) FILTER.
         private void RenderReportData(ReportFilter filter)
         {
             LoadSummaryCards(filter);
@@ -288,7 +394,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private static string FormatPct(int count, int total) => total == 0 ? "0.00%" : $"{count * 100.0 / total:0.00}%";
 
-        // BUILDS THE "RESULT TREND" CHART WITH 3 LINES: PASS, FAIL, TOTAL (counts per day, not percentage).
         private void LoadTrendChart(ReportFilter filter)
         {
             var trend = _reportService.GetResultTrend(filter);
@@ -409,7 +514,6 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Pagination always re-renders using the last APPLIED filter, never the live control values.
         private void GoToPage(int page)
         {
             int target = Math.Max(1, Math.Min(page, _totalPages));
@@ -577,6 +681,7 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPage1, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPage2, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPageLast, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+
         }
     }
 }

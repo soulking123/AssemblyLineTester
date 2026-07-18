@@ -7,7 +7,6 @@ namespace AssemblyLineTester.Services
 {
     public class TestHistoryService
     {
-        // TEST HISTORY LIST: reuses the same filter logic as the Reports page.
         public PagedResult<TestHistoryListItem> GetHistoryList(ReportFilter filter)
         {
             using var db = new AppDbContext();
@@ -43,7 +42,29 @@ namespace AssemblyLineTester.Services
             };
         }
 
-        // TEST DETAIL PANEL + TEST STEPS RESULT: full detail for one report row.
+        public bool DeleteHistory(int reportId)
+        {
+            using var db = new AppDbContext();
+            var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId);
+            if (report == null) return false;
+
+            using var tx = db.Database.BeginTransaction();
+            try
+            {
+                var steps = db.TestSteps.Where(s => s.ReportId == reportId);
+                db.TestSteps.RemoveRange(steps);
+                db.TestReports.Remove(report);
+                db.SaveChanges();
+                tx.Commit();
+                return true;
+            }
+            catch
+            {
+                try { tx.Rollback(); } catch { }
+                return false;
+            }
+        }
+
         public TestHistoryDetailDto? GetHistoryDetail(int reportId)
         {
             using var db = new AppDbContext();

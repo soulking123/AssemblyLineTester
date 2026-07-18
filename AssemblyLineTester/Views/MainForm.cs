@@ -26,6 +26,7 @@ namespace AssemblyLineTester.Views
         public MainForm()
         {
             InitializeComponent();
+            EnableDoubleBuffering();
 
             // Load CAT logo image into sidebar menu header
             try
@@ -79,6 +80,32 @@ namespace AssemblyLineTester.Views
             this.Resize += MainForm_Resize;
 
             SetActiveMenu(btnDashboard, GetOrInitPage("btnDashboard"));
+        }
+
+        private void EnableDoubleBuffering()
+        {
+            try
+            {
+                this.DoubleBuffered = true;
+                EnableDoubleBufferingRecursive(this);
+            }
+            catch { /* ignore */ }
+        }
+
+        private static void EnableDoubleBufferingRecursive(Control control)
+        {
+            if (control is SplitContainer || control is SplitterPanel || control is Panel || control is TableLayoutPanel || control is FlowLayoutPanel)
+            {
+                try
+                {
+                    typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(control, true, null);
+                }
+                catch { /* ignore */ }
+            }
+            foreach (Control child in control.Controls)
+            {
+                EnableDoubleBufferingRecursive(child);
+            }
         }
 
         private void InitializeUserInfo()
@@ -197,75 +224,109 @@ namespace AssemblyLineTester.Views
             }
 
             if (pnlContent == null) return;
+            SendMessage(pnlContent.Handle, 0x000B, 0, 0); // WM_SETREDRAW false
             pnlContent.SuspendLayout();
-            pnlContent.Controls.Clear();
-            if (activePage != null)
+            try
             {
-                activePage.Dock = DockStyle.Fill;
-                pnlContent.Controls.Add(activePage);
-            }
-            else
-            {
-                Label lblPlaceholder = new Label
+                if (activePage != null)
                 {
-                    Text = $"{activeBtn.FullText.Trim()} (Under Construction)",
-                    Font = AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold,
-                    ForeColor = Color.FromArgb(100, 116, 139),
-                    Dock = DockStyle.Fill,
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    BackColor = Color.FromArgb(244, 245, 247)
-                };
-                pnlContent.Controls.Add(lblPlaceholder);
+                    if (!pnlContent.Controls.Contains(activePage))
+                    {
+                        activePage.Dock = DockStyle.Fill;
+                        pnlContent.Controls.Add(activePage);
+                    }
+                    foreach (Control c in pnlContent.Controls)
+                    {
+                        if (c != activePage && c.Visible) c.Visible = false;
+                    }
+                    if (!activePage.Visible) activePage.Visible = true;
+                    activePage.BringToFront();
+                }
+                else
+                {
+                    pnlContent.Controls.Clear();
+                    Label lblPlaceholder = new Label
+                    {
+                        Text = $"{activeBtn.FullText.Trim()} (Under Construction)",
+                        Font = AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold,
+                        ForeColor = Color.FromArgb(100, 116, 139),
+                        Dock = DockStyle.Fill,
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        BackColor = Color.FromArgb(244, 245, 247)
+                    };
+                    pnlContent.Controls.Add(lblPlaceholder);
+                }
             }
-            pnlContent.ResumeLayout(true);
+            finally
+            {
+                pnlContent.ResumeLayout(true);
+                SendMessage(pnlContent.Handle, 0x000B, 1, 0); // WM_SETREDRAW true
+                pnlContent.Invalidate(true);
+            }
         }
 
-        // IDE1006 FIX: Huruf awal kapital (PascalCase)
         private void BtnToggleSidebar_Click(object sender, EventArgs e)
         {
             var menuButtons = new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
 
-            if (isSidebarExpanded)
+            SendMessage(this.Handle, 0x000B, 0, 0); // WM_SETREDRAW false
+            this.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            try
             {
-                splitContainer1.SplitterDistance = collapsedWidth;
-                isSidebarExpanded = false;
-
-                pnlLogoHeader.IsMinimized = true;
-                pnlLogoHeader.Size = new Size(collapsedWidth, 85);
-                lblMenu.Size = new Size(65, 65);
-                lblMenu.Location = new Point((collapsedWidth - 65) / 2, 10);
-                btnToggleSidebar.Location = new Point(0, 88);
-                btnToggleSidebar.Size = new Size(collapsedWidth, 66);
-
-                int currentY = 180;
-                foreach (var btn in menuButtons)
+                if (isSidebarExpanded)
                 {
-                    btn.SetMinimized(true);
-                    btn.Location = new Point(0, currentY);
-                    btn.Width = collapsedWidth;
-                    currentY += btn.Height + 12;
+                    splitContainer1.SplitterDistance = collapsedWidth;
+                    isSidebarExpanded = false;
+
+                    pnlLogoHeader.IsMinimized = true;
+                    pnlLogoHeader.Size = new Size(collapsedWidth, 85);
+                    lblMenu.Size = new Size(65, 65);
+                    lblMenu.Location = new Point((collapsedWidth - 65) / 2, 10);
+                    btnToggleSidebar.Location = new Point(0, 88);
+                    btnToggleSidebar.Size = new Size(collapsedWidth, 66);
+
+                    int currentY = 180;
+                    foreach (var btn in menuButtons)
+                    {
+                        btn.SetMinimized(true);
+                        btn.Location = new Point(0, currentY);
+                        btn.Width = collapsedWidth;
+                        currentY += btn.Height + 12;
+                    }
+                }
+                else
+                {
+                    splitContainer1.SplitterDistance = expandedWidth;
+                    isSidebarExpanded = true;
+
+                    pnlLogoHeader.IsMinimized = false;
+                    pnlLogoHeader.Size = new Size(300, 130);
+                    lblMenu.Size = new Size(200, 90);
+                    lblMenu.Location = new Point(16, 20);
+                    btnToggleSidebar.Location = new Point(320, 24);
+                    btnToggleSidebar.Size = new Size(88, 88);
+
+                    int currentY = 160;
+                    foreach (var btn in menuButtons)
+                    {
+                        btn.SetMinimized(false);
+                        btn.Location = new Point(32, currentY);
+                        btn.Width = expandedWidth - 55;
+                        currentY += btn.Height + 16;
+                    }
                 }
             }
-            else
+            finally
             {
-                splitContainer1.SplitterDistance = expandedWidth;
-                isSidebarExpanded = true;
-
-                pnlLogoHeader.IsMinimized = false;
-                pnlLogoHeader.Size = new Size(300, 130);
-                lblMenu.Size = new Size(200, 90);
-                lblMenu.Location = new Point(16, 20);
-                btnToggleSidebar.Location = new Point(320, 24);
-                btnToggleSidebar.Size = new Size(88, 88);
-
-                int currentY = 160;
-                foreach (var btn in menuButtons)
-                {
-                    btn.SetMinimized(false);
-                    btn.Location = new Point(32, currentY);
-                    btn.Width = expandedWidth - 55;
-                    currentY += btn.Height + 16;
-                }
+                splitContainer1.Panel2.ResumeLayout(true);
+                splitContainer1.Panel1.ResumeLayout(true);
+                splitContainer1.ResumeLayout(true);
+                this.ResumeLayout(true);
+                SendMessage(this.Handle, 0x000B, 1, 0); // WM_SETREDRAW true
+                this.Refresh();
             }
         }
 

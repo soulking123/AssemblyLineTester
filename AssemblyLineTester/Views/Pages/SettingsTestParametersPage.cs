@@ -106,6 +106,16 @@ namespace AssemblyLineTester.Views.Pages
         public SettingsTestParametersPage()
         {
             InitializeComponent();
+            // Enable double buffering improvements from dashboard branch for smoother rendering
+            try
+            {
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(gridConfig, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(splitContainerMain, true, null);
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(picPreview, true, null);
+                EnableDoubleBufferingRecursive(this);
+            }
+            catch { /* ignore */ }
+
             SetupEvents();
             if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
             {
@@ -116,6 +126,21 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        private static void EnableDoubleBufferingRecursive(Control control)
+        {
+            if (control is TableLayoutPanel || control is Panel || control is FlowLayoutPanel || control is SplitContainer)
+            {
+                try
+                {
+                    typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(control, true, null);
+                }
+                catch { /* ignore */ }
+            }
+            foreach (Control child in control.Controls)
+            {
+                EnableDoubleBufferingRecursive(child);
+            }
+        }
         private void LoadTestTypeColumnItems()
         {
             var names = _configService.GetTestTypeNames();
@@ -237,175 +262,18 @@ namespace AssemblyLineTester.Views.Pages
             ShowEditConfigsDialog();
         }
 
+
         private void ShowEditConfigsDialog()
         {
-            // Initial fetch - service handles ordering (most recent first)
-
-            using Form dlg = new()
+            using var dlg = new AssemblyLineTester.Views.Modals.EditConfigsModalForm(_configService, _loadedConfigName);
+            if (dlg.ShowDialog(this) == DialogResult.OK && dlg.SelectedConfiguration != null)
             {
-                Text = "Edit Config",
-                Width = 900,
-                Height = 520,
-                StartPosition = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.Sizable
-            };
-
-            // Top panel: search controls
-            var topPanel = new Panel() { Dock = DockStyle.Top, Height = 48, Padding = new Padding(8) };
-            var lblSearch = new Label() { Text = "Search by Config Name:", AutoSize = true, Left = 8, Top = 14 };
-            var txtSearch = new TextBox() { Left = 170, Top = 10, Width = 360 };
-            var btnSearchBox = new Button() { Text = "Search", Left = 540, Top = 8, Width = 80, Height = 30 };
-            var btnClearBox = new Button() { Text = "Clear", Left = 628, Top = 8, Width = 80, Height = 30 };
-
-            topPanel.Controls.Add(lblSearch);
-            topPanel.Controls.Add(txtSearch);
-            topPanel.Controls.Add(btnSearchBox);
-            topPanel.Controls.Add(btnClearBox);
-
-            var grid = new DataGridView()
-            {
-                Dock = DockStyle.Fill,
-                ReadOnly = true,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                AllowUserToAddRows = false,
-                AllowUserToDeleteRows = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-            };
-
-            grid.Columns.Add("ConfigName", "Config Name");
-            grid.Columns.Add("ProductModel", "Product Model");
-            grid.Columns.Add("CreatedAt", "Created At");
-            grid.Columns.Add("UpdatedAt", "Updated At");
-            grid.Columns.Add("IsActive", "Active");
-            grid.Columns.Add("NetCount", "Nets");
-
-            void PopulateGrid(IEnumerable<TestConfiguration> list)
-            {
-                grid.Rows.Clear();
-                foreach (var c in list)
-                {
-                    int idx = grid.Rows.Add(c.ConfigName, c.ProductModel, c.CreatedAt.ToString("g"), c.UpdatedAt?.ToString("g") ?? "-", c.IsActive ? "Yes" : "No", c.Nets?.Count ?? 0);
-                    grid.Rows[idx].Tag = c.ConfigName;
-                }
+                LoadConfigurationIntoGrid(dlg.SelectedConfiguration);
             }
-
-            // initial population (fetch from DB, ordered by UpdatedAt/CreatedAt desc)
-            PopulateGrid(_configService.GetConfigurations(null));
-
-            var btnPanel = new Panel() { Dock = DockStyle.Bottom, Height = 56 };
-            var btnLoad = new Button() { Text = "Load", Width = 100, Height = 36, Left = 8, Top = 10 }; 
-            var btnDelete = new Button() { Text = "Delete", Width = 100, Height = 36, Left = 116, Top = 10 };
-            var btnClose = new Button() { Text = "Close", Width = 100, Height = 36, Left = 224, Top = 10 };
-
-            btnLoad.Click += (s, e) =>
+            if (dlg.DeletedLoadedConfig)
             {
-                if (grid.SelectedRows.Count == 0)
-                {
-                    MessageBox.Show("Please select a configuration to load.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
-                var cfg = _configService.GetConfigurationByName(name);
-                if (cfg == null)
-                {
-                    MessageBox.Show("Selected configuration could not be loaded (it may have been deleted).", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                LoadConfigurationIntoGrid(cfg);
-                dlg.Close();
-            };
-
-            btnDelete.Click += (s, e) =>
-            {
-                if (grid.SelectedRows.Count == 0)
-                {
-                    MessageBox.Show("Please select a configuration to delete.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
-                if (MessageBox.Show($"Delete configuration '{name}'? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                    return;
-
-                try
-                {
-                    bool ok = _configService.DeleteConfiguration(name);
-                    if (ok)
-                    {
-                        // remove row and refresh
-                        grid.Rows.Remove(grid.SelectedRows[0]);
-                        MessageBox.Show("Configuration deleted.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        // if the deleted config was loaded in the editor, clear loaded state
-                        if (string.Equals(_loadedConfigName, name, StringComparison.OrdinalIgnoreCase))
-                        {
-                            _loadedConfigName = null;
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Failed to delete configuration.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error deleting configuration:\n{ex.Message}", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            };
-
-            btnClose.Click += (s, e) => dlg.Close();
-
-            btnPanel.Controls.Add(btnLoad);
-            btnPanel.Controls.Add(btnDelete);
-            btnPanel.Controls.Add(btnClose);
-
-            dlg.Controls.Add(grid);
-            dlg.Controls.Add(btnPanel);
-            dlg.Controls.Add(topPanel);
-
-            // double-click to load
-            grid.CellDoubleClick += (s, e) =>
-            {
-                if (e.RowIndex >= 0)
-                {
-                    grid.ClearSelection();
-                    grid.Rows[e.RowIndex].Selected = true;
-                    btnLoad.PerformClick();
-                }
-            };
-
-            // Search behaviour: perform DB-side filtered fetch for maintainability and performance
-            btnSearchBox.Click += (s, e) =>
-            {
-                string q = txtSearch.Text?.Trim() ?? "";
-                if (string.IsNullOrEmpty(q))
-                {
-                    PopulateGrid(_configService.GetConfigurations(null));
-                }
-                else
-                {
-                    PopulateGrid(_configService.GetConfigurations(q));
-                }
-            };
-
-            btnClearBox.Click += (s, e) =>
-            {
-                txtSearch.Text = "";
-                PopulateGrid(_configService.GetConfigurations(null));
-            };
-
-            txtSearch.KeyDown += (s, e) =>
-            {
-                if (e.KeyCode == Keys.Enter)
-                {
-                    btnSearchBox.PerformClick();
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                }
-            };
-
-            dlg.ShowDialog(this);
+                _loadedConfigName = null;
+            }
         }
 
         private void LoadConfigurationIntoGrid(TestConfiguration config)
@@ -1041,13 +909,13 @@ namespace AssemblyLineTester.Views.Pages
                     FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
                     ToAddress = toAddr,
                     ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
-                    // Resolve TestType from DB to avoid attaching transient entities to EF context
                     TestTypeId = tt?.Id ?? 0,
+                    TestType = null,
                     ExpectedValue = expected,
                     LowerLimit = lower,
                     UpperLimit = upper,
                     Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "" // raw unit as entered - SaveConfig() converts this to base unit
+                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "" 
                 });
             }
 

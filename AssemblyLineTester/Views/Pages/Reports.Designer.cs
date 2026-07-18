@@ -1032,9 +1032,7 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.AllowUserToOrderColumns = true;
             gridReports.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             gridReports.BackgroundColor = Color.White;
-            gridReports.BorderStyle = BorderStyle.None;
-            gridReports.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            gridReports.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            gridReports.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 250, 252);
             dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -1058,17 +1056,17 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.DefaultCellStyle = dataGridViewCellStyle7;
             gridReports.Dock = DockStyle.Fill;
             gridReports.EnableHeadersVisualStyles = false;
-            gridReports.GridColor = Color.FromArgb(241, 245, 249);
-            gridReports.Location = new Point(0, 32);
-            gridReports.Margin = new Padding(0, 6, 0, 6);
-            gridReports.MinimumSize = new Size(269, 164);
+            gridReports.GridColor = Color.FromArgb(203, 213, 225);
+            gridReports.Location = new Point(0, 39);
+            gridReports.Margin = new Padding(0, 13, 0, 13);
+            gridReports.MinimumSize = new Size(500, 350);
             gridReports.Name = "gridReports";
             gridReports.ReadOnly = true;
             gridReports.RowHeadersVisible = false;
             gridReports.RowHeadersWidth = 82;
             gridReports.RowTemplate.Height = 44;
             gridReports.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridReports.Size = new Size(941, 590);
+            gridReports.Size = new Size(941, 576);
             gridReports.TabIndex = 1;
             // 
             // colNo
@@ -1336,10 +1334,14 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // flpPreviewButtons
             // 
-            flpPreviewButtons.ColumnCount = 3;
-            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            flpPreviewButtons.ColumnCount = 7;
+            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.28F));
+            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.28F));
+            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.28F));
+            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.28F));
+            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.28F));
+            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.28F));
+            flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.28F));
             flpPreviewButtons.Controls.Add(btnExportPDF, 0, 0);
             flpPreviewButtons.Controls.Add(btnExportExcel, 1, 0);
             flpPreviewButtons.Controls.Add(btnPrint, 2, 0);
@@ -1363,7 +1365,7 @@ namespace AssemblyLineTester.Views.Pages
             btnExportPDF.Location = new Point(0, 0);
             btnExportPDF.Margin = new Padding(0, 0, 4, 0);
             btnExportPDF.Name = "btnExportPDF";
-            btnExportPDF.Size = new Size(207, 21);
+            btnExportPDF.Size = new Size(86, 21);
             btnExportPDF.TabIndex = 0;
             btnExportPDF.Text = "Export PDF";
             btnExportPDF.UseVisualStyleBackColor = false;
@@ -1376,10 +1378,10 @@ namespace AssemblyLineTester.Views.Pages
             btnExportExcel.FlatStyle = FlatStyle.Flat;
             btnExportExcel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnExportExcel.ForeColor = Color.FromArgb(40, 167, 69);
-            btnExportExcel.Location = new Point(215, 0);
+            btnExportExcel.Location = new Point(94, 0);
             btnExportExcel.Margin = new Padding(4, 0, 4, 0);
             btnExportExcel.Name = "btnExportExcel";
-            btnExportExcel.Size = new Size(203, 21);
+            btnExportExcel.Size = new Size(82, 21);
             btnExportExcel.TabIndex = 1;
             btnExportExcel.Text = "Export Excel";
             btnExportExcel.UseVisualStyleBackColor = false;
@@ -1392,10 +1394,10 @@ namespace AssemblyLineTester.Views.Pages
             btnPrint.FlatStyle = FlatStyle.Flat;
             btnPrint.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnPrint.ForeColor = Color.Black;
-            btnPrint.Location = new Point(426, 0);
+            btnPrint.Location = new Point(184, 0);
             btnPrint.Margin = new Padding(4, 0, 0, 0);
             btnPrint.Name = "btnPrint";
-            btnPrint.Size = new Size(209, 21);
+            btnPrint.Size = new Size(86, 21);
             btnPrint.TabIndex = 2;
             btnPrint.Text = "Print";
             btnPrint.UseVisualStyleBackColor = false;

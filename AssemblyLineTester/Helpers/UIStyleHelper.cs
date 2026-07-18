@@ -67,10 +67,11 @@ namespace AssemblyLineTester.Helpers
             typeof(DataGridView).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                                 ?.SetValue(grid, true);
 
-            grid.BorderStyle = BorderStyle.None;
+            grid.BorderStyle = BorderStyle.FixedSingle;
             grid.BackgroundColor = Color.White;
-            grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            grid.GridColor = Color.FromArgb(241, 245, 249);
+            grid.CellBorderStyle = DataGridViewCellBorderStyle.Single;
+            grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            grid.GridColor = Color.FromArgb(203, 213, 225);
             grid.RowHeadersVisible = false;
             grid.AllowUserToAddRows = false;
             grid.AllowUserToDeleteRows = false;
@@ -152,10 +153,12 @@ namespace AssemblyLineTester.Helpers
                 }
             };
 
+            Size lastSize = Size.Empty;
             card.Resize += (s, e) =>
             {
-                if (card.Width > 0 && card.Height > 0)
+                if (card.Width > 0 && card.Height > 0 && card.Size != lastSize)
                 {
+                    lastSize = card.Size;
                     var oldRegion = card.Region;
                     card.Region = new Region(GetRoundedPath(new Rectangle(0, 0, card.Width, card.Height), radius));
                     oldRegion?.Dispose();
@@ -165,6 +168,7 @@ namespace AssemblyLineTester.Helpers
 
             if (card.Width > 0 && card.Height > 0)
             {
+                lastSize = card.Size;
                 card.Region = new Region(GetRoundedPath(new Rectangle(0, 0, card.Width, card.Height), radius));
             }
         }
@@ -227,10 +231,12 @@ namespace AssemblyLineTester.Helpers
                 );
             };
 
+            Size lastSize = Size.Empty;
             btn.Resize += (s, e) =>
             {
-                if (btn.Width > 0 && btn.Height > 0)
+                if (btn.Width > 0 && btn.Height > 0 && btn.Size != lastSize)
                 {
+                    lastSize = btn.Size;
                     var oldRegion = btn.Region;
                     btn.Region = new Region(GetRoundedPath(new Rectangle(0, 0, btn.Width, btn.Height), radius));
                     oldRegion?.Dispose();
@@ -240,12 +246,20 @@ namespace AssemblyLineTester.Helpers
 
             if (btn.Width > 0 && btn.Height > 0)
             {
+                lastSize = btn.Size;
                 btn.Region = new Region(GetRoundedPath(new Rectangle(0, 0, btn.Width, btn.Height), radius));
             }
         }
 
         public static void SetupBadgeRoundedEdges(Label badge, int radius)
         {
+            if (badge == null) return;
+            if (badge.Tag is string tag && tag.Contains("STYLED_BADGE")) return;
+            badge.Tag = (badge.Tag?.ToString() ?? "") + " STYLED_BADGE";
+
+            typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                           ?.SetValue(badge, true);
+
             badge.Paint += (s, e) =>
             {
                 if (s is not Control ctrl) return;
@@ -261,11 +275,11 @@ namespace AssemblyLineTester.Helpers
                     e.Graphics.FillRectangle(parentBrush, 0, 0, badge.Width, badge.Height);
                 }
 
-                var rect = new Rectangle(0, 0, badge.Width - 1, badge.Height - 1);
-                using var path = GetRoundedPath(rect, radius);
-                using (var badgeBrush = new SolidBrush(badge.BackColor))
+                var rectOuter = new Rectangle(0, 0, badge.Width, badge.Height);
+                using var pathOuter = GetRoundedPath(rectOuter, radius);
+                using (var brush = new SolidBrush(badge.BackColor))
                 {
-                    e.Graphics.FillPath(badgeBrush, path);
+                    e.Graphics.FillPath(brush, pathOuter);
                 }
 
                 TextRenderer.DrawText(
@@ -278,10 +292,12 @@ namespace AssemblyLineTester.Helpers
                 );
             };
 
+            Size lastSize = Size.Empty;
             badge.Resize += (s, e) =>
             {
-                if (badge.Width > 0 && badge.Height > 0)
+                if (badge.Width > 0 && badge.Height > 0 && badge.Size != lastSize)
                 {
+                    lastSize = badge.Size;
                     var oldRegion = badge.Region;
                     badge.Region = new Region(GetRoundedPath(new Rectangle(0, 0, badge.Width, badge.Height), radius));
                     oldRegion?.Dispose();
@@ -291,6 +307,7 @@ namespace AssemblyLineTester.Helpers
 
             if (badge.Width > 0 && badge.Height > 0)
             {
+                lastSize = badge.Size;
                 badge.Region = new Region(GetRoundedPath(new Rectangle(0, 0, badge.Width, badge.Height), radius));
             }
         }
