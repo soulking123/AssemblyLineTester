@@ -326,6 +326,49 @@ namespace AssemblyLineTester.Views.Pages
             btnPageNext.Click += (s, e) => GoToPage(_currentPage + 1);
             btnPageLast.Click += (s, e) => GoToPage(_totalPages);
 
+            btnPageLast.Click += (s, e) => GoToPage(_totalPages);
+
+            btnExportPDF.Click += (s, e) =>
+            {
+                if (!SessionManager.HasPermission("Action.Reports.Export"))
+                {
+                    MessageBox.Show("You do not have permission to export reports.",
+                        "Access Denied",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                MessageBox.Show("Export PDF belum diimplementasikan.", "Info");
+            };
+
+            btnExportExcel.Click += (s, e) =>
+            {
+                if (!SessionManager.HasPermission("Action.Reports.Export"))
+                {
+                    MessageBox.Show("You do not have permission to export reports.",
+                        "Access Denied",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                MessageBox.Show("Export Excel belum diimplementasikan.", "Info");
+            };
+
+            btnPrint.Click += (s, e) =>
+            {
+                if (!SessionManager.HasPermission("Action.Reports.Export"))
+                {
+                    MessageBox.Show("You do not have permission to export reports.",
+                        "Access Denied",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                MessageBox.Show("Print belum diimplementasikan.", "Info");
+            };
         }
 
         private void ResetFilterControls()

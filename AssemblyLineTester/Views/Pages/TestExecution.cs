@@ -168,6 +168,12 @@ namespace AssemblyLineTester.Views.Pages
 
         private void btnStartTest_Click(object? sender, EventArgs e)
         {
+            if (!SessionManager.HasPermission("Action.TestExecution.Run"))
+            {
+                MessageBox.Show("You do not have permission to start and run test operations.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             // 1. Connect to the instrument
             bool isConnected = _instrument.Connect();
             if (!isConnected)

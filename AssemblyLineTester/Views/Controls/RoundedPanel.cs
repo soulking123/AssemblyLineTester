@@ -23,6 +23,34 @@ namespace AssemblyLineTester.Views.Controls
             }
         }
 
+        private Color borderColor = Color.Transparent;
+        [Category("Appearance")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [DefaultValue(typeof(Color), "Transparent")]
+        public Color BorderColor
+        {
+            get => borderColor;
+            set
+            {
+                borderColor = value;
+                Invalidate();
+            }
+        }
+
+        private float borderSize = 0f;
+        [Category("Appearance")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [DefaultValue(0f)]
+        public float BorderSize
+        {
+            get => borderSize;
+            set
+            {
+                borderSize = value;
+                Invalidate();
+            }
+        }
+
         public RoundedPanel()
         {
             DoubleBuffered = true;
@@ -98,6 +126,15 @@ namespace AssemblyLineTester.Views.Controls
             using (Brush surfaceBrush = new SolidBrush(BackColor))
             {
                 e.Graphics.FillPath(surfaceBrush, pathSurface);
+                
+                if (borderSize > 0 && borderColor != Color.Transparent)
+                {
+                    using (Pen borderPen = new Pen(borderColor, borderSize))
+                    {
+                        borderPen.Alignment = PenAlignment.Inset;
+                        e.Graphics.DrawPath(borderPen, pathSurface);
+                    }
+                }
             }
         }
     }

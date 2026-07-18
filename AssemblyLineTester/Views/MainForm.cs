@@ -42,8 +42,8 @@ namespace AssemblyLineTester.Views
             expandedWidth = splitContainer1.SplitterDistance;
             collapsedWidth = this.LogicalToDeviceUnits(85);
 
-            // Restrict access to User Management sidebar button to Administrators only
-            btnUserManagement.Visible = (SessionManager.CurrentUser?.Role?.Name == "Administrator");
+            // Apply dynamic Role-Based Access Control permissions to sidebar buttons
+            ApplyRolePermissions();
 
             ApplySidebarStyles();
             InitializeUserInfo();
@@ -80,6 +80,21 @@ namespace AssemblyLineTester.Views
             this.Resize += MainForm_Resize;
 
             SetActiveMenu(btnDashboard, GetOrInitPage("btnDashboard"));
+        }
+
+        /// <summary>
+        /// Updates sidebar navigation button visibility based on the active user's role and granular permissions.
+        /// </summary>
+        public void ApplyRolePermissions()
+        {
+            btnDashboard.Visible = SessionManager.HasPermission("Page.Dashboard");
+            btnTestExecution.Visible = SessionManager.HasPermission("Page.TestExecution");
+            btnHarnessDatabase.Visible = SessionManager.HasPermission("Page.HarnessDatabase");
+            btnTestHistory.Visible = SessionManager.HasPermission("Page.TestHistory");
+            btnReports.Visible = SessionManager.HasPermission("Page.Reports");
+            btnSystemLog.Visible = SessionManager.HasPermission("Page.SystemLog");
+            btnSettings.Visible = SessionManager.HasPermission("Page.Settings");
+            btnUserManagement.Visible = SessionManager.HasPermission("Page.UserManagement");
         }
 
         private void EnableDoubleBuffering()
@@ -206,6 +221,22 @@ namespace AssemblyLineTester.Views
 
             UserControl? targetPage = GetOrInitPage(clickedButton.Name);
             SetActiveMenu(clickedButton, targetPage);
+        }
+
+        /// <summary>
+        /// Programmatically navigates to Settings -> Users and Roles permissions tab.
+        /// </summary>
+        public void OpenRolePermissionsSettings()
+        {
+            if (btnSettings != null)
+            {
+                UserControl? targetPage = GetOrInitPage("btnSettings");
+                SetActiveMenu(btnSettings, targetPage);
+                if (pageSettings != null)
+                {
+                    pageSettings.OpenUsersAndRolesTab();
+                }
+            }
         }
 
         private void SetActiveMenu(AssemblyLineTester.Views.Controls.MenuButton activeBtn, UserControl? activePage)

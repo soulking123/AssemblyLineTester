@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace AssemblyLineTester.Models
 {
@@ -9,7 +9,7 @@ namespace AssemblyLineTester.Models
         public int NetConfigId { get; set; }
 
         public int ConfigId { get; set; }                                   
-        public TestConfiguration Configuration { get; set; } = null!;
+        public TestConfiguration? Configuration { get; set; }
         public string NetId { get; set; } = string.Empty;                   // Elec-Control-001
 
         public int SequenceNo { get; set; }                                 // 1,2,3,4,
@@ -21,8 +21,7 @@ namespace AssemblyLineTester.Models
 
         public int ToAddress { get; set; }                                  // 0,1,2,3,4
         public string ToLabel { get; set; } = string.Empty;                 // Y1=01
-
-        public int TestTypeId { get; set; }                                 
+        public int TestTypeId { get; set; }                                 // 
 
         public TestType? TestType { get; set; }
 

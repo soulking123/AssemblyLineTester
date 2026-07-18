@@ -14,6 +14,18 @@ namespace AssemblyLineTester.Views.Pages
         private TableLayoutPanel? tblUcContainer;
         private Label? lblUnderConstructionTitle;
         private SettingsTestParametersPage? testParametersPage;
+        private SettingsUsersAndRolesPage? _usersAndRolesPage;
+
+        /// <summary>
+        /// Programmatically switches directly to the Users & Roles tab.
+        /// </summary>
+        public void OpenUsersAndRolesTab()
+        {
+            if (lblTabUsers != null)
+            {
+                Tab_Click(lblTabUsers, EventArgs.Empty);
+            }
+        }
         private Panel? pnlPageContainer;
         private Label? activeTabLabel;
         private bool isLoaded = false;
@@ -230,12 +242,14 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = true;
                     tblContent.BringToFront();
                     if (testParametersPage != null) testParametersPage.Visible = false;
+                    if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
                 }
                 else if (clickedLabel == lblTabTest)
                 {
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (testParametersPage == null)
                     {
                         testParametersPage = new SettingsTestParametersPage
@@ -249,10 +263,29 @@ namespace AssemblyLineTester.Views.Pages
                     testParametersPage.Visible = true;
                     testParametersPage.BringToFront();
                 }
+                else if (clickedLabel == lblTabUsers)
+                {
+                    tblContent.Visible = false;
+                    if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    if (testParametersPage != null) testParametersPage.Visible = false;
+                    if (_usersAndRolesPage == null)
+                    {
+                        _usersAndRolesPage = new SettingsUsersAndRolesPage
+                        {
+                            Dock = DockStyle.Fill,
+                            Visible = true,
+                            Margin = new Padding(0)
+                        };
+                        pnlPageContainer.Controls.Add(_usersAndRolesPage);
+                    }
+                    _usersAndRolesPage.Visible = true;
+                    _usersAndRolesPage.BringToFront();
+                }
                 else
                 {
                     tblContent.Visible = false;
                     if (testParametersPage != null) testParametersPage.Visible = false;
+                    if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (tblUcContainer != null && lblUnderConstructionTitle != null)
                     {
                         lblUnderConstructionTitle.Text = $"{clickedLabel.Text.Trim()} — Under Construction";
