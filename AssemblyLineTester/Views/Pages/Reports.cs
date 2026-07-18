@@ -26,6 +26,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             InitializeComponent();
             this.Load += Reports_Load;
+            this.VisibleChanged += Reports_VisibleChanged;
         }
 
         private void Reports_Load(object? sender, EventArgs e)
@@ -42,6 +43,18 @@ namespace AssemblyLineTester.Views.Pages
             // No filter applied yet -> show everything.
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
             RenderReportData(_appliedFilter);
+        }
+
+        private void Reports_VisibleChanged(object? sender, EventArgs e)
+        {
+            if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                if (_appliedFilter == null)
+                {
+                    _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
+                }
+                RenderReportData(_appliedFilter);
+            }
         }
 
         private void InitializeCustomStyles()
@@ -127,8 +140,94 @@ namespace AssemblyLineTester.Views.Pages
             btnPageNext.Click += (s, e) => GoToPage(_currentPage + 1);
             btnPageLast.Click += (s, e) => GoToPage(_totalPages);
 
-            btnExportPDF.Click += (s, e) => MessageBox.Show("Export PDF belum diimplementasikan.", "Info");
-            btnExportExcel.Click += (s, e) => MessageBox.Show("Export Excel belum diimplementasikan.", "Info");
+            btnExportPDF.Click += (s, e) =>
+            {
+                if (_selectedReportId is null)
+                {
+                    MessageBox.Show("Please select a report to export.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using var sfd = new SaveFileDialog()
+                {
+                    Filter = "PDF files (*.pdf)|*.pdf",
+                    FileName = $"Report_{DateTime.Now:yyyyMMdd_HHmmss}.pdf",
+                    Title = "Save report as PDF"
+                };
+
+                if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(sfd.FileName))
+                {
+                    try
+                    {
+                        _reportService.GenerateReportPdf(_selectedReportId.Value, sfd.FileName);
+                        MessageBox.Show("PDF exported successfully.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to export PDF:\n{ex.Message}", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            };
+
+            // Allow clicking the Action column to export directly
+            gridReports.CellClick += (s, e) =>
+            {
+                if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridReports.Columns[e.ColumnIndex].Name == "colAction")
+                {
+                    var tag = gridReports.Rows[e.RowIndex].Tag;
+                    if (tag is int rid)
+                    {
+                        using var sfd = new SaveFileDialog()
+                        {
+                            Filter = "PDF files (*.pdf)|*.pdf",
+                            FileName = $"Report_{rid}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf",
+                            Title = "Save report as PDF"
+                        };
+
+                        if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(sfd.FileName))
+                        {
+                            try
+                            {
+                                _reportService.GenerateReportPdf(rid, sfd.FileName);
+                                MessageBox.Show("PDF exported successfully.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Failed to export PDF:\n{ex.Message}", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
+                }
+            };
+            btnExportExcel.Click += (s, e) =>
+            {
+                if (_selectedReportId is null)
+                {
+                    MessageBox.Show("Please select a report to export.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using var sfd = new SaveFileDialog()
+                {
+                    Filter = "Excel files (*.xlsx)|*.xlsx",
+                    FileName = $"Report_{_selectedReportId}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                    Title = "Save report as Excel"
+                };
+
+                if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(sfd.FileName))
+                {
+                    try
+                    {
+                        var exporter = new AssemblyLineTester.Services.ReportExportService();
+                        exporter.ExportReportToExcel(_selectedReportId.Value, sfd.FileName);
+                        MessageBox.Show("Excel exported successfully.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to export Excel:\n{ex.Message}", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            };
             btnPrint.Click += (s, e) => MessageBox.Show("Print belum diimplementasikan.", "Info");
         }
 
