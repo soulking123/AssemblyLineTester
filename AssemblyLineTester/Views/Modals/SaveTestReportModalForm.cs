@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
+using System.Diagnostics; 
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -97,7 +98,7 @@ namespace AssemblyLineTester.Views.Modals
                 txtGenSnVal.Focus();
                 return;
             }
-
+            Debug.WriteLine($"Saving test report for SN: {finalSn}, Operator: {finalOp}");
             try
             {
                 _reportService.SaveLiveTestReport(

@@ -17,7 +17,6 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="PdfSharp" Version="1.50.5147" />
-		<!-- System.Text.Encoding.CodePages removed - not referenced by code. -->
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="WinForms.DataVisualization" Version="1.10.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />

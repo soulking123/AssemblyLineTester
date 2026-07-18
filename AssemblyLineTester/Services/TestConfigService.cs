@@ -50,6 +50,7 @@ namespace AssemblyLineTester.Services
                 }
                 else
                 {
+
                     // Ensure CreatedAt/UpdatedAt are set for new configs
                     config.CreatedAt = DateTime.UtcNow;
                     config.UpdatedAt = DateTime.UtcNow;
@@ -127,6 +128,22 @@ namespace AssemblyLineTester.Services
         {
             return GetConfigurations(null);
         }
+
+        /// <summary>
+        /// Retrieve configurations optionally filtered by config name (case-insensitive)
+        /// and ordered by most-recently updated (or created) first.
+        /// This performs filtering at the database level for efficiency.
+        /// </summary>
+        //public List<TestConfiguration> GetConfigurations(string? configNameFilter)
+        //{
+        //    using var db = new AppDbContext();
+        //    var q = db.TestConfigurations
+        //        .Include(c => c.Nets)
+        //        .ThenInclude(n => n.TestType)
+        //        .OrderByDescending(c => c.CreatedAt)
+        //        .ToList();
+        //    return GetConfigurations(null);
+        //}
 
         /// <summary>
         /// Retrieve configurations optionally filtered by config name (case-insensitive)

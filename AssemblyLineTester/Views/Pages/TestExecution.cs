@@ -1,3 +1,4 @@
+using AssemblyLineTester.Data;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using System;
@@ -8,6 +9,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -15,8 +17,11 @@ namespace AssemblyLineTester.Views.Pages
     {
         private readonly InstrumentService _instrument = new();
         private List<LiveTestDetailRowDto> _loadedRows = new();
+        private readonly TestConfigService _configService = new TestConfigService();
         private string _customTestText = string.Empty;
         private double _continuityResistance ;
+
+        private string? _loadedConfigName = null;
 
 
         public TestExecution()
@@ -35,24 +40,24 @@ namespace AssemblyLineTester.Views.Pages
 
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                try
+                var configService = new TestConfigService();
+                var activeConfig = configService.GetActiveConfig();
+                if (activeConfig != null)
                 {
-                    var configService = new TestConfigService();
-                    var activeConfig = configService.GetActiveConfig();
-                    if (activeConfig != null)
+
+                    _customTestText = configService.ConvertToProgramText(activeConfig);
+                    lblPageHeader.Text = $"TEST EXECUTION - {activeConfig.ConfigName}";
+                    var resNet = activeConfig.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
+                    if (resNet != null && resNet.UpperLimit.HasValue)
                     {
-                        _customTestText = configService.ConvertToProgramText(activeConfig);
-                        var resNet = activeConfig.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
-                        if (resNet != null && resNet.UpperLimit.HasValue)
-                        {
-                            _continuityResistance = resNet.UpperLimit.Value;
-                        }
-                        Debug.WriteLine($"Loaded active config on startup: {activeConfig.ConfigName}");
+                        _continuityResistance = resNet.UpperLimit.Value;
                     }
+                    Debug.WriteLine($"Loaded active config on startup: {activeConfig.ConfigName}");
                 }
-                catch (Exception ex)
+                else
                 {
-                    Debug.WriteLine($"Error loading active config on startup: {ex.Message}");
+                    lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
+                    
                 }
             }
         }
@@ -68,6 +73,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbProductType.Items.AddRange(new object[] { "AC", "DC", "Hybrid" });
             cmbProductType.SelectedIndex = 0;
 
+            cmbArea.Items.Clear();
             cmbArea.Items.Clear();
             cmbArea.Items.AddRange(new object[] { "Engine Control", "Cabin Interior", "Chassis", "Dashboard" });
             cmbArea.SelectedIndex = 0;
@@ -166,27 +172,158 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+
+        //private void ShowEditConfigsDialog()
+        //{
+        //    var configs = _configService.GetAllConfigurations();
+
+        //    using Form dlg = new()
+        //    {
+        //        Text = "Edit Config",
+        //        Width = 900,
+        //        Height = 520,
+        //        StartPosition = FormStartPosition.CenterParent,
+        //        FormBorderStyle = FormBorderStyle.Sizable
+        //    };
+
+        //    var grid = new DataGridView()
+        //    {
+        //        Dock = DockStyle.Fill,
+        //        ReadOnly = true,
+        //        SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+        //        AllowUserToAddRows = false,
+        //        AllowUserToDeleteRows = false,
+        //        AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+        //    };
+
+        //    grid.Columns.Add("ConfigName", "Config Name");
+        //    grid.Columns.Add("ProductModel", "Product Model");
+        //    grid.Columns.Add("CreatedAt", "Created At");
+        //    grid.Columns.Add("UpdatedAt", "Updated At");
+        //    grid.Columns.Add("IsActive", "Active");
+        //    grid.Columns.Add("NetCount", "Nets");
+
+        //    foreach (var c in configs)
+        //    {
+        //        int idx = grid.Rows.Add(c.ConfigName, c.ProductModel, c.CreatedAt.ToString("g"), c.UpdatedAt?.ToString("g") ?? "-", c.IsActive ? "Yes" : "No", c.Nets?.Count ?? 0);
+        //        grid.Rows[idx].Tag = c.ConfigName;
+        //    }
+
+        //    var btnPanel = new Panel() { Dock = DockStyle.Bottom, Height = 56 };
+        //    var btnLoad = new Button() { Text = "Load", Width = 100, Height = 36, Left = 8, Top = 10 };
+        //    var btnDelete = new Button() { Text = "Delete", Width = 100, Height = 36, Left = 116, Top = 10 };
+        //    var btnClose = new Button() { Text = "Close", Width = 100, Height = 36, Left = 224, Top = 10 };
+
+        //    btnLoad.Click += (s, e) =>
+        //    {
+        //        if (grid.SelectedRows.Count == 0)
+        //        {
+        //            MessageBox.Show("Please select a configuration to load.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        //            return;
+        //        }
+
+        //        string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
+        //        var cfg = _configService.GetConfigurationByName(name);
+        //        if (cfg == null)
+        //        {
+        //            MessageBox.Show("Selected configuration could not be loaded (it may have been deleted).", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            return;
+        //        }
+
+        //        LoadConfigurationIntoGrid(cfg);
+        //        dlg.Close();
+        //    };
+
+
+
+        //    btnDelete.Click += (s, e) =>
+        //    {
+        //        if (grid.SelectedRows.Count == 0)
+        //        {
+        //            MessageBox.Show("Please select a configuration to delete.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        //            return;
+        //        }
+
+        //        string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
+        //        if (MessageBox.Show($"Delete configuration '{name}'? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+        //            return;
+
+        //        try
+        //        {
+        //            bool ok = _configService.DeleteConfiguration(name);
+        //            if (ok)
+        //            {
+        //                // remove row and refresh
+        //                grid.Rows.Remove(grid.SelectedRows[0]);
+        //                MessageBox.Show("Configuration deleted.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                // if the deleted config was loaded in the editor, clear loaded state
+        //                if (string.Equals(_loadedConfigName, name, StringComparison.OrdinalIgnoreCase))
+        //                {
+        //                    _loadedConfigName = null;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                MessageBox.Show("Failed to delete configuration.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            MessageBox.Show($"Error deleting configuration:\n{ex.Message}", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //        }
+        //    };
+
+        //    btnClose.Click += (s, e) => dlg.Close();
+
+        //    btnPanel.Controls.Add(btnLoad);
+        //    btnPanel.Controls.Add(btnDelete);
+        //    btnPanel.Controls.Add(btnClose);
+
+        //    dlg.Controls.Add(grid);
+        //    dlg.Controls.Add(btnPanel);
+
+        //    // double-click to load
+        //    grid.CellDoubleClick += (s, e) =>
+        //    {
+        //        if (e.RowIndex >= 0)
+        //        {
+        //            grid.ClearSelection();
+        //            grid.Rows[e.RowIndex].Selected = true;
+        //            btnLoad.PerformClick();
+        //        }
+        //    };
+
+        //    dlg.ShowDialog(this);
+        //}
+
+
+
         private void btnStartTest_Click(object? sender, EventArgs e)
         {
-            if (!SessionManager.HasPermission("Action.TestExecution.Run"))
-            {
-                MessageBox.Show("You do not have permission to start and run test operations.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            // 1. Temporarily pause background monitoring to prevent concurrent socket calls
+            //InstrumentService.StopMonitoring();
+            //_configService.GetConfigurationByName(name);
 
-            // 1. Connect to the instrument
-            bool isConnected = _instrument.Connect();
-            if (!isConnected)
+            try
             {
-                MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+                // 2. Connect to the instrument
+                bool isConnected = _instrument.Connect();
+                if (!isConnected)
+                {
+                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
             string loadedProgramName = "1107061216";
             string testProgramDetails = string.Empty;
 
             // 2. Load the test program
-            Debug.WriteLine(_customTestText);
+            //Debug.WriteLine(_customTestText);.
+
+             var activeConfig = _configService.GetActiveConfig();
+             _customTestText = _configService.ConvertToProgramText(activeConfig);
+
+                Debug.WriteLine("Convert to Tesxt");
             if (!string.IsNullOrEmpty(_customTestText))
             {
                 // Upload custom test text without saving to database (using empty string as testName)
@@ -205,6 +342,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             else
             {
+                Debug.WriteLine("error syntax");
                 // Fallback: Fetch/load the specified test program "1107061216"
                 //var getTestResult = _instrument.GetTestProgram("1107061216");
                 //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
@@ -213,10 +351,12 @@ namespace AssemblyLineTester.Views.Pages
                 //}
             }
 
-            Debug.WriteLine($"Active Program: {loadedProgramName}");
-            _ = testProgramDetails;
+            //Debug.WriteLine($"Active Program: {loadedProgramName}");
+            //_ = testProgramDetails;
 
-            // 3. Run Single Test (Hipot=false, Shorts=true)
+            //3.Run Single Test(Hipot= false, Shorts= true)
+
+            Debug.WriteLine("Run Test");
             var testResult = _instrument.RunSingleTest(false, true);
             if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
             {
@@ -226,6 +366,8 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             // 4. Get Measured Values
+
+            Debug.WriteLine("Get Measured Value");
             var measuredValuesResult = _instrument.GetMeasuredValues();
             _loadedRows = new List<LiveTestDetailRowDto>();
 
@@ -239,13 +381,31 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         var status = LiveTestStatus.Pending;
                         string statusStr = measurement.Status1?.Trim() ?? "";
-                        if (measurement.Value1 <= _continuityResistance )
+                        if (measurement.Value1 <= _continuityResistance)
                         {
                             status = LiveTestStatus.Pass;
                         }
-                        else 
+                        else
                         {
                             status = LiveTestStatus.Fail;
+                        }
+
+                        string rowTestType = "WIRE";
+                        if (!string.IsNullOrEmpty(measurement.Instruction))
+                        {
+                            string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
+                            if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
+                            {
+                                rowTestType = "WIRE";
+                            }
+                            else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
+                            {
+                                rowTestType = "OPEN";
+                            }
+                            else
+                            {
+                                rowTestType = measurement.Instruction;
+                            }
                         }
 
                         _loadedRows.Add(new LiveTestDetailRowDto
@@ -253,7 +413,7 @@ namespace AssemblyLineTester.Views.Pages
                             StepNo = step++,
                             NetId = measurement.Instruction ?? "",
                             TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
-                            TestType = measurement.Instruction ?? "",
+                            TestType = rowTestType,
                             MeasuredValue = Math.Round(measurement.Value1, 3),
                             Status = status
                         });
@@ -261,22 +421,31 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            // 5. Repopulate the GridView to show the results
+            //5.Repopulate the GridView to show the results
+
+            Debug.WriteLine("Update Grid");
+
             PopulateLiveDetailsGrid(_loadedRows);
 
-            // 6. Disconnect after test run
-            _instrument.Disconnect();
-
             // 7. Show summary MessageBox
-            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed 
-                ? "PASSED" 
+            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
+                ? "PASSED"
                 : "FAILED or INCOMPLETE";
 
+            }
+            finally
+            {
+                // 3. Resume background monitoring
+                //InstrumentService.StartMonitoring();
+            }
         }
 
         private void PopulateLiveDetailsGrid(List<LiveTestDetailRowDto> rows)
         {
+
             gridLiveDetails.Rows.Clear();
+
+            Debug.WriteLine("Update Grid 2");
 
             foreach (var row in rows)
             {
@@ -288,7 +457,12 @@ namespace AssemblyLineTester.Views.Pages
                     row.Status.ToString().ToUpperInvariant());
 
                 ApplyStatusStyle(gridLiveDetails.Rows[idx], row.Status);
+
+                Debug.WriteLine(row.MeasuredValue);
             }
+
+            Debug.WriteLine("Update Grid 3");
+            gridLiveDetails.Refresh();
         }
 
         private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)

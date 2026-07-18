@@ -1,7 +1,9 @@
+
 using AssemblyLineTester.Services;
 using FontAwesome.Sharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -113,6 +115,18 @@ namespace AssemblyLineTester.Views.Pages
         public SettingsTestParametersPage()
         {
             InitializeComponent();
+            EnableDoubleBuffering();
+            SetupEvents();
+            if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
+            {
+                LoadTestTypeColumnItems();
+                LoadDefaultData();
+                UpdateTotalNetCount();
+                UpdateDiagramSize();
+            }
+        }
+        private void EnableDoubleBuffering()
+        {
             // Enable double buffering improvements from dashboard branch for smoother rendering
             try
             {
@@ -356,6 +370,83 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnExport_Click(object? sender, EventArgs e)
         {
+            //double conectionResistance = double.Parse(txtConnectionResistance.Text.Trim());
+            //double insulationResistance = double.Parse(txtInsulationResistance.Text.Trim());
+
+            //var config = new TestConfiguration
+            //{
+            //    ConfigName = txtConfigName.Text.Trim(),
+            //    ProductModel = txtProductModel.Text.Trim(),
+            //    ConfigCode = "CFG-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+            //    CreatedBy = SessionManager.CurrentUser?.Username ?? "System",
+            //    CreatedAt = DateTime.UtcNow,
+            //    IsActive = true,
+            //    Nets = new List<TestConfigNet>()
+            //};
+
+            //foreach (DataGridViewRow row in gridConfig.Rows)
+            //{
+            //    if (row.IsNewRow) continue;
+
+            //    // Safely parse double values
+            //    double? ParseDouble(string cellName)
+            //    {
+            //        var val = row.Cells[cellName].Value?.ToString();
+            //        return double.TryParse(val, out double res) ? res : (double?)null;
+            //    }
+
+            //    // Safely parse integer values
+            //    int ParseInt(string cellName)
+            //    {
+            //        var val = row.Cells[cellName].Value?.ToString();
+            //        return int.TryParse(val, out int res) ? res : 0;
+            //    }
+
+            //    var net = new TestConfigNet
+            //    {
+            //        SequenceNo = ParseInt("colNo"),
+            //        NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
+            //        HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
+
+            //        FromAddress = ParseInt("colFromAddr"),
+            //        FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
+
+            //        ToAddress = ParseInt("colToAddr"),
+            //        ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
+
+            //        MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
+            //        LowerLimit = ParseDouble("colLowerLimit"),
+            //        UpperLimit = ParseDouble("colUpperLimit"),
+
+            //        // Dynamic TestTypeId mapping
+            //        TestTypeId = (row.Cells["colTestType"].Value?.ToString() == "Resistance") ? 11 : 15 // 11 = RESISTOR, 15 = WIRE
+            //    };
+
+            //    config.Nets.Add(net);
+            //}
+            //try
+            //{
+            //    _configService.SaveConfig(config);
+            //    _configService.SetActiveConfig(config.ConfigName);
+
+            //    var options = new System.Text.Json.JsonSerializerOptions
+            //    {
+            //        WriteIndented = true,
+            //        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            //    };
+            //    // 2. Convert the object to a JSON string
+            //    string json = System.Text.Json.JsonSerializer.Serialize(config, options);
+            //    // 3. Print the JSON string to your Debug console
+            //    Debug.WriteLine($"Instance:\n{json}");
+
+            //    string customText = _configService.ConvertToProgramText(config);
+            //    Debug.WriteLine($"Program Text:\n{customText}");
+
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show($"Error saving configuration: {ex.Message}", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
             // Save current grid configuration to the database.
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
             if (config == null)
@@ -525,7 +616,7 @@ namespace AssemblyLineTester.Views.Pages
 
             string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
 
-            if (testType.Equals("Continuity", StringComparison.OrdinalIgnoreCase))
+            if (testType.Equals("Wire", StringComparison.OrdinalIgnoreCase))
             {
                 row.Cells["colExpectedValue"].Value = "0";
                 row.Cells["colExpectedValue"].ReadOnly = true;

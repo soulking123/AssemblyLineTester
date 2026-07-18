@@ -27,6 +27,7 @@ namespace AssemblyLineTester.Views.Pages
             SetupGridColumns();
             SetupStepsGridColumns();
             SetupEvents();
+            this.VisibleChanged += TestHistory_VisibleChanged;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -37,6 +38,14 @@ namespace AssemblyLineTester.Views.Pages
                 if (cmbPageSize.Items.Count > 0) cmbPageSize.SelectedIndex = 0;
 
                 ResetFilterControls();
+                LoadHistoryData();
+            }
+        }
+
+        private void TestHistory_VisibleChanged(object? sender, EventArgs e)
+        {
+            if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
                 LoadHistoryData();
             }
         }

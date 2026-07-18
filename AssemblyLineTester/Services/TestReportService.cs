@@ -697,7 +697,7 @@ namespace AssemblyLineTester.Services
                         FromPin = string.IsNullOrEmpty(r.TestPoint) ? "-" : r.TestPoint,
                         ToPin = "-",
                         Color = "Red",
-                        TestTypeName = string.IsNullOrEmpty(r.TestType) ? "WIRE" : r.TestType,
+                        TestTypeName = "WIRE",
                         MeasuredValue = r.MeasuredValue,
                         LowerLimit = null,
                         UpperLimit = null,
@@ -710,7 +710,7 @@ namespace AssemblyLineTester.Services
                     {
                         ReportId = report.ReportId,
                         StepNo = stepCount++,
-                        TestTypeName = string.IsNullOrEmpty(r.TestType) ? "WIRE" : r.TestType,
+                        TestTypeName = "WIRE",
                         Result = rowPass,
                         DurationSeconds = 2
                     });

@@ -38,6 +38,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             InitializeComponent();
             this.Load += Reports_Load;
+            this.VisibleChanged += Reports_VisibleChanged;
             SetupEditableReportFields();
         }
 
@@ -53,6 +54,18 @@ namespace AssemblyLineTester.Views.Pages
             // No filter applied yet -> show everything.
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
             RenderReportData(_appliedFilter);
+        }
+
+        private void Reports_VisibleChanged(object? sender, EventArgs e)
+        {
+            if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                if (_appliedFilter == null)
+                {
+                    _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
+                }
+                RenderReportData(_appliedFilter);
+            }
         }
 
         private void InitializeCustomStyles()
