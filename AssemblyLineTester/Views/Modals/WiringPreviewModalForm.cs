@@ -6,6 +6,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using FontAwesome.Sharp;
+using AssemblyLineTester.Services;
+using AssemblyLineTester.Models;
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -51,7 +53,7 @@ namespace AssemblyLineTester.Views.Modals
         {
             InitializeComponent();
             SetupEvents();
-            LoadDefaultWiringData();
+            LoadActiveWiringData();
             UpdateDiagramSize();
             ApplyFormRounding();
         }
@@ -172,6 +174,39 @@ namespace AssemblyLineTester.Views.Modals
                 else if (pt.Y <= border) m.Result = (IntPtr)HTTOP;
                 else if (pt.Y >= ClientSize.Height - border) m.Result = (IntPtr)HTBOTTOM;
             }
+        }
+
+        private void LoadActiveWiringData()
+        {
+            netDefinitions.Clear();
+            highlightedRows.Clear();
+
+            var configService = new TestConfigService();
+            var activeConfig = configService.GetActiveConfig();
+
+            if (activeConfig != null && activeConfig.Nets != null && activeConfig.Nets.Count > 0)
+            {
+                int i = 0;
+                foreach (var net in activeConfig.Nets)
+                {
+                    netDefinitions.Add(new WiringNetInfo
+                    {
+                        RowIndex = i++,
+                        FromLabel = net.FromLabel ?? "",
+                        FromAddr = net.FromAddress.ToString(),
+                        ToLabel = net.ToLabel ?? "",
+                        ToAddr = net.ToAddress.ToString()
+                    });
+                }
+            }
+            else
+            {
+                // Fallback to sample data if no active config
+                LoadDefaultWiringData();
+            }
+
+            UpdateDiagramSize();
+            picPreview.Invalidate();
         }
 
         private void LoadDefaultWiringData()
