@@ -18,6 +18,7 @@ namespace AssemblyLineTester.Views
         private HarnessDatabase? pageHarnessDb;
         private Dashboard? pageDashboard;
         private TestExecution? pageTestExecution;
+        private ManualTestingPage? pageManualTesting;
         private Reports? pageReports;
         private Settings? pageSettings;
         private UserManagement? pageUserManagement;
@@ -89,6 +90,7 @@ namespace AssemblyLineTester.Views
         {
             btnDashboard.Visible = SessionManager.HasPermission("Page.Dashboard");
             btnTestExecution.Visible = SessionManager.HasPermission("Page.TestExecution");
+            btnManualTesting.Visible = SessionManager.HasPermission("Page.TestExecution");
             btnHarnessDatabase.Visible = SessionManager.HasPermission("Page.HarnessDatabase");
             btnTestHistory.Visible = SessionManager.HasPermission("Page.TestHistory");
             btnReports.Visible = SessionManager.HasPermission("Page.Reports");
@@ -147,7 +149,7 @@ namespace AssemblyLineTester.Views
 
         private void ApplySidebarStyles()
         {
-            AssemblyLineTester.Views.Controls.MenuButton[] menuButtons = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
+            AssemblyLineTester.Views.Controls.MenuButton[] menuButtons = [btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
             Font menuFont = new("Segoe UI", 11F, FontStyle.Regular);
 
             foreach (var btn in menuButtons)
@@ -169,6 +171,10 @@ namespace AssemblyLineTester.Views
             btnTestExecution.EmojiIcon = "⚡";
             btnTestExecution.FullText = "  ⚡    Test Execution";
             btnTestExecution.Text = "  ⚡    Test Execution";
+
+            btnManualTesting.EmojiIcon = "🕹️";
+            btnManualTesting.FullText = "  🕹️    Manual Testing";
+            btnManualTesting.Text = "  🕹️    Manual Testing";
 
             btnHarnessDatabase.EmojiIcon = "🗄️";
             btnHarnessDatabase.FullText = "  🗄️    Harness Database";
@@ -205,6 +211,7 @@ namespace AssemblyLineTester.Views
             {
                 "btnDashboard" => pageDashboard ??= new Dashboard(),
                 "btnTestExecution" => pageTestExecution ??= new TestExecution(),
+                "btnManualTesting" => pageManualTesting ??= new ManualTestingPage(),
                 "btnHarnessDatabase" => pageHarnessDb ??= new HarnessDatabase(),
                 "btnTestHistory" => pageTestHistory ??= new TestHistory(),
                 "btnReports" => pageReports ??= new Reports(),
@@ -247,7 +254,7 @@ namespace AssemblyLineTester.Views
                 lblArrow.Text = "⌄";
             }
 
-            AssemblyLineTester.Views.Controls.MenuButton[] allMenus = [btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
+            AssemblyLineTester.Views.Controls.MenuButton[] allMenus = [btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
 
             foreach (var btn in allMenus)
             {
@@ -298,7 +305,7 @@ namespace AssemblyLineTester.Views
 
         private void BtnToggleSidebar_Click(object sender, EventArgs e)
         {
-            var menuButtons = new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
+            var menuButtons = new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
 
             SendMessage(this.Handle, 0x000B, 0, 0); // WM_SETREDRAW false
             this.SuspendLayout();
@@ -471,6 +478,16 @@ namespace AssemblyLineTester.Views
             if (btnMaximize != null)
             {
                 btnMaximize.Text = (this.WindowState == FormWindowState.Maximized) ? "❐" : "□";
+            }
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return cp;
             }
         }
 

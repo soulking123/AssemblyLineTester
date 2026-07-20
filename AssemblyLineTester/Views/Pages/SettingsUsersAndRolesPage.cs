@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Models;
@@ -38,10 +39,10 @@ namespace AssemblyLineTester.Views.Pages
             flpRolesList.Resize += (s, ev) => AdjustCardSizes();
         }
 
-        private void SettingsUsersAndRolesPage_Load(object? sender, EventArgs e)
+        private async void SettingsUsersAndRolesPage_Load(object? sender, EventArgs e)
         {
             AdjustCardSizes();
-            LoadRolesAndPermissions();
+            await LoadRolesAndPermissionsAsync();
         }
 
         private void AdjustCardSizes()
@@ -56,11 +57,11 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void LoadRolesAndPermissions()
+        private async Task LoadRolesAndPermissionsAsync()
         {
             try
             {
-                _roles = _permissionService.GetAllRoles();
+                _roles = await _permissionService.GetAllRolesAsync();
                 _roleButtons.Clear();
 
                 // Map existing designer buttons to roles using their Tag property
@@ -81,7 +82,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (_roles.Count > 0)
                 {
-                    SelectRole(_roles[0].Id);
+                    await SelectRoleAsync(_roles[0].Id);
                 }
             }
             catch (Exception ex)
@@ -90,13 +91,13 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void BtnRole_Click(object? sender, EventArgs e)
+        private async void BtnRole_Click(object? sender, EventArgs e)
         {
             if (sender is AssemblyLineTester.Views.Controls.RoundedButton btn && btn.Tag != null)
             {
                 if (int.TryParse(btn.Tag.ToString(), out int roleId))
                 {
-                    SelectRole(roleId);
+                    await SelectRoleAsync(roleId);
                 }
             }
         }
@@ -112,7 +113,7 @@ namespace AssemblyLineTester.Views.Pages
             _ => "👤"
         };
 
-        private void SelectRole(int roleId)
+        private async Task SelectRoleAsync(int roleId)
         {
             _selectedRoleId = roleId;
             var role = _roles.FirstOrDefault(r => r.Id == roleId);
@@ -143,7 +144,7 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             // Load permissions for this role
-            var permissions = _permissionService.GetPermissionsByRoleId(roleId);
+            var permissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId);
             bool isAdmin = (role.Name == "Administrator");
 
             // Group permissions by category
@@ -187,7 +188,7 @@ namespace AssemblyLineTester.Views.Pages
             // Outer cards removed; FlowLayoutPanel auto-scrolls its contents directly
         }
 
-        private void BtnSaveChanges_Click(object? sender, EventArgs e)
+        private async void BtnSaveChanges_Click(object? sender, EventArgs e)
         {
             try
             {
@@ -204,7 +205,7 @@ namespace AssemblyLineTester.Views.Pages
                     "Permissions Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 // Re-render
-                SelectRole(_selectedRoleId);
+                await SelectRoleAsync(_selectedRoleId);
             }
             catch (Exception ex)
             {
@@ -212,7 +213,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void BtnResetDefaults_Click(object? sender, EventArgs e)
+        private async void BtnResetDefaults_Click(object? sender, EventArgs e)
         {
             var role = _roles.FirstOrDefault(r => r.Id == _selectedRoleId);
             var confirm = MessageBox.Show(
@@ -226,7 +227,7 @@ namespace AssemblyLineTester.Views.Pages
                 try
                 {
                     _permissionService.ResetRoleToDefaults(_selectedRoleId);
-                    SelectRole(_selectedRoleId);
+                    await SelectRoleAsync(_selectedRoleId);
                     MessageBox.Show($"Permissions for '{role?.Name}' have been reset to defaults.", "Reset Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
