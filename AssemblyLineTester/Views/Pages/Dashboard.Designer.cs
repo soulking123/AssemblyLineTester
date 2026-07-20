@@ -154,15 +154,13 @@ namespace AssemblyLineTester.Views.Pages
             tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblMain.Controls.Add(tblTop, 0, 0);
             tblMain.Controls.Add(tblMiddle, 0, 1);
-            tblMain.Controls.Add(tblBottom, 0, 2);
             tblMain.Dock = DockStyle.Fill;
             tblMain.Location = new Point(0, 0);
             tblMain.Margin = new Padding(0);
             tblMain.Name = "tblMain";
-            tblMain.RowCount = 3;
+            tblMain.RowCount = 2;
             tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 65F));
-            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 15F));
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 80F));
             tblMain.Size = new Size(2600, 1440);
             tblMain.TabIndex = 0;
             // 
@@ -189,7 +187,6 @@ namespace AssemblyLineTester.Views.Pages
             // cardTester
             // 
             cardTester.BackColor = Color.White;
-            cardTester.BorderStyle = BorderStyle.None;
             cardTester.Controls.Add(lblTesterSub);
             cardTester.Controls.Add(lblTesterStatus);
             cardTester.Controls.Add(lblTesterTitle);
@@ -240,7 +237,6 @@ namespace AssemblyLineTester.Views.Pages
             // cardMachine
             // 
             cardMachine.BackColor = Color.White;
-            cardMachine.BorderStyle = BorderStyle.None;
             cardMachine.Controls.Add(lblMachineSub);
             cardMachine.Controls.Add(lblMachineStatus);
             cardMachine.Controls.Add(lblMachineTitle);
@@ -291,7 +287,6 @@ namespace AssemblyLineTester.Views.Pages
             // cardDatabase
             // 
             cardDatabase.BackColor = Color.White;
-            cardDatabase.BorderStyle = BorderStyle.None;
             cardDatabase.Controls.Add(lblDatabaseSub);
             cardDatabase.Controls.Add(lblDatabaseStatus);
             cardDatabase.Controls.Add(lblDatabaseTitle);
@@ -342,7 +337,6 @@ namespace AssemblyLineTester.Views.Pages
             // cardActiveProg
             // 
             cardActiveProg.BackColor = Color.White;
-            cardActiveProg.BorderStyle = BorderStyle.None;
             cardActiveProg.Controls.Add(btnChangeProg);
             cardActiveProg.Controls.Add(picHarness);
             cardActiveProg.Controls.Add(lblProgDetails);
@@ -375,7 +369,6 @@ namespace AssemblyLineTester.Views.Pages
             // 
             picHarness.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             picHarness.BackColor = Color.FromArgb(248, 250, 252);
-            picHarness.BorderStyle = BorderStyle.None;
             picHarness.Location = new Point(592, 24);
             picHarness.Margin = new Padding(5);
             picHarness.Name = "picHarness";
@@ -410,24 +403,29 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblMiddle
             // 
-            tblMiddle.ColumnCount = 2;
+            tblMiddle.ColumnCount = 3;
             tblMiddle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 67.28827F));
-            tblMiddle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32.71173F));
+            tblMiddle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18.06173F));
+            tblMiddle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.65F));
             tblMiddle.Controls.Add(cardSummary, 0, 0);
+            tblMiddle.SetRowSpan(cardSummary, 2);
             tblMiddle.Controls.Add(cardHistory, 1, 0);
+            tblMiddle.SetColumnSpan(cardHistory, 2);
+            tblMiddle.Controls.Add(cardOperatingTime, 1, 1);
+            tblMiddle.Controls.Add(cardMaintenance, 2, 1);
             tblMiddle.Dock = DockStyle.Fill;
             tblMiddle.Location = new Point(13, 301);
             tblMiddle.Margin = new Padding(13);
             tblMiddle.Name = "tblMiddle";
-            tblMiddle.RowCount = 1;
-            tblMiddle.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblMiddle.RowCount = 2;
+            tblMiddle.RowStyles.Add(new RowStyle(SizeType.Percent, 81.25F));
+            tblMiddle.RowStyles.Add(new RowStyle(SizeType.Percent, 18.75F));
             tblMiddle.Size = new Size(2574, 910);
             tblMiddle.TabIndex = 1;
             // 
             // cardSummary
             // 
             cardSummary.BackColor = Color.White;
-            cardSummary.BorderStyle = BorderStyle.None;
             cardSummary.Controls.Add(tblCharts);
             cardSummary.Controls.Add(tblKpi);
             cardSummary.Controls.Add(cmbTimeRange);
@@ -501,7 +499,6 @@ namespace AssemblyLineTester.Views.Pages
             // kpiTotalTested
             // 
             kpiTotalTested.BackColor = Color.FromArgb(248, 250, 252);
-            kpiTotalTested.BorderStyle = BorderStyle.None;
             kpiTotalTested.Controls.Add(lblTotalTestedVal);
             kpiTotalTested.Controls.Add(lblTotalTestedTitle);
             kpiTotalTested.Dock = DockStyle.Fill;
@@ -538,7 +535,6 @@ namespace AssemblyLineTester.Views.Pages
             // kpiPass
             // 
             kpiPass.BackColor = Color.FromArgb(248, 250, 252);
-            kpiPass.BorderStyle = BorderStyle.None;
             kpiPass.Controls.Add(lblPassVal);
             kpiPass.Controls.Add(lblPassTitle);
             kpiPass.Dock = DockStyle.Fill;
@@ -575,7 +571,6 @@ namespace AssemblyLineTester.Views.Pages
             // kpiFail
             // 
             kpiFail.BackColor = Color.FromArgb(248, 250, 252);
-            kpiFail.BorderStyle = BorderStyle.None;
             kpiFail.Controls.Add(lblFailVal);
             kpiFail.Controls.Add(lblFailTitle);
             kpiFail.Dock = DockStyle.Fill;
@@ -612,7 +607,6 @@ namespace AssemblyLineTester.Views.Pages
             // kpiYield
             // 
             kpiYield.BackColor = Color.FromArgb(248, 250, 252);
-            kpiYield.BorderStyle = BorderStyle.None;
             kpiYield.Controls.Add(lblYieldVal);
             kpiYield.Controls.Add(lblYieldTitle);
             kpiYield.Dock = DockStyle.Fill;
@@ -649,7 +643,6 @@ namespace AssemblyLineTester.Views.Pages
             // kpiCycleTime
             // 
             kpiCycleTime.BackColor = Color.FromArgb(248, 250, 252);
-            kpiCycleTime.BorderStyle = BorderStyle.None;
             kpiCycleTime.Controls.Add(lblCycleTimeVal);
             kpiCycleTime.Controls.Add(lblCycleTimeTitle);
             kpiCycleTime.Dock = DockStyle.Fill;
@@ -711,7 +704,6 @@ namespace AssemblyLineTester.Views.Pages
             // cardHistory
             // 
             cardHistory.BackColor = Color.White;
-            cardHistory.BorderStyle = BorderStyle.None;
             cardHistory.Controls.Add(gridRecent);
             cardHistory.Controls.Add(lnkViewAll);
             cardHistory.Controls.Add(lblRecentTitle);
@@ -780,12 +772,10 @@ namespace AssemblyLineTester.Views.Pages
             // tblBottom
             // 
             tblBottom.ColumnCount = 3;
-            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
-            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22.5F));
-            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22.5F));
-            tblBottom.Controls.Add(cardModules, 0, 0);
-            tblBottom.Controls.Add(cardOperatingTime, 1, 0);
-            tblBottom.Controls.Add(cardMaintenance, 2, 0);
+            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 67.29F));
+            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18.06F));
+            tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.65F));
+            // tblBottom content moved
             tblBottom.Dock = DockStyle.Fill;
             tblBottom.Location = new Point(13, 1237);
             tblBottom.Margin = new Padding(13);
@@ -798,7 +788,6 @@ namespace AssemblyLineTester.Views.Pages
             // cardModules
             // 
             cardModules.BackColor = Color.White;
-            cardModules.BorderStyle = BorderStyle.None;
             cardModules.Controls.Add(tblModules);
             cardModules.Controls.Add(lblModulesTitle);
             cardModules.Dock = DockStyle.Fill;
@@ -806,7 +795,7 @@ namespace AssemblyLineTester.Views.Pages
             cardModules.Margin = new Padding(10);
             cardModules.Name = "cardModules";
             cardModules.Padding = new Padding(24);
-            cardModules.Size = new Size(1395, 170);
+            cardModules.Size = new Size(1712, 170);
             cardModules.TabIndex = 0;
             // 
             // tblModules
@@ -826,7 +815,7 @@ namespace AssemblyLineTester.Views.Pages
             tblModules.Name = "tblModules";
             tblModules.RowCount = 1;
             tblModules.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblModules.Size = new Size(1344, 83);
+            tblModules.Size = new Size(1661, 83);
             tblModules.TabIndex = 1;
             // 
             // pnlMod1
@@ -837,7 +826,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlMod1.Location = new Point(5, 5);
             pnlMod1.Margin = new Padding(5);
             pnlMod1.Name = "pnlMod1";
-            pnlMod1.Size = new Size(326, 73);
+            pnlMod1.Size = new Size(405, 73);
             pnlMod1.TabIndex = 0;
             // 
             // lblMod1Status
@@ -869,10 +858,10 @@ namespace AssemblyLineTester.Views.Pages
             pnlMod2.Controls.Add(lblMod2Status);
             pnlMod2.Controls.Add(lblMod2Title);
             pnlMod2.Dock = DockStyle.Fill;
-            pnlMod2.Location = new Point(341, 5);
+            pnlMod2.Location = new Point(420, 5);
             pnlMod2.Margin = new Padding(5);
             pnlMod2.Name = "pnlMod2";
-            pnlMod2.Size = new Size(326, 73);
+            pnlMod2.Size = new Size(405, 73);
             pnlMod2.TabIndex = 1;
             // 
             // lblMod2Status
@@ -904,10 +893,10 @@ namespace AssemblyLineTester.Views.Pages
             pnlMod3.Controls.Add(lblMod3Status);
             pnlMod3.Controls.Add(lblMod3Title);
             pnlMod3.Dock = DockStyle.Fill;
-            pnlMod3.Location = new Point(677, 5);
+            pnlMod3.Location = new Point(835, 5);
             pnlMod3.Margin = new Padding(5);
             pnlMod3.Name = "pnlMod3";
-            pnlMod3.Size = new Size(326, 73);
+            pnlMod3.Size = new Size(405, 73);
             pnlMod3.TabIndex = 2;
             // 
             // lblMod3Status
@@ -939,10 +928,10 @@ namespace AssemblyLineTester.Views.Pages
             pnlMod4.Controls.Add(lblMod4Status);
             pnlMod4.Controls.Add(lblMod4Title);
             pnlMod4.Dock = DockStyle.Fill;
-            pnlMod4.Location = new Point(1013, 5);
+            pnlMod4.Location = new Point(1250, 5);
             pnlMod4.Margin = new Padding(5);
             pnlMod4.Name = "pnlMod4";
-            pnlMod4.Size = new Size(326, 73);
+            pnlMod4.Size = new Size(406, 73);
             pnlMod4.TabIndex = 3;
             // 
             // lblMod4Status
@@ -984,16 +973,15 @@ namespace AssemblyLineTester.Views.Pages
             // cardOperatingTime
             // 
             cardOperatingTime.BackColor = Color.White;
-            cardOperatingTime.BorderStyle = BorderStyle.None;
             cardOperatingTime.Controls.Add(lblOpTimeSub);
             cardOperatingTime.Controls.Add(lblOpTimeVal);
             cardOperatingTime.Controls.Add(lblOpTimeTitle);
             cardOperatingTime.Dock = DockStyle.Fill;
-            cardOperatingTime.Location = new Point(1425, 10);
+            cardOperatingTime.Location = new Point(1742, 10);
             cardOperatingTime.Margin = new Padding(10);
             cardOperatingTime.Name = "cardOperatingTime";
             cardOperatingTime.Padding = new Padding(24);
-            cardOperatingTime.Size = new Size(559, 170);
+            cardOperatingTime.Size = new Size(444, 170);
             cardOperatingTime.TabIndex = 1;
             // 
             // lblOpTimeSub
@@ -1035,16 +1023,15 @@ namespace AssemblyLineTester.Views.Pages
             // cardMaintenance
             // 
             cardMaintenance.BackColor = Color.White;
-            cardMaintenance.BorderStyle = BorderStyle.None;
             cardMaintenance.Controls.Add(lblMaintSub);
             cardMaintenance.Controls.Add(lblMaintVal);
             cardMaintenance.Controls.Add(lblMaintTitle);
             cardMaintenance.Dock = DockStyle.Fill;
-            cardMaintenance.Location = new Point(2004, 10);
+            cardMaintenance.Location = new Point(2206, 10);
             cardMaintenance.Margin = new Padding(10);
             cardMaintenance.Name = "cardMaintenance";
             cardMaintenance.Padding = new Padding(24);
-            cardMaintenance.Size = new Size(560, 170);
+            cardMaintenance.Size = new Size(358, 170);
             cardMaintenance.TabIndex = 2;
             // 
             // lblMaintSub

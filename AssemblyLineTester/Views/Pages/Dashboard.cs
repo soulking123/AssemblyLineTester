@@ -398,7 +398,6 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardActiveProg, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardSummary, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardHistory, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardModules, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardOperatingTime, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardMaintenance, 12, Color.FromArgb(34, 40, 49), 2.5f);
 
@@ -408,10 +407,6 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiYield, 8, Color.FromArgb(148, 163, 184), 1.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiCycleTime, 8, Color.FromArgb(148, 163, 184), 1.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(picHarness, 8, Color.FromArgb(148, 163, 184), 1.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod1, 8, Color.FromArgb(148, 163, 184), 1.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod2, 8, Color.FromArgb(148, 163, 184), 1.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod3, 8, Color.FromArgb(148, 163, 184), 1.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod4, 8, Color.FromArgb(148, 163, 184), 1.5f);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnChangeProg, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             btnChangeProg.Click += BtnChangeProg_Click;

@@ -52,22 +52,22 @@ namespace AssemblyLineTester.Views.Modals
                 // Style Grid Columns
                 if (gridConfigs.Columns["ConfigId"] != null)
                 {
-                    gridConfigs.Columns["ConfigId"].Visible = false;
+                    gridConfigs.Columns["ConfigId"]!.Visible = false;
                 }
 
                 if (gridConfigs.Columns["ConfigName"] != null)
                 {
-                    gridConfigs.Columns["ConfigName"].HeaderText = "Configuration Name";
+                    gridConfigs.Columns["ConfigName"]!.HeaderText = "Configuration Name";
                 }
 
                 if (gridConfigs.Columns["ProductModel"] != null)
                 {
-                    gridConfigs.Columns["ProductModel"].HeaderText = "Product Model";
+                    gridConfigs.Columns["ProductModel"]!.HeaderText = "Product Model";
                 }
 
                 if (gridConfigs.Columns["LastUpdate"] != null)
                 {
-                    gridConfigs.Columns["LastUpdate"].HeaderText = "Last Update";
+                    gridConfigs.Columns["LastUpdate"]!.HeaderText = "Last Update";
                 }
 
                 // Grid Styling to match modern look

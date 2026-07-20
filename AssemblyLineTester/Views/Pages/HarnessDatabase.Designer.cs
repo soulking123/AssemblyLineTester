@@ -731,7 +731,6 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblTestSummaryContent
             // 
-            tblTestSummaryContent.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             tblTestSummaryContent.ColumnCount = 2;
             tblTestSummaryContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
             tblTestSummaryContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
@@ -1020,6 +1019,79 @@ namespace AssemblyLineTester.Views.Pages
             panelFilters.PerformLayout();
             ResumeLayout(false);
 
+        }
+
+        public void InitializeCustomStyles()
+        {
+            if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                dataGridViewList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.None;
+                dataGridViewList.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+
+                foreach (System.Windows.Forms.DataGridViewColumn col in dataGridViewList.Columns)
+                {
+                    col.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+                }
+
+                if (dataGridViewList.Columns["colNo"] is System.Windows.Forms.DataGridViewColumn colNo)
+                {
+                    colNo.MinimumWidth = 50;
+                    colNo.Width = 60;
+                }
+                if (dataGridViewList.Columns["colProductModel"] is System.Windows.Forms.DataGridViewColumn colProductModel)
+                {
+                    colProductModel.MinimumWidth = 95;
+                    colProductModel.Width = 115;
+                }
+                if (dataGridViewList.Columns["colProductType"] is System.Windows.Forms.DataGridViewColumn colProductType)
+                {
+                    colProductType.MinimumWidth = 90;
+                    colProductType.Width = 105;
+                }
+                if (dataGridViewList.Columns["colArea"] is System.Windows.Forms.DataGridViewColumn colArea)
+                {
+                    colArea.MinimumWidth = 170;
+                    colArea.Width = 220;
+                }
+                if (dataGridViewList.Columns["colPartNumber"] is System.Windows.Forms.DataGridViewColumn colPartNumber)
+                {
+                    colPartNumber.MinimumWidth = 145;
+                    colPartNumber.Width = 175;
+                }
+                if (dataGridViewList.Columns["colEcnNo"] is System.Windows.Forms.DataGridViewColumn colEcnNo)
+                {
+                    colEcnNo.MinimumWidth = 105;
+                    colEcnNo.Width = 125;
+                }
+                if (dataGridViewList.Columns["colRevision"] is System.Windows.Forms.DataGridViewColumn colRevision)
+                {
+                    colRevision.MinimumWidth = 55;
+                    colRevision.Width = 65;
+                }
+                if (dataGridViewList.Columns["colStatus"] is System.Windows.Forms.DataGridViewColumn colStatus)
+                {
+                    colStatus.MinimumWidth = 90;
+                    colStatus.Width = 115;
+                }
+                if (dataGridViewList.Columns["colLastUpdated"] is System.Windows.Forms.DataGridViewColumn colLastUpdated)
+                {
+                    colLastUpdated.MinimumWidth = 140;
+                    colLastUpdated.Width = 160;
+                    colLastUpdated.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+                }
+            }
+
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(panelFilters, 12, System.Drawing.Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(tableLayoutPanelLeft, 12, System.Drawing.Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(panelDetailCard, 12, System.Drawing.Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(panelCardSpecs, 12, System.Drawing.Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(panelCardTestSummary, 12, System.Drawing.Color.FromArgb(34, 40, 49), 2.5f);
+
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSearch, 10, System.Drawing.Color.FromArgb(250, 204, 21), System.Drawing.Color.FromArgb(254, 216, 53), System.Drawing.Color.FromArgb(234, 186, 10), System.Drawing.Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, System.Drawing.Color.FromArgb(241, 245, 249), System.Drawing.Color.FromArgb(226, 232, 240), System.Drawing.Color.FromArgb(203, 213, 225), System.Drawing.Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddHarness, 10, System.Drawing.Color.FromArgb(250, 204, 21), System.Drawing.Color.FromArgb(254, 216, 53), System.Drawing.Color.FromArgb(234, 186, 10), System.Drawing.Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnEdit, 10, System.Drawing.Color.FromArgb(248, 250, 252), System.Drawing.Color.FromArgb(241, 245, 249), System.Drawing.Color.FromArgb(226, 232, 240), System.Drawing.Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnDelete, 10, System.Drawing.Color.FromArgb(254, 242, 242), System.Drawing.Color.FromArgb(254, 226, 226), System.Drawing.Color.FromArgb(254, 202, 202), System.Drawing.Color.Transparent);
         }
 
         #endregion

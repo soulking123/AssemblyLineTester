@@ -19,93 +19,29 @@ namespace AssemblyLineTester.Views.Pages
         private readonly List<string[]> _allHarnesses = [];
         private Label? _lblPageInfo;
 
+        // Carousel States
+        private int _currentHarnessSlide = 0;
+        private int _currentMachineSlide = 0;
+        private const int TotalSlides = 3;
+
         public HarnessDatabase()
         {
             InitializeComponent();
             AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(dataGridViewList);
             picHarnessImage.Paint += PicHarnessImage_Paint;
             picMachineArea.Paint += PicMachineArea_Paint;
+            picHarnessImage.MouseClick += PicHarnessImage_MouseClick;
+            picMachineArea.MouseClick += PicMachineArea_MouseClick;
             dataGridViewList.CellPainting += DataGridViewList_CellPainting;
-            this.Load += HarnessDatabase_Load;
+            
+            InitializeCustomStyles();
             SetupEvents();
             SetupPagination();
             PopulateDummyData();
         }
 
-        private void HarnessDatabase_Load(object? sender, EventArgs e)
-        {
-            if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
-            {
-                dataGridViewList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-                dataGridViewList.ScrollBars = ScrollBars.Both;
-
-                foreach (DataGridViewColumn col in dataGridViewList.Columns)
-                {
-                    col.Resizable = DataGridViewTriState.True;
-                }
-
-                if (dataGridViewList.Columns["colNo"] is DataGridViewColumn colNo)
-                {
-                    colNo.MinimumWidth = 50;
-                    colNo.Width = 60;
-                }
-                if (dataGridViewList.Columns["colProductModel"] is DataGridViewColumn colProductModel)
-                {
-                    colProductModel.MinimumWidth = 95;
-                    colProductModel.Width = 115;
-                }
-                if (dataGridViewList.Columns["colProductType"] is DataGridViewColumn colProductType)
-                {
-                    colProductType.MinimumWidth = 90;
-                    colProductType.Width = 105;
-                }
-                if (dataGridViewList.Columns["colArea"] is DataGridViewColumn colArea)
-                {
-                    colArea.MinimumWidth = 170;
-                    colArea.Width = 220;
-                }
-                if (dataGridViewList.Columns["colPartNumber"] is DataGridViewColumn colPartNumber)
-                {
-                    colPartNumber.MinimumWidth = 145;
-                    colPartNumber.Width = 175;
-                }
-                if (dataGridViewList.Columns["colEcnNo"] is DataGridViewColumn colEcnNo)
-                {
-                    colEcnNo.MinimumWidth = 105;
-                    colEcnNo.Width = 125;
-                }
-                if (dataGridViewList.Columns["colRevision"] is DataGridViewColumn colRevision)
-                {
-                    colRevision.MinimumWidth = 55;
-                    colRevision.Width = 65;
-                }
-                if (dataGridViewList.Columns["colStatus"] is DataGridViewColumn colStatus)
-                {
-                    colStatus.MinimumWidth = 90;
-                    colStatus.Width = 115;
-                }
-                if (dataGridViewList.Columns["colLastUpdated"] is DataGridViewColumn colLastUpdated)
-                {
-                    colLastUpdated.MinimumWidth = 140;
-                    colLastUpdated.Width = 160;
-                    colLastUpdated.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                }
-            }
-        }
-
         private void SetupEvents()
         {
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(panelFilters, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(tableLayoutPanelLeft, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(panelDetailCard, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(panelCardSpecs, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(panelCardTestSummary, 12, Color.FromArgb(34, 40, 49), 2.5f);
-
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSearch, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddHarness, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnEdit, 10, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnDelete, 10, Color.FromArgb(254, 242, 242), Color.FromArgb(254, 226, 226), Color.FromArgb(254, 202, 202), Color.Transparent);
 
             btnAddHarness.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Add Harness functionality under construction.", "Info"); };
             btnEdit.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Edit Harness functionality under construction.", "Info"); };
@@ -536,20 +472,47 @@ namespace AssemblyLineTester.Views.Pages
             using var penBorder = new Pen(Color.FromArgb(148, 163, 184), 1.5f);
             e.Graphics.DrawRectangle(penBorder, 0, 0, rect.Width - 1, rect.Height - 1);
 
-            using var penCable = new Pen(Color.FromArgb(51, 65, 85), 4);
-            using var penBranch1 = new Pen(Color.FromArgb(239, 68, 68), 3);
-            using var penBranch2 = new Pen(Color.FromArgb(59, 130, 246), 3);
-
             int cy = rect.Height / 2;
-            e.Graphics.DrawLine(penCable, rect.Width * 0.15f, cy, rect.Width * 0.7f, cy);
-            e.Graphics.DrawLine(penBranch1, rect.Width * 0.45f, cy, rect.Width * 0.65f, cy - (rect.Height * 0.25f));
-            e.Graphics.DrawLine(penBranch2, rect.Width * 0.55f, cy, rect.Width * 0.75f, cy + (rect.Height * 0.25f));
-
             using var brushConn = new SolidBrush(Color.FromArgb(30, 41, 59));
-            e.Graphics.FillRectangle(brushConn, rect.Width * 0.1f, cy - 12, 36, 24);
-            e.Graphics.FillRectangle(brushConn, rect.Width * 0.68f, cy - 10, 28, 20);
-            e.Graphics.FillRectangle(brushConn, rect.Width * 0.63f, cy - (rect.Height * 0.25f) - 10, 24, 18);
-            e.Graphics.FillRectangle(brushConn, rect.Width * 0.73f, cy + (rect.Height * 0.25f) - 8, 24, 18);
+
+            if (_currentHarnessSlide == 0)
+            {
+                using var penCable = new Pen(Color.FromArgb(51, 65, 85), 4);
+                using var penBranch1 = new Pen(Color.FromArgb(239, 68, 68), 3);
+                using var penBranch2 = new Pen(Color.FromArgb(59, 130, 246), 3);
+
+                e.Graphics.DrawLine(penCable, rect.Width * 0.15f, cy, rect.Width * 0.7f, cy);
+                e.Graphics.DrawLine(penBranch1, rect.Width * 0.45f, cy, rect.Width * 0.65f, cy - (rect.Height * 0.25f));
+                e.Graphics.DrawLine(penBranch2, rect.Width * 0.55f, cy, rect.Width * 0.75f, cy + (rect.Height * 0.25f));
+
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.1f, cy - 12, 36, 24);
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.68f, cy - 10, 28, 20);
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.63f, cy - (rect.Height * 0.25f) - 10, 24, 18);
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.73f, cy + (rect.Height * 0.25f) - 8, 24, 18);
+            }
+            else if (_currentHarnessSlide == 1)
+            {
+                using var penCable = new Pen(Color.FromArgb(51, 65, 85), 4);
+                using var penBranch = new Pen(Color.FromArgb(22, 163, 74), 3);
+
+                e.Graphics.DrawLine(penCable, rect.Width * 0.2f, cy - 50, rect.Width * 0.8f, cy - 50);
+                e.Graphics.DrawLine(penBranch, rect.Width * 0.5f, cy - 50, rect.Width * 0.5f, cy + 80);
+
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.15f, cy - 62, 36, 24);
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.78f, cy - 62, 36, 24);
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.47f, cy + 80, 24, 30);
+            }
+            else
+            {
+                using var penCable = new Pen(Color.FromArgb(51, 65, 85), 4);
+                
+                e.Graphics.DrawLine(penCable, rect.Width * 0.25f, cy, rect.Width * 0.75f, cy);
+                
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.2f, cy - 20, 40, 40);
+                e.Graphics.FillRectangle(brushConn, rect.Width * 0.72f, cy - 20, 40, 40);
+            }
+
+            DrawCarouselUI(e.Graphics, rect, _currentHarnessSlide);
         }
 
         private void PicMachineArea_Paint(object? sender, PaintEventArgs e)
@@ -562,16 +525,111 @@ namespace AssemblyLineTester.Views.Pages
             using var penBorder = new Pen(Color.FromArgb(148, 163, 184), 1.5f);
             e.Graphics.DrawRectangle(penBorder, 0, 0, rect.Width - 1, rect.Height - 1);
 
-            using var penBox = new Pen(Color.FromArgb(148, 163, 184), 2);
-            penBox.DashStyle = DashStyle.Dash;
-            var areaRect = new Rectangle((int)(rect.Width * 0.2f), (int)(rect.Height * 0.2f), (int)(rect.Width * 0.6f), (int)(rect.Height * 0.6f));
-            e.Graphics.DrawRectangle(penBox, areaRect);
-
-            using var brushHighlight = new SolidBrush(Color.FromArgb(60, 250, 204, 21));
-            e.Graphics.FillRectangle(brushHighlight, (int)(rect.Width * 0.4f), (int)(rect.Height * 0.35f), (int)(rect.Width * 0.25f), (int)(rect.Height * 0.3f));
-
+            using var penBox = new Pen(Color.FromArgb(148, 163, 184), 2) { DashStyle = DashStyle.Dash };
             var font = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold;
-            TextRenderer.DrawText(e.Graphics, "ENGINE ROOM - ZONE A2", font, areaRect, Color.FromArgb(71, 85, 105), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+            if (_currentMachineSlide == 0)
+            {
+                var areaRect = new Rectangle((int)(rect.Width * 0.2f), (int)(rect.Height * 0.2f), (int)(rect.Width * 0.6f), (int)(rect.Height * 0.6f));
+                e.Graphics.DrawRectangle(penBox, areaRect);
+
+                using var brushHighlight = new SolidBrush(Color.FromArgb(60, 250, 204, 21));
+                e.Graphics.FillRectangle(brushHighlight, (int)(rect.Width * 0.4f), (int)(rect.Height * 0.35f), (int)(rect.Width * 0.25f), (int)(rect.Height * 0.3f));
+
+                TextRenderer.DrawText(e.Graphics, "ENGINE ROOM - ZONE A2", font, areaRect, Color.FromArgb(71, 85, 105), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+            else if (_currentMachineSlide == 1)
+            {
+                var areaRect = new Rectangle((int)(rect.Width * 0.1f), (int)(rect.Height * 0.1f), (int)(rect.Width * 0.4f), (int)(rect.Height * 0.8f));
+                e.Graphics.DrawRectangle(penBox, areaRect);
+
+                using var brushHighlight = new SolidBrush(Color.FromArgb(60, 59, 130, 246));
+                e.Graphics.FillRectangle(brushHighlight, (int)(rect.Width * 0.15f), (int)(rect.Height * 0.2f), (int)(rect.Width * 0.3f), (int)(rect.Height * 0.2f));
+
+                TextRenderer.DrawText(e.Graphics, "CABIN MAIN CONTROL", font, areaRect, Color.FromArgb(71, 85, 105), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+            else
+            {
+                var areaRect = new Rectangle((int)(rect.Width * 0.5f), (int)(rect.Height * 0.3f), (int)(rect.Width * 0.4f), (int)(rect.Height * 0.4f));
+                e.Graphics.DrawRectangle(penBox, areaRect);
+
+                using var brushHighlight = new SolidBrush(Color.FromArgb(60, 239, 68, 68));
+                e.Graphics.FillRectangle(brushHighlight, (int)(rect.Width * 0.55f), (int)(rect.Height * 0.4f), (int)(rect.Width * 0.3f), (int)(rect.Height * 0.2f));
+
+                TextRenderer.DrawText(e.Graphics, "HYDRAULIC PUMP C", font, areaRect, Color.FromArgb(71, 85, 105), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+
+            DrawCarouselUI(e.Graphics, rect, _currentMachineSlide);
+        }
+
+        private void DrawCarouselUI(Graphics g, Rectangle rect, int currentSlide)
+        {
+            int arrowZoneWidth = 50;
+            using var arrowBgBrush = new SolidBrush(Color.FromArgb(10, 0, 0, 0));
+            g.FillRectangle(arrowBgBrush, 0, 0, arrowZoneWidth, rect.Height);
+            g.FillRectangle(arrowBgBrush, rect.Width - arrowZoneWidth, 0, arrowZoneWidth, rect.Height);
+
+            using var arrowPen = new Pen(Color.FromArgb(100, 116, 139), 3);
+            arrowPen.StartCap = LineCap.Round;
+            arrowPen.EndCap = LineCap.Round;
+            arrowPen.LineJoin = LineJoin.Round;
+
+            int cy = rect.Height / 2;
+            int arrowSize = 12;
+            
+            int leftX = 20;
+            g.DrawLines(arrowPen, [new Point(leftX + arrowSize, cy - arrowSize), new Point(leftX, cy), new Point(leftX + arrowSize, cy + arrowSize)]);
+
+            int rightX = rect.Width - 20 - arrowSize;
+            g.DrawLines(arrowPen, [new Point(rightX, cy - arrowSize), new Point(rightX + arrowSize, cy), new Point(rightX, cy + arrowSize)]);
+
+            int dotSize = 8;
+            int dotSpacing = 8;
+            int totalDotsWidth = (TotalSlides * dotSize) + ((TotalSlides - 1) * dotSpacing);
+            int startX = (rect.Width - totalDotsWidth) / 2;
+            int dotY = rect.Height - 20;
+
+            for (int i = 0; i < TotalSlides; i++)
+            {
+                var dotRect = new Rectangle(startX + (i * (dotSize + dotSpacing)), dotY, dotSize, dotSize);
+                if (i == currentSlide)
+                {
+                    using var activeBrush = new SolidBrush(Color.FromArgb(250, 204, 21));
+                    g.FillEllipse(activeBrush, dotRect);
+                }
+                else
+                {
+                    using var inactiveBrush = new SolidBrush(Color.FromArgb(203, 213, 225));
+                    g.FillEllipse(inactiveBrush, dotRect);
+                }
+            }
+        }
+
+        private void PicHarnessImage_MouseClick(object? sender, MouseEventArgs e)
+        {
+            if (sender is not Control ctrl) return;
+            HandleCarouselClick(e.Location, ctrl.Width, ref _currentHarnessSlide);
+            ctrl.Invalidate();
+        }
+
+        private void PicMachineArea_MouseClick(object? sender, MouseEventArgs e)
+        {
+            if (sender is not Control ctrl) return;
+            HandleCarouselClick(e.Location, ctrl.Width, ref _currentMachineSlide);
+            ctrl.Invalidate();
+        }
+
+        private void HandleCarouselClick(Point clickLocation, int controlWidth, ref int currentSlide)
+        {
+            int arrowZoneWidth = 50;
+            if (clickLocation.X <= arrowZoneWidth)
+            {
+                currentSlide = (currentSlide - 1 + TotalSlides) % TotalSlides;
+            }
+            else if (clickLocation.X >= controlWidth - arrowZoneWidth)
+            {
+                currentSlide = (currentSlide + 1) % TotalSlides;
+            }
         }
     }
 }

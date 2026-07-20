@@ -16,13 +16,11 @@ namespace AssemblyLineTester.Views.Pages
     public partial class TestExecution : UserControl
     {
         private readonly InstrumentService _instrument = new();
-        private List<LiveTestDetailRowDto> _loadedRows = new();
-        private readonly TestConfigService _configService = new TestConfigService();
+        private List<LiveTestDetailRowDto> _loadedRows = [];
+        private readonly TestConfigService _configService = new();
         private string _customTestText = string.Empty;
         private double _continuityResistance ;
         private int? _currentReportId;
-
-        private string? _loadedConfigName = null;
 
 
         public TestExecution()
@@ -67,24 +65,24 @@ namespace AssemblyLineTester.Views.Pages
         private void SetupFilterDropdowns()
         {
             cmbProductModel.Items.Clear();
-            cmbProductModel.Items.AddRange(new object[] { "6060", "6070", "8080", "9090" });
+            cmbProductModel.Items.AddRange(["6060", "6070", "8080", "9090"]);
             cmbProductModel.SelectedIndex = 0;
 
             cmbProductType.Items.Clear();
-            cmbProductType.Items.AddRange(new object[] { "AC", "DC", "Hybrid" });
+            cmbProductType.Items.AddRange(["AC", "DC", "Hybrid"]);
             cmbProductType.SelectedIndex = 0;
 
             cmbArea.Items.Clear();
             cmbArea.Items.Clear();
-            cmbArea.Items.AddRange(new object[] { "Engine Control", "Cabin Interior", "Chassis", "Dashboard" });
+            cmbArea.Items.AddRange(["Engine Control", "Cabin Interior", "Chassis", "Dashboard"]);
             cmbArea.SelectedIndex = 0;
 
             cmbPartNumber.Items.Clear();
-            cmbPartNumber.Items.AddRange(new object[] { "WH-ENG-001", "WH-ENG-002", "WH-CAB-005", "WH-CHS-010" });
+            cmbPartNumber.Items.AddRange(["WH-ENG-001", "WH-ENG-002", "WH-CAB-005", "WH-CHS-010"]);
             cmbPartNumber.SelectedIndex = 0;
 
             cmbEcnNo.Items.Clear();
-            cmbEcnNo.Items.AddRange(new object[] { "123.R001", "123.R002", "124.R000" });
+            cmbEcnNo.Items.AddRange(["123.R001", "123.R002", "124.R000"]);
             cmbEcnNo.SelectedIndex = 0;
         }
 
@@ -142,13 +140,13 @@ namespace AssemblyLineTester.Views.Pages
                             var tempConfig = new Models.TestConfiguration
                             {
                                 ConfigName = System.IO.Path.GetFileNameWithoutExtension(dlg.LoadedFilePath),
-                                Nets = netsDto.Select((d, idx) => new Models.TestConfigNet
+                                Nets = [.. netsDto.Select((d, idx) => new Models.TestConfigNet
                                 {
                                     SequenceNo = idx + 1,
                                     FromAddress = d.FromAddress,
                                     ToAddress = d.ToAddress,
                                     UpperLimit = d.UpperLimit
-                                }).ToList()
+                                })]
                             };
                             _customTestText = configService.ConvertToProgramText(tempConfig);
                             var resNet = tempConfig.Nets.FirstOrDefault(n => n.UpperLimit.HasValue);
@@ -297,7 +295,7 @@ namespace AssemblyLineTester.Views.Pages
         //    dlg.ShowDialog(this);
         //}
 
-        private void btnStartTest_Click(object? sender, EventArgs e)
+        private void BtnStartTest_Click(object? sender, EventArgs e)
         {
             // 1. Temporarily pause background monitoring to prevent concurrent socket calls
             //InstrumentService.StopMonitoring();
@@ -313,13 +311,16 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
 
-                string loadedProgramName = "1107061216";
-                string testProgramDetails = string.Empty;
-
                 // 2. Load the test program
                 //Debug.WriteLine(_customTestText);.
 
                  var activeConfig = _configService.GetActiveConfig();
+                 if (activeConfig == null)
+                 {
+                     MessageBox.Show("No active test configuration found. Please load a test program first.", "Missing Configuration", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                     _instrument.Disconnect();
+                     return;
+                 }
                  _customTestText = _configService.ConvertToProgramText(activeConfig);
 
                 Debug.WriteLine("Convert to Tesxt");
@@ -339,8 +340,6 @@ namespace AssemblyLineTester.Views.Pages
                             MessageBox.Show($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        loadedProgramName = "Custom Wirelist (Active)";
-                        testProgramDetails = _customTestText;
                         _continuityResistance = _instrument.GetContinuityResistance();
 
                         Debug.WriteLine($"Nilai Continuity Resistance saat ini: {_continuityResistance}");
@@ -378,7 +377,7 @@ namespace AssemblyLineTester.Views.Pages
                 // 4. Get Measured Values
                 Debug.WriteLine("Get Measured Value");
                 var measuredValuesResult = _instrument.GetMeasuredValues();
-                _loadedRows = new List<LiveTestDetailRowDto>();
+                _loadedRows = [];
 
                 if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
                 {
@@ -531,21 +530,15 @@ namespace AssemblyLineTester.Views.Pages
             g.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle r = picMachineOverview.ClientRectangle;
 
-            using (LinearGradientBrush brush = new LinearGradientBrush(r, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), 45F))
-            {
-                g.FillRectangle(brush, r);
-            }
+            using LinearGradientBrush brush = new(r, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), 45F);
+            g.FillRectangle(brush, r);
 
-            using (Pen pen = new Pen(Color.FromArgb(148, 163, 184), 2))
-            {
-                g.DrawRectangle(pen, 20, 20, r.Width - 40, r.Height - 40);
-            }
+            using Pen pen = new(Color.FromArgb(148, 163, 184), 2);
+            g.DrawRectangle(pen, 20, 20, r.Width - 40, r.Height - 40);
 
-            using (Brush b = new SolidBrush(Color.FromArgb(71, 85, 105)))
-            {
-                StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString("🖥️ Assembly Test Station #4\n[Online & Active]", AssemblyLineTester.Helpers.UIStyleHelper.Font11Bold, b, r, sf);
-            }
+            using SolidBrush b = new(Color.FromArgb(71, 85, 105));
+            StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            g.DrawString("🖥️ Assembly Test Station #4\n[Online & Active]", AssemblyLineTester.Helpers.UIStyleHelper.Font11Bold, b, r, sf);
         }
 
         private void PicAreaDetail_Paint(object? sender, PaintEventArgs e)
@@ -554,15 +547,11 @@ namespace AssemblyLineTester.Views.Pages
             g.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle r = picAreaDetail.ClientRectangle;
 
-            using (SolidBrush brush = new SolidBrush(Color.FromArgb(248, 250, 252)))
-            {
-                g.FillRectangle(brush, r);
-            }
+            using SolidBrush brush = new(Color.FromArgb(248, 250, 252));
+            g.FillRectangle(brush, r);
 
-            using (Pen borderPen = new Pen(Color.FromArgb(226, 232, 240), 1))
-            {
-                g.DrawRectangle(borderPen, 0, 0, r.Width - 1, r.Height - 1);
-            }
+            using Pen borderPen = new(Color.FromArgb(226, 232, 240), 1);
+            g.DrawRectangle(borderPen, 0, 0, r.Width - 1, r.Height - 1);
 
             string[,] details = new string[,]
             {
@@ -573,30 +562,24 @@ namespace AssemblyLineTester.Views.Pages
                 { "💻 Calibration Ver:", "ALT-ECU-v3.4.1" }
             };
 
-            using (Brush bKey = new SolidBrush(Color.FromArgb(71, 85, 105)))
+            using SolidBrush bKey = new(Color.FromArgb(71, 85, 105));
+            float startY = 30;
+            float rowHeight = (r.Height - 60) / 5f;
+
+            for (int i = 0; i < 5; i++)
             {
-                float startY = 30;
-                float rowHeight = (r.Height - 60) / 5f;
+                string key = details[i, 0];
+                string val = details[i, 1];
 
-                for (int i = 0; i < 5; i++)
+                g.DrawString(key, AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, bKey, 30, startY + (i * rowHeight));
+
+                using SolidBrush bVal = new(i == 2 ? Color.FromArgb(13, 110, 253) : Color.FromArgb(15, 23, 42));
+                g.DrawString(val, AssemblyLineTester.Helpers.UIStyleHelper.Font95Regular, bVal, 220, startY + (i * rowHeight));
+
+                if (i < 4)
                 {
-                    string key = details[i, 0];
-                    string val = details[i, 1];
-
-                    g.DrawString(key, AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, bKey, 30, startY + (i * rowHeight));
-
-                    using (Brush bVal = new SolidBrush(i == 2 ? Color.FromArgb(13, 110, 253) : Color.FromArgb(15, 23, 42)))
-                    {
-                        g.DrawString(val, AssemblyLineTester.Helpers.UIStyleHelper.Font95Regular, bVal, 220, startY + (i * rowHeight));
-                    }
-
-                    if (i < 4)
-                    {
-                        using (Pen sepPen = new Pen(Color.FromArgb(241, 245, 249), 1))
-                        {
-                            g.DrawLine(sepPen, 20, startY + (i * rowHeight) + rowHeight - 5, r.Width - 20, startY + (i * rowHeight) + rowHeight - 5);
-                        }
-                    }
+                    using Pen sepPen = new(Color.FromArgb(241, 245, 249), 1);
+                    g.DrawLine(sepPen, 20, startY + (i * rowHeight) + rowHeight - 5, r.Width - 20, startY + (i * rowHeight) + rowHeight - 5);
                 }
             }
         }
@@ -607,16 +590,12 @@ namespace AssemblyLineTester.Views.Pages
             g.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle r = picHarnessConn.ClientRectangle;
 
-            using (SolidBrush brush = new SolidBrush(Color.FromArgb(241, 245, 249)))
-            {
-                g.FillRectangle(brush, r);
-            }
+            using SolidBrush brush = new(Color.FromArgb(241, 245, 249));
+            g.FillRectangle(brush, r);
 
-            using (Brush b = new SolidBrush(Color.FromArgb(51, 65, 85)))
-            {
-                StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString("🔌 Connector Pinout: 24-Pin ECU Harness\nActive Pin: J1-23 ➔ J3-16", AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold, b, r, sf);
-            }
+            using SolidBrush b = new(Color.FromArgb(51, 65, 85));
+            StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            g.DrawString("🔌 Connector Pinout: 24-Pin ECU Harness\nActive Pin: J1-23 ➔ J3-16", AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold, b, r, sf);
         }
 
         private void SetupEvents()

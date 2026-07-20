@@ -400,7 +400,7 @@ namespace AssemblyLineTester.Views.Pages
             btnStartTest.TabIndex = 0;
             btnStartTest.Text = "▶ START TEST";
             btnStartTest.UseVisualStyleBackColor = false;
-            btnStartTest.Click += btnStartTest_Click;
+            btnStartTest.Click += BtnStartTest_Click;
             // 
             // btnStopTest
             // 
