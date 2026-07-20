@@ -739,5 +739,28 @@ namespace AssemblyLineTester.Services
             if (result) return "PASS";
             return measured.HasValue ? "FAIL" : "OPEN";
         }
+
+        public int SaveDraftLiveTestReport(
+            string productModel, string productType, string area, string ecnNumber, string revision,
+            string partNumber, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr)
+        {
+            string operatorName = SessionManager.CurrentUser?.FullName ?? "Unknown";
+            return SaveLiveTestReport(
+                productModel, productType, area, ecnNumber, revision, partNumber,
+                serialNumber: $"PENDING-{testDateTime:HHmmss}",
+                operatorName: operatorName,
+                testDateTime, rows, overallResultStr);
+        }
+
+        public void UpdateSerialNumber(int reportId, string serialNumber)
+        {
+            using var db = new AppDbContext();
+            var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId)
+                ?? throw new InvalidOperationException($"Report {reportId} not found.");
+
+            if (!string.IsNullOrWhiteSpace(serialNumber)) report.SerialNumber = serialNumber.Trim();
+
+            db.SaveChanges();
+        }
     }
 }

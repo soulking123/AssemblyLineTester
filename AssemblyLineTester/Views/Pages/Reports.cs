@@ -18,8 +18,7 @@ namespace AssemblyLineTester.Views.Pages
         private int _totalPages = 1;
         private int? _selectedReportId;
 
-        // The filter actually being displayed (list/summary/trend). Only changes when
-        // the user clicks "Generate Report" (or "Reset"), NOT on every control change.
+        // The filter actually being displayed (list/summary/trend). Only changes when.
         private ReportFilter _appliedFilter = new();
         private Chart chartTrend = null!;
 
@@ -29,16 +28,12 @@ namespace AssemblyLineTester.Views.Pages
         private Button _btnDeleteReport = null!;
         private Button _btnSaveReportEdit = null!;
         private Button _btnCancelReportEdit = null!;
-        private TextBox _txtEditModel = null!, _txtEditType = null!, _txtEditArea = null!, _txtEditEcn = null!;
-        private TextBox _txtEditRev = null!, _txtEditPart = null!, _txtEditSn = null!, _txtEditOp = null!;
-        private ComboBox _cmbEditResult = null!;
-
+        private TextBox _txtEditSn = null!;
 
         public Reports()
         {
             InitializeComponent();
             this.Load += Reports_Load;
-            this.VisibleChanged += Reports_VisibleChanged;
             SetupEditableReportFields();
         }
 
@@ -54,18 +49,6 @@ namespace AssemblyLineTester.Views.Pages
             // No filter applied yet -> show everything.
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
             RenderReportData(_appliedFilter);
-        }
-
-        private void Reports_VisibleChanged(object? sender, EventArgs e)
-        {
-            if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
-            {
-                if (_appliedFilter == null)
-                {
-                    _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
-                }
-                RenderReportData(_appliedFilter);
-            }
         }
 
         private void InitializeCustomStyles()
@@ -130,26 +113,8 @@ namespace AssemblyLineTester.Views.Pages
                 _btnSaveReportEdit.Visible = false;
                 _btnCancelReportEdit.Visible = false;
 
-                _txtEditModel = CreateOverlayTextBox(lblGenModelVal);
-                _txtEditType = CreateOverlayTextBox(lblGenTypeVal);
-                _txtEditArea = CreateOverlayTextBox(lblGenAreaVal);
-                _txtEditEcn = CreateOverlayTextBox(lblGenEcnVal);
-                _txtEditRev = CreateOverlayTextBox(lblGenRevVal);
-                _txtEditPart = CreateOverlayTextBox(lblGenPartVal);
                 _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
-                _txtEditOp = CreateOverlayTextBox(lblGenOpVal);
-
-                _cmbEditResult = new ComboBox
-                {
-                    Location = lblGenResVal.Location,
-                    Size = lblGenResVal.Size,
-                    DropDownStyle = ComboBoxStyle.DropDownList,
-                    Visible = false,
-                    Font = lblGenResVal.Font
-                };
-                _cmbEditResult.Items.AddRange(new object[] { "PASS", "FAIL" });
-                lblGenResVal.Parent!.Controls.Add(_cmbEditResult);
-                _cmbEditResult.BringToFront();
+                _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
 
                 _btnEditReport.Click += (s, e) => EnterEditMode();
                 _btnSaveReportEdit.Click += (s, e) => SaveReportEdit();
@@ -176,12 +141,9 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch (Exception ex)
             {
-                // If this fires, it tells you EXACTLY which control name doesn't exist -
-                // fix the mismatched name and rebuild.
                 MessageBox.Show($"SetupEditableReportFields failed:\n{ex.Message}", "Setup Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
 
         private static TextBox CreateOverlayTextBox(Label sourceLabel)
         {
@@ -206,17 +168,7 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             _isEditingReport = true;
-
-            _txtEditModel.Text = lblGenModelVal.Text;
-            _txtEditType.Text = lblGenTypeVal.Text;
-            _txtEditArea.Text = lblGenAreaVal.Text;
-            _txtEditEcn.Text = lblGenEcnVal.Text;
-            _txtEditRev.Text = lblGenRevVal.Text;
-            _txtEditPart.Text = lblGenPartVal.Text;
             _txtEditSn.Text = lblGenSnVal.Text;
-            _txtEditOp.Text = lblGenOpVal.Text;
-            _cmbEditResult.SelectedItem = lblGenResVal.Text.ToUpperInvariant() == "PASS" ? "PASS" : "FAIL";
-
             ToggleEditControls(showTextboxes: true);
 
             _btnEditReport.Visible = false;
@@ -243,14 +195,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private void ToggleEditControls(bool showTextboxes)
         {
-            lblGenModelVal.Visible = lblGenTypeVal.Visible = lblGenAreaVal.Visible = !showTextboxes;
-            lblGenEcnVal.Visible = lblGenRevVal.Visible = lblGenPartVal.Visible = !showTextboxes;
-            lblGenSnVal.Visible = lblGenOpVal.Visible = lblGenResVal.Visible = !showTextboxes;
-
-            _txtEditModel.Visible = _txtEditType.Visible = _txtEditArea.Visible = showTextboxes;
-            _txtEditEcn.Visible = _txtEditRev.Visible = _txtEditPart.Visible = showTextboxes;
-            _txtEditSn.Visible = _txtEditOp.Visible = showTextboxes;
-            _cmbEditResult.Visible = showTextboxes;
+            lblGenSnVal.Visible = !showTextboxes;
+            _txtEditSn.Visible = showTextboxes;
         }
 
         private void SaveReportEdit()
@@ -265,17 +211,7 @@ namespace AssemblyLineTester.Views.Pages
 
             try
             {
-                _reportService.UpdateReportHeader(
-                    _selectedReportId.Value,
-                    _txtEditModel.Text.Trim(),
-                    _txtEditType.Text.Trim(),
-                    _txtEditArea.Text.Trim(),
-                    _txtEditEcn.Text.Trim(),
-                    _txtEditRev.Text.Trim(),
-                    _txtEditPart.Text.Trim(),
-                    _txtEditSn.Text.Trim(),
-                    _txtEditOp.Text.Trim(),
-                    _cmbEditResult.SelectedItem?.ToString() ?? "PASS");
+                _reportService.UpdateSerialNumber(_selectedReportId.Value, _txtEditSn.Text.Trim());
 
                 ExitEditMode(refresh: true);
                 LoadReportsGrid(_appliedFilter);
@@ -411,9 +347,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (!SessionManager.HasPermission("Action.Reports.Export"))
                 {
                     MessageBox.Show("You do not have permission to export reports.",
-                        "Access Denied",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                        "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -774,7 +708,6 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPage1, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPage2, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPageLast, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-
         }
     }
 }
