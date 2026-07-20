@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
@@ -19,6 +20,15 @@ namespace AssemblyLineTester.Services
         {
             using var db = new AppDbContext();
             return db.Roles.OrderBy(r => r.Id).ToList();
+        }
+
+        /// <summary>
+        /// Retrieves all roles available in the system asynchronously.
+        /// </summary>
+        public async Task<List<Role>> GetAllRolesAsync()
+        {
+            using var db = new AppDbContext();
+            return await db.Roles.OrderBy(r => r.Id).ToListAsync();
         }
 
         /// <summary>
@@ -58,6 +68,47 @@ namespace AssemblyLineTester.Services
             if (addedNew)
             {
                 db.SaveChanges();
+            }
+
+            return existing;
+        }
+
+        /// <summary>
+        /// Retrieves all assigned and available permissions for a given role ID asynchronously.
+        /// </summary>
+        public async Task<List<RolePermission>> GetPermissionsByRoleIdAsync(int roleId)
+        {
+            using var db = new AppDbContext();
+            var existing = await db.RolePermissions
+                .Where(rp => rp.RoleId == roleId)
+                .OrderBy(rp => rp.Id)
+                .ToListAsync();
+
+            // Ensure all standard keys exist for this role
+            var allDefs = GetStandardPermissionDefinitions();
+            bool addedNew = false;
+
+            foreach (var (key, group, desc) in allDefs)
+            {
+                if (!existing.Any(e => e.PermissionKey == key))
+                {
+                    var newRp = new RolePermission
+                    {
+                        RoleId = roleId,
+                        PermissionKey = key,
+                        PermissionGroup = group,
+                        Description = desc,
+                        IsGranted = (roleId == 1) // Administrator gets true by default
+                    };
+                    db.RolePermissions.Add(newRp);
+                    existing.Add(newRp);
+                    addedNew = true;
+                }
+            }
+
+            if (addedNew)
+            {
+                await db.SaveChangesAsync();
             }
 
             return existing;

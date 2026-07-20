@@ -22,6 +22,7 @@ namespace AssemblyLineTester.Views
             btnToggleSidebar = new Button();
             btnDashboard = new AssemblyLineTester.Views.Controls.MenuButton();
             btnTestExecution = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnManualTesting = new AssemblyLineTester.Views.Controls.MenuButton();
             btnHarnessDatabase = new AssemblyLineTester.Views.Controls.MenuButton();
             btnTestHistory = new AssemblyLineTester.Views.Controls.MenuButton();
             btnReports = new AssemblyLineTester.Views.Controls.MenuButton();
@@ -80,6 +81,7 @@ namespace AssemblyLineTester.Views
             splitContainer1.Panel1.Controls.Add(btnToggleSidebar);
             splitContainer1.Panel1.Controls.Add(btnDashboard);
             splitContainer1.Panel1.Controls.Add(btnTestExecution);
+            splitContainer1.Panel1.Controls.Add(btnManualTesting);
             splitContainer1.Panel1.Controls.Add(btnHarnessDatabase);
             splitContainer1.Panel1.Controls.Add(btnTestHistory);
             splitContainer1.Panel1.Controls.Add(btnReports);
@@ -163,10 +165,23 @@ namespace AssemblyLineTester.Views
             btnTestExecution.UseVisualStyleBackColor = true;
             btnTestExecution.Click += BtnMenu_Click;
             // 
+            // btnManualTesting
+            // 
+            btnManualTesting.Font = new Font("Segoe UI", 11F);
+            btnManualTesting.Location = new Point(32, 352);
+            btnManualTesting.Margin = new Padding(5);
+            btnManualTesting.Name = "btnManualTesting";
+            btnManualTesting.Size = new Size(377, 80);
+            btnManualTesting.TabIndex = 4;
+            btnManualTesting.Text = "        Manual Testing";
+            btnManualTesting.TextAlign = ContentAlignment.MiddleLeft;
+            btnManualTesting.UseVisualStyleBackColor = true;
+            btnManualTesting.Click += BtnMenu_Click;
+            // 
             // btnHarnessDatabase
             // 
             btnHarnessDatabase.Font = new Font("Segoe UI", 11F);
-            btnHarnessDatabase.Location = new Point(32, 352);
+            btnHarnessDatabase.Location = new Point(32, 448);
             btnHarnessDatabase.Margin = new Padding(5);
             btnHarnessDatabase.Name = "btnHarnessDatabase";
             btnHarnessDatabase.Size = new Size(377, 80);
@@ -179,7 +194,7 @@ namespace AssemblyLineTester.Views
             // btnTestHistory
             // 
             btnTestHistory.Font = new Font("Segoe UI", 11F);
-            btnTestHistory.Location = new Point(32, 448);
+            btnTestHistory.Location = new Point(32, 544);
             btnTestHistory.Margin = new Padding(5);
             btnTestHistory.Name = "btnTestHistory";
             btnTestHistory.Size = new Size(377, 80);
@@ -192,7 +207,7 @@ namespace AssemblyLineTester.Views
             // btnReports
             // 
             btnReports.Font = new Font("Segoe UI", 11F);
-            btnReports.Location = new Point(32, 544);
+            btnReports.Location = new Point(32, 640);
             btnReports.Margin = new Padding(5);
             btnReports.Name = "btnReports";
             btnReports.Size = new Size(377, 80);
@@ -205,7 +220,7 @@ namespace AssemblyLineTester.Views
             // btnSystemLog
             // 
             btnSystemLog.Font = new Font("Segoe UI", 11F);
-            btnSystemLog.Location = new Point(32, 640);
+            btnSystemLog.Location = new Point(32, 736);
             btnSystemLog.Margin = new Padding(5);
             btnSystemLog.Name = "btnSystemLog";
             btnSystemLog.Size = new Size(377, 80);
@@ -218,7 +233,7 @@ namespace AssemblyLineTester.Views
             // btnSettings
             // 
             btnSettings.Font = new Font("Segoe UI", 11F);
-            btnSettings.Location = new Point(32, 736);
+            btnSettings.Location = new Point(32, 832);
             btnSettings.Margin = new Padding(5);
             btnSettings.Name = "btnSettings";
             btnSettings.Size = new Size(377, 80);
@@ -231,7 +246,7 @@ namespace AssemblyLineTester.Views
             // btnUserManagement
             // 
             btnUserManagement.Font = new Font("Segoe UI", 11F);
-            btnUserManagement.Location = new Point(32, 832);
+            btnUserManagement.Location = new Point(32, 928);
             btnUserManagement.Margin = new Padding(5);
             btnUserManagement.Name = "btnUserManagement";
             btnUserManagement.Size = new Size(377, 80);
@@ -563,6 +578,7 @@ namespace AssemblyLineTester.Views
         private System.Windows.Forms.PictureBox lblMenu;
         private AssemblyLineTester.Views.Controls.MenuButton btnDashboard;
         private AssemblyLineTester.Views.Controls.MenuButton btnTestExecution;
+        private AssemblyLineTester.Views.Controls.MenuButton btnManualTesting;
         private AssemblyLineTester.Views.Controls.MenuButton btnHarnessDatabase;
         private AssemblyLineTester.Views.Controls.MenuButton btnTestHistory;
         private AssemblyLineTester.Views.Controls.MenuButton btnReports;
