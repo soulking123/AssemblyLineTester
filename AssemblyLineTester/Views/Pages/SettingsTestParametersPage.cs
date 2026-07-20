@@ -180,10 +180,10 @@ namespace AssemblyLineTester.Views.Pages
 
             string[] defaultRows =
             [
-                "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|Resistance|0|5|2.5|±5%|Ω",
-                "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|Resistance|0|5|2.5|±5%|Ω",
-                "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|Capacitance|0|100|50|±10%|μF",
-                "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|Resistance|0|5|2.5|±5%|Ω"
+                "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|WIRE|0|0|0|-|Ω",
+                "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|WIRE|0|0|0|-|Ω",
+                "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|WIRE|0|0|0|-|Ω",
+                "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|WIRE|0|0|0|-|Ω"
             ];
 
             foreach (string rowStr in defaultRows)
@@ -241,10 +241,19 @@ namespace AssemblyLineTester.Views.Pages
         private void BtnAdd_Click(object? sender, EventArgs e)
         {
             if (!CheckEditPermission()) return;
+
             int newIdx = gridConfig.Rows.Count + 1;
-            int idx = gridConfig.Rows.Add(newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply", "0", $"X1-0{newIdx}", "0", $"Y1-0{newIdx}", "Resistance", "0", "5", "2.5", "±5%", "Ω");
+            string defaultUnit = UnitConversionHelper.GetBaseUnit("WIRE"); // "Ω"
+
+            int idx = gridConfig.Rows.Add(
+                newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply",
+                "0", $"X1-0{newIdx}", "0", $"Y1-0{newIdx}",
+                "WIRE", "0", "0", "0", "-", defaultUnit);
+
             UpdateRowUnitDropdown(idx);
+            gridConfig.Rows[idx].Cells["colUnit"].Value = defaultUnit;
             RecalculateRowLimits(gridConfig.Rows[idx]);
+
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
@@ -616,7 +625,7 @@ namespace AssemblyLineTester.Views.Pages
 
             string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
 
-            if (testType.Equals("Wire", StringComparison.OrdinalIgnoreCase))
+            if (ContinuityLikeTypes.Contains(testType, StringComparer.OrdinalIgnoreCase))
             {
                 row.Cells["colExpectedValue"].Value = "0";
                 row.Cells["colExpectedValue"].ReadOnly = true;

@@ -22,6 +22,7 @@ namespace AssemblyLineTester.Views.Modals
         private readonly string _partNumber;
         private readonly string _overallResult;
         private readonly DateTime _testTime;
+        private readonly int? _existingReportId;
 
         public SaveTestReportModalForm(
             string productModel,
@@ -34,7 +35,8 @@ namespace AssemblyLineTester.Views.Modals
             string serialNumber,
             string overallResult,
             DateTime testTime,
-            List<LiveTestDetailRowDto> rows)
+            List<LiveTestDetailRowDto> rows,
+            int? existingReportId = null)
         {
             _productModel = productModel;
             _ecnNumber = ecnNumber;
@@ -45,6 +47,7 @@ namespace AssemblyLineTester.Views.Modals
             _overallResult = overallResult;
             _testTime = testTime;
             _rows = rows;
+            _existingReportId = existingReportId;
 
             InitializeComponent();
 
@@ -53,11 +56,15 @@ namespace AssemblyLineTester.Views.Modals
             lblGenTypeVal.Text = _productType;
             lblGenRevVal.Text = _revision;
             lblGenAreaVal.Text = _area;
-            txtGenOpVal.Text = string.IsNullOrEmpty(operatorName) ? "OP-402" : operatorName;
             lblGenPartVal.Text = _partNumber;
             lblGenTimeVal.Text = _testTime.ToString("dd MMM yyyy HH:mm:ss");
             txtGenSnVal.Text = string.IsNullOrEmpty(serialNumber) ? $"SN-{_testTime:HHmmss}" : serialNumber;
             lblGenResVal.Text = _overallResult;
+            txtGenOpVal.Text = SessionManager.CurrentUser?.FullName ?? "Unknown";
+            txtGenOpVal.ReadOnly = true;
+            txtGenOpVal.Enabled = false;
+            txtGenOpVal.BackColor = Color.FromArgb(241, 245, 249); 
+            txtGenOpVal.TabStop = false;
 
             if (string.Equals(_overallResult, "PASS", StringComparison.OrdinalIgnoreCase))
             {
@@ -89,7 +96,7 @@ namespace AssemblyLineTester.Views.Modals
 
         private void BtnConfirmSave_Click(object? sender, EventArgs e)
         {
-            string finalOp = txtGenOpVal.Text.Trim();
+            string finalOp = SessionManager.CurrentUser?.FullName ?? "Unknown";
             string finalSn = txtGenSnVal.Text.Trim();
 
             if (string.IsNullOrEmpty(finalSn))
@@ -98,22 +105,19 @@ namespace AssemblyLineTester.Views.Modals
                 txtGenSnVal.Focus();
                 return;
             }
-            Debug.WriteLine($"Saving test report for SN: {finalSn}, Operator: {finalOp}");
+
             try
             {
-                _reportService.SaveLiveTestReport(
-                    _productModel,
-                    _productType,
-                    _area,
-                    _ecnNumber,
-                    _revision,
-                    _partNumber,
-                    finalSn,
-                    finalOp,
-                    _testTime,
-                    _rows,
-                    _overallResult
-                );
+                if (_existingReportId.HasValue)
+                {
+                    _reportService.UpdateSerialNumber(_existingReportId.Value, finalSn);
+                }
+                else
+                {
+                    _reportService.SaveLiveTestReport(
+                        _productModel, _productType, _area, _ecnNumber, _revision, _partNumber,
+                        finalSn, finalOp, _testTime, _rows, _overallResult);
+                }
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();

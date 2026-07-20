@@ -20,6 +20,7 @@ namespace AssemblyLineTester.Views.Pages
         private readonly TestConfigService _configService = new TestConfigService();
         private string _customTestText = string.Empty;
         private double _continuityResistance ;
+        private int? _currentReportId;
 
         private string? _loadedConfigName = null;
 
@@ -296,8 +297,6 @@ namespace AssemblyLineTester.Views.Pages
         //    dlg.ShowDialog(this);
         //}
 
-
-
         private void btnStartTest_Click(object? sender, EventArgs e)
         {
             // 1. Temporarily pause background monitoring to prevent concurrent socket calls
@@ -427,8 +426,28 @@ namespace AssemblyLineTester.Views.Pages
 
             PopulateLiveDetailsGrid(_loadedRows);
 
-            // 7. Show summary MessageBox
-            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
+                try
+                {
+                    bool allPass = _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
+                    string overallResult = allPass ? "PASS" : "FAIL";
+
+                    var reportService = new TestReportService();
+                    _currentReportId = reportService.SaveDraftLiveTestReport(
+                        cmbProductModel.Text, cmbProductType.Text, cmbArea.Text, cmbEcnNo.Text, "1.0",
+                        cmbPartNumber.Text, DateTime.Now, _loadedRows, overallResult);
+
+                    Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Failed to auto-save draft report: {ex.Message}");
+                    MessageBox.Show(
+                        "Test completed but failed to record it to Test History automatically.\nYou can still save it manually via Save Report.",
+                        "Auto-Save Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                // 7. Show summary MessageBox
+                string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
                 ? "PASSED"
                 : "FAILED or INCOMPLETE";
 
