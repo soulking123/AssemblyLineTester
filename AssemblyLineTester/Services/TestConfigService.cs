@@ -54,6 +54,8 @@ namespace AssemblyLineTester.Services
                     // Ensure CreatedAt/UpdatedAt are set for new configs
                     config.CreatedAt = DateTime.UtcNow;
                     config.UpdatedAt = DateTime.UtcNow;
+                    //config.CreatedBy = User.
+
                     db.TestConfigurations.Add(config);
                 }
 

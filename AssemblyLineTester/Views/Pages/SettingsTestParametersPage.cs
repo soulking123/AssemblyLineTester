@@ -49,7 +49,6 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                LoadDefaultData();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
                 picPreview.Invalidate();
@@ -120,7 +119,6 @@ namespace AssemblyLineTester.Views.Pages
             if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
             {
                 LoadTestTypeColumnItems();
-                LoadDefaultData();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
             }
@@ -136,15 +134,6 @@ namespace AssemblyLineTester.Views.Pages
                 EnableDoubleBufferingRecursive(this);
             }
             catch { /* ignore */ }
-
-            SetupEvents();
-            if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
-            {
-                LoadTestTypeColumnItems();
-                LoadDefaultData();
-                UpdateTotalNetCount();
-                UpdateDiagramSize();
-            }
         }
 
         private static void EnableDoubleBufferingRecursive(Control control)
@@ -173,33 +162,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void LoadDefaultData()
-        {
-            gridConfig.Rows.Clear();
-            highlightedRows.Clear();
 
-            string[] defaultRows =
-            [
-                "1|Elec-Control-001|Low Voltage Supply|0|X1-01|7|Y1-01|WIRE|0|0|0|-|Ω",
-                "2|Elec-Control-001|ECM-Main Connector|1|X2-01|5|Y2-01|WIRE|0|0|0|-|Ω",
-                "3|Elec-Control-001|ECM-Main Connector|2|X2-02|6|Y2-02|WIRE|0|0|0|-|Ω",
-                "4|Elec-Control-001|Low Voltage Supply|3|X1-02|4|Y1-02|WIRE|0|0|0|-|Ω"
-            ];
-
-            foreach (string rowStr in defaultRows)
-            {
-                string[] parts = rowStr.Split('|');
-                int idx = gridConfig.Rows.Add(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9], parts[10], parts[11], parts[12]);
-                UpdateRowUnitDropdown(idx);
-                gridConfig.Rows[idx].Cells["colUnit"].Value = parts[12];
-                RecalculateRowLimits(gridConfig.Rows[idx]);
-            }
-
-            RenumberRows();
-            UpdateTotalNetCount();
-            UpdateDiagramSize();
-            picPreview.Invalidate();
-        }
 
         private void RenumberRows()
         {
@@ -379,85 +342,10 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnExport_Click(object? sender, EventArgs e)
         {
-            //double conectionResistance = double.Parse(txtConnectionResistance.Text.Trim());
-            //double insulationResistance = double.Parse(txtInsulationResistance.Text.Trim());
-
-            //var config = new TestConfiguration
-            //{
-            //    ConfigName = txtConfigName.Text.Trim(),
-            //    ProductModel = txtProductModel.Text.Trim(),
-            //    ConfigCode = "CFG-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-            //    CreatedBy = SessionManager.CurrentUser?.Username ?? "System",
-            //    CreatedAt = DateTime.UtcNow,
-            //    IsActive = true,
-            //    Nets = new List<TestConfigNet>()
-            //};
-
-            //foreach (DataGridViewRow row in gridConfig.Rows)
-            //{
-            //    if (row.IsNewRow) continue;
-
-            //    // Safely parse double values
-            //    double? ParseDouble(string cellName)
-            //    {
-            //        var val = row.Cells[cellName].Value?.ToString();
-            //        return double.TryParse(val, out double res) ? res : (double?)null;
-            //    }
-
-            //    // Safely parse integer values
-            //    int ParseInt(string cellName)
-            //    {
-            //        var val = row.Cells[cellName].Value?.ToString();
-            //        return int.TryParse(val, out int res) ? res : 0;
-            //    }
-
-            //    var net = new TestConfigNet
-            //    {
-            //        SequenceNo = ParseInt("colNo"),
-            //        NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
-            //        HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
-
-            //        FromAddress = ParseInt("colFromAddr"),
-            //        FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
-
-            //        ToAddress = ParseInt("colToAddr"),
-            //        ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
-
-            //        MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
-            //        LowerLimit = ParseDouble("colLowerLimit"),
-            //        UpperLimit = ParseDouble("colUpperLimit"),
-
-            //        // Dynamic TestTypeId mapping
-            //        TestTypeId = (row.Cells["colTestType"].Value?.ToString() == "Resistance") ? 11 : 15 // 11 = RESISTOR, 15 = WIRE
-            //    };
-
-            //    config.Nets.Add(net);
-            //}
-            //try
-            //{
-            //    _configService.SaveConfig(config);
-            //    _configService.SetActiveConfig(config.ConfigName);
-
-            //    var options = new System.Text.Json.JsonSerializerOptions
-            //    {
-            //        WriteIndented = true,
-            //        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
-            //    };
-            //    // 2. Convert the object to a JSON string
-            //    string json = System.Text.Json.JsonSerializer.Serialize(config, options);
-            //    // 3. Print the JSON string to your Debug console
-            //    Debug.WriteLine($"Instance:\n{json}");
-
-            //    string customText = _configService.ConvertToProgramText(config);
-            //    Debug.WriteLine($"Program Text:\n{customText}");
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Error saving configuration: {ex.Message}", "Export Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //    return;
             // Save current grid configuration to the database.
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
+            config.CreatedBy = SessionManager.CurrentUser.Username;
+            Debug.WriteLine($"curernt user : {config.CreatedBy}");
             if (config == null)
             {
                 MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -493,6 +381,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 // New config
+                Debug.WriteLine($"curernt userrr : {config.CreatedBy}");
                 _configService.SaveConfig(config);
                 _loadedConfigName = config.ConfigName;
                 MessageBox.Show("Configuration saved successfully.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Information);

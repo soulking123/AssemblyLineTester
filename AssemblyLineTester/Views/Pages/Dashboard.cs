@@ -15,10 +15,13 @@ namespace AssemblyLineTester.Views.Pages
     public partial class Dashboard : UserControl
     {
         private readonly DashboardService _dashboardService = new();
+        private readonly TestConfigService _configService = new();
         private readonly InstrumentService _instrument = new();
         private System.Windows.Forms.Timer? _uiRefreshTimer;
         private DashboardTimeRange _selectedRange = DashboardTimeRange.Today;
         private int _totalFailForChart;
+
+        
 
         public Dashboard()
         {
@@ -26,6 +29,15 @@ namespace AssemblyLineTester.Views.Pages
             InitializeCustomStyles();
             LoadDashboardData();
             StartUiRefreshTimer();
+            this.VisibleChanged += Dashboard_VisibleChanged;
+        }
+
+        private void Dashboard_VisibleChanged(object? sender, EventArgs e)
+        {
+            if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                LoadDashboardData();
+            }
         }
 
         private void InitializeCustomStyles()
@@ -273,14 +285,16 @@ namespace AssemblyLineTester.Views.Pages
         // "ACTIVE PROGRAM" card: prioritizes an in-progress report, falls back to the latest one.
         private void LoadActiveProgram()
         {
-            var active = _dashboardService.GetActiveProgram();
+            var currentUser = SessionManager.CurrentUser.Username;
+            var activeConfig = _configService.GetActiveConfig();
 
-            lblProgDetails.Text = active is null
+            lblProgDetails.Text = activeConfig is null
                 ? "No test program has been run yet."
-                : $"Product Model : {active.ProductModel}\n" +
-                  $"Part Number   : {active.PartNumber}\n" +
-                  $"Status        : {active.StatusLabel}\n" +
-                  $"Last Run      : {active.LastRunAt:dd MMM yyyy HH:mm}";
+                : $"Config Name      : {activeConfig.ConfigName}\n" +
+                  $"Product Model    : {activeConfig.ProductModel}\n" +
+                  $"Total Test       : {activeConfig.Nets.Count}\n" +
+                  $"Created By       : {activeConfig.CreatedBy}\n" +
+                  $"Last Update      : {activeConfig.UpdatedAt:dd MMM yyyy HH:mm}";
         }
 
         private void GridRecent_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
