@@ -162,8 +162,6 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-
-
         private void RenumberRows()
         {
             for (int i = 0; i < gridConfig.Rows.Count; i++)
@@ -208,9 +206,12 @@ namespace AssemblyLineTester.Views.Pages
             int newIdx = gridConfig.Rows.Count + 1;
             string defaultUnit = UnitConversionHelper.GetBaseUnit("WIRE"); // "Ω"
 
+            int nextFromAddr = GetNextAvailableAddress();
+            int nextToAddr = nextFromAddr + 1; // must differ from nextFromAddr too, since it's the same address pool
+
             int idx = gridConfig.Rows.Add(
                 newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply",
-                "0", $"X1-0{newIdx}", "0", $"Y1-0{newIdx}",
+                nextFromAddr.ToString(), $"X1-0{newIdx}", nextToAddr.ToString(), $"Y1-0{newIdx}",
                 "WIRE", "0", "0", "0", "-", defaultUnit);
 
             UpdateRowUnitDropdown(idx);
@@ -221,6 +222,34 @@ namespace AssemblyLineTester.Views.Pages
             UpdateTotalNetCount();
             UpdateDiagramSize();
             picPreview.Invalidate();
+        }
+
+        // Finds the next address not yet used anywhere in colFromAddr or colToAddr (shared pool).
+        private int GetNextAvailableAddress()
+        {
+            int max = -1;
+            foreach (DataGridViewRow row in gridConfig.Rows)
+            {
+                if (row.IsNewRow) continue;
+                if (int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int fromVal) && fromVal > max) max = fromVal;
+                if (int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toVal) && toVal > max) max = toVal;
+            }
+            return max + 1;
+        }
+
+        // Finds the next unused address for the given column (max existing value + 1).
+        private int GetNextAvailableAddress(string columnName)
+        {
+            int max = -1;
+            foreach (DataGridViewRow row in gridConfig.Rows)
+            {
+                if (row.IsNewRow) continue;
+                if (int.TryParse(row.Cells[columnName].Value?.ToString(), out int val) && val > max)
+                {
+                    max = val;
+                }
+            }
+            return max + 1;
         }
 
         private void BtnRemove_Click(object? sender, EventArgs e)
@@ -342,6 +371,17 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnExport_Click(object? sender, EventArgs e)
         {
+
+            var duplicateAddresses = GetDuplicateAddresses();
+            if (duplicateAddresses.Count > 0)
+            {
+                MessageBox.Show(
+                    $"Duplicate address found: {string.Join(", ", duplicateAddresses)}.\n" +
+                    "Every Net-From / Net-To Address must be unique across the whole configuration.",
+                    "Duplicate Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             // Save current grid configuration to the database.
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
             config.CreatedBy = SessionManager.CurrentUser.Username;
@@ -471,10 +511,29 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_CellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
         {
-
             if (e.RowIndex < 0 || e.RowIndex >= gridConfig.Rows.Count) return;
             var row = gridConfig.Rows[e.RowIndex];
             if (row.IsNewRow) return;
+
+            var colFromAddr = gridConfig.Columns["colFromAddr"];
+            var colToAddr = gridConfig.Columns["colToAddr"];
+
+            if ((colFromAddr != null && e.ColumnIndex == colFromAddr.Index) ||
+                (colToAddr != null && e.ColumnIndex == colToAddr.Index))
+            {
+                string columnName = e.ColumnIndex == colFromAddr!.Index ? "colFromAddr" : "colToAddr";
+                string label = columnName == "colFromAddr" ? "Net-From Address" : "Net-To Address";
+                string newValue = e.FormattedValue?.ToString()?.Trim() ?? "";
+
+                if (!string.IsNullOrWhiteSpace(newValue) && IsAddressUsedElsewhere(newValue, e.RowIndex, columnName))
+                {
+                    MessageBox.Show(
+                        $"{label} '{newValue}' is already used elsewhere (as a From or To address). Duplicate address is not allowed.",
+                        "Duplicate Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    e.Cancel = true;
+                    return;
+                }
+            }
 
             var colTolerance = gridConfig.Columns["colTolerance"];
             if (colTolerance != null && e.ColumnIndex == colTolerance.Index)
@@ -495,6 +554,96 @@ namespace AssemblyLineTester.Views.Pages
                     }
                 }
             }
+        }
+
+        // Checks `value` against BOTH colFromAddr and colToAddr across ALL rows (shared address pool),
+        // excluding only the exact cell currently being edited - same-row cross-column collisions
+        // (From == To in one row) ARE checked and blocked.
+        private bool IsAddressUsedElsewhere(string value, int currentRowIndex, string currentColumnName)
+        {
+            for (int i = 0; i < gridConfig.Rows.Count; i++)
+            {
+                var row = gridConfig.Rows[i];
+                if (row.IsNewRow) continue;
+
+                string fromVal = row.Cells["colFromAddr"].Value?.ToString()?.Trim() ?? "";
+                string toVal = row.Cells["colToAddr"].Value?.ToString()?.Trim() ?? "";
+
+                bool isSameFromCell = i == currentRowIndex && currentColumnName == "colFromAddr";
+                if (!isSameFromCell && string.Equals(fromVal, value, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+                bool isSameToCell = i == currentRowIndex && currentColumnName == "colToAddr";
+                if (!isSameToCell && string.Equals(toVal, value, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+
+        // Scans the whole grid (both columns combined) for any address used more than once.
+        private List<string> GetDuplicateAddresses()
+        {
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var duplicates = new List<string>();
+
+            foreach (DataGridViewRow row in gridConfig.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                string fromVal = row.Cells["colFromAddr"].Value?.ToString()?.Trim() ?? "";
+                string toVal = row.Cells["colToAddr"].Value?.ToString()?.Trim() ?? "";
+
+                foreach (var val in new[] { fromVal, toVal })
+                {
+                    if (string.IsNullOrWhiteSpace(val)) continue;
+                    if (!seen.Add(val) && !duplicates.Contains(val, StringComparer.OrdinalIgnoreCase))
+                    {
+                        duplicates.Add(val);
+                    }
+                }
+            }
+
+            return duplicates;
+        }
+
+        // Checks whether `value` already exists in any OTHER row's given column.
+        private bool IsAddressDuplicate(string columnName, string value, int currentRowIndex)
+        {
+            for (int i = 0; i < gridConfig.Rows.Count; i++)
+            {
+                if (i == currentRowIndex) continue;
+                var row = gridConfig.Rows[i];
+                if (row.IsNewRow) continue;
+
+                string existing = row.Cells[columnName].Value?.ToString()?.Trim() ?? "";
+                if (string.Equals(existing, value, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Scans the whole grid and returns any address values used more than once in the given column.
+        // Catches cases CellValidating can't - e.g. rows added/loaded programmatically.
+        private List<string> GetDuplicateAddresses(string columnName)
+        {
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var duplicates = new List<string>();
+
+            foreach (DataGridViewRow row in gridConfig.Rows)
+            {
+                if (row.IsNewRow) continue;
+                string val = row.Cells[columnName].Value?.ToString()?.Trim() ?? "";
+                if (string.IsNullOrWhiteSpace(val)) continue;
+
+                if (!seen.Add(val) && !duplicates.Contains(val, StringComparer.OrdinalIgnoreCase))
+                {
+                    duplicates.Add(val);
+                }
+            }
+
+            return duplicates;
         }
 
         private void RecalculateAllRows()

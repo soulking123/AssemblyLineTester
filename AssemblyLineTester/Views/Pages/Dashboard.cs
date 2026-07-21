@@ -110,7 +110,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPassTitle.Text = $"PASS ({passPct:0.00}%)";
             lblFailTitle.Text = $"FAIL ({failPct:0.00}%)";
 
-            lblSummaryTitle.Text = $"SUMMARY ({cmbTimeRange.Text})";
+            lblSummaryTitle.Text = $"SUMMARY REPORT ({cmbTimeRange.Text})";
         }
 
         // Bar Chart (History): Pass/Fail grouped adaptively (day/week/month) based on the range,

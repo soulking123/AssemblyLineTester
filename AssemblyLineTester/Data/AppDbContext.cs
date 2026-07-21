@@ -19,6 +19,7 @@ namespace AssemblyLineTester.Data
         public DbSet<TestStep> TestSteps { get; set; } = null!;
         public DbSet<TestConfiguration> TestConfigurations { get; set; } = null!;
         public DbSet<TestConfigNet> TestConfigNets { get; set; } = null!;
+        public DbSet<ReportTestTypeSummary> ReportTestTypeSummaries { get; set; } = null!;
 
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -83,15 +84,17 @@ namespace AssemblyLineTester.Data
             );
 
             // 6. Seed initial users with secure BCrypt hashes
-            const string passHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm";
-            const string faizHash = "$2b$11$rZFf4GHizQh2xGlxxdSj4eRzsOf4gSoVdwbLOcvwfozyn5nVfKd/2";
+            const string adminHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS";
+            const string faizHash = "$2b$11$VAO3CvR8UbFBe9Pn2sNrG.1Wg5vA7FpwVqPyxQeME/5PGTQ4PYk2u";
+            const string tegarHash = "$2b$11$SsUZzVTYh87OPBYbFMYNO.JNJ44jLe3wBxLq2cg7WFPWl.yHAIi6O";
+            const string khenHash = "$2b$11$JzVT2cjdgorN0AVlQHKv5uNCt1fNbQvlW7J1nEqd0pk2hDCAihDPe";
 
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     UserId = 1,
                     Username = "admin",
-                    PasswordHash = passHash,
+                    PasswordHash = adminHash,
                     FullName = "System Administrator",
                     CompanyId = "CAT0100",
                     RoleId = 1, // Administrator
@@ -103,9 +106,9 @@ namespace AssemblyLineTester.Data
                 new User
                 {
                     UserId = 2,
-                    Username = "fally12",
-                    PasswordHash = passHash,
-                    FullName = "Fally Kusuma",
+                    Username = "faiz",
+                    PasswordHash = faizHash,
+                    FullName = "Faiz",
                     CompanyId = "CAT0001",
                     RoleId = 1, // Administrator
                     Department = "Engineering",
@@ -117,9 +120,9 @@ namespace AssemblyLineTester.Data
                 new User
                 {
                     UserId = 3,
-                    Username = "faiz",
-                    PasswordHash = faizHash,
-                    FullName = "Faiz",
+                    Username = "khen",
+                    PasswordHash = khenHash,
+                    FullName = "Khen",
                     CompanyId = "CAT0002",
                     RoleId = 3, // Engineer
                     Department = "Engineering",
@@ -131,9 +134,9 @@ namespace AssemblyLineTester.Data
                 new User
                 {
                     UserId = 4,
-                    Username = "doni42",
-                    PasswordHash = passHash,
-                    FullName = "Doni Pratama",
+                    Username = "tegar",
+                    PasswordHash = tegarHash,
+                    FullName = "Tegar",
                     CompanyId = "CAT0003",
                     RoleId = 2, // Operator
                     Department = "Production",
@@ -141,188 +144,6 @@ namespace AssemblyLineTester.Data
                     CreatedAt = DateTime.Parse("2026-03-12T14:10:05"),
                     LastLogin = DateTime.Parse("2026-03-15T09:55:33"),
                     UpdatedAt = DateTime.Parse("2026-03-15T09:55:33")
-                },
-                new User
-                {
-                    UserId = 5,
-                    Username = "rian24",
-                    PasswordHash = passHash,
-                    FullName = "Rian Hidayat",
-                    CompanyId = "CAT0004",
-                    RoleId = 4, // Technician
-                    Department = "Maintenance",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-12T15:45:30"),
-                    LastLogin = DateTime.Parse("2026-03-14T16:22:18"),
-                    UpdatedAt = DateTime.Parse("2026-03-14T16:22:18")
-                },
-                new User
-                {
-                    UserId = 6,
-                    Username = "maria57",
-                    PasswordHash = passHash,
-                    FullName = "Maria Sari",
-                    CompanyId = "CAT0005",
-                    RoleId = 2, // Operator
-                    Department = "Production",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-13T09:02:44"),
-                    LastLogin = DateTime.Parse("2026-03-15T08:17:09"),
-                    UpdatedAt = DateTime.Parse("2026-03-15T08:17:09")
-                },
-                new User
-                {
-                    UserId = 7,
-                    Username = "agus08",
-                    PasswordHash = passHash,
-                    FullName = "Agus Setiawan",
-                    CompanyId = "CAT0006",
-                    RoleId = 3, // Engineer
-                    Department = "Engineering",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-13T11:21:36"),
-                    LastLogin = DateTime.Parse("2026-03-15T07:58:23"),
-                    UpdatedAt = DateTime.Parse("2026-03-15T07:58:23")
-                },
-                new User
-                {
-                    UserId = 8,
-                    Username = "lina15",
-                    PasswordHash = passHash,
-                    FullName = "Lina Putri",
-                    CompanyId = "CAT0007",
-                    RoleId = 5, // Quality
-                    Department = "Quality Assurance",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-14T10:05:17"),
-                    LastLogin = DateTime.Parse("2026-03-14T17:11:05"),
-                    UpdatedAt = DateTime.Parse("2026-03-14T17:11:05")
-                },
-                new User
-                {
-                    UserId = 9,
-                    Username = "yudi89",
-                    PasswordHash = passHash,
-                    FullName = "Yudi Rahman",
-                    CompanyId = "CAT0008",
-                    RoleId = 4, // Technician
-                    Department = "Maintenance",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-14T13:17:08"),
-                    LastLogin = DateTime.Parse("2026-03-14T15:33:44"),
-                    UpdatedAt = DateTime.Parse("2026-03-14T15:33:44")
-                },
-                new User
-                {
-                    UserId = 10,
-                    Username = "budi24",
-                    PasswordHash = passHash,
-                    FullName = "Budi Santoso",
-                    CompanyId = "CAT0009",
-                    RoleId = 6, // Supervisor
-                    Department = "Production",
-                    StatusId = 2, // Inactive
-                    CreatedAt = DateTime.Parse("2026-03-05T09:40:10"),
-                    LastLogin = DateTime.Parse("2026-03-08T14:12:33"),
-                    UpdatedAt = DateTime.Parse("2026-03-08T14:12:33")
-                },
-                new User
-                {
-                    UserId = 11,
-                    Username = "lisa11",
-                    PasswordHash = passHash,
-                    FullName = "Lisa Kartika",
-                    CompanyId = "CAT0010",
-                    RoleId = 2, // Operator
-                    Department = "Production",
-                    StatusId = 2, // Inactive
-                    CreatedAt = DateTime.Parse("2026-03-06T14:56:31"),
-                    LastLogin = DateTime.Parse("2026-03-07T11:07:15"),
-                    UpdatedAt = DateTime.Parse("2026-03-07T11:07:15")
-                },
-                new User
-                {
-                    UserId = 12,
-                    Username = "hendra655",
-                    PasswordHash = passHash,
-                    FullName = "Hendra Wijaya",
-                    CompanyId = "CAT0011",
-                    RoleId = 3, // Engineer
-                    Department = "Engineering",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-01T08:15:00"),
-                    LastLogin = DateTime.Parse("2026-03-06T10:15:00"),
-                    UpdatedAt = DateTime.Parse("2026-03-06T10:15:00")
-                },
-                new User
-                {
-                    UserId = 13,
-                    Username = "dewi89",
-                    PasswordHash = passHash,
-                    FullName = "Dewi Lestari",
-                    CompanyId = "CAT0012",
-                    RoleId = 5, // Quality
-                    Department = "Quality Assurance",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-01T09:12:00"),
-                    LastLogin = DateTime.Parse("2026-03-05T14:30:15"),
-                    UpdatedAt = DateTime.Parse("2026-03-05T14:30:15")
-                },
-                new User
-                {
-                    UserId = 14,
-                    Username = "eko25",
-                    PasswordHash = passHash,
-                    FullName = "Eko Nugroho",
-                    CompanyId = "CAT0013",
-                    RoleId = 2, // Operator
-                    Department = "Production",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-02T11:20:00"),
-                    LastLogin = DateTime.Parse("2026-03-05T08:45:10"),
-                    UpdatedAt = DateTime.Parse("2026-03-05T08:45:10")
-                },
-                new User
-                {
-                    UserId = 15,
-                    Username = "siti64",
-                    PasswordHash = passHash,
-                    FullName = "Siti Aminah",
-                    CompanyId = "CAT0014",
-                    RoleId = 4, // Technician
-                    Department = "Maintenance",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-02T13:30:00"),
-                    LastLogin = DateTime.Parse("2026-03-04T16:10:00"),
-                    UpdatedAt = DateTime.Parse("2026-03-04T16:10:00")
-                },
-                new User
-                {
-                    UserId = 16,
-                    Username = "joko11",
-                    PasswordHash = passHash,
-                    FullName = "Joko Susilo",
-                    CompanyId = "CAT0015",
-                    RoleId = 2, // Operator
-                    Department = "Production",
-                    StatusId = 3, // Locked
-                    CreatedAt = DateTime.Parse("2026-03-03T10:00:00"),
-                    LastLogin = DateTime.Parse("2026-03-03T09:00:00"),
-                    UpdatedAt = DateTime.Parse("2026-03-03T09:00:00")
-                },
-                new User
-                {
-                    UserId = 17,
-                    Username = "ratna97",
-                    PasswordHash = passHash,
-                    FullName = "Ratna Sari",
-                    CompanyId = "CAT0016",
-                    RoleId = 6, // Supervisor
-                    Department = "Production",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-04T15:45:00"),
-                    LastLogin = DateTime.Parse("2026-03-03T13:15:20"),
-                    UpdatedAt = DateTime.Parse("2026-03-03T13:15:20")
                 }
             );
 
@@ -413,6 +234,27 @@ namespace AssemblyLineTester.Data
                 .WithMany(r => r.RolePermissions)
                 .HasForeignKey(rp => rp.RoleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ReportTestTypeSummary>()
+                .HasOne(s => s.Report)
+                .WithMany()
+                .HasForeignKey(s => s.ReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ReportTestTypeSummary>()
+                .HasOne(s => s.TestTypeInfo)
+                .WithMany()
+                .HasForeignKey(s => s.TestTypeName)
+                .HasPrincipalKey(t => t.TestTypeName)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReportTestTypeSummary>()
+                .HasIndex(s => new { s.ReportId, s.TestTypeName })
+                .IsUnique();
+
+            // Speeds up the Dashboard's date-range + fail-breakdown query.
+            modelBuilder.Entity<ReportTestTypeSummary>()
+                .HasIndex(s => s.TestTypeName);
 
             modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());
         }

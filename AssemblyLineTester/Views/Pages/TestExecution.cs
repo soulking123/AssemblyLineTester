@@ -19,7 +19,7 @@ namespace AssemblyLineTester.Views.Pages
         private List<LiveTestDetailRowDto> _loadedRows = new();
         private readonly TestConfigService _configService = new TestConfigService();
         private string _customTestText = string.Empty;
-        private double _continuityResistance ;
+        private double _continuityResistance;
         private int? _currentReportId;
 
         private string? _loadedConfigName = null;
@@ -58,7 +58,7 @@ namespace AssemblyLineTester.Views.Pages
                 else
                 {
                     lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
-                    
+
                 }
             }
         }
@@ -319,8 +319,8 @@ namespace AssemblyLineTester.Views.Pages
                 // 2. Load the test program
                 //Debug.WriteLine(_customTestText);.
 
-                 var activeConfig = _configService.GetActiveConfig();
-                 _customTestText = _configService.ConvertToProgramText(activeConfig);
+                var activeConfig = _configService.GetActiveConfig();
+                _customTestText = _configService.ConvertToProgramText(activeConfig);
 
                 Debug.WriteLine("Convert to Tesxt");
                 Debug.WriteLine(_customTestText);
@@ -348,13 +348,13 @@ namespace AssemblyLineTester.Views.Pages
                     else
                     {
                         Debug.WriteLine("error syntax");
-                            // Fallback: Fetch/load the specified test program "1107061216"
-                            //var getTestResult = _instrument.GetTestProgram("1107061216");
-                            //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
-                            //{
-                            //    testProgramDetails = getTestResult.Result;
-                            //}
-                        }
+                        // Fallback: Fetch/load the specified test program "1107061216"
+                        //var getTestResult = _instrument.GetTestProgram("1107061216");
+                        //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
+                        //{
+                        //    testProgramDetails = getTestResult.Result;
+                        //}
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -422,6 +422,8 @@ namespace AssemblyLineTester.Views.Pages
                                 StepNo = step++,
                                 NetId = measurement.Instruction ?? "",
                                 TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
+                                FromPoint = $"{measurement.Point1}",   
+                                ToPoint = $"{measurement.Point2}",
                                 TestType = rowTestType,
                                 MeasuredValue = Math.Round(measurement.Value1, 3),
                                 Status = status
@@ -465,7 +467,7 @@ namespace AssemblyLineTester.Views.Pages
                 ? "PASSED"
                 : "FAILED or INCOMPLETE";
 
-                }
+            }
             finally
             {
                 // 3. Resume background monitoring
@@ -666,7 +668,8 @@ namespace AssemblyLineTester.Views.Pages
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
                 DateTime.Now,
-                _loadedRows ?? new List<LiveTestDetailRowDto>()
+                _loadedRows ?? new List<LiveTestDetailRowDto>(),
+                _currentReportId
             );
 
             if (modal.ShowDialog(this) == DialogResult.OK)

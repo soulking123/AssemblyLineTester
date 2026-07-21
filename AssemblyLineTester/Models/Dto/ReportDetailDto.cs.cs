@@ -15,8 +15,11 @@ namespace AssemblyLineTester.Models.Dto
         public string PartNumber { get; set; } = string.Empty;
         public string SerialNumber { get; set; } = string.Empty;
         public string Operator { get; set; } = string.Empty;
-        public string TestTime { get; set; } = string.Empty; // formatted duration HH:mm:ss
+        public string TestTime { get; set; } = string.Empty; 
         public string OverallResult { get; set; } = string.Empty;
+        public int TotalNets { get; set; }
+        public int PassCount { get; set; }
+        public int FailCount { get; set; }
 
         public List<TestTypeSummaryDto> TypeSummaries { get; set; } = new();
         public List<TestDetailDto> Details { get; set; } = new();

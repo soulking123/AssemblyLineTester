@@ -63,8 +63,7 @@ namespace AssemblyLineTester.Services
             using var db = new AppDbContext();
             var filter = BuildRangeFilter(range);
             var granularity = GetGranularityForRange(range);
-            var reports = TestReportQueryHelper.ApplyFilter(db, filter).ToList();
-
+            var reports = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft).ToList();
             var points = reports
                 .GroupBy(r => BucketKey(r.TestDateTime, granularity))
                 .OrderBy(g => g.Key)
@@ -85,7 +84,7 @@ namespace AssemblyLineTester.Services
         {
             using var db = new AppDbContext();
             var filter = BuildRangeFilter(range);
-            var reports = TestReportQueryHelper.ApplyFilter(db, filter).ToList();
+            var reports = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft).ToList();
 
             int total = reports.Count;
             int pass = reports.Count(r => r.Status == TestStatus.Completed && r.OverallResult == TestResult.Pass);
@@ -110,28 +109,34 @@ namespace AssemblyLineTester.Services
         }
 
 
-        // "FAIL BY REASON" doughnut: failed net counts grouped by test type, within the range.
+        // "FAIL BY REASON" doughnut: now reads pre-aggregated FailCount per test type,
         public List<FailReasonSliceDto> GetFailReasonBreakdown(DashboardTimeRange range)
         {
             using var db = new AppDbContext();
             var filter = BuildRangeFilter(range);
-            var reportIds = TestReportQueryHelper.ApplyFilter(db, filter).Select(r => r.ReportId).ToList();
+            var reportIds = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft).Select(r => r.ReportId);
 
-            var failedDetails = db.TestDetails
-                .Where(d => reportIds.Contains(d.ReportId) && !d.Result)
+            var grouped = db.ReportTestTypeSummaries
+                .Where(s => reportIds.Contains(s.ReportId))
+                .GroupBy(s => s.TestTypeName)
+                .Select(g => new
+                {
+                    TestType = g.Key,
+                    FailCount = g.Sum(s => s.FailCount)
+                })
+                .Where(g => g.FailCount > 0)
+                .OrderByDescending(g => g.FailCount)
                 .ToList();
 
-            int totalFail = failedDetails.Count;
+            int totalFail = grouped.Sum(g => g.FailCount);
             if (totalFail == 0) return new List<FailReasonSliceDto>();
 
-            return failedDetails
-                .GroupBy(d => d.TestTypeName)
-                .OrderByDescending(g => g.Count())
+            return grouped
                 .Select(g => new FailReasonSliceDto
                 {
-                    TestTypeName = g.Key,
-                    FailCount = g.Count(),
-                    PercentOfTotalFail = Math.Round(g.Count() * 100.0 / totalFail, 1)
+                    TestTypeName = g.TestType,
+                    FailCount = g.FailCount,
+                    PercentOfTotalFail = Math.Round(g.FailCount * 100.0 / totalFail, 1)
                 })
                 .ToList();
         }
@@ -141,6 +146,7 @@ namespace AssemblyLineTester.Services
         {
             using var db = new AppDbContext();
             return db.TestReports
+                .Where(r => !r.IsDraft)
                 .OrderByDescending(r => r.TestDateTime)
                 .Take(count)
                 .Select(r => new RecentTestItemDto

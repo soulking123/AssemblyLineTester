@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260720024719_InitialCreate")]
+    [Migration("20260721024515_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -46,11 +46,43 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            LastUsageDate = new DateTime(2026, 7, 20, 0, 0, 0, 0, DateTimeKind.Local),
+                            LastUsageDate = new DateTime(2026, 7, 21, 0, 0, 0, 0, DateTimeKind.Local),
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,
                             RemainingMaintHours = 2160.0
                         });
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.ReportTestTypeSummary", b =>
+                {
+                    b.Property<int>("SummaryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FailCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PassCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestTypeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TotalCount")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("SummaryId");
+
+                    b.HasIndex("TestTypeName");
+
+                    b.HasIndex("ReportId", "TestTypeName")
+                        .IsUnique();
+
+                    b.ToTable("ReportTestTypeSummaries");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.Role", b =>
@@ -1182,6 +1214,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<string>("FilePath")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDraft")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Operator")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1445,7 +1480,7 @@ namespace AssemblyLineTester.Migrations
                             CreatedAt = new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local),
                             Department = "Engineering",
                             FullName = "System Administrator",
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
+                            PasswordHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS",
                             RoleId = 1,
                             StatusId = 1,
                             UpdatedAt = new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local),
@@ -1457,13 +1492,13 @@ namespace AssemblyLineTester.Migrations
                             CompanyId = "CAT0001",
                             CreatedAt = new DateTime(2026, 3, 10, 9, 15, 22, 0, DateTimeKind.Unspecified),
                             Department = "Engineering",
-                            FullName = "Fally Kusuma",
+                            FullName = "Faiz",
                             LastLogin = new DateTime(2026, 3, 15, 10, 28, 41, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
+                            PasswordHash = "$2b$11$VAO3CvR8UbFBe9Pn2sNrG.1Wg5vA7FpwVqPyxQeME/5PGTQ4PYk2u",
                             RoleId = 1,
                             StatusId = 1,
                             UpdatedAt = new DateTime(2026, 3, 15, 10, 28, 41, 0, DateTimeKind.Unspecified),
-                            Username = "fally12"
+                            Username = "faiz"
                         },
                         new
                         {
@@ -1471,13 +1506,13 @@ namespace AssemblyLineTester.Migrations
                             CompanyId = "CAT0002",
                             CreatedAt = new DateTime(2026, 3, 11, 8, 23, 15, 0, DateTimeKind.Unspecified),
                             Department = "Engineering",
-                            FullName = "Faiz",
+                            FullName = "Khen",
                             LastLogin = new DateTime(2026, 3, 15, 9, 41, 12, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$rZFf4GHizQh2xGlxxdSj4eRzsOf4gSoVdwbLOcvwfozyn5nVfKd/2",
+                            PasswordHash = "$2b$11$JzVT2cjdgorN0AVlQHKv5uNCt1fNbQvlW7J1nEqd0pk2hDCAihDPe",
                             RoleId = 3,
                             StatusId = 1,
                             UpdatedAt = new DateTime(2026, 3, 15, 9, 41, 12, 0, DateTimeKind.Unspecified),
-                            Username = "faiz"
+                            Username = "khen"
                         },
                         new
                         {
@@ -1485,195 +1520,13 @@ namespace AssemblyLineTester.Migrations
                             CompanyId = "CAT0003",
                             CreatedAt = new DateTime(2026, 3, 12, 14, 10, 5, 0, DateTimeKind.Unspecified),
                             Department = "Production",
-                            FullName = "Doni Pratama",
+                            FullName = "Tegar",
                             LastLogin = new DateTime(2026, 3, 15, 9, 55, 33, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
+                            PasswordHash = "$2b$11$SsUZzVTYh87OPBYbFMYNO.JNJ44jLe3wBxLq2cg7WFPWl.yHAIi6O",
                             RoleId = 2,
                             StatusId = 1,
                             UpdatedAt = new DateTime(2026, 3, 15, 9, 55, 33, 0, DateTimeKind.Unspecified),
-                            Username = "doni42"
-                        },
-                        new
-                        {
-                            UserId = 5,
-                            CompanyId = "CAT0004",
-                            CreatedAt = new DateTime(2026, 3, 12, 15, 45, 30, 0, DateTimeKind.Unspecified),
-                            Department = "Maintenance",
-                            FullName = "Rian Hidayat",
-                            LastLogin = new DateTime(2026, 3, 14, 16, 22, 18, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 4,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 14, 16, 22, 18, 0, DateTimeKind.Unspecified),
-                            Username = "rian24"
-                        },
-                        new
-                        {
-                            UserId = 6,
-                            CompanyId = "CAT0005",
-                            CreatedAt = new DateTime(2026, 3, 13, 9, 2, 44, 0, DateTimeKind.Unspecified),
-                            Department = "Production",
-                            FullName = "Maria Sari",
-                            LastLogin = new DateTime(2026, 3, 15, 8, 17, 9, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 2,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 15, 8, 17, 9, 0, DateTimeKind.Unspecified),
-                            Username = "maria57"
-                        },
-                        new
-                        {
-                            UserId = 7,
-                            CompanyId = "CAT0006",
-                            CreatedAt = new DateTime(2026, 3, 13, 11, 21, 36, 0, DateTimeKind.Unspecified),
-                            Department = "Engineering",
-                            FullName = "Agus Setiawan",
-                            LastLogin = new DateTime(2026, 3, 15, 7, 58, 23, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 3,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 15, 7, 58, 23, 0, DateTimeKind.Unspecified),
-                            Username = "agus08"
-                        },
-                        new
-                        {
-                            UserId = 8,
-                            CompanyId = "CAT0007",
-                            CreatedAt = new DateTime(2026, 3, 14, 10, 5, 17, 0, DateTimeKind.Unspecified),
-                            Department = "Quality Assurance",
-                            FullName = "Lina Putri",
-                            LastLogin = new DateTime(2026, 3, 14, 17, 11, 5, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 5,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 14, 17, 11, 5, 0, DateTimeKind.Unspecified),
-                            Username = "lina15"
-                        },
-                        new
-                        {
-                            UserId = 9,
-                            CompanyId = "CAT0008",
-                            CreatedAt = new DateTime(2026, 3, 14, 13, 17, 8, 0, DateTimeKind.Unspecified),
-                            Department = "Maintenance",
-                            FullName = "Yudi Rahman",
-                            LastLogin = new DateTime(2026, 3, 14, 15, 33, 44, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 4,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 14, 15, 33, 44, 0, DateTimeKind.Unspecified),
-                            Username = "yudi89"
-                        },
-                        new
-                        {
-                            UserId = 10,
-                            CompanyId = "CAT0009",
-                            CreatedAt = new DateTime(2026, 3, 5, 9, 40, 10, 0, DateTimeKind.Unspecified),
-                            Department = "Production",
-                            FullName = "Budi Santoso",
-                            LastLogin = new DateTime(2026, 3, 8, 14, 12, 33, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 6,
-                            StatusId = 2,
-                            UpdatedAt = new DateTime(2026, 3, 8, 14, 12, 33, 0, DateTimeKind.Unspecified),
-                            Username = "budi24"
-                        },
-                        new
-                        {
-                            UserId = 11,
-                            CompanyId = "CAT0010",
-                            CreatedAt = new DateTime(2026, 3, 6, 14, 56, 31, 0, DateTimeKind.Unspecified),
-                            Department = "Production",
-                            FullName = "Lisa Kartika",
-                            LastLogin = new DateTime(2026, 3, 7, 11, 7, 15, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 2,
-                            StatusId = 2,
-                            UpdatedAt = new DateTime(2026, 3, 7, 11, 7, 15, 0, DateTimeKind.Unspecified),
-                            Username = "lisa11"
-                        },
-                        new
-                        {
-                            UserId = 12,
-                            CompanyId = "CAT0011",
-                            CreatedAt = new DateTime(2026, 3, 1, 8, 15, 0, 0, DateTimeKind.Unspecified),
-                            Department = "Engineering",
-                            FullName = "Hendra Wijaya",
-                            LastLogin = new DateTime(2026, 3, 6, 10, 15, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 3,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 6, 10, 15, 0, 0, DateTimeKind.Unspecified),
-                            Username = "hendra655"
-                        },
-                        new
-                        {
-                            UserId = 13,
-                            CompanyId = "CAT0012",
-                            CreatedAt = new DateTime(2026, 3, 1, 9, 12, 0, 0, DateTimeKind.Unspecified),
-                            Department = "Quality Assurance",
-                            FullName = "Dewi Lestari",
-                            LastLogin = new DateTime(2026, 3, 5, 14, 30, 15, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 5,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 5, 14, 30, 15, 0, DateTimeKind.Unspecified),
-                            Username = "dewi89"
-                        },
-                        new
-                        {
-                            UserId = 14,
-                            CompanyId = "CAT0013",
-                            CreatedAt = new DateTime(2026, 3, 2, 11, 20, 0, 0, DateTimeKind.Unspecified),
-                            Department = "Production",
-                            FullName = "Eko Nugroho",
-                            LastLogin = new DateTime(2026, 3, 5, 8, 45, 10, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 2,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 5, 8, 45, 10, 0, DateTimeKind.Unspecified),
-                            Username = "eko25"
-                        },
-                        new
-                        {
-                            UserId = 15,
-                            CompanyId = "CAT0014",
-                            CreatedAt = new DateTime(2026, 3, 2, 13, 30, 0, 0, DateTimeKind.Unspecified),
-                            Department = "Maintenance",
-                            FullName = "Siti Aminah",
-                            LastLogin = new DateTime(2026, 3, 4, 16, 10, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 4,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 4, 16, 10, 0, 0, DateTimeKind.Unspecified),
-                            Username = "siti64"
-                        },
-                        new
-                        {
-                            UserId = 16,
-                            CompanyId = "CAT0015",
-                            CreatedAt = new DateTime(2026, 3, 3, 10, 0, 0, 0, DateTimeKind.Unspecified),
-                            Department = "Production",
-                            FullName = "Joko Susilo",
-                            LastLogin = new DateTime(2026, 3, 3, 9, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 2,
-                            StatusId = 3,
-                            UpdatedAt = new DateTime(2026, 3, 3, 9, 0, 0, 0, DateTimeKind.Unspecified),
-                            Username = "joko11"
-                        },
-                        new
-                        {
-                            UserId = 17,
-                            CompanyId = "CAT0016",
-                            CreatedAt = new DateTime(2026, 3, 4, 15, 45, 0, 0, DateTimeKind.Unspecified),
-                            Department = "Production",
-                            FullName = "Ratna Sari",
-                            LastLogin = new DateTime(2026, 3, 3, 13, 15, 20, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$oiAF9zslwUXNz1Zr1O6MDOtiiD1wGnPvR2bNJ6hekI2L1mhz8ErGm",
-                            RoleId = 6,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 3, 13, 15, 20, 0, DateTimeKind.Unspecified),
-                            Username = "ratna97"
+                            Username = "tegar"
                         });
                 });
 
@@ -1716,6 +1569,26 @@ namespace AssemblyLineTester.Migrations
                             Description = "User is locked out due to multiple failed login attempts",
                             Name = "Locked"
                         });
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.ReportTestTypeSummary", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestReport", "Report")
+                        .WithMany()
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AssemblyLineTester.Models.TestType", "TestTypeInfo")
+                        .WithMany()
+                        .HasForeignKey("TestTypeName")
+                        .HasPrincipalKey("TestTypeName")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Report");
+
+                    b.Navigation("TestTypeInfo");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.RolePermission", b =>

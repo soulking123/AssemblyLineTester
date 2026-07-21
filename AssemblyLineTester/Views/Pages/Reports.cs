@@ -18,7 +18,6 @@ namespace AssemblyLineTester.Views.Pages
         private int _totalPages = 1;
         private int? _selectedReportId;
 
-        // The filter actually being displayed (list/summary/trend). Only changes when.
         private ReportFilter _appliedFilter = new();
         private Chart chartTrend = null!;
 
@@ -34,8 +33,11 @@ namespace AssemblyLineTester.Views.Pages
         {
             InitializeComponent();
             this.Load += Reports_Load;
+            this.VisibleChanged += Reports_VisibleChanged; 
             SetupEditableReportFields();
         }
+
+        private bool _hasLoadedOnce;
 
         private void Reports_Load(object? sender, EventArgs e)
         {
@@ -46,8 +48,17 @@ namespace AssemblyLineTester.Views.Pages
             InitializeCustomStyles();
             WireEvents();
 
-            // No filter applied yet -> show everything.
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
+            RenderReportData(_appliedFilter);
+            _hasLoadedOnce = true;
+        }
+
+        private void Reports_VisibleChanged(object? sender, EventArgs e)
+        {
+            if (DesignMode) return;
+            if (!Visible) return;
+            if (!_hasLoadedOnce) return;
+
             RenderReportData(_appliedFilter);
         }
 
@@ -607,30 +618,41 @@ namespace AssemblyLineTester.Views.Pages
                 (lblR1C1, lblR1C2, lblR1C3, lblR1C4, lblR1C5),
                 (lblR2C1, lblR2C2, lblR2C3, lblR2C4, lblR2C5),
                 (lblR3C1, lblR3C2, lblR3C3, lblR3C4, lblR3C5),
-                (lblR4C1, lblR4C2, lblR4C3, lblR4C4, lblR4C5),
-                (lblR5C1, lblR5C2, lblR5C3, lblR5C4, lblR5C5)
+                (lblR4C1, lblR4C2, lblR4C3, lblR4C4, lblR4C5)
             };
 
-            for (int i = 0; i < detail.TypeSummaries.Count && i < rows.Length; i++)
+            int typeCount = Math.Min(detail.TypeSummaries.Count, rows.Length);
+            for (int i = 0; i < rows.Length; i++)
             {
-                var s = detail.TypeSummaries[i];
                 var (cName, cTotal, cPass, cFail, cRate) = rows[i];
-                cName.Text = s.TestType;
-                cTotal.Text = s.Total.ToString();
-                cPass.Text = s.Pass.ToString();
-                cFail.Text = s.Fail.ToString();
-                cFail.ForeColor = s.Fail > 0 ? Color.FromArgb(220, 38, 38) : Color.FromArgb(30, 41, 59);
-                cRate.Text = $"{s.PassRatePercent:0.00}%";
-                cRate.ForeColor = s.Fail > 0 ? Color.FromArgb(220, 38, 38) : Color.FromArgb(30, 41, 59);
+                if (i < typeCount)
+                {
+                    var s = detail.TypeSummaries[i];
+                    cName.Text = s.TestType;
+                    cTotal.Text = s.Total.ToString();
+                    cPass.Text = s.Pass.ToString();
+                    cFail.Text = s.Fail.ToString();
+                    cFail.ForeColor = s.Fail > 0 ? Color.FromArgb(220, 38, 38) : Color.FromArgb(30, 41, 59);
+                    cRate.Text = $"{s.PassRatePercent:0.00}%";
+                    cRate.ForeColor = s.Fail > 0 ? Color.FromArgb(220, 38, 38) : Color.FromArgb(30, 41, 59);
+                }
+                else
+                {
+                    cName.Text = "-";
+                    cTotal.Text = "-";
+                    cPass.Text = "-";
+                    cFail.Text = "-";
+                    cFail.ForeColor = Color.FromArgb(30, 41, 59);
+                    cRate.Text = "-";
+                    cRate.ForeColor = Color.FromArgb(30, 41, 59);
+                }
             }
 
-            int totalAll = detail.TypeSummaries.Sum(t => t.Total);
-            int passAll = detail.TypeSummaries.Sum(t => t.Pass);
-            int failAll = detail.TypeSummaries.Sum(t => t.Fail);
-            lblR5C2.Text = totalAll.ToString();
-            lblR5C3.Text = passAll.ToString();
-            lblR5C4.Text = failAll.ToString();
-            lblR5C5.Text = totalAll == 0 ? "100.00%" : $"{passAll * 100.0 / totalAll:0.00}%";
+            lblR5C1.Text = "TOTAL";
+            lblR5C2.Text = detail.TotalNets.ToString();
+            lblR5C3.Text = detail.PassCount.ToString();
+            lblR5C4.Text = detail.FailCount.ToString();
+            lblR5C5.Text = detail.TotalNets == 0 ? "100.00%" : $"{detail.PassCount * 100.0 / detail.TotalNets:0.00}%";
 
             bool overallPass = string.Equals(detail.OverallResult, "PASS", StringComparison.OrdinalIgnoreCase);
             lblPassBox.Text = detail.OverallResult;
@@ -649,6 +671,21 @@ namespace AssemblyLineTester.Views.Pages
             lblGenAreaVal.Text = lblGenOpVal.Text = lblGenPartVal.Text = lblGenTimeVal.Text = "-";
             lblGenSnVal.Text = lblGenResVal.Text = "-";
             lblPassBox.Text = "-";
+
+            var summaryRows = new[]
+            {
+                (lblR1C1, lblR1C2, lblR1C3, lblR1C4, lblR1C5),
+                (lblR2C1, lblR2C2, lblR2C3, lblR2C4, lblR2C5),
+                (lblR3C1, lblR3C2, lblR3C3, lblR3C4, lblR3C5),
+                (lblR4C1, lblR4C2, lblR4C3, lblR4C4, lblR4C5),
+                (lblR5C1, lblR5C2, lblR5C3, lblR5C4, lblR5C5)
+            };
+            foreach (var (cName, cTotal, cPass, cFail, cRate) in summaryRows)
+            {
+                cName.Text = cTotal.Text = cPass.Text = cFail.Text = cRate.Text = "-";
+                cFail.ForeColor = Color.FromArgb(30, 41, 59);
+                cRate.ForeColor = Color.FromArgb(30, 41, 59);
+            }
         }
 
         private void GridReports_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
