@@ -1,7 +1,10 @@
+using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using FontAwesome.Sharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -15,6 +18,9 @@ namespace AssemblyLineTester.Views.Pages
         private readonly List<DiagramNode> leftNodes = new();
         private readonly List<DiagramNode> rightNodes = new();
         private readonly List<DiagramConnection> connections = new();
+        private readonly TestConfigService _configService = new TestConfigService();
+        private readonly InstrumentService _instrument = new InstrumentService();
+        private string _customTestText = string.Empty;
 
         private class DiagramNode
         {
@@ -42,7 +48,7 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                LoadDefaultData();
+                LoadTestTypeColumnItems();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
                 picPreview.Invalidate();
@@ -51,25 +57,56 @@ namespace AssemblyLineTester.Views.Pages
 
         private void SetupEvents()
         {
-            btnAdd.Click += BtnAdd_Click;
-            btnRemove.Click += BtnRemove_Click;
-            btnReset.Click += BtnReset_Click;
             btnExport.Click += (s, e) => MessageBox.Show("Export feature not implemented yet.", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
             btnImport.Click += (s, e) => MessageBox.Show("Import feature not implemented yet.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             btnLearnConnection.Click += (s, e) => MessageBox.Show("Learning connection...", "Learn Connection", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            btnStart.Click += (s, e) => MessageBox.Show("Starting manual test...", "Start Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             gridConfig.CellValueChanged += GridConfig_CellValueChanged;
             gridConfig.RowsRemoved += GridConfig_RowsChanged;
             gridConfig.RowsAdded += GridConfig_RowsChanged;
             gridConfig.CellClick += GridConfig_CellClick;
+            gridConfig.CurrentCellDirtyStateChanged += GridConfig_CurrentCellDirtyStateChanged;
+            gridConfig.DataError += (s, e) => { e.ThrowException = false; };
 
             picPreview.Paint += PicPreview_Paint;
             picPreview.MouseDown += PicPreview_MouseDown;
             picPreview.Resize += (s, e) => picPreview.Invalidate();
             pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
             splitContainerMain.SplitterMoved += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
+        }
+
+        private static string[] GetUnitsForTestType(string testType) => UnitConversionHelper.GetUnitsForTestType(testType);
+
+        private void UpdateRowUnitDropdown(int rowIndex)
+        {
+            if (rowIndex < 0 || rowIndex >= gridConfig.Rows.Count) return;
+            DataGridViewRow row = gridConfig.Rows[rowIndex];
+            string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
+            string[] allowedUnits = GetUnitsForTestType(testType);
+
+            if (row.Cells["colUnit"] is DataGridViewComboBoxCell unitCell)
+            {
+                string currentVal = unitCell.Value?.ToString() ?? "";
+                unitCell.Items.Clear();
+                unitCell.Items.AddRange(allowedUnits);
+
+                if (!allowedUnits.Contains(currentVal))
+                {
+                    unitCell.Value = allowedUnits.Length > 0 ? allowedUnits[0] : "";
+                }
+            }
+        }
+
+        private void LoadTestTypeColumnItems()
+        {
+            var names = _configService.GetTestTypeNames();
+
+            if (gridConfig.Columns["colTestType"] is DataGridViewComboBoxColumn testTypeCol && names.Count > 0)
+            {
+                testTypeCol.Items.Clear();
+                testTypeCol.Items.AddRange(names.Cast<object>().ToArray());
+            }
         }
 
         public ManualTestingPage()
@@ -90,22 +127,7 @@ namespace AssemblyLineTester.Views.Pages
             catch { /* ignore */ }
         }
 
-        private void LoadDefaultData()
-        {
-            gridConfig.Rows.Clear();
-            highlightedRows.Clear();
 
-            // Default Data: No, From, To, Measurement
-            gridConfig.Rows.Add("1", "X1-01", "Y1-01", "Ω");
-            gridConfig.Rows.Add("2", "X2-01", "Y2-01", "Ω");
-            gridConfig.Rows.Add("3", "X2-02", "Y2-02", "μF");
-            gridConfig.Rows.Add("4", "X1-02", "Y1-02", "Ω");
-
-            RenumberRows();
-            UpdateTotalNetCount();
-            UpdateDiagramSize();
-            picPreview.Invalidate();
-        }
 
         private void RenumberRows()
         {
@@ -137,7 +159,13 @@ namespace AssemblyLineTester.Views.Pages
         private void BtnAdd_Click(object? sender, EventArgs e)
         {
             int newIdx = gridConfig.Rows.Count + 1;
-            gridConfig.Rows.Add(newIdx.ToString(), $"X1-{newIdx:D2}", $"Y1-{newIdx:D2}", "Ω");
+            string defaultTestType = "WIRE";
+            string defaultUnit = UnitConversionHelper.GetBaseUnit(defaultTestType);
+
+            int idx = gridConfig.Rows.Add(newIdx.ToString(), $"{newIdx}", $"{newIdx+64}", defaultTestType, defaultUnit);
+            UpdateRowUnitDropdown(idx);
+            gridConfig.Rows[idx].Cells["colUnit"].Value = defaultUnit;
+
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
@@ -180,7 +208,74 @@ namespace AssemblyLineTester.Views.Pages
                 picPreview.Invalidate();
             }
         }
+        private void btnLearnConnection_Click(object sender, EventArgs e)
+        {
+            //_instrumen
+        }
 
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            //bool isConnected = _instrument.Connect();
+            //if (!isConnected)
+            //{
+            //    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
+            Debug.WriteLine("Starting create manual config...");
+            var manualConfig = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
+            Debug.WriteLine("Suceed created manual config...");
+            _customTestText = _configService.ConvertToProgramText(manualConfig);
+            Debug.WriteLine(_customTestText); 
+        }
+
+        private void btnStartSelected_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Start selected is not implemented yet", "btnStartSelected",MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private TestConfiguration? BuildConfigurationFromGrid(string configName, string productModel, string? description)
+        {
+            var nets = new List<TestConfigNet>();
+
+            for (int i = 0; i < gridConfig.Rows.Count; i++)
+            {
+                var row = gridConfig.Rows[i];
+                if (row.IsNewRow) continue;
+
+                if (!int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int fromAddr))
+                {
+                    MessageBox.Show($"Row {i + 1}: Net-From Address must be a number.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return null;
+                }
+                if (!int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toAddr))
+                {
+                    MessageBox.Show($"Row {i + 1}: Net-To Address must be a number.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return null;
+                }
+
+                string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
+                var tt = _configService.GetTestTypeByName(testTypeName);
+                nets.Add(new TestConfigNet
+                {
+                    SequenceNo = i + 1,
+                    FromAddress = fromAddr,
+                    ToAddress = toAddr,
+                    TestTypeId = tt?.Id ?? 0,
+                    TestType = null,
+                    LowerLimit = 10,
+                    UpperLimit = 10,
+                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? ""
+                });
+            }
+
+            return new TestConfiguration
+            {
+                ConfigName = configName,
+                ProductModel = productModel,
+                Description = description,
+                Nets = nets
+            };
+        }
         private void GridConfig_RowsChanged(object? sender, EventArgs e)
         {
             UpdateTotalNetCount();
@@ -190,7 +285,20 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
         {
+            if (e.RowIndex >= 0 && e.ColumnIndex == gridConfig.Columns["colTestType"]?.Index)
+            {
+                UpdateRowUnitDropdown(e.RowIndex);
+            }
             picPreview.Invalidate();
+        }
+
+        private void GridConfig_CurrentCellDirtyStateChanged(object? sender, EventArgs e)
+        {
+            if (gridConfig.IsCurrentCellDirty &&
+               (gridConfig.CurrentCell is DataGridViewComboBoxCell || gridConfig.CurrentCell is DataGridViewCheckBoxCell))
+            {
+                gridConfig.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            }
         }
 
         private void GridConfig_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -357,7 +465,7 @@ namespace AssemblyLineTester.Views.Pages
                 Pen p = highlightedRows.Contains(conn.RowIndex) ? activeWirePen : wirePen;
                 g.DrawBezier(p, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
             }
-            
+
             using Font fontLabel = new("Segoe UI", 9F, FontStyle.Regular);
             using Font fontAddr = new("Segoe UI", 10.5F, FontStyle.Bold);
             using StringFormat sfLabel = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisCharacter };
@@ -410,9 +518,11 @@ namespace AssemblyLineTester.Views.Pages
             path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
             path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
             path.CloseFigure();
-            
+
             g.FillPath(brush, path);
             g.DrawPath(pen, path);
         }
+
+        
     }
 }

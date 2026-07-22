@@ -55,44 +55,48 @@ namespace AssemblyLineTester.Views
             pnlCard.Controls.Add(lblPassword);
             pnlCard.Controls.Add(pnlPasswordContainer);
             pnlCard.Controls.Add(btnLogin);
-            pnlCard.Location = new Point(54, 66);
-            pnlCard.Margin = new Padding(6);
+            pnlCard.Location = new Point(33, 41);
+            pnlCard.Margin = new Padding(4);
             pnlCard.Name = "pnlCard";
-            pnlCard.Size = new Size(700, 776);
+            pnlCard.Size = new Size(431, 485);
             pnlCard.TabIndex = 0;
+            pnlCard.MouseDown += Form_MouseDown;
             // 
             // logoBox
             // 
             logoBox.BackColor = Color.Transparent;
-            logoBox.Location = new Point(83, 27);
-            logoBox.Margin = new Padding(6);
+            logoBox.Image = Properties.Resources.cat_logo;
+            logoBox.Location = new Point(51, 17);
+            logoBox.Margin = new Padding(4);
             logoBox.Name = "logoBox";
-            logoBox.Size = new Size(531, 153);
+            logoBox.Size = new Size(327, 96);
             logoBox.SizeMode = PictureBoxSizeMode.Zoom;
             logoBox.TabIndex = 0;
             logoBox.TabStop = false;
+            logoBox.MouseDown += Form_MouseDown;
             // 
             // lblTitle
             // 
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblTitle.Location = new Point(171, 186);
-            lblTitle.Margin = new Padding(6, 0, 6, 0);
+            lblTitle.Location = new Point(105, 116);
+            lblTitle.Margin = new Padding(4, 0, 4, 0);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(359, 59);
+            lblTitle.Size = new Size(226, 37);
             lblTitle.TabIndex = 1;
             lblTitle.Text = "WELCOME BACK";
+            lblTitle.MouseDown += Form_MouseDown;
             // 
             // lblSubtitle
             // 
             lblSubtitle.AutoSize = true;
             lblSubtitle.Font = new Font("Segoe UI", 10F);
             lblSubtitle.ForeColor = Color.FromArgb(100, 116, 139);
-            lblSubtitle.Location = new Point(117, 245);
-            lblSubtitle.Margin = new Padding(6, 0, 6, 0);
+            lblSubtitle.Location = new Point(72, 153);
+            lblSubtitle.Margin = new Padding(4, 0, 4, 0);
             lblSubtitle.Name = "lblSubtitle";
-            lblSubtitle.Size = new Size(461, 37);
+            lblSubtitle.Size = new Size(297, 23);
             lblSubtitle.TabIndex = 2;
             lblSubtitle.Text = "Please enter your credentials to login.";
             // 
@@ -101,10 +105,10 @@ namespace AssemblyLineTester.Views
             lblUserId.AutoSize = true;
             lblUserId.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblUserId.ForeColor = Color.FromArgb(100, 116, 139);
-            lblUserId.Location = new Point(80, 325);
-            lblUserId.Margin = new Padding(6, 0, 6, 0);
+            lblUserId.Location = new Point(49, 203);
+            lblUserId.Margin = new Padding(4, 0, 4, 0);
             lblUserId.Name = "lblUserId";
-            lblUserId.Size = new Size(146, 37);
+            lblUserId.Size = new Size(89, 23);
             lblUserId.TabIndex = 3;
             lblUserId.Text = "Username";
             // 
@@ -114,11 +118,14 @@ namespace AssemblyLineTester.Views
             pnlUsernameContainer.Controls.Add(txtUsername);
             pnlUsernameContainer.Controls.Add(iconUsername);
             pnlUsernameContainer.Controls.Add(pnlUsernameLine);
-            pnlUsernameContainer.Location = new Point(80, 368);
-            pnlUsernameContainer.Margin = new Padding(6);
+            pnlUsernameContainer.Location = new Point(49, 230);
+            pnlUsernameContainer.Margin = new Padding(4);
             pnlUsernameContainer.Name = "pnlUsernameContainer";
-            pnlUsernameContainer.Size = new Size(541, 67);
+            pnlUsernameContainer.Size = new Size(333, 42);
             pnlUsernameContainer.TabIndex = 4;
+            pnlUsernameContainer.Click += FocusUsername;
+            pnlUsernameContainer.MouseEnter += UpdateUsernameVisuals;
+            pnlUsernameContainer.MouseLeave += UpdateUsernameVisuals;
             // 
             // txtUsername
             // 
@@ -126,11 +133,13 @@ namespace AssemblyLineTester.Views
             txtUsername.BorderStyle = BorderStyle.None;
             txtUsername.Font = new Font("Segoe UI", 12F);
             txtUsername.ForeColor = Color.Black;
-            txtUsername.Location = new Point(55, 13);
-            txtUsername.Margin = new Padding(6);
+            txtUsername.Location = new Point(34, 8);
+            txtUsername.Margin = new Padding(4);
             txtUsername.Name = "txtUsername";
-            txtUsername.Size = new Size(479, 43);
+            txtUsername.Size = new Size(295, 27);
             txtUsername.TabIndex = 1;
+            txtUsername.Enter += UpdateUsernameVisuals;
+            txtUsername.KeyDown += TxtUsername_EnterKeyDown;
             // 
             // iconUsername
             // 
@@ -139,34 +148,38 @@ namespace AssemblyLineTester.Views
             iconUsername.IconChar = FontAwesome.Sharp.IconChar.User;
             iconUsername.IconColor = Color.FromArgb(100, 116, 139);
             iconUsername.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconUsername.IconSize = 38;
-            iconUsername.Location = new Point(3, 13);
-            iconUsername.Margin = new Padding(6);
+            iconUsername.IconSize = 24;
+            iconUsername.Location = new Point(2, 8);
+            iconUsername.Margin = new Padding(4);
             iconUsername.Name = "iconUsername";
-            iconUsername.Size = new Size(39, 38);
+            iconUsername.Size = new Size(24, 24);
             iconUsername.SizeMode = PictureBoxSizeMode.CenterImage;
             iconUsername.TabIndex = 0;
             iconUsername.TabStop = false;
+            iconUsername.Click += FocusUsername;
+            iconUsername.MouseEnter += UpdateUsernameVisuals;
+            iconUsername.MouseLeave += UpdateUsernameVisuals;
             // 
             // pnlUsernameLine
             // 
             pnlUsernameLine.BackColor = Color.FromArgb(100, 116, 139);
             pnlUsernameLine.Dock = DockStyle.Bottom;
-            pnlUsernameLine.Location = new Point(0, 64);
+            pnlUsernameLine.Location = new Point(0, 40);
             pnlUsernameLine.Margin = new Padding(0);
             pnlUsernameLine.Name = "pnlUsernameLine";
-            pnlUsernameLine.Size = new Size(541, 3);
+            pnlUsernameLine.Size = new Size(333, 2);
             pnlUsernameLine.TabIndex = 2;
+            pnlUsernameLine.Click += FocusUsername;
             // 
             // lblPassword
             // 
             lblPassword.AutoSize = true;
             lblPassword.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblPassword.ForeColor = Color.FromArgb(100, 116, 139);
-            lblPassword.Location = new Point(80, 458);
-            lblPassword.Margin = new Padding(6, 0, 6, 0);
+            lblPassword.Location = new Point(49, 286);
+            lblPassword.Margin = new Padding(4, 0, 4, 0);
             lblPassword.Name = "lblPassword";
-            lblPassword.Size = new Size(139, 37);
+            lblPassword.Size = new Size(85, 23);
             lblPassword.TabIndex = 5;
             lblPassword.Text = "Password";
             // 
@@ -176,11 +189,16 @@ namespace AssemblyLineTester.Views
             pnlPasswordContainer.Controls.Add(txtPassword);
             pnlPasswordContainer.Controls.Add(iconPassword);
             pnlPasswordContainer.Controls.Add(pnlPasswordLine);
-            pnlPasswordContainer.Location = new Point(80, 501);
-            pnlPasswordContainer.Margin = new Padding(6);
+            pnlPasswordContainer.Location = new Point(49, 313);
+            pnlPasswordContainer.Margin = new Padding(4);
             pnlPasswordContainer.Name = "pnlPasswordContainer";
-            pnlPasswordContainer.Size = new Size(541, 67);
+            pnlPasswordContainer.Size = new Size(333, 42);
             pnlPasswordContainer.TabIndex = 6;
+            pnlPasswordContainer.Click += FocusPassword;
+            pnlPasswordContainer.Enter += UpdatePasswordVisuals;
+            pnlPasswordContainer.Leave += UpdatePasswordVisuals;
+            pnlPasswordContainer.MouseEnter += UpdatePasswordVisuals;
+            pnlPasswordContainer.MouseLeave += UpdatePasswordVisuals;
             // 
             // txtPassword
             // 
@@ -188,12 +206,13 @@ namespace AssemblyLineTester.Views
             txtPassword.BorderStyle = BorderStyle.None;
             txtPassword.Font = new Font("Segoe UI", 12F);
             txtPassword.ForeColor = Color.Black;
-            txtPassword.Location = new Point(55, 13);
-            txtPassword.Margin = new Padding(6);
+            txtPassword.Location = new Point(34, 8);
+            txtPassword.Margin = new Padding(4);
             txtPassword.Name = "txtPassword";
-            txtPassword.Size = new Size(479, 43);
+            txtPassword.Size = new Size(295, 27);
             txtPassword.TabIndex = 1;
             txtPassword.UseSystemPasswordChar = true;
+            txtPassword.KeyDown += TxtPassword_EnterKeyDown;
             // 
             // iconPassword
             // 
@@ -202,24 +221,28 @@ namespace AssemblyLineTester.Views
             iconPassword.IconChar = FontAwesome.Sharp.IconChar.Key;
             iconPassword.IconColor = Color.FromArgb(100, 116, 139);
             iconPassword.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconPassword.IconSize = 38;
-            iconPassword.Location = new Point(3, 13);
-            iconPassword.Margin = new Padding(6);
+            iconPassword.IconSize = 24;
+            iconPassword.Location = new Point(2, 8);
+            iconPassword.Margin = new Padding(4);
             iconPassword.Name = "iconPassword";
-            iconPassword.Size = new Size(39, 38);
+            iconPassword.Size = new Size(24, 24);
             iconPassword.SizeMode = PictureBoxSizeMode.CenterImage;
             iconPassword.TabIndex = 0;
             iconPassword.TabStop = false;
+            iconPassword.Click += FocusPassword;
+            iconPassword.MouseEnter += UpdatePasswordVisuals;
+            iconPassword.MouseLeave += UpdatePasswordVisuals;
             // 
             // pnlPasswordLine
             // 
             pnlPasswordLine.BackColor = Color.FromArgb(100, 116, 139);
             pnlPasswordLine.Dock = DockStyle.Bottom;
-            pnlPasswordLine.Location = new Point(0, 64);
+            pnlPasswordLine.Location = new Point(0, 40);
             pnlPasswordLine.Margin = new Padding(0);
             pnlPasswordLine.Name = "pnlPasswordLine";
-            pnlPasswordLine.Size = new Size(541, 3);
+            pnlPasswordLine.Size = new Size(333, 2);
             pnlPasswordLine.TabIndex = 2;
+            pnlPasswordLine.Click += FocusPassword;
             // 
             // btnLogin
             // 
@@ -229,11 +252,14 @@ namespace AssemblyLineTester.Views
             btnLogin.FlatStyle = FlatStyle.Flat;
             btnLogin.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnLogin.ForeColor = Color.FromArgb(15, 23, 42);
-            btnLogin.Location = new Point(80, 621);
-            btnLogin.Margin = new Padding(6);
+            btnLogin.HoverForeColor = Color.Empty;
+            btnLogin.Location = new Point(49, 388);
+            btnLogin.Margin = new Padding(4);
             btnLogin.Name = "btnLogin";
-            btnLogin.Size = new Size(541, 80);
+            btnLogin.PressedForeColor = Color.Empty;
+            btnLogin.Size = new Size(333, 50);
             btnLogin.TabIndex = 7;
+            btnLogin.TabStop = false;
             btnLogin.Text = "LOG IN";
             btnLogin.UseVisualStyleBackColor = false;
             btnLogin.Click += BtnLogin_Click;
@@ -250,23 +276,23 @@ namespace AssemblyLineTester.Views
             btnClose.IconColor = Color.FromArgb(203, 213, 225);
             btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnClose.IconSize = 28;
-            btnClose.Location = new Point(744, 8);
+            btnClose.Location = new Point(458, 5);
             btnClose.Margin = new Padding(0);
             btnClose.Name = "btnClose";
-            btnClose.Size = new Size(54, 50);
+            btnClose.Size = new Size(33, 31);
             btnClose.TabIndex = 8;
             btnClose.UseVisualStyleBackColor = false;
             // 
             // LoginForm
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(34, 40, 49);
-            ClientSize = new Size(806, 914);
+            ClientSize = new Size(496, 571);
             Controls.Add(btnClose);
             Controls.Add(pnlCard);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(6);
+            Margin = new Padding(4);
             MaximizeBox = false;
             Name = "LoginForm";
             StartPosition = FormStartPosition.CenterScreen;

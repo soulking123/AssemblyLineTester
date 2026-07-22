@@ -16,7 +16,6 @@ namespace AssemblyLineTester.Views.Pages
     {
         private readonly DashboardService _dashboardService = new();
         private readonly TestConfigService _configService = new();
-        private readonly InstrumentService _instrument = new();
         private System.Windows.Forms.Timer? _uiRefreshTimer;
         private DashboardTimeRange _selectedRange = DashboardTimeRange.Today;
         private int _totalFailForChart;
