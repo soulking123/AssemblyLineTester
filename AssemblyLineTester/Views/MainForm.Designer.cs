@@ -74,6 +74,7 @@ namespace AssemblyLineTester.Views
             splitContainer1.Location = new Point(0, 0);
             splitContainer1.Margin = new Padding(5);
             splitContainer1.Name = "splitContainer1";
+            splitContainer1.IsSplitterFixed = true;
             // 
             // splitContainer1.Panel1
             // 

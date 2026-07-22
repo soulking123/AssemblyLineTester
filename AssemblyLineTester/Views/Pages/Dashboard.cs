@@ -21,7 +21,7 @@ namespace AssemblyLineTester.Views.Pages
         private DashboardTimeRange _selectedRange = DashboardTimeRange.Today;
         private int _totalFailForChart;
 
-        
+
 
         public Dashboard()
         {

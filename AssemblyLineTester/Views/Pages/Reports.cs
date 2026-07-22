@@ -543,7 +543,11 @@ namespace AssemblyLineTester.Views.Pages
             if (gridReports.Rows.Count > 0)
             {
                 gridReports.Rows[0].Selected = true;
-                if (gridReports.Rows[0].Tag is int firstId) LoadPreview(firstId);
+                if (gridReports.Rows[0].Tag is int firstId)
+                {
+                    _selectedReportId = firstId;
+                    LoadPreview(firstId);
+                }
             }
             else
             {

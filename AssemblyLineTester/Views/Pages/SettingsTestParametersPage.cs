@@ -57,12 +57,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void SetupEvents()
         {
-            btnAdd.Click += BtnAdd_Click;
-            btnRemove.Click += BtnRemove_Click;
-            btnReset.Click += BtnReset_Click;
-            btnImport.Click += BtnImport_Click;
-            btnExport.Click += BtnExport_Click;
-
             gridConfig.CellValueChanged += GridConfig_CellValueChanged;
             gridConfig.CellValidating += GridConfig_CellValidating;
             gridConfig.RowsRemoved += GridConfig_RowsChanged;

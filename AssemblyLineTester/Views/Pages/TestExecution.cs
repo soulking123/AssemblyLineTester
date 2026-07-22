@@ -422,7 +422,7 @@ namespace AssemblyLineTester.Views.Pages
                                 StepNo = step++,
                                 NetId = measurement.Instruction ?? "",
                                 TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
-                                FromPoint = $"{measurement.Point1}",   
+                                FromPoint = $"{measurement.Point1}",
                                 ToPoint = $"{measurement.Point2}",
                                 TestType = rowTestType,
                                 MeasuredValue = Math.Round(measurement.Value1, 3),

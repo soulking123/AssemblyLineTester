@@ -140,7 +140,7 @@ namespace AssemblyLineTester.Views.Controls
 
         private Color GetParentBackColor()
         {
-            Control parent = this.Parent;
+            Control? parent = this.Parent;
             while (parent != null && parent.BackColor == Color.Transparent)
             {
                 parent = parent.Parent;
