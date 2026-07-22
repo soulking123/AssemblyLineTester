@@ -33,11 +33,6 @@ namespace AssemblyLineTester.Views.Pages
             splitContainerMain = new SplitContainer();
             pnlLeftBox = new Panel();
             gridConfig = new DataGridView();
-            colNo = new DataGridViewTextBoxColumn();
-            colFromAddr = new DataGridViewTextBoxColumn();
-            colToAddr = new DataGridViewTextBoxColumn();
-            colTestType = new DataGridViewComboBoxColumn();
-            colUnit = new DataGridViewComboBoxColumn();
             pnlConfigInfo = new Panel();
             tblConfigInfo = new TableLayoutPanel();
             btnStartSelected = new AssemblyLineTester.Views.Controls.RoundedButton();
@@ -80,6 +75,11 @@ namespace AssemblyLineTester.Views.Pages
             tblCellInsRes = new TableLayoutPanel();
             lblInsulationResistance = new Label();
             txtInsulationResistance = new TextBox();
+            colNo = new DataGridViewTextBoxColumn();
+            colFromAddr = new DataGridViewTextBoxColumn();
+            colToAddr = new DataGridViewTextBoxColumn();
+            colTestType = new DataGridViewComboBoxColumn();
+            colUnit = new DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)splitContainerMain).BeginInit();
             splitContainerMain.Panel1.SuspendLayout();
             splitContainerMain.Panel2.SuspendLayout();
@@ -209,41 +209,6 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.RowTemplate.Height = 38;
             gridConfig.Size = new Size(675, 678);
             gridConfig.TabIndex = 4;
-            // 
-            // colNo
-            // 
-            colNo.HeaderText = "No.";
-            colNo.MinimumWidth = 50;
-            colNo.Name = "colNo";
-            colNo.ReadOnly = true;
-            // 
-            // colFromAddr
-            // 
-            colFromAddr.HeaderText = "From";
-            colFromAddr.MinimumWidth = 90;
-            colFromAddr.Name = "colFromAddr";
-            // 
-            // colToAddr
-            // 
-            colToAddr.HeaderText = "To";
-            colToAddr.MinimumWidth = 90;
-            colToAddr.Name = "colToAddr";
-            // 
-            // colTestType
-            // 
-            colTestType.FlatStyle = FlatStyle.Flat;
-            colTestType.HeaderText = "Test Type";
-            colTestType.Items.AddRange(new object[] { "WIRE", "4WIRE", "TWISTED PAIR", "SIGNATURE WIRE", "RESISTOR", "4RESISTOR", "CAPACITOR", "DIODE", "SIGNATURE DIODE", "OPEN", "CLOSE", "LINK", "PROBE", "COMMENT", "LUA COMPONENT" });
-            colTestType.MinimumWidth = 110;
-            colTestType.Name = "colTestType";
-            // 
-            // colUnit
-            // 
-            colUnit.FlatStyle = FlatStyle.Flat;
-            colUnit.HeaderText = "Measurement";
-            colUnit.Items.AddRange(new object[] { "Ω", "mΩ", "kΩ", "MΩ", "GΩ", "F", "μF", "nF", "pF", "V", "mV", "kV", "A", "mA", "Hz", "ms" });
-            colUnit.MinimumWidth = 110;
-            colUnit.Name = "colUnit";
             // 
             // pnlConfigInfo
             // 
@@ -813,6 +778,41 @@ namespace AssemblyLineTester.Views.Pages
             txtInsulationResistance.TabIndex = 1;
             txtInsulationResistance.Text = "500";
             // 
+            // colNo
+            // 
+            colNo.HeaderText = "No.";
+            colNo.MinimumWidth = 50;
+            colNo.Name = "colNo";
+            colNo.ReadOnly = true;
+            // 
+            // colFromAddr
+            // 
+            colFromAddr.HeaderText = "From";
+            colFromAddr.MinimumWidth = 90;
+            colFromAddr.Name = "colFromAddr";
+            // 
+            // colToAddr
+            // 
+            colToAddr.HeaderText = "To";
+            colToAddr.MinimumWidth = 90;
+            colToAddr.Name = "colToAddr";
+            // 
+            // colTestType
+            // 
+            colTestType.FlatStyle = FlatStyle.Flat;
+            colTestType.HeaderText = "Test Type";
+            colTestType.Items.AddRange(new object[] { "WIRE", "4WIRE", "TWISTED PAIR", "SIGNATURE WIRE", "RESISTOR", "4RESISTOR", "CAPACITOR", "DIODE", "SIGNATURE DIODE", "OPEN", "CLOSE", "LINK", "PROBE", "COMMENT", "LUA COMPONENT" });
+            colTestType.MinimumWidth = 110;
+            colTestType.Name = "colTestType";
+            // 
+            // colUnit
+            // 
+            colUnit.HeaderText = "Measurement";
+            colUnit.MinimumWidth = 110;
+            colUnit.Name = "colUnit";
+            colUnit.Resizable = DataGridViewTriState.True;
+            colUnit.SortMode = DataGridViewColumnSortMode.NotSortable;
+            // 
             // ManualTestingPage
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -873,7 +873,6 @@ namespace AssemblyLineTester.Views.Pages
         private DataGridViewTextBoxColumn colUpperLimit;
         private DataGridViewTextBoxColumn colExpectedValue;
         private DataGridViewTextBoxColumn colTolerance;
-        private DataGridViewComboBoxColumn colUnit;
         private Panel pnlConfigInfo;
         private TableLayoutPanel tblConfigInfo;
         private TableLayoutPanel tblCellConfigName;
@@ -908,5 +907,6 @@ namespace AssemblyLineTester.Views.Pages
         private Panel pnlHeaderBottom;
         private Label lblHeaderBottom;
         private Controls.RoundedButton btnStartSelected;
+        private DataGridViewTextBoxColumn colUnit;
     }
 }
