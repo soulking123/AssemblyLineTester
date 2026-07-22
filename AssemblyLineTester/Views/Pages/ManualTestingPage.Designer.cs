@@ -30,6 +30,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             btnLearnConnection = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnStart = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnStartSelected = new AssemblyLineTester.Views.Controls.RoundedButton();
             splitContainerMain = new SplitContainer();
             pnlLeftBox = new Panel();
             gridConfig = new DataGridView();
@@ -142,6 +143,26 @@ namespace AssemblyLineTester.Views.Pages
             btnStart.TabIndex = 1;
             btnStart.Text = "Start";
             btnStart.UseVisualStyleBackColor = false;
+            // 
+            // btnStartSelected
+            // 
+            btnStartSelected.BackColor = Color.FromArgb(245, 158, 11);
+            btnStartSelected.BorderRadius = 14;
+            btnStartSelected.FlatAppearance.BorderSize = 0;
+            btnStartSelected.FlatStyle = FlatStyle.Flat;
+            btnStartSelected.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnStartSelected.ForeColor = Color.White;
+            btnStartSelected.HoverBackColor = Color.FromArgb(217, 119, 6);
+            btnStartSelected.HoverForeColor = Color.Empty;
+            btnStartSelected.Dock = DockStyle.Fill;
+            btnStartSelected.Margin = new Padding(40, 10, 40, 10);
+            btnStartSelected.Name = "btnStartSelected";
+            btnStartSelected.NormalBackColor = Color.FromArgb(245, 158, 11);
+            btnStartSelected.PressedBackColor = Color.FromArgb(180, 83, 9);
+            btnStartSelected.PressedForeColor = Color.Empty;
+            btnStartSelected.TabIndex = 2;
+            btnStartSelected.Text = "Start Selected";
+            btnStartSelected.UseVisualStyleBackColor = false;
             // 
             // splitContainerMain
             // 
@@ -260,14 +281,19 @@ namespace AssemblyLineTester.Views.Pages
             tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblConfigInfo.Controls.Add(btnLearnConnection, 0, 0);
             tblConfigInfo.Controls.Add(btnStart, 1, 0);
+            tblConfigInfo.Controls.Add(btnStartSelected, 0, 1);
+            tblConfigInfo.SetColumnSpan(btnStartSelected, 2);
+            tblConfigInfo.Controls.Add(tblCellConnRes, 0, 2);
+            tblConfigInfo.Controls.Add(tblCellInsRes, 1, 2);
             tblConfigInfo.Dock = DockStyle.Fill;
             tblConfigInfo.Location = new Point(15, 10);
             tblConfigInfo.Margin = new Padding(0);
             tblConfigInfo.Name = "tblConfigInfo";
-            tblConfigInfo.RowCount = 1;
+            tblConfigInfo.RowCount = 3;
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
-            tblConfigInfo.Size = new Size(1068, 56);
+            tblConfigInfo.RowStyles.Add(new RowStyle());
+            tblConfigInfo.Size = new Size(1068, 200);
             tblConfigInfo.TabIndex = 0;
             // 
             // pnlConfigInfoHeader
@@ -839,6 +865,7 @@ namespace AssemblyLineTester.Views.Pages
         #endregion
         private AssemblyLineTester.Views.Controls.RoundedButton btnLearnConnection;
         private AssemblyLineTester.Views.Controls.RoundedButton btnStart;
+        private AssemblyLineTester.Views.Controls.RoundedButton btnStartSelected;
 
         private SplitContainer splitContainerMain;
         private Panel pnlLeftBox;

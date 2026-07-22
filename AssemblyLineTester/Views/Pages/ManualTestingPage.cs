@@ -59,6 +59,7 @@ namespace AssemblyLineTester.Views.Pages
 
             btnLearnConnection.Click += (s, e) => MessageBox.Show("Learning connection...", "Learn Connection", MessageBoxButtons.OK, MessageBoxIcon.Information);
             btnStart.Click += (s, e) => MessageBox.Show("Starting manual test...", "Start Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            btnStartSelected.Click += (s, e) => MessageBox.Show("Starting selected...", "Start Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             gridConfig.CellValueChanged += GridConfig_CellValueChanged;
             gridConfig.RowsRemoved += GridConfig_RowsChanged;
