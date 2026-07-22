@@ -11,6 +11,16 @@ namespace AssemblyLineTester.Views
         private int expandedWidth = 380;
         private int collapsedWidth = 90;
 
+        private Size _expandedLogoSize;
+        private Point _expandedToggleLoc;
+        private Size _expandedToggleSize;
+        private Size _expandedLblMenuSize;
+        private Point _expandedLblMenuLoc;
+        private int _expandedMenuStartY;
+        private int _expandedMenuX;
+        private int _expandedMenuWidth;
+        private int _expandedMenuGap;
+
         public bool IsLoggingOut { get; private set; } = false;
 
         private TestHistory? pageTestHistory;
@@ -41,7 +51,17 @@ namespace AssemblyLineTester.Views
             catch { /* fallback silently */ }
             this.WindowState = FormWindowState.Maximized;
             expandedWidth = splitContainer1.SplitterDistance;
-            collapsedWidth = this.LogicalToDeviceUnits(85);
+            collapsedWidth = (int)(expandedWidth * (90f / 380f));
+
+            _expandedLogoSize = pnlLogoHeader.Size;
+            _expandedToggleLoc = btnToggleSidebar.Location;
+            _expandedToggleSize = btnToggleSidebar.Size;
+            _expandedLblMenuSize = lblMenu.Size;
+            _expandedLblMenuLoc = lblMenu.Location;
+            _expandedMenuStartY = btnDashboard.Location.Y;
+            _expandedMenuX = btnDashboard.Location.X;
+            _expandedMenuWidth = btnDashboard.Width;
+            _expandedMenuGap = btnTestExecution.Location.Y - btnDashboard.Location.Y - btnDashboard.Height;
 
             // Apply dynamic Role-Based Access Control permissions to sidebar buttons
             ApplyRolePermissions();
@@ -320,19 +340,22 @@ namespace AssemblyLineTester.Views
                     isSidebarExpanded = false;
 
                     pnlLogoHeader.IsMinimized = true;
-                    pnlLogoHeader.Size = new Size(collapsedWidth, 85);
-                    lblMenu.Size = new Size(65, 65);
-                    lblMenu.Location = new Point((collapsedWidth - 65) / 2, 10);
-                    btnToggleSidebar.Location = new Point(0, 88);
-                    btnToggleSidebar.Size = new Size(collapsedWidth, 66);
+                    pnlLogoHeader.Size = new Size(collapsedWidth, (int)(_expandedLogoSize.Height * (85f / 130f)));
+                    
+                    Size newLblMenuSize = new Size((int)(_expandedLblMenuSize.Width * (65f / 200f)), (int)(_expandedLblMenuSize.Height * (65f / 90f)));
+                    lblMenu.Size = newLblMenuSize;
+                    lblMenu.Location = new Point((collapsedWidth - newLblMenuSize.Width) / 2, (int)(_expandedLblMenuLoc.Y * (10f / 20f)));
+                    
+                    btnToggleSidebar.Location = new Point(0, _expandedToggleSize.Height);
+                    btnToggleSidebar.Size = new Size(collapsedWidth, (int)(_expandedToggleSize.Height * (66f / 88f)));
 
-                    int currentY = 180;
+                    int currentY = _expandedMenuStartY + (int)(_expandedToggleSize.Height * (20f / 88f));
                     foreach (var btn in menuButtons)
                     {
                         btn.SetMinimized(true);
                         btn.Location = new Point(0, currentY);
                         btn.Width = collapsedWidth;
-                        currentY += btn.Height + 12;
+                        currentY += btn.Height + (int)(_expandedMenuGap * (12f / 16f));
                     }
                 }
                 else
@@ -341,19 +364,19 @@ namespace AssemblyLineTester.Views
                     isSidebarExpanded = true;
 
                     pnlLogoHeader.IsMinimized = false;
-                    pnlLogoHeader.Size = new Size(300, 130);
-                    lblMenu.Size = new Size(200, 90);
-                    lblMenu.Location = new Point(16, 20);
-                    btnToggleSidebar.Location = new Point(320, 24);
-                    btnToggleSidebar.Size = new Size(88, 88);
+                    pnlLogoHeader.Size = _expandedLogoSize;
+                    lblMenu.Size = _expandedLblMenuSize;
+                    lblMenu.Location = _expandedLblMenuLoc;
+                    btnToggleSidebar.Location = _expandedToggleLoc;
+                    btnToggleSidebar.Size = _expandedToggleSize;
 
-                    int currentY = 160;
+                    int currentY = _expandedMenuStartY;
                     foreach (var btn in menuButtons)
                     {
                         btn.SetMinimized(false);
-                        btn.Location = new Point(32, currentY);
-                        btn.Width = expandedWidth - 55;
-                        currentY += btn.Height + 16;
+                        btn.Location = new Point(_expandedMenuX, currentY);
+                        btn.Width = _expandedMenuWidth;
+                        currentY += btn.Height + _expandedMenuGap;
                     }
                 }
             }
