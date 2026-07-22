@@ -1,6 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using AssemblyLineTester.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Text.Json;
 
 namespace AssemblyLineTester.Data
 {
@@ -20,6 +21,8 @@ namespace AssemblyLineTester.Data
         public DbSet<TestConfiguration> TestConfigurations { get; set; } = null!;
         public DbSet<TestConfigNet> TestConfigNets { get; set; } = null!;
         public DbSet<ReportTestTypeSummary> ReportTestTypeSummaries { get; set; } = null!;
+        public DbSet<ProductHarness> ProductHarnesses { get; set; } = null!;
+        public DbSet<Connector> Connectors { get; set; } = null!;
 
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -32,6 +35,7 @@ namespace AssemblyLineTester.Data
 
             string dbPath = Path.Combine(appDataFolder, "users.db");
             optionsBuilder.UseSqlite($"Data Source={dbPath}");
+            optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         }
 
         /// Configures entity mapping relationships, unique indexes, and seeds initial data.
@@ -39,7 +43,7 @@ namespace AssemblyLineTester.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // 1. Configure Unique Indexes
+            // Configure Unique Indexes
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
@@ -52,21 +56,126 @@ namespace AssemblyLineTester.Data
                 .HasIndex(s => s.Name)
                 .IsUnique();
 
-            // 2. Configure relationship cascade delete rules for Roles (Restrict delete to prevent orphan records)
+            // Configure relationship cascade delete rules for Roles (Restrict delete to prevent orphan records)
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Role)
                 .WithMany()
                 .HasForeignKey(u => u.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 3. Configure relationship cascade delete rules for Statuses (Restrict delete to prevent orphan records)
+            // Configure relationship cascade delete rules for Statuses (Restrict delete to prevent orphan records)
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Status)
                 .WithMany()
                 .HasForeignKey(u => u.StatusId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 4. Seed initial Roles
+            // Unique indexes for the new tables
+            modelBuilder.Entity<TestReport>()
+                .HasIndex(r => r.ReportNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<TestType>()
+                .HasIndex(t => t.TestTypeName)
+                .IsUnique();
+
+            // TestDetails -> TestReports (cascade delete: deleting a report removes its details)
+            modelBuilder.Entity<TestDetail>()
+                .HasOne(d => d.Report)
+                .WithMany(r => r.Details)
+                .HasForeignKey(d => d.ReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // TestDetails -> TestTypes (lookup by name, restrict delete to prevent orphan details)
+            modelBuilder.Entity<TestDetail>()
+                .HasOne(d => d.TestTypeInfo)
+                .WithMany()
+                .HasForeignKey(d => d.TestTypeName)
+                .HasPrincipalKey(t => t.TestTypeName);
+
+            // Configure Report → TestStep relationship (One Report has many Test Steps)
+            modelBuilder.Entity<TestStep>()
+                .HasOne(s => s.Report)
+                .WithMany(r => r.Steps)
+                .HasForeignKey(s => s.ReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure TestTypeInfo → TestStep relationship using TestTypeName
+            modelBuilder.Entity<TestStep>()
+                .HasOne(s => s.TestTypeInfo)
+                .WithMany()
+                .HasForeignKey(s => s.TestTypeName)
+                .HasPrincipalKey(t => t.TestTypeName)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Ensure StepNo is unique within each Report
+            modelBuilder.Entity<TestStep>()
+                .HasIndex(s => new { s.ReportId, s.StepNo })
+                .IsUnique();
+
+            // Speeds up Test History pagination/sorting once row count grows into the hundreds/thousands.
+            modelBuilder.Entity<TestReport>()
+                .HasIndex(r => r.TestDateTime);
+
+            modelBuilder.Entity<MaintenanceState>().HasData(
+                new MaintenanceState
+                {
+                    Id = 1,
+                    LastUsageDate = DateTime.Parse("2026-01-01"),
+                    OperatingSecondsToday = 0,
+                    RemainingMaintDays = 180,
+                    RemainingMaintHours = 2160.0
+                }
+            );
+
+            // Configure RolePermission entity and unique index
+            modelBuilder.Entity<RolePermission>()
+                .HasIndex(rp => new { rp.RoleId, rp.PermissionKey })
+                .IsUnique();
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //TestReport → ReportTestTypeSummary relationship (One Report has many Test Type Summaries)
+            modelBuilder.Entity<ReportTestTypeSummary>()
+                .HasOne(s => s.Report)
+                .WithMany()
+                .HasForeignKey(s => s.ReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ReportTestTypeSummary>()
+                .HasOne(s => s.TestTypeInfo)
+                .WithMany()
+                .HasForeignKey(s => s.TestTypeName)
+                .HasPrincipalKey(t => t.TestTypeName)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReportTestTypeSummary>()
+                .HasIndex(s => new { s.ReportId, s.TestTypeName })
+                .IsUnique();
+
+            // Speeds up the Dashboard's date-range + fail-breakdown query.
+            modelBuilder.Entity<ReportTestTypeSummary>()
+                .HasIndex(s => s.TestTypeName);
+
+            // Connector entity configuration
+            modelBuilder.Entity<Connector>()
+                .HasOne(c => c.ProductHarness)
+                .WithMany(p => p.ConnectorList)
+                .HasForeignKey(c => c.ProductHarnessId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Save ImgePath as unique for each ProductHarness
+            string imagesFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AssemblyLineTester", "Images");
+
+            //======== SEED DATA BELOW =========//
+
+            // Seed initial Roles
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Administrator", Description = "Full system administration access" },
                 new Role { Id = 2, Name = "Operator", Description = "Standard machine line operations" },
@@ -76,14 +185,14 @@ namespace AssemblyLineTester.Data
                 new Role { Id = 6, Name = "Supervisor", Description = "Line shift supervision access" }
             );
 
-            // 5. Seed initial User Statuses
+            // Seed initial User Statuses
             modelBuilder.Entity<UserStatus>().HasData(
                 new UserStatus { Id = 1, Name = "Active", Description = "User is active and allowed to log in" },
                 new UserStatus { Id = 2, Name = "Inactive", Description = "User is inactive and disabled" },
                 new UserStatus { Id = 3, Name = "Locked", Description = "User is locked out due to multiple failed login attempts" }
             );
 
-            // 6. Seed initial users with secure BCrypt hashes
+            // Seed initial users with secure BCrypt hashes
             const string adminHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS";
             const string faizHash = "$2b$11$VAO3CvR8UbFBe9Pn2sNrG.1Wg5vA7FpwVqPyxQeME/5PGTQ4PYk2u";
             const string tegarHash = "$2b$11$SsUZzVTYh87OPBYbFMYNO.JNJ44jLe3wBxLq2cg7WFPWl.yHAIi6O";
@@ -147,29 +256,6 @@ namespace AssemblyLineTester.Data
                 }
             );
 
-            // Unique indexes for the new tables
-            modelBuilder.Entity<TestReport>()
-                .HasIndex(r => r.ReportNumber)
-                .IsUnique();
-
-            modelBuilder.Entity<TestType>()
-                .HasIndex(t => t.TestTypeName)
-                .IsUnique();
-
-            // TestDetails -> TestReports (cascade delete: deleting a report removes its details)
-            modelBuilder.Entity<TestDetail>()
-                .HasOne(d => d.Report)
-                .WithMany(r => r.Details)
-                .HasForeignKey(d => d.ReportId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // TestDetails -> TestTypes (lookup by name, restrict delete to prevent orphan details)
-            modelBuilder.Entity<TestDetail>()
-                .HasOne(d => d.TestTypeInfo)
-                .WithMany()
-                .HasForeignKey(d => d.TestTypeName)
-                .HasPrincipalKey(t => t.TestTypeName);
-
             // Seed initial test types
             modelBuilder.Entity<TestType>().HasData(
                 new TestType { Id = 1, TestTypeName = "4RESISTOR", DisplayName = "4RESISTOR" },
@@ -189,72 +275,63 @@ namespace AssemblyLineTester.Data
                 new TestType { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE" }
             );
 
-            // Configure Report → TestStep relationship (One Report has many Test Steps)
-            modelBuilder.Entity<TestStep>()
-                .HasOne(s => s.Report)
-                .WithMany(r => r.Steps)
-                .HasForeignKey(s => s.ReportId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Configure TestTypeInfo → TestStep relationship using TestTypeName
-            modelBuilder.Entity<TestStep>()
-                .HasOne(s => s.TestTypeInfo)
-                .WithMany()
-                .HasForeignKey(s => s.TestTypeName)
-                .HasPrincipalKey(t => t.TestTypeName)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Ensure StepNo is unique within each Report
-            modelBuilder.Entity<TestStep>()
-                .HasIndex(s => new { s.ReportId, s.StepNo })
-                .IsUnique();
-
-            // Speeds up Test History pagination/sorting once row count grows into the hundreds/thousands.
-            modelBuilder.Entity<TestReport>()
-                .HasIndex(r => r.TestDateTime);
-
-            modelBuilder.Entity<MaintenanceState>().HasData(
-                new MaintenanceState
+            // Seed initial Product Harnesses
+            modelBuilder.Entity<ProductHarness>().HasData(
+                new ProductHarness
                 {
-                    Id = 1,
-                    LastUsageDate = DateTime.Today,
-                    OperatingSecondsToday = 0,
-                    RemainingMaintDays = 180,
-                    RemainingMaintHours = 2160.0
+                    ProductHarnessId = 1,
+                    Name = "Main Engine Harness 6020",
+                    ProductModel = "6020",
+                    ProductType = "AC",
+                    Area = "Engine Control",
+                    LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
+                    ImagePath = @"Assets/img/Harness/6040.png",
+                    ConnectorListName = new List<string> { "J1", "J2" }
+                },
+                new ProductHarness
+                {
+                    ProductHarnessId = 2,
+                    Name = "Cabin Interior Harness 6030",
+                    ProductModel = "6030",
+                    ProductType = "AC",
+                    Area = "Cabin Interior",
+                    LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
+                    ConnectorListName = new List<string> { "J1" }
+                },
+                new ProductHarness
+                {
+                    ProductHarnessId = 3,
+                    Name = "Chassis Harness 6040",
+                    ProductModel = "6040",
+                    ProductType = "AC",
+                    Area = "Chassis",
+                    LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
+                    ImagePath = @"Assets/img/Harness/6040.png",
+                    ConnectorListName = new List<string> { "J1", "J2", "J3" }
+                },
+                new ProductHarness
+                {
+                    ProductHarnessId = 4,
+                    Name = "Dashboard Harness 6060",
+                    ProductModel = "6060",
+                    ProductType = "AC",
+                    Area = "Dashboard",
+                    LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
+                    ConnectorListName = new List<string> { "J1" }
                 }
             );
 
-            // Configure RolePermission entity and unique index
-            modelBuilder.Entity<RolePermission>()
-                .HasIndex(rp => new { rp.RoleId, rp.PermissionKey })
-                .IsUnique();
+            // Seed initial Connectors 
+            modelBuilder.Entity<Connector>().HasData(
+                new Connector { ConnectorId = 1, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ImagePath = @"Assets/img/Connector/J1.png", ProductHarnessId = 1 },
+                new Connector { ConnectorId = 2, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 1 },
+                new Connector { ConnectorId = 3, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 32, WireSize = "20 AWG", CurrentRating = 3, MountingStyle = "Free Hanging", ImagePath = @"Assets/img/Connector/J1.png", ProductHarnessId = 2 },
+                new Connector { ConnectorId = 4, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ImagePath = @"Assets/img/Connector/J1.png", ProductHarnessId = 3 },
+                new Connector { ConnectorId = 5, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 3 },
+                new Connector { ConnectorId = 6, Perf = "Standard", PartNumber = "D507F3", ContactType = "Female", ContactQuantity = 16, WireSize = "22 AWG", CurrentRating = 2, MountingStyle = "Panel Mount", ProductHarnessId = 3 },
+                new Connector { ConnectorId = 7, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ImagePath = @"Assets/img/Connector/J1.png", ProductHarnessId = 4 }
+            );
 
-            modelBuilder.Entity<RolePermission>()
-                .HasOne(rp => rp.Role)
-                .WithMany(r => r.RolePermissions)
-                .HasForeignKey(rp => rp.RoleId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ReportTestTypeSummary>()
-                .HasOne(s => s.Report)
-                .WithMany()
-                .HasForeignKey(s => s.ReportId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ReportTestTypeSummary>()
-                .HasOne(s => s.TestTypeInfo)
-                .WithMany()
-                .HasForeignKey(s => s.TestTypeName)
-                .HasPrincipalKey(t => t.TestTypeName)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ReportTestTypeSummary>()
-                .HasIndex(s => new { s.ReportId, s.TestTypeName })
-                .IsUnique();
-
-            // Speeds up the Dashboard's date-range + fail-breakdown query.
-            modelBuilder.Entity<ReportTestTypeSummary>()
-                .HasIndex(s => s.TestTypeName);
 
             modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());
         }

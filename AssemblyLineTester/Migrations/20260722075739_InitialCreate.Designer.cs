@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260721024515_InitialCreate")]
+    [Migration("20260722075739_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -46,7 +46,7 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            LastUsageDate = new DateTime(2026, 7, 21, 0, 0, 0, 0, DateTimeKind.Local),
+                            LastUsageDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,
                             RemainingMaintHours = 2160.0
@@ -1571,6 +1571,222 @@ namespace AssemblyLineTester.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Connector", b =>
+                {
+                    b.Property<int>("ConnectorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ContactQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ContactType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("CurrentRating")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MountingStyle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Perf")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductHarnessId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("WireSize")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ConnectorId");
+
+                    b.HasIndex("ProductHarnessId");
+
+                    b.ToTable("Connectors");
+
+                    b.HasData(
+                        new
+                        {
+                            ConnectorId = 1,
+                            ContactQuantity = 64,
+                            ContactType = "Female",
+                            CurrentRating = 5.0,
+                            ImagePath = "Assets/img/Connector/J1.png",
+                            MountingStyle = "Panel Mount",
+                            PartNumber = "D507F1",
+                            Perf = "Standard",
+                            ProductHarnessId = 1,
+                            WireSize = "18 AWG"
+                        },
+                        new
+                        {
+                            ConnectorId = 2,
+                            ContactQuantity = 64,
+                            ContactType = "Male",
+                            CurrentRating = 5.0,
+                            MountingStyle = "Panel Mount",
+                            PartNumber = "D507F2",
+                            Perf = "Standard",
+                            ProductHarnessId = 1,
+                            WireSize = "18 AWG"
+                        },
+                        new
+                        {
+                            ConnectorId = 3,
+                            ContactQuantity = 32,
+                            ContactType = "Female",
+                            CurrentRating = 3.0,
+                            ImagePath = "Assets/img/Connector/J1.png",
+                            MountingStyle = "Free Hanging",
+                            PartNumber = "D507F1",
+                            Perf = "Standard",
+                            ProductHarnessId = 2,
+                            WireSize = "20 AWG"
+                        },
+                        new
+                        {
+                            ConnectorId = 4,
+                            ContactQuantity = 64,
+                            ContactType = "Female",
+                            CurrentRating = 5.0,
+                            ImagePath = "Assets/img/Connector/J1.png",
+                            MountingStyle = "Panel Mount",
+                            PartNumber = "D507F1",
+                            Perf = "Standard",
+                            ProductHarnessId = 3,
+                            WireSize = "18 AWG"
+                        },
+                        new
+                        {
+                            ConnectorId = 5,
+                            ContactQuantity = 64,
+                            ContactType = "Male",
+                            CurrentRating = 5.0,
+                            MountingStyle = "Panel Mount",
+                            PartNumber = "D507F2",
+                            Perf = "Standard",
+                            ProductHarnessId = 3,
+                            WireSize = "18 AWG"
+                        },
+                        new
+                        {
+                            ConnectorId = 6,
+                            ContactQuantity = 16,
+                            ContactType = "Female",
+                            CurrentRating = 2.0,
+                            MountingStyle = "Panel Mount",
+                            PartNumber = "D507F3",
+                            Perf = "Standard",
+                            ProductHarnessId = 3,
+                            WireSize = "22 AWG"
+                        },
+                        new
+                        {
+                            ConnectorId = 7,
+                            ContactQuantity = 64,
+                            ContactType = "Female",
+                            CurrentRating = 5.0,
+                            ImagePath = "Assets/img/Connector/J1.png",
+                            MountingStyle = "Panel Mount",
+                            PartNumber = "D507F1",
+                            Perf = "Standard",
+                            ProductHarnessId = 4,
+                            WireSize = "18 AWG"
+                        });
+                });
+
+            modelBuilder.Entity("ProductHarness", b =>
+                {
+                    b.Property<int>("ProductHarnessId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Area")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("ConnectorListName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductModel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ProductHarnessId");
+
+                    b.ToTable("ProductHarnesses");
+
+                    b.HasData(
+                        new
+                        {
+                            ProductHarnessId = 1,
+                            Area = "Engine Control",
+                            ConnectorListName = "[\"J1\",\"J2\"]",
+                            ImagePath = "Assets/img/Harness/6040.png",
+                            LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
+                            Name = "Main Engine Harness 6020",
+                            ProductModel = "6020",
+                            ProductType = "AC"
+                        },
+                        new
+                        {
+                            ProductHarnessId = 2,
+                            Area = "Cabin Interior",
+                            ConnectorListName = "[\"J1\"]",
+                            LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
+                            Name = "Cabin Interior Harness 6030",
+                            ProductModel = "6030",
+                            ProductType = "AC"
+                        },
+                        new
+                        {
+                            ProductHarnessId = 3,
+                            Area = "Chassis",
+                            ConnectorListName = "[\"J1\",\"J2\",\"J3\"]",
+                            ImagePath = "Assets/img/Harness/6040.png",
+                            LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
+                            Name = "Chassis Harness 6040",
+                            ProductModel = "6040",
+                            ProductType = "AC"
+                        },
+                        new
+                        {
+                            ProductHarnessId = 4,
+                            Area = "Dashboard",
+                            ConnectorListName = "[\"J1\"]",
+                            LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
+                            Name = "Dashboard Harness 6060",
+                            ProductModel = "6060",
+                            ProductType = "AC"
+                        });
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.ReportTestTypeSummary", b =>
                 {
                     b.HasOne("AssemblyLineTester.Models.TestReport", "Report")
@@ -1678,6 +1894,17 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Status");
                 });
 
+            modelBuilder.Entity("Connector", b =>
+                {
+                    b.HasOne("ProductHarness", "ProductHarness")
+                        .WithMany("ConnectorList")
+                        .HasForeignKey("ProductHarnessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductHarness");
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.Role", b =>
                 {
                     b.Navigation("RolePermissions");
@@ -1693,6 +1920,11 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Details");
 
                     b.Navigation("Steps");
+                });
+
+            modelBuilder.Entity("ProductHarness", b =>
+                {
+                    b.Navigation("ConnectorList");
                 });
 #pragma warning restore 612, 618
         }
