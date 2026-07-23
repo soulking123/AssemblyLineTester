@@ -57,7 +57,6 @@ namespace AssemblyLineTester.Views.Pages
             flpActionButtons = new FlowLayoutPanel();
             btnSearch = new Button();
             btnReset = new Button();
-            logoBox = new PictureBox();
             lblTitle = new Label();
             mainLayout = new TableLayoutPanel();
             pnlLeft = new Panel();
@@ -128,14 +127,12 @@ namespace AssemblyLineTester.Views.Pages
             tblStepsContent = new TableLayoutPanel();
             lblStepsTitle = new Label();
             gridSteps = new DataGridView();
-            // btnDeleteHistory will be instantiated later where its properties and event handler are configured
             pnlTop.SuspendLayout();
             pnlFilterCard.SuspendLayout();
             tblFilterInner.SuspendLayout();
             tblFilterInputs.SuspendLayout();
             tblDateRange.SuspendLayout();
             flpActionButtons.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)logoBox).BeginInit();
             mainLayout.SuspendLayout();
             pnlLeft.SuspendLayout();
             tblLeftContent.SuspendLayout();
@@ -163,7 +160,6 @@ namespace AssemblyLineTester.Views.Pages
             // 
             pnlTop.BackColor = Color.FromArgb(244, 245, 247);
             pnlTop.Controls.Add(pnlFilterCard);
-            pnlTop.Controls.Add(logoBox);
             pnlTop.Controls.Add(lblTitle);
             pnlTop.Dock = DockStyle.Top;
             pnlTop.Location = new Point(0, 0);
@@ -442,10 +438,10 @@ namespace AssemblyLineTester.Views.Pages
             flpActionButtons.AutoSize = true;
             flpActionButtons.Controls.Add(btnSearch);
             flpActionButtons.Controls.Add(btnReset);
-            flpActionButtons.Location = new Point(1902, 51);
+            flpActionButtons.Location = new Point(1902, 41);
             flpActionButtons.Margin = new Padding(12, 0, 0, 0);
             flpActionButtons.Name = "flpActionButtons";
-            flpActionButtons.Size = new Size(284, 53);
+            flpActionButtons.Size = new Size(284, 63);
             flpActionButtons.TabIndex = 1;
             flpActionButtons.WrapContents = false;
             // 
@@ -458,7 +454,7 @@ namespace AssemblyLineTester.Views.Pages
             btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSearch.ForeColor = Color.FromArgb(15, 23, 42);
             btnSearch.Location = new Point(0, 0);
-            btnSearch.Margin = new Padding(0, 0, 8, 0);
+            btnSearch.Margin = new Padding(0, 0, 8, 10);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(154, 53);
             btnSearch.TabIndex = 16;
@@ -481,27 +477,17 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.Text = "Reset";
             btnReset.UseVisualStyleBackColor = false;
             // 
-            // logoBox
-            // 
-            logoBox.BackColor = Color.Transparent;
-            logoBox.Location = new Point(39, 19);
-            logoBox.Margin = new Padding(8);
-            logoBox.Name = "logoBox";
-            logoBox.Size = new Size(58, 58);
-            logoBox.TabIndex = 0;
-            logoBox.TabStop = false;
-            // 
             // lblTitle
             // 
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(15, 23, 42);
-            lblTitle.Location = new Point(107, 19);
+            lblTitle.Location = new Point(39, 19);
             lblTitle.Margin = new Padding(8, 0, 8, 0);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(291, 54);
+            lblTitle.Size = new Size(380, 54);
             lblTitle.TabIndex = 1;
-            lblTitle.Text = "TEST HISTORY";
+            lblTitle.Text = " 📜  TEST HISTORY";
             // 
             // mainLayout
             // 
@@ -594,34 +580,34 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // btnExport
             // 
-            btnExport.BackColor = Color.White;
+            btnExport.BackColor = Color.FromArgb(241, 245, 249);
             btnExport.Cursor = Cursors.Hand;
             btnExport.FlatAppearance.BorderColor = Color.LightGray;
             btnExport.FlatStyle = FlatStyle.Flat;
-            btnExport.Font = new Font("Segoe UI", 9F);
+            btnExport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnExport.ForeColor = Color.FromArgb(30, 41, 59);
             btnExport.Location = new Point(427, 10);
             btnExport.Margin = new Padding(0, 10, 0, 0);
             btnExport.Name = "btnExport";
             btnExport.Size = new Size(163, 55);
             btnExport.TabIndex = 1;
-            btnExport.Text = "Export";
+            btnExport.Text = "📤 Export";
             btnExport.UseVisualStyleBackColor = false;
             // 
             // btnRefresh
             // 
-            btnRefresh.BackColor = Color.White;
+            btnRefresh.BackColor = Color.FromArgb(241, 245, 249);
             btnRefresh.Cursor = Cursors.Hand;
             btnRefresh.FlatAppearance.BorderColor = Color.LightGray;
             btnRefresh.FlatStyle = FlatStyle.Flat;
-            btnRefresh.Font = new Font("Segoe UI", 9F);
+            btnRefresh.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnRefresh.ForeColor = Color.FromArgb(30, 41, 59);
             btnRefresh.Location = new Point(229, 10);
             btnRefresh.Margin = new Padding(0, 10, 20, 0);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.Size = new Size(178, 55);
             btnRefresh.TabIndex = 0;
-            btnRefresh.Text = "Refresh";
+            btnRefresh.Text = "↻ Refresh";
             btnRefresh.UseVisualStyleBackColor = false;
             // 
             // gridData
@@ -1175,24 +1161,6 @@ namespace AssemblyLineTester.Views.Pages
             // flpDetailFooter
             // 
             flpDetailFooter.Controls.Add(btnViewReport);
-            // btnDeleteHistory will be added after btnViewReport
-            // btnDeleteHistory
-            btnDeleteHistory = new Button();
-            btnDeleteHistory.BackColor = Color.FromArgb(254, 242, 242);
-            btnDeleteHistory.Cursor = Cursors.Hand;
-            btnDeleteHistory.FlatAppearance.BorderColor = Color.FromArgb(254, 202, 202);
-            btnDeleteHistory.FlatStyle = FlatStyle.Flat;
-            btnDeleteHistory.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnDeleteHistory.ForeColor = Color.FromArgb(239, 68, 68);
-            btnDeleteHistory.Location = new Point(0, 0);
-            btnDeleteHistory.Margin = new Padding(0, 0, 8, 0);
-            btnDeleteHistory.Name = "btnDeleteHistory";
-            btnDeleteHistory.Size = new Size(220, 52);
-            btnDeleteHistory.TabIndex = 1;
-            btnDeleteHistory.Text = "🗑 Delete History";
-            btnDeleteHistory.UseVisualStyleBackColor = false;
-            btnDeleteHistory.Enabled = false;
-            btnDeleteHistory.Click += BtnDeleteHistory_Click;
             flpDetailFooter.Controls.Add(btnDeleteHistory);
             flpDetailFooter.Dock = DockStyle.Fill;
             flpDetailFooter.FlowDirection = FlowDirection.RightToLeft;
@@ -1217,6 +1185,24 @@ namespace AssemblyLineTester.Views.Pages
             btnViewReport.TabIndex = 0;
             btnViewReport.Text = "View Test Report";
             btnViewReport.UseVisualStyleBackColor = false;
+            // 
+            // btnDeleteHistory
+            // 
+            btnDeleteHistory.BackColor = Color.FromArgb(254, 242, 242);
+            btnDeleteHistory.Cursor = Cursors.Hand;
+            btnDeleteHistory.Enabled = false;
+            btnDeleteHistory.FlatAppearance.BorderColor = Color.FromArgb(254, 202, 202);
+            btnDeleteHistory.FlatStyle = FlatStyle.Flat;
+            btnDeleteHistory.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnDeleteHistory.ForeColor = Color.FromArgb(239, 68, 68);
+            btnDeleteHistory.Location = new Point(203, 0);
+            btnDeleteHistory.Margin = new Padding(0, 0, 8, 0);
+            btnDeleteHistory.Name = "btnDeleteHistory";
+            btnDeleteHistory.Size = new Size(220, 52);
+            btnDeleteHistory.TabIndex = 1;
+            btnDeleteHistory.Text = "🗑 Delete History";
+            btnDeleteHistory.UseVisualStyleBackColor = false;
+            btnDeleteHistory.Click += BtnDeleteHistory_Click;
             // 
             // pnlSummary
             // 
@@ -1492,7 +1478,6 @@ namespace AssemblyLineTester.Views.Pages
             tblDateRange.ResumeLayout(false);
             tblDateRange.PerformLayout();
             flpActionButtons.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)logoBox).EndInit();
             mainLayout.ResumeLayout(false);
             pnlLeft.ResumeLayout(false);
             tblLeftContent.ResumeLayout(false);
@@ -1526,8 +1511,6 @@ namespace AssemblyLineTester.Views.Pages
 
 
         private System.Windows.Forms.Panel pnlTop;
-
-        private System.Windows.Forms.PictureBox logoBox;
 
         private System.Windows.Forms.Label lblTitle;
 

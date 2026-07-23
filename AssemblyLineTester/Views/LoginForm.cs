@@ -40,8 +40,14 @@ namespace AssemblyLineTester.Views
                 {
                     logoBox.Image = Image.FromFile(logoPath);
                 }
+
+                string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.ico");
+                if (System.IO.File.Exists(iconPath))
+                {
+                    this.Icon = new Icon(iconPath);
+                }
             }
-            catch { /* fallback silently if image missing */ }
+            catch { /* fallback silently if image/icon missing */ }
 
             // Disable tab stop on the login button so Tab cycles only between textboxes
             btnLogin.TabStop = false;

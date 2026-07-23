@@ -169,7 +169,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPageHeader.Name = "lblPageHeader";
             lblPageHeader.Size = new Size(2656, 48);
             lblPageHeader.TabIndex = 0;
-            lblPageHeader.Text = "🏠  TEST EXECUTION";
+            lblPageHeader.Text = "⚡  TEST EXECUTION";
             lblPageHeader.TextAlign = ContentAlignment.BottomLeft;
             // 
             // tblFilterRow

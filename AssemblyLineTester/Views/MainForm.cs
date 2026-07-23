@@ -39,13 +39,19 @@ namespace AssemblyLineTester.Views
             InitializeComponent();
             EnableDoubleBuffering();
 
-            // Load CAT logo image into sidebar menu header
+            // Load CAT logo image into sidebar menu header and app icon
             try
             {
                 string logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
                 if (System.IO.File.Exists(logoPath))
                 {
                     lblMenu.Image = Image.FromFile(logoPath);
+                }
+
+                string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.ico");
+                if (System.IO.File.Exists(iconPath))
+                {
+                    this.Icon = new Icon(iconPath);
                 }
             }
             catch { /* fallback silently */ }

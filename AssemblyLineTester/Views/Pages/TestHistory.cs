@@ -50,15 +50,6 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void LogoBox_Paint(object? sender, PaintEventArgs e)
-        {
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var pen = new Pen(Color.FromArgb(15, 23, 42), 2.2f);
-            Rectangle rect = new(4, 4, 22, 22);
-            e.Graphics.DrawEllipse(pen, rect);
-            e.Graphics.DrawLine(pen, 15, 15, 15, 9);
-            e.Graphics.DrawLine(pen, 15, 15, 19, 17);
-        }
 
 
         // Registers all filter/pagination/selection controls to a single reload flow.
@@ -72,8 +63,8 @@ namespace AssemblyLineTester.Views.Pages
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSearch, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewReport, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupBadgeRoundedEdges(lblDetailBadge, 10);

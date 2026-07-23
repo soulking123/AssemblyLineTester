@@ -533,8 +533,8 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardRoleSummary, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardUserActivity, 12, Color.FromArgb(34, 40, 49), 2.5f);
 
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddUser, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnManageRolePermissions, 10, Color.FromArgb(59, 130, 246), Color.FromArgb(37, 99, 235), Color.FromArgb(29, 78, 216), Color.Transparent);
         }

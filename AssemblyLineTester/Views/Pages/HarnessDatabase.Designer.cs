@@ -28,8 +28,8 @@ namespace AssemblyLineTester.Views.Pages
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             splitContainerMain = new SplitContainer();
             tableLayoutPanelLeft = new TableLayoutPanel();
             lblListTitle = new Label();
@@ -213,24 +213,24 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewList.BackgroundColor = Color.White;
             dataGridViewList.BorderStyle = BorderStyle.None;
             dataGridViewList.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.FromArgb(248, 250, 252);
-            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dataGridViewCellStyle3.ForeColor = Color.FromArgb(71, 85, 105);
-            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(248, 250, 252);
-            dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(71, 85, 105);
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
-            dataGridViewList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 250, 252);
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle1.ForeColor = Color.FromArgb(71, 85, 105);
+            dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(248, 250, 252);
+            dataGridViewCellStyle1.SelectionForeColor = Color.FromArgb(71, 85, 105);
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dataGridViewList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewList.Columns.AddRange(new DataGridViewColumn[] { colNo, colProductModel, colProductType, colArea, colPartNumber, colEcnNo, colRevision, colStatus, colLastUpdated });
-            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = Color.White;
-            dataGridViewCellStyle4.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle4.ForeColor = Color.FromArgb(30, 41, 59);
-            dataGridViewCellStyle4.SelectionBackColor = Color.FromArgb(239, 246, 255);
-            dataGridViewCellStyle4.SelectionForeColor = Color.FromArgb(30, 41, 59);
-            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.False;
-            dataGridViewList.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.White;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(30, 41, 59);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(239, 246, 255);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(30, 41, 59);
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dataGridViewList.DefaultCellStyle = dataGridViewCellStyle2;
             dataGridViewList.Dock = DockStyle.Fill;
             dataGridViewList.EnableHeadersVisualStyles = false;
             dataGridViewList.GridColor = Color.FromArgb(203, 213, 225);
@@ -1048,7 +1048,7 @@ namespace AssemblyLineTester.Views.Pages
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new Size(5245, 88);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "🛢  HARNESSES DATABASE";
+            lblTitle.Text = "🗄️  HARNESSES DATABASE";
             lblTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // tableLayoutPanelMain

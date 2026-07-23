@@ -255,12 +255,6 @@ namespace AssemblyLineTester.Views.Pages
                 }
             };
 
-            btnPageFirst.Click += (s, e) => GoToPage(1);
-            btnPagePrev.Click += (s, e) => GoToPage(_currentPage - 1);
-            btnPage1.Click += (s, e) => GoToPage(int.Parse(btnPage1.Text));
-            btnPage2.Click += (s, e) => GoToPage(int.Parse(btnPage2.Text));
-            btnPageNext.Click += (s, e) => GoToPage(_currentPage + 1);
-            btnPageLast.Click += (s, e) => GoToPage(_totalPages);
 
             btnExportPDF.Click += (s, e) =>
             {
@@ -538,29 +532,95 @@ namespace AssemblyLineTester.Views.Pages
 
         private void UpdatePaginationUI(int totalCount)
         {
-            int start = totalCount == 0 ? 0 : (_currentPage - 1) * _pageSize + 1;
-            int end = Math.Min(_currentPage * _pageSize, totalCount);
-            lblPageInfo.Text = $"Showing {start} to {end} of {totalCount} entries";
-
-            btnPageFirst.Enabled = _currentPage > 1;
-            btnPagePrev.Enabled = _currentPage > 1;
-            btnPageNext.Enabled = _currentPage < _totalPages;
-            btnPageLast.Enabled = _currentPage < _totalPages;
-
-            btnPage1.Text = _currentPage.ToString();
-            btnPage1.BackColor = Color.FromArgb(30, 41, 59);
-            btnPage1.ForeColor = Color.White;
-
-            bool hasNextPage = _currentPage < _totalPages;
-            btnPage2.Visible = hasNextPage;
-            if (hasNextPage)
+            if (totalCount == 0)
             {
-                btnPage2.Text = (_currentPage + 1).ToString();
-                btnPage2.BackColor = Color.FromArgb(241, 245, 249);
-                btnPage2.ForeColor = Color.FromArgb(51, 65, 85);
+                lblPageInfo.Text = "Showing 0 to 0 of 0 entries";
+            }
+            else
+            {
+                int start = (_currentPage - 1) * _pageSize + 1;
+                int end = Math.Min(_currentPage * _pageSize, totalCount);
+                lblPageInfo.Text = $"Showing {start} to {end} of {totalCount} entries";
             }
 
-            btnPageDots.Visible = _totalPages > _currentPage + 1;
+            flpPageButtons.Controls.Clear();
+
+            var btnLast = CreatePageButton("»", false, _currentPage < _totalPages, (s, e) => GoToPage(_totalPages));
+            flpPageButtons.Controls.Add(btnLast);
+
+            var btnNext = CreatePageButton("›", false, _currentPage < _totalPages, (s, e) => { if (_currentPage < _totalPages) GoToPage(_currentPage + 1); });
+            flpPageButtons.Controls.Add(btnNext);
+
+            for (int p = _totalPages; p >= 1; p--)
+            {
+                if (p == 1 || p == _totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
+                {
+                    int pageNum = p;
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => GoToPage(pageNum));
+                    flpPageButtons.Controls.Add(btnPage);
+                }
+                else if (p == _currentPage - 2 || p == _currentPage + 2)
+                {
+                    var btnDots = CreatePageButton("...", false, false, null);
+                    flpPageButtons.Controls.Add(btnDots);
+                }
+            }
+
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) GoToPage(_currentPage - 1); });
+            flpPageButtons.Controls.Add(btnPrev);
+
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => GoToPage(1));
+            flpPageButtons.Controls.Add(btnFirst);
+        }
+
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
+        {
+            Button btn = new()
+            {
+                Text = text,
+                Size = new Size(38, 40),
+                Margin = new Padding(2, 6, 2, 6),
+                FlatStyle = FlatStyle.Flat,
+                Enabled = isEnabled,
+                Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Padding = new Padding(0, 0, 0, 2),
+                UseCompatibleTextRendering = true
+            };
+            btn.FlatAppearance.BorderSize = 1;
+
+            if (text == "...")
+            {
+                btn.BackColor = Color.Transparent;
+                btn.ForeColor = Color.FromArgb(100, 116, 139);
+                btn.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold;
+                btn.FlatAppearance.BorderSize = 0;
+                btn.Enabled = false;
+                btn.Cursor = Cursors.Default;
+                AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btn, 8, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent);
+            }
+            else if (isActive)
+            {
+                btn.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold;
+                AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btn, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+            }
+            else if (!isEnabled)
+            {
+                btn.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font95Regular;
+                AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btn, 8, Color.FromArgb(248, 250, 252), Color.FromArgb(248, 250, 252), Color.FromArgb(248, 250, 252), Color.Transparent);
+            }
+            else
+            {
+                btn.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font95Regular;
+                AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btn, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            }
+
+            if (onClick is not null)
+            {
+                btn.Click += onClick;
+            }
+
+            return btn;
         }
 
         private void LoadPreview(int reportId)
@@ -686,16 +746,12 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportPDF, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportExcel, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225));
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPrint, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225));
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportExcel, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225));
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPrint, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225));
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnEditReport, 10, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnDeleteReport, 10, Color.FromArgb(220, 38, 38), Color.FromArgb(239, 68, 68), Color.FromArgb(185, 28, 28), Color.Transparent);
 
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPageFirst, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPagePrev, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPage1, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPage2, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPageLast, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+
         }
     }
 }
