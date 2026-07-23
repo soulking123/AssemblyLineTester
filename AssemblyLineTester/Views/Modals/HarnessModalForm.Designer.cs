@@ -34,16 +34,20 @@ namespace AssemblyLineTester.Views.Modals
             lblArea = new Label();
             txtArea = new TextBox();
             lblConnectors = new Label();
-            lstConnectors = new CheckedListBox();
+            pnlConnectorPicker = new Panel();
+            flpConnectorChips = new FlowLayoutPanel();
+            lblConnectorArrow = new Label();
             lblImage = new Label();
             btnChooseImage = new Button();
-            lblImageStatus = new Label();
+            lstImages = new ListBox();
+            btnRemoveImage = new Button();
             pnlFooter = new Panel();
             btnCancel = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnSave = new AssemblyLineTester.Views.Controls.RoundedButton();
             pnlCustomHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconLogo).BeginInit();
             pnlHeader.SuspendLayout();
+            pnlConnectorPicker.SuspendLayout();
             pnlFooter.SuspendLayout();
             SuspendLayout();
             // 
@@ -210,16 +214,43 @@ namespace AssemblyLineTester.Views.Modals
             lblConnectors.Location = new Point(57, 395);
             lblConnectors.Name = "lblConnectors";
             lblConnectors.Size = new Size(215, 21);
-            lblConnectors.Text = "Select Harness Connectors";
+            lblConnectors.Text = "Harness Connector(s) - click to add";
             // 
-            // lstConnectors
+            // pnlConnectorPicker
             // 
-            lstConnectors.Font = new Font("Segoe UI", 9F);
-            lstConnectors.FormattingEnabled = true;
-            lstConnectors.Location = new Point(57, 425);
-            lstConnectors.Name = "lstConnectors";
-            lstConnectors.Size = new Size(388, 180);
-            lstConnectors.TabIndex = 6;
+            // Single box that both displays picked connectors as chips AND acts as the click target
+            // that opens the multi-select checklist popup. Replaces the old ComboBox + separate list.
+            pnlConnectorPicker.BackColor = Color.White;
+            pnlConnectorPicker.BorderStyle = BorderStyle.FixedSingle;
+            pnlConnectorPicker.Controls.Add(flpConnectorChips);
+            pnlConnectorPicker.Controls.Add(lblConnectorArrow);
+            pnlConnectorPicker.Cursor = Cursors.Hand;
+            pnlConnectorPicker.Location = new Point(57, 425);
+            pnlConnectorPicker.MinimumSize = new Size(388, 42);
+            pnlConnectorPicker.Name = "pnlConnectorPicker";
+            pnlConnectorPicker.Size = new Size(388, 42);
+            pnlConnectorPicker.TabIndex = 6;
+            // 
+            // flpConnectorChips
+            // 
+            flpConnectorChips.BackColor = Color.White;
+            flpConnectorChips.Cursor = Cursors.Hand;
+            flpConnectorChips.Dock = DockStyle.Fill;
+            flpConnectorChips.FlowDirection = FlowDirection.LeftToRight;
+            flpConnectorChips.Name = "flpConnectorChips";
+            flpConnectorChips.Padding = new Padding(6, 6, 24, 6);
+            flpConnectorChips.WrapContents = true;
+            // 
+            // lblConnectorArrow
+            // 
+            lblConnectorArrow.Cursor = Cursors.Hand;
+            lblConnectorArrow.Font = new Font("Segoe UI", 8F);
+            lblConnectorArrow.ForeColor = Color.FromArgb(100, 116, 139);
+            lblConnectorArrow.Location = new Point(362, 12);
+            lblConnectorArrow.Name = "lblConnectorArrow";
+            lblConnectorArrow.Size = new Size(20, 20);
+            lblConnectorArrow.Text = "▼";
+            lblConnectorArrow.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblImage
             // 
@@ -227,9 +258,10 @@ namespace AssemblyLineTester.Views.Modals
             lblImage.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblImage.ForeColor = Color.FromArgb(51, 65, 85);
             lblImage.Location = new Point(496, 395);
+            lblImage.MaximumSize = new Size(388, 0);
             lblImage.Name = "lblImage";
-            lblImage.Size = new Size(117, 21);
-            lblImage.Text = "Harness Image";
+            lblImage.Size = new Size(362, 21);
+            lblImage.Text = "Images (multiple allowed, max 2MB each, JPG/PNG)";
             // 
             // btnChooseImage
             // 
@@ -238,17 +270,26 @@ namespace AssemblyLineTester.Views.Modals
             btnChooseImage.Name = "btnChooseImage";
             btnChooseImage.Size = new Size(388, 42);
             btnChooseImage.TabIndex = 7;
-            btnChooseImage.Text = "Choose Image...";
+            btnChooseImage.Text = "Choose Images...";
             // 
-            // lblImageStatus
+            // lstImages
             // 
-            lblImageStatus.AutoSize = true;
-            lblImageStatus.Font = new Font("Segoe UI", 8.5F, FontStyle.Italic);
-            lblImageStatus.ForeColor = Color.FromArgb(100, 116, 139);
-            lblImageStatus.Location = new Point(496, 475);
-            lblImageStatus.Name = "lblImageStatus";
-            lblImageStatus.Size = new Size(130, 20);
-            lblImageStatus.Text = "No file selected.";
+            lstImages.Font = new Font("Segoe UI", 8.5F);
+            lstImages.IntegralHeight = false;
+            lstImages.Location = new Point(496, 477);
+            lstImages.Name = "lstImages";
+            lstImages.Size = new Size(388, 220);
+            lstImages.TabIndex = 8;
+            // 
+            // btnRemoveImage
+            // 
+            btnRemoveImage.Font = new Font("Segoe UI", 8.5F);
+            btnRemoveImage.ForeColor = Color.FromArgb(239, 68, 68);
+            btnRemoveImage.Location = new Point(496, 707);
+            btnRemoveImage.Name = "btnRemoveImage";
+            btnRemoveImage.Size = new Size(388, 38);
+            btnRemoveImage.TabIndex = 9;
+            btnRemoveImage.Text = "Remove Selected";
             // 
             // pnlFooter
             // 
@@ -256,7 +297,7 @@ namespace AssemblyLineTester.Views.Modals
             pnlFooter.Controls.Add(btnCancel);
             pnlFooter.Controls.Add(btnSave);
             pnlFooter.Dock = DockStyle.Bottom;
-            pnlFooter.Location = new Point(0, 650);
+            pnlFooter.Location = new Point(0, 780);
             pnlFooter.Name = "pnlFooter";
             pnlFooter.Size = new Size(942, 100);
             pnlFooter.TabIndex = 8;
@@ -299,12 +340,13 @@ namespace AssemblyLineTester.Views.Modals
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(248, 250, 252);
             CancelButton = btnCancel;
-            ClientSize = new Size(942, 750);
+            ClientSize = new Size(942, 880);
             Controls.Add(pnlFooter);
-            Controls.Add(lblImageStatus);
+            Controls.Add(btnRemoveImage);
+            Controls.Add(lstImages);
             Controls.Add(btnChooseImage);
             Controls.Add(lblImage);
-            Controls.Add(lstConnectors);
+            Controls.Add(pnlConnectorPicker);
             Controls.Add(lblConnectors);
             Controls.Add(txtArea);
             Controls.Add(lblArea);
@@ -326,6 +368,7 @@ namespace AssemblyLineTester.Views.Modals
             ((System.ComponentModel.ISupportInitialize)iconLogo).EndInit();
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
+            pnlConnectorPicker.ResumeLayout(false);
             pnlFooter.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
@@ -347,10 +390,13 @@ namespace AssemblyLineTester.Views.Modals
         private Label lblArea;
         private TextBox txtArea;
         private Label lblConnectors;
-        private CheckedListBox lstConnectors;
+        private Panel pnlConnectorPicker;
+        private FlowLayoutPanel flpConnectorChips;
+        private Label lblConnectorArrow;
         private Label lblImage;
         private Button btnChooseImage;
-        private Label lblImageStatus;
+        private ListBox lstImages;
+        private Button btnRemoveImage;
         private Panel pnlFooter;
         private AssemblyLineTester.Views.Controls.RoundedButton btnCancel;
         private AssemblyLineTester.Views.Controls.RoundedButton btnSave;

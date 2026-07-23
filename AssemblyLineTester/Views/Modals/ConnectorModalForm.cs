@@ -11,7 +11,6 @@ namespace AssemblyLineTester.Views.Modals
     public partial class ConnectorModalForm : Form
     {
         private readonly ConnectorService _connectorService;
-        private readonly int _productHarnessId;
         private readonly Connector? _editingConnector;
 
         private readonly System.Collections.Generic.List<ImageEntry> _imageEntries = new();
@@ -26,10 +25,9 @@ namespace AssemblyLineTester.Views.Modals
         }
 
 
-        public ConnectorModalForm(ConnectorService connectorService, int productHarnessId)
+        public ConnectorModalForm(ConnectorService connectorService)
         {
             _connectorService = connectorService;
-            _productHarnessId = productHarnessId;
             _editingConnector = null;
 
             InitializeComponent();
@@ -38,11 +36,11 @@ namespace AssemblyLineTester.Views.Modals
             ApplyFormRounding();
         }
 
-        // Edit mode: prefill fields and existing images from the given connector.
+        // Edit mode: prefill fields and existing images from the given connector. Editing modifies
+        // the shared catalog entry, so it's visible from every harness that uses this connector.
         public ConnectorModalForm(ConnectorService connectorService, Connector connectorToEdit)
         {
             _connectorService = connectorService;
-            _productHarnessId = connectorToEdit.ProductHarnessId;
             _editingConnector = connectorToEdit;
 
             InitializeComponent();
@@ -259,8 +257,7 @@ namespace AssemblyLineTester.Views.Modals
                 ContactQuantity = contactQty,
                 WireSize = txtWireSize.Text.Trim(),
                 CurrentRating = ParseCurrentRating(txtCurrentRating.Text),
-                MountingStyle = txtMountingStyle.Text.Trim(),
-                ProductHarnessId = _productHarnessId
+                MountingStyle = txtMountingStyle.Text.Trim()
             };
 
             var newImagePaths = _imageEntries.Where(i => i.SourcePath != null).Select(i => i.SourcePath!).ToList();

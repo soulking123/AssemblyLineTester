@@ -40,7 +40,7 @@ namespace AssemblyLineTester.Migrations
                     ProductType = table.Column<string>(type: "TEXT", nullable: false),
                     Area = table.Column<string>(type: "TEXT", nullable: false),
                     LastUpdate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: true),
+                    ImagePaths = table.Column<string>(type: "TEXT", nullable: false),
                     ConnectorListName = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -175,17 +175,37 @@ namespace AssemblyLineTester.Migrations
                     WireSize = table.Column<string>(type: "TEXT", nullable: false),
                     CurrentRating = table.Column<double>(type: "REAL", nullable: false),
                     MountingStyle = table.Column<string>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: true),
-                    ProductHarnessId = table.Column<int>(type: "INTEGER", nullable: false)
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Connectors", x => x.ConnectorId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HarnessConnectors",
+                columns: table => new
+                {
+                    HarnessConnectorId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProductHarnessId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ConnectorId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Position = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HarnessConnectors", x => x.HarnessConnectorId);
                     table.ForeignKey(
-                        name: "FK_Connectors_ProductHarnesses_ProductHarnessId",
+                        name: "FK_HarnessConnectors_ProductHarnesses_ProductHarnessId",
                         column: x => x.ProductHarnessId,
                         principalTable: "ProductHarnesses",
                         principalColumn: "ProductHarnessId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_HarnessConnectors_Connectors_ConnectorId",
+                        column: x => x.ConnectorId,
+                        principalTable: "Connectors",
+                        principalColumn: "ConnectorId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -386,13 +406,13 @@ namespace AssemblyLineTester.Migrations
 
             migrationBuilder.InsertData(
                 table: "ProductHarnesses",
-                columns: new[] { "ProductHarnessId", "Area", "ConnectorListName", "ImagePath", "LastUpdate", "Name", "ProductModel", "ProductType" },
+                columns: new[] { "ProductHarnessId", "Area", "ConnectorListName", "ImagePaths", "LastUpdate", "Name", "ProductModel", "ProductType" },
                 values: new object[,]
                 {
-                    { 1, "Engine Control", "[\"J1\",\"J2\"]", "Assets/img/Harness/6040.png", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Main Engine Harness 6020", "6020", "AC" },
-                    { 2, "Cabin Interior", "[\"J1\"]", null, new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Cabin Interior Harness 6030", "6030", "AC" },
-                    { 3, "Chassis", "[\"J1\",\"J2\",\"J3\"]", "Assets/img/Harness/6040.png", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Chassis Harness 6040", "6040", "AC" },
-                    { 4, "Dashboard", "[\"J1\"]", null, new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Dashboard Harness 6060", "6060", "AC" }
+                    { 1, "Engine Control", "[\"J1\",\"J2\"]", "[\"Assets/img/Harness/6040.png\"]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Main Engine Harness 6020", "6020", "AC" },
+                    { 2, "Cabin Interior", "[\"J1\"]", "[]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Cabin Interior Harness 6030", "6030", "AC" },
+                    { 3, "Chassis", "[\"J1\",\"J2\",\"J3\"]", "[\"Assets/img/Harness/6040.png\"]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Chassis Harness 6040", "6040", "AC" },
+                    { 4, "Dashboard", "[\"J1\"]", "[]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Dashboard Harness 6060", "6060", "AC" }
                 });
 
             migrationBuilder.InsertData(
@@ -442,16 +462,30 @@ namespace AssemblyLineTester.Migrations
 
             migrationBuilder.InsertData(
                 table: "Connectors",
-                columns: new[] { "ConnectorId", "ContactQuantity", "ContactType", "CurrentRating", "ImagePath", "MountingStyle", "PartNumber", "Perf", "ProductHarnessId", "WireSize" },
+                columns: new[] { "ConnectorId", "ContactQuantity", "ContactType", "CurrentRating", "ImagePath", "MountingStyle", "PartNumber", "Perf", "WireSize" },
                 values: new object[,]
                 {
-                    { 1, 64, "Female", 5.0, "Assets/img/Connector/J1.png", "Panel Mount", "D507F1", "Standard", 1, "18 AWG" },
-                    { 2, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", 1, "18 AWG" },
-                    { 3, 32, "Female", 3.0, "Assets/img/Connector/J1.png", "Free Hanging", "D507F1", "Standard", 2, "20 AWG" },
-                    { 4, 64, "Female", 5.0, "Assets/img/Connector/J1.png", "Panel Mount", "D507F1", "Standard", 3, "18 AWG" },
-                    { 5, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", 3, "18 AWG" },
-                    { 6, 16, "Female", 2.0, null, "Panel Mount", "D507F3", "Standard", 3, "22 AWG" },
-                    { 7, 64, "Female", 5.0, "Assets/img/Connector/J1.png", "Panel Mount", "D507F1", "Standard", 4, "18 AWG" }
+                    { 1, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" },
+                    { 2, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", "18 AWG" },
+                    { 3, 32, "Female", 3.0, null, "Free Hanging", "D507F1", "Standard", "20 AWG" },
+                    { 4, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" },
+                    { 5, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", "18 AWG" },
+                    { 6, 16, "Female", 2.0, null, "Panel Mount", "D507F3", "Standard", "22 AWG" },
+                    { 7, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "HarnessConnectors",
+                columns: new[] { "HarnessConnectorId", "ConnectorId", "Position", "ProductHarnessId" },
+                values: new object[,]
+                {
+                    { 1, 1, 1, 1 },
+                    { 2, 2, 2, 1 },
+                    { 3, 3, 1, 2 },
+                    { 4, 4, 1, 3 },
+                    { 5, 5, 2, 3 },
+                    { 6, 6, 3, 3 },
+                    { 7, 7, 1, 4 }
                 });
 
             migrationBuilder.InsertData(
@@ -563,9 +597,15 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Connectors_ProductHarnessId",
-                table: "Connectors",
-                column: "ProductHarnessId");
+                name: "IX_HarnessConnectors_ConnectorId",
+                table: "HarnessConnectors",
+                column: "ConnectorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HarnessConnectors_ProductHarnessId_ConnectorId",
+                table: "HarnessConnectors",
+                columns: new[] { "ProductHarnessId", "ConnectorId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReportTestTypeSummaries_ReportId_TestTypeName",
@@ -664,6 +704,9 @@ namespace AssemblyLineTester.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "HarnessConnectors");
+
             migrationBuilder.DropTable(
                 name: "Connectors");
 

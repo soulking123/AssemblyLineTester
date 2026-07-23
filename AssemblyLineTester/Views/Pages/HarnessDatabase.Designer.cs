@@ -69,11 +69,21 @@ namespace AssemblyLineTester.Views.Pages
             tabConnector = new TabPage();
             tableLayoutPanelConnector = new TableLayoutPanel();
             panelConnectorList = new Panel();
-            dgvConnectors = new DataGridView();
+            tblConnectorListLayout = new TableLayoutPanel();
             panelConnectorTop = new Panel();
             btnAddConnector = new Button();
             btnEditConnector = new Button();
             btnDeleteConnector = new Button();
+            panelConnectorSearch = new Panel();
+            txtConnectorSearch = new TextBox();
+            btnConnectorSearch = new Button();
+            dgvConnectors = new DataGridView();
+            tblConnectorPagination = new TableLayoutPanel();
+            flpConnectorPages = new FlowLayoutPanel();
+            flpConnectorShowEntries = new FlowLayoutPanel();
+            lblConnectorShowEntries2 = new Label();
+            cmbConnectorShowEntries = new ComboBox();
+            lblConnectorShowEntries1 = new Label();
             panelConnectorDetail = new Panel();
             tableLayoutPanelConnectorDetail = new TableLayoutPanel();
             panelConnectorInfo = new Panel();
@@ -134,8 +144,12 @@ namespace AssemblyLineTester.Views.Pages
             tabConnector.SuspendLayout();
             tableLayoutPanelConnector.SuspendLayout();
             panelConnectorList.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvConnectors).BeginInit();
+            tblConnectorListLayout.SuspendLayout();
             panelConnectorTop.SuspendLayout();
+            panelConnectorSearch.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvConnectors).BeginInit();
+            tblConnectorPagination.SuspendLayout();
+            flpConnectorShowEntries.SuspendLayout();
             panelConnectorDetail.SuspendLayout();
             tableLayoutPanelConnectorDetail.SuspendLayout();
             panelConnectorInfo.SuspendLayout();
@@ -626,7 +640,7 @@ namespace AssemblyLineTester.Views.Pages
             lblMachineArea.Name = "lblMachineArea";
             lblMachineArea.Size = new Size(211, 36);
             lblMachineArea.TabIndex = 3;
-            lblMachineArea.Text = "MACHINE AREA";
+            lblMachineArea.Text = "CONNECTOR";
             // 
             // picMachineArea
             // 
@@ -685,8 +699,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // panelConnectorList
             // 
-            panelConnectorList.Controls.Add(dgvConnectors);
-            panelConnectorList.Controls.Add(panelConnectorTop);
+            panelConnectorList.Controls.Add(tblConnectorListLayout);
             panelConnectorList.Dock = DockStyle.Fill;
             panelConnectorList.Location = new Point(0, 0);
             panelConnectorList.Margin = new Padding(0, 0, 26, 0);
@@ -694,28 +707,37 @@ namespace AssemblyLineTester.Views.Pages
             panelConnectorList.Size = new Size(1575, 1727);
             panelConnectorList.TabIndex = 0;
             // 
-            // dgvConnectors
+            // tblConnectorListLayout
             // 
-            dgvConnectors.BackgroundColor = Color.White;
-            dgvConnectors.BorderStyle = BorderStyle.None;
-            dgvConnectors.ColumnHeadersHeight = 46;
-            dgvConnectors.Dock = DockStyle.Fill;
-            dgvConnectors.Location = new Point(0, 90);
-            dgvConnectors.Name = "dgvConnectors";
-            dgvConnectors.RowHeadersWidth = 82;
-            dgvConnectors.Size = new Size(1575, 1637);
-            dgvConnectors.TabIndex = 0;
+            tblConnectorListLayout.ColumnCount = 1;
+            tblConnectorListLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblConnectorListLayout.Controls.Add(panelConnectorTop, 0, 0);
+            tblConnectorListLayout.Controls.Add(panelConnectorSearch, 0, 1);
+            tblConnectorListLayout.Controls.Add(dgvConnectors, 0, 2);
+            tblConnectorListLayout.Controls.Add(tblConnectorPagination, 0, 3);
+            tblConnectorListLayout.Dock = DockStyle.Fill;
+            tblConnectorListLayout.Location = new Point(0, 0);
+            tblConnectorListLayout.Margin = new Padding(0);
+            tblConnectorListLayout.Name = "tblConnectorListLayout";
+            tblConnectorListLayout.RowCount = 4;
+            tblConnectorListLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
+            tblConnectorListLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 74F));
+            tblConnectorListLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblConnectorListLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 114F));
+            tblConnectorListLayout.Size = new Size(1575, 1727);
+            tblConnectorListLayout.TabIndex = 0;
             // 
             // panelConnectorTop
             // 
             panelConnectorTop.Controls.Add(btnAddConnector);
             panelConnectorTop.Controls.Add(btnEditConnector);
             panelConnectorTop.Controls.Add(btnDeleteConnector);
-            panelConnectorTop.Dock = DockStyle.Top;
+            panelConnectorTop.Dock = DockStyle.Fill;
             panelConnectorTop.Location = new Point(0, 0);
+            panelConnectorTop.Margin = new Padding(0);
             panelConnectorTop.Name = "panelConnectorTop";
             panelConnectorTop.Size = new Size(1575, 90);
-            panelConnectorTop.TabIndex = 1;
+            panelConnectorTop.TabIndex = 0;
             // 
             // btnAddConnector
             // 
@@ -756,6 +778,123 @@ namespace AssemblyLineTester.Views.Pages
             btnDeleteConnector.TabIndex = 2;
             btnDeleteConnector.Text = "🗑 Delete";
             btnDeleteConnector.UseVisualStyleBackColor = false;
+            // 
+            // panelConnectorSearch
+            // 
+            panelConnectorSearch.Controls.Add(txtConnectorSearch);
+            panelConnectorSearch.Controls.Add(btnConnectorSearch);
+            panelConnectorSearch.Dock = DockStyle.Fill;
+            panelConnectorSearch.Location = new Point(0, 90);
+            panelConnectorSearch.Margin = new Padding(0);
+            panelConnectorSearch.Name = "panelConnectorSearch";
+            panelConnectorSearch.Size = new Size(1575, 74);
+            panelConnectorSearch.TabIndex = 1;
+            // 
+            // txtConnectorSearch
+            // 
+            txtConnectorSearch.Font = new Font("Segoe UI", 9.5F);
+            txtConnectorSearch.Location = new Point(0, 12);
+            txtConnectorSearch.Name = "txtConnectorSearch";
+            txtConnectorSearch.PlaceholderText = "Search by Part Number...";
+            txtConnectorSearch.Size = new Size(1315, 31);
+            txtConnectorSearch.TabIndex = 0;
+            // 
+            // btnConnectorSearch
+            // 
+            btnConnectorSearch.BackColor = Color.FromArgb(241, 245, 249);
+            btnConnectorSearch.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnConnectorSearch.FlatStyle = FlatStyle.Flat;
+            btnConnectorSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnConnectorSearch.Location = new Point(1325, 8);
+            btnConnectorSearch.Name = "btnConnectorSearch";
+            btnConnectorSearch.Size = new Size(250, 40);
+            btnConnectorSearch.TabIndex = 1;
+            btnConnectorSearch.Text = "🔍 Search";
+            btnConnectorSearch.UseVisualStyleBackColor = false;
+            // 
+            // dgvConnectors
+            // 
+            dgvConnectors.BackgroundColor = Color.White;
+            dgvConnectors.BorderStyle = BorderStyle.None;
+            dgvConnectors.ColumnHeadersHeight = 46;
+            dgvConnectors.Dock = DockStyle.Fill;
+            dgvConnectors.Location = new Point(0, 164);
+            dgvConnectors.Margin = new Padding(0);
+            dgvConnectors.Name = "dgvConnectors";
+            dgvConnectors.RowHeadersWidth = 82;
+            dgvConnectors.Size = new Size(1575, 1439);
+            dgvConnectors.TabIndex = 2;
+            // 
+            // tblConnectorPagination
+            // 
+            tblConnectorPagination.ColumnCount = 2;
+            tblConnectorPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
+            tblConnectorPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
+            tblConnectorPagination.Controls.Add(flpConnectorPages, 0, 0);
+            tblConnectorPagination.Controls.Add(flpConnectorShowEntries, 1, 0);
+            tblConnectorPagination.Dock = DockStyle.Fill;
+            tblConnectorPagination.Location = new Point(0, 1603);
+            tblConnectorPagination.Margin = new Padding(0);
+            tblConnectorPagination.Name = "tblConnectorPagination";
+            tblConnectorPagination.RowCount = 1;
+            tblConnectorPagination.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblConnectorPagination.Size = new Size(1575, 114);
+            tblConnectorPagination.TabIndex = 3;
+            // 
+            // flpConnectorPages
+            // 
+            flpConnectorPages.Dock = DockStyle.Fill;
+            flpConnectorPages.Location = new Point(0, 0);
+            flpConnectorPages.Margin = new Padding(0);
+            flpConnectorPages.Name = "flpConnectorPages";
+            flpConnectorPages.Size = new Size(686, 114);
+            flpConnectorPages.TabIndex = 0;
+            // 
+            // flpConnectorShowEntries
+            // 
+            flpConnectorShowEntries.Controls.Add(lblConnectorShowEntries2);
+            flpConnectorShowEntries.Controls.Add(cmbConnectorShowEntries);
+            flpConnectorShowEntries.Controls.Add(lblConnectorShowEntries1);
+            flpConnectorShowEntries.Dock = DockStyle.Fill;
+            flpConnectorShowEntries.FlowDirection = FlowDirection.RightToLeft;
+            flpConnectorShowEntries.Location = new Point(686, 0);
+            flpConnectorShowEntries.Margin = new Padding(0);
+            flpConnectorShowEntries.Name = "flpConnectorShowEntries";
+            flpConnectorShowEntries.Size = new Size(889, 114);
+            flpConnectorShowEntries.TabIndex = 1;
+            flpConnectorShowEntries.WrapContents = false;
+            // 
+            // lblConnectorShowEntries2
+            // 
+            lblConnectorShowEntries2.AutoSize = true;
+            lblConnectorShowEntries2.Font = new Font("Segoe UI", 9F);
+            lblConnectorShowEntries2.ForeColor = Color.FromArgb(100, 116, 139);
+            lblConnectorShowEntries2.Location = new Point(778, 19);
+            lblConnectorShowEntries2.Margin = new Padding(6, 19, 0, 0);
+            lblConnectorShowEntries2.Name = "lblConnectorShowEntries2";
+            lblConnectorShowEntries2.Text = "entries";
+            // 
+            // cmbConnectorShowEntries
+            // 
+            cmbConnectorShowEntries.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbConnectorShowEntries.Font = new Font("Segoe UI", 9F);
+            cmbConnectorShowEntries.FormattingEnabled = true;
+            cmbConnectorShowEntries.Items.AddRange(new object[] { "10", "25", "50" });
+            cmbConnectorShowEntries.Location = new Point(674, 13);
+            cmbConnectorShowEntries.Margin = new Padding(6, 13, 6, 0);
+            cmbConnectorShowEntries.Name = "cmbConnectorShowEntries";
+            cmbConnectorShowEntries.Size = new Size(98, 40);
+            cmbConnectorShowEntries.TabIndex = 1;
+            // 
+            // lblConnectorShowEntries1
+            // 
+            lblConnectorShowEntries1.AutoSize = true;
+            lblConnectorShowEntries1.Font = new Font("Segoe UI", 9F);
+            lblConnectorShowEntries1.ForeColor = Color.FromArgb(100, 116, 139);
+            lblConnectorShowEntries1.Location = new Point(586, 19);
+            lblConnectorShowEntries1.Margin = new Padding(0, 19, 6, 0);
+            lblConnectorShowEntries1.Name = "lblConnectorShowEntries1";
+            lblConnectorShowEntries1.Text = "Show";
             // 
             // panelConnectorDetail
             // 
@@ -1268,8 +1407,14 @@ namespace AssemblyLineTester.Views.Pages
             tabConnector.ResumeLayout(false);
             tableLayoutPanelConnector.ResumeLayout(false);
             panelConnectorList.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvConnectors).EndInit();
+            tblConnectorListLayout.ResumeLayout(false);
             panelConnectorTop.ResumeLayout(false);
+            panelConnectorSearch.ResumeLayout(false);
+            panelConnectorSearch.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvConnectors).EndInit();
+            tblConnectorPagination.ResumeLayout(false);
+            flpConnectorShowEntries.ResumeLayout(false);
+            flpConnectorShowEntries.PerformLayout();
             panelConnectorDetail.ResumeLayout(false);
             tableLayoutPanelConnectorDetail.ResumeLayout(false);
             panelConnectorInfo.ResumeLayout(false);
@@ -1440,6 +1585,16 @@ namespace AssemblyLineTester.Views.Pages
         private DataGridView dgvConnectors;
         private TableLayoutPanel tableLayoutPanelConnector;
         private Panel panelConnectorList;
+        private TableLayoutPanel tblConnectorListLayout;
+        private Panel panelConnectorSearch;
+        private TextBox txtConnectorSearch;
+        private Button btnConnectorSearch;
+        private TableLayoutPanel tblConnectorPagination;
+        private FlowLayoutPanel flpConnectorPages;
+        private FlowLayoutPanel flpConnectorShowEntries;
+        private Label lblConnectorShowEntries1;
+        private ComboBox cmbConnectorShowEntries;
+        private Label lblConnectorShowEntries2;
         private Panel panelConnectorDetail;
         private TableLayoutPanel tableLayoutPanelConnectorDetail;
         private Panel panelConnectorInfo;

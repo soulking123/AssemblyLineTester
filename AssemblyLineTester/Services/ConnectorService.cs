@@ -18,25 +18,30 @@ namespace AssemblyLineTester.Services
         private const long MaxImageSizeBytes = 2 * 1024 * 1024; // 2MB
         private static readonly string ConnectorImageRoot = Path.Combine("Assets", "img", "connector");
 
+        // Connectors linked to a harness, in the order they were attached ("J1", "J2", ...).
         public List<Connector> GetConnectorsByHarness(int harnessId)
         {
             using var db = new AppDbContext();
-            return db.Connectors
-                .Where(c => c.ProductHarnessId == harnessId)
-                .OrderBy(c => c.PartNumber)
+            return db.HarnessConnectors
+                .Where(hc => hc.ProductHarnessId == harnessId)
+                .OrderBy(hc => hc.Position)
+                .Include(hc => hc.Connector)
+                .Select(hc => hc.Connector!)
                 .ToList();
+        }
+
+        // Every connector in the shared catalog - used to populate the "add connector" picker,
+        // since any connector can be attached to any number of harnesses.
+        public List<Connector> GetAllConnectors()
+        {
+            using var db = new AppDbContext();
+            return db.Connectors.OrderBy(c => c.PartNumber).ToList();
         }
 
         public Connector? GetById(int connectorId)
         {
             using var db = new AppDbContext();
             return db.Connectors.FirstOrDefault(c => c.ConnectorId == connectorId);
-        }
-
-        public List<Connector> GetAllConnectors()
-        {
-            using var db = new AppDbContext();
-            return db.Connectors.ToList();
         }
 
         /// Returns the full path of every image belonging to a connector.
@@ -50,9 +55,13 @@ namespace AssemblyLineTester.Services
 
             if (Directory.Exists(fullPath))
             {
+                // The folder is keyed by PartNumber, which several connectors can share, so files are
+                // named "{ConnectorId}_{i}.ext". Filter by that prefix so a connector only shows its
+                // own images, not those of siblings that happen to share the same part number.
                 result.AddRange(
                     Directory.GetFiles(fullPath)
                         .Where(f => AllowedImageExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
+                        .Where(f => Path.GetFileName(f).StartsWith($"{connector.ConnectorId}_", StringComparison.Ordinal))
                         .OrderBy(f => f));
             }
             else if (File.Exists(fullPath))
@@ -63,8 +72,9 @@ namespace AssemblyLineTester.Services
             return result;
         }
 
-        /// Inserts a new connector, creates Assets/img/connector/{PartNumber}/ folder,
-        /// and copies images with filename pattern: {ConnectorId}_{i}.ext
+        /// Inserts a new connector into the shared catalog (no harness link - that happens later via
+        /// the harness modal), creates Assets/img/connector/{PartNumber}/ folder, and copies images
+        /// with filename pattern: {ConnectorId}_{i}.ext
         public (Connector? Connector, string? Error) AddConnector(Connector connector, List<string> sourceImagePaths)
         {
             string? validationError = Validate(connector);
@@ -164,7 +174,6 @@ namespace AssemblyLineTester.Services
         {
             if (string.IsNullOrWhiteSpace(connector.Perf)) return "Perf is required.";
             if (string.IsNullOrWhiteSpace(connector.PartNumber)) return "Part Number is required.";
-            if (connector.ProductHarnessId <= 0) return "Connector must belong to a harness.";
             return null;
         }
 
