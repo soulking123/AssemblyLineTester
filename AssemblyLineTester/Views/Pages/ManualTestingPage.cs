@@ -359,7 +359,7 @@ namespace AssemblyLineTester.Views.Pages
                 Pen p = highlightedRows.Contains(conn.RowIndex) ? activeWirePen : wirePen;
                 g.DrawBezier(p, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
             }
-            
+
             using Font fontLabel = new("Segoe UI", 9F, FontStyle.Regular);
             using Font fontAddr = new("Segoe UI", 10.5F, FontStyle.Bold);
             using StringFormat sfLabel = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisCharacter };
@@ -412,7 +412,7 @@ namespace AssemblyLineTester.Views.Pages
             path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
             path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
             path.CloseFigure();
-            
+
             g.FillPath(brush, path);
             g.DrawPath(pen, path);
         }

@@ -21,12 +21,12 @@ namespace AssemblyLineTester.Views
                 foreach (var process in processes)
                 {
                     process.Kill();
-                    process.WaitForExit(3000); // Wait up to 3 seconds for it to fully exit and release locks
+                    process.WaitForExit(3000);
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error ending easywire process: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error terminate easywire process: {ex.Message}");
             }
 
             _instrument.Connect();
@@ -103,11 +103,9 @@ namespace AssemblyLineTester.Views
             btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
 
             this.MouseDown += Form_MouseDown;
-            pnlCard.MouseDown += Form_MouseDown;
-            lblTitle.MouseDown += Form_MouseDown;
-            logoBox.MouseDown += Form_MouseDown;
         }
 
+        
         [DllImport("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
         [DllImport("user32.dll")]
@@ -130,6 +128,32 @@ namespace AssemblyLineTester.Views
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         private static extern IntPtr CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightEllipse);
 
+        private void UpdateUsernameVisuals(object? sender, EventArgs e)
+        {
+            bool active = txtUsername.Focused || pnlUsernameContainer.ClientRectangle.Contains(pnlUsernameContainer.PointToClient(Cursor.Position));
+            pnlUsernameLine.BackColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
+            iconUsername.IconColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
+
+            //pnlPasswordLine.BackColor = System.Drawing.Color.FromArgb(100, 116, 139);
+            //iconPassword.IconColor =  System.Drawing.Color.FromArgb(100, 116, 139);
+        }
+        private void UpdatePasswordVisuals(object? sender, EventArgs e)
+        {
+            bool active = txtPassword.Focused || pnlPasswordContainer.ClientRectangle.Contains(pnlPasswordContainer.PointToClient(Cursor.Position));
+            pnlPasswordLine.BackColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
+            iconPassword.IconColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
+
+            //pnlUsernameLine.BackColor =  System.Drawing.Color.FromArgb(100, 116, 139);
+            //iconUsername.IconColor = System.Drawing.Color.FromArgb(100, 116, 139);
+        }
+        private void FocusUsername(object? sender, EventArgs e)
+        {
+            txtUsername.Focus();
+        }
+        private void FocusPassword(object? sender, EventArgs e)
+        {
+            txtPassword.Focus();
+        }
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);

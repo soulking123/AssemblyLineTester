@@ -24,6 +24,7 @@ namespace AssemblyLineTester.Services
         {
             lock (_lockObj)
             {
+                if (IsConnected) return true;
                 try
                 {
                     var connectionResult = _service.Connect(ServerIPandPort, UserName, Password);
@@ -282,6 +283,44 @@ namespace AssemblyLineTester.Services
                 try
                 {
                     return _service.GetServerInformation(_connectionId);
+                }
+                catch
+                {
+                    return null!;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Triggers a learn operation on the connected CTA instrument for the specified test name.
+        /// </summary>
+        public CtaCommandResultCode LearnConnection(string testName = "")
+        {
+            if (!IsConnected) return (CtaCommandResultCode)(-1);
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.Learn(_connectionId, testName);
+                }
+                catch
+                {
+                    return (CtaCommandResultCode)(-2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the learned connection or test program text from the connected CTA Server.
+        /// </summary>
+        public CtaStringResult GetLearnedConnection(string testName = "")
+        {
+            if (!IsConnected) return null!;
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.GetTest(_connectionId, testName);
                 }
                 catch
                 {

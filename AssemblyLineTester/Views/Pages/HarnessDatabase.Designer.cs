@@ -39,9 +39,6 @@ namespace AssemblyLineTester.Views.Pages
             colProductType = new DataGridViewTextBoxColumn();
             colArea = new DataGridViewTextBoxColumn();
             colPartNumber = new DataGridViewTextBoxColumn();
-            colEcnNo = new DataGridViewTextBoxColumn();
-            colRevision = new DataGridViewTextBoxColumn();
-            colStatus = new DataGridViewTextBoxColumn();
             colLastUpdated = new DataGridViewTextBoxColumn();
             tblPagination = new TableLayoutPanel();
             flpPages = new FlowLayoutPanel();
@@ -223,7 +220,7 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
             dataGridViewList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewList.Columns.AddRange(new DataGridViewColumn[] { colNo, colProductModel, colProductType, colArea, colPartNumber, colEcnNo, colRevision, colStatus, colLastUpdated });
+
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = Color.White;
             dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
@@ -232,6 +229,9 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(30, 41, 59);
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
             dataGridViewList.DefaultCellStyle = dataGridViewCellStyle2;
+
+            dataGridViewList.Columns.AddRange(new DataGridViewColumn[] { colNo, colProductModel, colProductType, colArea, colPartNumber, colLastUpdated });
+
             dataGridViewList.Dock = DockStyle.Fill;
             dataGridViewList.EnableHeadersVisualStyles = false;
             dataGridViewList.GridColor = Color.FromArgb(203, 213, 225);
@@ -290,33 +290,6 @@ namespace AssemblyLineTester.Views.Pages
             colPartNumber.Name = "colPartNumber";
             colPartNumber.ReadOnly = true;
             colPartNumber.Width = 200;
-            // 
-            // colEcnNo
-            // 
-            colEcnNo.FillWeight = 75F;
-            colEcnNo.HeaderText = "ECN\r\nNo.";
-            colEcnNo.MinimumWidth = 75;
-            colEcnNo.Name = "colEcnNo";
-            colEcnNo.ReadOnly = true;
-            colEcnNo.Width = 200;
-            // 
-            // colRevision
-            // 
-            colRevision.FillWeight = 45F;
-            colRevision.HeaderText = "Rev.";
-            colRevision.MinimumWidth = 45;
-            colRevision.Name = "colRevision";
-            colRevision.ReadOnly = true;
-            colRevision.Width = 200;
-            // 
-            // colStatus
-            // 
-            colStatus.FillWeight = 75F;
-            colStatus.HeaderText = "Status";
-            colStatus.MinimumWidth = 75;
-            colStatus.Name = "colStatus";
-            colStatus.ReadOnly = true;
-            colStatus.Width = 200;
             // 
             // colLastUpdated
             // 
@@ -1406,9 +1379,6 @@ namespace AssemblyLineTester.Views.Pages
         private DataGridViewTextBoxColumn colProductType;
         private DataGridViewTextBoxColumn colArea;
         private DataGridViewTextBoxColumn colPartNumber;
-        private DataGridViewTextBoxColumn colEcnNo;
-        private DataGridViewTextBoxColumn colRevision;
-        private DataGridViewTextBoxColumn colStatus;
         private DataGridViewTextBoxColumn colLastUpdated;
         private TableLayoutPanel tableLayoutPanelRight;
         private Panel panelDetailTop;

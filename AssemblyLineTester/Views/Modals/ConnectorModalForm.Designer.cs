@@ -30,26 +30,25 @@ namespace AssemblyLineTester.Views.Modals
             lblPartNumber = new Label();
             txtPartNumber = new TextBox();
             lblContactType = new Label();
-            cmbContactType = new ComboBox();
-            lblContactQuality = new Label();
-            cmbContactQuality = new ComboBox();
+            txtContactType = new TextBox();
+            lblContactQuantity = new Label();
+            txtContactQuantity = new TextBox();
             lblWireSize = new Label();
-            cmbWireSize = new ComboBox();
+            txtWireSize = new TextBox();
             lblCurrentRating = new Label();
-            cmbCurrentRating = new ComboBox();
+            txtCurrentRating = new TextBox();
             lblMountingStyle = new Label();
-            cmbMountingStyle = new ComboBox();
+            txtMountingStyle = new TextBox();
             lblImage = new Label();
             btnChooseImage = new Button();
-            lblImagePath = new Label();
-            picPreview = new PictureBox();
+            lstImages = new ListBox();
+            btnRemoveImage = new Button();
             pnlFooter = new Panel();
             btnCancel = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnSave = new AssemblyLineTester.Views.Controls.RoundedButton();
             pnlCustomHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconLogo).BeginInit();
             pnlHeader.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picPreview).BeginInit();
             pnlFooter.SuspendLayout();
             SuspendLayout();
             // 
@@ -188,34 +187,32 @@ namespace AssemblyLineTester.Views.Modals
             lblContactType.TabIndex = 14;
             lblContactType.Text = "Contact Type *";
             // 
-            // cmbContactType
+            // txtContactType
             // 
-            cmbContactType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbContactType.Font = new Font("Segoe UI", 10.5F);
-            cmbContactType.Location = new Point(57, 375);
-            cmbContactType.Name = "cmbContactType";
-            cmbContactType.Size = new Size(388, 46);
-            cmbContactType.TabIndex = 13;
+            txtContactType.Font = new Font("Segoe UI", 10.5F);
+            txtContactType.Location = new Point(57, 375);
+            txtContactType.Name = "txtContactType";
+            txtContactType.Size = new Size(388, 45);
+            txtContactType.TabIndex = 13;
             // 
-            // lblContactQuality
+            // lblContactQuantity
             // 
-            lblContactQuality.AutoSize = true;
-            lblContactQuality.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblContactQuality.ForeColor = Color.FromArgb(51, 65, 85);
-            lblContactQuality.Location = new Point(496, 336);
-            lblContactQuality.Name = "lblContactQuality";
-            lblContactQuality.Size = new Size(223, 36);
-            lblContactQuality.TabIndex = 12;
-            lblContactQuality.Text = "Contact Quality *";
+            lblContactQuantity.AutoSize = true;
+            lblContactQuantity.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblContactQuantity.ForeColor = Color.FromArgb(51, 65, 85);
+            lblContactQuantity.Location = new Point(496, 336);
+            lblContactQuantity.Name = "lblContactQuantity";
+            lblContactQuantity.Size = new Size(223, 36);
+            lblContactQuantity.TabIndex = 12;
+            lblContactQuantity.Text = "Contact Quantity *";
             // 
-            // cmbContactQuality
+            // txtContactQuantity
             // 
-            cmbContactQuality.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbContactQuality.Font = new Font("Segoe UI", 10.5F);
-            cmbContactQuality.Location = new Point(496, 375);
-            cmbContactQuality.Name = "cmbContactQuality";
-            cmbContactQuality.Size = new Size(388, 46);
-            cmbContactQuality.TabIndex = 11;
+            txtContactQuantity.Font = new Font("Segoe UI", 10.5F);
+            txtContactQuantity.Location = new Point(496, 375);
+            txtContactQuantity.Name = "txtContactQuantity";
+            txtContactQuantity.Size = new Size(388, 45);
+            txtContactQuantity.TabIndex = 11;
             // 
             // lblWireSize
             // 
@@ -228,14 +225,13 @@ namespace AssemblyLineTester.Views.Modals
             lblWireSize.TabIndex = 10;
             lblWireSize.Text = "Wire Size *";
             // 
-            // cmbWireSize
+            // txtWireSize
             // 
-            cmbWireSize.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbWireSize.Font = new Font("Segoe UI", 10.5F);
-            cmbWireSize.Location = new Point(57, 475);
-            cmbWireSize.Name = "cmbWireSize";
-            cmbWireSize.Size = new Size(388, 46);
-            cmbWireSize.TabIndex = 9;
+            txtWireSize.Font = new Font("Segoe UI", 10.5F);
+            txtWireSize.Location = new Point(57, 475);
+            txtWireSize.Name = "txtWireSize";
+            txtWireSize.Size = new Size(388, 45);
+            txtWireSize.TabIndex = 9;
             // 
             // lblCurrentRating
             // 
@@ -248,14 +244,13 @@ namespace AssemblyLineTester.Views.Modals
             lblCurrentRating.TabIndex = 8;
             lblCurrentRating.Text = "Current Rating *";
             // 
-            // cmbCurrentRating
+            // txtCurrentRating
             // 
-            cmbCurrentRating.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbCurrentRating.Font = new Font("Segoe UI", 10.5F);
-            cmbCurrentRating.Location = new Point(496, 475);
-            cmbCurrentRating.Name = "cmbCurrentRating";
-            cmbCurrentRating.Size = new Size(388, 46);
-            cmbCurrentRating.TabIndex = 7;
+            txtCurrentRating.Font = new Font("Segoe UI", 10.5F);
+            txtCurrentRating.Location = new Point(496, 475);
+            txtCurrentRating.Name = "txtCurrentRating";
+            txtCurrentRating.Size = new Size(388, 45);
+            txtCurrentRating.TabIndex = 7;
             // 
             // lblMountingStyle
             // 
@@ -268,14 +263,13 @@ namespace AssemblyLineTester.Views.Modals
             lblMountingStyle.TabIndex = 6;
             lblMountingStyle.Text = "Mounting Style *";
             // 
-            // cmbMountingStyle
+            // txtMountingStyle
             // 
-            cmbMountingStyle.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbMountingStyle.Font = new Font("Segoe UI", 10.5F);
-            cmbMountingStyle.Location = new Point(52, 575);
-            cmbMountingStyle.Name = "cmbMountingStyle";
-            cmbMountingStyle.Size = new Size(388, 46);
-            cmbMountingStyle.TabIndex = 5;
+            txtMountingStyle.Font = new Font("Segoe UI", 10.5F);
+            txtMountingStyle.Location = new Point(57, 575);
+            txtMountingStyle.Name = "txtMountingStyle";
+            txtMountingStyle.Size = new Size(388, 45);
+            txtMountingStyle.TabIndex = 5;
             // 
             // lblImage
             // 
@@ -283,40 +277,39 @@ namespace AssemblyLineTester.Views.Modals
             lblImage.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblImage.ForeColor = Color.FromArgb(51, 65, 85);
             lblImage.Location = new Point(496, 536);
+            lblImage.MaximumSize = new Size(388, 0);
             lblImage.Name = "lblImage";
             lblImage.Size = new Size(362, 36);
             lblImage.TabIndex = 4;
-            lblImage.Text = "Image (Max 2MB, JPG/PNG)";
+            lblImage.Text = "Images (multiple allowed, max 2MB each, JPG/PNG)";
             // 
             // btnChooseImage
             // 
             btnChooseImage.Font = new Font("Segoe UI", 9F);
             btnChooseImage.Location = new Point(500, 575);
             btnChooseImage.Name = "btnChooseImage";
-            btnChooseImage.Size = new Size(150, 45);
+            btnChooseImage.Size = new Size(384, 42);
             btnChooseImage.TabIndex = 3;
-            btnChooseImage.Text = "Choose Image";
+            btnChooseImage.Text = "Choose Images...";
             // 
-            // lblImagePath
+            // lstImages
             // 
-            lblImagePath.AutoSize = true;
-            lblImagePath.Font = new Font("Segoe UI", 8F);
-            lblImagePath.ForeColor = Color.Gray;
-            lblImagePath.Location = new Point(500, 629);
-            lblImagePath.Name = "lblImagePath";
-            lblImagePath.Size = new Size(151, 30);
-            lblImagePath.TabIndex = 2;
-            lblImagePath.Text = "No file chosen";
+            lstImages.Font = new Font("Segoe UI", 8.5F);
+            lstImages.IntegralHeight = false;
+            lstImages.Location = new Point(500, 625);
+            lstImages.Name = "lstImages";
+            lstImages.Size = new Size(384, 195);
+            lstImages.TabIndex = 2;
             // 
-            // picPreview
+            // btnRemoveImage
             // 
-            picPreview.BorderStyle = BorderStyle.FixedSingle;
-            picPreview.Location = new Point(664, 575);
-            picPreview.Name = "picPreview";
-            picPreview.Size = new Size(220, 150);
-            picPreview.SizeMode = PictureBoxSizeMode.Zoom;
-            picPreview.TabIndex = 1;
-            picPreview.TabStop = false;
+            btnRemoveImage.Font = new Font("Segoe UI", 8.5F);
+            btnRemoveImage.ForeColor = Color.FromArgb(239, 68, 68);
+            btnRemoveImage.Location = new Point(500, 828);
+            btnRemoveImage.Name = "btnRemoveImage";
+            btnRemoveImage.Size = new Size(384, 38);
+            btnRemoveImage.TabIndex = 6;
+            btnRemoveImage.Text = "Remove Selected";
             // 
             // pnlFooter
             // 
@@ -324,7 +317,7 @@ namespace AssemblyLineTester.Views.Modals
             pnlFooter.Controls.Add(btnCancel);
             pnlFooter.Controls.Add(btnSave);
             pnlFooter.Dock = DockStyle.Bottom;
-            pnlFooter.Location = new Point(0, 800);
+            pnlFooter.Location = new Point(0, 906);
             pnlFooter.Name = "pnlFooter";
             pnlFooter.Size = new Size(942, 128);
             pnlFooter.TabIndex = 0;
@@ -375,21 +368,21 @@ namespace AssemblyLineTester.Views.Modals
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(248, 250, 252);
             CancelButton = btnCancel;
-            ClientSize = new Size(942, 928);
+            ClientSize = new Size(942, 1034);
             Controls.Add(pnlFooter);
-            Controls.Add(picPreview);
-            Controls.Add(lblImagePath);
+            Controls.Add(btnRemoveImage);
+            Controls.Add(lstImages);
             Controls.Add(btnChooseImage);
             Controls.Add(lblImage);
-            Controls.Add(cmbMountingStyle);
+            Controls.Add(txtMountingStyle);
             Controls.Add(lblMountingStyle);
-            Controls.Add(cmbCurrentRating);
+            Controls.Add(txtCurrentRating);
             Controls.Add(lblCurrentRating);
-            Controls.Add(cmbWireSize);
+            Controls.Add(txtWireSize);
             Controls.Add(lblWireSize);
-            Controls.Add(cmbContactQuality);
-            Controls.Add(lblContactQuality);
-            Controls.Add(cmbContactType);
+            Controls.Add(txtContactQuantity);
+            Controls.Add(lblContactQuantity);
+            Controls.Add(txtContactType);
             Controls.Add(lblContactType);
             Controls.Add(txtPartNumber);
             Controls.Add(lblPartNumber);
@@ -409,7 +402,6 @@ namespace AssemblyLineTester.Views.Modals
             ((System.ComponentModel.ISupportInitialize)iconLogo).EndInit();
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)picPreview).EndInit();
             pnlFooter.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
@@ -423,20 +415,20 @@ namespace AssemblyLineTester.Views.Modals
         private System.Windows.Forms.Label lblPartNumber;
         private System.Windows.Forms.TextBox txtPartNumber;
         private System.Windows.Forms.Label lblContactType;
-        private System.Windows.Forms.ComboBox cmbContactType;
-        private System.Windows.Forms.Label lblContactQuality;
-        private System.Windows.Forms.ComboBox cmbContactQuality;
+        private System.Windows.Forms.TextBox txtContactType;
+        private System.Windows.Forms.Label lblContactQuantity;
+        private System.Windows.Forms.TextBox txtContactQuantity;
         private System.Windows.Forms.Label lblWireSize;
-        private System.Windows.Forms.ComboBox cmbWireSize;
+        private System.Windows.Forms.TextBox txtWireSize;
         private System.Windows.Forms.Label lblCurrentRating;
-        private System.Windows.Forms.ComboBox cmbCurrentRating;
+        private System.Windows.Forms.TextBox txtCurrentRating;
         private System.Windows.Forms.Label lblMountingStyle;
-        private System.Windows.Forms.ComboBox cmbMountingStyle;
+        private System.Windows.Forms.TextBox txtMountingStyle;
         private System.Windows.Forms.Label lblImage;
         private System.Windows.Forms.Button btnChooseImage;
-        private System.Windows.Forms.Label lblImagePath;
-        private System.Windows.Forms.PictureBox picPreview;
-        
+        private System.Windows.Forms.ListBox lstImages;
+        private System.Windows.Forms.Button btnRemoveImage;
+
         private System.Windows.Forms.Panel pnlFooter;
         private AssemblyLineTester.Views.Controls.RoundedButton btnCancel;
         private AssemblyLineTester.Views.Controls.RoundedButton btnSave;

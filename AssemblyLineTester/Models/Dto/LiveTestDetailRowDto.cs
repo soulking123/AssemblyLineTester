@@ -15,6 +15,8 @@
         public int StepNo { get; set; }
         public string NetId { get; set; } = string.Empty;
         public string TestPoint { get; set; } = string.Empty;
+        public string FromPoint { get; set; } = string.Empty;
+        public string ToPoint { get; set; } = string.Empty;
         public string TestType { get; set; } = string.Empty;
         public string ExpectedValue { get; set; } = string.Empty;
         public double? MeasuredValue { get; set; }

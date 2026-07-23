@@ -21,10 +21,26 @@ namespace AssemblyLineTester.Services
             "SIGNATURE WIRE", "TWISTED PAIR", "WIRE"
         };
 
+        private static string ResolveTestTypeName(string? rawTestType)
+        {
+            if (string.IsNullOrWhiteSpace(rawTestType)) return "WIRE";
+
+            string trimmed = rawTestType.Trim().ToUpperInvariant();
+            foreach (var known in AllTestTypeNames)
+            {
+                if (string.Equals(known, trimmed, StringComparison.OrdinalIgnoreCase))
+                    return known;
+            }
+
+            return "WIRE";
+        }
+
         public ReportSummary GetSummary(ReportFilter filter)
         {
             using var db = new AppDbContext();
-            var reports = TestReportQueryHelper.ApplyFilter(db, filter).ToList();
+            // Drafts (auto-saved at Start Test, not yet confirmed via Save Report modal)
+            // stay out of the Reports page until the user explicitly saves them.
+            var reports = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft).ToList();
 
             int total = reports.Count;
             int pass = reports.Count(r => r.Status == TestStatus.Completed && r.OverallResult == TestResult.Pass);
@@ -459,11 +475,14 @@ namespace AssemblyLineTester.Services
                 }
 
                 // draw cells
-                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[0], dRowH); g2.DrawString(idx.ToString(), font, XBrushes.Black, new XRect(dx, y2 + 3, dCols[0], dRowH), XStringFormats.Center); dx += dCols[0];
+                g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[0], dRowH);
+                var netIdText = Ellipsize(g2, d.NetId, font, dCols[0] - 6);
+                g2.DrawString(netIdText, font, XBrushes.Black, new XRect(dx, y2 + 3, dCols[0], dRowH), XStringFormats.Center);
+                dx += dCols[0];
 
                 g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[1], dRowH);
-                var netHarness = Ellipsize(g2, d.NetId + " - " + d.HarnessGroup, font, dCols[1] - 12);
-                g2.DrawString(netHarness, font, XBrushes.Black, new XRect(dx + 3, y2, dCols[1] - 6, dRowH), XStringFormats.CenterLeft);
+                var harnessText = Ellipsize(g2, d.HarnessGroup, font, dCols[1] - 12);
+                g2.DrawString(harnessText, font, XBrushes.Black, new XRect(dx + 3, y2, dCols[1] - 6, dRowH), XStringFormats.CenterLeft);
                 dx += dCols[1];
 
                 g2.DrawRectangle(XPens.LightGray, dx, y2, dCols[2], dRowH);
@@ -543,7 +562,7 @@ namespace AssemblyLineTester.Services
         public List<ReportTrendPoint> GetResultTrend(ReportFilter filter)
         {
             using var db = new AppDbContext();
-            var reports = TestReportQueryHelper.ApplyFilter(db, filter).ToList();
+            var reports = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft).ToList();
 
             return reports
                 .GroupBy(r => r.TestDateTime.Date)
@@ -561,7 +580,7 @@ namespace AssemblyLineTester.Services
         public PagedResult<ReportListItem> GetReportList(ReportFilter filter)
         {
             using var db = new AppDbContext();
-            var query = TestReportQueryHelper.ApplyFilter(db, filter).OrderByDescending(r => r.TestDateTime);
+            var query = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft).OrderByDescending(r => r.TestDateTime);
 
             int totalCount = query.Count();
             var page = query
@@ -597,18 +616,18 @@ namespace AssemblyLineTester.Services
 
             var details = db.TestDetails.Where(d => d.ReportId == reportId).ToList();
 
-            var typeSummaries = details
-                .GroupBy(d => d.TestTypeName)
-                .Select(g => new TestTypeSummaryDto
+            var typeSummaries = db.ReportTestTypeSummaries
+                .Where(s => s.ReportId == reportId)
+                .OrderByDescending(s => s.TotalCount)
+                .Take(4)
+                .Select(s => new TestTypeSummaryDto
                 {
-                    TestType = g.Key,
-                    Total = g.Count(),
-                    Pass = g.Count(d => d.Result),
-                    Fail = g.Count(d => !d.Result),
-                    PassRatePercent = g.Count() == 0 ? 100 : Math.Round(g.Count(d => d.Result) * 100.0 / g.Count(), 2)
+                    TestType = s.TestTypeName,
+                    Total = s.TotalCount,
+                    Pass = s.PassCount,
+                    Fail = s.FailCount,
+                    PassRatePercent = s.TotalCount == 0 ? 100 : Math.Round(s.PassCount * 100.0 / s.TotalCount, 2)
                 })
-                .OrderByDescending(s => s.Total)
-                .Take(5) // matches the 5 static rows in Reports.cs's preview panel (lblR1..lblR5)
                 .ToList();
 
             var detailDtos = details.Select(d => new TestDetailDto
@@ -641,12 +660,15 @@ namespace AssemblyLineTester.Services
                 Operator = report.Operator,
                 TestTime = duration.HasValue ? duration.Value.ToString(@"hh\:mm\:ss") : "-",
                 OverallResult = report.OverallResult?.ToString().ToUpperInvariant() ?? "-",
+                TotalNets = report.TotalNets,
+                PassCount = report.PassCount,
+                FailCount = report.FailCount,
                 TypeSummaries = typeSummaries,
                 Details = detailDtos
             };
         }
 
-        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr)
+        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false)
         {
             using var db = new AppDbContext();
 
@@ -674,6 +696,7 @@ namespace AssemblyLineTester.Services
                 FailCount = failCount,
                 Status = TestStatus.Completed,
                 OverallResult = isPass ? TestResult.Pass : TestResult.Fail,
+                IsDraft = isDraft,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -689,15 +712,17 @@ namespace AssemblyLineTester.Services
                 foreach (var r in rows)
                 {
                     bool rowPass = r.Status == LiveTestStatus.Pass;
+                    string rowTypeName = ResolveTestTypeName(r.TestType);
+
                     details.Add(new TestDetail
                     {
                         ReportId = report.ReportId,
                         NetId = r.NetId ?? $"N{stepCount:000}",
                         HarnessGroup = $"{area} Connector",
-                        FromPin = string.IsNullOrEmpty(r.TestPoint) ? "-" : r.TestPoint,
-                        ToPin = "-",
+                        FromPin = string.IsNullOrEmpty(r.FromPoint) ? "-" : r.FromPoint,
+                        ToPin = string.IsNullOrEmpty(r.ToPoint) ? "-" : r.ToPoint,
                         Color = "Red",
-                        TestTypeName = "WIRE",
+                        TestTypeName = rowTypeName,
                         MeasuredValue = r.MeasuredValue,
                         LowerLimit = null,
                         UpperLimit = null,
@@ -710,7 +735,7 @@ namespace AssemblyLineTester.Services
                     {
                         ReportId = report.ReportId,
                         StepNo = stepCount++,
-                        TestTypeName = "WIRE",
+                        TestTypeName = rowTypeName,
                         Result = rowPass,
                         DurationSeconds = 2
                     });
@@ -718,6 +743,8 @@ namespace AssemblyLineTester.Services
 
                 db.TestDetails.AddRange(details);
                 db.TestSteps.AddRange(steps);
+                db.SaveChanges();
+                SaveReportTestTypeSummaries(db, report.ReportId, details);
                 db.SaveChanges();
             }
 
@@ -749,7 +776,29 @@ namespace AssemblyLineTester.Services
                 productModel, productType, area, ecnNumber, revision, partNumber,
                 serialNumber: $"PENDING-{testDateTime:HHmmss}",
                 operatorName: operatorName,
-                testDateTime, rows, overallResultStr);
+                testDateTime, rows, overallResultStr, isDraft: true);
+        }
+
+        // Called when the user confirms the Save Report modal for a draft that was
+        // auto-created at Start Test. Updates the final serial number and marks the
+        // report as no longer a draft, so it becomes visible on the Reports page.
+        // Deletes draft reports (never confirmed via Save Report) older than the given
+        // age. Confirmed reports (IsDraft = false) are never touched by this. Cascade
+        // delete on TestDetails/TestSteps/ReportTestTypeSummaries removes their children too.
+        public int PurgeOldDrafts(int olderThanDays = 30)
+        {
+            using var db = new AppDbContext();
+            var cutoff = DateTime.UtcNow.AddDays(-olderThanDays);
+
+            var oldDrafts = db.TestReports
+                .Where(r => r.IsDraft && r.CreatedAt < cutoff)
+                .ToList();
+
+            if (oldDrafts.Count == 0) return 0;
+
+            db.TestReports.RemoveRange(oldDrafts);
+            db.SaveChanges();
+            return oldDrafts.Count;
         }
 
         public void UpdateSerialNumber(int reportId, string serialNumber)
@@ -759,8 +808,26 @@ namespace AssemblyLineTester.Services
                 ?? throw new InvalidOperationException($"Report {reportId} not found.");
 
             if (!string.IsNullOrWhiteSpace(serialNumber)) report.SerialNumber = serialNumber.Trim();
+            report.IsDraft = false;
 
             db.SaveChanges();
+        }
+
+        // test type and writes the pre-aggregated counts into ReportTestTypeSummary.
+        private static void SaveReportTestTypeSummaries(AppDbContext db, int reportId, List<TestDetail> details)
+        {
+            var summaries = details
+                .GroupBy(d => d.TestTypeName)
+                .Select(g => new ReportTestTypeSummary
+                {
+                    ReportId = reportId,
+                    TestTypeName = g.Key,
+                    TotalCount = g.Count(),
+                    PassCount = g.Count(d => d.Result),
+                    FailCount = g.Count(d => !d.Result)
+                });
+
+            db.ReportTestTypeSummaries.AddRange(summaries);
         }
     }
 }

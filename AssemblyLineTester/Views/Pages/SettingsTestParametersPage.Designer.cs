@@ -121,9 +121,9 @@ namespace AssemblyLineTester.Views.Pages
             splitContainerMain.Panel2.BackColor = Color.FromArgb(248, 250, 252);
             splitContainerMain.Panel2.Controls.Add(pnlRightBox);
             splitContainerMain.Panel2MinSize = 400;
-            splitContainerMain.Size = new Size(2016, 1330);
-            splitContainerMain.SplitterDistance = 1100;
-            splitContainerMain.SplitterWidth = 12;
+            splitContainerMain.Size = new Size(1241, 832);
+            splitContainerMain.SplitterDistance = 677;
+            splitContainerMain.SplitterWidth = 7;
             splitContainerMain.TabIndex = 0;
             // 
             // pnlLeftBox
@@ -139,7 +139,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlLeftBox.Location = new Point(0, 0);
             pnlLeftBox.Margin = new Padding(0);
             pnlLeftBox.Name = "pnlLeftBox";
-            pnlLeftBox.Size = new Size(1100, 1330);
+            pnlLeftBox.Size = new Size(677, 832);
             pnlLeftBox.TabIndex = 0;
             // 
             // gridConfig
@@ -154,13 +154,12 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colNetId, colHarnessGroup, colFromAddr, colFromLabel, colToAddr, colToLabel, colTestType, colLowerLimit, colUpperLimit, colExpectedValue, colTolerance, colUnit });
             gridConfig.Dock = DockStyle.Fill;
             gridConfig.EnableHeadersVisualStyles = false;
-            gridConfig.Location = new Point(0, 362);
-            gridConfig.Margin = new Padding(5);
+            gridConfig.Location = new Point(0, 232);
             gridConfig.Name = "gridConfig";
             gridConfig.RowHeadersVisible = false;
             gridConfig.RowHeadersWidth = 82;
             gridConfig.RowTemplate.Height = 38;
-            gridConfig.Size = new Size(1098, 966);
+            gridConfig.Size = new Size(675, 598);
             gridConfig.TabIndex = 4;
             // 
             // colNo
@@ -268,11 +267,10 @@ namespace AssemblyLineTester.Views.Pages
             pnlConfigInfo.CausesValidation = false;
             pnlConfigInfo.Controls.Add(tblConfigInfo);
             pnlConfigInfo.Dock = DockStyle.Top;
-            pnlConfigInfo.Location = new Point(0, 156);
-            pnlConfigInfo.Margin = new Padding(5);
+            pnlConfigInfo.Location = new Point(0, 98);
             pnlConfigInfo.Name = "pnlConfigInfo";
-            pnlConfigInfo.Padding = new Padding(15, 10, 15, 10);
-            pnlConfigInfo.Size = new Size(1098, 206);
+            pnlConfigInfo.Padding = new Padding(9, 6, 9, 6);
+            pnlConfigInfo.Size = new Size(675, 134);
             pnlConfigInfo.TabIndex = 3;
             // 
             // tblConfigInfo
@@ -288,13 +286,13 @@ namespace AssemblyLineTester.Views.Pages
             tblConfigInfo.Controls.Add(tblCellConnRes, 0, 1);
             tblConfigInfo.Controls.Add(tblCellInsRes, 1, 1);
             tblConfigInfo.Dock = DockStyle.Fill;
-            tblConfigInfo.Location = new Point(15, 10);
+            tblConfigInfo.Location = new Point(9, 6);
             tblConfigInfo.Margin = new Padding(0);
             tblConfigInfo.Name = "tblConfigInfo";
             tblConfigInfo.RowCount = 2;
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
-            tblConfigInfo.Size = new Size(1068, 186);
+            tblConfigInfo.Size = new Size(657, 122);
             tblConfigInfo.TabIndex = 0;
             // 
             // tblCellConfigName
@@ -305,13 +303,13 @@ namespace AssemblyLineTester.Views.Pages
             tblCellConfigName.Controls.Add(lblConfigName, 0, 0);
             tblCellConfigName.Controls.Add(txtConfigName, 0, 1);
             tblCellConfigName.Dock = DockStyle.Fill;
-            tblCellConfigName.Location = new Point(6, 4);
-            tblCellConfigName.Margin = new Padding(6, 4, 15, 8);
+            tblCellConfigName.Location = new Point(4, 2);
+            tblCellConfigName.Margin = new Padding(4, 2, 9, 5);
             tblCellConfigName.Name = "tblCellConfigName";
             tblCellConfigName.RowCount = 2;
             tblCellConfigName.RowStyles.Add(new RowStyle());
             tblCellConfigName.RowStyles.Add(new RowStyle());
-            tblCellConfigName.Size = new Size(513, 81);
+            tblCellConfigName.Size = new Size(315, 54);
             tblCellConfigName.TabIndex = 0;
             // 
             // lblConfigName
@@ -320,9 +318,9 @@ namespace AssemblyLineTester.Views.Pages
             lblConfigName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblConfigName.ForeColor = Color.FromArgb(100, 116, 139);
             lblConfigName.Location = new Point(0, 0);
-            lblConfigName.Margin = new Padding(0, 0, 0, 6);
+            lblConfigName.Margin = new Padding(0, 0, 0, 4);
             lblConfigName.Name = "lblConfigName";
-            lblConfigName.Size = new Size(164, 32);
+            lblConfigName.Size = new Size(101, 20);
             lblConfigName.TabIndex = 0;
             lblConfigName.Text = "Config Name";
             // 
@@ -331,10 +329,10 @@ namespace AssemblyLineTester.Views.Pages
             txtConfigName.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtConfigName.CausesValidation = false;
             txtConfigName.Font = new Font("Segoe UI", 10F);
-            txtConfigName.Location = new Point(0, 38);
+            txtConfigName.Location = new Point(0, 24);
             txtConfigName.Margin = new Padding(0);
             txtConfigName.Name = "txtConfigName";
-            txtConfigName.Size = new Size(513, 43);
+            txtConfigName.Size = new Size(315, 30);
             txtConfigName.TabIndex = 1;
             txtConfigName.Text = "Main Harness Test";
             // 
@@ -346,13 +344,13 @@ namespace AssemblyLineTester.Views.Pages
             tblCellProductModel.Controls.Add(lblProductModel, 0, 0);
             tblCellProductModel.Controls.Add(txtProductModel, 0, 1);
             tblCellProductModel.Dock = DockStyle.Fill;
-            tblCellProductModel.Location = new Point(549, 4);
-            tblCellProductModel.Margin = new Padding(15, 4, 6, 8);
+            tblCellProductModel.Location = new Point(337, 2);
+            tblCellProductModel.Margin = new Padding(9, 2, 4, 5);
             tblCellProductModel.Name = "tblCellProductModel";
             tblCellProductModel.RowCount = 2;
             tblCellProductModel.RowStyles.Add(new RowStyle());
             tblCellProductModel.RowStyles.Add(new RowStyle());
-            tblCellProductModel.Size = new Size(513, 81);
+            tblCellProductModel.Size = new Size(316, 54);
             tblCellProductModel.TabIndex = 1;
             // 
             // lblProductModel
@@ -361,9 +359,9 @@ namespace AssemblyLineTester.Views.Pages
             lblProductModel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblProductModel.ForeColor = Color.FromArgb(100, 116, 139);
             lblProductModel.Location = new Point(0, 0);
-            lblProductModel.Margin = new Padding(0, 0, 0, 6);
+            lblProductModel.Margin = new Padding(0, 0, 0, 4);
             lblProductModel.Name = "lblProductModel";
-            lblProductModel.Size = new Size(185, 32);
+            lblProductModel.Size = new Size(112, 20);
             lblProductModel.TabIndex = 0;
             lblProductModel.Text = "Product Model";
             // 
@@ -372,10 +370,10 @@ namespace AssemblyLineTester.Views.Pages
             txtProductModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtProductModel.CausesValidation = false;
             txtProductModel.Font = new Font("Segoe UI", 10F);
-            txtProductModel.Location = new Point(0, 38);
+            txtProductModel.Location = new Point(0, 24);
             txtProductModel.Margin = new Padding(0);
             txtProductModel.Name = "txtProductModel";
-            txtProductModel.Size = new Size(513, 43);
+            txtProductModel.Size = new Size(316, 30);
             txtProductModel.TabIndex = 1;
             txtProductModel.Text = "6060";
             // 
@@ -387,13 +385,13 @@ namespace AssemblyLineTester.Views.Pages
             tblCellConnRes.Controls.Add(lblConnectionResistance, 0, 0);
             tblCellConnRes.Controls.Add(txtConnectionResistance, 0, 1);
             tblCellConnRes.Dock = DockStyle.Fill;
-            tblCellConnRes.Location = new Point(6, 97);
-            tblCellConnRes.Margin = new Padding(6, 4, 15, 8);
+            tblCellConnRes.Location = new Point(4, 63);
+            tblCellConnRes.Margin = new Padding(4, 2, 9, 5);
             tblCellConnRes.Name = "tblCellConnRes";
             tblCellConnRes.RowCount = 2;
             tblCellConnRes.RowStyles.Add(new RowStyle());
             tblCellConnRes.RowStyles.Add(new RowStyle());
-            tblCellConnRes.Size = new Size(513, 81);
+            tblCellConnRes.Size = new Size(315, 54);
             tblCellConnRes.TabIndex = 2;
             // 
             // lblConnectionResistance
@@ -402,9 +400,9 @@ namespace AssemblyLineTester.Views.Pages
             lblConnectionResistance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblConnectionResistance.ForeColor = Color.FromArgb(100, 116, 139);
             lblConnectionResistance.Location = new Point(0, 0);
-            lblConnectionResistance.Margin = new Padding(0, 0, 0, 6);
+            lblConnectionResistance.Margin = new Padding(0, 0, 0, 4);
             lblConnectionResistance.Name = "lblConnectionResistance";
-            lblConnectionResistance.Size = new Size(336, 32);
+            lblConnectionResistance.Size = new Size(207, 20);
             lblConnectionResistance.TabIndex = 0;
             lblConnectionResistance.Text = "Connection Resistance (mΩ)";
             // 
@@ -413,10 +411,10 @@ namespace AssemblyLineTester.Views.Pages
             txtConnectionResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtConnectionResistance.CausesValidation = false;
             txtConnectionResistance.Font = new Font("Segoe UI", 10F);
-            txtConnectionResistance.Location = new Point(0, 38);
+            txtConnectionResistance.Location = new Point(0, 24);
             txtConnectionResistance.Margin = new Padding(0);
             txtConnectionResistance.Name = "txtConnectionResistance";
-            txtConnectionResistance.Size = new Size(513, 43);
+            txtConnectionResistance.Size = new Size(315, 30);
             txtConnectionResistance.TabIndex = 1;
             txtConnectionResistance.Text = "2.5";
             // 
@@ -428,13 +426,13 @@ namespace AssemblyLineTester.Views.Pages
             tblCellInsRes.Controls.Add(lblInsulationResistance, 0, 0);
             tblCellInsRes.Controls.Add(txtInsulationResistance, 0, 1);
             tblCellInsRes.Dock = DockStyle.Fill;
-            tblCellInsRes.Location = new Point(549, 97);
-            tblCellInsRes.Margin = new Padding(15, 4, 6, 8);
+            tblCellInsRes.Location = new Point(337, 63);
+            tblCellInsRes.Margin = new Padding(9, 2, 4, 5);
             tblCellInsRes.Name = "tblCellInsRes";
             tblCellInsRes.RowCount = 2;
             tblCellInsRes.RowStyles.Add(new RowStyle());
             tblCellInsRes.RowStyles.Add(new RowStyle());
-            tblCellInsRes.Size = new Size(513, 81);
+            tblCellInsRes.Size = new Size(316, 54);
             tblCellInsRes.TabIndex = 3;
             // 
             // lblInsulationResistance
@@ -443,9 +441,9 @@ namespace AssemblyLineTester.Views.Pages
             lblInsulationResistance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblInsulationResistance.ForeColor = Color.FromArgb(100, 116, 139);
             lblInsulationResistance.Location = new Point(0, 0);
-            lblInsulationResistance.Margin = new Padding(0, 0, 0, 6);
+            lblInsulationResistance.Margin = new Padding(0, 0, 0, 4);
             lblInsulationResistance.Name = "lblInsulationResistance";
-            lblInsulationResistance.Size = new Size(321, 32);
+            lblInsulationResistance.Size = new Size(198, 20);
             lblInsulationResistance.TabIndex = 0;
             lblInsulationResistance.Text = "Insulation Resistance (MΩ)";
             // 
@@ -454,10 +452,10 @@ namespace AssemblyLineTester.Views.Pages
             txtInsulationResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtInsulationResistance.CausesValidation = false;
             txtInsulationResistance.Font = new Font("Segoe UI", 10F);
-            txtInsulationResistance.Location = new Point(0, 38);
+            txtInsulationResistance.Location = new Point(0, 24);
             txtInsulationResistance.Margin = new Padding(0);
             txtInsulationResistance.Name = "txtInsulationResistance";
-            txtInsulationResistance.Size = new Size(513, 43);
+            txtInsulationResistance.Size = new Size(316, 30);
             txtInsulationResistance.TabIndex = 1;
             txtInsulationResistance.Text = "500";
             // 
@@ -466,10 +464,9 @@ namespace AssemblyLineTester.Views.Pages
             pnlConfigInfoHeader.BackColor = Color.FromArgb(203, 213, 225);
             pnlConfigInfoHeader.Controls.Add(lblConfigInfoHeader);
             pnlConfigInfoHeader.Dock = DockStyle.Top;
-            pnlConfigInfoHeader.Location = new Point(0, 116);
-            pnlConfigInfoHeader.Margin = new Padding(5);
+            pnlConfigInfoHeader.Location = new Point(0, 73);
             pnlConfigInfoHeader.Name = "pnlConfigInfoHeader";
-            pnlConfigInfoHeader.Size = new Size(1098, 40);
+            pnlConfigInfoHeader.Size = new Size(675, 25);
             pnlConfigInfoHeader.TabIndex = 2;
             // 
             // lblConfigInfoHeader
@@ -478,10 +475,9 @@ namespace AssemblyLineTester.Views.Pages
             lblConfigInfoHeader.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblConfigInfoHeader.ForeColor = Color.FromArgb(30, 41, 59);
             lblConfigInfoHeader.Location = new Point(0, 0);
-            lblConfigInfoHeader.Margin = new Padding(5, 0, 5, 0);
             lblConfigInfoHeader.Name = "lblConfigInfoHeader";
-            lblConfigInfoHeader.Padding = new Padding(10, 0, 0, 0);
-            lblConfigInfoHeader.Size = new Size(1098, 40);
+            lblConfigInfoHeader.Padding = new Padding(6, 0, 0, 0);
+            lblConfigInfoHeader.Size = new Size(675, 25);
             lblConfigInfoHeader.TabIndex = 0;
             lblConfigInfoHeader.Text = "Config Summary";
             lblConfigInfoHeader.TextAlign = ContentAlignment.MiddleLeft;
@@ -491,10 +487,9 @@ namespace AssemblyLineTester.Views.Pages
             pnlButtons.BackColor = Color.FromArgb(248, 250, 252);
             pnlButtons.Controls.Add(tblButtons);
             pnlButtons.Dock = DockStyle.Top;
-            pnlButtons.Location = new Point(0, 56);
-            pnlButtons.Margin = new Padding(5);
+            pnlButtons.Location = new Point(0, 35);
             pnlButtons.Name = "pnlButtons";
-            pnlButtons.Size = new Size(1098, 60);
+            pnlButtons.Size = new Size(675, 38);
             pnlButtons.TabIndex = 1;
             // 
             // tblButtons
@@ -511,7 +506,7 @@ namespace AssemblyLineTester.Views.Pages
             tblButtons.Name = "tblButtons";
             tblButtons.RowCount = 1;
             tblButtons.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblButtons.Size = new Size(1098, 60);
+            tblButtons.Size = new Size(675, 38);
             tblButtons.TabIndex = 0;
             // 
             // flpButtonsLeft
@@ -524,8 +519,8 @@ namespace AssemblyLineTester.Views.Pages
             flpButtonsLeft.Location = new Point(0, 0);
             flpButtonsLeft.Margin = new Padding(0);
             flpButtonsLeft.Name = "flpButtonsLeft";
-            flpButtonsLeft.Padding = new Padding(15, 8, 0, 8);
-            flpButtonsLeft.Size = new Size(549, 60);
+            flpButtonsLeft.Padding = new Padding(9, 5, 0, 5);
+            flpButtonsLeft.Size = new Size(337, 38);
             flpButtonsLeft.TabIndex = 0;
             flpButtonsLeft.WrapContents = false;
             // 
@@ -538,12 +533,14 @@ namespace AssemblyLineTester.Views.Pages
             btnTotalNet.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnTotalNet.ForeColor = Color.FromArgb(30, 41, 59);
             btnTotalNet.HoverBackColor = Color.FromArgb(203, 213, 225);
-            btnTotalNet.Location = new Point(15, 8);
-            btnTotalNet.Margin = new Padding(0, 0, 10, 0);
+            btnTotalNet.HoverForeColor = Color.Empty;
+            btnTotalNet.Location = new Point(9, 5);
+            btnTotalNet.Margin = new Padding(0, 0, 6, 0);
             btnTotalNet.Name = "btnTotalNet";
             btnTotalNet.NormalBackColor = Color.FromArgb(203, 213, 225);
             btnTotalNet.PressedBackColor = Color.FromArgb(203, 213, 225);
-            btnTotalNet.Size = new Size(165, 44);
+            btnTotalNet.PressedForeColor = Color.Empty;
+            btnTotalNet.Size = new Size(102, 28);
             btnTotalNet.TabIndex = 0;
             btnTotalNet.Text = "Total Net: 4";
             btnTotalNet.UseVisualStyleBackColor = false;
@@ -557,16 +554,19 @@ namespace AssemblyLineTester.Views.Pages
             btnAdd.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             btnAdd.ForeColor = Color.White;
             btnAdd.HoverBackColor = Color.FromArgb(22, 163, 74);
-            btnAdd.Location = new Point(190, 8);
-            btnAdd.Margin = new Padding(0, 0, 10, 0);
+            btnAdd.HoverForeColor = Color.Empty;
+            btnAdd.Location = new Point(117, 5);
+            btnAdd.Margin = new Padding(0, 0, 6, 0);
             btnAdd.Name = "btnAdd";
             btnAdd.NormalBackColor = Color.FromArgb(34, 197, 94);
             btnAdd.PressedBackColor = Color.FromArgb(21, 128, 61);
-            btnAdd.Size = new Size(60, 44);
+            btnAdd.PressedForeColor = Color.Empty;
+            btnAdd.Size = new Size(37, 28);
             btnAdd.TabIndex = 1;
             btnAdd.Text = "+";
             btnAdd.TextAlign = ContentAlignment.TopCenter;
             btnAdd.UseVisualStyleBackColor = false;
+            btnAdd.Click += BtnAdd_Click;
             // 
             // btnRemove
             // 
@@ -577,15 +577,18 @@ namespace AssemblyLineTester.Views.Pages
             btnRemove.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             btnRemove.ForeColor = Color.White;
             btnRemove.HoverBackColor = Color.FromArgb(220, 38, 38);
-            btnRemove.Location = new Point(260, 8);
+            btnRemove.HoverForeColor = Color.Empty;
+            btnRemove.Location = new Point(160, 5);
             btnRemove.Margin = new Padding(0);
             btnRemove.Name = "btnRemove";
             btnRemove.NormalBackColor = Color.FromArgb(239, 68, 68);
             btnRemove.PressedBackColor = Color.FromArgb(185, 28, 28);
-            btnRemove.Size = new Size(59, 44);
+            btnRemove.PressedForeColor = Color.Empty;
+            btnRemove.Size = new Size(36, 28);
             btnRemove.TabIndex = 2;
             btnRemove.Text = "-";
             btnRemove.UseVisualStyleBackColor = false;
+            btnRemove.Click += BtnRemove_Click;
             // 
             // flpButtonsRight
             // 
@@ -595,11 +598,11 @@ namespace AssemblyLineTester.Views.Pages
             flpButtonsRight.Controls.Add(btnImport);
             flpButtonsRight.Dock = DockStyle.Fill;
             flpButtonsRight.FlowDirection = FlowDirection.RightToLeft;
-            flpButtonsRight.Location = new Point(549, 0);
+            flpButtonsRight.Location = new Point(337, 0);
             flpButtonsRight.Margin = new Padding(0);
             flpButtonsRight.Name = "flpButtonsRight";
-            flpButtonsRight.Padding = new Padding(0, 8, 15, 8);
-            flpButtonsRight.Size = new Size(549, 60);
+            flpButtonsRight.Padding = new Padding(0, 5, 9, 5);
+            flpButtonsRight.Size = new Size(338, 38);
             flpButtonsRight.TabIndex = 1;
             flpButtonsRight.WrapContents = false;
             // 
@@ -612,15 +615,18 @@ namespace AssemblyLineTester.Views.Pages
             btnExport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnExport.ForeColor = Color.FromArgb(30, 41, 59);
             btnExport.HoverBackColor = Color.FromArgb(148, 163, 184);
-            btnExport.Location = new Point(351, 8);
-            btnExport.Margin = new Padding(10, 0, 0, 0);
+            btnExport.HoverForeColor = Color.Empty;
+            btnExport.Location = new Point(216, 5);
+            btnExport.Margin = new Padding(6, 0, 0, 0);
             btnExport.Name = "btnExport";
             btnExport.NormalBackColor = Color.FromArgb(203, 213, 225);
             btnExport.PressedBackColor = Color.FromArgb(100, 116, 139);
-            btnExport.Size = new Size(183, 44);
+            btnExport.PressedForeColor = Color.Empty;
+            btnExport.Size = new Size(113, 28);
             btnExport.TabIndex = 5;
             btnExport.Text = "Save Config";
             btnExport.UseVisualStyleBackColor = false;
+            btnExport.Click += BtnExport_Click;
             // 
             // btnReset
             // 
@@ -631,15 +637,18 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnReset.ForeColor = Color.FromArgb(220, 38, 38);
             btnReset.HoverBackColor = Color.FromArgb(254, 226, 226);
-            btnReset.Location = new Point(173, 8);
-            btnReset.Margin = new Padding(10, 0, 0, 0);
+            btnReset.HoverForeColor = Color.Empty;
+            btnReset.Location = new Point(107, 5);
+            btnReset.Margin = new Padding(6, 0, 0, 0);
             btnReset.Name = "btnReset";
             btnReset.NormalBackColor = Color.FromArgb(203, 213, 225);
             btnReset.PressedBackColor = Color.FromArgb(254, 202, 202);
-            btnReset.Size = new Size(168, 44);
+            btnReset.PressedForeColor = Color.Empty;
+            btnReset.Size = new Size(103, 28);
             btnReset.TabIndex = 4;
             btnReset.Text = "Reset Config";
             btnReset.UseVisualStyleBackColor = false;
+            btnReset.Click += BtnReset_Click;
             // 
             // btnImport
             // 
@@ -650,15 +659,18 @@ namespace AssemblyLineTester.Views.Pages
             btnImport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnImport.ForeColor = Color.FromArgb(30, 41, 59);
             btnImport.HoverBackColor = Color.FromArgb(148, 163, 184);
-            btnImport.Location = new Point(-21, 8);
+            btnImport.HoverForeColor = Color.Empty;
+            btnImport.Location = new Point(-12, 5);
             btnImport.Margin = new Padding(0);
             btnImport.Name = "btnImport";
             btnImport.NormalBackColor = Color.FromArgb(203, 213, 225);
             btnImport.PressedBackColor = Color.FromArgb(100, 116, 139);
-            btnImport.Size = new Size(184, 44);
+            btnImport.PressedForeColor = Color.Empty;
+            btnImport.Size = new Size(113, 28);
             btnImport.TabIndex = 3;
             btnImport.Text = "Edit Config";
             btnImport.UseVisualStyleBackColor = false;
+            btnImport.Click += BtnImport_Click;
             // 
             // pnlHeaderTop
             // 
@@ -666,9 +678,8 @@ namespace AssemblyLineTester.Views.Pages
             pnlHeaderTop.Controls.Add(lblHeaderTop);
             pnlHeaderTop.Dock = DockStyle.Top;
             pnlHeaderTop.Location = new Point(0, 0);
-            pnlHeaderTop.Margin = new Padding(5);
             pnlHeaderTop.Name = "pnlHeaderTop";
-            pnlHeaderTop.Size = new Size(1098, 56);
+            pnlHeaderTop.Size = new Size(675, 35);
             pnlHeaderTop.TabIndex = 0;
             // 
             // lblHeaderTop
@@ -677,9 +688,8 @@ namespace AssemblyLineTester.Views.Pages
             lblHeaderTop.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblHeaderTop.ForeColor = Color.FromArgb(30, 41, 59);
             lblHeaderTop.Location = new Point(0, 0);
-            lblHeaderTop.Margin = new Padding(5, 0, 5, 0);
             lblHeaderTop.Name = "lblHeaderTop";
-            lblHeaderTop.Size = new Size(1098, 56);
+            lblHeaderTop.Size = new Size(675, 35);
             lblHeaderTop.TabIndex = 0;
             lblHeaderTop.Text = "Net List & Harness Configuration";
             lblHeaderTop.TextAlign = ContentAlignment.MiddleCenter;
@@ -694,7 +704,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlRightBox.Location = new Point(0, 0);
             pnlRightBox.Margin = new Padding(0);
             pnlRightBox.Name = "pnlRightBox";
-            pnlRightBox.Size = new Size(904, 1330);
+            pnlRightBox.Size = new Size(557, 832);
             pnlRightBox.TabIndex = 1;
             // 
             // pnlPreviewScroll
@@ -703,19 +713,17 @@ namespace AssemblyLineTester.Views.Pages
             pnlPreviewScroll.BackColor = Color.FromArgb(248, 250, 252);
             pnlPreviewScroll.Controls.Add(picPreview);
             pnlPreviewScroll.Dock = DockStyle.Fill;
-            pnlPreviewScroll.Location = new Point(0, 56);
-            pnlPreviewScroll.Margin = new Padding(5);
+            pnlPreviewScroll.Location = new Point(0, 35);
             pnlPreviewScroll.Name = "pnlPreviewScroll";
-            pnlPreviewScroll.Size = new Size(902, 1272);
+            pnlPreviewScroll.Size = new Size(555, 795);
             pnlPreviewScroll.TabIndex = 1;
             // 
             // picPreview
             // 
             picPreview.BackColor = Color.FromArgb(248, 250, 252);
             picPreview.Location = new Point(0, 0);
-            picPreview.Margin = new Padding(5);
             picPreview.Name = "picPreview";
-            picPreview.Size = new Size(895, 1250);
+            picPreview.Size = new Size(551, 781);
             picPreview.TabIndex = 1;
             picPreview.TabStop = false;
             // 
@@ -725,9 +733,8 @@ namespace AssemblyLineTester.Views.Pages
             pnlHeaderBottom.Controls.Add(lblHeaderBottom);
             pnlHeaderBottom.Dock = DockStyle.Top;
             pnlHeaderBottom.Location = new Point(0, 0);
-            pnlHeaderBottom.Margin = new Padding(5);
             pnlHeaderBottom.Name = "pnlHeaderBottom";
-            pnlHeaderBottom.Size = new Size(902, 56);
+            pnlHeaderBottom.Size = new Size(555, 35);
             pnlHeaderBottom.TabIndex = 0;
             // 
             // lblHeaderBottom
@@ -736,23 +743,22 @@ namespace AssemblyLineTester.Views.Pages
             lblHeaderBottom.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblHeaderBottom.ForeColor = Color.FromArgb(30, 41, 59);
             lblHeaderBottom.Location = new Point(0, 0);
-            lblHeaderBottom.Margin = new Padding(5, 0, 5, 0);
             lblHeaderBottom.Name = "lblHeaderBottom";
-            lblHeaderBottom.Size = new Size(902, 56);
+            lblHeaderBottom.Size = new Size(555, 35);
             lblHeaderBottom.TabIndex = 0;
             lblHeaderBottom.Text = "Live Schematic Diagram Preview";
             lblHeaderBottom.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // SettingsTestParametersPage
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(248, 250, 252);
             Controls.Add(splitContainerMain);
             Margin = new Padding(0);
             Name = "SettingsTestParametersPage";
-            Padding = new Padding(15);
-            Size = new Size(2046, 1360);
+            Padding = new Padding(9, 9, 9, 9);
+            Size = new Size(1259, 850);
             splitContainerMain.Panel1.ResumeLayout(false);
             splitContainerMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainerMain).EndInit();

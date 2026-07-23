@@ -8,6 +8,7 @@ namespace AssemblyLineTester.Services
     /// Manages the active user login session globally across the application.
     public static class SessionManager
     {
+
         private static readonly HashSet<string> _userPermissions = new();
 
         /// The currently logged-in user.

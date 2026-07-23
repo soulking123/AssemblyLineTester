@@ -1,16 +1,59 @@
 using System;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
+using AssemblyLineTester.Models;
+using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views.Modals
 {
     public partial class ConnectorModalForm : Form
     {
-        public ConnectorModalForm(bool isEditMode = false)
+        private readonly ConnectorService _connectorService;
+        private readonly int _productHarnessId;
+        private readonly Connector? _editingConnector;
+
+        private readonly System.Collections.Generic.List<ImageEntry> _imageEntries = new();
+        private readonly System.Collections.Generic.List<string> _removedExistingFileNames = new();
+        private readonly ToolTip _fileNameToolTip = new();
+
+        private sealed class ImageEntry
         {
+            public required string FileName;
+            public string? SourcePath;
+            public override string ToString() => TruncateFileName(FileName);
+        }
+
+
+        public ConnectorModalForm(ConnectorService connectorService, int productHarnessId)
+        {
+            _connectorService = connectorService;
+            _productHarnessId = productHarnessId;
+            _editingConnector = null;
+
             InitializeComponent();
-            InitializeDropdowns();
-            
+            ConfigureModeUI(isEditMode: false);
+            WireEvents();
+            ApplyFormRounding();
+        }
+
+        // Edit mode: prefill fields and existing images from the given connector.
+        public ConnectorModalForm(ConnectorService connectorService, Connector connectorToEdit)
+        {
+            _connectorService = connectorService;
+            _productHarnessId = connectorToEdit.ProductHarnessId;
+            _editingConnector = connectorToEdit;
+
+            InitializeComponent();
+            ConfigureModeUI(isEditMode: true);
+            LoadConnectorForEdit(connectorToEdit);
+            WireEvents();
+            ApplyFormRounding();
+        }
+
+        private void ConfigureModeUI(bool isEditMode)
+        {
             if (isEditMode)
             {
                 lblCustomTitle.Text = "EDIT CONNECTOR";
@@ -23,7 +66,10 @@ namespace AssemblyLineTester.Views.Modals
                 lblTitle.Text = "Add New Connector";
                 btnSave.Text = "Add Connector";
             }
+        }
 
+        private void WireEvents()
+        {
             btnSave.Click += BtnSave_Click;
 
             btnClose.Click += (s, e) => this.Close();
@@ -31,11 +77,11 @@ namespace AssemblyLineTester.Views.Modals
             btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
 
             btnChooseImage.Click += BtnChooseImage_Click;
+            btnRemoveImage.Click += BtnRemoveImage_Click;
+            lstImages.MouseMove += LstImages_MouseMove;
 
             pnlCustomHeader.MouseDown += TitleBar_MouseDown;
             iconLogo.MouseDown += TitleBar_MouseDown;
-
-            ApplyFormRounding();
         }
 
         protected override void OnResize(EventArgs e)
@@ -79,56 +125,111 @@ namespace AssemblyLineTester.Views.Modals
             }
         }
 
-        private void InitializeDropdowns()
+        // Prefills the form from an existing connector and loads its saved images into the list.
+        private void LoadConnectorForEdit(Connector c)
         {
-            cmbContactType.Items.Clear();
-            cmbContactType.Items.AddRange(new string[] { "Pin", "Socket", "Blade", "Receptacle" });
-            cmbContactType.SelectedIndex = 0;
+            txtPerf.Text = c.Perf;
+            txtPartNumber.Text = c.PartNumber;
+            txtContactType.Text = c.ContactType;
+            txtContactQuantity.Text = c.ContactQuantity.ToString();
+            txtWireSize.Text = c.WireSize;
+            txtCurrentRating.Text = FormatCurrentRating(c.CurrentRating);
+            txtMountingStyle.Text = c.MountingStyle;
 
-            cmbContactQuality.Items.Clear();
-            cmbContactQuality.Items.AddRange(new string[] { "Standard", "Premium", "Gold Plated", "Silver Plated" });
-            cmbContactQuality.SelectedIndex = 0;
+            foreach (var path in _connectorService.GetConnectorImagePaths(c))
+            {
+                _imageEntries.Add(new ImageEntry { FileName = Path.GetFileName(path), SourcePath = null });
+            }
+            RefreshImageList();
+        }
 
-            cmbWireSize.Items.Clear();
-            cmbWireSize.Items.AddRange(new string[] { "0.50 mm²", "0.75 mm²", "1.00 mm²", "1.50 mm²", "2.00 mm²", "4.00 mm²" });
-            cmbWireSize.SelectedIndex = 0;
-
-            cmbCurrentRating.Items.Clear();
-            cmbCurrentRating.Items.AddRange(new string[] { "5A", "10A", "15A", "20A", "30A", "50A" });
-            cmbCurrentRating.SelectedIndex = 1;
-
-            cmbMountingStyle.Items.Clear();
-            cmbMountingStyle.Items.AddRange(new string[] { "Panel Mount", "Cable Mount", "PCB Mount", "Surface Mount" });
-            cmbMountingStyle.SelectedIndex = 0;
+        private static string FormatCurrentRating(double amps)
+        {
+            string number = amps % 1 == 0 ? ((int)amps).ToString() : amps.ToString("0.#");
+            return number + "A";
         }
 
         private void BtnChooseImage_Click(object? sender, EventArgs e)
         {
-            using (OpenFileDialog ofd = new OpenFileDialog())
+            using var ofd = new OpenFileDialog
             {
-                ofd.Filter = "Image Files|*.jpg;*.jpeg;*.png";
-                ofd.Title = "Select Connector Image";
+                Filter = "Image Files|*.jpg;*.jpeg;*.png",
+                Title = "Select Connector Images",
+                Multiselect = true
+            };
 
-                if (ofd.ShowDialog() == DialogResult.OK)
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            foreach (var filePath in ofd.FileNames)
+            {
+                try
                 {
-                    try
+                    var fileInfo = new FileInfo(filePath);
+                    if (fileInfo.Length > 2 * 1024 * 1024)
                     {
-                        var fileInfo = new System.IO.FileInfo(ofd.FileName);
-                        if (fileInfo.Length > 2 * 1024 * 1024)
-                        {
-                            MessageBox.Show("Image size must be less than 2MB.", "File Too Large", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
+                        MessageBox.Show($"'{fileInfo.Name}' is larger than 2MB and was skipped.", "File Too Large", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        continue;
+                    }
 
-                        picPreview.Image = Image.FromFile(ofd.FileName);
-                        lblImagePath.Text = ofd.FileName;
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error loading image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    if (_imageEntries.Any(i => i.SourcePath == filePath)) continue;
+
+                    _imageEntries.Add(new ImageEntry { FileName = fileInfo.Name, SourcePath = filePath });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error reading image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+
+            RefreshImageList();
+        }
+
+        private void BtnRemoveImage_Click(object? sender, EventArgs e)
+        {
+            if (lstImages.SelectedItem is not ImageEntry entry) return;
+
+            _imageEntries.Remove(entry);
+            if (entry.SourcePath == null)
+                _removedExistingFileNames.Add(entry.FileName);
+
+            RefreshImageList();
+        }
+
+        private void RefreshImageList()
+        {
+            lstImages.Items.Clear();
+            foreach (var entry in _imageEntries) lstImages.Items.Add(entry);
+
+            lblImage.Text = _imageEntries.Count == 0
+                ? "Images (multiple allowed, max 2MB each, JPG/PNG)"
+                : $"Images ({_imageEntries.Count} selected)";
+
+            if (_imageEntries.Count > 0)
+            {
+                lstImages.SelectedIndex = 0;
+            }
+        }
+
+        private void LstImages_MouseMove(object? sender, MouseEventArgs e)
+        {
+            int index = lstImages.IndexFromPoint(e.Location);
+            if (index < 0 || index >= _imageEntries.Count) return;
+
+            string full = _imageEntries[index].FileName;
+            if (_fileNameToolTip.GetToolTip(lstImages) != full)
+                _fileNameToolTip.SetToolTip(lstImages, full);
+        }
+
+        private static string TruncateFileName(string fileName, int maxLength = 35)
+        {
+            if (fileName.Length <= maxLength) return fileName;
+
+            string ext = Path.GetExtension(fileName);
+            string nameOnly = Path.GetFileNameWithoutExtension(fileName);
+            int keep = Math.Max(maxLength - ext.Length - 3, 3);
+            if (keep >= nameOnly.Length) return fileName;
+
+            return nameOnly.Substring(0, keep) + "..." + ext;
         }
 
         private void BtnSave_Click(object? sender, EventArgs e)
@@ -147,10 +248,59 @@ namespace AssemblyLineTester.Views.Modals
                 return;
             }
 
-            // Perform Save Action...
-            MessageBox.Show($"Connector '{txtPartNumber.Text}' has been successfully saved!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            int.TryParse(txtContactQuantity.Text.Trim(), out int contactQty);
+
+            var connector = new Connector
+            {
+                ConnectorId = _editingConnector?.ConnectorId ?? 0,
+                Perf = txtPerf.Text.Trim(),
+                PartNumber = txtPartNumber.Text.Trim(),
+                ContactType = txtContactType.Text.Trim(),
+                ContactQuantity = contactQty,
+                WireSize = txtWireSize.Text.Trim(),
+                CurrentRating = ParseCurrentRating(txtCurrentRating.Text),
+                MountingStyle = txtMountingStyle.Text.Trim(),
+                ProductHarnessId = _productHarnessId
+            };
+
+            var newImagePaths = _imageEntries.Where(i => i.SourcePath != null).Select(i => i.SourcePath!).ToList();
+
+            try
+            {
+                if (_editingConnector == null)
+                {
+                    var (saved, error) = _connectorService.AddConnector(connector, newImagePaths);
+                    if (saved == null)
+                    {
+                        MessageBox.Show(error ?? "Failed to save connector.", "Save Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+                else
+                {
+                    var (success, error) = _connectorService.UpdateConnector(connector, newImagePaths, _removedExistingFileNames);
+                    if (!success)
+                    {
+                        MessageBox.Show(error ?? "Failed to save connector.", "Save Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unexpected error while saving connector: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            MessageBox.Show($"Connector '{connector.PartNumber}' has been successfully saved!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.DialogResult = DialogResult.OK;
             this.Close();
+        }
+
+        private static double ParseCurrentRating(string text)
+        {
+            string digitsOnly = new string(text.Where(ch => char.IsDigit(ch) || ch == '.').ToArray());
+            return double.TryParse(digitsOnly, out double value) ? value : 0;
         }
     }
 }
