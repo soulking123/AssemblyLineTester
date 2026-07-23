@@ -562,16 +562,20 @@ namespace AssemblyLineTester.Views.Pages
                 }
             };
 
-            flpShowEntries.WrapContents = false;
+            flpShowEntries.WrapContents = true;
+            float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
+            float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
             _lblPageInfo = new Label
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 9F),
                 ForeColor = Color.FromArgb(100, 116, 139),
-                Margin = new Padding(10, 19, 0, 0),
+                Margin = new Padding((int)(10 * scaleX), (int)(19 * scaleY), 0, 0),
                 Name = "lblPageInfo"
             };
             flpShowEntries.Controls.Add(_lblPageInfo);
+            flpShowEntries.Controls.SetChildIndex(_lblPageInfo, 0);
+            flpShowEntries.SetFlowBreak(_lblPageInfo, true);
         }
 
         private void PopulateHarnessData()
@@ -644,10 +648,13 @@ namespace AssemblyLineTester.Views.Pages
 
             flpPages.Controls.Clear();
 
-            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; PopulateGrid(); });
+            float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
+            float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
+
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; PopulateGrid(); }, scaleX, scaleY);
             flpPages.Controls.Add(btnFirst);
 
-            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; PopulateGrid(); } });
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; PopulateGrid(); } }, scaleX, scaleY);
             flpPages.Controls.Add(btnPrev);
 
             for (int p = 1; p <= totalPages; p++)
@@ -655,35 +662,35 @@ namespace AssemblyLineTester.Views.Pages
                 if (p == 1 || p == totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
                 {
                     int pageNum = p;
-                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateGrid(); });
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateGrid(); }, scaleX, scaleY);
                     flpPages.Controls.Add(btnPage);
                 }
                 else if (p == _currentPage - 2 || p == _currentPage + 2)
                 {
-                    var btnDots = CreatePageButton("...", false, false, null);
+                    var btnDots = CreatePageButton("...", false, false, null, scaleX, scaleY);
                     flpPages.Controls.Add(btnDots);
                 }
             }
 
-            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; PopulateGrid(); } });
+            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; PopulateGrid(); } }, scaleX, scaleY);
             flpPages.Controls.Add(btnNext);
 
-            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; PopulateGrid(); });
+            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; PopulateGrid(); }, scaleX, scaleY);
             flpPages.Controls.Add(btnLast);
         }
 
-        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick, float scaleX, float scaleY)
         {
             Button btn = new()
             {
                 Text = text,
-                Size = new Size(38, 40),
-                Margin = new Padding(2, 6, 2, 6),
+                Size = new Size((int)(38 * scaleX), (int)(40 * scaleY)),
+                Margin = new Padding((int)(2 * scaleX), (int)(6 * scaleY), (int)(2 * scaleX), (int)(6 * scaleY)),
                 FlatStyle = FlatStyle.Flat,
                 Enabled = isEnabled,
                 Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Padding = new Padding(0, 0, 0, 2),
+                Padding = new Padding(0, 0, 0, (int)(2 * scaleY)),
                 UseCompatibleTextRendering = true
             };
             btn.FlatAppearance.BorderSize = 1;

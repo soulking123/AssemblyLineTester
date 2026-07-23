@@ -36,7 +36,6 @@ namespace AssemblyLineTester.Views.Pages
 
         {
             pnlTop = new Panel();
-            logoBox = new PictureBox();
             lblTitle = new Label();
             panelFilters = new Panel();
             tblFilterInner = new TableLayoutPanel();
@@ -88,7 +87,6 @@ namespace AssemblyLineTester.Views.Pages
             lblLogDetailTitle = new Label();
             lblLogDetailContent = new Label();
             pnlTop.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)logoBox).BeginInit();
             panelFilters.SuspendLayout();
             tblFilterInner.SuspendLayout();
             tblFilterInputs.SuspendLayout();
@@ -110,7 +108,6 @@ namespace AssemblyLineTester.Views.Pages
             // pnlTop
             // 
             pnlTop.BackColor = Color.FromArgb(248, 250, 252);
-            pnlTop.Controls.Add(logoBox);
             pnlTop.Controls.Add(lblTitle);
             pnlTop.Controls.Add(panelFilters);
             pnlTop.Dock = DockStyle.Top;
@@ -120,27 +117,17 @@ namespace AssemblyLineTester.Views.Pages
             pnlTop.Size = new Size(2520, 294);
             pnlTop.TabIndex = 0;
             // 
-            // logoBox
-            // 
-            logoBox.BackColor = Color.LightGray;
-            logoBox.Location = new Point(39, 29);
-            logoBox.Margin = new Padding(5);
-            logoBox.Name = "logoBox";
-            logoBox.Size = new Size(68, 67);
-            logoBox.TabIndex = 0;
-            logoBox.TabStop = false;
-            // 
             // lblTitle
             // 
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(15, 23, 42);
-            lblTitle.Location = new Point(127, 29);
+            lblTitle.Location = new Point(39, 29);
             lblTitle.Margin = new Padding(5, 0, 5, 0);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(261, 54);
+            lblTitle.Size = new Size(350, 54);
             lblTitle.TabIndex = 1;
-            lblTitle.Text = "SYSTEM LOG";
+            lblTitle.Text = " 🖥️  SYSTEM LOG";
             // 
             // panelFilters
             // 
@@ -290,7 +277,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbLogLevel.Font = new Font("Segoe UI", 9.5F);
             cmbLogLevel.FormattingEnabled = true;
             cmbLogLevel.Items.AddRange(new object[] { "All", "INFO", "WARNING", "ERROR" });
-            cmbLogLevel.Location = new Point(600, 69);
+            cmbLogLevel.Location = new Point(600, 70);
             cmbLogLevel.Margin = new Padding(4);
             cmbLogLevel.Name = "cmbLogLevel";
             cmbLogLevel.Size = new Size(291, 43);
@@ -318,7 +305,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbModule.Font = new Font("Segoe UI", 9.5F);
             cmbModule.FormattingEnabled = true;
             cmbModule.Items.AddRange(new object[] { "All", "Test Execution", "Communication", "Harness Database", "Database", "User Management", "System" });
-            cmbModule.Location = new Point(899, 69);
+            cmbModule.Location = new Point(899, 70);
             cmbModule.Margin = new Padding(4);
             cmbModule.Name = "cmbModule";
             cmbModule.Size = new Size(291, 43);
@@ -346,7 +333,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbUser.Font = new Font("Segoe UI", 9.5F);
             cmbUser.FormattingEnabled = true;
             cmbUser.Items.AddRange(new object[] { "All", "System", "Fally" });
-            cmbUser.Location = new Point(1198, 69);
+            cmbUser.Location = new Point(1198, 70);
             cmbUser.Margin = new Padding(4);
             cmbUser.Name = "cmbUser";
             cmbUser.Size = new Size(291, 43);
@@ -374,7 +361,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbAction.Font = new Font("Segoe UI", 9.5F);
             cmbAction.FormattingEnabled = true;
             cmbAction.Items.AddRange(new object[] { "All", "Start Test", "Load Program", "Step Complete", "Test Complete", "Update", "Connection Lost", "Reconnected", "Login", "Backup" });
-            cmbAction.Location = new Point(1497, 69);
+            cmbAction.Location = new Point(1497, 70);
             cmbAction.Margin = new Padding(4);
             cmbAction.Name = "cmbAction";
             cmbAction.Size = new Size(291, 43);
@@ -411,10 +398,10 @@ namespace AssemblyLineTester.Views.Pages
             flpActionButtons.AutoSize = true;
             flpActionButtons.Controls.Add(btnSearch);
             flpActionButtons.Controls.Add(btnReset);
-            flpActionButtons.Location = new Point(2102, 88);
+            flpActionButtons.Location = new Point(2102, 68);
             flpActionButtons.Margin = new Padding(10, 0, 0, 0);
             flpActionButtons.Name = "flpActionButtons";
-            flpActionButtons.Size = new Size(308, 48);
+            flpActionButtons.Size = new Size(308, 68);
             flpActionButtons.TabIndex = 1;
             flpActionButtons.WrapContents = false;
             // 
@@ -443,7 +430,7 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnReset.ForeColor = Color.FromArgb(71, 85, 105);
             btnReset.Location = new Point(168, 0);
-            btnReset.Margin = new Padding(0);
+            btnReset.Margin = new Padding(0, 0, 0, 20);
             btnReset.Name = "btnReset";
             btnReset.Size = new Size(140, 48);
             btnReset.TabIndex = 17;
@@ -486,7 +473,7 @@ namespace AssemblyLineTester.Views.Pages
             // btnExport
             // 
             btnExport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnExport.BackColor = Color.White;
+            btnExport.BackColor = Color.FromArgb(241, 245, 249);
             btnExport.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
             btnExport.FlatStyle = FlatStyle.Flat;
             btnExport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
@@ -502,7 +489,7 @@ namespace AssemblyLineTester.Views.Pages
             // btnRefresh
             // 
             btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnRefresh.BackColor = Color.White;
+            btnRefresh.BackColor = Color.FromArgb(241, 245, 249);
             btnRefresh.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
             btnRefresh.FlatStyle = FlatStyle.Flat;
             btnRefresh.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
@@ -841,7 +828,6 @@ namespace AssemblyLineTester.Views.Pages
             Size = new Size(2520, 1570);
             pnlTop.ResumeLayout(false);
             pnlTop.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)logoBox).EndInit();
             panelFilters.ResumeLayout(false);
             tblFilterInner.ResumeLayout(false);
             tblFilterInner.PerformLayout();
@@ -871,9 +857,8 @@ namespace AssemblyLineTester.Views.Pages
         #endregion
 
         private System.Windows.Forms.Panel pnlTop;
-        private System.Windows.Forms.Panel panelFilters;
-        private System.Windows.Forms.PictureBox logoBox;
         private System.Windows.Forms.Label lblTitle;
+        private System.Windows.Forms.Panel panelFilters;
 
         // Filter Controls
         private System.Windows.Forms.Label lblDateRange;

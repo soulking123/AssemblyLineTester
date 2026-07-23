@@ -8,6 +8,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<PlatformTarget>x86</PlatformTarget>
+		<ApplicationIcon>Assets\cat_logo.ico</ApplicationIcon>
 	</PropertyGroup>
 
 
@@ -39,6 +40,10 @@
     <Content Include="Assets\cat_logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\cat_logo.ico">
+	<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
     <Content Include="Assets\img\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

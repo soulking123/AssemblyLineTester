@@ -196,10 +196,13 @@ namespace AssemblyLineTester.Views.Pages
             if (flpPages is null) return;
             flpPages.Controls.Clear();
 
-            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; LoadLogData(); });
+            float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
+            float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
+
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; LoadLogData(); }, scaleX, scaleY);
             flpPages.Controls.Add(btnFirst);
 
-            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; LoadLogData(); } });
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; LoadLogData(); } }, scaleX, scaleY);
             flpPages.Controls.Add(btnPrev);
 
             for (int p = 1; p <= totalPages; p++)
@@ -207,35 +210,35 @@ namespace AssemblyLineTester.Views.Pages
                 if (p == 1 || p == totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
                 {
                     int pageNum = p;
-                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; LoadLogData(); });
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; LoadLogData(); }, scaleX, scaleY);
                     flpPages.Controls.Add(btnPage);
                 }
                 else if (p == _currentPage - 2 || p == _currentPage + 2)
                 {
-                    var btnDots = CreatePageButton("...", false, false, null);
+                    var btnDots = CreatePageButton("...", false, false, null, scaleX, scaleY);
                     flpPages.Controls.Add(btnDots);
                 }
             }
 
-            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; LoadLogData(); } });
+            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; LoadLogData(); } }, scaleX, scaleY);
             flpPages.Controls.Add(btnNext);
 
-            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; LoadLogData(); });
+            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; LoadLogData(); }, scaleX, scaleY);
             flpPages.Controls.Add(btnLast);
         }
 
-        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick, float scaleX, float scaleY)
         {
             Button btn = new()
             {
                 Text = text,
-                Size = new Size(38, 40),
-                Margin = new Padding(2, 6, 2, 6),
+                Size = new Size((int)(38 * scaleX), (int)(40 * scaleY)),
+                Margin = new Padding((int)(2 * scaleX), (int)(6 * scaleY), (int)(2 * scaleX), (int)(6 * scaleY)),
                 FlatStyle = FlatStyle.Flat,
                 Enabled = isEnabled,
                 Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Padding = new Padding(0, 0, 0, 2),
+                Padding = new Padding(0, 0, 0, (int)(2 * scaleY)),
                 UseCompatibleTextRendering = true
             };
             btn.FlatAppearance.BorderSize = 1;
@@ -326,8 +329,8 @@ namespace AssemblyLineTester.Views.Pages
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSearch, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
         }
 
         private void PnlChartContainer_Paint(object? sender, PaintEventArgs e)

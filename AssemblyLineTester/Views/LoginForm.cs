@@ -32,6 +32,72 @@ namespace AssemblyLineTester.Views
             _instrument.Connect();
             InitializeComponent();
 
+            // Load CAT logo image
+            try
+            {
+                string logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
+                if (System.IO.File.Exists(logoPath))
+                {
+                    logoBox.Image = Image.FromFile(logoPath);
+                }
+
+                string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.ico");
+                if (System.IO.File.Exists(iconPath))
+                {
+                    this.Icon = new Icon(iconPath);
+                }
+            }
+            catch { /* fallback silently if image/icon missing */ }
+
+            // Disable tab stop on the login button so Tab cycles only between textboxes
+            btnLogin.TabStop = false;
+
+            txtUsername.KeyDown += TxtUsername_EnterKeyDown;
+            txtPassword.KeyDown += TxtPassword_EnterKeyDown;
+
+            // Wire up focus & hover styling to animate underline and icon colors to Gold without disappearing
+            void UpdateUsernameVisuals()
+            {
+                bool active = txtUsername.Focused || pnlUsernameContainer.ClientRectangle.Contains(pnlUsernameContainer.PointToClient(Cursor.Position));
+                pnlUsernameLine.BackColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
+                iconUsername.IconColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
+            }
+
+            void UpdatePasswordVisuals()
+            {
+                bool active = txtPassword.Focused || pnlPasswordContainer.ClientRectangle.Contains(pnlPasswordContainer.PointToClient(Cursor.Position));
+                pnlPasswordLine.BackColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
+                iconPassword.IconColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
+            }
+
+            txtUsername.Enter += (s, e) => UpdateUsernameVisuals();
+            txtUsername.Leave += (s, e) => UpdateUsernameVisuals();
+            txtUsername.MouseEnter += (s, e) => UpdateUsernameVisuals();
+            txtUsername.MouseLeave += (s, e) => UpdateUsernameVisuals();
+            pnlUsernameContainer.MouseEnter += (s, e) => UpdateUsernameVisuals();
+            pnlUsernameContainer.MouseLeave += (s, e) => UpdateUsernameVisuals();
+            iconUsername.MouseEnter += (s, e) => UpdateUsernameVisuals();
+            iconUsername.MouseLeave += (s, e) => UpdateUsernameVisuals();
+
+            txtPassword.Enter += (s, e) => UpdatePasswordVisuals();
+            txtPassword.Leave += (s, e) => UpdatePasswordVisuals();
+            txtPassword.MouseEnter += (s, e) => UpdatePasswordVisuals();
+            txtPassword.MouseLeave += (s, e) => UpdatePasswordVisuals();
+            pnlPasswordContainer.MouseEnter += (s, e) => UpdatePasswordVisuals();
+            pnlPasswordContainer.MouseLeave += (s, e) => UpdatePasswordVisuals();
+            iconPassword.MouseEnter += (s, e) => UpdatePasswordVisuals();
+            iconPassword.MouseLeave += (s, e) => UpdatePasswordVisuals();
+
+            // Allow clicking anywhere on the icon or underline row to focus the textbox
+            pnlUsernameContainer.Click += (s, e) => txtUsername.Focus();
+            iconUsername.Click += (s, e) => txtUsername.Focus();
+            pnlUsernameLine.Click += (s, e) => txtUsername.Focus();
+
+            pnlPasswordContainer.Click += (s, e) => txtPassword.Focus();
+            iconPassword.Click += (s, e) => txtPassword.Focus();
+            pnlPasswordLine.Click += (s, e) => txtPassword.Focus();
+
+            // Wire up close button and form dragging
             btnClose.Click += (s, e) => this.Close();
             btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
             btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };

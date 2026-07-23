@@ -39,13 +39,19 @@ namespace AssemblyLineTester.Views
             InitializeComponent();
             EnableDoubleBuffering();
 
-            // Load CAT logo image into sidebar menu header
+            // Load CAT logo image into sidebar menu header and app icon
             try
             {
                 string logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
                 if (System.IO.File.Exists(logoPath))
                 {
                     lblMenu.Image = Image.FromFile(logoPath);
+                }
+
+                string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.ico");
+                if (System.IO.File.Exists(iconPath))
+                {
+                    this.Icon = new Icon(iconPath);
                 }
             }
             catch { /* fallback silently */ }
@@ -97,6 +103,12 @@ namespace AssemblyLineTester.Views
 
             btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(239, 68, 68); btnClose.ForeColor = Color.White; };
             btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.ForeColor = Color.FromArgb(100, 116, 139); };
+
+            // Fix explicitly set Designer fonts that do not auto-scale
+            float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
+            btnMaximize.Font = new Font(btnMaximize.Font.FontFamily, btnMaximize.Font.Size * scaleY, btnMaximize.Font.Style);
+            btnMinimize.Font = new Font(btnMinimize.Font.FontFamily, btnMinimize.Font.Size * scaleY, btnMinimize.Font.Style);
+            btnClose.Font = new Font(btnClose.Font.FontFamily, btnClose.Font.Size * scaleY, btnClose.Font.Style);
 
             this.Resize += MainForm_Resize;
 
