@@ -168,11 +168,6 @@ namespace AssemblyLineTester.Data
                 .HasForeignKey(c => c.ProductHarnessId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Save ImgePath as unique for each ProductHarness
-            string imagesFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "AssemblyLineTester", "Images");
-
             //======== SEED DATA BELOW =========//
 
             // Seed initial Roles
@@ -285,7 +280,7 @@ namespace AssemblyLineTester.Data
                     ProductType = "AC",
                     Area = "Engine Control",
                     LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
-                    ImagePath = @"Assets/img/Harness/6040.png",
+                    ImagePaths = new List<string> { @"Assets/img/Harness/6040.png" },
                     ConnectorListName = new List<string> { "J1", "J2" }
                 },
                 new ProductHarness
@@ -306,7 +301,7 @@ namespace AssemblyLineTester.Data
                     ProductType = "AC",
                     Area = "Chassis",
                     LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
-                    ImagePath = @"Assets/img/Harness/6040.png",
+                    ImagePaths = new List<string> { @"Assets/img/Harness/6040.png" },
                     ConnectorListName = new List<string> { "J1", "J2", "J3" }
                 },
                 new ProductHarness
@@ -323,13 +318,13 @@ namespace AssemblyLineTester.Data
 
             // Seed initial Connectors 
             modelBuilder.Entity<Connector>().HasData(
-                new Connector { ConnectorId = 1, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ImagePath = @"Assets/img/Connector/J1.png", ProductHarnessId = 1 },
+                new Connector { ConnectorId = 1, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 1 },
                 new Connector { ConnectorId = 2, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 1 },
-                new Connector { ConnectorId = 3, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 32, WireSize = "20 AWG", CurrentRating = 3, MountingStyle = "Free Hanging", ImagePath = @"Assets/img/Connector/J1.png", ProductHarnessId = 2 },
-                new Connector { ConnectorId = 4, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ImagePath = @"Assets/img/Connector/J1.png", ProductHarnessId = 3 },
+                new Connector { ConnectorId = 3, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 32, WireSize = "20 AWG", CurrentRating = 3, MountingStyle = "Free Hanging", ProductHarnessId = 2 },
+                new Connector { ConnectorId = 4, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 3 },
                 new Connector { ConnectorId = 5, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 3 },
                 new Connector { ConnectorId = 6, Perf = "Standard", PartNumber = "D507F3", ContactType = "Female", ContactQuantity = 16, WireSize = "22 AWG", CurrentRating = 2, MountingStyle = "Panel Mount", ProductHarnessId = 3 },
-                new Connector { ConnectorId = 7, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ImagePath = @"Assets/img/Connector/J1.png", ProductHarnessId = 4 }
+                new Connector { ConnectorId = 7, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 4 }
             );
 
 

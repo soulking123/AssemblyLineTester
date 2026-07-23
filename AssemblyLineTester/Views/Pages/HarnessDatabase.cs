@@ -19,11 +19,18 @@ namespace AssemblyLineTester.Views.Pages
         private Connector? _selectedConnector;
         private int _genInfoRowIndex;
 
+        private readonly HarnessService _harnessService = new();
+
         // "Connector & Pin" tab state
         private readonly ConnectorService _connectorService = new();
         private readonly Dictionary<int, Connector> _connectorCache = new();
         private List<string> _connectorImagePaths = [];
         private int _connectorImageIndex = 0;
+        private List<Connector> _allConnectorsForHarness = [];
+        private List<Connector> _filteredConnectorsForHarness = [];
+        private int _connectorCurrentPage = 1;
+        private int _connectorPageSize = 10;
+        private Label? _lblConnectorPageInfo;
         private Label? _lblConnPartNumber, _lblConnContactType, _lblConnContactQty, _lblConnWireSize, _lblConnCurrentRating, _lblConnMountingStyle;
         private Label? _lblPageInfo;
         private bool _isGeneralEditMode = false;
@@ -61,7 +68,11 @@ namespace AssemblyLineTester.Views.Pages
             if (dataGridViewList.Rows[e.RowIndex].Tag is not int harnessId) return;
 
             var harness = _allHarnessEntities.FirstOrDefault(h => h.ProductHarnessId == harnessId);
-            if (harness != null) RenderHarnessSelected(harness);
+            if (harness != null)
+            {
+                RenderHarnessSelected(harness);
+                tabControlDetail.SelectedIndex = 0; // always jump back to the General tab on a new selection
+            }
         }
 
         private void HarnessDatabase_Load(object? sender, EventArgs e)
@@ -115,18 +126,60 @@ namespace AssemblyLineTester.Views.Pages
         {
 
             btnAddHarness.Click += (s, e) =>
+            {
+                if (!HasConnectorEditPermission()) return;
+
+                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _connectorService);
+                if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
-                    if (!HasConnectorEditPermission()) return;
+                    PopulateHarnessData();
+                }
+            };
 
-                    using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(new HarnessService(), _connectorService);
-                    if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
-                    {
-                        PopulateHarnessData();
-                    }
-                };
+            btnEditGeneral.Click += (s, e) =>
+            {
+                if (!HasConnectorEditPermission()) return;
 
-            btnEditGeneral.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Edit Harness functionality under construction.", "Info"); };
-            btnDeleteHarness.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Delete Harness functionality under construction.", "Info"); };
+                if (_selectedHarness == null)
+                {
+                    MessageBox.Show("Please select a harness from the list first.", "No Harness Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _connectorService, _selectedHarness);
+                if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
+                {
+                    int editedId = _selectedHarness.ProductHarnessId;
+                    PopulateHarnessData();
+                    var refreshed = _allHarnessEntities.FirstOrDefault(h => h.ProductHarnessId == editedId);
+                    if (refreshed != null) RenderHarnessSelected(refreshed);
+                }
+            };
+
+            btnDeleteHarness.Click += (s, e) =>
+            {
+                if (!HasConnectorEditPermission()) return;
+
+                if (_selectedHarness == null)
+                {
+                    MessageBox.Show("Please select a harness from the list first.", "No Harness Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var confirm = MessageBox.Show(
+                    $"Delete harness '{_selectedHarness.Name}'? Its connectors and saved images will also be removed. This action cannot be undone.",
+                    "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (confirm != DialogResult.Yes) return;
+
+                var (success, error) = _harnessService.DeleteHarness(_selectedHarness.ProductHarnessId);
+                if (!success)
+                {
+                    MessageBox.Show(error ?? "Failed to delete harness.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                PopulateHarnessData();
+            };
             btnSearch.Click += (s, e) => ApplyFilters();
             btnReset.Click += (s, e) =>
             {
@@ -712,7 +765,7 @@ namespace AssemblyLineTester.Views.Pages
             _lblConnCurrentRating = AddGenInfoValueRow("Current Rating", "-");
             _lblConnMountingStyle = AddGenInfoValueRow("Mounting Style", "-");
 
-            SetHarnessImage(harness.ImagePath);
+            SetHarnessImage(harness.ImagePaths.FirstOrDefault());
             SetConnectorImage(null);
             RefreshConnectorGrid();
         }
@@ -809,7 +862,7 @@ namespace AssemblyLineTester.Views.Pages
                 _lblConnWireSize!.Text = conn.WireSize;
                 _lblConnCurrentRating!.Text = $"{conn.CurrentRating} A";
                 _lblConnMountingStyle!.Text = conn.MountingStyle;
-                SetConnectorImage(conn.ImagePath);
+                SetConnectorImage(_connectorService.GetConnectorImagePaths(conn).FirstOrDefault());
             }
             else
             {

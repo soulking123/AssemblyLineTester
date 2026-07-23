@@ -40,7 +40,7 @@ namespace AssemblyLineTester.Migrations
                     ProductType = table.Column<string>(type: "TEXT", nullable: false),
                     Area = table.Column<string>(type: "TEXT", nullable: false),
                     LastUpdate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: true),
+                    ImagePaths = table.Column<string>(type: "TEXT", nullable: false),
                     ConnectorListName = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -386,13 +386,13 @@ namespace AssemblyLineTester.Migrations
 
             migrationBuilder.InsertData(
                 table: "ProductHarnesses",
-                columns: new[] { "ProductHarnessId", "Area", "ConnectorListName", "ImagePath", "LastUpdate", "Name", "ProductModel", "ProductType" },
+                columns: new[] { "ProductHarnessId", "Area", "ConnectorListName", "ImagePaths", "LastUpdate", "Name", "ProductModel", "ProductType" },
                 values: new object[,]
                 {
-                    { 1, "Engine Control", "[\"J1\",\"J2\"]", "Assets/img/Harness/6040.png", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Main Engine Harness 6020", "6020", "AC" },
-                    { 2, "Cabin Interior", "[\"J1\"]", null, new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Cabin Interior Harness 6030", "6030", "AC" },
-                    { 3, "Chassis", "[\"J1\",\"J2\",\"J3\"]", "Assets/img/Harness/6040.png", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Chassis Harness 6040", "6040", "AC" },
-                    { 4, "Dashboard", "[\"J1\"]", null, new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Dashboard Harness 6060", "6060", "AC" }
+                    { 1, "Engine Control", "[\"J1\",\"J2\"]", "[\"Assets/img/Harness/6040.png\"]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Main Engine Harness 6020", "6020", "AC" },
+                    { 2, "Cabin Interior", "[\"J1\"]", "[]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Cabin Interior Harness 6030", "6030", "AC" },
+                    { 3, "Chassis", "[\"J1\",\"J2\",\"J3\"]", "[\"Assets/img/Harness/6040.png\"]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Chassis Harness 6040", "6040", "AC" },
+                    { 4, "Dashboard", "[\"J1\"]", "[]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Dashboard Harness 6060", "6060", "AC" }
                 });
 
             migrationBuilder.InsertData(
@@ -445,13 +445,13 @@ namespace AssemblyLineTester.Migrations
                 columns: new[] { "ConnectorId", "ContactQuantity", "ContactType", "CurrentRating", "ImagePath", "MountingStyle", "PartNumber", "Perf", "ProductHarnessId", "WireSize" },
                 values: new object[,]
                 {
-                    { 1, 64, "Female", 5.0, "Assets/img/Connector/J1.png", "Panel Mount", "D507F1", "Standard", 1, "18 AWG" },
+                    { 1, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", 1, "18 AWG" },
                     { 2, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", 1, "18 AWG" },
-                    { 3, 32, "Female", 3.0, "Assets/img/Connector/J1.png", "Free Hanging", "D507F1", "Standard", 2, "20 AWG" },
-                    { 4, 64, "Female", 5.0, "Assets/img/Connector/J1.png", "Panel Mount", "D507F1", "Standard", 3, "18 AWG" },
+                    { 3, 32, "Female", 3.0, null, "Free Hanging", "D507F1", "Standard", 2, "20 AWG" },
+                    { 4, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", 3, "18 AWG" },
                     { 5, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", 3, "18 AWG" },
                     { 6, 16, "Female", 2.0, null, "Panel Mount", "D507F3", "Standard", 3, "22 AWG" },
-                    { 7, 64, "Female", 5.0, "Assets/img/Connector/J1.png", "Panel Mount", "D507F1", "Standard", 4, "18 AWG" }
+                    { 7, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", 4, "18 AWG" }
                 });
 
             migrationBuilder.InsertData(

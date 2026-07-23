@@ -11,12 +11,18 @@ namespace AssemblyLineTester.Views.Modals
 {
     public partial class HarnessModalForm : Form
     {
+        private const int MaxFileNameDisplayLength = 30;
+
         private readonly HarnessService _harnessService;
         private readonly ConnectorService _connectorService;
         private readonly ProductHarness? _editingHarness;
-        private string? _selectedImagePath;
+        private readonly List<string> _selectedImagePaths = new();
+        private readonly List<Connector> _selectedConnectors = new();
+        private ToolStripDropDown? _connectorDropdown;
+        private CheckedListBox? _connectorCheckList;
+        private TextBox? _connectorSearchBox;
+        private List<Connector> _allConnectorsCache = new();
 
-        // Constructor Mode Add
         public HarnessModalForm(HarnessService harnessService, ConnectorService connectorService)
         {
             _harnessService = harnessService;
@@ -25,12 +31,10 @@ namespace AssemblyLineTester.Views.Modals
 
             InitializeComponent();
             ConfigureModeUI(isEditMode: false);
-            LoadConnectorsDropdown();
             WireEvents();
             ApplyFormRounding();
         }
 
-        // Constructor Mode Edit
         public HarnessModalForm(HarnessService harnessService, ConnectorService connectorService, ProductHarness harnessToEdit)
         {
             _harnessService = harnessService;
@@ -39,7 +43,6 @@ namespace AssemblyLineTester.Views.Modals
 
             InitializeComponent();
             ConfigureModeUI(isEditMode: true);
-            LoadConnectorsDropdown();
             LoadHarnessForEdit(harnessToEdit);
             WireEvents();
             ApplyFormRounding();
@@ -61,49 +64,29 @@ namespace AssemblyLineTester.Views.Modals
             }
         }
 
-        private void LoadConnectorsDropdown()
-        {
-            lstConnectors.Items.Clear();
-
-            // Mendapatkan data connector dari ConnectorService.
-            // Jika method di ConnectorService Anda bernama lain (misal GetConnectors() atau GetAll()), 
-            // ganti _connectorService.GetAllConnectors() dengan method tersebut.
-            var connectors = _connectorService.GetAllConnectors();
-
-            foreach (var conn in connectors)
-            {
-                // Menambahkan object connector ke CheckedListBox
-                lstConnectors.Items.Add(conn);
-            }
-
-            // Tampilkan nomor Part / Name di list
-            lstConnectors.DisplayMember = "PartNumber";
-        }
-
         private void LoadHarnessForEdit(ProductHarness h)
         {
             txtName.Text = h.Name;
             txtProductModel.Text = h.ProductModel;
             txtProductType.Text = h.ProductType;
             txtArea.Text = h.Area;
-            _selectedImagePath = h.ImagePath;
 
-            if (!string.IsNullOrEmpty(_selectedImagePath))
+            _selectedConnectors.Clear();
+            flpConnectorChips.Controls.Clear();
+            if (h.ConnectorList != null)
             {
-                lblImageStatus.Text = Path.GetFileName(_selectedImagePath);
+                foreach (var conn in h.ConnectorList)
+                {
+                    AddConnectorChip(conn);
+                }
             }
 
-            // Centang connector yang sudah terpilih sebelumnya (Multiple Selection)
-            for (int i = 0; i < lstConnectors.Items.Count; i++)
+            _selectedImagePaths.Clear();
+            lstImages.Items.Clear();
+            foreach (string path in h.ImagePaths)
             {
-                if (lstConnectors.Items[i] is Connector conn)
-                {
-                    bool isSelected = h.ConnectorList != null && h.ConnectorList.Any(c => c.ConnectorId == conn.ConnectorId);
-                    if (isSelected)
-                    {
-                        lstConnectors.SetItemChecked(i, true);
-                    }
-                }
+                _selectedImagePaths.Add(path);
+                lstImages.Items.Add(TruncateFileName(Path.GetFileName(path)));
             }
         }
 
@@ -111,6 +94,14 @@ namespace AssemblyLineTester.Views.Modals
         {
             btnSave.Click += BtnSave_Click;
             btnChooseImage.Click += BtnChooseImage_Click;
+            btnRemoveImage.Click += BtnRemoveImage_Click;
+
+            // Clicking anywhere on the picker box (background or arrow) opens the multi-select
+            // popup. Clicks on an individual chip's delete button don't bubble up to these, since
+            // WinForms Click events aren't routed - so this is safe.
+            pnlConnectorPicker.Click += (s, e) => OpenConnectorPicker();
+            flpConnectorChips.Click += (s, e) => OpenConnectorPicker();
+            lblConnectorArrow.Click += (s, e) => OpenConnectorPicker();
 
             btnClose.Click += (s, e) => this.Close();
             btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
@@ -120,25 +111,249 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.MouseDown += TitleBar_MouseDown;
         }
 
+        // Builds the popup checklist once and reuses it; the ToolStripDropDown itself persists,
+        // only the CheckedListBox's Items get refreshed on every open (so newly added connectors
+        // elsewhere in the app show up without reopening the form).
+        private void EnsureConnectorPickerBuilt()
+        {
+            if (_connectorDropdown != null) return;
+
+            int width = pnlConnectorPicker.Width;
+
+            _connectorSearchBox = new TextBox
+            {
+                Width = width - 10,
+                Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9,
+                PlaceholderText = "Search connector..."
+            };
+            _connectorSearchBox.TextChanged += ConnectorSearchBox_TextChanged;
+
+            _connectorCheckList = new CheckedListBox
+            {
+                Width = width,
+                CheckOnClick = true,
+                Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9,
+                BorderStyle = BorderStyle.None,
+                DisplayMember = "PartNumber",
+                IntegralHeight = true // snaps height so the last visible row never gets cut in half
+            };
+            // Only 5 rows show at once; anything beyond that scrolls (built into CheckedListBox).
+            _connectorCheckList.Height = (_connectorCheckList.ItemHeight * 5) + 4;
+
+            var searchHost = new ToolStripControlHost(_connectorSearchBox)
+            {
+                AutoSize = false,
+                Width = width,
+                Height = _connectorSearchBox.Height + 10,
+                Margin = new Padding(4, 4, 4, 2),
+                Padding = new Padding(0)
+            };
+
+            var listHost = new ToolStripControlHost(_connectorCheckList)
+            {
+                AutoSize = false,
+                Width = _connectorCheckList.Width,
+                Height = _connectorCheckList.Height,
+                Margin = new Padding(0, 0, 0, 4),
+                Padding = new Padding(0)
+            };
+
+            _connectorDropdown = new ToolStripDropDown
+            {
+                AutoClose = true,
+                DropShadowEnabled = true,
+                Padding = new Padding(2)
+            };
+            _connectorDropdown.Items.Add(searchHost);
+            _connectorDropdown.Items.Add(listHost);
+        }
+
+        // Opens the popup with every connector, checkbox pre-ticked for whatever's already picked.
+        // Checking/unchecking an item updates the chips live - the user can tick several connectors
+        // in one open instead of reopening a dropdown per connector.
+        private void OpenConnectorPicker()
+        {
+            EnsureConnectorPickerBuilt();
+
+            _allConnectorsCache = _connectorService.GetAllConnectors();
+
+            _connectorSearchBox!.TextChanged -= ConnectorSearchBox_TextChanged;
+            _connectorSearchBox.Text = string.Empty;
+            _connectorSearchBox.TextChanged += ConnectorSearchBox_TextChanged;
+
+            PopulateCheckList(string.Empty);
+
+            _connectorDropdown!.Show(pnlConnectorPicker, new Point(0, pnlConnectorPicker.Height));
+            _connectorSearchBox.Focus();
+        }
+
+        private void ConnectorSearchBox_TextChanged(object? sender, EventArgs e) => PopulateCheckList(_connectorSearchBox!.Text);
+
+        // Filters the checklist by part number (case-insensitive). Runs on every keystroke in the
+        // search box, and once with an empty term each time the popup opens.
+        private void PopulateCheckList(string searchTerm)
+        {
+            _connectorCheckList!.ItemCheck -= ConnectorCheckList_ItemCheck;
+            _connectorCheckList.Items.Clear();
+
+            var filtered = string.IsNullOrWhiteSpace(searchTerm)
+                ? _allConnectorsCache
+                : _allConnectorsCache.Where(c => c.PartNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            foreach (var conn in filtered)
+            {
+                int index = _connectorCheckList.Items.Add(conn);
+                bool isChecked = _selectedConnectors.Any(c => c.ConnectorId == conn.ConnectorId);
+                _connectorCheckList.SetItemChecked(index, isChecked);
+            }
+
+            _connectorCheckList.ItemCheck += ConnectorCheckList_ItemCheck;
+        }
+
+        private void ConnectorCheckList_ItemCheck(object? sender, ItemCheckEventArgs e)
+        {
+            if (_connectorCheckList!.Items[e.Index] is not Connector connector) return;
+
+            // ItemCheck fires before the box's own state updates, so defer to after this call returns.
+            BeginInvoke(new Action(() =>
+            {
+                if (e.NewValue == CheckState.Checked)
+                    AddConnectorChip(connector);
+                else
+                    RemoveConnectorChip(connector.ConnectorId);
+            }));
+        }
+
+        // Adds a removable "chip" (part number + delete button) inside pnlConnectorPicker.
+        // Ignores connectors already picked.
+        private void AddConnectorChip(Connector connector)
+        {
+            if (_selectedConnectors.Any(c => c.ConnectorId == connector.ConnectorId)) return;
+            _selectedConnectors.Add(connector);
+
+            var chip = new Panel
+            {
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                BackColor = Color.FromArgb(241, 245, 249),
+                Margin = new Padding(0, 0, 6, 6),
+                Padding = new Padding(8, 4, 4, 4),
+                Tag = connector.ConnectorId
+            };
+
+            var flow = new FlowLayoutPanel
+            {
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false
+            };
+
+            var lbl = new Label
+            {
+                Text = connector.PartNumber,
+                Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9,
+                ForeColor = Color.FromArgb(51, 65, 85),
+                AutoSize = true,
+                Anchor = AnchorStyles.Left,
+                Margin = new Padding(0, 2, 6, 0)
+            };
+
+            var btnDelete = new Button
+            {
+                Text = "\u2715", // ✕
+                Font = new Font("Segoe UI", 8F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(148, 163, 184),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent,
+                Size = new Size(18, 18),
+                Cursor = Cursors.Hand,
+                Margin = new Padding(0),
+                TabStop = false
+            };
+            btnDelete.FlatAppearance.BorderSize = 0;
+            btnDelete.Click += (s, e) => RemoveConnectorChip(connector.ConnectorId);
+
+            flow.Controls.Add(lbl);
+            flow.Controls.Add(btnDelete);
+            chip.Controls.Add(flow);
+
+            flpConnectorChips.Controls.Add(chip);
+        }
+
+        // Removes a connector's chip and, if the picker popup is open/built, unchecks it there too
+        // so both stay in sync.
+        private void RemoveConnectorChip(int connectorId)
+        {
+            _selectedConnectors.RemoveAll(c => c.ConnectorId == connectorId);
+
+            var chip = flpConnectorChips.Controls.OfType<Panel>().FirstOrDefault(p => p.Tag is int id && id == connectorId);
+            if (chip != null)
+            {
+                flpConnectorChips.Controls.Remove(chip);
+                chip.Dispose();
+            }
+
+            if (_connectorCheckList != null)
+            {
+                for (int i = 0; i < _connectorCheckList.Items.Count; i++)
+                {
+                    if (_connectorCheckList.Items[i] is Connector c && c.ConnectorId == connectorId)
+                    {
+                        _connectorCheckList.ItemCheck -= ConnectorCheckList_ItemCheck;
+                        _connectorCheckList.SetItemChecked(i, false);
+                        _connectorCheckList.ItemCheck += ConnectorCheckList_ItemCheck;
+                        break;
+                    }
+                }
+            }
+        }
+
         private void BtnChooseImage_Click(object? sender, EventArgs e)
         {
             using var ofd = new OpenFileDialog
             {
                 Filter = "Image Files|*.jpg;*.jpeg;*.png",
-                Title = "Select Harness Image"
+                Title = "Select Harness Images",
+                Multiselect = true
             };
 
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            foreach (string fileName in ofd.FileNames)
             {
-                var fileInfo = new FileInfo(ofd.FileName);
+                var fileInfo = new FileInfo(fileName);
                 if (fileInfo.Length > 2 * 1024 * 1024)
                 {
-                    MessageBox.Show("Selected image exceeds 2MB limit.", "File Too Large", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    MessageBox.Show($"'{fileInfo.Name}' exceeds the 2MB limit and was skipped.", "File Too Large", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    continue;
                 }
-                _selectedImagePath = ofd.FileName;
-                lblImageStatus.Text = fileInfo.Name;
+
+                if (_selectedImagePaths.Contains(fileName)) continue;
+
+                _selectedImagePaths.Add(fileName);
+                lstImages.Items.Add(TruncateFileName(fileInfo.Name));
             }
+        }
+
+        private void BtnRemoveImage_Click(object? sender, EventArgs e)
+        {
+            if (lstImages.SelectedIndex < 0)
+            {
+                MessageBox.Show("Select an image in the list to remove.", "No Image Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int index = lstImages.SelectedIndex;
+            _selectedImagePaths.RemoveAt(index);
+            lstImages.Items.RemoveAt(index);
+        }
+
+        private static string TruncateFileName(string fileName)
+        {
+            return fileName.Length > MaxFileNameDisplayLength
+                ? fileName.Substring(0, MaxFileNameDisplayLength) + "..."
+                : fileName;
         }
 
         private void BtnSave_Click(object? sender, EventArgs e)
@@ -157,8 +372,7 @@ namespace AssemblyLineTester.Views.Modals
                 return;
             }
 
-            // Mengambil SELURUH connector yang dicentang (Multiple selection support)
-            var selectedConnectors = lstConnectors.CheckedItems.OfType<Connector>().ToList();
+            var selectedConnectors = new List<Connector>(_selectedConnectors);
 
             var harness = new ProductHarness
             {
@@ -167,7 +381,7 @@ namespace AssemblyLineTester.Views.Modals
                 ProductModel = txtProductModel.Text.Trim(),
                 ProductType = txtProductType.Text.Trim(),
                 Area = txtArea.Text.Trim(),
-                ImagePath = _selectedImagePath,
+                ImagePaths = new List<string>(_selectedImagePaths),
                 LastUpdate = DateTime.UtcNow,
                 ConnectorList = selectedConnectors,
                 ConnectorListName = selectedConnectors.Select(c => c.PartNumber).ToList()
@@ -175,14 +389,14 @@ namespace AssemblyLineTester.Views.Modals
 
             try
             {
-                // Panggil method add/update sesuai service Anda
-                if (_editingHarness == null)
+                var (success, error) = _editingHarness == null
+                    ? _harnessService.AddHarness(harness)
+                    : _harnessService.UpdateHarness(harness);
+
+                if (!success)
                 {
-                    _harnessService.AddHarness(harness);
-                }
-                else
-                {
-                    _harnessService.UpdateHarness(harness);
+                    MessageBox.Show(error ?? "Failed to save harness.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
 
                 MessageBox.Show($"Harness '{harness.Name}' saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);

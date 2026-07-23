@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260722075739_InitialCreate")]
+    [Migration("20260723080253_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1622,7 +1622,6 @@ namespace AssemblyLineTester.Migrations
                             ContactQuantity = 64,
                             ContactType = "Female",
                             CurrentRating = 5.0,
-                            ImagePath = "Assets/img/Connector/J1.png",
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F1",
                             Perf = "Standard",
@@ -1647,7 +1646,6 @@ namespace AssemblyLineTester.Migrations
                             ContactQuantity = 32,
                             ContactType = "Female",
                             CurrentRating = 3.0,
-                            ImagePath = "Assets/img/Connector/J1.png",
                             MountingStyle = "Free Hanging",
                             PartNumber = "D507F1",
                             Perf = "Standard",
@@ -1660,7 +1658,6 @@ namespace AssemblyLineTester.Migrations
                             ContactQuantity = 64,
                             ContactType = "Female",
                             CurrentRating = 5.0,
-                            ImagePath = "Assets/img/Connector/J1.png",
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F1",
                             Perf = "Standard",
@@ -1697,7 +1694,6 @@ namespace AssemblyLineTester.Migrations
                             ContactQuantity = 64,
                             ContactType = "Female",
                             CurrentRating = 5.0,
-                            ImagePath = "Assets/img/Connector/J1.png",
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F1",
                             Perf = "Standard",
@@ -1720,7 +1716,8 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ImagePath")
+                    b.PrimitiveCollection<string>("ImagePaths")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastUpdate")
@@ -1748,7 +1745,7 @@ namespace AssemblyLineTester.Migrations
                             ProductHarnessId = 1,
                             Area = "Engine Control",
                             ConnectorListName = "[\"J1\",\"J2\"]",
-                            ImagePath = "Assets/img/Harness/6040.png",
+                            ImagePaths = "[\"Assets/img/Harness/6040.png\"]",
                             LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
                             Name = "Main Engine Harness 6020",
                             ProductModel = "6020",
@@ -1759,6 +1756,7 @@ namespace AssemblyLineTester.Migrations
                             ProductHarnessId = 2,
                             Area = "Cabin Interior",
                             ConnectorListName = "[\"J1\"]",
+                            ImagePaths = "[]",
                             LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
                             Name = "Cabin Interior Harness 6030",
                             ProductModel = "6030",
@@ -1769,7 +1767,7 @@ namespace AssemblyLineTester.Migrations
                             ProductHarnessId = 3,
                             Area = "Chassis",
                             ConnectorListName = "[\"J1\",\"J2\",\"J3\"]",
-                            ImagePath = "Assets/img/Harness/6040.png",
+                            ImagePaths = "[\"Assets/img/Harness/6040.png\"]",
                             LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
                             Name = "Chassis Harness 6040",
                             ProductModel = "6040",
@@ -1780,6 +1778,7 @@ namespace AssemblyLineTester.Migrations
                             ProductHarnessId = 4,
                             Area = "Dashboard",
                             ConnectorListName = "[\"J1\"]",
+                            ImagePaths = "[]",
                             LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
                             Name = "Dashboard Harness 6060",
                             ProductModel = "6060",

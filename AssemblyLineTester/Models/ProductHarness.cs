@@ -11,8 +11,7 @@ public class ProductHarness
     public string Area { get; set; } = string.Empty;
     public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
 
-    public string? ImagePath { get; set; }
+    public List<string> ImagePaths { get; set; } = new();
     public List<String> ConnectorListName { get; set; } = new();
     public List<Connector> ConnectorList { get; set; } = new();
-
 }
