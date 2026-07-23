@@ -15,21 +15,21 @@ namespace AssemblyLineTester.Views
         private readonly InstrumentService _instrument = new();
         public LoginForm()
         {
-            try
-            {
-                var processes = System.Diagnostics.Process.GetProcessesByName("easywire");
-                foreach (var process in processes)
-                {
-                    process.Kill();
-                    process.WaitForExit(3000);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error terminate easywire process: {ex.Message}");
-            }
+            //try
+            //{
+            //    var processes = System.Diagnostics.Process.GetProcessesByName("easywire");
+            //    foreach (var process in processes)
+            //    {
+            //        process.Kill();
+            //        process.WaitForExit(3000);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"Error terminate easywire process: {ex.Message}");
+            //}
 
-            _instrument.Connect();
+            //_instrument.Connect();
             InitializeComponent();
 
             // Load CAT logo image

@@ -48,7 +48,6 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                LoadDefaultData();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
                 picPreview.Invalidate();
@@ -655,31 +654,31 @@ namespace AssemblyLineTester.Views.Pages
 
         private void btnLearnConnection_Click(object sender, EventArgs e)
         {
-            bool isConnected = _instrument.Connect();
-            if (!isConnected)
-            {
-                MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            //bool isConnected = _instrument.Connect();
+            //if (!isConnected)
+            //{
+            //    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
 
-            var learnResult = _instrument.LearnConnection();
-            if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
-            {
-                MessageBox.Show($"Failed to execute learn operation on instrument. Error: {learnResult}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            //var learnResult = _instrument.LearnConnection();
+            //if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+            //{
+            //    MessageBox.Show($"Failed to execute learn operation on instrument. Error: {learnResult}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
 
-            var getTestResult = _instrument.GetLearnedConnection();
-            if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
-            {
-                MessageBox.Show("Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            //var getTestResult = _instrument.GetLearnedConnection();
+            //if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
+            //{
+            //    MessageBox.Show("Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
 
-            _customTestText = getTestResult.Result;
-            Debug.WriteLine($"Learned Connection Text:\n{_customTestText}");
+            //_customTestText = getTestResult.Result;
+            //Debug.WriteLine($"Learned Connection Text:\n{_customTestText}");
 
-            ParseAndPopulateGridFromProgramText(_customTestText);
+            //ParseAndPopulateGridFromProgramText(_customTestText);
             MessageBox.Show("Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }

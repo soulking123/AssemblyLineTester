@@ -299,180 +299,177 @@ namespace AssemblyLineTester.Views.Pages
 
         private void btnStartTest_Click(object? sender, EventArgs e)
         {
-            // 1. Temporarily pause background monitoring to prevent concurrent socket calls
-            //InstrumentService.StopMonitoring();
-            //_configService.GetConfigurationByName(name);
 
-            try
-            {
-                // 2. Connect to the instrument
-                bool isConnected = _instrument.Connect();
-                if (!isConnected)
-                {
-                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+            //try
+            //{
+            //    // 2. Connect to the instrument
+            //    bool isConnected = _instrument.Connect();
+            //    if (!isConnected)
+            //    {
+            //        MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //        return;
+            //    }
 
-                string loadedProgramName = "1107061216";
-                string testProgramDetails = string.Empty;
+            //    string loadedProgramName = "1107061216";
+            //    string testProgramDetails = string.Empty;
 
-                // 2. Load the test program
-                //Debug.WriteLine(_customTestText);.
+            //    // 2. Load the test program
+            //    //Debug.WriteLine(_customTestText);.
 
-                var activeConfig = _configService.GetActiveConfig();
-                _customTestText = _configService.ConvertToProgramText(activeConfig);
+            //    var activeConfig = _configService.GetActiveConfig();
+            //    _customTestText = _configService.ConvertToProgramText(activeConfig);
 
-                Debug.WriteLine("Convert to Tesxt");
-                Debug.WriteLine(_customTestText);
-                try
-                {
+            //    Debug.WriteLine("Convert to Tesxt");
+            //    Debug.WriteLine(_customTestText);
+            //    try
+            //    {
 
-                    if (!string.IsNullOrEmpty(_customTestText))
-                    {
-                        // Upload custom test text without saving to database (using empty string as testName)
-                        Debug.WriteLine("before put");
-                        var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
-                        Debug.WriteLine("after put");
-                        if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
-                        {
-                            _instrument.Disconnect();
-                            MessageBox.Show($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        loadedProgramName = "Custom Wirelist (Active)";
-                        testProgramDetails = _customTestText;
-                        _continuityResistance = _instrument.GetContinuityResistance();
+            //        if (!string.IsNullOrEmpty(_customTestText))
+            //        {
+            //            // Upload custom test text without saving to database (using empty string as testName)
+            //            Debug.WriteLine("before put");
+            //            var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
+            //            Debug.WriteLine("after put");
+            //            if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+            //            {
+            //                _instrument.Disconnect();
+            //                MessageBox.Show($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //                return;
+            //            }
+            //            loadedProgramName = "Custom Wirelist (Active)";
+            //            testProgramDetails = _customTestText;
+            //            _continuityResistance = _instrument.GetContinuityResistance();
 
-                        Debug.WriteLine($"Nilai Continuity Resistance saat ini: {_continuityResistance}");
-                    }
-                    else
-                    {
-                        Debug.WriteLine("error syntax");
-                        // Fallback: Fetch/load the specified test program "1107061216"
-                        //var getTestResult = _instrument.GetTestProgram("1107061216");
-                        //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
-                        //{
-                        //    testProgramDetails = getTestResult.Result;
-                        //}
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error convert to text file :\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+            //            Debug.WriteLine($"Nilai Continuity Resistance saat ini: {_continuityResistance}");
+            //        }
+            //        else
+            //        {
+            //            Debug.WriteLine("error syntax");
+            //            // Fallback: Fetch/load the specified test program "1107061216"
+            //            //var getTestResult = _instrument.GetTestProgram("1107061216");
+            //            //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
+            //            //{
+            //            //    testProgramDetails = getTestResult.Result;
+            //            //}
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        MessageBox.Show($"Error convert to text file :\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    }
 
-                //Debug.WriteLine($"Active Program: {loadedProgramName}");
-                //_ = testProgramDetails;
+            //    //Debug.WriteLine($"Active Program: {loadedProgramName}");
+            //    //_ = testProgramDetails;
 
-                //3.Run Single Test(Hipot= false, Shorts= true)
+            //    //3.Run Single Test(Hipot= false, Shorts= true)
 
-                Debug.WriteLine("Run Test");
-                var testResult = _instrument.RunSingleTest(false, true);
-                if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
-                {
-                    _instrument.Disconnect();
-                    MessageBox.Show($"Test run failed to execute. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Test Run Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+            //    Debug.WriteLine("Run Test");
+            //    var testResult = _instrument.RunSingleTest(false, true);
+            //    if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+            //    {
+            //        _instrument.Disconnect();
+            //        MessageBox.Show($"Test run failed to execute. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Test Run Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //        return;
+            //    }
 
-                // 4. Get Measured Values
-                Debug.WriteLine("Get Measured Value");
-                var measuredValuesResult = _instrument.GetMeasuredValues();
-                _loadedRows = new List<LiveTestDetailRowDto>();
+            //    // 4. Get Measured Values
+            //    Debug.WriteLine("Get Measured Value");
+            //    var measuredValuesResult = _instrument.GetMeasuredValues();
+            //    _loadedRows = new List<LiveTestDetailRowDto>();
 
-                if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
-                {
-                    var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
-                    if (list != null)
-                    {
-                        int step = 1;
-                        foreach (var measurement in list)
-                        {
-                            var status = LiveTestStatus.Pending;
-                            string statusStr = measurement.Status1?.Trim() ?? "";
-                            if (measurement.Value1 <= _continuityResistance)
-                            {
-                                status = LiveTestStatus.Pass;
-                            }
-                            else
-                            {
-                                status = LiveTestStatus.Fail;
-                            }
+            //    if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
+            //    {
+            //        var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
+            //        if (list != null)
+            //        {
+            //            int step = 1;
+            //            foreach (var measurement in list)
+            //            {
+            //                var status = LiveTestStatus.Pending;
+            //                string statusStr = measurement.Status1?.Trim() ?? "";
+            //                if (measurement.Value1 <= _continuityResistance)
+            //                {
+            //                    status = LiveTestStatus.Pass;
+            //                }
+            //                else
+            //                {
+            //                    status = LiveTestStatus.Fail;
+            //                }
 
-                            string rowTestType = "WIRE";
-                            if (!string.IsNullOrEmpty(measurement.Instruction))
-                            {
-                                string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
-                                if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
-                                {
-                                    rowTestType = "WIRE";
-                                }
-                                else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
-                                {
-                                    rowTestType = "OPEN";
-                                }
-                                else
-                                {
-                                    rowTestType = measurement.Instruction;
-                                }
-                            }
+            //                string rowTestType = "WIRE";
+            //                if (!string.IsNullOrEmpty(measurement.Instruction))
+            //                {
+            //                    string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
+            //                    if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
+            //                    {
+            //                        rowTestType = "WIRE";
+            //                    }
+            //                    else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
+            //                    {
+            //                        rowTestType = "OPEN";
+            //                    }
+            //                    else
+            //                    {
+            //                        rowTestType = measurement.Instruction;
+            //                    }
+            //                }
 
-                            _loadedRows.Add(new LiveTestDetailRowDto
-                            {
-                                StepNo = step++,
-                                NetId = measurement.Instruction ?? "",
-                                TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
-                                FromPoint = $"{measurement.Point1}",
-                                ToPoint = $"{measurement.Point2}",
-                                TestType = rowTestType,
-                                MeasuredValue = Math.Round(measurement.Value1, 3),
-                                Status = status
-                            });
-                        }
-                    }
-                }
+            //                _loadedRows.Add(new LiveTestDetailRowDto
+            //                {
+            //                    StepNo = step++,
+            //                    NetId = measurement.Instruction ?? "",
+            //                    TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
+            //                    FromPoint = $"{measurement.Point1}",
+            //                    ToPoint = $"{measurement.Point2}",
+            //                    TestType = rowTestType,
+            //                    MeasuredValue = Math.Round(measurement.Value1, 3),
+            //                    Status = status
+            //                });
+            //            }
+            //        }
+            //    }
 
-                //5.Repopulate the GridView to show the results
+            //    //5.Repopulate the GridView to show the results
 
-                Debug.WriteLine("Update Grid");
+            //    Debug.WriteLine("Update Grid");
 
-                PopulateLiveDetailsGrid(_loadedRows);
+            //    PopulateLiveDetailsGrid(_loadedRows);
 
-                // 7. Show summary MessageBox
-                //string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
-                //    ? "PASSED"
-                //    : "FAILED or INCOMPLETE";
-                try
-                {
-                    bool allPass = _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
-                    string overallResult = allPass ? "PASS" : "FAIL";
+            //    // 7. Show summary MessageBox
+            //    //string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
+            //    //    ? "PASSED"
+            //    //    : "FAILED or INCOMPLETE";
+            //    try
+            //    {
+            //        bool allPass = _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
+            //        string overallResult = allPass ? "PASS" : "FAIL";
 
-                    var reportService = new TestReportService();
-                    _currentReportId = reportService.SaveDraftLiveTestReport(
-                        cmbProductModel.Text, cmbProductType.Text, cmbArea.Text, cmbEcnNo.Text, "1.0",
-                        cmbPartNumber.Text, DateTime.Now, _loadedRows, overallResult);
+            //        var reportService = new TestReportService();
+            //        _currentReportId = reportService.SaveDraftLiveTestReport(
+            //            cmbProductModel.Text, cmbProductType.Text, cmbArea.Text, cmbEcnNo.Text, "1.0",
+            //            cmbPartNumber.Text, DateTime.Now, _loadedRows, overallResult);
 
-                    Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to auto-save draft report: {ex.Message}");
-                    MessageBox.Show(
-                        "Test completed but failed to record it to Test History automatically.\nYou can still save it manually via Save Report.",
-                        "Auto-Save Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+            //        Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Debug.WriteLine($"Failed to auto-save draft report: {ex.Message}");
+            //        MessageBox.Show(
+            //            "Test completed but failed to record it to Test History automatically.\nYou can still save it manually via Save Report.",
+            //            "Auto-Save Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    }
 
-                // 7. Show summary MessageBox
-                string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
-                ? "PASSED"
-                : "FAILED or INCOMPLETE";
+            //    // 7. Show summary MessageBox
+            //    string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
+            //    ? "PASSED"
+            //    : "FAILED or INCOMPLETE";
 
-            }
-            finally
-            {
-                // 3. Resume background monitoring
-                //InstrumentService.StartMonitoring();
-            }
+            //}
+            //finally
+            //{
+            //    // 3. Resume background monitoring
+            //    //InstrumentService.StartMonitoring();
+            //}
         }
 
         private void PopulateLiveDetailsGrid(List<LiveTestDetailRowDto> rows)

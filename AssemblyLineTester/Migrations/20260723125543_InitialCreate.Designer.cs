@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260723080253_InitialCreate")]
+    [Migration("20260723125543_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
