@@ -64,19 +64,22 @@ namespace AssemblyLineTester.Views.Pages
                 FlowDirection = FlowDirection.LeftToRight
             };
 
+            float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
+            float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
+
             Label lblShow = new()
             {
                 Text = "Show",
                 AutoSize = true,
-                Margin = new Padding(0, 14, 5, 0),
+                Margin = new Padding(0, (int)(14 * scaleY), (int)(5 * scaleX), 0),
                 ForeColor = Color.FromArgb(71, 85, 105)
             };
 
             cmbPageSize.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbPageSize.Items.AddRange(["10", "25", "50", "100"]);
             cmbPageSize.SelectedIndex = 0;
-            cmbPageSize.Size = new Size(65, 30);
-            cmbPageSize.Margin = new Padding(0, 10, 0, 0);
+            cmbPageSize.Size = new Size((int)(65 * scaleX), (int)(30 * scaleY));
+            cmbPageSize.Margin = new Padding(0, (int)(10 * scaleY), 0, 0);
             cmbPageSize.SelectedIndexChanged += (s, e) =>
             {
                 if (int.TryParse(cmbPageSize.SelectedItem?.ToString(), out int size))
@@ -91,7 +94,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 Text = "entries",
                 AutoSize = true,
-                Margin = new Padding(5, 14, 0, 0),
+                Margin = new Padding((int)(5 * scaleX), (int)(14 * scaleY), 0, 0),
                 ForeColor = Color.FromArgb(71, 85, 105)
             };
 
@@ -248,10 +251,13 @@ namespace AssemblyLineTester.Views.Pages
 
             flpPaginationButtons.Controls.Clear();
 
-            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; PopulateUserGrid(); });
+            float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
+            float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
+
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => { _currentPage = 1; PopulateUserGrid(); }, scaleX, scaleY);
             flpPaginationButtons.Controls.Add(btnFirst);
 
-            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; PopulateUserGrid(); } });
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) { _currentPage--; PopulateUserGrid(); } }, scaleX, scaleY);
             flpPaginationButtons.Controls.Add(btnPrev);
 
             for (int p = 1; p <= totalPages; p++)
@@ -259,35 +265,35 @@ namespace AssemblyLineTester.Views.Pages
                 if (p == 1 || p == totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
                 {
                     int pageNum = p;
-                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateUserGrid(); });
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => { _currentPage = pageNum; PopulateUserGrid(); }, scaleX, scaleY);
                     flpPaginationButtons.Controls.Add(btnPage);
                 }
                 else if (p == _currentPage - 2 || p == _currentPage + 2)
                 {
-                    var btnDots = CreatePageButton("...", false, false, null);
+                    var btnDots = CreatePageButton("...", false, false, null, scaleX, scaleY);
                     flpPaginationButtons.Controls.Add(btnDots);
                 }
             }
 
-            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; PopulateUserGrid(); } });
+            var btnNext = CreatePageButton("›", false, _currentPage < totalPages, (s, e) => { if (_currentPage < totalPages) { _currentPage++; PopulateUserGrid(); } }, scaleX, scaleY);
             flpPaginationButtons.Controls.Add(btnNext);
 
-            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; PopulateUserGrid(); });
+            var btnLast = CreatePageButton("»", false, _currentPage < totalPages, (s, e) => { _currentPage = totalPages; PopulateUserGrid(); }, scaleX, scaleY);
             flpPaginationButtons.Controls.Add(btnLast);
         }
 
-        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick, float scaleX, float scaleY)
         {
             Button btn = new()
             {
                 Text = text,
-                Size = new Size(38, 40),
-                Margin = new Padding(2, 6, 2, 6),
+                Size = new Size((int)(38 * scaleX), (int)(40 * scaleY)),
+                Margin = new Padding((int)(2 * scaleX), (int)(6 * scaleY), (int)(2 * scaleX), (int)(6 * scaleY)),
                 FlatStyle = FlatStyle.Flat,
                 Enabled = isEnabled,
                 Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Padding = new Padding(0, 0, 0, 2),
+                Padding = new Padding(0, 0, 0, (int)(2 * scaleY)),
                 UseCompatibleTextRendering = true
             };
             btn.FlatAppearance.BorderSize = 1;

@@ -545,10 +545,13 @@ namespace AssemblyLineTester.Views.Pages
 
             flpPageButtons.Controls.Clear();
 
-            var btnLast = CreatePageButton("»", false, _currentPage < _totalPages, (s, e) => GoToPage(_totalPages));
+            float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
+            float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
+
+            var btnLast = CreatePageButton("»", false, _currentPage < _totalPages, (s, e) => GoToPage(_totalPages), scaleX, scaleY);
             flpPageButtons.Controls.Add(btnLast);
 
-            var btnNext = CreatePageButton("›", false, _currentPage < _totalPages, (s, e) => { if (_currentPage < _totalPages) GoToPage(_currentPage + 1); });
+            var btnNext = CreatePageButton("›", false, _currentPage < _totalPages, (s, e) => { if (_currentPage < _totalPages) GoToPage(_currentPage + 1); }, scaleX, scaleY);
             flpPageButtons.Controls.Add(btnNext);
 
             for (int p = _totalPages; p >= 1; p--)
@@ -556,35 +559,35 @@ namespace AssemblyLineTester.Views.Pages
                 if (p == 1 || p == _totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
                 {
                     int pageNum = p;
-                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => GoToPage(pageNum));
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => GoToPage(pageNum), scaleX, scaleY);
                     flpPageButtons.Controls.Add(btnPage);
                 }
                 else if (p == _currentPage - 2 || p == _currentPage + 2)
                 {
-                    var btnDots = CreatePageButton("...", false, false, null);
+                    var btnDots = CreatePageButton("...", false, false, null, scaleX, scaleY);
                     flpPageButtons.Controls.Add(btnDots);
                 }
             }
 
-            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) GoToPage(_currentPage - 1); });
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) GoToPage(_currentPage - 1); }, scaleX, scaleY);
             flpPageButtons.Controls.Add(btnPrev);
 
-            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => GoToPage(1));
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => GoToPage(1), scaleX, scaleY);
             flpPageButtons.Controls.Add(btnFirst);
         }
 
-        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick)
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick, float scaleX, float scaleY)
         {
             Button btn = new()
             {
                 Text = text,
-                Size = new Size(38, 40),
-                Margin = new Padding(2, 6, 2, 6),
+                Size = new Size((int)(38 * scaleX), (int)(40 * scaleY)),
+                Margin = new Padding((int)(2 * scaleX), (int)(6 * scaleY), (int)(2 * scaleX), (int)(6 * scaleY)),
                 FlatStyle = FlatStyle.Flat,
                 Enabled = isEnabled,
                 Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Padding = new Padding(0, 0, 0, 2),
+                Padding = new Padding(0, 0, 0, (int)(2 * scaleY)),
                 UseCompatibleTextRendering = true
             };
             btn.FlatAppearance.BorderSize = 1;

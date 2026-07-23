@@ -91,19 +91,13 @@ namespace AssemblyLineTester.Views.Pages
 
             activeTabLabel = lblTabGen;
 
-            // Setup General Tab click handler
-            lblTabGen.Cursor = Cursors.Hand;
-            tabGeneral.Cursor = Cursors.Hand;
-            lblTabGen.Click += (s, ev) => Tab_Click(lblTabGen, ev);
-            tabGeneral.Click += (s, ev) => Tab_Click(lblTabGen, ev);
-
             flpTabs.SuspendLayout();
             try
             {
                 foreach (Label lbl in tabLabels)
                 {
-                    if (lbl == lblTabGen) continue;
                     lbl.Cursor = Cursors.Hand;
+                    lbl.Padding = new Padding(0, 0, 0, 10);
                     lbl.Click += (s, ev) => Tab_Click(lbl, ev);
                     lbl.Paint += (s, ev) =>
                     {
@@ -229,11 +223,6 @@ namespace AssemblyLineTester.Views.Pages
                 clickedLabel.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Bold;
                 clickedLabel.ForeColor = Color.FromArgb(30, 41, 59);
 
-                // Move bottom yellow indicator for General tab vs others
-                if (pnlTabIndicator != null)
-                {
-                    pnlTabIndicator.Visible = (clickedLabel == lblTabGen);
-                }
                 flpTabs.Invalidate(true);
 
                 // Switch content view cleanly inside pnlPageContainer

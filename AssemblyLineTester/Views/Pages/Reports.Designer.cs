@@ -354,6 +354,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             splitLeftRight.Dock = DockStyle.Fill;
             splitLeftRight.FixedPanel = FixedPanel.Panel1;
+            splitLeftRight.IsSplitterFixed = true;
             splitLeftRight.Location = new Point(0, 0);
             splitLeftRight.Margin = new Padding(0);
             splitLeftRight.Name = "splitLeftRight";

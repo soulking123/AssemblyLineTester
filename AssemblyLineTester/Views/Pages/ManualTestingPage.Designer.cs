@@ -168,6 +168,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             splitContainerMain.BackColor = Color.FromArgb(203, 213, 225);
             splitContainerMain.Dock = DockStyle.Fill;
+            splitContainerMain.IsSplitterFixed = true;
             splitContainerMain.Location = new Point(15, 15);
             splitContainerMain.Margin = new Padding(5);
             splitContainerMain.Name = "splitContainerMain";

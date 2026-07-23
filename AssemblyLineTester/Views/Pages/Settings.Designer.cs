@@ -26,9 +26,7 @@ namespace AssemblyLineTester.Views.Pages
             tblMain = new TableLayoutPanel();
             lblHeader = new Label();
             flpTabs = new FlowLayoutPanel();
-            tabGeneral = new TableLayoutPanel();
             lblTabGen = new Label();
-            pnlTabIndicator = new Panel();
             lblTabTest = new Label();
             lblTabHw = new Label();
             lblTabUsers = new Label();
@@ -143,7 +141,6 @@ namespace AssemblyLineTester.Views.Pages
             btnSyncTime = new Button();
             tblMain.SuspendLayout();
             flpTabs.SuspendLayout();
-            tabGeneral.SuspendLayout();
             tblContent.SuspendLayout();
             tblLeftColumn.SuspendLayout();
             cardGeneral.SuspendLayout();
@@ -202,7 +199,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // flpTabs
             // 
-            flpTabs.Controls.Add(tabGeneral);
+            flpTabs.Controls.Add(lblTabGen);
             flpTabs.Controls.Add(lblTabTest);
             flpTabs.Controls.Add(lblTabHw);
             flpTabs.Controls.Add(lblTabUsers);
@@ -215,47 +212,18 @@ namespace AssemblyLineTester.Views.Pages
             flpTabs.Name = "flpTabs";
             flpTabs.Size = new Size(1968, 90);
             flpTabs.TabIndex = 1;
-            // 
-            // tabGeneral
-            // 
-            tabGeneral.AutoSize = true;
-            tabGeneral.ColumnCount = 1;
-            tabGeneral.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tabGeneral.Controls.Add(lblTabGen, 0, 0);
-            tabGeneral.Controls.Add(pnlTabIndicator, 0, 1);
-            tabGeneral.Location = new Point(0, 0);
-            tabGeneral.Margin = new Padding(0, 0, 67, 0);
-            tabGeneral.Name = "tabGeneral";
-            tabGeneral.RowCount = 2;
-            tabGeneral.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
-            tabGeneral.RowStyles.Add(new RowStyle(SizeType.Absolute, 8F));
-            tabGeneral.Size = new Size(312, 98);
-            tabGeneral.TabIndex = 0;
-            // 
             // lblTabGen
             // 
             lblTabGen.AutoSize = true;
             lblTabGen.Cursor = Cursors.Hand;
-            lblTabGen.Dock = DockStyle.Fill;
             lblTabGen.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
             lblTabGen.ForeColor = Color.FromArgb(30, 41, 59);
-            lblTabGen.Location = new Point(0, 13);
-            lblTabGen.Margin = new Padding(0, 13, 0, 0);
+            lblTabGen.Location = new Point(0, 21);
+            lblTabGen.Margin = new Padding(0, 21, 67, 0);
             lblTabGen.Name = "lblTabGen";
-            lblTabGen.Size = new Size(312, 77);
+            lblTabGen.Size = new Size(111, 38);
             lblTabGen.TabIndex = 0;
             lblTabGen.Text = "General";
-            lblTabGen.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // pnlTabIndicator
-            // 
-            pnlTabIndicator.BackColor = Color.FromArgb(245, 158, 11);
-            pnlTabIndicator.Dock = DockStyle.Fill;
-            pnlTabIndicator.Location = new Point(0, 90);
-            pnlTabIndicator.Margin = new Padding(0);
-            pnlTabIndicator.Name = "pnlTabIndicator";
-            pnlTabIndicator.Size = new Size(312, 8);
-            pnlTabIndicator.TabIndex = 1;
             // 
             // lblTabTest
             // 
@@ -1908,8 +1876,6 @@ namespace AssemblyLineTester.Views.Pages
             tblMain.ResumeLayout(false);
             flpTabs.ResumeLayout(false);
             flpTabs.PerformLayout();
-            tabGeneral.ResumeLayout(false);
-            tabGeneral.PerformLayout();
             tblContent.ResumeLayout(false);
             tblContent.PerformLayout();
             tblLeftColumn.ResumeLayout(false);
@@ -1961,11 +1927,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.FlowLayoutPanel flpTabs;
 
-        private System.Windows.Forms.TableLayoutPanel tabGeneral;
-
         private System.Windows.Forms.Label lblTabGen;
-
-        private System.Windows.Forms.Panel pnlTabIndicator;
 
         private System.Windows.Forms.Label lblTabTest;
 

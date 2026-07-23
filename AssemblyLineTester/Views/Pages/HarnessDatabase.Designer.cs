@@ -155,6 +155,7 @@ namespace AssemblyLineTester.Views.Pages
             // splitContainerMain
             // 
             splitContainerMain.Dock = DockStyle.Fill;
+            splitContainerMain.IsSplitterFixed = true;
             splitContainerMain.Location = new Point(36, 269);
             splitContainerMain.Margin = new Padding(10);
             splitContainerMain.Name = "splitContainerMain";
@@ -329,8 +330,8 @@ namespace AssemblyLineTester.Views.Pages
             // tblPagination
             // 
             tblPagination.ColumnCount = 2;
-            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
-            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
+            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
+            tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
             tblPagination.Controls.Add(flpPages, 0, 0);
             tblPagination.Controls.Add(flpShowEntries, 1, 0);
             tblPagination.Dock = DockStyle.Fill;
