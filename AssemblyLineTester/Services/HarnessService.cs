@@ -16,5 +16,19 @@ namespace AssemblyLineTester.Services
                 .OrderByDescending(h => h.LastUpdate)
                 .ToList();
         }
+
+        public void AddHarness(ProductHarness harness)
+        {
+            using var db = new AppDbContext();
+            db.ProductHarnesses.Add(harness);
+            db.SaveChanges();
+        }
+
+        public void UpdateHarness(ProductHarness harness)
+        {
+            using var db = new AppDbContext();
+            db.ProductHarnesses.Update(harness);
+            db.SaveChanges();
+        }
     }
 }

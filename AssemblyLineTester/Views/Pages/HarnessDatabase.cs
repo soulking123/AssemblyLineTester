@@ -1,4 +1,3 @@
-
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
@@ -19,8 +18,17 @@ namespace AssemblyLineTester.Views.Pages
         private ProductHarness? _selectedHarness;
         private Connector? _selectedConnector;
         private int _genInfoRowIndex;
+
+        // "Connector & Pin" tab state
+        private readonly ConnectorService _connectorService = new();
+        private readonly Dictionary<int, Connector> _connectorCache = new();
+        private List<string> _connectorImagePaths = [];
+        private int _connectorImageIndex = 0;
         private Label? _lblConnPartNumber, _lblConnContactType, _lblConnContactQty, _lblConnWireSize, _lblConnCurrentRating, _lblConnMountingStyle;
         private Label? _lblPageInfo;
+        private bool _isGeneralEditMode = false;
+        private Image? _customHarnessImage = null;
+        private Image? _customMachineImage = null;
 
         // Carousel States
         private int _currentHarnessSlide = 0;
@@ -31,15 +39,18 @@ namespace AssemblyLineTester.Views.Pages
         {
             InitializeComponent();
             AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(dataGridViewList);
+            dataGridViewList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewList.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             picHarnessImage.Paint += PicHarnessImage_Paint;
             picMachineArea.Paint += PicMachineArea_Paint;
             dataGridViewList.CellClick += DataGridViewList_CellClick;
             this.Load += HarnessDatabase_Load;
             picHarnessImage.MouseClick += PicHarnessImage_MouseClick;
-            picMachineArea.MouseClick += PicMachineArea_MouseClick;          
+            picMachineArea.MouseClick += PicMachineArea_MouseClick;
             InitializeCustomStyles();
             SetupEvents();
             SetupPagination();
+            InitializeConnectorGrid(); // from origin/dashboard - fills the previously empty "Connector & Pin" tab
             PopulateHarnessData();
         }
 
@@ -103,10 +114,19 @@ namespace AssemblyLineTester.Views.Pages
         private void SetupEvents()
         {
 
-            btnAddHarness.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Add Harness functionality under construction.", "Info"); };
-            btnEdit.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Edit Harness functionality under construction.", "Info"); };
-            btnDelete.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Delete Harness functionality under construction.", "Info"); };
+            btnAddHarness.Click += (s, e) =>
+                {
+                    if (!HasConnectorEditPermission()) return;
 
+                    using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(new HarnessService(), _connectorService);
+                    if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
+                    {
+                        PopulateHarnessData();
+                    }
+                };
+
+            btnEditGeneral.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Edit Harness functionality under construction.", "Info"); };
+            btnDeleteHarness.Click += (s, e) => { if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator") { MessageBox.Show("You do not have permission to modify harness database records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Delete Harness functionality under construction.", "Info"); };
             btnSearch.Click += (s, e) => ApplyFilters();
             btnReset.Click += (s, e) =>
             {
@@ -147,6 +167,309 @@ namespace AssemblyLineTester.Views.Pages
             _currentPage = 1;
             ShowNoHarnessSelectedState(); // selected harness may no longer be in the filtered result
             PopulateGrid();
+        }
+
+        private void InitializeConnectorGrid()
+        {
+            dgvConnectors.Columns.Clear();
+            dgvConnectors.Columns.Add(new DataGridViewTextBoxColumn { Name = "colPerf", HeaderText = "Perf", FillWeight = 50, Visible = false });
+            dgvConnectors.Columns.Add(new DataGridViewTextBoxColumn { Name = "colPartNumber", HeaderText = "Part Number", FillWeight = 100 });
+            dgvConnectors.Columns.Add(new DataGridViewTextBoxColumn { Name = "colContactType", HeaderText = "Type", FillWeight = 70 });
+            dgvConnectors.Columns.Add(new DataGridViewTextBoxColumn { Name = "colContactQuantity", HeaderText = "Qty", FillWeight = 60 });
+            dgvConnectors.Columns.Add(new DataGridViewTextBoxColumn { Name = "colWireSize", HeaderText = "Wire", FillWeight = 60 });
+            dgvConnectors.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCurrentRating", HeaderText = "Current Rating", FillWeight = 80, Visible = false });
+            dgvConnectors.Columns.Add(new DataGridViewTextBoxColumn { Name = "colMountingStyle", HeaderText = "Mount", FillWeight = 70 });
+
+            dgvConnectors.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvConnectors.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvConnectors.MultiSelect = false;
+            dgvConnectors.ReadOnly = true;
+            dgvConnectors.AllowUserToAddRows = false;
+            dgvConnectors.RowHeadersVisible = false;
+
+            AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(dgvConnectors);
+            dgvConnectors.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvConnectors.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+
+            dgvConnectors.SelectionChanged += DgvConnectors_SelectionChanged;
+
+            btnAddConnector.Click += BtnAddConnector_Click;
+            btnEditConnector.Click += BtnEditConnector_Click;
+            btnDeleteConnector.Click += BtnDeleteConnector_Click;
+
+            picConnectorImage.Paint += PicConnectorImage_Paint;
+            picConnectorImage.MouseClick += PicConnectorImage_MouseClick;
+
+            RefreshConnectorGrid();
+        }
+
+        // Reloads dgvConnectors from the database for the currently selected harness. Called on
+        // harness selection and after any Add/Edit/Delete connector action.
+        private void RefreshConnectorGrid()
+        {
+            dgvConnectors.Rows.Clear();
+            _connectorCache.Clear();
+
+            var connectors = _connectorService.GetAllConnectors();
+            foreach (var c in connectors)
+            {
+                int rowIndex = dgvConnectors.Rows.Add(c.Perf, c.PartNumber, c.ContactType, c.ContactQuantity, c.WireSize, $"{c.CurrentRating} A", c.MountingStyle);
+                dgvConnectors.Rows[rowIndex].Tag = c.ConnectorId;
+                _connectorCache[c.ConnectorId] = c;
+            }
+
+            if (dgvConnectors.Rows.Count > 0)
+            {
+                dgvConnectors.ClearSelection();
+                dgvConnectors.Rows[0].Selected = true;
+                DgvConnectors_SelectionChanged(dgvConnectors, EventArgs.Empty);
+            }
+            else
+            {
+                PopulateConnectorInfo(null);
+                SetConnectorGalleryImages(null);
+            }
+        }
+
+        // btnAddConnector/btnEditConnector/btnDeleteConnector share the same permission check used
+        // elsewhere on this page for modifying harness database records.
+        private bool HasConnectorEditPermission()
+        {
+            if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator")
+            {
+                MessageBox.Show("You do not have permission to modify connector records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        private void BtnAddConnector_Click(object? sender, EventArgs e)
+        {
+            if (!HasConnectorEditPermission()) return;
+
+            if (_selectedHarness == null)
+            {
+                MessageBox.Show("Please select a harness from the list first.", "No Harness Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService, _selectedHarness.ProductHarnessId);
+            if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
+            {
+                RefreshConnectorGrid();
+            }
+        }
+
+        private void BtnEditConnector_Click(object? sender, EventArgs e)
+        {
+            if (!HasConnectorEditPermission()) return;
+
+            if (dgvConnectors.SelectedRows.Count == 0 ||
+                dgvConnectors.SelectedRows[0].Tag is not int connectorId ||
+                !_connectorCache.TryGetValue(connectorId, out var connector))
+            {
+                MessageBox.Show("Please select a connector to edit.", "No Connector Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService, connector);
+            if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
+            {
+                RefreshConnectorGrid();
+            }
+        }
+
+        private void BtnDeleteConnector_Click(object? sender, EventArgs e)
+        {
+            if (!HasConnectorEditPermission()) return;
+
+            if (dgvConnectors.SelectedRows.Count == 0 || dgvConnectors.SelectedRows[0].Tag is not int connectorId)
+            {
+                MessageBox.Show("Please select a connector to delete.", "No Connector Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string partNumber = dgvConnectors.SelectedRows[0].Cells["colPartNumber"].Value?.ToString() ?? "this connector";
+            var confirm = MessageBox.Show(
+                $"Delete connector '{partNumber}'? Its saved images will also be removed. This action cannot be undone.",
+                "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (confirm != DialogResult.Yes) return;
+
+            var (success, error) = _connectorService.DeleteConnector(connectorId);
+            if (!success)
+            {
+                MessageBox.Show(error ?? "Failed to delete connector.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            RefreshConnectorGrid();
+        }
+
+        private void DgvConnectors_SelectionChanged(object? sender, EventArgs e)
+        {
+            if (dgvConnectors.SelectedRows.Count > 0)
+            {
+                var row = dgvConnectors.SelectedRows[0];
+                PopulateConnectorInfo(row);
+
+                if (row.Tag is int connectorId && _connectorCache.TryGetValue(connectorId, out var conn))
+                {
+                    _selectedConnector = conn;
+                    SetConnectorGalleryImages(conn);
+                }
+                else
+                {
+                    _selectedConnector = null;
+                    SetConnectorGalleryImages(null);
+                }
+            }
+            else
+            {
+                _selectedConnector = null;
+                PopulateConnectorInfo(null);
+                SetConnectorGalleryImages(null);
+            }
+        }
+
+        private void PopulateConnectorInfo(DataGridViewRow? row)
+        {
+            tblConnectorInfo.Controls.Clear();
+            if (row == null) return;
+
+            var data = new (string Key, string Val)[]
+            {
+                ("Perf", row.Cells["colPerf"].Value?.ToString() ?? ""),
+                ("Part Number", row.Cells["colPartNumber"].Value?.ToString() ?? ""),
+                ("Contact Type", row.Cells["colContactType"].Value?.ToString() ?? ""),
+                ("Contact Quantity", row.Cells["colContactQuantity"].Value?.ToString() ?? ""),
+                ("Wire Size", row.Cells["colWireSize"].Value?.ToString() ?? ""),
+                ("Current Rating", row.Cells["colCurrentRating"].Value?.ToString() ?? ""),
+                ("Mounting Style", row.Cells["colMountingStyle"].Value?.ToString() ?? "")
+            };
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                var lblKey = new Label
+                {
+                    Text = data[i].Key,
+                    Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold,
+                    ForeColor = Color.FromArgb(71, 85, 105),
+                    AutoSize = true,
+                    Anchor = AnchorStyles.Left | AnchorStyles.Top,
+                    Margin = new Padding(4, 6, 4, 0)
+                };
+                tblConnectorInfo.Controls.Add(lblKey, 0, i);
+
+                var lblVal = new Label
+                {
+                    Text = ": " + data[i].Val,
+                    Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9,
+                    ForeColor = Color.FromArgb(15, 23, 42),
+                    AutoSize = true,
+                    Anchor = AnchorStyles.Left | AnchorStyles.Top,
+                    Margin = new Padding(0, 6, 4, 0)
+                };
+                tblConnectorInfo.Controls.Add(lblVal, 1, i);
+            }
+        }
+
+        // Loads every image saved for the given connector and shows the first one. Called whenever
+        // the connector selection changes in the "Connector & Pin" tab.
+        private void SetConnectorGalleryImages(Connector? connector)
+        {
+            _connectorImagePaths = _connectorService.GetConnectorImagePaths(connector);
+            _connectorImageIndex = 0;
+            LoadConnectorGalleryImage();
+        }
+
+        private void LoadConnectorGalleryImage()
+        {
+            var oldImage = picConnectorImage.Image;
+            picConnectorImage.Image = null;
+            oldImage?.Dispose();
+
+            if (_connectorImagePaths.Count > 0 && _connectorImageIndex >= 0 && _connectorImageIndex < _connectorImagePaths.Count)
+            {
+                try
+                {
+                    picConnectorImage.SizeMode = PictureBoxSizeMode.Zoom;
+                    picConnectorImage.Image = Image.FromFile(_connectorImagePaths[_connectorImageIndex]);
+                }
+                catch
+                {
+                    // corrupt/unreadable file - leave the panel blank instead of crashing
+                }
+            }
+
+            picConnectorImage.Invalidate();
+        }
+
+        // Draws a placeholder message when there's no image, or paging arrows + a counter when the
+        // connector has more than one image.
+        private void PicConnectorImage_Paint(object? sender, PaintEventArgs e)
+        {
+            if (sender is not Control ctrl || e.Graphics == null) return;
+            var rect = ctrl.ClientRectangle;
+            if (rect.Width <= 1 || rect.Height <= 1) return;
+
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            if (picConnectorImage.Image == null)
+            {
+                var font = AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold;
+                using var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                string message = _selectedConnector == null ? "Select a connector to view its images." : "No images uploaded for this connector.";
+                e.Graphics.DrawString(message, font, Brushes.Gray, rect, sf);
+                return;
+            }
+
+            if (_connectorImagePaths.Count > 1)
+                DrawConnectorGalleryUI(e.Graphics, rect);
+        }
+
+        private void DrawConnectorGalleryUI(Graphics g, Rectangle rect)
+        {
+            int arrowZoneWidth = 50;
+            using var arrowBgBrush = new SolidBrush(Color.FromArgb(10, 0, 0, 0));
+            g.FillRectangle(arrowBgBrush, 0, 0, arrowZoneWidth, rect.Height);
+            g.FillRectangle(arrowBgBrush, rect.Width - arrowZoneWidth, 0, arrowZoneWidth, rect.Height);
+
+            using var arrowPen = new Pen(Color.FromArgb(100, 116, 139), 3);
+            arrowPen.StartCap = LineCap.Round;
+            arrowPen.EndCap = LineCap.Round;
+            arrowPen.LineJoin = LineJoin.Round;
+
+            int cy = rect.Height / 2;
+            int arrowSize = 12;
+
+            int leftX = 20;
+            g.DrawLines(arrowPen, [new Point(leftX + arrowSize, cy - arrowSize), new Point(leftX, cy), new Point(leftX + arrowSize, cy + arrowSize)]);
+
+            int rightX = rect.Width - 20 - arrowSize;
+            g.DrawLines(arrowPen, [new Point(rightX, cy - arrowSize), new Point(rightX + arrowSize, cy), new Point(rightX, cy + arrowSize)]);
+
+            string counter = $"{_connectorImageIndex + 1} / {_connectorImagePaths.Count}";
+            var counterFont = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold;
+            var counterSize = g.MeasureString(counter, counterFont);
+            var counterRect = new RectangleF(rect.Width - counterSize.Width - 22, rect.Height - counterSize.Height - 16, counterSize.Width + 12, counterSize.Height + 6);
+            using var counterBg = new SolidBrush(Color.FromArgb(160, 15, 23, 42));
+            g.FillRectangle(counterBg, counterRect);
+            g.DrawString(counter, counterFont, Brushes.White, counterRect.X + 6, counterRect.Y + 3);
+        }
+
+        private void PicConnectorImage_MouseClick(object? sender, MouseEventArgs e)
+        {
+            if (_connectorImagePaths.Count <= 1) return;
+
+            int arrowZoneWidth = 50;
+            if (e.Location.X <= arrowZoneWidth)
+                _connectorImageIndex = (_connectorImageIndex - 1 + _connectorImagePaths.Count) % _connectorImagePaths.Count;
+            else if (e.Location.X >= picConnectorImage.Width - arrowZoneWidth)
+                _connectorImageIndex = (_connectorImageIndex + 1) % _connectorImagePaths.Count;
+            else
+                return;
+
+            LoadConnectorGalleryImage();
         }
 
         private void SetupPagination()
@@ -359,6 +682,7 @@ namespace AssemblyLineTester.Views.Pages
 
             SetHarnessImage(null);
             SetConnectorImage(null);
+            RefreshConnectorGrid();
         }
 
         // Called when a harness row is clicked. Shows harness fields, the harness image,
@@ -390,6 +714,7 @@ namespace AssemblyLineTester.Views.Pages
 
             SetHarnessImage(harness.ImagePath);
             SetConnectorImage(null);
+            RefreshConnectorGrid();
         }
 
         // Adds a key/value row to tblGenInfo and returns the value Label so its text can be updated later.
@@ -656,6 +981,17 @@ namespace AssemblyLineTester.Views.Pages
             using var penBorder = new Pen(Color.FromArgb(148, 163, 184), 1.5f);
             e.Graphics.DrawRectangle(penBorder, 0, 0, rect.Width - 1, rect.Height - 1);
 
+            if (_customHarnessImage != null)
+            {
+                var ratio = Math.Min((float)rect.Width / _customHarnessImage.Width, (float)rect.Height / _customHarnessImage.Height);
+                var w = _customHarnessImage.Width * ratio;
+                var h = _customHarnessImage.Height * ratio;
+                var x = (rect.Width - w) / 2;
+                var y = (rect.Height - h) / 2;
+                e.Graphics.DrawImage(_customHarnessImage, x, y, w, h);
+                return;
+            }
+
             int cy = rect.Height / 2;
             using var brushConn = new SolidBrush(Color.FromArgb(30, 41, 59));
 
@@ -689,9 +1025,9 @@ namespace AssemblyLineTester.Views.Pages
             else
             {
                 using var penCable = new Pen(Color.FromArgb(51, 65, 85), 4);
-                
+
                 e.Graphics.DrawLine(penCable, rect.Width * 0.25f, cy, rect.Width * 0.75f, cy);
-                
+
                 e.Graphics.FillRectangle(brushConn, rect.Width * 0.2f, cy - 20, 40, 40);
                 e.Graphics.FillRectangle(brushConn, rect.Width * 0.72f, cy - 20, 40, 40);
             }
@@ -709,6 +1045,17 @@ namespace AssemblyLineTester.Views.Pages
 
             using var penBorder = new Pen(Color.FromArgb(148, 163, 184), 1.5f);
             e.Graphics.DrawRectangle(penBorder, 0, 0, rect.Width - 1, rect.Height - 1);
+
+            if (_customMachineImage != null)
+            {
+                var ratio = Math.Min((float)rect.Width / _customMachineImage.Width, (float)rect.Height / _customMachineImage.Height);
+                var w = _customMachineImage.Width * ratio;
+                var h = _customMachineImage.Height * ratio;
+                var x = (rect.Width - w) / 2;
+                var y = (rect.Height - h) / 2;
+                e.Graphics.DrawImage(_customMachineImage, x, y, w, h);
+                return;
+            }
 
             using var penBox = new Pen(Color.FromArgb(148, 163, 184), 2) { DashStyle = DashStyle.Dash };
             var font = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold;
@@ -761,7 +1108,7 @@ namespace AssemblyLineTester.Views.Pages
 
             int cy = rect.Height / 2;
             int arrowSize = 12;
-            
+
             int leftX = 20;
             g.DrawLines(arrowPen, [new Point(leftX + arrowSize, cy - arrowSize), new Point(leftX, cy), new Point(leftX + arrowSize, cy + arrowSize)]);
 

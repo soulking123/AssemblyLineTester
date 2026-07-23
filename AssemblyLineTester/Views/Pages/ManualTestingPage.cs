@@ -162,7 +162,7 @@ namespace AssemblyLineTester.Views.Pages
             string defaultTestType = "WIRE";
             string defaultUnit = UnitConversionHelper.GetBaseUnit(defaultTestType);
 
-            int idx = gridConfig.Rows.Add(newIdx.ToString(), $"{newIdx}", $"{newIdx+64}", defaultTestType, defaultUnit);
+            int idx = gridConfig.Rows.Add(newIdx.ToString(), $"{newIdx}", $"{newIdx + 64}", defaultTestType, defaultUnit);
             UpdateRowUnitDropdown(idx);
             gridConfig.Rows[idx].Cells["colUnit"].Value = defaultUnit;
 
@@ -730,6 +730,6 @@ namespace AssemblyLineTester.Views.Pages
             g.DrawPath(pen, path);
         }
 
-        
+
     }
 }

@@ -23,10 +23,6 @@ namespace AssemblyLineTester.Views.Pages
 
         // --- Report Edit/Delete feature ---
         private bool _isEditingReport;
-        private Button _btnEditReport = null!;
-        private Button _btnDeleteReport = null!;
-        private Button _btnSaveReportEdit = null!;
-        private Button _btnCancelReportEdit = null!;
         private TextBox _txtEditSn = null!;
 
         public Reports()
@@ -111,27 +107,17 @@ namespace AssemblyLineTester.Views.Pages
         {
             try
             {
-                _btnEditReport = CreateActionButton("Edit", Color.FromArgb(37, 99, 235));
-                _btnDeleteReport = CreateActionButton("Delete", Color.FromArgb(220, 38, 38));
-                _btnSaveReportEdit = CreateActionButton("Save", Color.FromArgb(22, 163, 74));
-                _btnCancelReportEdit = CreateActionButton("Cancel", Color.FromArgb(100, 116, 139));
-
-                flpPreviewButtons.Controls.Add(_btnEditReport, 3, 0);
-                flpPreviewButtons.Controls.Add(_btnDeleteReport, 4, 0);
-                flpPreviewButtons.Controls.Add(_btnSaveReportEdit, 5, 0);
-                flpPreviewButtons.Controls.Add(_btnCancelReportEdit, 6, 0);
-
-                _btnSaveReportEdit.Visible = false;
-                _btnCancelReportEdit.Visible = false;
+                btnSaveReportEdit.Visible = false;
+                btnCancelReportEdit.Visible = false;
 
                 _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
                 _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
 
-                _btnEditReport.Click += (s, e) => EnterEditMode();
-                _btnSaveReportEdit.Click += (s, e) => SaveReportEdit();
-                _btnCancelReportEdit.Click += (s, e) => ExitEditMode(refresh: true);
+                btnEditReport.Click += (s, e) => EnterEditMode();
+                btnSaveReportEdit.Click += (s, e) => SaveReportEdit();
+                btnCancelReportEdit.Click += (s, e) => ExitEditMode(refresh: true);
 
-                _btnDeleteReport.Click += (s, e) =>
+                btnDeleteReport.Click += (s, e) =>
                 {
                     if (_selectedReportId is null)
                     {
@@ -182,10 +168,10 @@ namespace AssemblyLineTester.Views.Pages
             _txtEditSn.Text = lblGenSnVal.Text;
             ToggleEditControls(showTextboxes: true);
 
-            _btnEditReport.Visible = false;
-            _btnDeleteReport.Visible = false;
-            _btnSaveReportEdit.Visible = true;
-            _btnCancelReportEdit.Visible = true;
+            btnEditReport.Visible = false;
+            btnDeleteReport.Visible = false;
+            btnSaveReportEdit.Visible = true;
+            btnCancelReportEdit.Visible = true;
         }
 
         private void ExitEditMode(bool refresh)
@@ -193,10 +179,10 @@ namespace AssemblyLineTester.Views.Pages
             _isEditingReport = false;
             ToggleEditControls(showTextboxes: false);
 
-            _btnEditReport.Visible = true;
-            _btnDeleteReport.Visible = true;
-            _btnSaveReportEdit.Visible = false;
-            _btnCancelReportEdit.Visible = false;
+            btnEditReport.Visible = true;
+            btnDeleteReport.Visible = true;
+            btnSaveReportEdit.Visible = false;
+            btnCancelReportEdit.Visible = false;
 
             if (refresh && _selectedReportId.HasValue)
             {
@@ -741,8 +727,10 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportPDF, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportExcel, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPrint, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportExcel, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225));
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPrint, 10, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225));
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnEditReport, 10, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnDeleteReport, 10, Color.FromArgb(220, 38, 38), Color.FromArgb(239, 68, 68), Color.FromArgb(185, 28, 28), Color.Transparent);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPageFirst, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPagePrev, 8, Color.White, Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);

@@ -1,0 +1,358 @@
+﻿using System.Drawing;
+using System.Windows.Forms;
+
+namespace AssemblyLineTester.Views.Modals
+{
+    partial class HarnessModalForm
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        private void InitializeComponent()
+        {
+            pnlCustomHeader = new Panel();
+            lblCustomTitle = new Label();
+            iconLogo = new FontAwesome.Sharp.IconPictureBox();
+            btnClose = new FontAwesome.Sharp.IconButton();
+            pnlHeader = new Panel();
+            lblSubtitle = new Label();
+            lblTitle = new Label();
+            lblName = new Label();
+            txtName = new TextBox();
+            lblProductModel = new Label();
+            txtProductModel = new TextBox();
+            lblProductType = new Label();
+            txtProductType = new TextBox();
+            lblArea = new Label();
+            txtArea = new TextBox();
+            lblConnectors = new Label();
+            lstConnectors = new CheckedListBox();
+            lblImage = new Label();
+            btnChooseImage = new Button();
+            lblImageStatus = new Label();
+            pnlFooter = new Panel();
+            btnCancel = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnSave = new AssemblyLineTester.Views.Controls.RoundedButton();
+            pnlCustomHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)iconLogo).BeginInit();
+            pnlHeader.SuspendLayout();
+            pnlFooter.SuspendLayout();
+            SuspendLayout();
+            // 
+            // pnlCustomHeader
+            // 
+            pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
+            pnlCustomHeader.Controls.Add(lblCustomTitle);
+            pnlCustomHeader.Controls.Add(iconLogo);
+            pnlCustomHeader.Controls.Add(btnClose);
+            pnlCustomHeader.Dock = DockStyle.Top;
+            pnlCustomHeader.Location = new Point(0, 0);
+            pnlCustomHeader.Name = "pnlCustomHeader";
+            pnlCustomHeader.Size = new Size(942, 80);
+            pnlCustomHeader.TabIndex = 0;
+            // 
+            // lblCustomTitle
+            // 
+            lblCustomTitle.AutoSize = true;
+            lblCustomTitle.Font = new Font("Segoe UI", 11.5F, FontStyle.Bold);
+            lblCustomTitle.ForeColor = Color.White;
+            lblCustomTitle.Location = new Point(89, 22);
+            lblCustomTitle.Name = "lblCustomTitle";
+            lblCustomTitle.Size = new Size(220, 25);
+            lblCustomTitle.Text = "ADD/EDIT HARNESS";
+            // 
+            // iconLogo
+            // 
+            iconLogo.BackColor = Color.Transparent;
+            iconLogo.ForeColor = Color.FromArgb(250, 204, 21);
+            iconLogo.IconChar = FontAwesome.Sharp.IconChar.DiagramProject;
+            iconLogo.IconColor = Color.FromArgb(250, 204, 21);
+            iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            iconLogo.IconSize = 45;
+            iconLogo.Location = new Point(24, 18);
+            iconLogo.Name = "iconLogo";
+            iconLogo.Size = new Size(48, 45);
+            iconLogo.TabIndex = 1;
+            iconLogo.TabStop = false;
+            // 
+            // btnClose
+            // 
+            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnClose.BackColor = Color.Transparent;
+            btnClose.FlatAppearance.BorderSize = 0;
+            btnClose.FlatStyle = FlatStyle.Flat;
+            btnClose.IconChar = FontAwesome.Sharp.IconChar.Close;
+            btnClose.IconColor = Color.FromArgb(203, 213, 225);
+            btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnClose.IconSize = 24;
+            btnClose.Location = new Point(861, 0);
+            btnClose.Name = "btnClose";
+            btnClose.Size = new Size(81, 80);
+            btnClose.TabIndex = 2;
+            btnClose.UseVisualStyleBackColor = false;
+            // 
+            // pnlHeader
+            // 
+            pnlHeader.BackColor = Color.White;
+            pnlHeader.Controls.Add(lblSubtitle);
+            pnlHeader.Controls.Add(lblTitle);
+            pnlHeader.Dock = DockStyle.Top;
+            pnlHeader.Location = new Point(0, 80);
+            pnlHeader.Name = "pnlHeader";
+            pnlHeader.Size = new Size(942, 110);
+            pnlHeader.TabIndex = 1;
+            // 
+            // lblSubtitle
+            // 
+            lblSubtitle.AutoSize = true;
+            lblSubtitle.Font = new Font("Segoe UI", 9.5F);
+            lblSubtitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblSubtitle.Location = new Point(52, 65);
+            lblSubtitle.Name = "lblSubtitle";
+            lblSubtitle.Size = new Size(310, 21);
+            lblSubtitle.Text = "Fill in product harness configuration details.";
+            // 
+            // lblTitle
+            // 
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.FromArgb(30, 41, 59);
+            lblTitle.Location = new Point(49, 20);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(280, 35);
+            lblTitle.Text = "Harness Specifications";
+            // 
+            // lblName
+            // 
+            lblName.AutoSize = true;
+            lblName.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblName.ForeColor = Color.FromArgb(51, 65, 85);
+            lblName.Location = new Point(57, 215);
+            lblName.Name = "lblName";
+            lblName.Size = new Size(125, 21);
+            lblName.Text = "Harness Name *";
+            // 
+            // txtName
+            // 
+            txtName.Font = new Font("Segoe UI", 10.5F);
+            txtName.Location = new Point(57, 245);
+            txtName.Name = "txtName";
+            txtName.Size = new Size(388, 31);
+            txtName.TabIndex = 2;
+            // 
+            // lblProductModel
+            // 
+            lblProductModel.AutoSize = true;
+            lblProductModel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblProductModel.ForeColor = Color.FromArgb(51, 65, 85);
+            lblProductModel.Location = new Point(496, 215);
+            lblProductModel.Name = "lblProductModel";
+            lblProductModel.Size = new Size(134, 21);
+            lblProductModel.Text = "Product Model *";
+            // 
+            // txtProductModel
+            // 
+            txtProductModel.Font = new Font("Segoe UI", 10.5F);
+            txtProductModel.Location = new Point(496, 245);
+            txtProductModel.Name = "txtProductModel";
+            txtProductModel.Size = new Size(388, 31);
+            txtProductModel.TabIndex = 3;
+            // 
+            // lblProductType
+            // 
+            lblProductType.AutoSize = true;
+            lblProductType.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblProductType.ForeColor = Color.FromArgb(51, 65, 85);
+            lblProductType.Location = new Point(57, 305);
+            lblProductType.Name = "lblProductType";
+            lblProductType.Size = new Size(110, 21);
+            lblProductType.Text = "Product Type";
+            // 
+            // txtProductType
+            // 
+            txtProductType.Font = new Font("Segoe UI", 10.5F);
+            txtProductType.Location = new Point(57, 335);
+            txtProductType.Name = "txtProductType";
+            txtProductType.Size = new Size(388, 31);
+            txtProductType.TabIndex = 4;
+            // 
+            // lblArea
+            // 
+            lblArea.AutoSize = true;
+            lblArea.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblArea.ForeColor = Color.FromArgb(51, 65, 85);
+            lblArea.Location = new Point(496, 305);
+            lblArea.Name = "lblArea";
+            lblArea.Size = new Size(45, 21);
+            lblArea.Text = "Area";
+            // 
+            // txtArea
+            // 
+            txtArea.Font = new Font("Segoe UI", 10.5F);
+            txtArea.Location = new Point(496, 335);
+            txtArea.Name = "txtArea";
+            txtArea.Size = new Size(388, 31);
+            txtArea.TabIndex = 5;
+            // 
+            // lblConnectors
+            // 
+            lblConnectors.AutoSize = true;
+            lblConnectors.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblConnectors.ForeColor = Color.FromArgb(51, 65, 85);
+            lblConnectors.Location = new Point(57, 395);
+            lblConnectors.Name = "lblConnectors";
+            lblConnectors.Size = new Size(215, 21);
+            lblConnectors.Text = "Select Harness Connectors";
+            // 
+            // lstConnectors
+            // 
+            lstConnectors.Font = new Font("Segoe UI", 9F);
+            lstConnectors.FormattingEnabled = true;
+            lstConnectors.Location = new Point(57, 425);
+            lstConnectors.Name = "lstConnectors";
+            lstConnectors.Size = new Size(388, 180);
+            lstConnectors.TabIndex = 6;
+            // 
+            // lblImage
+            // 
+            lblImage.AutoSize = true;
+            lblImage.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblImage.ForeColor = Color.FromArgb(51, 65, 85);
+            lblImage.Location = new Point(496, 395);
+            lblImage.Name = "lblImage";
+            lblImage.Size = new Size(117, 21);
+            lblImage.Text = "Harness Image";
+            // 
+            // btnChooseImage
+            // 
+            btnChooseImage.Font = new Font("Segoe UI", 9F);
+            btnChooseImage.Location = new Point(496, 425);
+            btnChooseImage.Name = "btnChooseImage";
+            btnChooseImage.Size = new Size(388, 42);
+            btnChooseImage.TabIndex = 7;
+            btnChooseImage.Text = "Choose Image...";
+            // 
+            // lblImageStatus
+            // 
+            lblImageStatus.AutoSize = true;
+            lblImageStatus.Font = new Font("Segoe UI", 8.5F, FontStyle.Italic);
+            lblImageStatus.ForeColor = Color.FromArgb(100, 116, 139);
+            lblImageStatus.Location = new Point(496, 475);
+            lblImageStatus.Name = "lblImageStatus";
+            lblImageStatus.Size = new Size(130, 20);
+            lblImageStatus.Text = "No file selected.";
+            // 
+            // pnlFooter
+            // 
+            pnlFooter.BackColor = Color.FromArgb(34, 40, 49);
+            pnlFooter.Controls.Add(btnCancel);
+            pnlFooter.Controls.Add(btnSave);
+            pnlFooter.Dock = DockStyle.Bottom;
+            pnlFooter.Location = new Point(0, 650);
+            pnlFooter.Name = "pnlFooter";
+            pnlFooter.Size = new Size(942, 100);
+            pnlFooter.TabIndex = 8;
+            // 
+            // btnCancel
+            // 
+            btnCancel.BackColor = Color.FromArgb(241, 245, 249);
+            btnCancel.BorderRadius = 20;
+            btnCancel.DialogResult = DialogResult.Cancel;
+            btnCancel.FlatAppearance.BorderSize = 0;
+            btnCancel.FlatStyle = FlatStyle.Flat;
+            btnCancel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnCancel.ForeColor = Color.FromArgb(71, 85, 105);
+            btnCancel.Location = new Point(528, 22);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(171, 55);
+            btnCancel.TabIndex = 0;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = false;
+            // 
+            // btnSave
+            // 
+            btnSave.BackColor = Color.FromArgb(250, 204, 21);
+            btnSave.BorderRadius = 20;
+            btnSave.FlatAppearance.BorderSize = 0;
+            btnSave.FlatStyle = FlatStyle.Flat;
+            btnSave.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnSave.ForeColor = Color.FromArgb(15, 23, 42);
+            btnSave.Location = new Point(715, 22);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(171, 55);
+            btnSave.TabIndex = 1;
+            btnSave.Text = "Save";
+            btnSave.UseVisualStyleBackColor = false;
+            // 
+            // HarnessModalForm
+            // 
+            AcceptButton = btnSave;
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(248, 250, 252);
+            CancelButton = btnCancel;
+            ClientSize = new Size(942, 750);
+            Controls.Add(pnlFooter);
+            Controls.Add(lblImageStatus);
+            Controls.Add(btnChooseImage);
+            Controls.Add(lblImage);
+            Controls.Add(lstConnectors);
+            Controls.Add(lblConnectors);
+            Controls.Add(txtArea);
+            Controls.Add(lblArea);
+            Controls.Add(txtProductType);
+            Controls.Add(lblProductType);
+            Controls.Add(txtProductModel);
+            Controls.Add(lblProductModel);
+            Controls.Add(txtName);
+            Controls.Add(lblName);
+            Controls.Add(pnlHeader);
+            Controls.Add(pnlCustomHeader);
+            Font = new Font("Segoe UI", 9F);
+            FormBorderStyle = FormBorderStyle.None;
+            Name = "HarnessModalForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Harness Details";
+            pnlCustomHeader.ResumeLayout(false);
+            pnlCustomHeader.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)iconLogo).EndInit();
+            pnlHeader.ResumeLayout(false);
+            pnlHeader.PerformLayout();
+            pnlFooter.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        private Panel pnlCustomHeader;
+        private Label lblCustomTitle;
+        private FontAwesome.Sharp.IconPictureBox iconLogo;
+        private FontAwesome.Sharp.IconButton btnClose;
+        private Panel pnlHeader;
+        private Label lblTitle;
+        private Label lblSubtitle;
+        private Label lblName;
+        private TextBox txtName;
+        private Label lblProductModel;
+        private TextBox txtProductModel;
+        private Label lblProductType;
+        private TextBox txtProductType;
+        private Label lblArea;
+        private TextBox txtArea;
+        private Label lblConnectors;
+        private CheckedListBox lstConnectors;
+        private Label lblImage;
+        private Button btnChooseImage;
+        private Label lblImageStatus;
+        private Panel pnlFooter;
+        private AssemblyLineTester.Views.Controls.RoundedButton btnCancel;
+        private AssemblyLineTester.Views.Controls.RoundedButton btnSave;
+    }
+}
