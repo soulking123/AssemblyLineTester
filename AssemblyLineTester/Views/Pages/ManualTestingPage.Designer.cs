@@ -31,6 +31,7 @@ namespace AssemblyLineTester.Views.Pages
             btnLearnConnection = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnStart = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnStartSelected = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnAbort = new AssemblyLineTester.Views.Controls.RoundedButton();
             splitContainerMain = new SplitContainer();
             pnlLeftBox = new Panel();
             gridConfig = new DataGridView();
@@ -40,6 +41,12 @@ namespace AssemblyLineTester.Views.Pages
             colUnit = new DataGridViewComboBoxColumn();
             pnlConfigInfo = new Panel();
             tblConfigInfo = new TableLayoutPanel();
+            tblCellConnRes = new TableLayoutPanel();
+            lblConnectionResistance = new Label();
+            txtConnectionResistance = new TextBox();
+            tblCellInsRes = new TableLayoutPanel();
+            lblInsulationResistance = new Label();
+            txtInsulationResistance = new TextBox();
             pnlConfigInfoHeader = new Panel();
             lblConfigInfoHeader = new Label();
             pnlButtons = new Panel();
@@ -74,12 +81,6 @@ namespace AssemblyLineTester.Views.Pages
             tblCellProductModel = new TableLayoutPanel();
             lblProductModel = new Label();
             txtProductModel = new TextBox();
-            tblCellConnRes = new TableLayoutPanel();
-            lblConnectionResistance = new Label();
-            txtConnectionResistance = new TextBox();
-            tblCellInsRes = new TableLayoutPanel();
-            lblInsulationResistance = new Label();
-            txtInsulationResistance = new TextBox();
             ((System.ComponentModel.ISupportInitialize)splitContainerMain).BeginInit();
             splitContainerMain.Panel1.SuspendLayout();
             splitContainerMain.Panel2.SuspendLayout();
@@ -88,6 +89,8 @@ namespace AssemblyLineTester.Views.Pages
             ((System.ComponentModel.ISupportInitialize)gridConfig).BeginInit();
             pnlConfigInfo.SuspendLayout();
             tblConfigInfo.SuspendLayout();
+            tblCellConnRes.SuspendLayout();
+            tblCellInsRes.SuspendLayout();
             pnlConfigInfoHeader.SuspendLayout();
             pnlButtons.SuspendLayout();
             tblButtons.SuspendLayout();
@@ -100,26 +103,26 @@ namespace AssemblyLineTester.Views.Pages
             pnlHeaderBottom.SuspendLayout();
             tblCellConfigName.SuspendLayout();
             tblCellProductModel.SuspendLayout();
-            tblCellConnRes.SuspendLayout();
-            tblCellInsRes.SuspendLayout();
             SuspendLayout();
             // 
             // btnLearnConnection
             // 
             btnLearnConnection.BackColor = Color.FromArgb(203, 213, 225);
             btnLearnConnection.BorderRadius = 14;
+            btnLearnConnection.Dock = DockStyle.Fill;
             btnLearnConnection.FlatAppearance.BorderSize = 0;
             btnLearnConnection.FlatStyle = FlatStyle.Flat;
             btnLearnConnection.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnLearnConnection.ForeColor = Color.FromArgb(30, 41, 59);
             btnLearnConnection.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnLearnConnection.HoverForeColor = Color.Empty;
-            btnLearnConnection.Dock = DockStyle.Fill;
-            btnLearnConnection.Margin = new Padding(40, 10, 40, 10);
+            btnLearnConnection.Location = new Point(20, 10);
+            btnLearnConnection.Margin = new Padding(20, 10, 20, 10);
             btnLearnConnection.Name = "btnLearnConnection";
             btnLearnConnection.NormalBackColor = Color.FromArgb(203, 213, 225);
             btnLearnConnection.PressedBackColor = Color.FromArgb(100, 116, 139);
             btnLearnConnection.PressedForeColor = Color.Empty;
+            btnLearnConnection.Size = new Size(227, 48);
             btnLearnConnection.TabIndex = 0;
             btnLearnConnection.Text = "Learn Connection";
             btnLearnConnection.UseVisualStyleBackColor = false;
@@ -128,18 +131,20 @@ namespace AssemblyLineTester.Views.Pages
             // 
             btnStart.BackColor = Color.FromArgb(34, 197, 94);
             btnStart.BorderRadius = 14;
+            btnStart.Dock = DockStyle.Fill;
             btnStart.FlatAppearance.BorderSize = 0;
             btnStart.FlatStyle = FlatStyle.Flat;
             btnStart.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnStart.ForeColor = Color.White;
             btnStart.HoverBackColor = Color.FromArgb(22, 163, 74);
             btnStart.HoverForeColor = Color.Empty;
-            btnStart.Dock = DockStyle.Fill;
-            btnStart.Margin = new Padding(40, 10, 40, 10);
+            btnStart.Location = new Point(287, 10);
+            btnStart.Margin = new Padding(20, 10, 20, 10);
             btnStart.Name = "btnStart";
             btnStart.NormalBackColor = Color.FromArgb(34, 197, 94);
             btnStart.PressedBackColor = Color.FromArgb(21, 128, 61);
             btnStart.PressedForeColor = Color.Empty;
+            btnStart.Size = new Size(227, 48);
             btnStart.TabIndex = 1;
             btnStart.Text = "Start";
             btnStart.UseVisualStyleBackColor = false;
@@ -148,21 +153,45 @@ namespace AssemblyLineTester.Views.Pages
             // 
             btnStartSelected.BackColor = Color.FromArgb(245, 158, 11);
             btnStartSelected.BorderRadius = 14;
+            btnStartSelected.Dock = DockStyle.Fill;
             btnStartSelected.FlatAppearance.BorderSize = 0;
             btnStartSelected.FlatStyle = FlatStyle.Flat;
             btnStartSelected.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnStartSelected.ForeColor = Color.White;
             btnStartSelected.HoverBackColor = Color.FromArgb(217, 119, 6);
             btnStartSelected.HoverForeColor = Color.Empty;
-            btnStartSelected.Dock = DockStyle.Fill;
-            btnStartSelected.Margin = new Padding(40, 10, 40, 10);
+            btnStartSelected.Location = new Point(554, 10);
+            btnStartSelected.Margin = new Padding(20, 10, 20, 10);
             btnStartSelected.Name = "btnStartSelected";
             btnStartSelected.NormalBackColor = Color.FromArgb(245, 158, 11);
             btnStartSelected.PressedBackColor = Color.FromArgb(180, 83, 9);
             btnStartSelected.PressedForeColor = Color.Empty;
+            btnStartSelected.Size = new Size(227, 48);
             btnStartSelected.TabIndex = 2;
             btnStartSelected.Text = "Start Selected";
             btnStartSelected.UseVisualStyleBackColor = false;
+            // 
+            // btnAbort
+            // 
+            btnAbort.BackColor = Color.FromArgb(239, 68, 68);
+            btnAbort.BorderRadius = 14;
+            btnAbort.Dock = DockStyle.Fill;
+            btnAbort.FlatAppearance.BorderSize = 0;
+            btnAbort.FlatStyle = FlatStyle.Flat;
+            btnAbort.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnAbort.ForeColor = Color.White;
+            btnAbort.HoverBackColor = Color.FromArgb(220, 38, 38);
+            btnAbort.HoverForeColor = Color.Empty;
+            btnAbort.Location = new Point(821, 10);
+            btnAbort.Margin = new Padding(20, 10, 20, 10);
+            btnAbort.Name = "btnAbort";
+            btnAbort.NormalBackColor = Color.FromArgb(239, 68, 68);
+            btnAbort.PressedBackColor = Color.FromArgb(185, 28, 28);
+            btnAbort.PressedForeColor = Color.Empty;
+            btnAbort.Size = new Size(227, 48);
+            btnAbort.TabIndex = 3;
+            btnAbort.Text = "Abort";
+            btnAbort.UseVisualStyleBackColor = false;
             // 
             // splitContainerMain
             // 
@@ -209,22 +238,22 @@ namespace AssemblyLineTester.Views.Pages
             // 
             gridConfig.AllowUserToAddRows = false;
             gridConfig.AllowUserToDeleteRows = false;
+            gridConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             gridConfig.BackgroundColor = Color.White;
             gridConfig.BorderStyle = BorderStyle.None;
             gridConfig.CausesValidation = false;
             gridConfig.ColumnHeadersHeight = 45;
             gridConfig.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colFromAddr, colToAddr, colUnit });
             gridConfig.Dock = DockStyle.Fill;
             gridConfig.EnableHeadersVisualStyles = false;
-            gridConfig.Location = new Point(0, 232);
+            gridConfig.Location = new Point(0, 337);
             gridConfig.Margin = new Padding(5);
             gridConfig.Name = "gridConfig";
             gridConfig.RowHeadersVisible = false;
             gridConfig.RowHeadersWidth = 82;
             gridConfig.RowTemplate.Height = 38;
-            gridConfig.Size = new Size(1098, 1096);
+            gridConfig.Size = new Size(1098, 991);
             gridConfig.TabIndex = 4;
             // 
             // colNo
@@ -233,21 +262,18 @@ namespace AssemblyLineTester.Views.Pages
             colNo.MinimumWidth = 50;
             colNo.Name = "colNo";
             colNo.ReadOnly = true;
-            colNo.Width = 60;
             // 
             // colFromAddr
             // 
             colFromAddr.HeaderText = "From";
             colFromAddr.MinimumWidth = 90;
             colFromAddr.Name = "colFromAddr";
-            colFromAddr.Width = 110;
             // 
             // colToAddr
             // 
             colToAddr.HeaderText = "To";
             colToAddr.MinimumWidth = 90;
             colToAddr.Name = "colToAddr";
-            colToAddr.Width = 110;
             // 
             // colUnit
             // 
@@ -256,7 +282,6 @@ namespace AssemblyLineTester.Views.Pages
             colUnit.Items.AddRange(new object[] { "Ω", "mΩ", "kΩ", "MΩ", "GΩ", "F", "μF", "nF", "pF", "V", "mV", "kV", "A", "mA", "Hz", "ms" });
             colUnit.MinimumWidth = 110;
             colUnit.Name = "colUnit";
-            colUnit.Width = 140;
             // 
             // pnlConfigInfo
             // 
@@ -269,7 +294,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlConfigInfo.Margin = new Padding(5);
             pnlConfigInfo.Name = "pnlConfigInfo";
             pnlConfigInfo.Padding = new Padding(15, 10, 15, 10);
-            pnlConfigInfo.Size = new Size(1098, 76);
+            pnlConfigInfo.Size = new Size(1098, 181);
             pnlConfigInfo.TabIndex = 3;
             // 
             // tblConfigInfo
@@ -277,25 +302,110 @@ namespace AssemblyLineTester.Views.Pages
             tblConfigInfo.AutoSize = true;
             tblConfigInfo.BackColor = Color.White;
             tblConfigInfo.CausesValidation = false;
-            tblConfigInfo.ColumnCount = 2;
-            tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblConfigInfo.ColumnCount = 4;
+            tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tblConfigInfo.Controls.Add(btnLearnConnection, 0, 0);
             tblConfigInfo.Controls.Add(btnStart, 1, 0);
-            tblConfigInfo.Controls.Add(btnStartSelected, 0, 1);
-            tblConfigInfo.SetColumnSpan(btnStartSelected, 2);
-            tblConfigInfo.Controls.Add(tblCellConnRes, 0, 2);
-            tblConfigInfo.Controls.Add(tblCellInsRes, 1, 2);
+            tblConfigInfo.Controls.Add(btnStartSelected, 2, 0);
+            tblConfigInfo.Controls.Add(btnAbort, 3, 0);
+            tblConfigInfo.Controls.Add(tblCellConnRes, 0, 1);
+            tblConfigInfo.Controls.Add(tblCellInsRes, 2, 1);
             tblConfigInfo.Dock = DockStyle.Fill;
             tblConfigInfo.Location = new Point(15, 10);
             tblConfigInfo.Margin = new Padding(0);
             tblConfigInfo.Name = "tblConfigInfo";
-            tblConfigInfo.RowCount = 3;
+            tblConfigInfo.RowCount = 2;
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
-            tblConfigInfo.RowStyles.Add(new RowStyle());
-            tblConfigInfo.Size = new Size(1068, 200);
+            tblConfigInfo.Size = new Size(1068, 161);
             tblConfigInfo.TabIndex = 0;
+            // 
+            // tblCellConnRes
+            // 
+            tblCellConnRes.AutoSize = true;
+            tblCellConnRes.ColumnCount = 1;
+            tblConfigInfo.SetColumnSpan(tblCellConnRes, 2);
+            tblCellConnRes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblCellConnRes.Controls.Add(lblConnectionResistance, 0, 0);
+            tblCellConnRes.Controls.Add(txtConnectionResistance, 0, 1);
+            tblCellConnRes.Dock = DockStyle.Fill;
+            tblCellConnRes.Location = new Point(6, 72);
+            tblCellConnRes.Margin = new Padding(6, 4, 15, 8);
+            tblCellConnRes.Name = "tblCellConnRes";
+            tblCellConnRes.RowCount = 2;
+            tblCellConnRes.RowStyles.Add(new RowStyle());
+            tblCellConnRes.RowStyles.Add(new RowStyle());
+            tblCellConnRes.Size = new Size(513, 81);
+            tblCellConnRes.TabIndex = 2;
+            // 
+            // lblConnectionResistance
+            // 
+            lblConnectionResistance.AutoSize = true;
+            lblConnectionResistance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblConnectionResistance.ForeColor = Color.FromArgb(100, 116, 139);
+            lblConnectionResistance.Location = new Point(0, 0);
+            lblConnectionResistance.Margin = new Padding(0, 0, 0, 6);
+            lblConnectionResistance.Name = "lblConnectionResistance";
+            lblConnectionResistance.Size = new Size(336, 32);
+            lblConnectionResistance.TabIndex = 0;
+            lblConnectionResistance.Text = "Connection Resistance (mΩ)";
+            // 
+            // txtConnectionResistance
+            // 
+            txtConnectionResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtConnectionResistance.CausesValidation = false;
+            txtConnectionResistance.Font = new Font("Segoe UI", 10F);
+            txtConnectionResistance.Location = new Point(0, 38);
+            txtConnectionResistance.Margin = new Padding(0);
+            txtConnectionResistance.Name = "txtConnectionResistance";
+            txtConnectionResistance.Size = new Size(513, 43);
+            txtConnectionResistance.TabIndex = 1;
+            txtConnectionResistance.Text = "2.5";
+            // 
+            // tblCellInsRes
+            // 
+            tblCellInsRes.AutoSize = true;
+            tblCellInsRes.ColumnCount = 1;
+            tblConfigInfo.SetColumnSpan(tblCellInsRes, 2);
+            tblCellInsRes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblCellInsRes.Controls.Add(lblInsulationResistance, 0, 0);
+            tblCellInsRes.Controls.Add(txtInsulationResistance, 0, 1);
+            tblCellInsRes.Dock = DockStyle.Fill;
+            tblCellInsRes.Location = new Point(549, 72);
+            tblCellInsRes.Margin = new Padding(15, 4, 6, 8);
+            tblCellInsRes.Name = "tblCellInsRes";
+            tblCellInsRes.RowCount = 2;
+            tblCellInsRes.RowStyles.Add(new RowStyle());
+            tblCellInsRes.RowStyles.Add(new RowStyle());
+            tblCellInsRes.Size = new Size(513, 81);
+            tblCellInsRes.TabIndex = 3;
+            // 
+            // lblInsulationResistance
+            // 
+            lblInsulationResistance.AutoSize = true;
+            lblInsulationResistance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblInsulationResistance.ForeColor = Color.FromArgb(100, 116, 139);
+            lblInsulationResistance.Location = new Point(0, 0);
+            lblInsulationResistance.Margin = new Padding(0, 0, 0, 6);
+            lblInsulationResistance.Name = "lblInsulationResistance";
+            lblInsulationResistance.Size = new Size(321, 32);
+            lblInsulationResistance.TabIndex = 0;
+            lblInsulationResistance.Text = "Insulation Resistance (MΩ)";
+            // 
+            // txtInsulationResistance
+            // 
+            txtInsulationResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtInsulationResistance.CausesValidation = false;
+            txtInsulationResistance.Font = new Font("Segoe UI", 10F);
+            txtInsulationResistance.Location = new Point(0, 38);
+            txtInsulationResistance.Margin = new Padding(0);
+            txtInsulationResistance.Name = "txtInsulationResistance";
+            txtInsulationResistance.Size = new Size(513, 43);
+            txtInsulationResistance.TabIndex = 1;
+            txtInsulationResistance.Text = "500";
             // 
             // pnlConfigInfoHeader
             // 
@@ -740,88 +850,6 @@ namespace AssemblyLineTester.Views.Pages
             txtProductModel.TabIndex = 1;
             txtProductModel.Text = "6060";
             // 
-            // tblCellConnRes
-            // 
-            tblCellConnRes.AutoSize = true;
-            tblCellConnRes.ColumnCount = 1;
-            tblCellConnRes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblCellConnRes.Controls.Add(lblConnectionResistance, 0, 0);
-            tblCellConnRes.Controls.Add(txtConnectionResistance, 0, 1);
-            tblCellConnRes.Dock = DockStyle.Fill;
-            tblCellConnRes.Location = new Point(6, 97);
-            tblCellConnRes.Margin = new Padding(6, 4, 15, 8);
-            tblCellConnRes.Name = "tblCellConnRes";
-            tblCellConnRes.RowCount = 2;
-            tblCellConnRes.RowStyles.Add(new RowStyle());
-            tblCellConnRes.RowStyles.Add(new RowStyle());
-            tblCellConnRes.Size = new Size(513, 81);
-            tblCellConnRes.TabIndex = 2;
-            // 
-            // lblConnectionResistance
-            // 
-            lblConnectionResistance.AutoSize = true;
-            lblConnectionResistance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblConnectionResistance.ForeColor = Color.FromArgb(100, 116, 139);
-            lblConnectionResistance.Location = new Point(0, 0);
-            lblConnectionResistance.Margin = new Padding(0, 0, 0, 6);
-            lblConnectionResistance.Name = "lblConnectionResistance";
-            lblConnectionResistance.Size = new Size(336, 32);
-            lblConnectionResistance.TabIndex = 0;
-            lblConnectionResistance.Text = "Connection Resistance (mΩ)";
-            // 
-            // txtConnectionResistance
-            // 
-            txtConnectionResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtConnectionResistance.CausesValidation = false;
-            txtConnectionResistance.Font = new Font("Segoe UI", 10F);
-            txtConnectionResistance.Location = new Point(0, 38);
-            txtConnectionResistance.Margin = new Padding(0);
-            txtConnectionResistance.Name = "txtConnectionResistance";
-            txtConnectionResistance.Size = new Size(513, 43);
-            txtConnectionResistance.TabIndex = 1;
-            txtConnectionResistance.Text = "2.5";
-            // 
-            // tblCellInsRes
-            // 
-            tblCellInsRes.AutoSize = true;
-            tblCellInsRes.ColumnCount = 1;
-            tblCellInsRes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblCellInsRes.Controls.Add(lblInsulationResistance, 0, 0);
-            tblCellInsRes.Controls.Add(txtInsulationResistance, 0, 1);
-            tblCellInsRes.Dock = DockStyle.Fill;
-            tblCellInsRes.Location = new Point(549, 97);
-            tblCellInsRes.Margin = new Padding(15, 4, 6, 8);
-            tblCellInsRes.Name = "tblCellInsRes";
-            tblCellInsRes.RowCount = 2;
-            tblCellInsRes.RowStyles.Add(new RowStyle());
-            tblCellInsRes.RowStyles.Add(new RowStyle());
-            tblCellInsRes.Size = new Size(513, 81);
-            tblCellInsRes.TabIndex = 3;
-            // 
-            // lblInsulationResistance
-            // 
-            lblInsulationResistance.AutoSize = true;
-            lblInsulationResistance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblInsulationResistance.ForeColor = Color.FromArgb(100, 116, 139);
-            lblInsulationResistance.Location = new Point(0, 0);
-            lblInsulationResistance.Margin = new Padding(0, 0, 0, 6);
-            lblInsulationResistance.Name = "lblInsulationResistance";
-            lblInsulationResistance.Size = new Size(321, 32);
-            lblInsulationResistance.TabIndex = 0;
-            lblInsulationResistance.Text = "Insulation Resistance (MΩ)";
-            // 
-            // txtInsulationResistance
-            // 
-            txtInsulationResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtInsulationResistance.CausesValidation = false;
-            txtInsulationResistance.Font = new Font("Segoe UI", 10F);
-            txtInsulationResistance.Location = new Point(0, 38);
-            txtInsulationResistance.Margin = new Padding(0);
-            txtInsulationResistance.Name = "txtInsulationResistance";
-            txtInsulationResistance.Size = new Size(513, 43);
-            txtInsulationResistance.TabIndex = 1;
-            txtInsulationResistance.Text = "500";
-            // 
             // ManualTestingPage
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
@@ -842,6 +870,11 @@ namespace AssemblyLineTester.Views.Pages
             pnlConfigInfo.ResumeLayout(false);
             pnlConfigInfo.PerformLayout();
             tblConfigInfo.ResumeLayout(false);
+            tblConfigInfo.PerformLayout();
+            tblCellConnRes.ResumeLayout(false);
+            tblCellConnRes.PerformLayout();
+            tblCellInsRes.ResumeLayout(false);
+            tblCellInsRes.PerformLayout();
             pnlConfigInfoHeader.ResumeLayout(false);
             pnlButtons.ResumeLayout(false);
             tblButtons.ResumeLayout(false);
@@ -856,10 +889,6 @@ namespace AssemblyLineTester.Views.Pages
             tblCellConfigName.PerformLayout();
             tblCellProductModel.ResumeLayout(false);
             tblCellProductModel.PerformLayout();
-            tblCellConnRes.ResumeLayout(false);
-            tblCellConnRes.PerformLayout();
-            tblCellInsRes.ResumeLayout(false);
-            tblCellInsRes.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -867,6 +896,7 @@ namespace AssemblyLineTester.Views.Pages
         private AssemblyLineTester.Views.Controls.RoundedButton btnLearnConnection;
         private AssemblyLineTester.Views.Controls.RoundedButton btnStart;
         private AssemblyLineTester.Views.Controls.RoundedButton btnStartSelected;
+        private AssemblyLineTester.Views.Controls.RoundedButton btnAbort;
 
         private SplitContainer splitContainerMain;
         private Panel pnlLeftBox;
