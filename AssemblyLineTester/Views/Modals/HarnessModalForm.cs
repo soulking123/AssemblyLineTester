@@ -168,9 +168,9 @@ namespace AssemblyLineTester.Views.Modals
             _connectorDropdown.Items.Add(listHost);
         }
 
-        // Opens the popup with every connector, checkbox pre-ticked for whatever's already picked.
-        // Checking/unchecking an item updates the chips live - the user can tick several connectors
-        // in one open instead of reopening a dropdown per connector.
+        // Opens the popup with every connector in the shared catalog, checkbox pre-ticked for
+        // whatever's already attached to this harness. A connector can be attached to several
+        // harnesses at once, so picking one here never affects any other harness.
         private void OpenConnectorPicker()
         {
             EnsureConnectorPickerBuilt();
@@ -372,6 +372,7 @@ namespace AssemblyLineTester.Views.Modals
                 return;
             }
 
+            // Order matters here: it's what HarnessService uses to number the connectors "J1", "J2", ...
             var selectedConnectors = new List<Connector>(_selectedConnectors);
 
             var harness = new ProductHarness
@@ -383,8 +384,7 @@ namespace AssemblyLineTester.Views.Modals
                 Area = txtArea.Text.Trim(),
                 ImagePaths = new List<string>(_selectedImagePaths),
                 LastUpdate = DateTime.UtcNow,
-                ConnectorList = selectedConnectors,
-                ConnectorListName = selectedConnectors.Select(c => c.PartNumber).ToList()
+                ConnectorList = selectedConnectors
             };
 
             try

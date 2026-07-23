@@ -628,7 +628,7 @@ namespace AssemblyLineTester.Views.Pages
             lblMachineArea.Name = "lblMachineArea";
             lblMachineArea.Size = new Size(211, 36);
             lblMachineArea.TabIndex = 3;
-            lblMachineArea.Text = "MACHINE AREA";
+            lblMachineArea.Text = "CONNECTOR";
             // 
             // picMachineArea
             // 

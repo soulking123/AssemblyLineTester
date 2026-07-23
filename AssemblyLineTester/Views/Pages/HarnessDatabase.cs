@@ -37,6 +37,13 @@ namespace AssemblyLineTester.Views.Pages
         private Image? _customHarnessImage = null;
         private Image? _customMachineImage = null;
 
+        // General tab image galleries (harness images, and the selected connector's images) -
+        // same paging pattern as the "Connector & Pin" tab's picConnectorImage gallery.
+        private List<string> _harnessImagePaths = [];
+        private int _harnessImageIndex = 0;
+        private List<string> _genConnectorImagePaths = [];
+        private int _genConnectorImageIndex = 0;
+
         // Carousel States
         private int _currentHarnessSlide = 0;
         private int _currentMachineSlide = 0;
@@ -133,6 +140,12 @@ namespace AssemblyLineTester.Views.Pages
                 if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     PopulateHarnessData();
+                    var created = _allHarnessEntities.OrderByDescending(h => h.ProductHarnessId).FirstOrDefault();
+                    if (created != null)
+                    {
+                        RenderHarnessSelected(created);
+                        tabControlDetail.SelectedIndex = 0;
+                    }
                 }
             };
 
@@ -256,8 +269,9 @@ namespace AssemblyLineTester.Views.Pages
             RefreshConnectorGrid();
         }
 
-        // Reloads dgvConnectors from the database for the currently selected harness. Called on
-        // harness selection and after any Add/Edit/Delete connector action.
+        // Reloads dgvConnectors with the entire connector catalog (every row in the Connectors
+        // table), independent of which harness is selected. Called on harness selection and after
+        // any Add/Edit/Delete connector action.
         private void RefreshConnectorGrid()
         {
             dgvConnectors.Rows.Clear();
@@ -300,13 +314,8 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!HasConnectorEditPermission()) return;
 
-            if (_selectedHarness == null)
-            {
-                MessageBox.Show("Please select a harness from the list first.", "No Harness Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService, _selectedHarness.ProductHarnessId);
+            // Add a connector to the shared catalog only - it's linked to harnesses later via the harness modal.
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService);
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
@@ -344,7 +353,7 @@ namespace AssemblyLineTester.Views.Pages
 
             string partNumber = dgvConnectors.SelectedRows[0].Cells["colPartNumber"].Value?.ToString() ?? "this connector";
             var confirm = MessageBox.Show(
-                $"Delete connector '{partNumber}'? Its saved images will also be removed. This action cannot be undone.",
+                $"Delete connector '{partNumber}'? It will be removed from every harness that uses it, and its saved images will also be removed. This action cannot be undone.",
                 "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (confirm != DialogResult.Yes) return;
 
@@ -432,21 +441,23 @@ namespace AssemblyLineTester.Views.Pages
         {
             _connectorImagePaths = _connectorService.GetConnectorImagePaths(connector);
             _connectorImageIndex = 0;
-            LoadConnectorGalleryImage();
+            LoadGalleryImage(picConnectorImage, _connectorImagePaths, _connectorImageIndex);
         }
 
-        private void LoadConnectorGalleryImage()
+        // Shared by every image gallery on this page (harness image, general-tab connector image,
+        // and the "Connector & Pin" tab image) so paging/loading logic isn't triplicated.
+        private static void LoadGalleryImage(PictureBox pic, List<string> paths, int index)
         {
-            var oldImage = picConnectorImage.Image;
-            picConnectorImage.Image = null;
+            var oldImage = pic.Image;
+            pic.Image = null;
             oldImage?.Dispose();
 
-            if (_connectorImagePaths.Count > 0 && _connectorImageIndex >= 0 && _connectorImageIndex < _connectorImagePaths.Count)
+            if (paths.Count > 0 && index >= 0 && index < paths.Count)
             {
                 try
                 {
-                    picConnectorImage.SizeMode = PictureBoxSizeMode.Zoom;
-                    picConnectorImage.Image = Image.FromFile(_connectorImagePaths[_connectorImageIndex]);
+                    pic.SizeMode = PictureBoxSizeMode.Zoom;
+                    pic.Image = Image.FromFile(paths[index]);
                 }
                 catch
                 {
@@ -454,7 +465,56 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            picConnectorImage.Invalidate();
+            pic.Invalidate();
+        }
+
+        // Hit-tests a click against the left/right arrow zones of a gallery and advances index
+        // (wrapping around). Returns false (no change) for clicks in the middle.
+        private static bool HandleGalleryClick(Point location, int controlWidth, int count, ref int index)
+        {
+            const int arrowZoneWidth = 50;
+            if (location.X <= arrowZoneWidth)
+            {
+                index = (index - 1 + count) % count;
+                return true;
+            }
+            if (location.X >= controlWidth - arrowZoneWidth)
+            {
+                index = (index + 1) % count;
+                return true;
+            }
+            return false;
+        }
+
+        // Draws paging arrows + a counter badge over a gallery image when it has more than one image.
+        private static void DrawGalleryUI(Graphics g, Rectangle rect, int index, int count)
+        {
+            int arrowZoneWidth = 50;
+            using var arrowBgBrush = new SolidBrush(Color.FromArgb(10, 0, 0, 0));
+            g.FillRectangle(arrowBgBrush, 0, 0, arrowZoneWidth, rect.Height);
+            g.FillRectangle(arrowBgBrush, rect.Width - arrowZoneWidth, 0, arrowZoneWidth, rect.Height);
+
+            using var arrowPen = new Pen(Color.FromArgb(100, 116, 139), 3);
+            arrowPen.StartCap = LineCap.Round;
+            arrowPen.EndCap = LineCap.Round;
+            arrowPen.LineJoin = LineJoin.Round;
+
+            int cy = rect.Height / 2;
+            int arrowSize = 12;
+
+            int leftX = 20;
+            g.DrawLines(arrowPen, [new Point(leftX + arrowSize, cy - arrowSize), new Point(leftX, cy), new Point(leftX + arrowSize, cy + arrowSize)]);
+
+            int rightX = rect.Width - 20 - arrowSize;
+            g.DrawLines(arrowPen, [new Point(rightX, cy - arrowSize), new Point(rightX + arrowSize, cy), new Point(rightX, cy + arrowSize)]);
+
+            string counter = $"{index + 1} / {count}";
+            var counterFont = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold;
+            var counterSize = g.MeasureString(counter, counterFont);
+            var counterRect = new RectangleF(rect.Width - counterSize.Width - 22, rect.Height - counterSize.Height - 16, counterSize.Width + 12, counterSize.Height + 6);
+            using var counterBg = new SolidBrush(Color.FromArgb(160, 15, 23, 42));
+            g.FillRectangle(counterBg, counterRect);
+            g.DrawString(counter, counterFont, Brushes.White, counterRect.X + 6, counterRect.Y + 3);
         }
 
         // Draws a placeholder message when there's no image, or paging arrows + a counter when the
@@ -477,52 +537,15 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             if (_connectorImagePaths.Count > 1)
-                DrawConnectorGalleryUI(e.Graphics, rect);
-        }
-
-        private void DrawConnectorGalleryUI(Graphics g, Rectangle rect)
-        {
-            int arrowZoneWidth = 50;
-            using var arrowBgBrush = new SolidBrush(Color.FromArgb(10, 0, 0, 0));
-            g.FillRectangle(arrowBgBrush, 0, 0, arrowZoneWidth, rect.Height);
-            g.FillRectangle(arrowBgBrush, rect.Width - arrowZoneWidth, 0, arrowZoneWidth, rect.Height);
-
-            using var arrowPen = new Pen(Color.FromArgb(100, 116, 139), 3);
-            arrowPen.StartCap = LineCap.Round;
-            arrowPen.EndCap = LineCap.Round;
-            arrowPen.LineJoin = LineJoin.Round;
-
-            int cy = rect.Height / 2;
-            int arrowSize = 12;
-
-            int leftX = 20;
-            g.DrawLines(arrowPen, [new Point(leftX + arrowSize, cy - arrowSize), new Point(leftX, cy), new Point(leftX + arrowSize, cy + arrowSize)]);
-
-            int rightX = rect.Width - 20 - arrowSize;
-            g.DrawLines(arrowPen, [new Point(rightX, cy - arrowSize), new Point(rightX + arrowSize, cy), new Point(rightX, cy + arrowSize)]);
-
-            string counter = $"{_connectorImageIndex + 1} / {_connectorImagePaths.Count}";
-            var counterFont = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold;
-            var counterSize = g.MeasureString(counter, counterFont);
-            var counterRect = new RectangleF(rect.Width - counterSize.Width - 22, rect.Height - counterSize.Height - 16, counterSize.Width + 12, counterSize.Height + 6);
-            using var counterBg = new SolidBrush(Color.FromArgb(160, 15, 23, 42));
-            g.FillRectangle(counterBg, counterRect);
-            g.DrawString(counter, counterFont, Brushes.White, counterRect.X + 6, counterRect.Y + 3);
+                DrawGalleryUI(e.Graphics, rect, _connectorImageIndex, _connectorImagePaths.Count);
         }
 
         private void PicConnectorImage_MouseClick(object? sender, MouseEventArgs e)
         {
             if (_connectorImagePaths.Count <= 1) return;
+            if (!HandleGalleryClick(e.Location, picConnectorImage.Width, _connectorImagePaths.Count, ref _connectorImageIndex)) return;
 
-            int arrowZoneWidth = 50;
-            if (e.Location.X <= arrowZoneWidth)
-                _connectorImageIndex = (_connectorImageIndex - 1 + _connectorImagePaths.Count) % _connectorImagePaths.Count;
-            else if (e.Location.X >= picConnectorImage.Width - arrowZoneWidth)
-                _connectorImageIndex = (_connectorImageIndex + 1) % _connectorImagePaths.Count;
-            else
-                return;
-
-            LoadConnectorGalleryImage();
+            LoadGalleryImage(picConnectorImage, _connectorImagePaths, _connectorImageIndex);
         }
 
         private void SetupPagination()
@@ -733,8 +756,8 @@ namespace AssemblyLineTester.Views.Pages
             tblGenInfo.SetColumnSpan(lbl, 2);
             tblGenInfo.Controls.Add(lbl, 0, 0);
 
-            SetHarnessImage(null);
-            SetConnectorImage(null);
+            SetHarnessImage([]);
+            SetConnectorImage([]);
             RefreshConnectorGrid();
         }
 
@@ -765,8 +788,8 @@ namespace AssemblyLineTester.Views.Pages
             _lblConnCurrentRating = AddGenInfoValueRow("Current Rating", "-");
             _lblConnMountingStyle = AddGenInfoValueRow("Mounting Style", "-");
 
-            SetHarnessImage(harness.ImagePaths.FirstOrDefault());
-            SetConnectorImage(null);
+            SetHarnessImage(harness.ImagePaths);
+            SetConnectorImage([]);
             RefreshConnectorGrid();
         }
 
@@ -800,7 +823,16 @@ namespace AssemblyLineTester.Views.Pages
             return lblVal;
         }
 
-        // Adds the Connector dropdown row, populated from the selected harness's connector list name (J1-J6).
+        // Pairs a "J1"/"J2"/... label with the connector it refers to. connectorNames and connectors
+        // are always built together (same order, same length) by HarnessService.GetAllHarnesses, so
+        // zipping them here by index is safe - unlike storing/matching them separately.
+        private sealed record ConnectorOption(string Label, Connector Connector)
+        {
+            public override string ToString() => Label;
+        }
+
+        // Adds the Connector dropdown row. Shows "J1", "J2", ... (the position each connector was
+        // attached to this harness), not the part number - selecting one loads that connector's info/image.
         private void AddConnectorDropdownRow(List<string> connectorNames, List<Connector> connectors)
         {
             tblGenInfo.RowCount++;
@@ -826,7 +858,7 @@ namespace AssemblyLineTester.Views.Pages
                 Margin = new Padding(0, 0, 4, 0)
             };
 
-            if (connectorNames.Count == 0)
+            if (connectors.Count == 0)
             {
                 cmb.Items.Add("No connector found for this harness");
                 cmb.SelectedIndex = 0;
@@ -834,15 +866,13 @@ namespace AssemblyLineTester.Views.Pages
             }
             else
             {
-                foreach (var name in connectorNames) cmb.Items.Add(name);
+                for (int i = 0; i < connectors.Count; i++)
+                    cmb.Items.Add(new ConnectorOption(connectorNames[i], connectors[i]));
+
                 cmb.SelectedIndexChanged += (s, e) =>
                 {
-                    if (s is ComboBox combo && combo.SelectedIndex >= 0)
-                    {
-                        int index = combo.SelectedIndex;
-                        Connector? conn = (index < connectors.Count) ? connectors[index] : (connectors.Count > 0 ? connectors[0] : null);
-                        OnConnectorSelected(conn);
-                    }
+                    if (s is ComboBox combo && combo.SelectedItem is ConnectorOption opt)
+                        OnConnectorSelected(opt.Connector);
                 };
             }
 
@@ -862,7 +892,7 @@ namespace AssemblyLineTester.Views.Pages
                 _lblConnWireSize!.Text = conn.WireSize;
                 _lblConnCurrentRating!.Text = $"{conn.CurrentRating} A";
                 _lblConnMountingStyle!.Text = conn.MountingStyle;
-                SetConnectorImage(_connectorService.GetConnectorImagePaths(conn).FirstOrDefault());
+                SetConnectorImage(_connectorService.GetConnectorImagePaths(conn));
             }
             else
             {
@@ -872,58 +902,45 @@ namespace AssemblyLineTester.Views.Pages
                 _lblConnWireSize!.Text = "-";
                 _lblConnCurrentRating!.Text = "-";
                 _lblConnMountingStyle!.Text = "-";
-                SetConnectorImage(null);
+                SetConnectorImage([]);
             }
         }
 
-        // Top image (picHarnessImage) shows the harness's own picture.
-        private void SetHarnessImage(string? relativePath) => LoadPictureBoxImage(picHarnessImage, relativePath);
-
-        // Bottom image (picMachineArea) now shows the selected connector's picture.
-        private void SetConnectorImage(string? relativePath) => LoadPictureBoxImage(picMachineArea, relativePath);
-
-        // Loads an image file from Assets/img or the app's local Images folder into a PictureBox, or clears it if not found.
-        private void LoadPictureBoxImage(PictureBox pic, string? relativePath)
+        // Top image (picHarnessImage) shows the harness's own pictures - can be more than one,
+        // pageable the same way as the "Connector & Pin" tab's gallery.
+        private void SetHarnessImage(List<string> relativePaths)
         {
-            var oldImage = pic.Image;
-            pic.Image = null;
-            oldImage?.Dispose();
+            _harnessImagePaths = relativePaths.Select(ResolveHarnessImagePath).Where(p => p != null).Select(p => p!).ToList();
+            _harnessImageIndex = 0;
+            LoadGalleryImage(picHarnessImage, _harnessImagePaths, _harnessImageIndex);
+        }
 
-            if (!string.IsNullOrWhiteSpace(relativePath))
-            {
-                string fullPath = string.Empty;
+        // Bottom image (picMachineArea, labeled "CONNECTOR") shows the selected connector's
+        // pictures - also pageable when there's more than one.
+        private void SetConnectorImage(List<string> fullPaths)
+        {
+            _genConnectorImagePaths = fullPaths;
+            _genConnectorImageIndex = 0;
+            LoadGalleryImage(picMachineArea, _genConnectorImagePaths, _genConnectorImageIndex);
+        }
 
-                // 1. Check relative path in application base directory
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string candidateBase = Path.Combine(baseDir, relativePath);
-                if (File.Exists(candidateBase))
-                {
-                    fullPath = candidateBase;
-                }
-                else if (File.Exists(relativePath))
-                {
-                    fullPath = Path.GetFullPath(relativePath);
-                }
-                else
-                {
-                    // 2. Fallback to AppData Images folder
-                    string imagesFolder = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        "AssemblyLineTester", "Images");
-                    string candidateAppData = Path.Combine(imagesFolder, relativePath);
-                    if (File.Exists(candidateAppData))
-                    {
-                        fullPath = candidateAppData;
-                    }
-                }
+        // Resolves a harness image's stored relative path against the app base directory, the
+        // current directory, and the AppData Images folder (in that order). Returns null if not found.
+        private static string? ResolveHarnessImagePath(string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath)) return null;
 
-                if (!string.IsNullOrEmpty(fullPath) && File.Exists(fullPath))
-                {
-                    pic.SizeMode = PictureBoxSizeMode.Zoom;
-                    pic.Image = Image.FromFile(fullPath);
-                }
-            }
-            pic.Invalidate();
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string candidateBase = Path.Combine(baseDir, relativePath);
+            if (File.Exists(candidateBase)) return candidateBase;
+
+            if (File.Exists(relativePath)) return Path.GetFullPath(relativePath);
+
+            string imagesFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AssemblyLineTester", "Images");
+            string candidateAppData = Path.Combine(imagesFolder, relativePath);
+            return File.Exists(candidateAppData) ? candidateAppData : null;
         }
 
         private void PopulateBottomCards()
@@ -1026,7 +1043,13 @@ namespace AssemblyLineTester.Views.Pages
         private void PicHarnessImage_Paint(object? sender, PaintEventArgs e)
         {
             if (sender is not Control ctrl || e.Graphics == null) return;
-            if (ctrl is PictureBox pic && pic.Image != null) return; // real image already rendered by the control itself
+            if (ctrl is PictureBox pic && pic.Image != null)
+            {
+                // real image already rendered by the control itself - just overlay paging if there's more than one
+                if (_harnessImagePaths.Count > 1)
+                    DrawGalleryUI(e.Graphics, ctrl.ClientRectangle, _harnessImageIndex, _harnessImagePaths.Count);
+                return;
+            }
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var rect = ctrl.ClientRectangle;
             if (rect.Width <= 1 || rect.Height <= 1) return;
@@ -1091,7 +1114,13 @@ namespace AssemblyLineTester.Views.Pages
         private void PicMachineArea_Paint(object? sender, PaintEventArgs e)
         {
             if (sender is not Control ctrl || e.Graphics == null) return;
-            if (ctrl is PictureBox pic && pic.Image != null) return; // real image already rendered by the control itself
+            if (ctrl is PictureBox pic && pic.Image != null)
+            {
+                // real image already rendered by the control itself - just overlay paging if there's more than one
+                if (_genConnectorImagePaths.Count > 1)
+                    DrawGalleryUI(e.Graphics, ctrl.ClientRectangle, _genConnectorImageIndex, _genConnectorImagePaths.Count);
+                return;
+            }
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var rect = ctrl.ClientRectangle;
             if (rect.Width <= 1 || rect.Height <= 1) return;
@@ -1193,6 +1222,15 @@ namespace AssemblyLineTester.Views.Pages
         private void PicHarnessImage_MouseClick(object? sender, MouseEventArgs e)
         {
             if (sender is not Control ctrl) return;
+
+            if (picHarnessImage.Image != null)
+            {
+                if (_harnessImagePaths.Count <= 1) return;
+                if (!HandleGalleryClick(e.Location, ctrl.Width, _harnessImagePaths.Count, ref _harnessImageIndex)) return;
+                LoadGalleryImage(picHarnessImage, _harnessImagePaths, _harnessImageIndex);
+                return;
+            }
+
             HandleCarouselClick(e.Location, ctrl.Width, ref _currentHarnessSlide);
             ctrl.Invalidate();
         }
@@ -1200,6 +1238,15 @@ namespace AssemblyLineTester.Views.Pages
         private void PicMachineArea_MouseClick(object? sender, MouseEventArgs e)
         {
             if (sender is not Control ctrl) return;
+
+            if (picMachineArea.Image != null)
+            {
+                if (_genConnectorImagePaths.Count <= 1) return;
+                if (!HandleGalleryClick(e.Location, ctrl.Width, _genConnectorImagePaths.Count, ref _genConnectorImageIndex)) return;
+                LoadGalleryImage(picMachineArea, _genConnectorImagePaths, _genConnectorImageIndex);
+                return;
+            }
+
             HandleCarouselClick(e.Location, ctrl.Width, ref _currentMachineSlide);
             ctrl.Invalidate();
         }

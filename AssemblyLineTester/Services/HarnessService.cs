@@ -10,20 +10,38 @@ namespace AssemblyLineTester.Services
 {
     public class HarnessService
     {
-        // Base folder for harness images: <app>/assets/img/harness/<folder>/<file>
-        private static string ImagesRoot => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "img", "harness");
+        // Base folder for harness images: <app>/assets/img/harness/<folder>/<file>.
+        // ImagesRootRelative is what gets stored in ImagePaths so the path resolves the same way
+        // whether against the app base dir or the seed data (which also stores the full relative path).
+        private static string ImagesRootRelative => Path.Combine("assets", "img", "harness");
+        private static string ImagesRoot => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ImagesRootRelative);
 
+        // Loads every harness with its connectors, ordered by the position each connector was
+        // attached in ("J1", "J2", ...). ConnectorList/ConnectorListName are derived fresh here every
+        // time instead of trusted from storage, so the two can never drift out of sync.
         public List<ProductHarness> GetAllHarnesses()
         {
             using var db = new AppDbContext();
-            return db.ProductHarnesses
-                .Include(h => h.ConnectorList)
+            var harnesses = db.ProductHarnesses
+                .Include(h => h.HarnessConnectors)
+                .ThenInclude(hc => hc.Connector)
                 .OrderByDescending(h => h.LastUpdate)
                 .ToList();
+
+            foreach (var h in harnesses)
+            {
+                h.ConnectorList = h.HarnessConnectors.OrderBy(hc => hc.Position).Select(hc => hc.Connector!).ToList();
+                h.ConnectorListName = BuildConnectorListNames(h.ConnectorList.Count);
+            }
+
+            return harnesses;
         }
 
-        // Inserts the harness, copies any freshly-picked images into its own folder, and
-        // re-points the selected connector's ProductHarnessId to this new harness.
+        // "J1", "J2", ... one per connector, matching ConnectorList's order.
+        private static List<string> BuildConnectorListNames(int count) => Enumerable.Range(1, count).Select(i => $"J{i}").ToList();
+
+        // Inserts the harness, copies any freshly-picked images into its own folder, and links the
+        // selected (shared-catalog) connectors to it in the order they were picked.
         // harness.ImagePaths may contain absolute paths (freshly picked via OpenFileDialog).
         public (bool success, string? error) AddHarness(ProductHarness harness)
         {
@@ -40,7 +58,7 @@ namespace AssemblyLineTester.Services
                     Area = harness.Area,
                     LastUpdate = DateTime.UtcNow,
                     ImagePaths = new List<string>(), // resolved after insert, once ProductHarnessId is known
-                    ConnectorListName = harness.ConnectorListName
+                    ConnectorListName = BuildConnectorListNames(selectedConnectorIds.Count)
                 };
 
                 db.ProductHarnesses.Add(newHarness);
@@ -49,7 +67,7 @@ namespace AssemblyLineTester.Services
                 newHarness.ImagePaths = ResolveImagePaths(newHarness, harness.ImagePaths);
                 db.SaveChanges();
 
-                ReassignConnectors(db, newHarness.ProductHarnessId, selectedConnectorIds);
+                SyncHarnessConnectors(db, newHarness.ProductHarnessId, selectedConnectorIds);
 
                 return (true, null);
             }
@@ -78,12 +96,12 @@ namespace AssemblyLineTester.Services
                 existing.ProductType = harness.ProductType;
                 existing.Area = harness.Area;
                 existing.LastUpdate = DateTime.UtcNow;
-                existing.ConnectorListName = harness.ConnectorListName;
+                existing.ConnectorListName = BuildConnectorListNames(selectedConnectorIds.Count);
                 existing.ImagePaths = ResolveImagePaths(existing, harness.ImagePaths);
 
                 db.SaveChanges();
 
-                ReassignConnectors(db, existing.ProductHarnessId, selectedConnectorIds);
+                SyncHarnessConnectors(db, existing.ProductHarnessId, selectedConnectorIds);
 
                 return (true, null);
             }
@@ -93,7 +111,8 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // Deletes the harness row (its connectors cascade-delete per the FK config) and its image folder.
+        // Deletes the harness row (its harness<->connector links cascade-delete per the FK config -
+        // the connectors themselves are left alone since other harnesses may still use them) and its image folder.
         public (bool success, string? error) DeleteHarness(int productHarnessId)
         {
             try
@@ -159,7 +178,8 @@ namespace AssemblyLineTester.Services
             }
 
             File.Copy(sourceFile, destPath, overwrite: false);
-            return Path.Combine(folderName, Path.GetFileName(destPath));
+            // Store the full relative path (incl. assets/img/harness) so it resolves against the app base dir.
+            return Path.Combine(ImagesRootRelative, folderName, Path.GetFileName(destPath));
         }
 
         // Folder name = sanitized harness Name + ProductHarnessId, so it stays unique/stable
@@ -171,18 +191,24 @@ namespace AssemblyLineTester.Services
             return $"{safeName}_{harness.ProductHarnessId}";
         }
 
-        // Points the selected connector's ProductHarnessId at this harness. Note: since a Connector
-        // belongs to exactly one ProductHarness (non-nullable FK), assigning a connector that
-        // currently belongs to a different harness will move it out of that harness.
-        private static void ReassignConnectors(AppDbContext db, int harnessId, List<int> selectedConnectorIds)
+        // Replaces this harness's connector links with the given set, in order (Position 1..n -
+        // "J1".."Jn"). A connector can be linked to several harnesses at once, so this only ever
+        // touches links for this harnessId - other harnesses using the same connectors are untouched.
+        private static void SyncHarnessConnectors(AppDbContext db, int harnessId, List<int> orderedConnectorIds)
         {
-            if (selectedConnectorIds.Count == 0) return;
+            var existingLinks = db.HarnessConnectors.Where(hc => hc.ProductHarnessId == harnessId);
+            db.HarnessConnectors.RemoveRange(existingLinks);
 
-            var connectors = db.Connectors.Where(c => selectedConnectorIds.Contains(c.ConnectorId)).ToList();
-            foreach (var c in connectors)
+            for (int i = 0; i < orderedConnectorIds.Count; i++)
             {
-                c.ProductHarnessId = harnessId;
+                db.HarnessConnectors.Add(new HarnessConnector
+                {
+                    ProductHarnessId = harnessId,
+                    ConnectorId = orderedConnectorIds[i],
+                    Position = i + 1
+                });
             }
+
             db.SaveChanges();
         }
     }

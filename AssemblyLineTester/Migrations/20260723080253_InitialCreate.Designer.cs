@@ -1602,16 +1602,11 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ProductHarnessId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("WireSize")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("ConnectorId");
-
-                    b.HasIndex("ProductHarnessId");
 
                     b.ToTable("Connectors");
 
@@ -1625,7 +1620,6 @@ namespace AssemblyLineTester.Migrations
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F1",
                             Perf = "Standard",
-                            ProductHarnessId = 1,
                             WireSize = "18 AWG"
                         },
                         new
@@ -1637,7 +1631,6 @@ namespace AssemblyLineTester.Migrations
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F2",
                             Perf = "Standard",
-                            ProductHarnessId = 1,
                             WireSize = "18 AWG"
                         },
                         new
@@ -1649,7 +1642,6 @@ namespace AssemblyLineTester.Migrations
                             MountingStyle = "Free Hanging",
                             PartNumber = "D507F1",
                             Perf = "Standard",
-                            ProductHarnessId = 2,
                             WireSize = "20 AWG"
                         },
                         new
@@ -1661,7 +1653,6 @@ namespace AssemblyLineTester.Migrations
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F1",
                             Perf = "Standard",
-                            ProductHarnessId = 3,
                             WireSize = "18 AWG"
                         },
                         new
@@ -1673,7 +1664,6 @@ namespace AssemblyLineTester.Migrations
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F2",
                             Perf = "Standard",
-                            ProductHarnessId = 3,
                             WireSize = "18 AWG"
                         },
                         new
@@ -1685,7 +1675,6 @@ namespace AssemblyLineTester.Migrations
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F3",
                             Perf = "Standard",
-                            ProductHarnessId = 3,
                             WireSize = "22 AWG"
                         },
                         new
@@ -1697,8 +1686,83 @@ namespace AssemblyLineTester.Migrations
                             MountingStyle = "Panel Mount",
                             PartNumber = "D507F1",
                             Perf = "Standard",
-                            ProductHarnessId = 4,
                             WireSize = "18 AWG"
+                        });
+                });
+
+            modelBuilder.Entity("HarnessConnector", b =>
+                {
+                    b.Property<int>("HarnessConnectorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ConnectorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductHarnessId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("HarnessConnectorId");
+
+                    b.HasIndex("ConnectorId");
+
+                    b.HasIndex("ProductHarnessId", "ConnectorId")
+                        .IsUnique();
+
+                    b.ToTable("HarnessConnectors");
+
+                    b.HasData(
+                        new
+                        {
+                            HarnessConnectorId = 1,
+                            ConnectorId = 1,
+                            Position = 1,
+                            ProductHarnessId = 1
+                        },
+                        new
+                        {
+                            HarnessConnectorId = 2,
+                            ConnectorId = 2,
+                            Position = 2,
+                            ProductHarnessId = 1
+                        },
+                        new
+                        {
+                            HarnessConnectorId = 3,
+                            ConnectorId = 3,
+                            Position = 1,
+                            ProductHarnessId = 2
+                        },
+                        new
+                        {
+                            HarnessConnectorId = 4,
+                            ConnectorId = 4,
+                            Position = 1,
+                            ProductHarnessId = 3
+                        },
+                        new
+                        {
+                            HarnessConnectorId = 5,
+                            ConnectorId = 5,
+                            Position = 2,
+                            ProductHarnessId = 3
+                        },
+                        new
+                        {
+                            HarnessConnectorId = 6,
+                            ConnectorId = 6,
+                            Position = 3,
+                            ProductHarnessId = 3
+                        },
+                        new
+                        {
+                            HarnessConnectorId = 7,
+                            ConnectorId = 7,
+                            Position = 1,
+                            ProductHarnessId = 4
                         });
                 });
 
@@ -1893,13 +1957,21 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Status");
                 });
 
-            modelBuilder.Entity("Connector", b =>
+            modelBuilder.Entity("HarnessConnector", b =>
                 {
+                    b.HasOne("Connector", "Connector")
+                        .WithMany()
+                        .HasForeignKey("ConnectorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ProductHarness", "ProductHarness")
-                        .WithMany("ConnectorList")
+                        .WithMany("HarnessConnectors")
                         .HasForeignKey("ProductHarnessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Connector");
 
                     b.Navigation("ProductHarness");
                 });
@@ -1923,7 +1995,7 @@ namespace AssemblyLineTester.Migrations
 
             modelBuilder.Entity("ProductHarness", b =>
                 {
-                    b.Navigation("ConnectorList");
+                    b.Navigation("HarnessConnectors");
                 });
 #pragma warning restore 612, 618
         }

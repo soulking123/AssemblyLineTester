@@ -23,6 +23,7 @@ namespace AssemblyLineTester.Data
         public DbSet<ReportTestTypeSummary> ReportTestTypeSummaries { get; set; } = null!;
         public DbSet<ProductHarness> ProductHarnesses { get; set; } = null!;
         public DbSet<Connector> Connectors { get; set; } = null!;
+        public DbSet<HarnessConnector> HarnessConnectors { get; set; } = null!;
 
         /// Configures the database provider and connection string.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -161,12 +162,24 @@ namespace AssemblyLineTester.Data
             modelBuilder.Entity<ReportTestTypeSummary>()
                 .HasIndex(s => s.TestTypeName);
 
-            // Connector entity configuration
-            modelBuilder.Entity<Connector>()
-                .HasOne(c => c.ProductHarness)
-                .WithMany(p => p.ConnectorList)
-                .HasForeignKey(c => c.ProductHarnessId)
+            // HarnessConnector: join table for the many-to-many ProductHarness<->Connector relationship.
+            // Deleting a harness only removes its links (connectors may still be used elsewhere);
+            // deleting a connector removes it from every harness that used it.
+            modelBuilder.Entity<HarnessConnector>()
+                .HasOne(hc => hc.ProductHarness)
+                .WithMany(p => p.HarnessConnectors)
+                .HasForeignKey(hc => hc.ProductHarnessId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HarnessConnector>()
+                .HasOne(hc => hc.Connector)
+                .WithMany()
+                .HasForeignKey(hc => hc.ConnectorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HarnessConnector>()
+                .HasIndex(hc => new { hc.ProductHarnessId, hc.ConnectorId })
+                .IsUnique();
 
             //======== SEED DATA BELOW =========//
 
@@ -316,15 +329,26 @@ namespace AssemblyLineTester.Data
                 }
             );
 
-            // Seed initial Connectors 
+            // Seed initial Connectors (standalone catalog items - linked to harnesses via HarnessConnector below)
             modelBuilder.Entity<Connector>().HasData(
-                new Connector { ConnectorId = 1, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 1 },
-                new Connector { ConnectorId = 2, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 1 },
-                new Connector { ConnectorId = 3, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 32, WireSize = "20 AWG", CurrentRating = 3, MountingStyle = "Free Hanging", ProductHarnessId = 2 },
-                new Connector { ConnectorId = 4, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 3 },
-                new Connector { ConnectorId = 5, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 3 },
-                new Connector { ConnectorId = 6, Perf = "Standard", PartNumber = "D507F3", ContactType = "Female", ContactQuantity = 16, WireSize = "22 AWG", CurrentRating = 2, MountingStyle = "Panel Mount", ProductHarnessId = 3 },
-                new Connector { ConnectorId = 7, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount", ProductHarnessId = 4 }
+                new Connector { ConnectorId = 1, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" },
+                new Connector { ConnectorId = 2, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" },
+                new Connector { ConnectorId = 3, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 32, WireSize = "20 AWG", CurrentRating = 3, MountingStyle = "Free Hanging" },
+                new Connector { ConnectorId = 4, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" },
+                new Connector { ConnectorId = 5, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" },
+                new Connector { ConnectorId = 6, Perf = "Standard", PartNumber = "D507F3", ContactType = "Female", ContactQuantity = 16, WireSize = "22 AWG", CurrentRating = 2, MountingStyle = "Panel Mount" },
+                new Connector { ConnectorId = 7, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" }
+            );
+
+            // Seed initial harness<->connector links (Position = J1, J2, ... order)
+            modelBuilder.Entity<HarnessConnector>().HasData(
+                new HarnessConnector { HarnessConnectorId = 1, ProductHarnessId = 1, ConnectorId = 1, Position = 1 },
+                new HarnessConnector { HarnessConnectorId = 2, ProductHarnessId = 1, ConnectorId = 2, Position = 2 },
+                new HarnessConnector { HarnessConnectorId = 3, ProductHarnessId = 2, ConnectorId = 3, Position = 1 },
+                new HarnessConnector { HarnessConnectorId = 4, ProductHarnessId = 3, ConnectorId = 4, Position = 1 },
+                new HarnessConnector { HarnessConnectorId = 5, ProductHarnessId = 3, ConnectorId = 5, Position = 2 },
+                new HarnessConnector { HarnessConnectorId = 6, ProductHarnessId = 3, ConnectorId = 6, Position = 3 },
+                new HarnessConnector { HarnessConnectorId = 7, ProductHarnessId = 4, ConnectorId = 7, Position = 1 }
             );
 
 
