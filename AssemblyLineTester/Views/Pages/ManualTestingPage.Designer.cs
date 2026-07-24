@@ -29,12 +29,17 @@ namespace AssemblyLineTester.Views.Pages
         private void InitializeComponent()
         {
             btnLearnConnection = new AssemblyLineTester.Views.Controls.RoundedButton();
-            btnStart = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnStartAll = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnStartSelected = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnAbort = new AssemblyLineTester.Views.Controls.RoundedButton();
             splitContainerMain = new SplitContainer();
             pnlLeftBox = new Panel();
             gridConfig = new DataGridView();
+            colNo = new DataGridViewTextBoxColumn();
+            colFromAddr = new DataGridViewTextBoxColumn();
+            colToAddr = new DataGridViewTextBoxColumn();
+            colTestType = new DataGridViewComboBoxColumn();
+            colUnit = new DataGridViewTextBoxColumn();
             pnlConfigInfo = new Panel();
             tblConfigInfo = new TableLayoutPanel();
             tblCellConnRes = new TableLayoutPanel();
@@ -66,7 +71,6 @@ namespace AssemblyLineTester.Views.Pages
             colHarnessGroup = new DataGridViewTextBoxColumn();
             colFromLabel = new DataGridViewTextBoxColumn();
             colToLabel = new DataGridViewTextBoxColumn();
-            colTestType = new DataGridViewComboBoxColumn();
             colLowerLimit = new DataGridViewTextBoxColumn();
             colUpperLimit = new DataGridViewTextBoxColumn();
             colExpectedValue = new DataGridViewTextBoxColumn();
@@ -77,10 +81,6 @@ namespace AssemblyLineTester.Views.Pages
             tblCellProductModel = new TableLayoutPanel();
             lblProductModel = new Label();
             txtProductModel = new TextBox();
-            colNo = new DataGridViewTextBoxColumn();
-            colFromAddr = new DataGridViewTextBoxColumn();
-            colToAddr = new DataGridViewTextBoxColumn();
-            colUnit = new DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)splitContainerMain).BeginInit();
             splitContainerMain.Panel1.SuspendLayout();
             splitContainerMain.Panel2.SuspendLayout();
@@ -113,7 +113,7 @@ namespace AssemblyLineTester.Views.Pages
             btnLearnConnection.FlatAppearance.BorderSize = 0;
             btnLearnConnection.FlatStyle = FlatStyle.Flat;
             btnLearnConnection.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnLearnConnection.ForeColor = Color.FromArgb(30, 41, 59);
+            btnLearnConnection.ForeColor = Color.Black;
             btnLearnConnection.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnLearnConnection.HoverForeColor = Color.Empty;
             btnLearnConnection.Location = new Point(12, 6);
@@ -128,71 +128,74 @@ namespace AssemblyLineTester.Views.Pages
             btnLearnConnection.UseVisualStyleBackColor = false;
             btnLearnConnection.Click += btnLearnConnection_Click;
             // 
-            // btnStart
+            // btnStartAll
             // 
-            btnStart.BackColor = Color.FromArgb(34, 197, 94);
-            btnStart.BorderRadius = 14;
-            btnStart.Dock = DockStyle.Fill;
-            btnStart.FlatAppearance.BorderSize = 0;
-            btnStart.FlatStyle = FlatStyle.Flat;
-            btnStart.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnStart.ForeColor = Color.White;
-            btnStart.HoverBackColor = Color.FromArgb(22, 163, 74);
-            btnStart.HoverForeColor = Color.Empty;
-            btnStart.Location = new Point(176, 6);
-            btnStart.Margin = new Padding(12, 6, 12, 6);
-            btnStart.Name = "btnStart";
-            btnStart.NormalBackColor = Color.FromArgb(34, 197, 94);
-            btnStart.PressedBackColor = Color.FromArgb(21, 128, 61);
-            btnStart.PressedForeColor = Color.Empty;
-            btnStart.Size = new Size(140, 30);
-            btnStart.TabIndex = 1;
-            btnStart.Text = "Start";
-            btnStart.UseVisualStyleBackColor = false;
+            btnStartAll.BackColor = Color.FromArgb(203, 213, 225);
+            btnStartAll.BorderRadius = 14;
+            btnStartAll.Dock = DockStyle.Fill;
+            btnStartAll.FlatAppearance.BorderSize = 0;
+            btnStartAll.FlatStyle = FlatStyle.Flat;
+            btnStartAll.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnStartAll.ForeColor = Color.Black;
+            btnStartAll.HoverBackColor = Color.FromArgb(148, 163, 184);
+            btnStartAll.HoverForeColor = Color.Empty;
+            btnStartAll.Location = new Point(176, 6);
+            btnStartAll.Margin = new Padding(12, 6, 12, 6);
+            btnStartAll.Name = "btnStartAll";
+            btnStartAll.NormalBackColor = Color.FromArgb(203, 213, 225);
+            btnStartAll.PressedBackColor = Color.FromArgb(100, 116, 139);
+            btnStartAll.PressedForeColor = Color.Empty;
+            btnStartAll.Size = new Size(140, 30);
+            btnStartAll.TabIndex = 1;
+            btnStartAll.Text = "Start";
+            btnStartAll.UseVisualStyleBackColor = false;
+            btnStartAll.Click += btnStartAll_Click;
             // 
             // btnStartSelected
             // 
-            btnStartSelected.BackColor = Color.FromArgb(245, 158, 11);
+            btnStartSelected.BackColor = Color.FromArgb(203, 213, 225);
             btnStartSelected.BorderRadius = 14;
             btnStartSelected.Dock = DockStyle.Fill;
             btnStartSelected.FlatAppearance.BorderSize = 0;
             btnStartSelected.FlatStyle = FlatStyle.Flat;
             btnStartSelected.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnStartSelected.ForeColor = Color.White;
-            btnStartSelected.HoverBackColor = Color.FromArgb(217, 119, 6);
+            btnStartSelected.ForeColor = Color.Black;
+            btnStartSelected.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnStartSelected.HoverForeColor = Color.Empty;
             btnStartSelected.Location = new Point(340, 6);
             btnStartSelected.Margin = new Padding(12, 6, 12, 6);
             btnStartSelected.Name = "btnStartSelected";
-            btnStartSelected.NormalBackColor = Color.FromArgb(245, 158, 11);
-            btnStartSelected.PressedBackColor = Color.FromArgb(180, 83, 9);
+            btnStartSelected.NormalBackColor = Color.FromArgb(203, 213, 225);
+            btnStartSelected.PressedBackColor = Color.FromArgb(100, 116, 139);
             btnStartSelected.PressedForeColor = Color.Empty;
             btnStartSelected.Size = new Size(140, 30);
             btnStartSelected.TabIndex = 2;
             btnStartSelected.Text = "Start Selected";
             btnStartSelected.UseVisualStyleBackColor = false;
+            btnStartSelected.Click += btnStartSelected_Click;
             // 
             // btnAbort
             // 
-            btnAbort.BackColor = Color.FromArgb(239, 68, 68);
+            btnAbort.BackColor = Color.FromArgb(203, 213, 225);
             btnAbort.BorderRadius = 14;
             btnAbort.Dock = DockStyle.Fill;
             btnAbort.FlatAppearance.BorderSize = 0;
             btnAbort.FlatStyle = FlatStyle.Flat;
             btnAbort.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnAbort.ForeColor = Color.White;
-            btnAbort.HoverBackColor = Color.FromArgb(220, 38, 38);
+            btnAbort.ForeColor = Color.Black;
+            btnAbort.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnAbort.HoverForeColor = Color.Empty;
             btnAbort.Location = new Point(504, 6);
             btnAbort.Margin = new Padding(12, 6, 12, 6);
             btnAbort.Name = "btnAbort";
-            btnAbort.NormalBackColor = Color.FromArgb(239, 68, 68);
-            btnAbort.PressedBackColor = Color.FromArgb(185, 28, 28);
+            btnAbort.NormalBackColor = Color.FromArgb(203, 213, 225);
+            btnAbort.PressedBackColor = Color.FromArgb(100, 116, 139);
             btnAbort.PressedForeColor = Color.Empty;
             btnAbort.Size = new Size(141, 30);
             btnAbort.TabIndex = 3;
             btnAbort.Text = "Abort";
             btnAbort.UseVisualStyleBackColor = false;
+            btnAbort.Click += btnAbort_Click;
             // 
             // splitContainerMain
             // 
@@ -244,7 +247,7 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.CausesValidation = false;
             gridConfig.ColumnHeadersHeight = 45;
             gridConfig.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colFromAddr, colToAddr, colUnit });
+            gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colFromAddr, colToAddr, colTestType, colUnit });
             gridConfig.Dock = DockStyle.Fill;
             gridConfig.EnableHeadersVisualStyles = false;
             gridConfig.Location = new Point(0, 213);
@@ -254,6 +257,41 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.RowTemplate.Height = 38;
             gridConfig.Size = new Size(675, 617);
             gridConfig.TabIndex = 4;
+            // 
+            // colNo
+            // 
+            colNo.HeaderText = "No.";
+            colNo.MinimumWidth = 50;
+            colNo.Name = "colNo";
+            colNo.ReadOnly = true;
+            // 
+            // colFromAddr
+            // 
+            colFromAddr.HeaderText = "From";
+            colFromAddr.MinimumWidth = 90;
+            colFromAddr.Name = "colFromAddr";
+            // 
+            // colToAddr
+            // 
+            colToAddr.HeaderText = "To";
+            colToAddr.MinimumWidth = 90;
+            colToAddr.Name = "colToAddr";
+            // 
+            // colTestType
+            // 
+            colTestType.FlatStyle = FlatStyle.Flat;
+            colTestType.HeaderText = "Test Type";
+            colTestType.Items.AddRange(new object[] { "WIRE", "4WIRE", "TWISTED PAIR", "SIGNATURE WIRE", "RESISTOR", "4RESISTOR", "CAPACITOR", "DIODE", "SIGNATURE DIODE", "OPEN", "CLOSE", "LINK", "PROBE", "COMMENT", "LUA COMPONENT" });
+            colTestType.MinimumWidth = 120;
+            colTestType.Name = "colTestType";
+            // 
+            // colUnit
+            // 
+            colUnit.HeaderText = "Measurement";
+            colUnit.MinimumWidth = 110;
+            colUnit.Name = "colUnit";
+            colUnit.Resizable = DataGridViewTriState.True;
+            colUnit.SortMode = DataGridViewColumnSortMode.NotSortable;
             // 
             // pnlConfigInfo
             // 
@@ -279,7 +317,7 @@ namespace AssemblyLineTester.Views.Pages
             tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tblConfigInfo.Controls.Add(btnLearnConnection, 0, 0);
-            tblConfigInfo.Controls.Add(btnStart, 1, 0);
+            tblConfigInfo.Controls.Add(btnStartAll, 1, 0);
             tblConfigInfo.Controls.Add(btnStartSelected, 2, 0);
             tblConfigInfo.Controls.Add(btnAbort, 3, 0);
             tblConfigInfo.Controls.Add(tblCellConnRes, 0, 1);
@@ -691,15 +729,6 @@ namespace AssemblyLineTester.Views.Pages
             colToLabel.Name = "colToLabel";
             colToLabel.Width = 120;
             // 
-            // colTestType
-            // 
-            colTestType.FlatStyle = FlatStyle.Flat;
-            colTestType.HeaderText = "Test Type";
-            colTestType.Items.AddRange(new object[] { "Resistance", "Capacitance", "Continuity", "Insulation", "Short Circuit", "Functional", "Voltage" });
-            colTestType.MinimumWidth = 120;
-            colTestType.Name = "colTestType";
-            colTestType.Width = 150;
-            // 
             // colLowerLimit
             // 
             colLowerLimit.HeaderText = "Lower\nLimit";
@@ -812,33 +841,6 @@ namespace AssemblyLineTester.Views.Pages
             txtProductModel.TabIndex = 1;
             txtProductModel.Text = "6060";
             // 
-            // colNo
-            // 
-            colNo.HeaderText = "No.";
-            colNo.MinimumWidth = 50;
-            colNo.Name = "colNo";
-            colNo.ReadOnly = true;
-            // 
-            // colFromAddr
-            // 
-            colFromAddr.HeaderText = "From";
-            colFromAddr.MinimumWidth = 90;
-            colFromAddr.Name = "colFromAddr";
-            // 
-            // colToAddr
-            // 
-            colToAddr.HeaderText = "To";
-            colToAddr.MinimumWidth = 90;
-            colToAddr.Name = "colToAddr";
-            // 
-            // colUnit
-            // 
-            colUnit.HeaderText = "Measurement";
-            colUnit.MinimumWidth = 110;
-            colUnit.Name = "colUnit";
-            colUnit.Resizable = DataGridViewTriState.True;
-            colUnit.SortMode = DataGridViewColumnSortMode.NotSortable;
-            // 
             // ManualTestingPage
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -883,7 +885,7 @@ namespace AssemblyLineTester.Views.Pages
 
         #endregion
         private AssemblyLineTester.Views.Controls.RoundedButton btnLearnConnection;
-        private AssemblyLineTester.Views.Controls.RoundedButton btnStart;
+        private AssemblyLineTester.Views.Controls.RoundedButton btnStartAll;
         private AssemblyLineTester.Views.Controls.RoundedButton btnStartSelected;
         private AssemblyLineTester.Views.Controls.RoundedButton btnAbort;
 

@@ -21,6 +21,7 @@ namespace AssemblyLineTester.Views.Pages
         private readonly TestConfigService _configService = new TestConfigService();
         private readonly InstrumentService _instrument = new InstrumentService();
         private string _customTestText = string.Empty;
+        private System.Threading.CancellationTokenSource? _testCts;
 
         private class DiagramNode
         {
@@ -48,7 +49,6 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                LoadDefaultData();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
                 picPreview.Invalidate();
@@ -63,9 +63,9 @@ namespace AssemblyLineTester.Views.Pages
             btnExport.Click += (s, e) => MessageBox.Show("Export feature not implemented yet.", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
             btnImport.Click += (s, e) => MessageBox.Show("Import feature not implemented yet.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            btnStart.Click += (s, e) => MessageBox.Show("Starting manual test...", "Start Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            btnStartSelected.Click += (s, e) => MessageBox.Show("Starting selected...", "Start Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            btnAbort.Click += (s, e) => MessageBox.Show("Aborting test...", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //btnStart.Click += (s, e) => MessageBox.Show("Starting manual test...", "Start Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //btnStartSelected.Click += (s, e) => MessageBox.Show("Starting selected...", "Start Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //btnAbort.Click += (s, e) => MessageBox.Show("Aborting test...", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
             gridConfig.CellValueChanged += GridConfig_CellValueChanged;
             gridConfig.RowsRemoved += GridConfig_RowsChanged;
@@ -78,6 +78,29 @@ namespace AssemblyLineTester.Views.Pages
             pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
             splitContainerMain.SplitterMoved += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
         }
+
+        private static string[] GetUnitsForTestType(string testType) => UnitConversionHelper.GetUnitsForTestType(testType);
+
+        private void UpdateRowUnitDropdown(int rowIndex)
+        {
+            if (rowIndex < 0 || rowIndex >= gridConfig.Rows.Count) return;
+            DataGridViewRow row = gridConfig.Rows[rowIndex];
+            string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
+            string[] allowedUnits = GetUnitsForTestType(testType);
+
+            if (row.Cells["colUnit"] is DataGridViewComboBoxCell unitCell)
+            {
+                string currentVal = unitCell.Value?.ToString() ?? "";
+                unitCell.Items.Clear();
+                unitCell.Items.AddRange(allowedUnits);
+
+                if (!allowedUnits.Contains(currentVal))
+                {
+                    unitCell.Value = allowedUnits.Length > 0 ? allowedUnits[0] : "";
+                }
+            }
+        }
+
 
         public ManualTestingPage()
         {
@@ -97,22 +120,7 @@ namespace AssemblyLineTester.Views.Pages
             catch { /* ignore */ }
         }
 
-        private void LoadDefaultData()
-        {
-            gridConfig.Rows.Clear();
-            highlightedRows.Clear();
 
-            // Default Data: No, From, To, Measurement
-            gridConfig.Rows.Add("1", "X1-01", "Y1-01", "Ω");
-            gridConfig.Rows.Add("2", "X2-01", "Y2-01", "Ω");
-            gridConfig.Rows.Add("3", "X2-02", "Y2-02", "μF");
-            gridConfig.Rows.Add("4", "X1-02", "Y1-02", "Ω");
-
-            RenumberRows();
-            UpdateTotalNetCount();
-            UpdateDiagramSize();
-            picPreview.Invalidate();
-        }
 
         private void RenumberRows()
         {
@@ -144,7 +152,13 @@ namespace AssemblyLineTester.Views.Pages
         private void BtnAdd_Click(object? sender, EventArgs e)
         {
             int newIdx = gridConfig.Rows.Count + 1;
-            gridConfig.Rows.Add(newIdx.ToString(), $"X1-{newIdx:D2}", $"Y1-{newIdx:D2}", "Ω");
+            string defaultTestType = "WIRE";
+            string defaultUnit = UnitConversionHelper.GetBaseUnit(defaultTestType);
+
+            int idx = gridConfig.Rows.Add(newIdx.ToString(), $"{newIdx}", $"{newIdx + 64}", defaultTestType, defaultUnit);
+            UpdateRowUnitDropdown(idx);
+            gridConfig.Rows[idx].Cells["colUnit"].Value = defaultUnit;
+
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
@@ -187,7 +201,7 @@ namespace AssemblyLineTester.Views.Pages
                 picPreview.Invalidate();
             }
         }
-
+        
         private void ParseAndPopulateGridFromProgramText(string programText)
         {
             if (string.IsNullOrWhiteSpace(programText)) return;
@@ -285,27 +299,172 @@ namespace AssemblyLineTester.Views.Pages
             }
             return set.OrderBy(idx => idx).ToList();
         }
-
-        private void ExecuteTestForRows(List<int> targetRowIndices)
+        private async void btnLearnConnection_Click(object sender, EventArgs e)
         {
+            _testCts?.Cancel();
+            _testCts = new System.Threading.CancellationTokenSource();
+            var token = _testCts.Token;
+
+            btnLearnConnection.Enabled = false;
+            btnStartAll.Enabled = false;
+            btnStartSelected.Enabled = false;
+
+            try
+            {
+                var learnResult = await Task.Run(() => _instrument.LearnConnection(), token);
+                if (token.IsCancellationRequested) return;
+
+                if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+                {
+                    MessageBox.Show(this, $"Failed to execute learn operation on instrument. Error: {learnResult}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);
+                if (token.IsCancellationRequested) return;
+
+                if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
+                {
+                    MessageBox.Show(this, "Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                _customTestText = getTestResult.Result;
+                ParseAndPopulateGridFromProgramText(_customTestText);
+
+                MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (OperationCanceledException)
+            {
+                // Task was canceled via btnAbort
+            }
+            finally
+            {
+                btnLearnConnection.Enabled = true;
+                btnStartAll.Enabled = true;
+                btnStartSelected.Enabled = true;
+            }
+        }
+
+        private async void btnStartAll_Click(object sender, EventArgs e)
+        {
+            _testCts?.Cancel();
+            _testCts = new System.Threading.CancellationTokenSource();
+            var token = _testCts.Token;
+
+            btnLearnConnection.Enabled = false;
+            btnStartAll.Enabled = false;
+            btnStartSelected.Enabled = false;
+
+            try
+            {
+                var selectedRows = GetAllRowIndices();
+                if (selectedRows.Count == 0)
+                {
+                    MessageBox.Show(this, "Empty Row to Start.", "No Row Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                await Task.Run(() => ExecuteTestForRows(selectedRows, token), token);
+
+                if (!token.IsCancellationRequested)
+                {
+                    MessageBox.Show(this, "Finished testing all connections", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Task was canceled via btnAbort
+            }
+            finally
+            {
+                btnLearnConnection.Enabled = true;
+                btnStartAll.Enabled = true;
+                btnStartSelected.Enabled = true;
+            }
+        }
+
+        private async void btnStartSelected_Click(object sender, EventArgs e)
+        {
+            _testCts?.Cancel();
+            _testCts = new System.Threading.CancellationTokenSource();
+            var token = _testCts.Token;
+
+            btnLearnConnection.Enabled = false;
+            btnStartAll.Enabled = false;
+            btnStartSelected.Enabled = false;
+
+            try
+            {
+                var selectedRows = GetSelectedOrHighlightedRowIndices();
+                if (selectedRows.Count == 0)
+                {
+                    MessageBox.Show(this, "Please click or select at least one row to test.", "No Row Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                await Task.Run(() => ExecuteTestForRows(selectedRows, token), token);
+
+                if (!token.IsCancellationRequested)
+                {
+                    MessageBox.Show(this, "Finished testing selected connections", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Task was canceled via btnAbort
+            }
+            finally
+            {
+                btnLearnConnection.Enabled = true;
+                btnStartAll.Enabled = true;
+                btnStartSelected.Enabled = true;
+            }
+        }
+
+        private async void btnAbort_Click(object sender, EventArgs e)
+        {
+            // 1. Cancel software task execution loop
+            _testCts?.Cancel();
+
+            // 2. Send abort command to CTA instrument
+            var abortResult = await Task.Run(() => _instrument.Abort());
+            if (abortResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
+            {
+                MessageBox.Show(this, "Test operation successfully aborted.", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show(this, $"Failed to send abort command to instrument. Error: {abortResult}", "Abort Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ExecuteTestForRows(List<int> targetRowIndices, System.Threading.CancellationToken token = default)
+        {
+            if (token.IsCancellationRequested) return;
+
             if (targetRowIndices.Count == 0)
             {
-                MessageBox.Show("No valid rows selected for testing.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, "No valid rows selected for testing.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             bool isConnected = _instrument.Connect();
             if (!isConnected)
             {
-                MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, "Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
+            if (token.IsCancellationRequested) return;
 
             var manualConfig = BuildConfigurationForRows(targetRowIndices, txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
             if (manualConfig == null || manualConfig.Nets.Count == 0) return;
 
             _customTestText = _configService.ConvertToProgramText(manualConfig);
             Debug.WriteLine(_customTestText);
+
+            if (token.IsCancellationRequested) return;
 
             try
             {
@@ -315,32 +474,39 @@ namespace AssemblyLineTester.Views.Pages
                     if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                     {
                         _instrument.Disconnect();
-                        MessageBox.Show($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(this, $"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Generated test program text is empty.", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, "Generated test program text is empty.", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error converting configuration to program text:\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, $"Error converting configuration to program text:\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
+            if (token.IsCancellationRequested) return;
+
             Debug.WriteLine("Run Test");
             var testResult = _instrument.RunSingleTest(false, true);
+
+            if (token.IsCancellationRequested) return;
+
             if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
             {
-                MessageBox.Show($"Test execution failed. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Execution Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, $"Test execution failed. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Execution Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             Debug.WriteLine("Get Measured Value");
             var measuredValuesResult = _instrument.GetMeasuredValues();
+
+            if (token.IsCancellationRequested) return;
 
             if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
             {
@@ -350,6 +516,7 @@ namespace AssemblyLineTester.Views.Pages
                     int count = Math.Min(targetRowIndices.Count, list.Count);
                     for (int k = 0; k < count; k++)
                     {
+                        if (token.IsCancellationRequested) return;
                         int rowIndex = targetRowIndices[k];
                         if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
                         {
@@ -358,16 +525,15 @@ namespace AssemblyLineTester.Views.Pages
                             gridConfig.Rows[rowIndex].Cells["colUnit"].Value = valStr;
                         }
                     }
-                    MessageBox.Show("Manual test completed successfully!", "Test Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("No measured values returned from instrument.", "Test Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, "No measured values returned from instrument.", "Test Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else
             {
-                MessageBox.Show($"Failed to retrieve measured values. Error: {measuredValuesResult?.DllCallResult.ToString() ?? "Unknown"}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, $"Failed to retrieve measured values. Error: {measuredValuesResult?.DllCallResult.ToString() ?? "Unknown"}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -417,8 +583,6 @@ namespace AssemblyLineTester.Views.Pages
                 Nets = nets
             };
         }
-
-
         private void GridConfig_RowsChanged(object? sender, EventArgs e)
         {
             UpdateTotalNetCount();
@@ -428,7 +592,20 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
         {
+            if (e.RowIndex >= 0 && e.ColumnIndex == gridConfig.Columns["colTestType"]?.Index)
+            {
+                UpdateRowUnitDropdown(e.RowIndex);
+            }
             picPreview.Invalidate();
+        }
+
+        private void GridConfig_CurrentCellDirtyStateChanged(object? sender, EventArgs e)
+        {
+            if (gridConfig.IsCurrentCellDirty &&
+               (gridConfig.CurrentCell is DataGridViewComboBoxCell || gridConfig.CurrentCell is DataGridViewCheckBoxCell))
+            {
+                gridConfig.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            }
         }
 
         private void GridConfig_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -651,36 +828,6 @@ namespace AssemblyLineTester.Views.Pages
 
             g.FillPath(brush, path);
             g.DrawPath(pen, path);
-        }
-
-        private void btnLearnConnection_Click(object sender, EventArgs e)
-        {
-            bool isConnected = _instrument.Connect();
-            if (!isConnected)
-            {
-                MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            var learnResult = _instrument.LearnConnection();
-            if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
-            {
-                MessageBox.Show($"Failed to execute learn operation on instrument. Error: {learnResult}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            var getTestResult = _instrument.GetLearnedConnection();
-            if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
-            {
-                MessageBox.Show("Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            _customTestText = getTestResult.Result;
-            Debug.WriteLine($"Learned Connection Text:\n{_customTestText}");
-
-            ParseAndPopulateGridFromProgramText(_customTestText);
-            MessageBox.Show("Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
