@@ -109,7 +109,8 @@ namespace AssemblyLineTester.Services
         }
 
 
-        // "FAIL BY REASON" doughnut: now reads pre-aggregated FailCount per test type,
+        // "FAIL BY REASON" doughnut: counts, per test type, how many reports had at least one fail
+        // of that type - a report failing a type contributes 1 no matter how many nets failed in it.
         public List<FailReasonSliceDto> GetFailReasonBreakdown(DashboardTimeRange range)
         {
             using var db = new AppDbContext();
@@ -122,7 +123,7 @@ namespace AssemblyLineTester.Services
                 .Select(g => new
                 {
                     TestType = g.Key,
-                    FailCount = g.Sum(s => s.FailCount)
+                    FailCount = g.Count(s => s.FailCount > 0) // 1 per report that failed this type, not the net-fail total
                 })
                 .Where(g => g.FailCount > 0)
                 .OrderByDescending(g => g.FailCount)

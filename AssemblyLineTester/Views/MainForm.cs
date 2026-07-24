@@ -463,7 +463,7 @@ namespace AssemblyLineTester.Views
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            Application.Exit();
+            if (!IsLoggingOut) Application.Exit();
         }
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]

@@ -39,6 +39,8 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.Click += (s, ev) => { ResetFilters(); _currentPage = 1; LoadLogData(); };
             btnRefresh.Click += (s, ev) => LoadLogData();
             btnExport.Click += (s, ev) => { if (!SessionManager.HasPermission("Action.SystemLog.Clear")) { MessageBox.Show("You do not have permission to clear/export system logs.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Log export functionality under construction.", "Info"); };
+
+            DoubleBuffered = true;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -99,42 +101,50 @@ namespace AssemblyLineTester.Views.Pages
         // LOADS REAL LOG DATA AND SUMMARY FROM SystemLogService, THEN REFRESHES ALL VISUALS.
         public void LoadLogData()
         {
-            var filter = BuildFilterFromControls();
-            var paged = _logService.GetLogs(filter);
-
-            _totalCount = paged.TotalCount;
-            _totalPages = Math.Max(1, paged.TotalPages);
-
-            // clamp if filter shrank the result set below the current page
-            if (_currentPage > _totalPages)
+            SuspendLayout();
+            try
             {
-                _currentPage = _totalPages;
-                filter.Page = _currentPage;
-                paged = _logService.GetLogs(filter);
+                var filter = BuildFilterFromControls();
+                var paged = _logService.GetLogs(filter);
+
+                _totalCount = paged.TotalCount;
+                _totalPages = Math.Max(1, paged.TotalPages);
+
+                // clamp if filter shrank the result set below the current page
+                if (_currentPage > _totalPages)
+                {
+                    _currentPage = _totalPages;
+                    filter.Page = _currentPage;
+                    paged = _logService.GetLogs(filter);
+                }
+
+                _summary = _logService.GetSummary(filter);
+
+                gridData.Rows.Clear();
+                int no = (paged.Page - 1) * paged.PageSize + 1;
+                foreach (var log in paged.Items)
+                {
+                    gridData.Rows.Add(
+                        no++,
+                        log.Timestamp.ToLocalTime().ToString("dd MMM yyyy hh:mm:ss tt"),
+                        log.SeverityLevel.ToString().ToUpperInvariant(),
+                        log.ModuleName,
+                        string.IsNullOrEmpty(log.UserName) ? "-" : log.UserName,
+                        log.ActionName,
+                        log.Message,
+                        string.IsNullOrEmpty(log.IPAddress) ? "-" : $"{log.IPAddress}   \u22ee");
+                }
+
+                UpdateLegendLabels();
+                UpdatePaginationUI(_totalCount, _totalPages);
             }
-
-            _summary = _logService.GetSummary(filter);
-
-            gridData.Rows.Clear();
-            int no = (paged.Page - 1) * paged.PageSize + 1;
-            foreach (var log in paged.Items)
+            finally
             {
-                gridData.Rows.Add(
-                    no++,
-                    log.Timestamp.ToLocalTime().ToString("dd MMM yyyy hh:mm:ss tt"),
-                    log.SeverityLevel.ToString().ToUpperInvariant(),
-                    log.ModuleName,
-                    string.IsNullOrEmpty(log.UserName) ? "-" : log.UserName,
-                    log.ActionName,
-                    log.Message,
-                    string.IsNullOrEmpty(log.IPAddress) ? "-" : $"{log.IPAddress}   \u22ee");
+                ResumeLayout(true);
+                pnlChartContainer?.Invalidate();
+                pnlLevelStats.Invalidate();
+                pnlModuleStats.Invalidate();
             }
-
-            UpdateLegendLabels();
-            UpdatePaginationUI(_totalCount, _totalPages);
-            pnlChartContainer?.Invalidate();
-            pnlLevelStats.Invalidate();
-            pnlModuleStats.Invalidate();
         }
 
         private void UpdateLegendLabels()

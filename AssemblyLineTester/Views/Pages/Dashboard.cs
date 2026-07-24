@@ -285,7 +285,7 @@ namespace AssemblyLineTester.Views.Pages
         // "ACTIVE PROGRAM" card: prioritizes an in-progress report, falls back to the latest one.
         private void LoadActiveProgram()
         {
-            var currentUser = SessionManager.CurrentUser.Username;
+            var currentUser = SessionManager.CurrentUser?.Username ?? "Unknown";
             var activeConfig = _configService.GetActiveConfig();
 
             lblProgDetails.Text = activeConfig is null

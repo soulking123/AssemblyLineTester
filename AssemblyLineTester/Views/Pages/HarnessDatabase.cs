@@ -28,12 +28,8 @@ namespace AssemblyLineTester.Views.Pages
         private int _connectorImageIndex = 0;
         private List<Connector> _allConnectorsForHarness = [];
         private List<Connector> _filteredConnectorsForHarness = [];
-        private int _connectorCurrentPage = 1;
-        private int _connectorPageSize = 10;
-        private Label? _lblConnectorPageInfo;
         private Label? _lblConnPartNumber, _lblConnContactType, _lblConnContactQty, _lblConnWireSize, _lblConnCurrentRating, _lblConnMountingStyle;
         private Label? _lblPageInfo;
-        private bool _isGeneralEditMode = false;
         private Image? _customHarnessImage = null;
         private Image? _customMachineImage = null;
 
@@ -66,6 +62,8 @@ namespace AssemblyLineTester.Views.Pages
             SetupPagination();
             InitializeConnectorGrid(); // from origin/dashboard - fills the previously empty "Connector & Pin" tab
             PopulateHarnessData();
+
+            DoubleBuffered = true;
         }
 
         // Fires when the user clicks a row in the harness list - loads that harness into the General tab.
@@ -216,23 +214,31 @@ namespace AssemblyLineTester.Views.Pages
         // then refreshes the grid from page 1.
         private void ApplyFilters()
         {
-            string model = cmbProductModel.SelectedItem?.ToString() ?? "All";
-            string type = cmbProductType.SelectedItem?.ToString() ?? "All";
-            string area = cmbArea.SelectedItem?.ToString() ?? "All";
-            string partNumberQuery = txtPartNumber.Text.Trim();
+            SuspendLayout();
+            try
+            {
+                string model = cmbProductModel.SelectedItem?.ToString() ?? "All";
+                string type = cmbProductType.SelectedItem?.ToString() ?? "All";
+                string area = cmbArea.SelectedItem?.ToString() ?? "All";
+                string partNumberQuery = txtPartNumber.Text.Trim();
 
-            _filteredHarnessEntities = _allHarnessEntities.Where(h =>
-                (model == "All" || h.ProductModel == model) &&
-                (type == "All" || h.ProductType == type) &&
-                (area == "All" || h.Area == area) &&
-                (string.IsNullOrEmpty(partNumberQuery) ||
-                 h.ConnectorList.Any(c => c.PartNumber.Contains(partNumberQuery, StringComparison.OrdinalIgnoreCase)) ||
-                 h.ConnectorListName.Any(n => n.Contains(partNumberQuery, StringComparison.OrdinalIgnoreCase)))
-            ).ToList();
+                _filteredHarnessEntities = _allHarnessEntities.Where(h =>
+                    (model == "All" || h.ProductModel == model) &&
+                    (type == "All" || h.ProductType == type) &&
+                    (area == "All" || h.Area == area) &&
+                    (string.IsNullOrEmpty(partNumberQuery) ||
+                     h.ConnectorList.Any(c => c.PartNumber.Contains(partNumberQuery, StringComparison.OrdinalIgnoreCase)) ||
+                     h.ConnectorListName.Any(n => n.Contains(partNumberQuery, StringComparison.OrdinalIgnoreCase)))
+                ).ToList();
 
-            _currentPage = 1;
-            ShowNoHarnessSelectedState(); // selected harness may no longer be in the filtered result
-            PopulateGrid();
+                _currentPage = 1;
+                ShowNoHarnessSelectedState(); // selected harness may no longer be in the filtered result
+                PopulateGrid();
+            }
+            finally
+            {
+                ResumeLayout(true);
+            }
         }
 
         private void InitializeConnectorGrid()
@@ -262,6 +268,14 @@ namespace AssemblyLineTester.Views.Pages
             btnAddConnector.Click += BtnAddConnector_Click;
             btnEditConnector.Click += BtnEditConnector_Click;
             btnDeleteConnector.Click += BtnDeleteConnector_Click;
+            btnConnectorSearch.Click += (s, e) => ApplyConnectorFilter();
+            txtConnectorSearch.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ApplyConnectorFilter(); } };
+
+            // UI styling
+            txtConnectorSearch.PlaceholderText = "Search by part number, type, wire size, or mounting...";
+            txtConnectorSearch.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9;
+            btnConnectorSearch.Text = "Search";
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnConnectorSearch, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
 
             picConnectorImage.Paint += PicConnectorImage_Paint;
             picConnectorImage.MouseClick += PicConnectorImage_MouseClick;
@@ -269,21 +283,41 @@ namespace AssemblyLineTester.Views.Pages
             RefreshConnectorGrid();
         }
 
-        // Reloads dgvConnectors with the entire connector catalog (every row in the Connectors
-        // table), independent of which harness is selected. Called on harness selection and after
-        // any Add/Edit/Delete connector action.
-        private void RefreshConnectorGrid()
+        private void ApplyConnectorFilter()
+        {
+            string query = txtConnectorSearch.Text.Trim().ToLowerInvariant();
+            _filteredConnectorsForHarness = string.IsNullOrEmpty(query)
+                ? new List<Connector>(_allConnectorsForHarness)
+                : _allConnectorsForHarness.Where(c =>
+                    c.PartNumber.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    c.ContactType.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    c.WireSize.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    c.MountingStyle.Contains(query, StringComparison.OrdinalIgnoreCase)
+                  ).ToList();
+            RefreshConnectorGridFiltered();
+        }
+
+        private void RefreshConnectorGridFiltered()
         {
             dgvConnectors.Rows.Clear();
             _connectorCache.Clear();
 
-            var connectors = _connectorService.GetAllConnectors();
-            foreach (var c in connectors)
+            var display = _filteredConnectorsForHarness;
+            foreach (var c in display)
             {
                 int rowIndex = dgvConnectors.Rows.Add(c.Perf, c.PartNumber, c.ContactType, c.ContactQuantity, c.WireSize, $"{c.CurrentRating} A", c.MountingStyle);
                 dgvConnectors.Rows[rowIndex].Tag = c.ConnectorId;
                 _connectorCache[c.ConnectorId] = c;
             }
+
+            // Visual feedback: update result count in search status
+            string query = txtConnectorSearch.Text.Trim();
+            string status = string.IsNullOrEmpty(query)
+                ? $"Showing all {display.Count} connectors"
+                : $"Found {display.Count} of {_allConnectorsForHarness.Count} connectors";
+
+            // Try to find & update any status label, or just update button tooltip
+            btnConnectorSearch.Text = display.Count > 0 ? $"Search ({display.Count})" : "Search (0)";
 
             if (dgvConnectors.Rows.Count > 0)
             {
@@ -296,6 +330,16 @@ namespace AssemblyLineTester.Views.Pages
                 PopulateConnectorInfo(null);
                 SetConnectorGalleryImages(null);
             }
+        }
+
+        // Reloads dgvConnectors with the entire connector catalog (every row in the Connectors
+        // table), independent of which harness is selected. Called on harness selection and after
+        // any Add/Edit/Delete connector action.
+        private void RefreshConnectorGrid()
+        {
+            _allConnectorsForHarness = _connectorService.GetAllConnectors();
+            txtConnectorSearch.Text = string.Empty;
+            ApplyConnectorFilter();
         }
 
         // btnAddConnector/btnEditConnector/btnDeleteConnector share the same permission check used
@@ -580,30 +624,38 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulateHarnessData()
         {
-            var harnessService = new HarnessService();
-            _allHarnessEntities = harnessService.GetAllHarnesses();
+            SuspendLayout();
+            try
+            {
+                var harnessService = new HarnessService();
+                _allHarnessEntities = harnessService.GetAllHarnesses();
 
-            // Populate filter ComboBoxes from actual data instead of hardcoded values
-            cmbProductModel.Items.Clear();
-            cmbProductModel.Items.Add("All");
-            cmbProductModel.Items.AddRange(_allHarnessEntities.Select(h => h.ProductModel).Distinct().OrderBy(m => m).ToArray());
-            cmbProductModel.SelectedIndex = 0;
+                // Populate filter ComboBoxes from actual data instead of hardcoded values
+                cmbProductModel.Items.Clear();
+                cmbProductModel.Items.Add("All");
+                cmbProductModel.Items.AddRange(_allHarnessEntities.Select(h => h.ProductModel).Distinct().OrderBy(m => m).ToArray());
+                cmbProductModel.SelectedIndex = 0;
 
-            cmbProductType.Items.Clear();
-            cmbProductType.Items.Add("All");
-            cmbProductType.Items.AddRange(_allHarnessEntities.Select(h => h.ProductType).Distinct().OrderBy(t => t).ToArray());
-            cmbProductType.SelectedIndex = 0;
+                cmbProductType.Items.Clear();
+                cmbProductType.Items.Add("All");
+                cmbProductType.Items.AddRange(_allHarnessEntities.Select(h => h.ProductType).Distinct().OrderBy(t => t).ToArray());
+                cmbProductType.SelectedIndex = 0;
 
-            cmbArea.Items.Clear();
-            cmbArea.Items.Add("All");
-            cmbArea.Items.AddRange(_allHarnessEntities.Select(h => h.Area).Distinct().OrderBy(a => a).ToArray());
-            cmbArea.SelectedIndex = 0;
+                cmbArea.Items.Clear();
+                cmbArea.Items.Add("All");
+                cmbArea.Items.AddRange(_allHarnessEntities.Select(h => h.Area).Distinct().OrderBy(a => a).ToArray());
+                cmbArea.SelectedIndex = 0;
 
-            _filteredHarnessEntities = new List<ProductHarness>(_allHarnessEntities);
+                _filteredHarnessEntities = new List<ProductHarness>(_allHarnessEntities);
 
-            ShowNoHarnessSelectedState();
-            PopulateBottomCards();
-            PopulateGrid();
+                ShowNoHarnessSelectedState();
+                PopulateBottomCards();
+                PopulateGrid();
+            }
+            finally
+            {
+                ResumeLayout(true);
+            }
         }
 
         private void PopulateGrid()
