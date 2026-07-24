@@ -282,7 +282,10 @@ namespace AssemblyLineTester.Views
                             if (dashboard.IsLoggingOut)
                             {
                                 SessionManager.ClearSession();
+                                txtUsername.Clear();
+                                txtPassword.Clear();
                                 this.Show();
+                                txtUsername.Focus();
                             }
                             else
                             {

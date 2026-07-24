@@ -24,9 +24,6 @@ namespace AssemblyLineTester.Views.Pages
         private int? _currentReportId;
         private System.Threading.CancellationTokenSource? _testCts;
 
-        private string? _loadedConfigName = null;
-
-
         public TestExecution()
         {
             InitializeComponent();
