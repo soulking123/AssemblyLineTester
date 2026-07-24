@@ -378,13 +378,13 @@ namespace AssemblyLineTester.Views.Pages
 
             // Save current grid configuration to the database.
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
-            config.CreatedBy = SessionManager.CurrentUser.Username;
-            Debug.WriteLine($"curernt user : {config.CreatedBy}");
             if (config == null)
             {
                 MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            config.CreatedBy = SessionManager.CurrentUser?.Username ?? "Unknown";
+            Debug.WriteLine($"curernt user : {config.CreatedBy}");
 
             if (string.IsNullOrWhiteSpace(config.ConfigName))
             {

@@ -22,9 +22,6 @@ namespace AssemblyLineTester.Views.Pages
         private double _continuityResistance;
         private int? _currentReportId;
 
-        private string? _loadedConfigName = null;
-
-
         public TestExecution()
         {
             InitializeComponent();
@@ -313,14 +310,16 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
 
-                string loadedProgramName = "1107061216";
                 string testProgramDetails = string.Empty;
 
                 // 2. Load the test program
                 //Debug.WriteLine(_customTestText);.
 
                 var activeConfig = _configService.GetActiveConfig();
-                _customTestText = _configService.ConvertToProgramText(activeConfig);
+                if (activeConfig != null)
+                {
+                    _customTestText = _configService.ConvertToProgramText(activeConfig);
+                }
 
                 Debug.WriteLine("Convert to Tesxt");
                 Debug.WriteLine(_customTestText);
@@ -339,7 +338,6 @@ namespace AssemblyLineTester.Views.Pages
                             MessageBox.Show($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        loadedProgramName = "Custom Wirelist (Active)";
                         testProgramDetails = _customTestText;
                         _continuityResistance = _instrument.GetContinuityResistance();
 
