@@ -15,7 +15,4 @@ public class Connector
     public string MountingStyle { get; set; } = string.Empty;
 
     public string? ImagePath { get; set; }
-
-    public int ProductHarnessId { get; set; }
-    public ProductHarness? ProductHarness { get; set; }
 }
