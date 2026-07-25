@@ -9,6 +9,11 @@
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<PlatformTarget>x86</PlatformTarget>
 		<ApplicationIcon>Assets\cat_logo.ico</ApplicationIcon>
+		<!-- Designer files carry mixed AutoScaleDimensions baselines (7x15, 8x20, 13x32),
+		     so per-machine DPI scaling renders the same layout differently on each dev box.
+		     DpiUnaware makes Windows bitmap-stretch the app: identical layout everywhere,
+		     slightly soft on high-DPI screens. Remove once all baselines are normalized. -->
+		<ApplicationHighDpiMode>DpiUnaware</ApplicationHighDpiMode>
 	</PropertyGroup>
 
 

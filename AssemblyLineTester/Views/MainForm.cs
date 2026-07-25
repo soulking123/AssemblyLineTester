@@ -75,6 +75,8 @@ namespace AssemblyLineTester.Views
             ApplySidebarStyles();
             InitializeUserInfo();
 
+            this.Load += (s, e) => RepositionSidebarButtons();
+
             // Wire up header click events to auto-close dropdown when clicking outside
             pnlTopHeader.Click += CloseDropdownIfOpen;
             lblHeaderTitle.Click += CloseDropdownIfOpen;
@@ -129,6 +131,8 @@ namespace AssemblyLineTester.Views
             btnSystemLog.Visible = SessionManager.HasPermission("Page.SystemLog");
             btnSettings.Visible = SessionManager.HasPermission("Page.Settings");
             btnUserManagement.Visible = SessionManager.HasPermission("Page.UserManagement");
+
+            RepositionSidebarButtons();
         }
 
         private void EnableDoubleBuffering()
@@ -335,9 +339,40 @@ namespace AssemblyLineTester.Views
             }
         }
 
+        private AssemblyLineTester.Views.Controls.MenuButton[] SidebarMenuButtons =>
+            new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
+
+        /// Repositions visible sidebar buttons back-to-back, skipping hidden (no-permission) ones so no gap remains.
+        private void RepositionSidebarButtons()
+        {
+            var menuButtons = SidebarMenuButtons;
+            if (isSidebarExpanded)
+            {
+                int currentY = _expandedMenuStartY;
+                foreach (var btn in menuButtons)
+                {
+                    if (!btn.Visible) continue;
+                    btn.Location = new Point(_expandedMenuX, currentY);
+                    btn.Width = _expandedMenuWidth;
+                    currentY += btn.Height + _expandedMenuGap;
+                }
+            }
+            else
+            {
+                int currentY = _expandedMenuStartY + (int)(_expandedToggleSize.Height * (20f / 88f));
+                foreach (var btn in menuButtons)
+                {
+                    if (!btn.Visible) continue;
+                    btn.Location = new Point(0, currentY);
+                    btn.Width = collapsedWidth;
+                    currentY += btn.Height + (int)(_expandedMenuGap * (12f / 16f));
+                }
+            }
+        }
+
         private void BtnToggleSidebar_Click(object sender, EventArgs e)
         {
-            var menuButtons = new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
+            var menuButtons = SidebarMenuButtons;
 
             SendMessage(this.Handle, 0x000B, 0, 0); // WM_SETREDRAW false
             this.SuspendLayout();
@@ -365,6 +400,7 @@ namespace AssemblyLineTester.Views
                     foreach (var btn in menuButtons)
                     {
                         btn.SetMinimized(true);
+                        if (!btn.Visible) continue;
                         btn.Location = new Point(0, currentY);
                         btn.Width = collapsedWidth;
                         currentY += btn.Height + (int)(_expandedMenuGap * (12f / 16f));
@@ -386,6 +422,7 @@ namespace AssemblyLineTester.Views
                     foreach (var btn in menuButtons)
                     {
                         btn.SetMinimized(false);
+                        if (!btn.Visible) continue;
                         btn.Location = new Point(_expandedMenuX, currentY);
                         btn.Width = _expandedMenuWidth;
                         currentY += btn.Height + _expandedMenuGap;
