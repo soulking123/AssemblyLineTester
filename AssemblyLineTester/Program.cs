@@ -26,8 +26,13 @@ namespace AssemblyLineTester
             // Register code pages provider so PdfSharp and other libraries can use code page encodings (e.g., 1252)
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            //initalize the database
-            DbInitialize.Initialize();
+            // Stop here if the schema is not usable. Carrying on would write test results into a
+            // half-built database and the damage would not surface for weeks.
+            if (!DbInitialize.Initialize())
+            {
+                FileLogService.Error("Startup", "Aborted: the database could not be initialised.");
+                return;
+            }
 
             // Once per run is enough, and startup is the only moment nothing else is mid-write.
             new SystemLogService().PurgeOlderThan();

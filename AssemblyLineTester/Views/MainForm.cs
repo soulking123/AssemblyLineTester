@@ -36,9 +36,23 @@ namespace AssemblyLineTester.Views
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            if (!DesignMode)
+            if (DesignMode) return;
+
+            AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+            SetupUserDropdown();
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            if (DesignMode) return;
+
+            // After the window is on screen, not during Load: the user should see the application
+            // they signed into behind the dialog, so it reads as a step in setting up rather than
+            // as a login that failed.
+            if (SessionManager.CurrentUser?.MustChangePassword == true)
             {
-                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+                PromptPasswordChange(mandatory: true);
             }
         }
 
@@ -461,25 +475,61 @@ namespace AssemblyLineTester.Views
             }
         }
 
+        /// Full height of the dropdown once open. The open animation grows towards this.
+        private int _dropdownHeight;
+        private readonly System.Windows.Forms.Timer _dropdownTimer = new() { Interval = 15 };
+
         private void ToggleUserDropdown(object? sender, EventArgs e)
         {
             if (pnlUserDropdown == null) return;
+
             if (pnlUserDropdown.Visible)
             {
-                pnlUserDropdown.Visible = false;
-                lblArrow.Text = "⌄";
+                CloseUserDropdown();
+                return;
             }
-            else
-            {
-                // Align compact logout dropdown cleanly under the right side of pnlUser (near arrow)
-                Point screenPos = pnlUser.PointToScreen(new Point(pnlUser.Width - pnlUserDropdown.Width - 15, pnlUser.Height));
-                Point containerPos = this.PointToClient(screenPos);
 
-                pnlUserDropdown.Location = containerPos;
-                pnlUserDropdown.Visible = true;
-                pnlUserDropdown.BringToFront();
-                lblArrow.Text = "⌃";
+            // Align the dropdown under the right side of pnlUser, near the arrow.
+            Point screenPos = pnlUser.PointToScreen(new Point(pnlUser.Width - pnlUserDropdown.Width - 15, pnlUser.Height));
+            pnlUserDropdown.Location = this.PointToClient(screenPos);
+
+            // Grows to full height over roughly six frames. Short enough to feel instant, long
+            // enough that the menu reads as coming from the button rather than appearing on top.
+            pnlUserDropdown.Height = 1;
+            pnlUserDropdown.Visible = true;
+            pnlUserDropdown.BringToFront();
+            lblArrow.Text = "⌃";
+
+            _dropdownTimer.Stop();
+            _dropdownTimer.Tick -= GrowDropdown;
+            _dropdownTimer.Tick += GrowDropdown;
+            _dropdownTimer.Start();
+        }
+
+        private void GrowDropdown(object? sender, EventArgs e)
+        {
+            int step = Math.Max(6, _dropdownHeight / 5);
+            int next = pnlUserDropdown.Height + step;
+
+            if (next >= _dropdownHeight)
+            {
+                pnlUserDropdown.Height = _dropdownHeight;
+                _dropdownTimer.Stop();
+                return;
             }
+
+            pnlUserDropdown.Height = next;
+        }
+
+        private void CloseUserDropdown()
+        {
+            _dropdownTimer.Stop();
+
+            // Restored immediately rather than animated shut: the panel is about to be hidden, and
+            // a closing animation only delays whatever the user clicked.
+            pnlUserDropdown.Visible = false;
+            pnlUserDropdown.Height = _dropdownHeight;
+            lblArrow.Text = "⌄";
         }
 
         private void PnlUserDropdown_Paint(object? sender, PaintEventArgs e)
@@ -496,6 +546,120 @@ namespace AssemblyLineTester.Views
         private void BtnLogOut_MouseLeave(object? sender, EventArgs e)
         {
             btnLogOut.BackColor = Color.Transparent;
+        }
+
+        private Button btnChangePassword = null!;
+
+        /// <summary>
+        /// Rebuilds the user dropdown as a proper menu: Change Password above Log Out.
+        /// </summary>
+        /// <remarks>
+        /// The panel is sized from the measured text rather than the designer's fixed 220px, which
+        /// clipped "Change Password" outright, and every measurement goes through the DPI scale so
+        /// it does not clip again on a machine with different display scaling.
+        /// </remarks>
+        private void SetupUserDropdown()
+        {
+            float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
+            int S(int v) => Math.Max(1, (int)Math.Round(v * scale));
+
+            Font itemFont = AssemblyLineTester.Helpers.UIStyleHelper.ScaleFont(
+                AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold, scale);
+
+            btnChangePassword = new Button
+            {
+                Text = "🔑    Change Password",
+                ForeColor = Color.FromArgb(51, 65, 85),
+                Tag = "menu"
+            };
+
+            btnLogOut.Text = "⏻    Log Out";
+            btnLogOut.Font = itemFont;
+
+            // Widest label decides the panel, so no item can ever be cut off.
+            int widest = 0;
+            foreach (Button item in new[] { btnChangePassword, btnLogOut })
+            {
+                widest = Math.Max(widest, TextRenderer.MeasureText(item.Text, itemFont).Width);
+            }
+
+            int padding = S(10);
+            int rowHeight = S(46);
+            int itemWidth = widest + S(52);
+            int panelWidth = itemWidth + (padding * 2);
+
+            foreach (Button item in new[] { btnChangePassword, btnLogOut })
+            {
+                item.Font = itemFont;
+                item.BackColor = Color.Transparent;
+                item.Cursor = Cursors.Hand;
+                item.FlatStyle = FlatStyle.Flat;
+                item.FlatAppearance.BorderSize = 0;
+                item.TextAlign = ContentAlignment.MiddleLeft;
+                item.Padding = new Padding(S(14), 0, 0, 0);
+                item.UseVisualStyleBackColor = false;
+                item.Size = new Size(itemWidth, rowHeight);
+            }
+
+            btnChangePassword.Location = new Point(padding, padding);
+            btnLogOut.Location = new Point(padding, padding + rowHeight + S(9));
+
+            HoverFill(btnChangePassword, Color.FromArgb(241, 245, 249));
+            HoverFill(btnLogOut, Color.FromArgb(254, 226, 226));
+
+            btnChangePassword.Click += (s, e) =>
+            {
+                CloseUserDropdown();
+                PromptPasswordChange(mandatory: false);
+            };
+
+            pnlUserDropdown.Controls.Add(btnChangePassword);
+            _dropdownHeight = (padding * 2) + (rowHeight * 2) + S(9);
+            pnlUserDropdown.Size = new Size(panelWidth, _dropdownHeight);
+
+            // A hairline separator reads as one menu with two groups, rather than two loose buttons.
+            pnlUserDropdown.Paint += (s, e) =>
+            {
+                int y = btnLogOut.Top - S(5);
+                using var pen = new Pen(Color.FromArgb(226, 232, 240), 1);
+                e.Graphics.DrawLine(pen, padding + S(8), y, panelWidth - padding - S(8), y);
+            };
+
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(
+                pnlUserDropdown, 10, Color.FromArgb(203, 213, 225), 1.2f);
+        }
+
+        private static void HoverFill(Button button, Color hover)
+        {
+            button.MouseEnter += (s, e) => button.BackColor = hover;
+            button.MouseLeave += (s, e) => button.BackColor = Color.Transparent;
+        }
+
+        /// <summary>
+        /// Opens the change-password dialog, optionally as a step the user cannot skip.
+        /// </summary>
+        /// <remarks>
+        /// The mandatory path loops: the prompt reappears until the password is actually changed.
+        /// Anything less and closing the dialog would leave the shipped password in place while the
+        /// user is already inside the application.
+        /// </remarks>
+        private void PromptPasswordChange(bool mandatory)
+        {
+            float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
+
+            while (true)
+            {
+                if (mandatory)
+                {
+                    using var prompt = new AssemblyLineTester.Views.Modals.SecureAccountPromptForm(scale);
+                    prompt.ShowDialog(this);
+                }
+
+                using var dialog = new AssemblyLineTester.Views.Modals.ChangePasswordModalForm(_userService, mandatory);
+                DialogResult result = dialog.ShowDialog(this);
+
+                if (!mandatory || result == DialogResult.OK) return;
+            }
         }
 
         private void BtnLogOut_Click(object? sender, EventArgs e)

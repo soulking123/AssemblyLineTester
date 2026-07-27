@@ -50,6 +50,18 @@ namespace AssemblyLineTester.Services
             if (!File.Exists(sourcePath))
                 throw new FileNotFoundException("Backup file not found.", sourcePath);
 
+            // Restore overwrites everything, and a wrong file picked from a folder full of similar
+            // names is unrecoverable otherwise. Taken before any handle is touched, so a failure
+            // here stops the restore rather than leaving the operator with neither database.
+            string safetyCopy = Path.Combine(
+                Path.GetDirectoryName(DbPath)!,
+                $"pre-restore-{DateTime.Now:yyyyMMdd-HHmmss}.db");
+
+            if (File.Exists(DbPath))
+            {
+                Backup(safetyCopy);
+            }
+
             // Release pooled connections first so restore does not fight an open handle.
             SqliteConnection.ClearAllPools();
 
@@ -66,10 +78,11 @@ namespace AssemblyLineTester.Services
 
             // Written after the restore, so it lands in the database the operator now has. The
             // file log carries the same line for the case where the restored file is unreadable.
-            FileLogService.Warn("DatabaseBackupService.Restore", $"Live database replaced from '{sourcePath}'.");
+            FileLogService.Warn("DatabaseBackupService.Restore",
+                $"Live database replaced from '{sourcePath}'. Previous contents saved to '{safetyCopy}'.");
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Warning, "Database", "Restore Database",
-                $"Database restored from '{sourcePath}'. Previous data was replaced.");
+                $"Database restored from '{sourcePath}'. Previous data was saved to '{Path.GetFileName(safetyCopy)}' first.");
         }
     }
 }

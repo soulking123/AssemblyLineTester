@@ -17,6 +17,7 @@ namespace AssemblyLineTester.Views.Modals
             InitializeDropdowns();
 
             btnSave.Click += BtnSave_Click;
+            ReplacePasswordFieldsWithNotice();
 
             btnClose.Click += (s, e) => this.Close();
             btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
@@ -93,13 +94,49 @@ namespace AssemblyLineTester.Views.Modals
             cmbStatus.SelectedIndex = 0; // Default to Active
         }
 
+        /// <summary>
+        /// Hides the password inputs and puts a notice in the space they occupied.
+        /// </summary>
+        /// <remarks>
+        /// The administrator no longer chooses a password, so asking for one twice was two fields
+        /// of work producing a value that gets replaced at first sign-in anyway. The controls are
+        /// hidden rather than deleted from the designer file, which is Visual Studio's to own; the
+        /// notice fills the gap that hiding them would otherwise leave.
+        /// </remarks>
+        private void ReplacePasswordFieldsWithNotice()
+        {
+            foreach (Control control in new Control[] { lblPassword, txtPassword, lblConfirmPassword, txtConfirmPassword })
+            {
+                control.Visible = false;
+            }
+
+            var notice = new Label
+            {
+                Text = $"🔑   Starting password:  {UserService.DefaultNewUserPassword}\r\n" +
+                       "        They choose their own the first time they sign in.",
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
+                ForeColor = Color.FromArgb(71, 85, 105),
+                BackColor = Color.FromArgb(248, 250, 252),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(18, 0, 0, 0),
+                Location = lblPassword.Location,
+                Size = new Size(
+                    txtConfirmPassword.Right - lblPassword.Left,
+                    txtPassword.Bottom - lblPassword.Top)
+            };
+
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(
+                notice, 8, Color.FromArgb(226, 232, 240), 1.2f);
+
+            Controls.Add(notice);
+            notice.BringToFront();
+        }
+
         private void BtnSave_Click(object? sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
             string companyId = txtCompanyId.Text.Trim();
             string fullName = txtFullName.Text.Trim();
-            string password = txtPassword.Text;
-            string confirmPassword = txtConfirmPassword.Text;
 
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -112,21 +149,6 @@ namespace AssemblyLineTester.Views.Modals
             {
                 MessageBox.Show("Please enter the user's full name.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtFullName.Focus();
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                MessageBox.Show("Please enter a password.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtPassword.Focus();
-                return;
-            }
-
-            if (password != confirmPassword)
-            {
-                MessageBox.Show("Passwords do not match. Please re-enter.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtConfirmPassword.Clear();
-                txtConfirmPassword.Focus();
                 return;
             }
 
@@ -146,9 +168,18 @@ namespace AssemblyLineTester.Views.Modals
                     StatusId = statusId
                 };
 
-                _userService.CreateUser(newUser, password);
+                // No password is asked for: every account starts on the shared default and the
+                // holder is made to replace it the first time they sign in.
+                _userService.CreateUser(newUser);
 
-                MessageBox.Show($"User '{username}' has been successfully created!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(
+                    $"Account '{username}' is ready.\r\n\r\n" +
+                    $"Starting password:  {UserService.DefaultNewUserPassword}\r\n\r\n" +
+                    "They will be asked to choose their own the first time they sign in.\r\n" +
+                    "Hand the account over soon - until they do, this password is all it takes to get in.",
+                    "User created",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

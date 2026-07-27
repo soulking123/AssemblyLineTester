@@ -32,6 +32,9 @@ namespace AssemblyLineTester.Views.Pages
         private Font _pillFont = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
         private float _uiScale = 1f;
 
+        /// Height the filter inputs settled on, so the action buttons can match them.
+        private int _filterInputHeight;
+
         /// Initializes a new instance of the UserManagement class.
         public UserManagement(UserService userService)
         {
@@ -48,6 +51,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterDept.SelectedIndexChanged += FilterChanged;
             btnRefresh.Click += BtnRefresh_Click;
             btnAddUser.Click += BtnAddUser_Click;
+            btnExport.Click += BtnExport_Click;
             btnManageRolePermissions.Click += BtnManageRolePermissions_Click;
 
             gridUsers.CellFormatting += GridUsers_CellFormatting;
@@ -146,8 +150,11 @@ namespace AssemblyLineTester.Views.Pages
         {
             try
             {
-                // Fetch using the injected service, excluding system admin account from user list display
-                _allUsers = [.. _userService.GetAllUsers().Where(u => u.Username != "admin").OrderBy(u => u.UserId)];
+                // The admin account is listed like any other. Hiding it meant its password could
+                // never be changed from the UI, while the shipped default is identical on every
+                // installation - the one account that most needed to be reachable was the one
+                // account that was not.
+                _allUsers = [.. _userService.GetAllUsers().OrderBy(u => u.UserId)];
 
                 _totalUserCount = _allUsers.Count;
                 int activeUsers = _allUsers.Count(u => u.Status.Name == "Active");
@@ -430,6 +437,84 @@ namespace AssemblyLineTester.Views.Pages
             if (rowIndex >= 0 && rowIndex < gridUsers.Rows.Count) gridUsers.InvalidateRow(rowIndex);
         }
 
+        /// Writes the accounts currently listed to an .xlsx. The button existed and was styled but
+        /// had never been wired to anything.
+        private void BtnExport_Click(object? sender, EventArgs e)
+        {
+            using var dialog = new SaveFileDialog
+            {
+                Filter = "Excel workbook (*.xlsx)|*.xlsx",
+                FileName = $"user-accounts-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx"
+            };
+
+            if (dialog.ShowDialog() != DialogResult.OK) return;
+
+            Cursor previous = Cursor;
+            Cursor = Cursors.WaitCursor;
+            try
+            {
+                using var wb = new ClosedXML.Excel.XLWorkbook();
+                var ws = wb.Worksheets.Add("Users");
+
+                string[] headers = ["No.", "Username", "Full Name", "Role", "Department", "Status", "Last Login", "Created"];
+                for (int c = 0; c < headers.Length; c++)
+                {
+                    var cell = ws.Cell(1, c + 1);
+                    cell.Value = headers[c];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromArgb(230, 230, 230);
+                    cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                }
+
+                int r = 2;
+                foreach (var user in _allUsers)
+                {
+                    ws.Cell(r, 1).Value = r - 1;
+                    ws.Cell(r, 2).Value = user.Username;
+                    ws.Cell(r, 3).Value = user.FullName;
+                    ws.Cell(r, 4).Value = user.Role.Name;
+                    ws.Cell(r, 5).Value = user.Department;
+                    ws.Cell(r, 6).Value = user.Status.Name;
+
+                    // Real DateTime values, so the columns sort by time rather than alphabetically.
+                    if (user.LastLogin.HasValue)
+                    {
+                        ws.Cell(r, 7).Value = user.LastLogin.Value;
+                        ws.Cell(r, 7).Style.DateFormat.Format = "yyyy-mm-dd hh:mm";
+                    }
+                    else
+                    {
+                        ws.Cell(r, 7).Value = "never";
+                    }
+
+                    ws.Cell(r, 8).Value = user.CreatedAt;
+                    ws.Cell(r, 8).Style.DateFormat.Format = "yyyy-mm-dd hh:mm";
+                    r++;
+                }
+
+                ws.Columns().AdjustToContents();
+                ws.SheetView.FreezeRows(1);
+                if (_allUsers.Count > 0) ws.Range(1, 1, r - 1, headers.Length).SetAutoFilter();
+
+                wb.SaveAs(dialog.FileName);
+
+                new SystemLogService().Log(Models.SystemLog.LogSeverity.Info, "User Management",
+                    "Export Users", $"{_allUsers.Count} user accounts exported to Excel.");
+
+                MessageBox.Show($"{_allUsers.Count} accounts exported.", "Export complete",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("UserManagement.BtnExport_Click", "User export failed.", ex);
+                MessageBox.Show($"Export failed: {ex.Message}", "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor = previous;
+            }
+        }
+
         private void BtnRefresh_Click(object? sender, EventArgs e)
         {
             LoadDatabaseData();
@@ -676,10 +761,157 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardRoleSummary, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardUserActivity, 12, Color.FromArgb(34, 40, 49), 2.5f);
 
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddUser, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnManageRolePermissions, 10, Color.FromArgb(59, 130, 246), Color.FromArgb(37, 99, 235), Color.FromArgb(29, 78, 216), Color.Transparent);
+            StyleFilterSection();
+            StyleActionBar();
+        }
+
+        /// <summary>
+        /// Gives the filter row one consistent treatment across its inputs, labels and buttons.
+        /// </summary>
+        /// <remarks>
+        /// The row read as lopsided for two reasons. The search box was the only input without a
+        /// label, so the label line above it was blank on the left and populated on the right. And
+        /// the inputs still wore the default sunken WinForms chrome while the buttons beside them
+        /// had been given flat rounded surfaces, so the two halves looked like different products.
+        /// <para>
+        /// Everything here is measured through the DPI scale, since the designer's fixed heights
+        /// were what clipped this row on machines with different display scaling.
+        /// </para>
+        /// </remarks>
+        private void StyleFilterSection()
+        {
+            float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
+            int S(int v) => Math.Max(1, (int)Math.Round(v * scale));
+
+            Font labelFont = AssemblyLineTester.Helpers.UIStyleHelper.ScaleFont(
+                AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold, scale);
+            Font inputFont = AssemblyLineTester.Helpers.UIStyleHelper.ScaleFont(
+                AssemblyLineTester.Helpers.UIStyleHelper.Font105Regular, scale);
+
+            Color labelInk = Color.FromArgb(71, 85, 105);
+            Color inputInk = Color.FromArgb(30, 41, 59);
+            Color surface = Color.FromArgb(248, 250, 252);
+            int inputHeight = S(46);
+
+            // The search column had no caption, which is what left the label line half empty.
+            var lblFilterSearch = new Label
+            {
+                Text = "SEARCH",
+                Font = labelFont,
+                ForeColor = labelInk,
+                AutoSize = true,
+                Margin = lblFilterStatus.Margin,
+                Anchor = AnchorStyles.Left | AnchorStyles.Bottom
+            };
+            tblFilterInputs.Controls.Add(lblFilterSearch, 0, 0);
+
+            // Short, upper-case captions read as field labels rather than as sentences competing
+            // with the values underneath them.
+            lblFilterStatus.Text = "STATUS";
+            lblFilterRole.Text = "ROLE";
+            lblFilterDept.Text = "DEPARTMENT";
+
+            foreach (Label caption in new[] { lblFilterStatus, lblFilterRole, lblFilterDept })
+            {
+                caption.Font = labelFont;
+                caption.ForeColor = labelInk;
+                caption.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            }
+
+            foreach (ComboBox combo in new[] { cmbFilterStatus, cmbFilterRole, cmbFilterDept })
+            {
+                combo.Font = inputFont;
+                combo.ForeColor = inputInk;
+                combo.BackColor = surface;
+                combo.FlatStyle = FlatStyle.Flat;
+                combo.DropDownStyle = ComboBoxStyle.DropDownList;
+                combo.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+            }
+
+            // A ComboBox sizes itself from its font and refuses a Height, so the text box is matched
+            // to the combos rather than all four being forced to a number of my choosing.
+            inputHeight = cmbFilterStatus.Height;
+
+            txtSearch.Font = inputFont;
+            txtSearch.ForeColor = inputInk;
+            txtSearch.BackColor = surface;
+            txtSearch.BorderStyle = BorderStyle.FixedSingle;
+            txtSearch.PlaceholderText = "Username, full name or email";
+            txtSearch.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+            txtSearch.Height = inputHeight;
+
+            _filterInputHeight = inputHeight;
+        }
+
+        /// <summary>
+        /// Rebuilds the four action-bar buttons with one visual hierarchy.
+        /// </summary>
+        /// <remarks>
+        /// Two things were wrong. Every size was a fixed pixel count, so the labels clipped on any
+        /// machine whose display scaling differed from the one they were drawn on. And two buttons
+        /// were filled solids - a yellow "Add New User" next to a blue "Manage Role Permissions" -
+        /// which left the row with no single obvious action.
+        /// <para>
+        /// One filled button now, the one that creates something. Everything else is outlined, and
+        /// every width comes from the measured caption.
+        /// </para>
+        /// </remarks>
+        private void StyleActionBar()
+        {
+            float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
+            int S(int v) => Math.Max(1, (int)Math.Round(v * scale));
+
+            Font label = AssemblyLineTester.Helpers.UIStyleHelper.ScaleFont(
+                AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, scale);
+
+            btnExport.Text = "Export";
+            btnRefresh.Text = "Refresh";
+            btnManageRolePermissions.Text = "Role Permissions";
+            btnAddUser.Text = "＋  Add New User";
+
+            // Buttons take their height from the inputs beside them, so the whole row shares one
+            // baseline instead of two slightly different ones.
+            int height = _filterInputHeight > 0 ? _filterInputHeight : S(46);
+            var bar = new[] { btnExport, btnRefresh, btnManageRolePermissions, btnAddUser };
+
+            foreach (Button button in bar)
+            {
+                button.Font = label;
+                button.Cursor = Cursors.Hand;
+                button.Margin = new Padding(0, 0, S(10), 0);
+
+                // Width follows the caption, with even padding either side, so the row keeps a
+                // consistent rhythm instead of four arbitrary widths.
+                int textWidth = TextRenderer.MeasureText(button.Text, label).Width;
+                button.Size = new Size(textWidth + S(46), height);
+            }
+
+            btnAddUser.Margin = new Padding(0);
+
+            // Buttons sit on the same baseline as the inputs beside them. Anchoring them to the
+            // bottom of the card instead left the two halves of the row visibly out of line.
+            flpActionButtons.Anchor = AnchorStyles.Right | AnchorStyles.Top;
+            flpActionButtons.Margin = new Padding(S(20), 0, 0, 0);
+            flpActionButtons.Padding = new Padding(0, S(31), 0, 0);
+
+            // Secondary: white surface, grey outline. Present but quiet.
+            foreach (Button button in new[] { btnExport, btnRefresh, btnManageRolePermissions })
+            {
+                button.ForeColor = Color.FromArgb(51, 65, 85);
+                AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(button, 10,
+                    Color.White,
+                    Color.FromArgb(248, 250, 252),
+                    Color.FromArgb(241, 245, 249),
+                    Color.FromArgb(203, 213, 225));
+            }
+
+            // Primary: the only filled button on the page.
+            btnAddUser.ForeColor = Color.FromArgb(15, 23, 42);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddUser, 10,
+                Color.FromArgb(250, 204, 21),
+                Color.FromArgb(254, 216, 53),
+                Color.FromArgb(234, 186, 10),
+                Color.Transparent);
         }
 
         private void BtnManageRolePermissions_Click(object? sender, EventArgs e)

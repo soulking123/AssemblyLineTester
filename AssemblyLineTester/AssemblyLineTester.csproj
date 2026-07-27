@@ -8,9 +8,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<PlatformTarget>x86</PlatformTarget>
+		
 		<ApplicationIcon>Assets\cat_logo.ico</ApplicationIcon>
-		<!-- Bump on every build handed to anyone outside the team. A bug report without a
-		     version number cannot be matched to the code that produced it. -->
 		<Version>1.0.0</Version>
 	</PropertyGroup>
 

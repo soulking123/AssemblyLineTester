@@ -200,11 +200,14 @@ namespace AssemblyLineTester.Data
                 new UserStatus { Id = 3, Name = "Locked", Description = "User is locked out due to multiple failed login attempts" }
             );
 
-            // Seed initial users with secure BCrypt hashes
+            // One seeded account only. The developer accounts that used to sit here were personal
+            // logins, not data every customer should receive, and their hashes are in the git
+            // history forever.
+            //
+            // This hash is public by definition - it ships inside the installer and is identical on
+            // every machine - so the account is created with MustChangePassword set. It is a way in
+            // during commissioning, not a credential.
             const string adminHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS";
-            const string faizHash = "$2b$11$VAO3CvR8UbFBe9Pn2sNrG.1Wg5vA7FpwVqPyxQeME/5PGTQ4PYk2u";
-            const string tegarHash = "$2b$11$SsUZzVTYh87OPBYbFMYNO.JNJ44jLe3wBxLq2cg7WFPWl.yHAIi6O";
-            const string khenHash = "$2b$11$JzVT2cjdgorN0AVlQHKv5uNCt1fNbQvlW7J1nEqd0pk2hDCAihDPe";
 
             modelBuilder.Entity<User>().HasData(
                 new User
@@ -217,50 +220,9 @@ namespace AssemblyLineTester.Data
                     RoleId = 1, // Administrator
                     Department = "Engineering",
                     StatusId = 1, // Active
+                    MustChangePassword = true,
                     CreatedAt = DateTime.Parse("2026-03-01T08:00:00Z"),
                     UpdatedAt = DateTime.Parse("2026-03-01T08:00:00Z")
-                },
-                new User
-                {
-                    UserId = 2,
-                    Username = "faiz",
-                    PasswordHash = faizHash,
-                    FullName = "Faiz",
-                    CompanyId = "CAT0001",
-                    RoleId = 1, // Administrator
-                    Department = "Engineering",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-10T09:15:22"),
-                    LastLogin = DateTime.Parse("2026-03-15T10:28:41"),
-                    UpdatedAt = DateTime.Parse("2026-03-15T10:28:41")
-                },
-                new User
-                {
-                    UserId = 3,
-                    Username = "khen",
-                    PasswordHash = khenHash,
-                    FullName = "Khen",
-                    CompanyId = "CAT0002",
-                    RoleId = 3, // Engineer
-                    Department = "Engineering",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-11T08:23:15"),
-                    LastLogin = DateTime.Parse("2026-03-15T09:41:12"),
-                    UpdatedAt = DateTime.Parse("2026-03-15T09:41:12")
-                },
-                new User
-                {
-                    UserId = 4,
-                    Username = "tegar",
-                    PasswordHash = tegarHash,
-                    FullName = "Tegar",
-                    CompanyId = "CAT0003",
-                    RoleId = 2, // Operator
-                    Department = "Production",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-12T14:10:05"),
-                    LastLogin = DateTime.Parse("2026-03-15T09:55:33"),
-                    UpdatedAt = DateTime.Parse("2026-03-15T09:55:33")
                 }
             );
 

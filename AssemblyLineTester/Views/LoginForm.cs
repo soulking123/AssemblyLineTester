@@ -1,6 +1,7 @@
 using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Views.Modals;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -289,6 +290,10 @@ namespace AssemblyLineTester.Views
 
                     logService.Log(LogSeverity.Info, "Authentication", "Login",
                         $"User '{user.Username}' signed in.", user.Username);
+
+                    // A required password change is handled by MainForm once the user is inside.
+                    // Stopping them at the door reads as a rejected login; asking after they have
+                    // arrived reads as finishing setup, and blocks just as completely.
 
                     // update last login timestamp, save the logged-in user to the session, and close login form
                     _instrument.Connect();

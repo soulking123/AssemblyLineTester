@@ -995,8 +995,9 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("IPAddress")
-                        .HasColumnType("TEXT");
+                    b.Property<string>("MachineName")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("IPAddress");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -1441,6 +1442,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1477,53 +1481,12 @@ namespace AssemblyLineTester.Migrations
                             CreatedAt = new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local),
                             Department = "Engineering",
                             FullName = "System Administrator",
+                            MustChangePassword = true,
                             PasswordHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS",
                             RoleId = 1,
                             StatusId = 1,
                             UpdatedAt = new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local),
                             Username = "admin"
-                        },
-                        new
-                        {
-                            UserId = 2,
-                            CompanyId = "CAT0001",
-                            CreatedAt = new DateTime(2026, 3, 10, 9, 15, 22, 0, DateTimeKind.Unspecified),
-                            Department = "Engineering",
-                            FullName = "Faiz",
-                            LastLogin = new DateTime(2026, 3, 15, 10, 28, 41, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$VAO3CvR8UbFBe9Pn2sNrG.1Wg5vA7FpwVqPyxQeME/5PGTQ4PYk2u",
-                            RoleId = 1,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 15, 10, 28, 41, 0, DateTimeKind.Unspecified),
-                            Username = "faiz"
-                        },
-                        new
-                        {
-                            UserId = 3,
-                            CompanyId = "CAT0002",
-                            CreatedAt = new DateTime(2026, 3, 11, 8, 23, 15, 0, DateTimeKind.Unspecified),
-                            Department = "Engineering",
-                            FullName = "Khen",
-                            LastLogin = new DateTime(2026, 3, 15, 9, 41, 12, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$JzVT2cjdgorN0AVlQHKv5uNCt1fNbQvlW7J1nEqd0pk2hDCAihDPe",
-                            RoleId = 3,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 15, 9, 41, 12, 0, DateTimeKind.Unspecified),
-                            Username = "khen"
-                        },
-                        new
-                        {
-                            UserId = 4,
-                            CompanyId = "CAT0003",
-                            CreatedAt = new DateTime(2026, 3, 12, 14, 10, 5, 0, DateTimeKind.Unspecified),
-                            Department = "Production",
-                            FullName = "Tegar",
-                            LastLogin = new DateTime(2026, 3, 15, 9, 55, 33, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "$2b$11$SsUZzVTYh87OPBYbFMYNO.JNJ44jLe3wBxLq2cg7WFPWl.yHAIi6O",
-                            RoleId = 2,
-                            StatusId = 1,
-                            UpdatedAt = new DateTime(2026, 3, 15, 9, 55, 33, 0, DateTimeKind.Unspecified),
-                            Username = "tegar"
                         });
                 });
 
@@ -1606,85 +1569,6 @@ namespace AssemblyLineTester.Migrations
                     b.HasKey("ConnectorId");
 
                     b.ToTable("Connectors");
-
-                    b.HasData(
-                        new
-                        {
-                            ConnectorId = 1,
-                            ContactQuantity = 64,
-                            ContactType = "Female",
-                            CurrentRating = 5.0,
-                            MountingStyle = "Panel Mount",
-                            PartNumber = "D507F1",
-                            Perf = "Standard",
-                            WireSize = "18 AWG"
-                        },
-                        new
-                        {
-                            ConnectorId = 2,
-                            ContactQuantity = 64,
-                            ContactType = "Male",
-                            CurrentRating = 5.0,
-                            MountingStyle = "Panel Mount",
-                            PartNumber = "D507F2",
-                            Perf = "Standard",
-                            WireSize = "18 AWG"
-                        },
-                        new
-                        {
-                            ConnectorId = 3,
-                            ContactQuantity = 32,
-                            ContactType = "Female",
-                            CurrentRating = 3.0,
-                            MountingStyle = "Free Hanging",
-                            PartNumber = "D507F1",
-                            Perf = "Standard",
-                            WireSize = "20 AWG"
-                        },
-                        new
-                        {
-                            ConnectorId = 4,
-                            ContactQuantity = 64,
-                            ContactType = "Female",
-                            CurrentRating = 5.0,
-                            MountingStyle = "Panel Mount",
-                            PartNumber = "D507F1",
-                            Perf = "Standard",
-                            WireSize = "18 AWG"
-                        },
-                        new
-                        {
-                            ConnectorId = 5,
-                            ContactQuantity = 64,
-                            ContactType = "Male",
-                            CurrentRating = 5.0,
-                            MountingStyle = "Panel Mount",
-                            PartNumber = "D507F2",
-                            Perf = "Standard",
-                            WireSize = "18 AWG"
-                        },
-                        new
-                        {
-                            ConnectorId = 6,
-                            ContactQuantity = 16,
-                            ContactType = "Female",
-                            CurrentRating = 2.0,
-                            MountingStyle = "Panel Mount",
-                            PartNumber = "D507F3",
-                            Perf = "Standard",
-                            WireSize = "22 AWG"
-                        },
-                        new
-                        {
-                            ConnectorId = 7,
-                            ContactQuantity = 64,
-                            ContactType = "Female",
-                            CurrentRating = 5.0,
-                            MountingStyle = "Panel Mount",
-                            PartNumber = "D507F1",
-                            Perf = "Standard",
-                            WireSize = "18 AWG"
-                        });
                 });
 
             modelBuilder.Entity("HarnessConnector", b =>
@@ -1710,57 +1594,6 @@ namespace AssemblyLineTester.Migrations
                         .IsUnique();
 
                     b.ToTable("HarnessConnectors");
-
-                    b.HasData(
-                        new
-                        {
-                            HarnessConnectorId = 1,
-                            ConnectorId = 1,
-                            Position = 1,
-                            ProductHarnessId = 1
-                        },
-                        new
-                        {
-                            HarnessConnectorId = 2,
-                            ConnectorId = 2,
-                            Position = 2,
-                            ProductHarnessId = 1
-                        },
-                        new
-                        {
-                            HarnessConnectorId = 3,
-                            ConnectorId = 3,
-                            Position = 1,
-                            ProductHarnessId = 2
-                        },
-                        new
-                        {
-                            HarnessConnectorId = 4,
-                            ConnectorId = 4,
-                            Position = 1,
-                            ProductHarnessId = 3
-                        },
-                        new
-                        {
-                            HarnessConnectorId = 5,
-                            ConnectorId = 5,
-                            Position = 2,
-                            ProductHarnessId = 3
-                        },
-                        new
-                        {
-                            HarnessConnectorId = 6,
-                            ConnectorId = 6,
-                            Position = 3,
-                            ProductHarnessId = 3
-                        },
-                        new
-                        {
-                            HarnessConnectorId = 7,
-                            ConnectorId = 7,
-                            Position = 1,
-                            ProductHarnessId = 4
-                        });
                 });
 
             modelBuilder.Entity("ProductHarness", b =>
@@ -1799,52 +1632,6 @@ namespace AssemblyLineTester.Migrations
                     b.HasKey("ProductHarnessId");
 
                     b.ToTable("ProductHarnesses");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductHarnessId = 1,
-                            Area = "Engine Control",
-                            ConnectorListName = "[\"J1\",\"J2\"]",
-                            ImagePaths = "[\"Assets/img/Harness/6040.png\"]",
-                            LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
-                            Name = "Main Engine Harness 6020",
-                            ProductModel = "6020",
-                            ProductType = "AC"
-                        },
-                        new
-                        {
-                            ProductHarnessId = 2,
-                            Area = "Cabin Interior",
-                            ConnectorListName = "[\"J1\"]",
-                            ImagePaths = "[]",
-                            LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
-                            Name = "Cabin Interior Harness 6030",
-                            ProductModel = "6030",
-                            ProductType = "AC"
-                        },
-                        new
-                        {
-                            ProductHarnessId = 3,
-                            Area = "Chassis",
-                            ConnectorListName = "[\"J1\",\"J2\",\"J3\"]",
-                            ImagePaths = "[\"Assets/img/Harness/6040.png\"]",
-                            LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
-                            Name = "Chassis Harness 6040",
-                            ProductModel = "6040",
-                            ProductType = "AC"
-                        },
-                        new
-                        {
-                            ProductHarnessId = 4,
-                            Area = "Dashboard",
-                            ConnectorListName = "[\"J1\"]",
-                            ImagePaths = "[]",
-                            LastUpdate = new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local),
-                            Name = "Dashboard Harness 6060",
-                            ProductModel = "6060",
-                            ProductType = "AC"
-                        });
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.ReportTestTypeSummary", b =>
