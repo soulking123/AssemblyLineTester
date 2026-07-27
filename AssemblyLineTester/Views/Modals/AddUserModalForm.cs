@@ -34,6 +34,15 @@ namespace AssemblyLineTester.Views.Modals
             ApplyFormRounding();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (!DesignMode)
+            {
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+            }
+        }
+
         private void ApplyFormRounding()
         {
             if (Width <= 0 || Height <= 0) return;

@@ -75,7 +75,64 @@ namespace AssemblyLineTester.Services
 
                 db.Users.Add(newUser);
                 db.SaveChanges();
+
+                string roleName = db.Roles.Where(r => r.Id == newUser.RoleId).Select(r => r.Name).FirstOrDefault()
+                                  ?? newUser.RoleId.ToString();
+
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Warning,
+                    "User Management",
+                    "Create Account",
+                    $"Account '{newUser.Username}' created with role {roleName}.");
             }
+        }
+
+        /// Changes a user account's status. Only an Active account may sign in, so this is the
+        /// switch that grants and withdraws access to the application.
+        /// Throws an UnauthorizedAccessException if the current user may not manage accounts.
+        public void UpdateUserStatus(int userId, int newStatusId)
+        {
+            if (!SessionManager.HasPermission("Action.UserManagement.Edit"))
+            {
+                throw new UnauthorizedAccessException("Access denied. You are not allowed to manage user accounts.");
+            }
+
+            // Refuse to let someone disable the account they are currently signed in with; there is
+            // no second administrator guaranteed to exist to undo it.
+            if (SessionManager.CurrentUser?.UserId == userId)
+            {
+                throw new InvalidOperationException("You cannot change the status of your own account.");
+            }
+
+            using var db = new AppDbContext();
+
+            var user = db.Users.FirstOrDefault(u => u.UserId == userId)
+                ?? throw new InvalidOperationException("User not found.");
+
+            var status = db.UserStatuses.FirstOrDefault(s => s.Id == newStatusId)
+                ?? throw new ArgumentException($"Unknown status id {newStatusId}.", nameof(newStatusId));
+
+            if (user.StatusId == newStatusId)
+            {
+                return;
+            }
+
+            string previous = db.UserStatuses
+                .Where(s => s.Id == user.StatusId)
+                .Select(s => s.Name)
+                .FirstOrDefault() ?? user.StatusId.ToString();
+
+            user.StatusId = newStatusId;
+            user.UpdatedAt = DateTime.UtcNow;
+            db.SaveChanges();
+
+            // Granting or withdrawing access is exactly the kind of change that needs to be
+            // answerable later, so it goes in the system log rather than only in the row itself.
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning,
+                "User Management",
+                "Change Account Status",
+                $"Account '{user.Username}' changed from {previous} to {status.Name}.");
         }
     }
 }

@@ -328,5 +328,25 @@ namespace AssemblyLineTester.Services
                 }
             }
         }
+
+        /// <summary>
+        /// Sends an abort command to the connected CTA instrument to cancel active operations.
+        /// </summary>
+        public CtaCommandResultCode Abort()
+        {
+            if (!IsConnected) return (CtaCommandResultCode)(-1);
+            lock (_lockObj)
+            {
+                try
+                {
+                    var res = _service.Abort(_connectionId);
+                    return res != null ? res.DllCallResult : (CtaCommandResultCode)(-2);
+                }
+                catch
+                {
+                    return (CtaCommandResultCode)(-2);
+                }
+            }
+        }
     }
 }

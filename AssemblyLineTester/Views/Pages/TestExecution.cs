@@ -1,4 +1,5 @@
 using AssemblyLineTester.Data;
+using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using System;
@@ -21,6 +22,7 @@ namespace AssemblyLineTester.Views.Pages
         private string _customTestText = string.Empty;
         private double _continuityResistance;
         private int? _currentReportId;
+        private System.Threading.CancellationTokenSource? _testCts;
 
         public TestExecution()
         {
@@ -38,6 +40,7 @@ namespace AssemblyLineTester.Views.Pages
 
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 var configService = new TestConfigService();
                 var activeConfig = configService.GetActiveConfig();
                 if (activeConfig != null)
@@ -169,277 +172,29 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
         }
-
-
-        //private void ShowEditConfigsDialog()
-        //{
-        //    var configs = _configService.GetAllConfigurations();
-
-        //    using Form dlg = new()
-        //    {
-        //        Text = "Edit Config",
-        //        Width = 900,
-        //        Height = 520,
-        //        StartPosition = FormStartPosition.CenterParent,
-        //        FormBorderStyle = FormBorderStyle.Sizable
-        //    };
-
-        //    var grid = new DataGridView()
-        //    {
-        //        Dock = DockStyle.Fill,
-        //        ReadOnly = true,
-        //        SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-        //        AllowUserToAddRows = false,
-        //        AllowUserToDeleteRows = false,
-        //        AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-        //    };
-
-        //    grid.Columns.Add("ConfigName", "Config Name");
-        //    grid.Columns.Add("ProductModel", "Product Model");
-        //    grid.Columns.Add("CreatedAt", "Created At");
-        //    grid.Columns.Add("UpdatedAt", "Updated At");
-        //    grid.Columns.Add("IsActive", "Active");
-        //    grid.Columns.Add("NetCount", "Nets");
-
-        //    foreach (var c in configs)
-        //    {
-        //        int idx = grid.Rows.Add(c.ConfigName, c.ProductModel, c.CreatedAt.ToString("g"), c.UpdatedAt?.ToString("g") ?? "-", c.IsActive ? "Yes" : "No", c.Nets?.Count ?? 0);
-        //        grid.Rows[idx].Tag = c.ConfigName;
-        //    }
-
-        //    var btnPanel = new Panel() { Dock = DockStyle.Bottom, Height = 56 };
-        //    var btnLoad = new Button() { Text = "Load", Width = 100, Height = 36, Left = 8, Top = 10 };
-        //    var btnDelete = new Button() { Text = "Delete", Width = 100, Height = 36, Left = 116, Top = 10 };
-        //    var btnClose = new Button() { Text = "Close", Width = 100, Height = 36, Left = 224, Top = 10 };
-
-        //    btnLoad.Click += (s, e) =>
-        //    {
-        //        if (grid.SelectedRows.Count == 0)
-        //        {
-        //            MessageBox.Show("Please select a configuration to load.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        //            return;
-        //        }
-
-        //        string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
-        //        var cfg = _configService.GetConfigurationByName(name);
-        //        if (cfg == null)
-        //        {
-        //            MessageBox.Show("Selected configuration could not be loaded (it may have been deleted).", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            return;
-        //        }
-
-        //        LoadConfigurationIntoGrid(cfg);
-        //        dlg.Close();
-        //    };
-
-
-
-        //    btnDelete.Click += (s, e) =>
-        //    {
-        //        if (grid.SelectedRows.Count == 0)
-        //        {
-        //            MessageBox.Show("Please select a configuration to delete.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        //            return;
-        //        }
-
-        //        string name = grid.SelectedRows[0].Tag as string ?? grid.SelectedRows[0].Cells[0].Value?.ToString() ?? string.Empty;
-        //        if (MessageBox.Show($"Delete configuration '{name}'? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-        //            return;
-
-        //        try
-        //        {
-        //            bool ok = _configService.DeleteConfiguration(name);
-        //            if (ok)
-        //            {
-        //                // remove row and refresh
-        //                grid.Rows.Remove(grid.SelectedRows[0]);
-        //                MessageBox.Show("Configuration deleted.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //                // if the deleted config was loaded in the editor, clear loaded state
-        //                if (string.Equals(_loadedConfigName, name, StringComparison.OrdinalIgnoreCase))
-        //                {
-        //                    _loadedConfigName = null;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                MessageBox.Show("Failed to delete configuration.", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            MessageBox.Show($"Error deleting configuration:\n{ex.Message}", "Edit Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //        }
-        //    };
-
-        //    btnClose.Click += (s, e) => dlg.Close();
-
-        //    btnPanel.Controls.Add(btnLoad);
-        //    btnPanel.Controls.Add(btnDelete);
-        //    btnPanel.Controls.Add(btnClose);
-
-        //    dlg.Controls.Add(grid);
-        //    dlg.Controls.Add(btnPanel);
-
-        //    // double-click to load
-        //    grid.CellDoubleClick += (s, e) =>
-        //    {
-        //        if (e.RowIndex >= 0)
-        //        {
-        //            grid.ClearSelection();
-        //            grid.Rows[e.RowIndex].Selected = true;
-        //            btnLoad.PerformClick();
-        //        }
-        //    };
-
-        //    dlg.ShowDialog(this);
-        //}
-
-        private void btnStartTest_Click(object? sender, EventArgs e)
+      
+        private async void btnStartTest_Click(object? sender, EventArgs e)
         {
-            // 1. Temporarily pause background monitoring to prevent concurrent socket calls
-            //InstrumentService.StopMonitoring();
-            //_configService.GetConfigurationByName(name);
+            _testCts?.Cancel();
+            _testCts = new System.Threading.CancellationTokenSource();
+            var token = _testCts.Token;
+
+            btnLoadProgram.Enabled = false;
+            btnStartTest.Enabled = false;
+            btnSaveReport.Enabled = false;
 
             try
             {
-                // 2. Connect to the instrument
-                bool isConnected = _instrument.Connect();
-                if (!isConnected)
-                {
-                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                string testProgramDetails = string.Empty;
-
-                // 2. Load the test program
-                //Debug.WriteLine(_customTestText);.
-
                 var activeConfig = _configService.GetActiveConfig();
-                if (activeConfig != null)
+                if (activeConfig == null)
                 {
-                    _customTestText = _configService.ConvertToProgramText(activeConfig);
-                }
-
-                Debug.WriteLine("Convert to Tesxt");
-                Debug.WriteLine(_customTestText);
-                try
-                {
-
-                    if (!string.IsNullOrEmpty(_customTestText))
-                    {
-                        // Upload custom test text without saving to database (using empty string as testName)
-                        Debug.WriteLine("before put");
-                        var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
-                        Debug.WriteLine("after put");
-                        if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
-                        {
-                            _instrument.Disconnect();
-                            MessageBox.Show($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        testProgramDetails = _customTestText;
-                        _continuityResistance = _instrument.GetContinuityResistance();
-
-                        Debug.WriteLine($"Nilai Continuity Resistance saat ini: {_continuityResistance}");
-                    }
-                    else
-                    {
-                        Debug.WriteLine("error syntax");
-                        // Fallback: Fetch/load the specified test program "1107061216"
-                        //var getTestResult = _instrument.GetTestProgram("1107061216");
-                        //if (getTestResult != null && getTestResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
-                        //{
-                        //    testProgramDetails = getTestResult.Result;
-                        //}
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error convert to text file :\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-                //Debug.WriteLine($"Active Program: {loadedProgramName}");
-                //_ = testProgramDetails;
-
-                //3.Run Single Test(Hipot= false, Shorts= true)
-
-                Debug.WriteLine("Run Test");
-                var testResult = _instrument.RunSingleTest(false, true);
-                if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
-                {
-                    _instrument.Disconnect();
-                    MessageBox.Show($"Test run failed to execute. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Test Run Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("No active test program loaded.", "Missing Program", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
+                await Task.Run(() => ExecuteTest(activeConfig), token);
 
-                // 4. Get Measured Values
-                Debug.WriteLine("Get Measured Value");
-                var measuredValuesResult = _instrument.GetMeasuredValues();
-                _loadedRows = new List<LiveTestDetailRowDto>();
-
-                if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
-                {
-                    var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
-                    if (list != null)
-                    {
-                        int step = 1;
-                        foreach (var measurement in list)
-                        {
-                            var status = LiveTestStatus.Pending;
-                            string statusStr = measurement.Status1?.Trim() ?? "";
-                            if (measurement.Value1 <= _continuityResistance)
-                            {
-                                status = LiveTestStatus.Pass;
-                            }
-                            else
-                            {
-                                status = LiveTestStatus.Fail;
-                            }
-
-                            string rowTestType = "WIRE";
-                            if (!string.IsNullOrEmpty(measurement.Instruction))
-                            {
-                                string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
-                                if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
-                                {
-                                    rowTestType = "WIRE";
-                                }
-                                else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
-                                {
-                                    rowTestType = "OPEN";
-                                }
-                                else
-                                {
-                                    rowTestType = measurement.Instruction;
-                                }
-                            }
-
-                            _loadedRows.Add(new LiveTestDetailRowDto
-                            {
-                                StepNo = step++,
-                                NetId = measurement.Instruction ?? "",
-                                TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
-                                FromPoint = $"{measurement.Point1}",
-                                ToPoint = $"{measurement.Point2}",
-                                TestType = rowTestType,
-                                MeasuredValue = Math.Round(measurement.Value1, 3),
-                                Status = status
-                            });
-                        }
-                    }
-                }
-
-                //5.Repopulate the GridView to show the results
-
-                Debug.WriteLine("Update Grid");
 
                 PopulateLiveDetailsGrid(_loadedRows);
-
-                // 7. Show summary MessageBox
-                //string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
-                //    ? "PASSED"
-                //    : "FAILED or INCOMPLETE";
                 try
                 {
                     bool allPass = _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
@@ -459,17 +214,171 @@ namespace AssemblyLineTester.Views.Pages
                         "Test completed but failed to record it to Test History automatically.\nYou can still save it manually via Save Report.",
                         "Auto-Save Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
-
-                // 7. Show summary MessageBox
-                string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
-                ? "PASSED"
-                : "FAILED or INCOMPLETE";
-
             }
-            finally
+            catch (OperationCanceledException)
             {
-                // 3. Resume background monitoring
-                //InstrumentService.StartMonitoring();
+                // Task was canceled via btnAbort
+            }
+            finally 
+            {
+                btnLoadProgram.Enabled = true;
+                btnStartTest.Enabled = true;
+                btnSaveReport.Enabled = true;
+            }
+        }
+
+        private void ExecuteTest(TestConfiguration config ,System.Threading.CancellationToken token = default)
+        {
+            if (token.IsCancellationRequested) return;
+
+            bool isConnected = _instrument.Connect();
+            if (!isConnected)
+            {
+                MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (token.IsCancellationRequested) return;
+            _customTestText = _configService.ConvertToProgramText(config);
+            Debug.WriteLine(_customTestText);
+
+            if (token.IsCancellationRequested) return;
+            try
+            {
+                if (!string.IsNullOrEmpty(_customTestText))
+                {
+                    var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
+                }
+                else
+                {
+                    return;
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            if (token.IsCancellationRequested) return;
+            Debug.WriteLine("Run Test");
+            var testResult = _instrument.RunSingleTest(false, true);
+
+            if (token.IsCancellationRequested) return;
+
+            if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+            {
+                return;
+            }
+
+            Debug.WriteLine("Get Measured Value");
+            var measuredValuesResult = _instrument.GetMeasuredValues();
+            if (token.IsCancellationRequested) return;
+            _loadedRows = new List<LiveTestDetailRowDto>();
+
+            if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
+            {
+                var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
+                if (list != null)
+                {
+                    int step = 1;
+                    foreach (var measurement in list)
+                    {
+                        var status = LiveTestStatus.Pending;
+                        string statusStr = measurement.Status1?.Trim() ?? "";
+                        if (measurement.Value1 <= _continuityResistance)
+                        {
+                            status = LiveTestStatus.Pass;
+                        }
+                        else
+                        {
+                            status = LiveTestStatus.Fail;
+                        }
+
+                        string rowTestType = "WIRE";
+                        if (!string.IsNullOrEmpty(measurement.Instruction))
+                        {
+                            string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
+                            if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
+                            {
+                                rowTestType = "WIRE";
+                            }
+                            else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
+                            {
+                                rowTestType = "OPEN";
+                            }
+                            else
+                            {
+                                rowTestType = measurement.Instruction;
+                            }
+                        }
+
+                        _loadedRows.Add(new LiveTestDetailRowDto
+                        {
+                            StepNo = step++,
+                            NetId = measurement.Instruction ?? "",
+                            TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
+                            FromPoint = $"{measurement.Point1}",
+                            ToPoint = $"{measurement.Point2}",
+                            TestType = rowTestType,
+                            MeasuredValue = Math.Round(measurement.Value1, 3),
+                            Status = status
+                        });
+                    }
+                }
+            }
+            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
+            ? "PASSED"
+            : "FAILED or INCOMPLETE";
+
+        }
+
+        private async void btnStopTest_Click(object sender, EventArgs e)
+        {
+            _testCts?.Cancel();
+
+            // 2. Send abort command to CTA instrument
+            var abortResult = await Task.Run(() => _instrument.Abort());
+            if (abortResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
+            {
+                MessageBox.Show("Test operation successfully aborted.", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show($"Failed to send abort command to instrument. Error: {abortResult}", "Abort Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void BtnSaveReport_Click(object? sender, EventArgs e)
+        {
+            if (_loadedRows == null || _loadedRows.Count == 0)
+            {
+                if (MessageBox.Show("No active test data in grid. Do you want to open the save report modal anyway?", "No Test Results", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                {
+                    return;
+                }
+            }
+
+            bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
+            string overallResult = allPass ? "PASS" : "FAIL";
+
+            using var modal = new AssemblyLineTester.Views.Modals.SaveTestReportModalForm(
+                cmbProductModel.Text,
+                cmbEcnNo.Text,
+                cmbProductType.Text,
+                "1.0",
+                cmbArea.Text,
+                "OP-402",
+                cmbPartNumber.Text,
+                $"SN-{DateTime.Now:HHmmss}",
+                overallResult,
+                DateTime.Now,
+                _loadedRows ?? new List<LiveTestDetailRowDto>(),
+                _currentReportId
+            );
+
+            if (modal.ShowDialog(this) == DialogResult.OK)
+            {
+                MessageBox.Show("Test Report saved successfully to the database!\nIt can now be viewed in Reports and Test History.", "Report Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -497,7 +406,7 @@ namespace AssemblyLineTester.Views.Pages
             Debug.WriteLine("Update Grid 3");
             gridLiveDetails.Refresh();
         }
-
+      
         private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)
         {
             switch (status)
@@ -517,7 +426,7 @@ namespace AssemblyLineTester.Views.Pages
                     break;
             }
         }
-
+     
         private void SetupDiagramPointers()
         {
             picMachineOverview.Paint += PicMachineOverview_Paint;
@@ -642,44 +551,12 @@ namespace AssemblyLineTester.Views.Pages
             btnSaveReport.Click += BtnSaveReport_Click;
         }
 
-        private void BtnSaveReport_Click(object? sender, EventArgs e)
-        {
-            if (_loadedRows == null || _loadedRows.Count == 0)
-            {
-                if (MessageBox.Show("No active test data in grid. Do you want to open the save report modal anyway?", "No Test Results", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
-                {
-                    return;
-                }
-            }
-
-            bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
-            string overallResult = allPass ? "PASS" : "FAIL";
-
-            using var modal = new AssemblyLineTester.Views.Modals.SaveTestReportModalForm(
-                cmbProductModel.Text,
-                cmbEcnNo.Text,
-                cmbProductType.Text,
-                "1.0",
-                cmbArea.Text,
-                "OP-402",
-                cmbPartNumber.Text,
-                $"SN-{DateTime.Now:HHmmss}",
-                overallResult,
-                DateTime.Now,
-                _loadedRows ?? new List<LiveTestDetailRowDto>(),
-                _currentReportId
-            );
-
-            if (modal.ShowDialog(this) == DialogResult.OK)
-            {
-                MessageBox.Show("Test Report saved successfully to the database!\nIt can now be viewed in Reports and Test History.", "Report Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-
         private void BtnViewWiringDiagram_Click(object? sender, EventArgs e)
         {
             using var modal = new AssemblyLineTester.Views.Modals.WiringPreviewModalForm();
             modal.ShowDialog(this);
         }
+
+        
     }
 }

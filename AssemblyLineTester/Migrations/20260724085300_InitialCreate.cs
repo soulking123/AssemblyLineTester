@@ -14,6 +14,26 @@ namespace AssemblyLineTester.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Connectors",
+                columns: table => new
+                {
+                    ConnectorId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Perf = table.Column<string>(type: "TEXT", nullable: false),
+                    PartNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    ContactType = table.Column<string>(type: "TEXT", nullable: false),
+                    ContactQuantity = table.Column<int>(type: "INTEGER", nullable: false),
+                    WireSize = table.Column<string>(type: "TEXT", nullable: false),
+                    CurrentRating = table.Column<double>(type: "REAL", nullable: false),
+                    MountingStyle = table.Column<string>(type: "TEXT", nullable: false),
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Connectors", x => x.ConnectorId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MaintenanceStates",
                 columns: table => new
                 {
@@ -163,26 +183,6 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Connectors",
-                columns: table => new
-                {
-                    ConnectorId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Perf = table.Column<string>(type: "TEXT", nullable: false),
-                    PartNumber = table.Column<string>(type: "TEXT", nullable: false),
-                    ContactType = table.Column<string>(type: "TEXT", nullable: false),
-                    ContactQuantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    WireSize = table.Column<string>(type: "TEXT", nullable: false),
-                    CurrentRating = table.Column<double>(type: "REAL", nullable: false),
-                    MountingStyle = table.Column<string>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Connectors", x => x.ConnectorId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "HarnessConnectors",
                 columns: table => new
                 {
@@ -196,16 +196,16 @@ namespace AssemblyLineTester.Migrations
                 {
                     table.PrimaryKey("PK_HarnessConnectors", x => x.HarnessConnectorId);
                     table.ForeignKey(
-                        name: "FK_HarnessConnectors_ProductHarnesses_ProductHarnessId",
-                        column: x => x.ProductHarnessId,
-                        principalTable: "ProductHarnesses",
-                        principalColumn: "ProductHarnessId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_HarnessConnectors_Connectors_ConnectorId",
                         column: x => x.ConnectorId,
                         principalTable: "Connectors",
                         principalColumn: "ConnectorId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_HarnessConnectors_ProductHarnesses_ProductHarnessId",
+                        column: x => x.ProductHarnessId,
+                        principalTable: "ProductHarnesses",
+                        principalColumn: "ProductHarnessId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -400,6 +400,20 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Connectors",
+                columns: new[] { "ConnectorId", "ContactQuantity", "ContactType", "CurrentRating", "ImagePath", "MountingStyle", "PartNumber", "Perf", "WireSize" },
+                values: new object[,]
+                {
+                    { 1, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" },
+                    { 2, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", "18 AWG" },
+                    { 3, 32, "Female", 3.0, null, "Free Hanging", "D507F1", "Standard", "20 AWG" },
+                    { 4, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" },
+                    { 5, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", "18 AWG" },
+                    { 6, 16, "Female", 2.0, null, "Panel Mount", "D507F3", "Standard", "22 AWG" },
+                    { 7, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "MaintenanceStates",
                 columns: new[] { "Id", "LastUsageDate", "OperatingSecondsToday", "RemainingMaintDays", "RemainingMaintHours" },
                 values: new object[] { 1, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0.0, 180, 2160.0 });
@@ -458,20 +472,6 @@ namespace AssemblyLineTester.Migrations
                     { 1, "User is active and allowed to log in", "Active" },
                     { 2, "User is inactive and disabled", "Inactive" },
                     { 3, "User is locked out due to multiple failed login attempts", "Locked" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Connectors",
-                columns: new[] { "ConnectorId", "ContactQuantity", "ContactType", "CurrentRating", "ImagePath", "MountingStyle", "PartNumber", "Perf", "WireSize" },
-                values: new object[,]
-                {
-                    { 1, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" },
-                    { 2, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", "18 AWG" },
-                    { 3, 32, "Female", 3.0, null, "Free Hanging", "D507F1", "Standard", "20 AWG" },
-                    { 4, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" },
-                    { 5, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", "18 AWG" },
-                    { 6, 16, "Female", 2.0, null, "Panel Mount", "D507F3", "Standard", "22 AWG" },
-                    { 7, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" }
                 });
 
             migrationBuilder.InsertData(
@@ -708,9 +708,6 @@ namespace AssemblyLineTester.Migrations
                 name: "HarnessConnectors");
 
             migrationBuilder.DropTable(
-                name: "Connectors");
-
-            migrationBuilder.DropTable(
                 name: "MaintenanceStates");
 
             migrationBuilder.DropTable(
@@ -733,6 +730,9 @@ namespace AssemblyLineTester.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Connectors");
 
             migrationBuilder.DropTable(
                 name: "ProductHarnesses");

@@ -21,6 +21,17 @@ namespace AssemblyLineTester.Views.Pages
         private int _pageSize = 10;
         private readonly ComboBox cmbPageSize = new();
 
+        private const string ActivateLabel = "Activate";
+        private const string DeactivateLabel = "Deactivate";
+
+        /// Row whose action button the pointer is over, or -1. Drives the hover fill.
+        private int _hoveredActionRow = -1;
+
+        /// Pill text is drawn, not assigned to a control, so it never passes through the
+        /// AutoScale pass that ScaleExplicitFonts applies to the rest of the page.
+        private Font _pillFont = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
+        private float _uiScale = 1f;
+
         /// Initializes a new instance of the UserManagement class.
         public UserManagement(UserService userService)
         {
@@ -42,6 +53,9 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.CellFormatting += GridUsers_CellFormatting;
             gridUsers.CellPainting += GridUsers_CellPainting;
             gridUsers.SelectionChanged += GridUsers_SelectionChanged;
+            gridUsers.CellClick += GridUsers_CellClick;
+            gridUsers.CellMouseMove += GridUsers_CellMouseMove;
+            gridUsers.MouseLeave += GridUsers_MouseLeave;
 
             pnlRoleChart.Paint += PnlRoleChart_Paint;
 
@@ -52,6 +66,12 @@ namespace AssemblyLineTester.Views.Pages
 
         private void UserManagement_Load(object? sender, EventArgs e)
         {
+            if (!DesignMode)
+            {
+                _uiScale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, _uiScale);
+                _pillFont = AssemblyLineTester.Helpers.UIStyleHelper.ScaleFont(AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold, _uiScale);
+            }
             LoadDatabaseData();
         }
 
@@ -174,6 +194,7 @@ namespace AssemblyLineTester.Views.Pages
         private void PopulateUserGrid()
         {
             gridUsers.Rows.Clear();
+            _hoveredActionRow = -1; // the row it pointed at no longer exists
 
             string searchText = txtSearch.Text.Trim();
             string filterStatus = cmbFilterStatus.SelectedItem?.ToString() ?? "Status: All";
@@ -221,7 +242,8 @@ namespace AssemblyLineTester.Views.Pages
             int index = (_currentPage - 1) * _pageSize + 1;
             foreach (var user in pageItems)
             {
-                gridUsers.Rows.Add(
+                // The button is labelled with what the click will do, not with the state it is in.
+                int rowIndex = gridUsers.Rows.Add(
                     index++,
                     user.Username,
                     user.FullName,
@@ -231,8 +253,12 @@ namespace AssemblyLineTester.Views.Pages
                     user.Status.Name,
                     user.LastLogin?.ToString("dd MMM yyyy\r\nhh:mm:ss tt") ?? "-",
                     user.CreatedAt.ToString("dd MMM yyyy\r\nhh:mm:ss tt") ?? "-",
-                    "✏   🔒   ⋮"
+                    user.StatusId == UserStatus.Active ? DeactivateLabel : ActivateLabel
                 );
+
+                // Carries the account through paging and filtering, so the click handler never has
+                // to reconstruct which user a row index belongs to.
+                gridUsers.Rows[rowIndex].Tag = user;
             }
         }
 
@@ -340,6 +366,70 @@ namespace AssemblyLineTester.Views.Pages
         }
 
         /// Event handler to query fresh database data when refresh button is clicked.
+        /// Activates or deactivates the account on the clicked row. Only an Active account can
+        /// sign in, so this is where access is granted and withdrawn.
+        private void GridUsers_CellClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            if (gridUsers.Columns[e.ColumnIndex].Name != "colAction") return;
+            if (gridUsers.Rows[e.RowIndex].Tag is not User user) return;
+
+            bool activating = user.StatusId != UserStatus.Active;
+            int targetStatus = activating ? UserStatus.Active : UserStatus.Inactive;
+
+            string question = activating
+                ? $"Allow '{user.FullName}' to sign in again?"
+                : $"Block '{user.FullName}' from signing in?\r\n\r\nA session they already have open stays active until they log out.";
+
+            var answer = MessageBox.Show(
+                question,
+                activating ? "Activate account" : "Deactivate account",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+
+            if (answer != DialogResult.Yes) return;
+
+            try
+            {
+                _userService.UpdateUserStatus(user.UserId, targetStatus);
+                LoadDatabaseData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Cannot change status", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void GridUsers_CellMouseMove(object? sender, DataGridViewCellMouseEventArgs e)
+        {
+            bool onAction = e.RowIndex >= 0
+                && e.ColumnIndex >= 0
+                && gridUsers.Columns[e.ColumnIndex].Name == "colAction";
+
+            gridUsers.Cursor = onAction ? Cursors.Hand : Cursors.Default;
+            SetHoveredActionRow(onAction ? e.RowIndex : -1);
+        }
+
+        private void GridUsers_MouseLeave(object? sender, EventArgs e)
+        {
+            gridUsers.Cursor = Cursors.Default;
+            SetHoveredActionRow(-1);
+        }
+
+        /// Repaints only the rows entering and leaving the hover state, so moving the pointer down
+        /// a long list does not redraw the whole grid on every step.
+        private void SetHoveredActionRow(int rowIndex)
+        {
+            if (rowIndex == _hoveredActionRow) return;
+
+            int previous = _hoveredActionRow;
+            _hoveredActionRow = rowIndex;
+
+            if (previous >= 0 && previous < gridUsers.Rows.Count) gridUsers.InvalidateRow(previous);
+            if (rowIndex >= 0 && rowIndex < gridUsers.Rows.Count) gridUsers.InvalidateRow(rowIndex);
+        }
+
         private void BtnRefresh_Click(object? sender, EventArgs e)
         {
             LoadDatabaseData();
@@ -429,7 +519,7 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.Columns[cCreated].FillWeight = 110F;
 
             var cAction = gridUsers.Columns.Add("colAction", "Action");
-            gridUsers.Columns[cAction].FillWeight = 55F;
+            gridUsers.Columns[cAction].FillWeight = 95F; // fits "Deactivate" without the button touching the cell edges
             gridUsers.Columns[cAction].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
@@ -453,23 +543,70 @@ namespace AssemblyLineTester.Views.Pages
                 Color pillColor = status == "Active" ? Color.FromArgb(220, 252, 231) : (status == "Locked" ? Color.FromArgb(254, 226, 226) : Color.FromArgb(226, 232, 240));
                 Color textColor = status == "Active" ? Color.FromArgb(22, 101, 52) : (status == "Locked" ? Color.FromArgb(153, 27, 27) : Color.FromArgb(71, 85, 105));
                 
-                Size textSize = TextRenderer.MeasureText(status, AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold);
-                int badgeWidth = Math.Max(72, textSize.Width + 20);
-                int badgeHeight = 26;
+                Size textSize = TextRenderer.MeasureText(status, _pillFont);
+                int badgeWidth = Math.Max(Scaled(72), textSize.Width + Scaled(20));
+                int badgeHeight = Scaled(26);
                 int x = e.CellBounds.X + (e.CellBounds.Width - badgeWidth) / 2;
                 int y = e.CellBounds.Y + (e.CellBounds.Height - badgeHeight) / 2;
                 Rectangle badgeRect = new(x, y, badgeWidth, badgeHeight);
 
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 using var brush = new SolidBrush(pillColor);
-                using var path = AssemblyLineTester.Helpers.UIStyleHelper.GetRoundedRectPath(badgeRect, 6);
+                using var path = AssemblyLineTester.Helpers.UIStyleHelper.GetRoundedRectPath(badgeRect, Scaled(6));
                 e.Graphics.FillPath(brush, path);
 
-                TextRenderer.DrawText(e.Graphics, status, AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold, badgeRect, textColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                TextRenderer.DrawText(e.Graphics, status, _pillFont, badgeRect, textColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding);
+
+                e.Handled = true;
+                return;
+            }
+
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && gridUsers.Columns[e.ColumnIndex].Name == "colAction" && e.Value is not null && e.Graphics is not null)
+            {
+                e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
+
+                string label = e.Value.ToString() ?? string.Empty;
+                if (label.Length == 0)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                // Outlined, not filled. The status column right next to it uses solid pills, and a
+                // control the operator can press has to read differently from a label they cannot.
+                bool activates = label == ActivateLabel;
+                bool hovered = e.RowIndex == _hoveredActionRow;
+
+                Color borderColor = activates ? Color.FromArgb(134, 239, 172) : Color.FromArgb(252, 165, 165);
+                Color labelColor = activates ? Color.FromArgb(21, 128, 61) : Color.FromArgb(185, 28, 28);
+                Color fillColor = hovered
+                    ? (activates ? Color.FromArgb(220, 252, 231) : Color.FromArgb(254, 226, 226))
+                    : Color.White;
+
+                Size labelSize = TextRenderer.MeasureText(label, _pillFont);
+                int btnHeight = Scaled(28);
+                int btnWidth = Math.Min(e.CellBounds.Width - Scaled(8), labelSize.Width + Scaled(28));
+                int bx = e.CellBounds.X + (e.CellBounds.Width - btnWidth) / 2;
+                int by = e.CellBounds.Y + (e.CellBounds.Height - btnHeight) / 2;
+                Rectangle btnRect = new(bx, by, btnWidth, btnHeight);
+
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                using (var fill = new SolidBrush(fillColor))
+                using (var shape = AssemblyLineTester.Helpers.UIStyleHelper.GetRoundedRectPath(btnRect, Scaled(6)))
+                {
+                    e.Graphics.FillPath(fill, shape);
+                    using var pen = new Pen(borderColor, 1.4f * _uiScale);
+                    e.Graphics.DrawPath(pen, shape);
+                }
+
+                TextRenderer.DrawText(e.Graphics, label, _pillFont, btnRect, labelColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding);
 
                 e.Handled = true;
             }
         }
+
+        /// Converts a pixel measurement picked at design time into this machine's pixels.
+        private int Scaled(int value) => Math.Max(1, (int)Math.Round(value * _uiScale));
 
 
 

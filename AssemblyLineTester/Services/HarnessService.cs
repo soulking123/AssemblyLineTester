@@ -69,10 +69,15 @@ namespace AssemblyLineTester.Services
 
                 SyncHarnessConnectors(db, newHarness.ProductHarnessId, selectedConnectorIds);
 
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Harness Database", "Create Harness",
+                    $"Harness '{newHarness.Name}' created for model {newHarness.ProductModel} with {selectedConnectorIds.Count} connectors.");
+
                 return (true, null);
             }
             catch (Exception ex)
             {
+                FileLogService.Error("HarnessService.AddHarness", $"Could not create harness '{harness.Name}'.", ex);
                 return (false, ex.Message);
             }
         }
@@ -103,10 +108,15 @@ namespace AssemblyLineTester.Services
 
                 SyncHarnessConnectors(db, existing.ProductHarnessId, selectedConnectorIds);
 
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Harness Database", "Update Harness",
+                    $"Harness '{existing.Name}' updated: {selectedConnectorIds.Count} connectors, {existing.ImagePaths.Count} images.");
+
                 return (true, null);
             }
             catch (Exception ex)
             {
+                FileLogService.Error("HarnessService.UpdateHarness", $"Could not update harness {harness.ProductHarnessId}.", ex);
                 return (false, ex.Message);
             }
         }
@@ -127,13 +137,20 @@ namespace AssemblyLineTester.Services
                     Directory.Delete(folderPath, recursive: true);
                 }
 
+                string harnessName = existing.Name;
+
                 db.ProductHarnesses.Remove(existing);
                 db.SaveChanges();
+
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Warning, "Harness Database", "Delete Harness",
+                    $"Harness '{harnessName}' deleted along with its image folder.");
 
                 return (true, null);
             }
             catch (Exception ex)
             {
+                FileLogService.Error("HarnessService.DeleteHarness", $"Could not delete harness {productHarnessId}.", ex);
                 return (false, ex.Message);
             }
         }

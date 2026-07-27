@@ -79,6 +79,7 @@ namespace AssemblyLineTester.Views.Pages
             if (isLoaded) return;
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 isLoaded = true;
             }
         }

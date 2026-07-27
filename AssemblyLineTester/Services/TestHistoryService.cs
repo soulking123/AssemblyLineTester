@@ -58,9 +58,23 @@ namespace AssemblyLineTester.Services
                 tx.Commit();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                try { tx.Rollback(); } catch { }
+                FileLogService.Error("TestHistoryService.DeleteReport",
+                    $"Could not delete report {reportId}; rolling back.", ex);
+
+                try
+                {
+                    tx.Rollback();
+                }
+                catch (Exception rollbackFailure)
+                {
+                    // A failed rollback can leave the report half-deleted, so it is worse than the
+                    // original error and must not be the one that disappears.
+                    FileLogService.Error("TestHistoryService.DeleteReport",
+                        $"Rollback failed after a delete error on report {reportId}.", rollbackFailure);
+                }
+
                 return false;
             }
         }

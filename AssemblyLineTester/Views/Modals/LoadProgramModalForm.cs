@@ -30,6 +30,15 @@ namespace AssemblyLineTester.Views.Modals
             RefreshConfigs();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (!DesignMode)
+            {
+                UIStyleHelper.ScaleExplicitFonts(this, UIStyleHelper.GetHostScaleFactor(this));
+            }
+        }
+
         private void SetupStyles()
         {
             UIStyleHelper.SetupCardRoundedEdges(pnlGridCard, 12, Color.FromArgb(226, 232, 240), 1.5f);

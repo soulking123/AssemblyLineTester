@@ -38,7 +38,7 @@ namespace AssemblyLineTester.Views.Pages
             btnSearch.Click += (s, ev) => { _currentPage = 1; LoadLogData(); };
             btnReset.Click += (s, ev) => { ResetFilters(); _currentPage = 1; LoadLogData(); };
             btnRefresh.Click += (s, ev) => LoadLogData();
-            btnExport.Click += (s, ev) => { if (!SessionManager.HasPermission("Action.SystemLog.Clear")) { MessageBox.Show("You do not have permission to clear/export system logs.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } MessageBox.Show("Log export functionality under construction.", "Info"); };
+            btnExport.Click += BtnExport_Click;
 
             DoubleBuffered = true;
         }
@@ -48,9 +48,95 @@ namespace AssemblyLineTester.Views.Pages
             base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                _logService.SeedSampleDataIfEmpty();
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 ResetFilters();
                 LoadLogData();
+            }
+        }
+
+        /// Offers the two things anyone asks this page for: the visible log as a spreadsheet, and a
+        /// bundle to send when something has gone wrong.
+        private void BtnExport_Click(object? sender, EventArgs e)
+        {
+            if (!SessionManager.HasPermission("Action.SystemLog.Clear"))
+            {
+                MessageBox.Show("You do not have permission to export system logs.", "Access Denied",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var choice = MessageBox.Show(
+                "Export the log entries currently listed to an Excel file?\r\n\r\n" +
+                "Choose No to build a diagnostics bundle instead - a zip containing the technical " +
+                "logs to send to support when something has gone wrong.",
+                "Export",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (choice == DialogResult.Yes) ExportFilteredExcel();
+            else if (choice == DialogResult.No) ExportDiagnosticsBundle();
+        }
+
+        private void ExportFilteredExcel()
+        {
+            using var dialog = new SaveFileDialog
+            {
+                Filter = "Excel workbook (*.xlsx)|*.xlsx",
+                FileName = $"system-log-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx"
+            };
+
+            if (dialog.ShowDialog() != DialogResult.OK) return;
+
+            Cursor previous = Cursor;
+            Cursor = Cursors.WaitCursor;
+            try
+            {
+                int exported = _logService.ExportToExcel(BuildFilterFromControls(), dialog.FileName);
+
+                new SystemLogService().Log(LogSeverity.Info, "System Log", "Export Log",
+                    $"{exported} log entries exported to Excel.");
+
+                MessageBox.Show($"{exported} log entries exported.", "Export complete",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("SystemLog.ExportFilteredExcel", "Excel export failed.", ex);
+                MessageBox.Show($"Export failed: {ex.Message}", "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor = previous;
+            }
+        }
+
+        private void ExportDiagnosticsBundle()
+        {
+            using var dialog = new SaveFileDialog
+            {
+                Filter = "Zip archive (*.zip)|*.zip",
+                FileName = DiagnosticsService.SuggestedFileName()
+            };
+
+            if (dialog.ShowDialog() != DialogResult.OK) return;
+
+            try
+            {
+                int files = DiagnosticsService.CreateBundle(dialog.FileName);
+
+                new SystemLogService().Log(LogSeverity.Info, "Application", "Export Diagnostics",
+                    $"Diagnostics bundle created with {files} log files.");
+
+                MessageBox.Show(
+                    $"Diagnostics bundle saved.\r\n\r\n{files} log file(s) plus a machine summary.\r\n" +
+                    "Send this file to support.",
+                    "Diagnostics bundle", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("SystemLog.ExportDiagnosticsBundle", "Bundle creation failed.", ex);
+                MessageBox.Show($"Could not build the bundle: {ex.Message}", "Diagnostics bundle",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -132,7 +218,7 @@ namespace AssemblyLineTester.Views.Pages
                         string.IsNullOrEmpty(log.UserName) ? "-" : log.UserName,
                         log.ActionName,
                         log.Message,
-                        string.IsNullOrEmpty(log.IPAddress) ? "-" : $"{log.IPAddress}   \u22ee");
+                        string.IsNullOrEmpty(log.MachineName) ? "-" : log.MachineName);
                 }
 
                 UpdateLegendLabels();
@@ -174,7 +260,7 @@ namespace AssemblyLineTester.Views.Pages
             gridData.Columns.Add("User", "User");
             gridData.Columns.Add("Action", "Action");
             gridData.Columns.Add("Description", "Description");
-            gridData.Columns.Add("IP", "IP Address");
+            gridData.Columns.Add("Machine", "Machine");
 
             SetColumnWidth(gridData, "No", 45, DataGridViewContentAlignment.MiddleCenter);
             SetColumnWidth(gridData, "Date", 165);
@@ -183,7 +269,7 @@ namespace AssemblyLineTester.Views.Pages
             SetColumnWidth(gridData, "User", 85);
             SetColumnWidth(gridData, "Action", 120);
             SetColumnWidth(gridData, "Description", 260);
-            SetColumnWidth(gridData, "IP", 130);
+            SetColumnWidth(gridData, "Machine", 130);
 
 
 

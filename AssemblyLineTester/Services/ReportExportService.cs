@@ -184,6 +184,10 @@ namespace AssemblyLineTester.Services
             var dir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
             wb.SaveAs(outputPath);
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Info, "Test Report", "Export Excel",
+                $"Report {detail.ReportNumber} exported to Excel ({detail.Details.Count} detail rows).");
         }
     }
 }

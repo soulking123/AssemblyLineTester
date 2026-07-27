@@ -32,6 +32,15 @@ namespace AssemblyLineTester.Views.Pages
             this.VisibleChanged += Dashboard_VisibleChanged;
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (!DesignMode)
+            {
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+            }
+        }
+
         private void Dashboard_VisibleChanged(object? sender, EventArgs e)
         {
             if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)

@@ -33,6 +33,15 @@ namespace AssemblyLineTester.Views
         private Settings? pageSettings;
         private UserManagement? pageUserManagement;
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (!DesignMode)
+            {
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+            }
+        }
+
         /// Initializes a new instance of the MainForm class.
         public MainForm()
         {
@@ -163,10 +172,13 @@ namespace AssemblyLineTester.Views
 
         private void InitializeUserInfo()
         {
-            string fullName = SessionManager.CurrentUser?.FullName ?? "Fally Kusuma";
-            if (!string.IsNullOrWhiteSpace(fullName)) lblUserName.Text = fullName;
-            string roleName = SessionManager.CurrentUser?.Role?.Name ?? "Administrator";
-            if (!string.IsNullOrWhiteSpace(roleName)) lblUserRole.Text = roleName;
+            // Neutral fallbacks. A session that failed to load its user should read as unknown;
+            // naming a real person, or captioning the header "Administrator", tells whoever is at
+            // the machine something about their access that is not true.
+            string fullName = SessionManager.CurrentUser?.FullName ?? string.Empty;
+            lblUserName.Text = string.IsNullOrWhiteSpace(fullName) ? "Unknown user" : fullName;
+            string roleName = SessionManager.CurrentUser?.Role?.Name ?? string.Empty;
+            lblUserRole.Text = string.IsNullOrWhiteSpace(roleName) ? "No role" : roleName;
             lblDateText.Text = DateTime.Now.ToString("dd MMM yyyy");
             lblTimeText.Text = DateTime.Now.ToString("hh:mm:ss tt");
         }
@@ -435,7 +447,7 @@ namespace AssemblyLineTester.Views
                 splitContainer1.Panel1.ResumeLayout(true);
                 splitContainer1.ResumeLayout(true);
                 this.ResumeLayout(true);
-                SendMessage(this.Handle, 0x000B, 1, 0); // WM_SETREDRAW true
+                SendMessage(this.Handle, 0x000B, 1, 0); 
                 this.Refresh();
             }
         }
@@ -492,6 +504,12 @@ namespace AssemblyLineTester.Views
             lblArrow.Text = "⌄";
             if (MessageBox.Show("Are you sure you want to log out of Assembly Line Tester?", "Confirm Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
+                // Recorded before the session is torn down, while the username is still known.
+                string? username = SessionManager.CurrentUser?.Username;
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Authentication", "Logout",
+                    $"User '{username ?? "unknown"}' signed out.", username);
+
                 IsLoggingOut = true;
                 this.Close();
             }

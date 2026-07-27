@@ -36,6 +36,10 @@ namespace AssemblyLineTester.Services
 
             // Copies the entire database page-by-page; safe even while source is in use.
             source.BackupDatabase(target);
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Info, "Database", "Backup Database",
+                $"Database backed up to '{destinationPath}'.");
         }
 
         // REPLACES THE LIVE DATABASE WITH THE CONTENTS OF A BACKUP FILE.
@@ -59,6 +63,13 @@ namespace AssemblyLineTester.Services
             // Re-apply migrations in case the restored file is from an older schema version.
             using var db = new AppDbContext();
             db.Database.Migrate();
+
+            // Written after the restore, so it lands in the database the operator now has. The
+            // file log carries the same line for the case where the restored file is unreadable.
+            FileLogService.Warn("DatabaseBackupService.Restore", $"Live database replaced from '{sourcePath}'.");
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning, "Database", "Restore Database",
+                $"Database restored from '{sourcePath}'. Previous data was replaced.");
         }
     }
 }
