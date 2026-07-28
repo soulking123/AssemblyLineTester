@@ -345,6 +345,22 @@ namespace AssemblyLineTester.Services
             }
         }
 
+        public CtaStringResult GetLastError()
+        {
+            if (!IsConnected) return null!;
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.GetLastError(_connectionId);
+                }
+                catch
+                {
+                    return null!;
+                }
+            }
+        }
+
         /// <summary>
         /// Sends an abort command to the connected CTA instrument to cancel active operations.
         /// </summary>
