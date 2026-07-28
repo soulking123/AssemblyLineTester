@@ -41,6 +41,10 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void SettingsUsersAndRolesPage_Load(object? sender, EventArgs e)
         {
+            if (!DesignMode)
+            {
+                UIStyleHelper.ScaleExplicitFonts(this, UIStyleHelper.GetHostScaleFactor(this));
+            }
             AdjustCardSizes();
             await LoadRolesAndPermissionsAsync();
         }

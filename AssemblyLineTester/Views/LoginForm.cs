@@ -1,5 +1,7 @@
 using AssemblyLineTester.Data;
+using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Views.Modals;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -7,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using static AssemblyLineTester.Models.SystemLog;
 
 namespace AssemblyLineTester.Views
 {
@@ -52,8 +55,8 @@ namespace AssemblyLineTester.Views
             // Disable tab stop on the login button so Tab cycles only between textboxes
             btnLogin.TabStop = false;
 
-            txtUsername.KeyDown += TxtUsername_EnterKeyDown;
-            txtPassword.KeyDown += TxtPassword_EnterKeyDown;
+            // KeyDown for both textboxes is already wired in the designer. Subscribing again here
+            // ran each handler twice per keystroke, so one Enter produced two sign-in attempts.
 
             // Wire up focus & hover styling to animate underline and icon colors to Gold without disappearing
             void UpdateUsernameVisuals()
@@ -167,6 +170,10 @@ namespace AssemblyLineTester.Views
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            if (!DesignMode)
+            {
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+            }
             int preference = DWMWCP_ROUND;
             if (DwmSetWindowAttribute(Handle, DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int)) != 0)
             {
@@ -210,11 +217,15 @@ namespace AssemblyLineTester.Views
         /// Programmatically triggers the login button click when the Enter key is pressed.
         private void TxtPassword_EnterKeyDown(object? sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
-            {
-                btnLogin.PerformClick();
-                e.SuppressKeyPress = true; // Prevents the Windows beep sound
-            }
+            if (e.KeyCode != Keys.Enter) return;
+
+            // Consumed before the click, not after. PerformClick opens a modal dialog and does not
+            // return until it is dismissed; leaving the key live for that whole time lets keyboard
+            // auto-repeat queue a second Enter that fires the moment the dialog closes.
+            e.Handled = true;
+            e.SuppressKeyPress = true; // also prevents the Windows beep sound
+
+            btnLogin.PerformClick();
         }
 
         /// Authenticates user credentials against the local SQLite database.
@@ -235,75 +246,98 @@ namespace AssemblyLineTester.Views
                 {
                     var user = db.Users
                         .Include(u => u.Role) // Eager load Role to set the Session details correctly
+                        .Include(u => u.Status) // Needed to name the status when a sign-in is refused
                         .FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+
+                    var logService = new SystemLogService();
 
                     if (user == null)
                     {
+                        // Logged under the typed name, not a user id: the point of the entry is to
+                        // show a run of attempts against names that do not exist.
+                        logService.Log(LogSeverity.Warning, "Authentication", "Login Failed",
+                            $"Failed sign-in for unknown username '{username}'.", username);
                         MessageBox.Show("Invalid Login");
                         return;
                     }
 
                     bool isCorrect = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
 
+                    if (!isCorrect)
+                    {
+                        logService.Log(LogSeverity.Warning, "Authentication", "Login Failed",
+                            $"Failed sign-in for '{user.Username}': incorrect password.", user.Username);
+                        MessageBox.Show("Invalid Login");
+                        return;
+                    }
+
+                    // Deliberately after the password check: someone who does not know the password
+                    // learns nothing about whether the account exists or what state it is in.
+                    UserStatus.SelfCheck();
+                    if (!UserStatus.CanSignIn(user.StatusId))
+                    {
+                        string statusName = user.Status?.Name ?? "not active";
+                        logService.Log(LogSeverity.Warning, "Authentication", "Login Blocked",
+                            $"Sign-in blocked for '{user.Username}': account is {statusName}.", user.Username);
+
+                        MessageBox.Show(
+                            $"This account is {statusName}. Contact your administrator.",
+                            "Sign-in blocked",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    logService.Log(LogSeverity.Info, "Authentication", "Login",
+                        $"User '{user.Username}' signed in.", user.Username);
+
+                    // A required password change is handled by MainForm once the user is inside.
+                    // Stopping them at the door reads as a rejected login; asking after they have
+                    // arrived reads as finishing setup, and blocks just as completely.
 
                     // update last login timestamp, save the logged-in user to the session, and close login form
-                    if (isCorrect)
+                    _instrument.Connect();
+                    // Update LastLogin field and persist to SQLite database
+                    user.LastLogin = DateTime.Now;
+                    db.SaveChanges();
+
+                    // Start global instrument connection status monitoring
+                    InstrumentService.StartMonitoring();
+
+                    // Save the logged-in user in memory
+                    SessionManager.SetSession(user);
+
+                    // Start tracking maintenance and operational hours
+                    MaintenanceService.StartTracking();
+
+                    MainForm dashboard = new();
+
+                    // Close login form to terminate the application process when dashboard closes
+                    dashboard.FormClosed += (s, args) =>
                     {
-
-                        _instrument.Connect();
-                        // Update LastLogin field and persist to SQLite database
-                        user.LastLogin = DateTime.Now;
-                        db.SaveChanges();
-
-                        //bool isConnected = _instrument.Connect();
-                        //if (!isConnected)
-                        //{
-                        //    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //    return;
-                        //}
-                        //Debug.WriteLine($"Bool : {isConnected}");
-
-                        // Start global instrument connection status monitoring
-                        InstrumentService.StartMonitoring();
-
-                        // Save the logged-in user in memory
-                        SessionManager.SetSession(user);
-
-                        // Start tracking maintenance and operational hours
-                        MaintenanceService.StartTracking();
-
-                        MainForm dashboard = new();
-                        
-                        // Close login form to terminate the application process when dashboard closes
-                        dashboard.FormClosed += (s, args) => 
+                        MaintenanceService.StopTrackingAndSave();
+                        InstrumentService.StopMonitoring(); // Stop monitoring
+                        if (dashboard.IsLoggingOut)
                         {
-                            MaintenanceService.StopTrackingAndSave();
-                            InstrumentService.StopMonitoring(); // Stop monitoring
-                            if (dashboard.IsLoggingOut)
-                            {
-                                SessionManager.ClearSession();
-                                txtUsername.Clear();
-                                txtPassword.Clear();
-                                this.Show();
-                                txtUsername.Focus();
-                            }
-                            else
-                            {
-                                this.Close();
-                            }
-                        };
-                        
-                        dashboard.Show();
-                        this.Hide();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Invalid Login");
-                    }
+                            SessionManager.ClearSession();
+                            txtUsername.Clear();
+                            txtPassword.Clear();
+                            this.Show();
+                            txtUsername.Focus();
+                        }
+                        else
+                        {
+                            this.Close();
+                        }
+                    };
+
+                    dashboard.Show();
+                    this.Hide();
                 }
             }
             catch (Exception ex)
             {
+                FileLogService.Error("LoginForm.BtnLogin_Click", $"Sign-in failed for '{username}'.", ex);
                 MessageBox.Show($"Authentication error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

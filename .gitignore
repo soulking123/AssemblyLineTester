@@ -5,3 +5,11 @@
 bin/
 obj/
 *.cache
+
+# Compiled installers are build output, not source, and run to a couple of hundred MB each.
+Installer/Output/
+
+# Signing material and issued licences must never reach a repository the team shares.
+*.pem
+*.snk
+*.lic

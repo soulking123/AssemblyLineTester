@@ -33,6 +33,17 @@ namespace AssemblyLineTester.Models
         [ForeignKey("StatusId")]
         public UserStatus Status { get; set; } = null!;
 
+        /// <summary>
+        /// Blocks the account from doing anything until the password has been changed.
+        /// </summary>
+        /// <remarks>
+        /// Set on the seeded administrator and on every account an administrator creates, because
+        /// in both cases the password was chosen by someone other than the person using it. The
+        /// seeded hash also ships inside the installer, so it is identical on every machine until
+        /// this flag is cleared.
+        /// </remarks>
+        public bool MustChangePassword { get; set; }
+
         public DateTime? LastLogin { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

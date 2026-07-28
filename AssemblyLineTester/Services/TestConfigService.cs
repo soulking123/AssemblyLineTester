@@ -60,6 +60,11 @@ namespace AssemblyLineTester.Services
                 }
 
                 db.SaveChanges();
+
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Test Configuration",
+                    existingProgram != null ? "Update Test Config" : "Create Test Config",
+                    $"Test config '{config.ConfigName}' saved for model {config.ProductModel} with {config.Nets.Count} nets.");
             }
         }
 
@@ -184,9 +189,16 @@ namespace AssemblyLineTester.Services
 
             if (cfg == null) return false;
 
+            int netCount = cfg.Nets.Count;
+
             db.TestConfigNets.RemoveRange(cfg.Nets);
             db.TestConfigurations.Remove(cfg);
             db.SaveChanges();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning, "Test Configuration", "Delete Test Config",
+                $"Test config '{configName}' deleted along with {netCount} nets.");
+
             return true;
         }
 

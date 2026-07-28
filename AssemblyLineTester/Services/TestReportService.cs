@@ -66,8 +66,15 @@ namespace AssemblyLineTester.Services
             var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId);
             if (report is null) return;
 
+            // Captured before the row goes, so the entry names the report rather than a bare id.
+            string reportNumber = report.ReportNumber;
+
             db.TestReports.Remove(report);
             db.SaveChanges();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning, "Test Report", "Delete Report",
+                $"Report {reportNumber} deleted.");
         }
 
         // Updates the editable header fields of an existing report. Does NOT touch
@@ -97,6 +104,10 @@ namespace AssemblyLineTester.Services
             }
 
             db.SaveChanges();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning, "Test Report", "Edit Report Header",
+                $"Report {report.ReportNumber} header updated: part {partNumber}, serial {serialNumber}, result {overallResultStr}.");
         }
 
         private static double? ParseLeadingNumber(string? s)
@@ -162,7 +173,13 @@ namespace AssemblyLineTester.Services
                     // use actual drawn height when positioning title
                     logoH = drawH;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    // The report is still usable without the logo, so this must not stop the export -
+                    // but a run of these explains why customer PDFs come out unbranded.
+                    FileLogService.Warn("TestReportService.DrawPageHeader",
+                        $"Logo '{logoPath}' could not be drawn: {ex.Message}");
+                }
             }
 
             g.DrawString("TEST REPORT", titleFont, XBrushes.Black, new XRect(margin, y + logoH + 6, 400, 26), XStringFormats.TopLeft);
@@ -545,7 +562,15 @@ namespace AssemblyLineTester.Services
                 var pg = doc.Pages[p];
                 using var gpage = XGraphics.FromPdfPage(pg);
                 // Reuse DrawPageHeader to render the logo/title/meta consistently (meta will get pageIndex and totalPages)
-                try { DrawPageHeader(gpage, pg, detail, p + 1, totalPages, logoPath, margin); } catch { }
+                try
+                {
+                    DrawPageHeader(gpage, pg, detail, p + 1, totalPages, logoPath, margin);
+                }
+                catch (Exception ex)
+                {
+                    FileLogService.Warn("TestReportService.GenerateReportPdf",
+                        $"Header could not be drawn on page {p + 1} of {totalPages}: {ex.Message}");
+                }
 
                 // footer line and confidential text centered
                 double footerY = pg.Height - margin + 6;
@@ -557,6 +582,10 @@ namespace AssemblyLineTester.Services
 
             // Save
             doc.Save(outputPath);
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Info, "Test Report", "Export PDF",
+                $"Report {detail.ReportNumber} exported to PDF ({totalPages} pages).");
         }
 
         public List<ReportTrendPoint> GetResultTrend(ReportFilter filter)
@@ -748,6 +777,15 @@ namespace AssemblyLineTester.Services
                 db.SaveChanges();
             }
 
+            // Drafts are not logged: an operator saving progress mid-test is noise, and the entry
+            // that matters is UpdateSerialNumber, where the draft is confirmed.
+            if (!isDraft)
+            {
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Test Report", "Save Report",
+                    $"Report {report.ReportNumber} saved for part {partNumber}: {overallResultStr}, {totalCount} nets.");
+            }
+
             return report.ReportId;
         }
 
@@ -798,6 +836,11 @@ namespace AssemblyLineTester.Services
 
             db.TestReports.RemoveRange(oldDrafts);
             db.SaveChanges();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Info, "Test Report", "Purge Drafts",
+                $"{oldDrafts.Count} draft reports older than {olderThanDays} days removed.");
+
             return oldDrafts.Count;
         }
 
@@ -811,6 +854,10 @@ namespace AssemblyLineTester.Services
             report.IsDraft = false;
 
             db.SaveChanges();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning, "Test Report", "Update Serial Number",
+                $"Report {report.ReportNumber} serial set to {report.SerialNumber} and confirmed out of draft.");
         }
 
         // test type and writes the pre-aggregated counts into ReportTestTypeSummary.

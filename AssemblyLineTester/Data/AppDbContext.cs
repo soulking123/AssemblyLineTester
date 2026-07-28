@@ -200,11 +200,14 @@ namespace AssemblyLineTester.Data
                 new UserStatus { Id = 3, Name = "Locked", Description = "User is locked out due to multiple failed login attempts" }
             );
 
-            // Seed initial users with secure BCrypt hashes
+            // One seeded account only. The developer accounts that used to sit here were personal
+            // logins, not data every customer should receive, and their hashes are in the git
+            // history forever.
+            //
+            // This hash is public by definition - it ships inside the installer and is identical on
+            // every machine - so the account is created with MustChangePassword set. It is a way in
+            // during commissioning, not a credential.
             const string adminHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS";
-            const string faizHash = "$2b$11$VAO3CvR8UbFBe9Pn2sNrG.1Wg5vA7FpwVqPyxQeME/5PGTQ4PYk2u";
-            const string tegarHash = "$2b$11$SsUZzVTYh87OPBYbFMYNO.JNJ44jLe3wBxLq2cg7WFPWl.yHAIi6O";
-            const string khenHash = "$2b$11$JzVT2cjdgorN0AVlQHKv5uNCt1fNbQvlW7J1nEqd0pk2hDCAihDPe";
 
             modelBuilder.Entity<User>().HasData(
                 new User
@@ -217,50 +220,9 @@ namespace AssemblyLineTester.Data
                     RoleId = 1, // Administrator
                     Department = "Engineering",
                     StatusId = 1, // Active
+                    MustChangePassword = true,
                     CreatedAt = DateTime.Parse("2026-03-01T08:00:00Z"),
                     UpdatedAt = DateTime.Parse("2026-03-01T08:00:00Z")
-                },
-                new User
-                {
-                    UserId = 2,
-                    Username = "faiz",
-                    PasswordHash = faizHash,
-                    FullName = "Faiz",
-                    CompanyId = "CAT0001",
-                    RoleId = 1, // Administrator
-                    Department = "Engineering",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-10T09:15:22"),
-                    LastLogin = DateTime.Parse("2026-03-15T10:28:41"),
-                    UpdatedAt = DateTime.Parse("2026-03-15T10:28:41")
-                },
-                new User
-                {
-                    UserId = 3,
-                    Username = "khen",
-                    PasswordHash = khenHash,
-                    FullName = "Khen",
-                    CompanyId = "CAT0002",
-                    RoleId = 3, // Engineer
-                    Department = "Engineering",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-11T08:23:15"),
-                    LastLogin = DateTime.Parse("2026-03-15T09:41:12"),
-                    UpdatedAt = DateTime.Parse("2026-03-15T09:41:12")
-                },
-                new User
-                {
-                    UserId = 4,
-                    Username = "tegar",
-                    PasswordHash = tegarHash,
-                    FullName = "Tegar",
-                    CompanyId = "CAT0003",
-                    RoleId = 2, // Operator
-                    Department = "Production",
-                    StatusId = 1, // Active
-                    CreatedAt = DateTime.Parse("2026-03-12T14:10:05"),
-                    LastLogin = DateTime.Parse("2026-03-15T09:55:33"),
-                    UpdatedAt = DateTime.Parse("2026-03-15T09:55:33")
                 }
             );
 
@@ -283,75 +245,7 @@ namespace AssemblyLineTester.Data
                 new TestType { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE" }
             );
 
-            // Seed initial Product Harnesses
-            modelBuilder.Entity<ProductHarness>().HasData(
-                new ProductHarness
-                {
-                    ProductHarnessId = 1,
-                    Name = "Main Engine Harness 6020",
-                    ProductModel = "6020",
-                    ProductType = "AC",
-                    Area = "Engine Control",
-                    LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
-                    ImagePaths = new List<string> { @"Assets/img/Harness/6040.png" },
-                    ConnectorListName = new List<string> { "J1", "J2" }
-                },
-                new ProductHarness
-                {
-                    ProductHarnessId = 2,
-                    Name = "Cabin Interior Harness 6030",
-                    ProductModel = "6030",
-                    ProductType = "AC",
-                    Area = "Cabin Interior",
-                    LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
-                    ConnectorListName = new List<string> { "J1" }
-                },
-                new ProductHarness
-                {
-                    ProductHarnessId = 3,
-                    Name = "Chassis Harness 6040",
-                    ProductModel = "6040",
-                    ProductType = "AC",
-                    Area = "Chassis",
-                    LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
-                    ImagePaths = new List<string> { @"Assets/img/Harness/6040.png" },
-                    ConnectorListName = new List<string> { "J1", "J2", "J3" }
-                },
-                new ProductHarness
-                {
-                    ProductHarnessId = 4,
-                    Name = "Dashboard Harness 6060",
-                    ProductModel = "6060",
-                    ProductType = "AC",
-                    Area = "Dashboard",
-                    LastUpdate = DateTime.Parse("2026-06-01T08:00:00Z"),
-                    ConnectorListName = new List<string> { "J1" }
-                }
-            );
-
-            // Seed initial Connectors (standalone catalog items - linked to harnesses via HarnessConnector below)
-            modelBuilder.Entity<Connector>().HasData(
-                new Connector { ConnectorId = 1, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" },
-                new Connector { ConnectorId = 2, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" },
-                new Connector { ConnectorId = 3, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 32, WireSize = "20 AWG", CurrentRating = 3, MountingStyle = "Free Hanging" },
-                new Connector { ConnectorId = 4, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" },
-                new Connector { ConnectorId = 5, Perf = "Standard", PartNumber = "D507F2", ContactType = "Male", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" },
-                new Connector { ConnectorId = 6, Perf = "Standard", PartNumber = "D507F3", ContactType = "Female", ContactQuantity = 16, WireSize = "22 AWG", CurrentRating = 2, MountingStyle = "Panel Mount" },
-                new Connector { ConnectorId = 7, Perf = "Standard", PartNumber = "D507F1", ContactType = "Female", ContactQuantity = 64, WireSize = "18 AWG", CurrentRating = 5, MountingStyle = "Panel Mount" }
-            );
-
-            // Seed initial harness<->connector links (Position = J1, J2, ... order)
-            modelBuilder.Entity<HarnessConnector>().HasData(
-                new HarnessConnector { HarnessConnectorId = 1, ProductHarnessId = 1, ConnectorId = 1, Position = 1 },
-                new HarnessConnector { HarnessConnectorId = 2, ProductHarnessId = 1, ConnectorId = 2, Position = 2 },
-                new HarnessConnector { HarnessConnectorId = 3, ProductHarnessId = 2, ConnectorId = 3, Position = 1 },
-                new HarnessConnector { HarnessConnectorId = 4, ProductHarnessId = 3, ConnectorId = 4, Position = 1 },
-                new HarnessConnector { HarnessConnectorId = 5, ProductHarnessId = 3, ConnectorId = 5, Position = 2 },
-                new HarnessConnector { HarnessConnectorId = 6, ProductHarnessId = 3, ConnectorId = 6, Position = 3 },
-                new HarnessConnector { HarnessConnectorId = 7, ProductHarnessId = 4, ConnectorId = 7, Position = 1 }
-            );
-
-
+            // Seed initial role permissions
             modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());
         }
 

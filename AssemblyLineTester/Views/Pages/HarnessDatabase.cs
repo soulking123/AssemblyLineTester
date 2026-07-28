@@ -84,6 +84,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 dataGridViewList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
                 dataGridViewList.ScrollBars = ScrollBars.Both;
 
@@ -503,9 +504,12 @@ namespace AssemblyLineTester.Views.Pages
                     pic.SizeMode = PictureBoxSizeMode.Zoom;
                     pic.Image = Image.FromFile(paths[index]);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // corrupt/unreadable file - leave the panel blank instead of crashing
+                    // corrupt/unreadable file - leave the panel blank instead of crashing, but name
+                    // the file, or a missing harness image looks like a bug in the page instead.
+                    FileLogService.Warn("HarnessDatabase.ShowImage",
+                        $"Image '{paths[index]}' could not be loaded: {ex.Message}");
                 }
             }
 

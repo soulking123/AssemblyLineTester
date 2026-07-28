@@ -52,6 +52,7 @@ namespace AssemblyLineTester.Views.Pages
 
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
+                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 var configService = new TestConfigService();
                 var activeConfig = configService.GetActiveConfig();
                 if (activeConfig != null)
@@ -313,7 +314,7 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return;
             }

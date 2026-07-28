@@ -129,15 +129,30 @@ namespace AssemblyLineTester.Services
             using var db = new AppDbContext();
             var existing = db.RolePermissions.Where(rp => rp.RoleId == roleId).ToList();
 
+            var changed = new List<string>();
+
             foreach (var rp in existing)
             {
-                if (updatedToggles.TryGetValue(rp.PermissionKey, out bool granted))
+                if (updatedToggles.TryGetValue(rp.PermissionKey, out bool granted) && rp.IsGranted != granted)
                 {
+                    // Only the keys that actually moved go in the entry. Listing all forty every
+                    // time would bury the one that mattered.
+                    changed.Add($"{rp.PermissionKey}={(granted ? "on" : "off")}");
                     rp.IsGranted = granted;
                 }
             }
 
             db.SaveChanges();
+
+            if (changed.Count > 0)
+            {
+                string roleName = db.Roles.Where(r => r.Id == roleId).Select(r => r.Name).FirstOrDefault()
+                                  ?? roleId.ToString();
+
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Warning, "User Management", "Update Role Permissions",
+                    $"Permissions for role '{roleName}' changed: {string.Join(", ", changed)}");
+            }
 
             // If updating the active user's role, refresh the SessionManager cache immediately
             if (SessionManager.CurrentUser != null && SessionManager.CurrentUser.RoleId == roleId)
@@ -163,6 +178,13 @@ namespace AssemblyLineTester.Services
             }
 
             db.SaveChanges();
+
+            string resetRoleName = db.Roles.Where(r => r.Id == roleId).Select(r => r.Name).FirstOrDefault()
+                                   ?? roleId.ToString();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning, "User Management", "Reset Role Defaults",
+                $"Role '{resetRoleName}' reset to default permissions ({existing.Count} keys).");
 
             if (SessionManager.CurrentUser != null && SessionManager.CurrentUser.RoleId == roleId)
             {

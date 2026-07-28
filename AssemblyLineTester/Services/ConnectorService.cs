@@ -96,6 +96,10 @@ namespace AssemblyLineTester.Services
                 db.SaveChanges();
             }
 
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Info, "Harness Database", "Create Connector",
+                $"Connector '{connector.PartNumber}' created with {sourceImagePaths.Count} images.");
+
             return (connector, null);
         }
 
@@ -127,8 +131,17 @@ namespace AssemblyLineTester.Services
                         string target = Path.Combine(folderFull, fileName);
                         if (File.Exists(target))
                         {
-                            try { File.Delete(target); }
-                            catch { /* file locked/in use - non-fatal */ }
+                            try
+                            {
+                                File.Delete(target);
+                            }
+                            catch (Exception ex)
+                            {
+                                // File locked or in use - non-fatal, but the image stays on disk
+                                // after the user asked for it to go, and that needs a trail.
+                                FileLogService.Warn("ConnectorService.UpdateConnector",
+                                    $"Image '{target}' could not be deleted: {ex.Message}");
+                            }
                         }
                     }
                 }
@@ -142,6 +155,11 @@ namespace AssemblyLineTester.Services
             }
 
             db.SaveChanges();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Info, "Harness Database", "Update Connector",
+                $"Connector '{existing.PartNumber}' updated: {newSourceImagePaths.Count} images added, {removedImageFileNames.Count} removed.");
+
             return (true, null);
         }
 
@@ -153,6 +171,7 @@ namespace AssemblyLineTester.Services
             if (existing == null) return (false, "Connector not found.");
 
             string? imagePath = existing.ImagePath;
+            string partNumber = existing.PartNumber;
 
             db.Connectors.Remove(existing);
             db.SaveChanges();
@@ -162,10 +181,23 @@ namespace AssemblyLineTester.Services
                 string folderFull = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, imagePath);
                 if (Directory.Exists(folderFull))
                 {
-                    try { Directory.Delete(folderFull, recursive: true); }
-                    catch { /* non-fatal if a file is locked */ }
+                    try
+                    {
+                        Directory.Delete(folderFull, recursive: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Non-fatal if a file is locked, but the folder is now orphaned and someone
+                        // has to be able to find out why the disk did not shrink.
+                        FileLogService.Warn("ConnectorService.DeleteConnector",
+                            $"Connector row removed but image folder '{folderFull}' could not be deleted: {ex.Message}");
+                    }
                 }
             }
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning, "Harness Database", "Delete Connector",
+                $"Connector '{partNumber}' deleted.");
 
             return (true, null);
         }

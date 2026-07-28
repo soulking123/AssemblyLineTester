@@ -103,9 +103,13 @@ namespace AssemblyLineTester.Services
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Suppress database connection write issues on application shutdown
+                // Runs during shutdown, so the database may already be closing. Not worth stopping
+                // the exit for, but silently losing the operating hours would make the maintenance
+                // counter drift with nothing to explain it.
+                FileLogService.Warn("MaintenanceService.StopTrackingAndSave",
+                    $"Operating hours could not be saved: {ex.Message}");
             }
             _unsavedSeconds = 0;
         }

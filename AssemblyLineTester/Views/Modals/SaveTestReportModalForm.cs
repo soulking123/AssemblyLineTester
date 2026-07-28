@@ -94,6 +94,15 @@ namespace AssemblyLineTester.Views.Modals
             UpdateFooterButtonPositions();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (!DesignMode)
+            {
+                UIStyleHelper.ScaleExplicitFonts(this, UIStyleHelper.GetHostScaleFactor(this));
+            }
+        }
+
         private void BtnConfirmSave_Click(object? sender, EventArgs e)
         {
             string finalOp = SessionManager.CurrentUser?.FullName ?? "Unknown";
