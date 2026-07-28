@@ -67,7 +67,7 @@ namespace AssemblyLineTester.Views.Pages
             lblStartTimeKey = new Label();
             lblStartTimeVal = new Label();
             lblElapsedKey = new Label();
-            lblElapsedVal = new Label();
+            lblElapsedTimeVal = new Label();
             lblEstimatedKey = new Label();
             lblEstimatedVal = new Label();
             lblEndTimeKey = new Label();
@@ -81,10 +81,9 @@ namespace AssemblyLineTester.Views.Pages
             btnViewWiringDiagram = new Button();
             lblLiveDetailsTitle = new Label();
             cardTestSummary = new Panel();
-            lblSummaryText = new Label();
+            listBoxTestSummary = new ListBox();
             lblTestSummaryTitle = new Label();
             cardNotes = new Panel();
-            txtNotes = new TextBox();
             lblNotesTitle = new Label();
             tblMain.SuspendLayout();
             pnlTopBar.SuspendLayout();
@@ -609,7 +608,7 @@ namespace AssemblyLineTester.Views.Pages
             tblStatusLabels.Controls.Add(lblStartTimeKey, 0, 0);
             tblStatusLabels.Controls.Add(lblStartTimeVal, 1, 0);
             tblStatusLabels.Controls.Add(lblElapsedKey, 0, 1);
-            tblStatusLabels.Controls.Add(lblElapsedVal, 1, 1);
+            tblStatusLabels.Controls.Add(lblElapsedTimeVal, 1, 1);
             tblStatusLabels.Controls.Add(lblEstimatedKey, 0, 2);
             tblStatusLabels.Controls.Add(lblEstimatedVal, 1, 2);
             tblStatusLabels.Controls.Add(lblEndTimeKey, 0, 3);
@@ -664,18 +663,18 @@ namespace AssemblyLineTester.Views.Pages
             lblElapsedKey.Text = "Elapsed Time :";
             lblElapsedKey.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblElapsedVal
+            // lblElapsedTimeVal
             // 
-            lblElapsedVal.AutoSize = true;
-            lblElapsedVal.Dock = DockStyle.Fill;
-            lblElapsedVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblElapsedVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblElapsedVal.Location = new Point(258, 92);
-            lblElapsedVal.Name = "lblElapsedVal";
-            lblElapsedVal.Size = new Size(378, 92);
-            lblElapsedVal.TabIndex = 3;
-            lblElapsedVal.Text = "00:02:15";
-            lblElapsedVal.TextAlign = ContentAlignment.MiddleRight;
+            lblElapsedTimeVal.AutoSize = true;
+            lblElapsedTimeVal.Dock = DockStyle.Fill;
+            lblElapsedTimeVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblElapsedTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
+            lblElapsedTimeVal.Location = new Point(258, 92);
+            lblElapsedTimeVal.Name = "lblElapsedTimeVal";
+            lblElapsedTimeVal.Size = new Size(378, 92);
+            lblElapsedTimeVal.TabIndex = 3;
+            lblElapsedTimeVal.Text = "00:02:15";
+            lblElapsedTimeVal.TextAlign = ContentAlignment.MiddleRight;
             // 
             // lblEstimatedKey
             // 
@@ -733,12 +732,12 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblStatusRunning.Dock = DockStyle.Top;
             lblStatusRunning.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblStatusRunning.ForeColor = Color.FromArgb(40, 167, 69);
+            lblStatusRunning.ForeColor = Color.Gray;
             lblStatusRunning.Location = new Point(10, 56);
             lblStatusRunning.Name = "lblStatusRunning";
             lblStatusRunning.Size = new Size(639, 71);
             lblStatusRunning.TabIndex = 1;
-            lblStatusRunning.Text = "RUNNING";
+            lblStatusRunning.Text = "Idle";
             lblStatusRunning.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblTestStatusTitle
@@ -840,7 +839,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardTestSummary
             // 
             cardTestSummary.BackColor = Color.White;
-            cardTestSummary.Controls.Add(lblSummaryText);
+            cardTestSummary.Controls.Add(listBoxTestSummary);
             cardTestSummary.Controls.Add(lblTestSummaryTitle);
             cardTestSummary.Dock = DockStyle.Fill;
             cardTestSummary.Location = new Point(1340, 5);
@@ -850,16 +849,15 @@ namespace AssemblyLineTester.Views.Pages
             cardTestSummary.Size = new Size(657, 955);
             cardTestSummary.TabIndex = 0;
             // 
-            // lblSummaryText
+            // listBoxTestSummary
             // 
-            lblSummaryText.Dock = DockStyle.Fill;
-            lblSummaryText.Font = new Font("Segoe UI", 9.2F);
-            lblSummaryText.ForeColor = Color.FromArgb(51, 65, 85);
-            lblSummaryText.Location = new Point(10, 56);
-            lblSummaryText.Name = "lblSummaryText";
-            lblSummaryText.Size = new Size(637, 889);
-            lblSummaryText.TabIndex = 1;
-            lblSummaryText.Text = "Continuity Test (212/212 ✔️)\r\nShort Circuit Test (212/212 ✔️)\r\nInsulation Test (212/212 ⏳)\r\nFunctional Test (64/212 ⏳)\r\nFinal Verification (0/212)";
+            listBoxTestSummary.FormattingEnabled = true;
+            listBoxTestSummary.HorizontalScrollbar = true;
+            listBoxTestSummary.Location = new Point(12, 59);
+            listBoxTestSummary.Name = "listBoxTestSummary";
+            listBoxTestSummary.ScrollAlwaysVisible = true;
+            listBoxTestSummary.Size = new Size(372, 444);
+            listBoxTestSummary.TabIndex = 2;
             // 
             // lblTestSummaryTitle
             // 
@@ -876,7 +874,6 @@ namespace AssemblyLineTester.Views.Pages
             // cardNotes
             // 
             cardNotes.BackColor = Color.White;
-            cardNotes.Controls.Add(txtNotes);
             cardNotes.Controls.Add(lblNotesTitle);
             cardNotes.Dock = DockStyle.Fill;
             cardNotes.Location = new Point(2007, 2);
@@ -885,17 +882,6 @@ namespace AssemblyLineTester.Views.Pages
             cardNotes.Padding = new Padding(10);
             cardNotes.Size = new Size(658, 955);
             cardNotes.TabIndex = 1;
-            // 
-            // txtNotes
-            // 
-            txtNotes.BorderStyle = BorderStyle.None;
-            txtNotes.Dock = DockStyle.Fill;
-            txtNotes.Font = new Font("Segoe UI", 9.5F);
-            txtNotes.Location = new Point(10, 57);
-            txtNotes.Multiline = true;
-            txtNotes.Name = "txtNotes";
-            txtNotes.Size = new Size(638, 888);
-            txtNotes.TabIndex = 1;
             // 
             // lblNotesTitle
             // 
@@ -947,7 +933,6 @@ namespace AssemblyLineTester.Views.Pages
             pnlLiveDetailsHeader.ResumeLayout(false);
             cardTestSummary.ResumeLayout(false);
             cardNotes.ResumeLayout(false);
-            cardNotes.PerformLayout();
             ResumeLayout(false);
 
         }
@@ -993,7 +978,7 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Label lblStartTimeKey;
         private System.Windows.Forms.Label lblStartTimeVal;
         private System.Windows.Forms.Label lblElapsedKey;
-        private System.Windows.Forms.Label lblElapsedVal;
+        private System.Windows.Forms.Label lblElapsedTimeVal;
         private System.Windows.Forms.Label lblEstimatedKey;
         private System.Windows.Forms.Label lblEstimatedVal;
         private System.Windows.Forms.Label lblEndTimeKey;
@@ -1007,10 +992,10 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.DataGridView gridLiveDetails;
         private System.Windows.Forms.Label lblLiveDetailsTitle;
         private System.Windows.Forms.Panel cardTestSummary;
-        private System.Windows.Forms.Label lblSummaryText;
         private System.Windows.Forms.Label lblTestSummaryTitle;
         private System.Windows.Forms.Panel cardNotes;
-        private System.Windows.Forms.TextBox txtNotes;
         private System.Windows.Forms.Label lblNotesTitle;
+        private ListBox listBoxTestSummary;
+        private TextBox textBox1;
     }
 }

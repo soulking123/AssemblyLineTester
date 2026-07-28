@@ -2,6 +2,7 @@ using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
+using CtaDotNet.Enums;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,8 +10,13 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Xml.Linq;
+
+using Timer = System.Windows.Forms.Timer;
+
+
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -23,6 +29,10 @@ namespace AssemblyLineTester.Views.Pages
         private double _continuityResistance;
         private int? _currentReportId;
         private System.Threading.CancellationTokenSource? _testCts;
+        private Stopwatch _testStopwatch = new Stopwatch();
+        private Timer _elapsedTimer = new Timer();
+        private DateTime _startTime;
+        private DateTime _endTime;
 
         public TestExecution()
         {
@@ -32,6 +42,8 @@ namespace AssemblyLineTester.Views.Pages
             SetupDiagramPointers();
             btnLoadProgram.Click += BtnLoadProgram_Click;
             SetupEvents();
+            SetupTimer();
+
         }
 
         protected override void OnLoad(EventArgs e)
@@ -60,6 +72,39 @@ namespace AssemblyLineTester.Views.Pages
 
                 }
             }
+        }
+
+
+        private void SetupTimer()
+        {
+            // Set timer to trigger every 1 second (1000 ms)
+            _elapsedTimer.Interval = 1000;
+            _elapsedTimer.Tick += ElapsedTimer_Tick;
+        }
+        private void ElapsedTimer_Tick(object sender, EventArgs e)
+        {
+            // Update Elapsed Time display every 1 second (HH:mm:ss format)
+            lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
+        }
+
+        private void OnTestFinishedSuccessfully()
+        {
+            // Update Status
+            lblStatusRunning.Text = "Finished";
+            lblStatusRunning.ForeColor = Color.Green;
+            // Stop Stopwatch & Timer
+            StopTestTiming();
+        }
+        private void StopTestTiming()
+        {
+            // 1. Stop Timer & Stopwatch
+            _testStopwatch.Stop();
+            _elapsedTimer.Stop();
+            // 2. Record & Display End Time
+            _endTime = DateTime.Now;
+            lblEndTimeVal.Text = _endTime.ToString("dd MMM yyyy hh:mm:ss tt");
+            // 3. Ensure final exact elapsed time is displayed
+            lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
         // Populates the filter dropdowns at the top of the page (Product Model, Type, Area, etc).
@@ -185,7 +230,18 @@ namespace AssemblyLineTester.Views.Pages
             try
             {
                 TestConfiguration activeConfig = _configService.GetActiveConfig();
+                lblStatusRunning.Text = "Running";
+                lblStatusRunning.ForeColor = Color.Yellow;
+                _startTime = DateTime.Now;
+                lblStartTimeVal.Text = _startTime.ToString("dd MMM yyyy hh:mm:ss tt");
+                lblEndTimeVal.Text = "-";
+
+                _testStopwatch.Reset();
+                _testStopwatch.Start();
+                _elapsedTimer.Start();
                 await Task.Run(() => ExecuteTest(activeConfig), token);
+                if (token.IsCancellationRequested) return;
+
 
                 PopulateLiveDetailsGrid(_loadedRows);
                 try
@@ -198,6 +254,8 @@ namespace AssemblyLineTester.Views.Pages
                         cmbProductModel.Text, cmbProductType.Text, cmbArea.Text, cmbEcnNo.Text, "1.0",
                         cmbPartNumber.Text, DateTime.Now, _loadedRows, overallResult);
 
+                    ShowSummary(_loadedRows, overallResult);
+
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
                 catch (Exception ex)
@@ -207,6 +265,14 @@ namespace AssemblyLineTester.Views.Pages
                         "Test completed but failed to record it to Test History automatically.\nYou can still save it manually via Save Report.",
                         "Auto-Save Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
+                if (token.IsCancellationRequested) return;
+                lblStatusRunning.Text = "Finished";
+                lblStatusRunning.ForeColor = Color.Green;
+                lblElapsedTimeVal.Text = "00:00:00";
+
+                OnTestFinishedSuccessfully();
+
+
             }
             catch (OperationCanceledException)
             {
@@ -255,6 +321,7 @@ namespace AssemblyLineTester.Views.Pages
             if (token.IsCancellationRequested) return;
             Debug.WriteLine("Run Test");
             var testResult = _instrument.RunSingleTest(false, true);
+            string testResultStatusText = testResult.TestResultCode.ToString();
 
             if (token.IsCancellationRequested) return;
 
@@ -319,12 +386,53 @@ namespace AssemblyLineTester.Views.Pages
                     }
                 }
             }
-            string testStatusText = testResult.TestResultCode == CtaDotNet.Enums.extEnumTTesterAccessTestResult.ctatrPassed
-            ? "PASSED"
-            : "FAILED or INCOMPLETE";
 
         }
 
+        private void ShowSummary(List<LiveTestDetailRowDto> rows, string overallResultStatus)
+        {
+            var summaryList = rows
+             .GroupBy(r => r.TestType)
+             .Select(g => new
+             {
+                 TestType = g.Key,
+                 Total = g.Count(),
+                 Pass = g.Count(r => r.Status.ToString().ToUpper() == "PASS"),
+                 Fail = g.Count(r => r.Status.ToString().ToUpper() == "FAIL")
+             })
+             .ToList();
+
+            var errorResult = _instrument.GetTestErrors().ObjectReturnValue;
+            listBoxTestSummary.Items.Clear();
+
+            listBoxTestSummary.Items.Add($"TEST RESULT = {overallResultStatus}");
+
+            foreach (var summary in summaryList)
+            {
+                if (summary.Pass == summary.Total)
+                {
+                    listBoxTestSummary.Items.Add($"✔ {summary.TestType} ({summary.Pass}/{summary.Total})");
+                }
+                else
+                {
+                    listBoxTestSummary.Items.Add($"✖ {summary.TestType} ({summary.Pass}/{summary.Total})");
+                }
+            }
+
+            // Add Error Messages
+            if (errorResult?.ErrorList != null && errorResult.ErrorList.Count > 0)
+            {
+                
+                
+                listBoxTestSummary.Items.Add("");
+                listBoxTestSummary.Items.Add("TEST ERRORS");
+                listBoxTestSummary.Items.Add("");
+                foreach (var error in errorResult.ErrorList)
+                {
+                    listBoxTestSummary.Items.Add(error.Message);
+                }
+            }
+        }
         private async void btnStopTest_Click(object sender, EventArgs e)
         {
             _testCts?.Cancel();
@@ -333,6 +441,14 @@ namespace AssemblyLineTester.Views.Pages
             var abortResult = await Task.Run(() => _instrument.Abort());
             if (abortResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
             {
+                lblStatusRunning.Text = "Aborted";
+                lblStatusRunning.ForeColor = Color.Red;
+                StopTestTiming();
+                lblStartTimeVal.Text = "-";
+                lblElapsedTimeVal.Text = "-";
+                lblEndTimeVal.Text = "-";
+                gridLiveDetails.Rows.Clear();
+                _loadedRows.Clear();
                 MessageBox.Show("Test operation successfully aborted.", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
@@ -371,6 +487,10 @@ namespace AssemblyLineTester.Views.Pages
 
             if (modal.ShowDialog(this) == DialogResult.OK)
             {
+                lblStatusRunning.Text = "Idle";
+                lblStatusRunning.ForeColor = Color.Gray;
+                listBoxTestSummary.Items.Clear();
+
                 MessageBox.Show("Test Report saved successfully to the database!\nIt can now be viewed in Reports and Test History.", "Report Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -393,10 +513,8 @@ namespace AssemblyLineTester.Views.Pages
 
                 ApplyStatusStyle(gridLiveDetails.Rows[idx], row.Status);
 
-                Debug.WriteLine(row.MeasuredValue);
+                //Debug.WriteLine(row.MeasuredValue);
             }
-
-            Debug.WriteLine("Update Grid 3");
             gridLiveDetails.Refresh();
         }
       
