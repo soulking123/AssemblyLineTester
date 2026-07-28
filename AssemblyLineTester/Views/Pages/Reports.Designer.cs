@@ -1,4 +1,4 @@
-namespace AssemblyLineTester.Views.Pages
+﻿namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -120,10 +120,9 @@ namespace AssemblyLineTester.Views.Pages
             gridReports = new DataGridView();
             colNo = new DataGridViewTextBoxColumn();
             colReportName = new DataGridViewTextBoxColumn();
-            colReportType = new DataGridViewTextBoxColumn();
             colDateGenerated = new DataGridViewTextBoxColumn();
             colGeneratedBy = new DataGridViewTextBoxColumn();
-            colSize = new DataGridViewTextBoxColumn();
+            colResult = new DataGridViewTextBoxColumn();
             colAction = new DataGridViewTextBoxColumn();
             tblPagination = new TableLayoutPanel();
             lblPageInfo = new Label();
@@ -1016,7 +1015,7 @@ namespace AssemblyLineTester.Views.Pages
             tblCenter.RowCount = 3;
             tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
             tblCenter.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 31F));
+            tblCenter.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tblCenter.Size = new Size(940, 457);
             tblCenter.TabIndex = 0;
             // 
@@ -1051,7 +1050,7 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             gridReports.ColumnHeadersHeight = 48;
             gridReports.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridReports.Columns.AddRange(new DataGridViewColumn[] { colNo, colReportName, colReportType, colDateGenerated, colGeneratedBy, colSize, colAction });
+            gridReports.Columns.AddRange(new DataGridViewColumn[] { colNo, colReportName, colDateGenerated, colGeneratedBy, colResult, colAction });
             dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle7.BackColor = Color.White;
             dataGridViewCellStyle7.Font = new Font("Segoe UI", 9F);
@@ -1094,16 +1093,6 @@ namespace AssemblyLineTester.Views.Pages
             colReportName.Name = "colReportName";
             colReportName.ReadOnly = true;
             // 
-            // colReportType
-            // 
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            colReportType.DefaultCellStyle = dataGridViewCellStyle3;
-            colReportType.FillWeight = 70F;
-            colReportType.HeaderText = "Report Type";
-            colReportType.MinimumWidth = 90;
-            colReportType.Name = "colReportType";
-            colReportType.ReadOnly = true;
-            // 
             // colDateGenerated
             // 
             dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -1122,15 +1111,15 @@ namespace AssemblyLineTester.Views.Pages
             colGeneratedBy.Name = "colGeneratedBy";
             colGeneratedBy.ReadOnly = true;
             // 
-            // colSize
+            // colResult
             // 
-            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleRight;
-            colSize.DefaultCellStyle = dataGridViewCellStyle5;
-            colSize.FillWeight = 45F;
-            colSize.HeaderText = "Size";
-            colSize.MinimumWidth = 60;
-            colSize.Name = "colSize";
-            colSize.ReadOnly = true;
+            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            colResult.DefaultCellStyle = dataGridViewCellStyle5;
+            colResult.FillWeight = 60F;
+            colResult.HeaderText = "Result";
+            colResult.MinimumWidth = 80;
+            colResult.Name = "colResult";
+            colResult.ReadOnly = true;
             // 
             // colAction
             // 
@@ -1144,6 +1133,8 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblPagination
             // 
+            tblPagination.AutoSize = true;
+            tblPagination.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tblPagination.ColumnCount = 2;
             tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
@@ -1154,7 +1145,7 @@ namespace AssemblyLineTester.Views.Pages
             tblPagination.Margin = new Padding(0);
             tblPagination.Name = "tblPagination";
             tblPagination.RowCount = 1;
-            tblPagination.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblPagination.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tblPagination.Size = new Size(940, 31);
             tblPagination.TabIndex = 2;
             // 
@@ -1169,6 +1160,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPageInfo.TabIndex = 0;
             lblPageInfo.Text = "Showing 1 to 10 of 18 entries";
             lblPageInfo.TextAlign = ContentAlignment.MiddleLeft;
+            lblPageInfo.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // flpPageButtons
             // 
@@ -1179,12 +1171,15 @@ namespace AssemblyLineTester.Views.Pages
             flpPageButtons.Controls.Add(btnPage1);
             flpPageButtons.Controls.Add(btnPagePrev);
             flpPageButtons.Controls.Add(btnPageFirst);
+            flpPageButtons.AutoSize = true;
+            flpPageButtons.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             flpPageButtons.Dock = DockStyle.Fill;
             flpPageButtons.FlowDirection = FlowDirection.RightToLeft;
             flpPageButtons.Location = new Point(470, 2);
             flpPageButtons.Margin = new Padding(0, 2, 0, 0);
             flpPageButtons.Name = "flpPageButtons";
             flpPageButtons.Size = new Size(470, 29);
+            flpPageButtons.WrapContents = false;
             flpPageButtons.TabIndex = 1;
             // 
             // btnPageLast
@@ -2644,13 +2639,12 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colReportName;
 
-        private System.Windows.Forms.DataGridViewTextBoxColumn colReportType;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colDateGenerated;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colGeneratedBy;
 
-        private System.Windows.Forms.DataGridViewTextBoxColumn colSize;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colResult;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colAction;
 

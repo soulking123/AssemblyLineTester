@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -199,7 +199,6 @@ namespace AssemblyLineTester.Views.Controls
             pevent.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             pevent.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            // Clear with parent background
             if (Parent != null && Parent.BackColor != Color.Transparent)
             {
                 using (Brush parentBrush = new SolidBrush(Parent.BackColor))
@@ -214,7 +213,6 @@ namespace AssemblyLineTester.Views.Controls
 
             RectangleF rectSurface = new RectangleF(0.5f, 0.5f, Width - 1f, Height - 1f);
 
-            // Draw rounded pill background when active or hovered
             if (isActive)
             {
                 using (GraphicsPath pathSurface = GetFigurePath(rectSurface, borderRadius))
@@ -232,7 +230,6 @@ namespace AssemblyLineTester.Views.Controls
                 }
             }
 
-            // Let base IconButton render the vector icon and text
             base.OnPaint(pevent);
         }
     }

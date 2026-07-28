@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -140,7 +140,7 @@ namespace AssemblyLineTester.Views.Modals
                 int idx = gridConfigs.Rows.Add(
                     c.ConfigName,
                     c.ProductModel,
-                    c.CreatedAt.ToString("g"),
+                    AppTime.ToLocal(c.CreatedAt).ToString("g"),
                     c.UpdatedAt?.ToString("g") ?? "-",
                     c.IsActive ? "Yes" : "No",
                     c.Nets?.Count ?? 0

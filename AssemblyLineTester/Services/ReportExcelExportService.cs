@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using ClosedXML.Excel;
 using System.Linq;
@@ -6,23 +6,16 @@ using AssemblyLineTester.Models.Dto;
 
 namespace AssemblyLineTester.Services
 {
-    public class ReportExportService
+    // Renders a saved report as .xlsx; the counterpart to ReportPdfExportService.
+    public class ReportExcelExportService
     {
-        private readonly TestReportService _reportService;
-
-        public ReportExportService()
-        {
-            _reportService = new TestReportService();
-        }
-
         public void ExportReportToExcel(int reportId, string outputPath)
         {
-            var detail = _reportService.GetReportDetail(reportId);
+            var detail = new TestReportService().GetReportDetail(reportId);
             if (detail is null) throw new InvalidOperationException("Report not found.");
 
             using var wb = new XLWorkbook();
 
-            // Sheet 1: Summary
             var ws = wb.Worksheets.Add("Summary");
             int r = 1;
 
@@ -31,7 +24,6 @@ namespace AssemblyLineTester.Services
             ws.Cell(r, 1).Style.Font.Bold = true;
             r += 2;
 
-            // General info rows
             void AddInfo(string label, string? value)
             {
                 ws.Cell(r, 1).Value = label;
@@ -51,13 +43,11 @@ namespace AssemblyLineTester.Services
 
             r += 1;
 
-            // Test Result Summary header
             ws.Cell(r, 1).Value = "TEST RESULT SUMMARY";
             ws.Range(r, 1, r, 5).Merge();
             ws.Cell(r, 1).Style.Font.Bold = true;
             r += 1;
 
-            // Table headers
             var hdr = new[] { "Test Type", "Total", "Pass", "Fail", "Pass Rate" };
             for (int c = 0; c < hdr.Length; c++)
             {
@@ -80,11 +70,9 @@ namespace AssemblyLineTester.Services
 
                 ws.Cell(r, 5).Style.NumberFormat.Format = "0.00%";
 
-                // center numeric columns
                 ws.Range(r, 2, r, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                 ws.Range(r, 2, r, 5).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
-                // if there are failures, make fail cell red
                 if (s.Fail > 0)
                 {
                     ws.Cell(r, 4).Style.Font.FontColor = XLColor.DarkRed;
@@ -96,7 +84,6 @@ namespace AssemblyLineTester.Services
                 r++;
             }
 
-            // Total row with gray background
             ws.Cell(r, 1).Value = "Total";
             ws.Cell(r, 2).Value = sumTotal;
             ws.Cell(r, 3).Value = sumPass;
@@ -108,13 +95,12 @@ namespace AssemblyLineTester.Services
             ws.Range(r, 2, r, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             r += 2;
 
-            // Auto column widths for summary area (but set some minimums)
             ws.Columns(1, 5).AdjustToContents();
             ws.Column(1).Width = Math.Max(ws.Column(1).Width, 20);
             ws.Column(2).Width = Math.Max(ws.Column(2).Width, 3);
             ws.Column(3).Width = Math.Max(ws.Column(3).Width, 12);
 
-            // Sheet 2: Details
+            // Sheet 2: one row per net.
             var ws2 = wb.Worksheets.Add("Details");
             int rr = 1;
             var dHdr = new[] { "#", "Net ID", "Harness Group", "From", "To", "Test Type", "Lower", "Upper", "Measure", "Tolerance", "Result" };
@@ -137,18 +123,16 @@ namespace AssemblyLineTester.Services
                 ws2.Cell(rr, 4).Value = d.FromPin;
                 ws2.Cell(rr, 5).Value = d.ToPin;
                 ws2.Cell(rr, 6).Value = d.TestType;
-                ws2.Cell(rr, 7).Value = d.Limit?.Split('-').FirstOrDefault()?.Trim() ?? "-";
-                ws2.Cell(rr, 8).Value = d.Limit?.Split('-').Skip(1).FirstOrDefault()?.Trim() ?? "-";
+                // Written as numbers so the columns sort numerically.
+                if (d.LowerLimit.HasValue) ws2.Cell(rr, 7).Value = d.LowerLimit.Value; else ws2.Cell(rr, 7).Value = "-";
+                if (d.UpperLimit.HasValue) ws2.Cell(rr, 8).Value = d.UpperLimit.Value; else ws2.Cell(rr, 8).Value = "-";
                 ws2.Cell(rr, 9).Value = d.Measured;
-                // compute tolerance cell if present
-                ws2.Cell(rr, 10).Value = "";
+                ws2.Cell(rr, 10).Value = d.Tolerance;
                 ws2.Cell(rr, 11).Value = d.Result;
 
-                // align
                 ws2.Range(rr, 1, rr, 11).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                 ws2.Range(rr, 1, rr, 11).Style.Alignment.WrapText = false;
 
-                // Result coloring
                 if (string.Equals(d.Result, "PASS", StringComparison.OrdinalIgnoreCase))
                 {
                     ws2.Cell(rr, 11).Style.Font.FontColor = XLColor.DarkGreen;
@@ -166,21 +150,17 @@ namespace AssemblyLineTester.Services
                 idx++;
             }
 
-            // Format columns - set widths and enable text truncation via setting no wrap and letting users open cells
             ws2.Columns().AdjustToContents();
-            ws2.Column(2).Width = Math.Max(ws2.Column(2).Width, 12); // Net ID
-            ws2.Column(3).Width = Math.Max(ws2.Column(3).Width, 24); // Harness Group
-            ws2.Column(6).Width = Math.Max(ws2.Column(6).Width, 18); // Test Type
-            ws2.Column(9).Width = Math.Max(ws2.Column(9).Width, 14); // Measure
+            ws2.Column(2).Width = Math.Max(ws2.Column(2).Width, 12);
+            ws2.Column(3).Width = Math.Max(ws2.Column(3).Width, 24);
+            ws2.Column(6).Width = Math.Max(ws2.Column(6).Width, 18);
+            ws2.Column(9).Width = Math.Max(ws2.Column(9).Width, 14);
 
-            // Freeze header row
             ws2.SheetView.FreezeRows(1);
             ws.SheetView.FreezeRows(1);
 
-            // Auto filter on detail
             ws2.Range(1, 1, rr - 1, dHdr.Length).SetAutoFilter();
 
-            // Save
             var dir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
             wb.SaveAs(outputPath);

@@ -1,4 +1,4 @@
-using AssemblyLineTester.Services;
+﻿using AssemblyLineTester.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -6,14 +6,9 @@ using System.Windows.Forms;
 
 namespace AssemblyLineTester.Data
 {
-    /// Brings the database schema up to date at startup.
     public static class DbInitialize
     {
-        /// <summary>
-        /// Applies any pending EF Core migrations. Returns false if the database could not be
-        /// brought up to date, in which case the application must not carry on: running against a
-        /// half-built schema corrupts data in ways that only surface weeks later.
-        /// </summary>
+        // Applies pending migrations; false means the application must not carry on.
         public static bool Initialize()
         {
             try
@@ -23,8 +18,7 @@ namespace AssemblyLineTester.Data
                 string[] pending = [.. db.Database.GetPendingMigrations()];
                 db.Database.Migrate();
 
-                // Write-ahead logging survives an unclean shutdown far better than the default
-                // rollback journal, and a factory losing power mid-test is routine.
+            // WAL survives an unclean shutdown; a factory losing power mid-test is routine.
                 db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
 
                 if (pending.Length > 0)

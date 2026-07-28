@@ -1,4 +1,4 @@
-using AssemblyLineTester.Data;
+﻿using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -63,7 +64,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Populates the filter dropdowns at the top of the page (Product Model, Type, Area, etc).
+        // Fills the Product Model, Type, Area, Part Number and ECN dropdowns.
         private void SetupFilterDropdowns()
         {
             cmbProductModel.Items.Clear();
@@ -88,8 +89,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbEcnNo.SelectedIndex = 0;
         }
 
-        // Sets up grid columns and styling only. No rows are added here -
-        // the grid stays empty until a config file is loaded via Load Program.
+        // Columns and styling only; rows arrive when a program is loaded.
         private void SetupGridLiveDetails()
         {
             gridLiveDetails.Columns.Clear();
@@ -203,7 +203,7 @@ namespace AssemblyLineTester.Views.Pages
                     var reportService = new TestReportService();
                     _currentReportId = reportService.SaveDraftLiveTestReport(
                         cmbProductModel.Text, cmbProductType.Text, cmbArea.Text, cmbEcnNo.Text, "1.0",
-                        cmbPartNumber.Text, DateTime.Now, _loadedRows, overallResult);
+                        cmbPartNumber.Text, AppTime.UtcNow, _loadedRows, overallResult);
 
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
@@ -217,7 +217,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch (OperationCanceledException)
             {
-                // Task was canceled via btnAbort
+                // Aborted from btnStopTest, nothing left to report.
             }
             finally 
             {
@@ -321,6 +321,7 @@ namespace AssemblyLineTester.Views.Pages
                             ToPoint = $"{measurement.Point2}",
                             TestType = rowTestType,
                             MeasuredValue = Math.Round(measurement.Value1, 3),
+                            UpperLimit = _continuityResistance,
                             Status = status
                         });
                     }
@@ -336,7 +337,6 @@ namespace AssemblyLineTester.Views.Pages
         {
             _testCts?.Cancel();
 
-            // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
             if (abortResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
             {
@@ -367,11 +367,11 @@ namespace AssemblyLineTester.Views.Pages
                 cmbProductType.Text,
                 "1.0",
                 cmbArea.Text,
-                "OP-402",
+                SessionManager.CurrentUser?.FullName ?? "Unknown",
                 cmbPartNumber.Text,
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
-                DateTime.Now,
+                AppTime.UtcNow,
                 _loadedRows ?? new List<LiveTestDetailRowDto>(),
                 _currentReportId
             );
@@ -420,7 +420,7 @@ namespace AssemblyLineTester.Views.Pages
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(254, 240, 138);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(133, 77, 14);
                     break;
-                default: // Pending, Fail
+                default:
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(241, 245, 249);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(100, 116, 139);
                     break;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -6,16 +6,7 @@ using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Modals
 {
-    /// <summary>
-    /// Shown once the user is inside the application, when their account still carries a password
-    /// somebody else chose. Offers exactly one way forward.
-    /// </summary>
-    /// <remarks>
-    /// Deliberately placed after sign-in rather than during it. Being stopped at the door by a form
-    /// you did not ask for reads as a failure; landing in the application and then being asked to
-    /// finish setting it up reads as the last step of getting started. The block is just as
-    /// absolute either way - this dialog is modal and has no dismiss path.
-    /// </remarks>
+    // Shown after sign-in when the account still carries a password somebody else chose.
     public class SecureAccountPromptForm : Form
     {
         private readonly System.Windows.Forms.Timer _fadeTimer = new() { Interval = 15 };
@@ -63,8 +54,6 @@ namespace AssemblyLineTester.Views.Modals
             };
             Controls.Add(heading);
 
-            // Says what is actually true and why it matters, rather than citing a policy. The
-            // operator is being asked to fix a real weakness, not to satisfy a rule.
             var body = new Label
             {
                 Text = "This account still uses the password it was set up with.\r\n" +
@@ -111,8 +100,7 @@ namespace AssemblyLineTester.Views.Modals
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            // The only way out is the button, which sets DialogResult.OK. Alt+F4 and the taskbar
-            // are refused, or the shipped password would survive the prompt meant to replace it.
+            // Alt+F4 and the taskbar are refused; the button is the only way out.
             if (DialogResult != DialogResult.OK && e.CloseReason == CloseReason.UserClosing)
             {
                 e.Cancel = true;

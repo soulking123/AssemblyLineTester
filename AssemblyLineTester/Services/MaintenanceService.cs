@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Windows.Forms;
 using AssemblyLineTester.Data;
@@ -18,7 +18,6 @@ namespace AssemblyLineTester.Services
 
         public static void StartTracking()
         {
-            // Stop any existing timer to prevent duplicates
             if (_sessionTimer != null)
             {
                 _sessionTimer.Stop();
@@ -28,9 +27,8 @@ namespace AssemblyLineTester.Services
 
             using (var db = new AppDbContext())
             {
-                var state = db.MaintenanceStates.First(s => s.Id == 1);
+                var state = LoadOrCreateState(db);
 
-                // Check if calendar day rolled over since last session
                 if (DateTime.Today != state.LastUsageDate.Date)
                 {
                     PerformDayRollover(state, db);
@@ -44,7 +42,6 @@ namespace AssemblyLineTester.Services
 
             _unsavedSeconds = 0;
 
-            // Start the background tracking timer (ticks every second)
             _sessionTimer = new System.Windows.Forms.Timer();
             _sessionTimer.Interval = 1000;
             _sessionTimer.Tick += OnTimerTick;
@@ -56,18 +53,21 @@ namespace AssemblyLineTester.Services
             ActiveOperatingSeconds++;
             _unsavedSeconds++;
 
-            // Auto-save progress once a minute to prevent data loss on crashes
+            // Saved once a minute, so a crash costs at most that.
             if (_unsavedSeconds >= 60)
             {
                 SaveProgress();
             }
 
-            // Detect if day rolls over while application is running (Midnight transition)
+            // Midnight can arrive while the application is still running.
             if (DateTime.Today != LastUsageDate.Date)
             {
+                // Flushed before the rollover reads the stored value, or the last minute is lost.
+                SaveProgress();
+
                 using (var db = new AppDbContext())
                 {
-                    var state = db.MaintenanceStates.First(s => s.Id == 1);
+                    var state = LoadOrCreateState(db);
                     PerformDayRollover(state, db);
 
                     ActiveOperatingSeconds = state.OperatingSecondsToday;
@@ -89,6 +89,21 @@ namespace AssemblyLineTester.Services
             SaveProgress();
         }
 
+        // Recreated rather than thrown on: the caller is on the sign-in path.
+        private static MaintenanceState LoadOrCreateState(AppDbContext db)
+        {
+            var state = db.MaintenanceStates.FirstOrDefault(s => s.Id == 1);
+            if (state is not null) return state;
+
+            FileLogService.Warn("MaintenanceService.LoadOrCreateState",
+                "Maintenance state row was missing and has been recreated at its default interval.");
+
+            state = new MaintenanceState { Id = 1, LastUsageDate = DateTime.Today };
+            db.MaintenanceStates.Add(state);
+            db.SaveChanges();
+            return state;
+        }
+
         private static void SaveProgress()
         {
             try
@@ -105,9 +120,7 @@ namespace AssemblyLineTester.Services
             }
             catch (Exception ex)
             {
-                // Runs during shutdown, so the database may already be closing. Not worth stopping
-                // the exit for, but silently losing the operating hours would make the maintenance
-                // counter drift with nothing to explain it.
+                // Runs during shutdown, so the database may already be closing.
                 FileLogService.Warn("MaintenanceService.StopTrackingAndSave",
                     $"Operating hours could not be saved: {ex.Message}");
             }
@@ -117,18 +130,16 @@ namespace AssemblyLineTester.Services
         private static void PerformDayRollover(MaintenanceState state, AppDbContext db)
         {
             int daysPassed = (DateTime.Today - state.LastUsageDate.Date).Days;
-            if (daysPassed < 1) daysPassed = 1; // Safeguard for edge cases
 
-            // Decrease remaining days
+            // A clock that moved backwards must not charge a maintenance day that never passed.
+            if (daysPassed < 0) daysPassed = 0;
+
             state.RemainingMaintDays = Math.Max(0, state.RemainingMaintDays - daysPassed);
 
-            // Convert today's operating seconds to hours
             double operatingHoursToday = state.OperatingSecondsToday / 3600.0;
 
-            // Decrease remaining hours by daily usage
             state.RemainingMaintHours = Math.Max(0, state.RemainingMaintHours - operatingHoursToday);
 
-            // Reset operating time for the new day
             state.OperatingSecondsToday = 0;
             state.LastUsageDate = DateTime.Today;
 

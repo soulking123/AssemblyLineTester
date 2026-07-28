@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -68,11 +68,11 @@ namespace AssemblyLineTester.Views.Modals
 
             if (string.Equals(_overallResult, "PASS", StringComparison.OrdinalIgnoreCase))
             {
-                lblGenResVal.ForeColor = Color.FromArgb(4, 120, 87); // Green
+                lblGenResVal.ForeColor = Color.FromArgb(4, 120, 87);
             }
             else
             {
-                lblGenResVal.ForeColor = Color.FromArgb(220, 38, 38); // Red
+                lblGenResVal.ForeColor = Color.FromArgb(220, 38, 38);
             }
 
             btnClose.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
@@ -119,7 +119,7 @@ namespace AssemblyLineTester.Views.Modals
             {
                 if (_existingReportId.HasValue)
                 {
-                    _reportService.UpdateSerialNumber(_existingReportId.Value, finalSn);
+                    _reportService.ConfirmDraft(_existingReportId.Value, finalSn);
                 }
                 else
                 {
@@ -147,8 +147,8 @@ namespace AssemblyLineTester.Views.Modals
         private void UpdateFooterButtonPositions()
         {
             if (pnlFooter == null || btnConfirmSave == null || btnCancel == null) return;
-            int marginRight = 45; // match pnlFooter right padding
-            int gap = 19;         // gap between Cancel and Confirm Save
+            int marginRight = 45;
+            int gap = 19;
             int btnY = (pnlFooter.Height - btnConfirmSave.Height) / 2;
 
             btnConfirmSave.Location = new Point(pnlFooter.Width - btnConfirmSave.Width - marginRight, btnY);

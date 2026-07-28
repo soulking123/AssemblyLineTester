@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -36,8 +36,7 @@ namespace AssemblyLineTester.Views.Modals
             ApplyFormRounding();
         }
 
-        // Edit mode: prefill fields and existing images from the given connector. Editing modifies
-        // the shared catalog entry, so it's visible from every harness that uses this connector.
+        // Edit mode. Changes hit the shared catalogue, so every harness using it sees them.
         public ConnectorModalForm(ConnectorService connectorService, Connector connectorToEdit)
         {
             _connectorService = connectorService;
@@ -132,7 +131,7 @@ namespace AssemblyLineTester.Views.Modals
             }
         }
 
-        // Prefills the form from an existing connector and loads its saved images into the list.
+        // Prefills the form and image list from an existing connector.
         private void LoadConnectorForEdit(Connector c)
         {
             txtPerf.Text = c.Perf;

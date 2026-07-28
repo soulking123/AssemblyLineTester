@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -133,7 +133,6 @@ namespace AssemblyLineTester.Views.Controls
 
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
-            // Clear with parent backcolor for transparent blending
             if (Parent != null && Parent.BackColor != Color.Transparent)
             {
                 using (Brush brush = new SolidBrush(Parent.BackColor))
@@ -152,7 +151,6 @@ namespace AssemblyLineTester.Views.Controls
             pevent.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             pevent.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            // Ensure background is cleared cleanly before drawing shape
             if (Parent != null && Parent.BackColor != Color.Transparent)
             {
                 using (Brush brush = new SolidBrush(Parent.BackColor))
@@ -169,7 +167,6 @@ namespace AssemblyLineTester.Views.Controls
                 {
                     if (isMinimized)
                     {
-                        // Centered rounded square when minimized
                         float wBox = 64f;
                         float hBox = 64f;
                         if (wBox > Width - 8f) wBox = Width - 8f;
@@ -188,7 +185,6 @@ namespace AssemblyLineTester.Views.Controls
                     }
                     else
                     {
-                        // Rounded right end when expanded
                         float w = Width - 16f;
                         if (w < 20f) w = Width - 2f;
                         float h = Height - 1f;
@@ -212,7 +208,7 @@ namespace AssemblyLineTester.Views.Controls
                 }
             }
 
-            // Draw text directly without calling base.OnPaint so our custom highlight is preserved
+            // Drawn directly; base.OnPaint would wipe the custom highlight.
             if (isMinimized)
             {
                 TextRenderer.DrawText(

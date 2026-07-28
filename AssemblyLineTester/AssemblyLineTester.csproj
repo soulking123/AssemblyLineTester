@@ -28,6 +28,8 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+		<!-- Not redundant with EntityFrameworkCore.Sqlite: this pin forces 3.0.3 over the 2.1.11 that
+		     arrives transitively, which carries GHSA-2m69-gcr7-jv3q. Removing it reopens the advisory. -->
 		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
 		<PackageReference Include="FontAwesome.Sharp" Version="6.6.0" />
 	</ItemGroup>

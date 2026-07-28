@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -28,7 +28,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void SetupStyles()
         {
-            // Styles are applied directly via the Designer file (RoundedPanel / RoundedButton)
         }
 
         private void SetupEvents()
@@ -68,7 +67,7 @@ namespace AssemblyLineTester.Views.Pages
                 _roles = await _permissionService.GetAllRolesAsync();
                 _roleButtons.Clear();
 
-                // Map existing designer buttons to roles using their Tag property
+                // Designer buttons carry their role id in Tag.
                 foreach (Control ctrl in flpRolesList.Controls)
                 {
                     if (ctrl is AssemblyLineTester.Views.Controls.RoundedButton btnRole && btnRole.Tag != null)
@@ -77,8 +76,7 @@ namespace AssemblyLineTester.Views.Pages
                         {
                             _roleButtons[roleId] = btnRole;
                             
-                            // Setup click event
-                            btnRole.Click -= BtnRole_Click; // Ensure no duplicate subscriptions
+                            btnRole.Click -= BtnRole_Click;
                             btnRole.Click += BtnRole_Click;
                         }
                     }
@@ -125,7 +123,6 @@ namespace AssemblyLineTester.Views.Pages
 
             lblSelectedRoleTitle.Text = $"Role Permissions: {role.Name}";
 
-            // Highlight active role button
             foreach (var kvp in _roleButtons)
             {
                 if (kvp.Value is AssemblyLineTester.Views.Controls.RoundedButton rBtn)
@@ -140,18 +137,17 @@ namespace AssemblyLineTester.Views.Pages
                     else
                     {
                         rBtn.NormalBackColor = Color.FromArgb(248, 250, 252);
-                        rBtn.HoverBackColor = Color.FromArgb(254, 216, 53); // Same as Save Button hover
+                        rBtn.HoverBackColor = Color.FromArgb(254, 216, 53);
                         rBtn.ForeColor = Color.FromArgb(30, 41, 59);
                         rBtn.HoverForeColor = Color.FromArgb(15, 23, 42);
                     }
                 }
             }
 
-            // Load permissions for this role
             var permissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId);
-            bool isAdmin = (role.Name == "Administrator");
+            // Keyed by id, matching the service guard; a renamed role must not unlock its toggles.
+            bool isAdmin = (role.Id == 1);
 
-            // Group permissions by category
             var pagePerms = permissions.Where(p => p.PermissionGroup == "Page Access").ToList();
             var testPerms = permissions.Where(p => p.PermissionGroup == "Test Operations").ToList();
             var sysPerms = permissions.Where(p => p.PermissionGroup != "Page Access" && p.PermissionGroup != "Test Operations").ToList();
@@ -189,7 +185,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void AdjustCardHeights()
         {
-            // Outer cards removed; FlowLayoutPanel auto-scrolls its contents directly
         }
 
         private async void BtnSaveChanges_Click(object? sender, EventArgs e)
@@ -208,7 +203,6 @@ namespace AssemblyLineTester.Views.Pages
                 MessageBox.Show($"Permissions successfully updated for role '{role?.Name ?? _selectedRoleId.ToString()}'!",
                     "Permissions Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Re-render
                 await SelectRoleAsync(_selectedRoleId);
             }
             catch (Exception ex)

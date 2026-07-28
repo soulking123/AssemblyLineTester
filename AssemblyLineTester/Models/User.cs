@@ -1,13 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 
 namespace AssemblyLineTester.Models
 {
-    /// Represents a system user account in the application.
     public class User
     {
-        /// Unique identifier for the User.
         [Key]
         public int UserId { get; set; }
 
@@ -19,7 +18,6 @@ namespace AssemblyLineTester.Models
 
         public string CompanyId { get; set; } = string.Empty;
 
-        /// Foreign Key referring to the associated Role and navigation property for the assigned Role.
         public int RoleId { get; set; }
 
         [ForeignKey("RoleId")]
@@ -27,22 +25,38 @@ namespace AssemblyLineTester.Models
 
         public string Department { get; set; } = string.Empty;
 
-        /// Foreign Key referring to the associated UserStatus and navigation property for the assigned UserStatus.
         public int StatusId { get; set; }
 
         [ForeignKey("StatusId")]
         public UserStatus Status { get; set; } = null!;
 
-        /// <summary>
-        /// Blocks the account from doing anything until the password has been changed.
-        /// </summary>
-        /// <remarks>
-        /// Set on the seeded administrator and on every account an administrator creates, because
-        /// in both cases the password was chosen by someone other than the person using it. The
-        /// seeded hash also ships inside the installer, so it is identical on every machine until
-        /// this flag is cleared.
-        /// </remarks>
+        // Blocks the account until the password is changed; set whenever someone else chose it.
         public bool MustChangePassword { get; set; }
+
+        // Consecutive failures since the last success, cleared on sign-in and when a lock is applied.
+        public int FailedLoginCount { get; set; }
+
+        // A UTC instant rather than a flag, so the lock expires without anyone clearing it.
+        public DateTime? LockoutUntil { get; set; }
+
+        // Attempts allowed before the account locks, and how long it stays locked.
+        public const int MaxFailedLogins = 5;
+        public const int LockoutMinutes = 15;
+
+        // The instant is passed in so the rule can be checked without waiting for it to expire.
+        public bool IsLockedOut(DateTime utcNow) => LockoutUntil is DateTime until && until > utcNow;
+
+        // Debug-only guard on the lockout gate.
+        [Conditional("DEBUG")]
+        public static void SelfCheck()
+        {
+            var now = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+
+            Debug.Assert(!new User().IsLockedOut(now), "an account that has never been locked must sign in");
+            Debug.Assert(new User { LockoutUntil = now.AddMinutes(1) }.IsLockedOut(now), "a lock in the future must hold");
+            Debug.Assert(!new User { LockoutUntil = now.AddMinutes(-1) }.IsLockedOut(now), "an expired lock must release on its own");
+            Debug.Assert(!new User { LockoutUntil = now }.IsLockedOut(now), "a lock must release at its own expiry instant, not after it");
+        }
 
         public DateTime? LastLogin { get; set; }
 

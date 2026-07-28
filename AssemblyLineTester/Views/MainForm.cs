@@ -1,9 +1,10 @@
-using AssemblyLineTester.Views.Pages;
+﻿using AssemblyLineTester.Views.Pages;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views
 {
-    /// The main shell window for the application containing sidebar navigation and loaded subpages.
+    // Shell window: sidebar navigation plus whichever page is loaded into pnlContent.
     public partial class MainForm : Form
     {
         private readonly UserService _userService = new();
@@ -29,6 +30,7 @@ namespace AssemblyLineTester.Views
         private Dashboard? pageDashboard;
         private TestExecution? pageTestExecution;
         private ManualTestingPage? pageManualTesting;
+        private Label? _lblPlaceholder;
         private Reports? pageReports;
         private Settings? pageSettings;
         private UserManagement? pageUserManagement;
@@ -47,22 +49,18 @@ namespace AssemblyLineTester.Views
             base.OnShown(e);
             if (DesignMode) return;
 
-            // After the window is on screen, not during Load: the user should see the application
-            // they signed into behind the dialog, so it reads as a step in setting up rather than
-            // as a login that failed.
+            // After the window is on screen, so it reads as setup rather than a failed login.
             if (SessionManager.CurrentUser?.MustChangePassword == true)
             {
                 PromptPasswordChange(mandatory: true);
             }
         }
 
-        /// Initializes a new instance of the MainForm class.
         public MainForm()
         {
             InitializeComponent();
             EnableDoubleBuffering();
 
-            // Load CAT logo image into sidebar menu header and app icon
             try
             {
                 string logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
@@ -92,7 +90,6 @@ namespace AssemblyLineTester.Views
             _expandedMenuWidth = btnDashboard.Width;
             _expandedMenuGap = btnTestExecution.Location.Y - btnDashboard.Location.Y - btnDashboard.Height;
 
-            // Apply dynamic Role-Based Access Control permissions to sidebar buttons
             ApplyRolePermissions();
 
             ApplySidebarStyles();
@@ -100,7 +97,6 @@ namespace AssemblyLineTester.Views
 
             this.Load += (s, e) => RepositionSidebarButtons();
 
-            // Wire up header click events to auto-close dropdown when clicking outside
             pnlTopHeader.Click += CloseDropdownIfOpen;
             lblHeaderTitle.Click += CloseDropdownIfOpen;
             pnlRight.Click += CloseDropdownIfOpen;
@@ -108,7 +104,6 @@ namespace AssemblyLineTester.Views
             lblDateText.Click += CloseDropdownIfOpen;
             lblTimeText.Click += CloseDropdownIfOpen;
 
-            // Wire up header dragging for borderless form
             pnlTopHeader.MouseDown += Header_MouseDown;
             lblHeaderTitle.MouseDown += Header_MouseDown;
             pnlRight.MouseDown += Header_MouseDown;
@@ -129,7 +124,7 @@ namespace AssemblyLineTester.Views
             btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(239, 68, 68); btnClose.ForeColor = Color.White; };
             btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.ForeColor = Color.FromArgb(100, 116, 139); };
 
-            // Fix explicitly set Designer fonts that do not auto-scale
+            // Designer fonts skip the AutoScale pass, so they are scaled explicitly.
             float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
             btnMaximize.Font = new Font(btnMaximize.Font.FontFamily, btnMaximize.Font.Size * scaleY, btnMaximize.Font.Style);
             btnMinimize.Font = new Font(btnMinimize.Font.FontFamily, btnMinimize.Font.Size * scaleY, btnMinimize.Font.Style);
@@ -140,9 +135,7 @@ namespace AssemblyLineTester.Views
             SetActiveMenu(btnDashboard, GetOrInitPage("btnDashboard"));
         }
 
-        /// <summary>
-        /// Updates sidebar navigation button visibility based on the active user's role and granular permissions.
-        /// </summary>
+        // Shows only the sidebar buttons the active role is allowed to reach.
         public void ApplyRolePermissions()
         {
             btnDashboard.Visible = SessionManager.HasPermission("Page.Dashboard");
@@ -186,9 +179,7 @@ namespace AssemblyLineTester.Views
 
         private void InitializeUserInfo()
         {
-            // Neutral fallbacks. A session that failed to load its user should read as unknown;
-            // naming a real person, or captioning the header "Administrator", tells whoever is at
-            // the machine something about their access that is not true.
+            // Neutral fallbacks: a failed session must not caption itself with a real name or role.
             string fullName = SessionManager.CurrentUser?.FullName ?? string.Empty;
             lblUserName.Text = string.IsNullOrWhiteSpace(fullName) ? "Unknown user" : fullName;
             string roleName = SessionManager.CurrentUser?.Role?.Name ?? string.Empty;
@@ -262,11 +253,9 @@ namespace AssemblyLineTester.Views
             btnUserManagement.FullText = "  👥    User Management";
             btnUserManagement.Text = "  👥    User Management";
 
-            // Set Dashboard as initial active menu
             btnDashboard.IsActive = true;
         }
 
-        // IDE1006 FIX: Huruf awal kapital (PascalCase)
         private UserControl? GetOrInitPage(string buttonName)
         {
             return buttonName switch
@@ -292,9 +281,7 @@ namespace AssemblyLineTester.Views
             SetActiveMenu(clickedButton, targetPage);
         }
 
-        /// <summary>
-        /// Programmatically navigates to Settings -> Users and Roles permissions tab.
-        /// </summary>
+        // Jumps to Settings, Users and Roles tab.
         public void OpenRolePermissionsSettings()
         {
             if (btnSettings != null)
@@ -324,7 +311,7 @@ namespace AssemblyLineTester.Views
             }
 
             if (pnlContent == null) return;
-            SendMessage(pnlContent.Handle, 0x000B, 0, 0); // WM_SETREDRAW false
+            SendMessage(pnlContent.Handle, 0x000B, 0, 0);
             pnlContent.SuspendLayout();
             try
             {
@@ -333,6 +320,11 @@ namespace AssemblyLineTester.Views
                     if (!pnlContent.Controls.Contains(activePage))
                     {
                         activePage.Dock = DockStyle.Fill;
+
+                        // Pages are built on first navigation, long after the constructor ran its
+                        // own pass, so this is the only moment their controls can be buffered.
+                        UIStyleHelper.EnableDoubleBuffering(activePage);
+
                         pnlContent.Controls.Add(activePage);
                     }
                     foreach (Control c in pnlContent.Controls)
@@ -344,23 +336,36 @@ namespace AssemblyLineTester.Views
                 }
                 else
                 {
-                    pnlContent.Controls.Clear();
-                    Label lblPlaceholder = new Label
+                    // Pages are cached and reused, so they are hidden here rather than cleared.
+                    // Disposing them would leave GetOrInitPage handing back a dead control.
+                    _lblPlaceholder ??= new Label
                     {
-                        Text = $"{activeBtn.FullText.Trim()} (Under Construction)",
                         Font = AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold,
                         ForeColor = Color.FromArgb(100, 116, 139),
                         Dock = DockStyle.Fill,
                         TextAlign = ContentAlignment.MiddleCenter,
                         BackColor = Color.FromArgb(244, 245, 247)
                     };
-                    pnlContent.Controls.Add(lblPlaceholder);
+                    _lblPlaceholder.Text = $"{activeBtn.FullText.Trim()} (Under Construction)";
+
+                    if (!pnlContent.Controls.Contains(_lblPlaceholder))
+                    {
+                        pnlContent.Controls.Add(_lblPlaceholder);
+                    }
+
+                    foreach (Control c in pnlContent.Controls)
+                    {
+                        if (c != _lblPlaceholder && c.Visible) c.Visible = false;
+                    }
+
+                    _lblPlaceholder.Visible = true;
+                    _lblPlaceholder.BringToFront();
                 }
             }
             finally
             {
                 pnlContent.ResumeLayout(true);
-                SendMessage(pnlContent.Handle, 0x000B, 1, 0); // WM_SETREDRAW true
+                SendMessage(pnlContent.Handle, 0x000B, 1, 0);
                 pnlContent.Invalidate(true);
             }
         }
@@ -368,7 +373,7 @@ namespace AssemblyLineTester.Views
         private AssemblyLineTester.Views.Controls.MenuButton[] SidebarMenuButtons =>
             new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
 
-        /// Repositions visible sidebar buttons back-to-back, skipping hidden (no-permission) ones so no gap remains.
+        // Closes the gap left by sidebar buttons the role cannot see.
         private void RepositionSidebarButtons()
         {
             var menuButtons = SidebarMenuButtons;
@@ -400,7 +405,7 @@ namespace AssemblyLineTester.Views
         {
             var menuButtons = SidebarMenuButtons;
 
-            SendMessage(this.Handle, 0x000B, 0, 0); // WM_SETREDRAW false
+            SendMessage(this.Handle, 0x000B, 0, 0);
             this.SuspendLayout();
             splitContainer1.SuspendLayout();
             splitContainer1.Panel1.SuspendLayout();
@@ -475,7 +480,7 @@ namespace AssemblyLineTester.Views
             }
         }
 
-        /// Full height of the dropdown once open. The open animation grows towards this.
+        // Full height of the dropdown once open; the animation grows towards this.
         private int _dropdownHeight;
         private readonly System.Windows.Forms.Timer _dropdownTimer = new() { Interval = 15 };
 
@@ -489,12 +494,10 @@ namespace AssemblyLineTester.Views
                 return;
             }
 
-            // Align the dropdown under the right side of pnlUser, near the arrow.
             Point screenPos = pnlUser.PointToScreen(new Point(pnlUser.Width - pnlUserDropdown.Width - 15, pnlUser.Height));
             pnlUserDropdown.Location = this.PointToClient(screenPos);
 
-            // Grows to full height over roughly six frames. Short enough to feel instant, long
-            // enough that the menu reads as coming from the button rather than appearing on top.
+            // Roughly six frames, so the menu reads as coming from the button.
             pnlUserDropdown.Height = 1;
             pnlUserDropdown.Visible = true;
             pnlUserDropdown.BringToFront();
@@ -525,8 +528,7 @@ namespace AssemblyLineTester.Views
         {
             _dropdownTimer.Stop();
 
-            // Restored immediately rather than animated shut: the panel is about to be hidden, and
-            // a closing animation only delays whatever the user clicked.
+            // Restored, not animated shut: a closing animation only delays the click.
             pnlUserDropdown.Visible = false;
             pnlUserDropdown.Height = _dropdownHeight;
             lblArrow.Text = "⌄";
@@ -550,14 +552,7 @@ namespace AssemblyLineTester.Views
 
         private Button btnChangePassword = null!;
 
-        /// <summary>
-        /// Rebuilds the user dropdown as a proper menu: Change Password above Log Out.
-        /// </summary>
-        /// <remarks>
-        /// The panel is sized from the measured text rather than the designer's fixed 220px, which
-        /// clipped "Change Password" outright, and every measurement goes through the DPI scale so
-        /// it does not clip again on a machine with different display scaling.
-        /// </remarks>
+        // Sized from measured text through the DPI scale; the designer's fixed 220px clipped.
         private void SetupUserDropdown()
         {
             float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
@@ -576,7 +571,6 @@ namespace AssemblyLineTester.Views
             btnLogOut.Text = "⏻    Log Out";
             btnLogOut.Font = itemFont;
 
-            // Widest label decides the panel, so no item can ever be cut off.
             int widest = 0;
             foreach (Button item in new[] { btnChangePassword, btnLogOut })
             {
@@ -617,7 +611,6 @@ namespace AssemblyLineTester.Views
             _dropdownHeight = (padding * 2) + (rowHeight * 2) + S(9);
             pnlUserDropdown.Size = new Size(panelWidth, _dropdownHeight);
 
-            // A hairline separator reads as one menu with two groups, rather than two loose buttons.
             pnlUserDropdown.Paint += (s, e) =>
             {
                 int y = btnLogOut.Top - S(5);
@@ -635,14 +628,7 @@ namespace AssemblyLineTester.Views
             button.MouseLeave += (s, e) => button.BackColor = Color.Transparent;
         }
 
-        /// <summary>
-        /// Opens the change-password dialog, optionally as a step the user cannot skip.
-        /// </summary>
-        /// <remarks>
-        /// The mandatory path loops: the prompt reappears until the password is actually changed.
-        /// Anything less and closing the dialog would leave the shipped password in place while the
-        /// user is already inside the application.
-        /// </remarks>
+        // The mandatory path loops until the password actually changes; there is no dismiss.
         private void PromptPasswordChange(bool mandatory)
         {
             float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
@@ -668,8 +654,7 @@ namespace AssemblyLineTester.Views
             lblArrow.Text = "⌄";
             if (MessageBox.Show("Are you sure you want to log out of Assembly Line Tester?", "Confirm Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                // Recorded before the session is torn down, while the username is still known.
-                string? username = SessionManager.CurrentUser?.Username;
+                    string? username = SessionManager.CurrentUser?.Username;
                 new SystemLogService().Log(
                     Models.SystemLog.LogSeverity.Info, "Authentication", "Logout",
                     $"User '{username ?? "unknown"}' signed out.", username);
@@ -740,7 +725,7 @@ namespace AssemblyLineTester.Views
             get
             {
                 CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                cp.ExStyle |= 0x02000000;
                 return cp;
             }
         }
@@ -753,7 +738,7 @@ namespace AssemblyLineTester.Views
             if (m.Msg == WM_NCHITTEST && this.WindowState == FormWindowState.Normal)
             {
                 base.WndProc(ref m);
-                if ((int)m.Result == 1) // HTCLIENT
+                if ((int)m.Result == 1)
                 {
                     Point screenPoint = new Point(m.LParam.ToInt32());
                     Point clientPoint = this.PointToClient(screenPoint);
@@ -763,14 +748,14 @@ namespace AssemblyLineTester.Views
                     bool top = clientPoint.Y <= resizeAreaSize;
                     bool bottom = clientPoint.Y >= this.ClientSize.Height - resizeAreaSize;
 
-                    if (top && left) m.Result = (IntPtr)13; // HTTOPLEFT
-                    else if (top && right) m.Result = (IntPtr)14; // HTTOPRIGHT
-                    else if (bottom && left) m.Result = (IntPtr)16; // HTBOTTOMLEFT
-                    else if (bottom && right) m.Result = (IntPtr)17; // HTBOTTOMRIGHT
-                    else if (left) m.Result = (IntPtr)10; // HTLEFT
-                    else if (right) m.Result = (IntPtr)11; // HTRIGHT
-                    else if (top) m.Result = (IntPtr)12; // HTTOP
-                    else if (bottom) m.Result = (IntPtr)15; // HTBOTTOM
+                    if (top && left) m.Result = (IntPtr)13;
+                    else if (top && right) m.Result = (IntPtr)14;
+                    else if (bottom && left) m.Result = (IntPtr)16;
+                    else if (bottom && right) m.Result = (IntPtr)17;
+                    else if (left) m.Result = (IntPtr)10;
+                    else if (right) m.Result = (IntPtr)11;
+                    else if (top) m.Result = (IntPtr)12;
+                    else if (bottom) m.Result = (IntPtr)15;
                 }
                 return;
             }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -177,20 +177,17 @@ namespace AssemblyLineTester.Views.Controls
                 currentColor = Color.Gray;
             }
 
-            // Clear background with parent's backcolor for smooth anti-aliased rounded corners
             using (Brush parentBrush = new SolidBrush(GetParentBackColor()))
             {
                 pevent.Graphics.FillRectangle(parentBrush, 0, 0, Width, Height);
             }
 
-            // Draw rounded pill surface
             using (GraphicsPath pathSurface = GetFigurePath(rectSurface, borderRadius))
             using (Brush surfaceBrush = new SolidBrush(currentColor))
             {
                 pevent.Graphics.FillPath(surfaceBrush, pathSurface);
             }
 
-            // Determine text color
             Color currentForeColor = ForeColor;
             if (isPressed && PressedForeColor != Color.Empty)
             {
@@ -205,9 +202,7 @@ namespace AssemblyLineTester.Views.Controls
                 currentForeColor = Color.Gray;
             }
 
-            // Draw button text
             var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis;
-            // RoundedButton aligns text based on its TextAlign property.
             if (TextAlign == ContentAlignment.MiddleLeft || TextAlign == ContentAlignment.TopLeft || TextAlign == ContentAlignment.BottomLeft)
                 flags |= TextFormatFlags.Left;
             else if (TextAlign == ContentAlignment.MiddleRight || TextAlign == ContentAlignment.TopRight || TextAlign == ContentAlignment.BottomRight)

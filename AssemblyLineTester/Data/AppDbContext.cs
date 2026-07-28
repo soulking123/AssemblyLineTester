@@ -1,11 +1,10 @@
-using AssemblyLineTester.Models;
+﻿using AssemblyLineTester.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Text.Json;
 
 namespace AssemblyLineTester.Data
 {
-    /// Main database context for Entity Framework Core.
     public class AppDbContext : DbContext
     {
         public DbSet<User> Users { get; set; } = null!;
@@ -25,29 +24,35 @@ namespace AssemblyLineTester.Data
         public DbSet<Connector> Connectors { get; set; } = null!;
         public DbSet<HarnessConnector> HarnessConnectors { get; set; } = null!;
 
-        /// Configures the database provider and connection string.
+        // Folder holding the live database, its backups and the pre-restore copies.
+        public static string DataFolder { get; } = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "AssemblyLineTester");
+
+        // The single definition of the live database path.
+        public static string DbPath { get; } = Path.Combine(DataFolder, "users.db");
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string appDataFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "AssemblyLineTester");
+            Directory.CreateDirectory(DataFolder);
 
-            Directory.CreateDirectory(appDataFolder); // create if not exists
-
-            string dbPath = Path.Combine(appDataFolder, "users.db");
-            optionsBuilder.UseSqlite($"Data Source={dbPath}");
-            optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            optionsBuilder.UseSqlite($"Data Source={DbPath}");
+            // PendingModelChangesWarning stays unsuppressed; it is the only signal of model drift.
         }
 
-        /// Configures entity mapping relationships, unique indexes, and seeds initial data.
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Unique Indexes
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
+
+            // Filtered, so the many accounts without a Company ID do not collide.
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.CompanyId)
+                .IsUnique()
+                .HasFilter("\"CompanyId\" <> ''");
 
             modelBuilder.Entity<Role>()
                 .HasIndex(r => r.Name)
@@ -57,21 +62,19 @@ namespace AssemblyLineTester.Data
                 .HasIndex(s => s.Name)
                 .IsUnique();
 
-            // Configure relationship cascade delete rules for Roles (Restrict delete to prevent orphan records)
+            // Restrict, so deleting a role cannot orphan its users.
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Role)
                 .WithMany()
                 .HasForeignKey(u => u.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure relationship cascade delete rules for Statuses (Restrict delete to prevent orphan records)
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Status)
                 .WithMany()
                 .HasForeignKey(u => u.StatusId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Unique indexes for the new tables
             modelBuilder.Entity<TestReport>()
                 .HasIndex(r => r.ReportNumber)
                 .IsUnique();
@@ -80,28 +83,25 @@ namespace AssemblyLineTester.Data
                 .HasIndex(t => t.TestTypeName)
                 .IsUnique();
 
-            // TestDetails -> TestReports (cascade delete: deleting a report removes its details)
+            // Deleting a report takes its details with it.
             modelBuilder.Entity<TestDetail>()
                 .HasOne(d => d.Report)
                 .WithMany(r => r.Details)
                 .HasForeignKey(d => d.ReportId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // TestDetails -> TestTypes (lookup by name, restrict delete to prevent orphan details)
             modelBuilder.Entity<TestDetail>()
                 .HasOne(d => d.TestTypeInfo)
                 .WithMany()
                 .HasForeignKey(d => d.TestTypeName)
                 .HasPrincipalKey(t => t.TestTypeName);
 
-            // Configure Report → TestStep relationship (One Report has many Test Steps)
             modelBuilder.Entity<TestStep>()
                 .HasOne(s => s.Report)
                 .WithMany(r => r.Steps)
                 .HasForeignKey(s => s.ReportId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Configure TestTypeInfo → TestStep relationship using TestTypeName
             modelBuilder.Entity<TestStep>()
                 .HasOne(s => s.TestTypeInfo)
                 .WithMany()
@@ -109,14 +109,24 @@ namespace AssemblyLineTester.Data
                 .HasPrincipalKey(t => t.TestTypeName)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Ensure StepNo is unique within each Report
             modelBuilder.Entity<TestStep>()
                 .HasIndex(s => new { s.ReportId, s.StepNo })
                 .IsUnique();
 
-            // Speeds up Test History pagination/sorting once row count grows into the hundreds/thousands.
+            // Speeds up Test History pagination once the row count grows.
             modelBuilder.Entity<TestReport>()
                 .HasIndex(r => r.TestDateTime);
+
+            // Every System Log query filters and sorts on Timestamp; six months is a lot to scan.
+            modelBuilder.Entity<SystemLog>()
+                .HasIndex(l => l.Timestamp);
+
+            // Named explicitly, or EF invents a shadow FK column and leaves ConfigId at zero.
+            modelBuilder.Entity<TestConfigNet>()
+                .HasOne(n => n.Configuration)
+                .WithMany(c => c.Nets)
+                .HasForeignKey(n => n.ConfigId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<MaintenanceState>().HasData(
                 new MaintenanceState
@@ -129,7 +139,6 @@ namespace AssemblyLineTester.Data
                 }
             );
 
-            // Configure RolePermission entity and unique index
             modelBuilder.Entity<RolePermission>()
                 .HasIndex(rp => new { rp.RoleId, rp.PermissionKey })
                 .IsUnique();
@@ -140,7 +149,6 @@ namespace AssemblyLineTester.Data
                 .HasForeignKey(rp => rp.RoleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //TestReport → ReportTestTypeSummary relationship (One Report has many Test Type Summaries)
             modelBuilder.Entity<ReportTestTypeSummary>()
                 .HasOne(s => s.Report)
                 .WithMany()
@@ -158,13 +166,11 @@ namespace AssemblyLineTester.Data
                 .HasIndex(s => new { s.ReportId, s.TestTypeName })
                 .IsUnique();
 
-            // Speeds up the Dashboard's date-range + fail-breakdown query.
+            // Speeds up the Dashboard fail-breakdown query.
             modelBuilder.Entity<ReportTestTypeSummary>()
                 .HasIndex(s => s.TestTypeName);
 
-            // HarnessConnector: join table for the many-to-many ProductHarness<->Connector relationship.
-            // Deleting a harness only removes its links (connectors may still be used elsewhere);
-            // deleting a connector removes it from every harness that used it.
+            // Join table for the many-to-many between harnesses and connectors.
             modelBuilder.Entity<HarnessConnector>()
                 .HasOne(hc => hc.ProductHarness)
                 .WithMany(p => p.HarnessConnectors)
@@ -181,9 +187,8 @@ namespace AssemblyLineTester.Data
                 .HasIndex(hc => new { hc.ProductHarnessId, hc.ConnectorId })
                 .IsUnique();
 
-            //======== SEED DATA BELOW =========//
+            // ---- Seed data ----
 
-            // Seed initial Roles
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Administrator", Description = "Full system administration access" },
                 new Role { Id = 2, Name = "Operator", Description = "Standard machine line operations" },
@@ -193,20 +198,13 @@ namespace AssemblyLineTester.Data
                 new Role { Id = 6, Name = "Supervisor", Description = "Line shift supervision access" }
             );
 
-            // Seed initial User Statuses
             modelBuilder.Entity<UserStatus>().HasData(
                 new UserStatus { Id = 1, Name = "Active", Description = "User is active and allowed to log in" },
                 new UserStatus { Id = 2, Name = "Inactive", Description = "User is inactive and disabled" },
                 new UserStatus { Id = 3, Name = "Locked", Description = "User is locked out due to multiple failed login attempts" }
             );
 
-            // One seeded account only. The developer accounts that used to sit here were personal
-            // logins, not data every customer should receive, and their hashes are in the git
-            // history forever.
-            //
-            // This hash is public by definition - it ships inside the installer and is identical on
-            // every machine - so the account is created with MustChangePassword set. It is a way in
-            // during commissioning, not a credential.
+            // One seeded account only; the developer accounts that sat here were personal.
             const string adminHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS";
 
             modelBuilder.Entity<User>().HasData(
@@ -217,16 +215,15 @@ namespace AssemblyLineTester.Data
                     PasswordHash = adminHash,
                     FullName = "System Administrator",
                     CompanyId = "CAT0100",
-                    RoleId = 1, // Administrator
+                    RoleId = 1,
                     Department = "Engineering",
-                    StatusId = 1, // Active
+                    StatusId = 1,
                     MustChangePassword = true,
                     CreatedAt = DateTime.Parse("2026-03-01T08:00:00Z"),
                     UpdatedAt = DateTime.Parse("2026-03-01T08:00:00Z")
                 }
             );
 
-            // Seed initial test types
             modelBuilder.Entity<TestType>().HasData(
                 new TestType { Id = 1, TestTypeName = "4RESISTOR", DisplayName = "4RESISTOR" },
                 new TestType { Id = 2, TestTypeName = "4WIRE", DisplayName = "4WIRE" },
@@ -245,31 +242,12 @@ namespace AssemblyLineTester.Data
                 new TestType { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE" }
             );
 
-            // Seed initial role permissions
             modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());
         }
 
         private static RolePermission[] GetInitialRolePermissions()
         {
-            var defs = new[]
-            {
-                ("Page.Dashboard", "Page Access", "Access Dashboard Page"),
-                ("Page.TestExecution", "Page Access", "Access Test Execution Page"),
-                ("Page.HarnessDatabase", "Page Access", "Access Harness Database Page"),
-                ("Page.TestHistory", "Page Access", "Access Test History Page"),
-                ("Page.Reports", "Page Access", "Access Reports Page"),
-                ("Page.SystemLog", "Page Access", "Access System Log Page"),
-                ("Page.Settings", "Page Access", "Access Settings Page"),
-                ("Page.UserManagement", "Page Access", "Access User Management Page"),
-                ("Action.TestExecution.Run", "Test Operations", "Start and Run Testing Operations"),
-                ("Action.TestConfig.Edit", "Test Operations", "Add and Edit Test Parameters & Harness Specs"),
-                ("Action.Instruments.Calibrate", "Test Operations", "Calibrate and Configure Hardware Instruments"),
-                ("Action.UserManagement.Edit", "System & Logs", "Add, Edit, and Manage System User Accounts"),
-                ("Action.Reports.Export", "System & Logs", "Export and Print Test Reports & Analytics"),
-                ("Action.SystemLog.Clear", "System & Logs", "Clear and Purge System Activity Logs"),
-                ("Action.Database.Backup", "System & Logs", "Create and Restore Database Backups")
-            };
-
+            var defs = Services.RolePermissionService.GetStandardPermissionDefinitions();
             var list = new List<RolePermission>();
             int idCounter = 1;
 
@@ -277,37 +255,6 @@ namespace AssemblyLineTester.Data
             {
                 foreach (var (key, group, desc) in defs)
                 {
-                    bool granted = false;
-                    if (roleId == 1) // Administrator
-                    {
-                        granted = true;
-                    }
-                    else if (roleId == 2) // Operator
-                    {
-                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.TestHistory" or "Action.TestExecution.Run")
-                            granted = true;
-                    }
-                    else if (roleId == 3) // Engineer
-                    {
-                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.TestConfig.Edit" or "Action.Instruments.Calibrate" or "Action.Reports.Export")
-                            granted = true;
-                    }
-                    else if (roleId == 4) // Technician
-                    {
-                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.Instruments.Calibrate" or "Action.Reports.Export")
-                            granted = true;
-                    }
-                    else if (roleId == 5) // Quality
-                    {
-                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Action.Reports.Export")
-                            granted = true;
-                    }
-                    else if (roleId == 6) // Supervisor
-                    {
-                        if (key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Action.TestExecution.Run" or "Action.Reports.Export")
-                            granted = true;
-                    }
-
                     list.Add(new RolePermission
                     {
                         Id = idCounter++,
@@ -315,7 +262,7 @@ namespace AssemblyLineTester.Data
                         PermissionKey = key,
                         PermissionGroup = group,
                         Description = desc,
-                        IsGranted = granted
+                        IsGranted = Services.RolePermissionService.GetDefaultGrantState(roleId, key)
                     });
                 }
             }

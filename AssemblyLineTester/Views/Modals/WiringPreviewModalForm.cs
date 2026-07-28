@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -210,7 +210,6 @@ namespace AssemblyLineTester.Views.Modals
             }
             else
             {
-                // Fallback to sample data if no active config
                 LoadDefaultWiringData();
             }
 

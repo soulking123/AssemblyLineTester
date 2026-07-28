@@ -1,4 +1,4 @@
-using AssemblyLineTester.Data;
+﻿using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views.Modals;
@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using static AssemblyLineTester.Models.SystemLog;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views
 {
@@ -35,7 +36,6 @@ namespace AssemblyLineTester.Views
             _instrument.Connect();
             InitializeComponent();
 
-            // Load CAT logo image
             try
             {
                 string logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
@@ -52,13 +52,10 @@ namespace AssemblyLineTester.Views
             }
             catch { /* fallback silently if image/icon missing */ }
 
-            // Disable tab stop on the login button so Tab cycles only between textboxes
             btnLogin.TabStop = false;
 
-            // KeyDown for both textboxes is already wired in the designer. Subscribing again here
-            // ran each handler twice per keystroke, so one Enter produced two sign-in attempts.
+            // KeyDown is already wired in the designer; subscribing again doubled every keystroke.
 
-            // Wire up focus & hover styling to animate underline and icon colors to Gold without disappearing
             void UpdateUsernameVisuals()
             {
                 bool active = txtUsername.Focused || pnlUsernameContainer.ClientRectangle.Contains(pnlUsernameContainer.PointToClient(Cursor.Position));
@@ -91,7 +88,6 @@ namespace AssemblyLineTester.Views
             iconPassword.MouseEnter += (s, e) => UpdatePasswordVisuals();
             iconPassword.MouseLeave += (s, e) => UpdatePasswordVisuals();
 
-            // Allow clicking anywhere on the icon or underline row to focus the textbox
             pnlUsernameContainer.Click += (s, e) => txtUsername.Focus();
             iconUsername.Click += (s, e) => txtUsername.Focus();
             pnlUsernameLine.Click += (s, e) => txtUsername.Focus();
@@ -100,7 +96,6 @@ namespace AssemblyLineTester.Views
             iconPassword.Click += (s, e) => txtPassword.Focus();
             pnlPasswordLine.Click += (s, e) => txtPassword.Focus();
 
-            // Wire up close button and form dragging
             btnClose.Click += (s, e) => this.Close();
             btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
             btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
@@ -137,8 +132,6 @@ namespace AssemblyLineTester.Views
             pnlUsernameLine.BackColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
             iconUsername.IconColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
 
-            //pnlPasswordLine.BackColor = System.Drawing.Color.FromArgb(100, 116, 139);
-            //iconPassword.IconColor =  System.Drawing.Color.FromArgb(100, 116, 139);
         }
         private void UpdatePasswordVisuals(object? sender, EventArgs e)
         {
@@ -146,8 +139,6 @@ namespace AssemblyLineTester.Views
             pnlPasswordLine.BackColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
             iconPassword.IconColor = active ? System.Drawing.Color.FromArgb(250, 204, 21) : System.Drawing.Color.FromArgb(100, 116, 139);
 
-            //pnlUsernameLine.BackColor =  System.Drawing.Color.FromArgb(100, 116, 139);
-            //iconUsername.IconColor = System.Drawing.Color.FromArgb(100, 116, 139);
         }
         private void FocusUsername(object? sender, EventArgs e)
         {
@@ -204,31 +195,26 @@ namespace AssemblyLineTester.Views
             base.OnPaint(e);
         }
 
-        /// Moves focus to the password textbox when the Enter key is pressed.
         private void TxtUsername_EnterKeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
                 txtPassword.Focus();
-                e.SuppressKeyPress = true; // Prevents the Windows beep sound
+                e.SuppressKeyPress = true;
             }
         }
 
-        /// Programmatically triggers the login button click when the Enter key is pressed.
         private void TxtPassword_EnterKeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter) return;
 
-            // Consumed before the click, not after. PerformClick opens a modal dialog and does not
-            // return until it is dismissed; leaving the key live for that whole time lets keyboard
-            // auto-repeat queue a second Enter that fires the moment the dialog closes.
+            // Consumed before the click, or auto-repeat queues a second Enter behind the modal.
             e.Handled = true;
-            e.SuppressKeyPress = true; // also prevents the Windows beep sound
+            e.SuppressKeyPress = true;
 
             btnLogin.PerformClick();
         }
 
-        /// Authenticates user credentials against the local SQLite database.
         private void BtnLogin_Click(object? sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
@@ -245,19 +231,35 @@ namespace AssemblyLineTester.Views
                 using (var db = new AppDbContext())
                 {
                     var user = db.Users
-                        .Include(u => u.Role) // Eager load Role to set the Session details correctly
-                        .Include(u => u.Status) // Needed to name the status when a sign-in is refused
+                        .Include(u => u.Role)
+                        .Include(u => u.Status)
                         .FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
 
                     var logService = new SystemLogService();
 
                     if (user == null)
                     {
-                        // Logged under the typed name, not a user id: the point of the entry is to
-                        // show a run of attempts against names that do not exist.
+                        // Logged under the typed name, to show runs against names that do not exist.
                         logService.Log(LogSeverity.Warning, "Authentication", "Login Failed",
                             $"Failed sign-in for unknown username '{username}'.", username);
                         MessageBox.Show("Invalid Login");
+                        return;
+                    }
+
+                    // Before the password, so a password list gets no verdict on each guess.
+                    User.SelfCheck();
+                    if (user.IsLockedOut(DateTime.UtcNow))
+                    {
+                        int minutesLeft = (int)Math.Ceiling((user.LockoutUntil!.Value - DateTime.UtcNow).TotalMinutes);
+                        logService.Log(LogSeverity.Warning, "Authentication", "Login Blocked",
+                            $"Sign-in refused for '{user.Username}': account locked for {minutesLeft} more minute(s).", user.Username);
+
+                        MessageBox.Show(
+                            $"Too many failed sign-in attempts. Try again in {minutesLeft} minute(s), " +
+                            $"or ask an administrator to reset the password.",
+                            "Account locked",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
                         return;
                     }
 
@@ -265,14 +267,42 @@ namespace AssemblyLineTester.Views
 
                     if (!isCorrect)
                     {
+                        user.FailedLoginCount++;
+
+                        if (user.FailedLoginCount >= User.MaxFailedLogins)
+                        {
+                            // Cleared with the lock, so an expired lock gives a fresh run of attempts.
+                            user.FailedLoginCount = 0;
+                            user.LockoutUntil = DateTime.UtcNow.AddMinutes(User.LockoutMinutes);
+                            db.SaveChanges();
+
+                            logService.Log(LogSeverity.Warning, "Authentication", "Account Locked",
+                                $"Account '{user.Username}' locked for {User.LockoutMinutes} minutes after {User.MaxFailedLogins} failed sign-in attempts.", user.Username);
+
+                            MessageBox.Show(
+                                $"Too many failed sign-in attempts. This account is locked for {User.LockoutMinutes} minutes.",
+                                "Account locked",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        db.SaveChanges();
+
                         logService.Log(LogSeverity.Warning, "Authentication", "Login Failed",
-                            $"Failed sign-in for '{user.Username}': incorrect password.", user.Username);
+                            $"Failed sign-in for '{user.Username}': incorrect password ({user.FailedLoginCount} of {User.MaxFailedLogins}).", user.Username);
                         MessageBox.Show("Invalid Login");
                         return;
                     }
 
-                    // Deliberately after the password check: someone who does not know the password
-                    // learns nothing about whether the account exists or what state it is in.
+                    // The count catches consecutive guessing, not typos spread over months.
+                    user.FailedLoginCount = 0;
+                    user.LockoutUntil = null;
+
+                    // Committed before the status check below, which returns early.
+                    db.SaveChanges();
+
+                    // After the password check, so a wrong guess learns nothing about the account.
                     UserStatus.SelfCheck();
                     if (!UserStatus.CanSignIn(user.StatusId))
                     {
@@ -292,31 +322,23 @@ namespace AssemblyLineTester.Views
                         $"User '{user.Username}' signed in.", user.Username);
 
                     // A required password change is handled by MainForm once the user is inside.
-                    // Stopping them at the door reads as a rejected login; asking after they have
-                    // arrived reads as finishing setup, and blocks just as completely.
-
-                    // update last login timestamp, save the logged-in user to the session, and close login form
                     _instrument.Connect();
-                    // Update LastLogin field and persist to SQLite database
-                    user.LastLogin = DateTime.Now;
+                    user.LastLogin = AppTime.UtcNow;
                     db.SaveChanges();
 
-                    // Start global instrument connection status monitoring
                     InstrumentService.StartMonitoring();
 
-                    // Save the logged-in user in memory
                     SessionManager.SetSession(user);
 
-                    // Start tracking maintenance and operational hours
                     MaintenanceService.StartTracking();
 
                     MainForm dashboard = new();
 
-                    // Close login form to terminate the application process when dashboard closes
+                    // Closing the dashboard ends the process unless the user logged out.
                     dashboard.FormClosed += (s, args) =>
                     {
                         MaintenanceService.StopTrackingAndSave();
-                        InstrumentService.StopMonitoring(); // Stop monitoring
+                        InstrumentService.StopMonitoring();
                         if (dashboard.IsLoggingOut)
                         {
                             SessionManager.ClearSession();
