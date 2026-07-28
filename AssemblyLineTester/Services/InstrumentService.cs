@@ -250,6 +250,22 @@ namespace AssemblyLineTester.Services
             }
         }
 
+        public DllDualValueReturnObject<CtaTestErrorResult> GetTestErrors()
+        {
+            if (!IsConnected) return null!;
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.GetTestErrors(_connectionId);
+                }
+                catch
+                {
+                    return null!;
+                }
+            }
+        }
+
         public DllDualValueReturnObject<CtaMeasuredValuesResult> GetMeasuredValues()
         {
             if (!IsConnected) return null!;

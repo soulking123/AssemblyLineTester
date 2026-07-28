@@ -305,8 +305,17 @@ namespace AssemblyLineTester.Views.Pages
             btnStartAll.Enabled = false;
             btnStartSelected.Enabled = false;
 
+            
             try
             {
+                bool isConnected = _instrument.Connect();
+                if (!isConnected)
+                {
+                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                Debug.WriteLine("debuggin2");
                 var learnResult = await Task.Run(() => _instrument.LearnConnection(), token);
                 if (token.IsCancellationRequested) return;
 
@@ -318,9 +327,11 @@ namespace AssemblyLineTester.Views.Pages
 
                 var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);
                 if (token.IsCancellationRequested) return;
-
+                Debug.WriteLine("debuggin");
+                Debug.WriteLine(getTestResult);
                 if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
                 {
+
                     MessageBox.Show(this, "Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -347,7 +358,6 @@ namespace AssemblyLineTester.Views.Pages
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
-
             btnLearnConnection.Enabled = false;
             btnStartAll.Enabled = false;
             btnStartSelected.Enabled = false;
