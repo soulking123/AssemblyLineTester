@@ -11,7 +11,6 @@ namespace AssemblyLineTester.Views
         private bool isSidebarExpanded = true;
         private readonly int expandedWidth = 380;
         private readonly int collapsedWidth = 90;
-
         private readonly Size _expandedLogoSize;
         private readonly Point _expandedToggleLoc;
         private readonly Size _expandedToggleSize;
