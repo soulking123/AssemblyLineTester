@@ -131,8 +131,9 @@ namespace AssemblyLineTester.Views.Pages
             chartHistory.ChartAreas.Clear();
             chartHistory.Series.Clear();
             chartHistory.Legends.Clear();
+            chartHistory.BackColor = Color.FromArgb(248, 250, 252);
 
-            ChartArea areaBar = new("BarArea") { BackColor = Color.White };
+            ChartArea areaBar = new("BarArea") { BackColor = Color.FromArgb(248, 250, 252) };
             areaBar.AxisX.MajorGrid.Enabled = false;
             areaBar.AxisX.LabelStyle.Font = new("Segoe UI", 8.5F);
             areaBar.AxisX.LabelStyle.ForeColor = Color.FromArgb(100, 116, 139);
@@ -150,7 +151,8 @@ namespace AssemblyLineTester.Views.Pages
             {
                 Docking = Docking.Top,
                 Alignment = StringAlignment.Center,
-                Font = new("Segoe UI", 9F, FontStyle.Bold)
+                Font = new("Segoe UI", 9F, FontStyle.Bold),
+                BackColor = Color.FromArgb(248, 250, 252)
             };
             chartHistory.Legends.Add(legBar);
 
@@ -205,15 +207,17 @@ namespace AssemblyLineTester.Views.Pages
             chartFailReason.ChartAreas.Clear();
             chartFailReason.Series.Clear();
             chartFailReason.Legends.Clear();
+            chartFailReason.BackColor = Color.FromArgb(248, 250, 252);
 
-            ChartArea areaPie = new("PieArea") { BackColor = Color.White };
+            ChartArea areaPie = new("PieArea") { BackColor = Color.FromArgb(248, 250, 252) };
             chartFailReason.ChartAreas.Add(areaPie);
 
             Legend legPie = new("PieLegend")
             {
                 Docking = Docking.Bottom,
                 Alignment = StringAlignment.Center,
-                Font = new("Segoe UI", 9F, FontStyle.Regular)
+                Font = new("Segoe UI", 9F, FontStyle.Regular),
+                BackColor = Color.FromArgb(248, 250, 252)
             };
             chartFailReason.Legends.Add(legPie);
 
@@ -416,6 +420,8 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiFail, 8, Color.FromArgb(148, 163, 184), 1.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiYield, 8, Color.FromArgb(148, 163, 184), 1.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(kpiCycleTime, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardChartHistory, 8, Color.FromArgb(148, 163, 184), 1.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardFailReason, 8, Color.FromArgb(148, 163, 184), 1.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(picHarness, 8, Color.FromArgb(148, 163, 184), 1.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod1, 8, Color.FromArgb(148, 163, 184), 1.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlMod2, 8, Color.FromArgb(148, 163, 184), 1.5f);

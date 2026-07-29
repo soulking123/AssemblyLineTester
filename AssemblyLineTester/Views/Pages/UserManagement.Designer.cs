@@ -123,7 +123,7 @@ namespace AssemblyLineTester.Views.Pages
             lblUserDetailsTitle = new Label();
             cardRoleSummary = new Panel();
             tblRoleContainer = new TableLayoutPanel();
-            pnlRoleChart = new Panel();
+            chartRole = new System.Windows.Forms.DataVisualization.Charting.Chart();
             tblRoleLegend = new TableLayoutPanel();
             lblLegendBox1 = new Label();
             lblLegendVal1 = new Label();
@@ -183,6 +183,7 @@ namespace AssemblyLineTester.Views.Pages
             cardUserList.SuspendLayout();
             tblUserListContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridUsers).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)chartRole).BeginInit();
             tblPagination.SuspendLayout();
             tblDetailsColumn.SuspendLayout();
             cardUserDetails.SuspendLayout();
@@ -1520,7 +1521,7 @@ namespace AssemblyLineTester.Views.Pages
             tblRoleContainer.ColumnCount = 2;
             tblRoleContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
             tblRoleContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
-            tblRoleContainer.Controls.Add(pnlRoleChart, 0, 0);
+            tblRoleContainer.Controls.Add(chartRole, 0, 0);
             tblRoleContainer.Controls.Add(tblRoleLegend, 1, 0);
             tblRoleContainer.Dock = DockStyle.Fill;
             tblRoleContainer.Location = new Point(15, 45);
@@ -1530,13 +1531,16 @@ namespace AssemblyLineTester.Views.Pages
             tblRoleContainer.Size = new Size(558, 222);
             tblRoleContainer.TabIndex = 1;
             // 
-            // pnlRoleChart
+            // chartRole
             // 
-            pnlRoleChart.Dock = DockStyle.Fill;
-            pnlRoleChart.Location = new Point(3, 3);
-            pnlRoleChart.Name = "pnlRoleChart";
-            pnlRoleChart.Size = new Size(217, 216);
-            pnlRoleChart.TabIndex = 0;
+            chartRole.BackColor = Color.White;
+            chartRole.Dock = DockStyle.Fill;
+            chartRole.Location = new Point(3, 3);
+            chartRole.Margin = new Padding(0);
+            chartRole.Name = "chartRole";
+            chartRole.Size = new Size(217, 216);
+            chartRole.TabIndex = 0;
+            chartRole.Text = "chartRole";
             // 
             // tblRoleLegend
             // 
@@ -1975,6 +1979,7 @@ namespace AssemblyLineTester.Views.Pages
             cardUserList.ResumeLayout(false);
             tblUserListContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)gridUsers).EndInit();
+            ((System.ComponentModel.ISupportInitialize)chartRole).EndInit();
             tblPagination.ResumeLayout(false);
             tblDetailsColumn.ResumeLayout(false);
             cardUserDetails.ResumeLayout(false);
@@ -2101,7 +2106,7 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Label lblValCreated;
 
         private System.Windows.Forms.TableLayoutPanel tblRoleContainer;
-        private System.Windows.Forms.Panel pnlRoleChart;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartRole;
         private System.Windows.Forms.TableLayoutPanel tblRoleLegend;
         private System.Windows.Forms.Label lblLegendBox1;
         private System.Windows.Forms.Label lblLegendVal1;

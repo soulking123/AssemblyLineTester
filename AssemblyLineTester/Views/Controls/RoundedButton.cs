@@ -164,17 +164,17 @@ namespace AssemblyLineTester.Views.Controls
             RectangleF rectSurface = new RectangleF(0.5f, 0.5f, Width - 1f, Height - 1f);
 
             Color currentColor = normalBackColor;
-            if (isPressed)
+            if (!Enabled)
+            {
+                currentColor = Color.FromArgb(226, 232, 240); // Light gray background
+            }
+            else if (isPressed)
             {
                 currentColor = pressedBackColor;
             }
             else if (isHovered)
             {
                 currentColor = hoverBackColor;
-            }
-            else if (!Enabled)
-            {
-                currentColor = Color.Gray;
             }
 
             // Clear background with parent's backcolor for smooth anti-aliased rounded corners
@@ -192,17 +192,17 @@ namespace AssemblyLineTester.Views.Controls
 
             // Determine text color
             Color currentForeColor = ForeColor;
-            if (isPressed && PressedForeColor != Color.Empty)
+            if (!Enabled)
+            {
+                currentForeColor = Color.FromArgb(148, 163, 184); // Darker gray text
+            }
+            else if (isPressed && PressedForeColor != Color.Empty)
             {
                 currentForeColor = PressedForeColor;
             }
             else if (isHovered && HoverForeColor != Color.Empty)
             {
                 currentForeColor = HoverForeColor;
-            }
-            else if (!Enabled)
-            {
-                currentForeColor = Color.Gray;
             }
 
             // Draw button text

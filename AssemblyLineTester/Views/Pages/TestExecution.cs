@@ -230,17 +230,20 @@ namespace AssemblyLineTester.Views.Pages
 
             try
             {
-                TestConfiguration activeConfig = _configService.GetActiveConfig();
-                lblStatusRunning.Text = "Running";
-                lblStatusRunning.ForeColor = Color.Yellow;
-                _startTime = DateTime.Now;
-                lblStartTimeVal.Text = _startTime.ToString("dd MMM yyyy hh:mm:ss tt");
-                lblEndTimeVal.Text = "-";
+                TestConfiguration? activeConfig = _configService.GetActiveConfig();
+                if (activeConfig != null)
+                {
+                    lblStatusRunning.Text = "Running";
+                    lblStatusRunning.ForeColor = Color.Yellow;
+                    _startTime = DateTime.Now;
+                    lblStartTimeVal.Text = _startTime.ToString("dd MMM yyyy hh:mm:ss tt");
+                    lblEndTimeVal.Text = "-";
 
-                _testStopwatch.Reset();
-                _testStopwatch.Start();
-                _elapsedTimer.Start();
-                await Task.Run(() => ExecuteTest(activeConfig), token);
+                    _testStopwatch.Reset();
+                    _testStopwatch.Start();
+                    _elapsedTimer.Start();
+                    await Task.Run(() => ExecuteTest(activeConfig), token);
+                }
                 if (token.IsCancellationRequested) return;
 
 

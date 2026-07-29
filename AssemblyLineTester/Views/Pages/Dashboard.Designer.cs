@@ -69,7 +69,9 @@ namespace AssemblyLineTester.Views.Pages
             tblMiddle = new TableLayoutPanel();
             cardSummary = new Panel();
             tblCharts = new TableLayoutPanel();
+            cardChartHistory = new Panel();
             chartHistory = new Chart();
+            cardFailReason = new Panel();
             chartFailReason = new Chart();
             tblKpi = new TableLayoutPanel();
             kpiTotalTested = new Panel();
@@ -93,6 +95,14 @@ namespace AssemblyLineTester.Views.Pages
             gridRecent = new DataGridView();
             lnkViewAll = new LinkLabel();
             lblRecentTitle = new Label();
+            cardOperatingTime = new Panel();
+            lblOpTimeSub = new Label();
+            lblOpTimeVal = new Label();
+            lblOpTimeTitle = new Label();
+            cardMaintenance = new Panel();
+            lblMaintSub = new Label();
+            lblMaintVal = new Label();
+            lblMaintTitle = new Label();
             tblBottom = new TableLayoutPanel();
             cardModules = new Panel();
             tblModules = new TableLayoutPanel();
@@ -109,14 +119,6 @@ namespace AssemblyLineTester.Views.Pages
             lblMod4Status = new Label();
             lblMod4Title = new Label();
             lblModulesTitle = new Label();
-            cardOperatingTime = new Panel();
-            lblOpTimeSub = new Label();
-            lblOpTimeVal = new Label();
-            lblOpTimeTitle = new Label();
-            cardMaintenance = new Panel();
-            lblMaintSub = new Label();
-            lblMaintVal = new Label();
-            lblMaintTitle = new Label();
             tblMain.SuspendLayout();
             tblTop.SuspendLayout();
             cardTester.SuspendLayout();
@@ -127,7 +129,9 @@ namespace AssemblyLineTester.Views.Pages
             tblMiddle.SuspendLayout();
             cardSummary.SuspendLayout();
             tblCharts.SuspendLayout();
+            cardChartHistory.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)chartHistory).BeginInit();
+            cardFailReason.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)chartFailReason).BeginInit();
             tblKpi.SuspendLayout();
             kpiTotalTested.SuspendLayout();
@@ -137,15 +141,14 @@ namespace AssemblyLineTester.Views.Pages
             kpiCycleTime.SuspendLayout();
             cardHistory.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridRecent).BeginInit();
-            tblBottom.SuspendLayout();
+            cardOperatingTime.SuspendLayout();
+            cardMaintenance.SuspendLayout();
             cardModules.SuspendLayout();
             tblModules.SuspendLayout();
             pnlMod1.SuspendLayout();
             pnlMod2.SuspendLayout();
             pnlMod3.SuspendLayout();
             pnlMod4.SuspendLayout();
-            cardOperatingTime.SuspendLayout();
-            cardMaintenance.SuspendLayout();
             SuspendLayout();
             // 
             // tblMain
@@ -408,9 +411,7 @@ namespace AssemblyLineTester.Views.Pages
             tblMiddle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18.06173F));
             tblMiddle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.65F));
             tblMiddle.Controls.Add(cardSummary, 0, 0);
-            tblMiddle.SetRowSpan(cardSummary, 2);
             tblMiddle.Controls.Add(cardHistory, 1, 0);
-            tblMiddle.SetColumnSpan(cardHistory, 2);
             tblMiddle.Controls.Add(cardOperatingTime, 1, 1);
             tblMiddle.Controls.Add(cardMaintenance, 2, 1);
             tblMiddle.Dock = DockStyle.Fill;
@@ -420,7 +421,7 @@ namespace AssemblyLineTester.Views.Pages
             tblMiddle.RowCount = 2;
             tblMiddle.RowStyles.Add(new RowStyle(SizeType.Percent, 81.25F));
             tblMiddle.RowStyles.Add(new RowStyle(SizeType.Percent, 18.75F));
-            tblMiddle.Size = new Size(2574, 910);
+            tblMiddle.Size = new Size(2574, 1126);
             tblMiddle.TabIndex = 1;
             // 
             // cardSummary
@@ -435,7 +436,8 @@ namespace AssemblyLineTester.Views.Pages
             cardSummary.Margin = new Padding(10);
             cardSummary.Name = "cardSummary";
             cardSummary.Padding = new Padding(24);
-            cardSummary.Size = new Size(1712, 890);
+            tblMiddle.SetRowSpan(cardSummary, 2);
+            cardSummary.Size = new Size(1712, 1106);
             cardSummary.TabIndex = 0;
             // 
             // tblCharts
@@ -444,34 +446,59 @@ namespace AssemblyLineTester.Views.Pages
             tblCharts.ColumnCount = 2;
             tblCharts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 72.48645F));
             tblCharts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 27.513546F));
-            tblCharts.Controls.Add(chartHistory, 0, 0);
-            tblCharts.Controls.Add(chartFailReason, 1, 0);
+            tblCharts.Controls.Add(cardChartHistory, 0, 0);
+            tblCharts.Controls.Add(cardFailReason, 1, 0);
             tblCharts.Location = new Point(24, 240);
             tblCharts.Margin = new Padding(5);
             tblCharts.Name = "tblCharts";
             tblCharts.RowCount = 1;
             tblCharts.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblCharts.Size = new Size(1661, 624);
+            tblCharts.Size = new Size(1661, 840);
             tblCharts.TabIndex = 3;
+            // 
+            // cardChartHistory
+            // 
+            cardChartHistory.BackColor = Color.FromArgb(248, 250, 252);
+            cardChartHistory.Controls.Add(chartHistory);
+            cardChartHistory.Dock = DockStyle.Fill;
+            cardChartHistory.Location = new Point(5, 5);
+            cardChartHistory.Margin = new Padding(5);
+            cardChartHistory.Name = "cardChartHistory";
+            cardChartHistory.Padding = new Padding(10);
+            cardChartHistory.Size = new Size(1193, 830);
+            cardChartHistory.TabIndex = 0;
             // 
             // chartHistory
             // 
             chartHistory.Dock = DockStyle.Fill;
-            chartHistory.Location = new Point(5, 5);
-            chartHistory.Margin = new Padding(5);
+            chartHistory.Location = new Point(10, 10);
+            chartHistory.Margin = new Padding(0);
             chartHistory.Name = "chartHistory";
-            chartHistory.Size = new Size(1193, 614);
+            chartHistory.Size = new Size(1173, 810);
             chartHistory.TabIndex = 0;
             chartHistory.Text = "chartHistory";
             // 
+            // cardFailReason
+            // 
+            cardFailReason.BackColor = Color.FromArgb(248, 250, 252);
+            cardFailReason.Controls.Add(chartFailReason);
+            cardFailReason.Dock = DockStyle.Fill;
+            cardFailReason.Location = new Point(1208, 5);
+            cardFailReason.Margin = new Padding(5);
+            cardFailReason.Name = "cardFailReason";
+            cardFailReason.Padding = new Padding(10);
+            cardFailReason.Size = new Size(448, 830);
+            cardFailReason.TabIndex = 1;
+            // 
             // chartFailReason
             // 
+            chartFailReason.BackColor = Color.FromArgb(248, 250, 252);
             chartFailReason.Dock = DockStyle.Fill;
-            chartFailReason.Location = new Point(1208, 5);
-            chartFailReason.Margin = new Padding(5);
+            chartFailReason.Location = new Point(10, 10);
+            chartFailReason.Margin = new Padding(0);
             chartFailReason.Name = "chartFailReason";
-            chartFailReason.Size = new Size(448, 614);
-            chartFailReason.TabIndex = 1;
+            chartFailReason.Size = new Size(428, 810);
+            chartFailReason.TabIndex = 0;
             chartFailReason.Text = "chartFailReason";
             // 
             // tblKpi
@@ -704,6 +731,7 @@ namespace AssemblyLineTester.Views.Pages
             // cardHistory
             // 
             cardHistory.BackColor = Color.White;
+            tblMiddle.SetColumnSpan(cardHistory, 2);
             cardHistory.Controls.Add(gridRecent);
             cardHistory.Controls.Add(lnkViewAll);
             cardHistory.Controls.Add(lblRecentTitle);
@@ -712,7 +740,7 @@ namespace AssemblyLineTester.Views.Pages
             cardHistory.Margin = new Padding(10);
             cardHistory.Name = "cardHistory";
             cardHistory.Padding = new Padding(24);
-            cardHistory.Size = new Size(822, 890);
+            cardHistory.Size = new Size(822, 894);
             cardHistory.TabIndex = 1;
             // 
             // gridRecent
@@ -740,7 +768,7 @@ namespace AssemblyLineTester.Views.Pages
             gridRecent.Name = "gridRecent";
             gridRecent.RowHeadersWidth = 51;
             gridRecent.RowTemplate.Height = 35;
-            gridRecent.Size = new Size(771, 776);
+            gridRecent.Size = new Size(771, 780);
             gridRecent.TabIndex = 2;
             // 
             // lnkViewAll
@@ -769,13 +797,112 @@ namespace AssemblyLineTester.Views.Pages
             lblRecentTitle.TabIndex = 0;
             lblRecentTitle.Text = "RECENT TEST HISTORY";
             // 
+            // cardOperatingTime
+            // 
+            cardOperatingTime.BackColor = Color.White;
+            cardOperatingTime.Controls.Add(lblOpTimeSub);
+            cardOperatingTime.Controls.Add(lblOpTimeVal);
+            cardOperatingTime.Controls.Add(lblOpTimeTitle);
+            cardOperatingTime.Dock = DockStyle.Fill;
+            cardOperatingTime.Location = new Point(1742, 924);
+            cardOperatingTime.Margin = new Padding(10);
+            cardOperatingTime.Name = "cardOperatingTime";
+            cardOperatingTime.Padding = new Padding(24);
+            cardOperatingTime.Size = new Size(444, 192);
+            cardOperatingTime.TabIndex = 1;
+            // 
+            // lblOpTimeSub
+            // 
+            lblOpTimeSub.AutoSize = true;
+            lblOpTimeSub.Font = new Font("Segoe UI", 9F);
+            lblOpTimeSub.ForeColor = Color.FromArgb(100, 116, 139);
+            lblOpTimeSub.Location = new Point(24, 120);
+            lblOpTimeSub.Margin = new Padding(5, 0, 5, 0);
+            lblOpTimeSub.Name = "lblOpTimeSub";
+            lblOpTimeSub.Size = new Size(156, 32);
+            lblOpTimeSub.TabIndex = 2;
+            lblOpTimeSub.Text = "HH : MM : SS";
+            // 
+            // lblOpTimeVal
+            // 
+            lblOpTimeVal.AutoSize = true;
+            lblOpTimeVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            lblOpTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
+            lblOpTimeVal.Location = new Point(20, 51);
+            lblOpTimeVal.Margin = new Padding(5, 0, 5, 0);
+            lblOpTimeVal.Name = "lblOpTimeVal";
+            lblOpTimeVal.Size = new Size(306, 72);
+            lblOpTimeVal.TabIndex = 1;
+            lblOpTimeVal.Text = "03 : 46 : 22";
+            // 
+            // lblOpTimeTitle
+            // 
+            lblOpTimeTitle.AutoSize = true;
+            lblOpTimeTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblOpTimeTitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblOpTimeTitle.Location = new Point(24, 19);
+            lblOpTimeTitle.Margin = new Padding(5, 0, 5, 0);
+            lblOpTimeTitle.Name = "lblOpTimeTitle";
+            lblOpTimeTitle.Size = new Size(385, 32);
+            lblOpTimeTitle.TabIndex = 0;
+            lblOpTimeTitle.Text = "TOTAL OPERATING TIME (Today)";
+            // 
+            // cardMaintenance
+            // 
+            cardMaintenance.BackColor = Color.White;
+            cardMaintenance.Controls.Add(lblMaintSub);
+            cardMaintenance.Controls.Add(lblMaintVal);
+            cardMaintenance.Controls.Add(lblMaintTitle);
+            cardMaintenance.Dock = DockStyle.Fill;
+            cardMaintenance.Location = new Point(2206, 924);
+            cardMaintenance.Margin = new Padding(10);
+            cardMaintenance.Name = "cardMaintenance";
+            cardMaintenance.Padding = new Padding(24);
+            cardMaintenance.Size = new Size(358, 192);
+            cardMaintenance.TabIndex = 2;
+            // 
+            // lblMaintSub
+            // 
+            lblMaintSub.AutoSize = true;
+            lblMaintSub.Font = new Font("Segoe UI", 9F);
+            lblMaintSub.ForeColor = Color.FromArgb(100, 116, 139);
+            lblMaintSub.Location = new Point(24, 120);
+            lblMaintSub.Margin = new Padding(5, 0, 5, 0);
+            lblMaintSub.Name = "lblMaintSub";
+            lblMaintSub.Size = new Size(174, 32);
+            lblMaintSub.TabIndex = 2;
+            lblMaintSub.Text = "Or 6,500 Hours";
+            // 
+            // lblMaintVal
+            // 
+            lblMaintVal.AutoSize = true;
+            lblMaintVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            lblMaintVal.ForeColor = Color.FromArgb(30, 41, 59);
+            lblMaintVal.Location = new Point(20, 51);
+            lblMaintVal.Margin = new Padding(5, 0, 5, 0);
+            lblMaintVal.Name = "lblMaintVal";
+            lblMaintVal.Size = new Size(260, 72);
+            lblMaintVal.TabIndex = 1;
+            lblMaintVal.Text = "145 Days";
+            // 
+            // lblMaintTitle
+            // 
+            lblMaintTitle.AutoSize = true;
+            lblMaintTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMaintTitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblMaintTitle.Location = new Point(24, 19);
+            lblMaintTitle.Margin = new Padding(5, 0, 5, 0);
+            lblMaintTitle.Name = "lblMaintTitle";
+            lblMaintTitle.Size = new Size(223, 32);
+            lblMaintTitle.TabIndex = 0;
+            lblMaintTitle.Text = "Next Maintenance";
+            // 
             // tblBottom
             // 
             tblBottom.ColumnCount = 3;
             tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 67.29F));
             tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18.06F));
             tblBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.65F));
-            // tblBottom content moved
             tblBottom.Dock = DockStyle.Fill;
             tblBottom.Location = new Point(13, 1237);
             tblBottom.Margin = new Padding(13);
@@ -970,106 +1097,6 @@ namespace AssemblyLineTester.Views.Pages
             lblModulesTitle.TabIndex = 0;
             lblModulesTitle.Text = "SYSTEM MODULE STATUS";
             // 
-            // cardOperatingTime
-            // 
-            cardOperatingTime.BackColor = Color.White;
-            cardOperatingTime.Controls.Add(lblOpTimeSub);
-            cardOperatingTime.Controls.Add(lblOpTimeVal);
-            cardOperatingTime.Controls.Add(lblOpTimeTitle);
-            cardOperatingTime.Dock = DockStyle.Fill;
-            cardOperatingTime.Location = new Point(1742, 10);
-            cardOperatingTime.Margin = new Padding(10);
-            cardOperatingTime.Name = "cardOperatingTime";
-            cardOperatingTime.Padding = new Padding(24);
-            cardOperatingTime.Size = new Size(444, 170);
-            cardOperatingTime.TabIndex = 1;
-            // 
-            // lblOpTimeSub
-            // 
-            lblOpTimeSub.AutoSize = true;
-            lblOpTimeSub.Font = new Font("Segoe UI", 9F);
-            lblOpTimeSub.ForeColor = Color.FromArgb(100, 116, 139);
-            lblOpTimeSub.Location = new Point(24, 120);
-            lblOpTimeSub.Margin = new Padding(5, 0, 5, 0);
-            lblOpTimeSub.Name = "lblOpTimeSub";
-            lblOpTimeSub.Size = new Size(156, 32);
-            lblOpTimeSub.TabIndex = 2;
-            lblOpTimeSub.Text = "HH : MM : SS";
-            // 
-            // lblOpTimeVal
-            // 
-            lblOpTimeVal.AutoSize = true;
-            lblOpTimeVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblOpTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblOpTimeVal.Location = new Point(20, 51);
-            lblOpTimeVal.Margin = new Padding(5, 0, 5, 0);
-            lblOpTimeVal.Name = "lblOpTimeVal";
-            lblOpTimeVal.Size = new Size(306, 72);
-            lblOpTimeVal.TabIndex = 1;
-            lblOpTimeVal.Text = "03 : 46 : 22";
-            // 
-            // lblOpTimeTitle
-            // 
-            lblOpTimeTitle.AutoSize = true;
-            lblOpTimeTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblOpTimeTitle.ForeColor = Color.FromArgb(100, 116, 139);
-            lblOpTimeTitle.Location = new Point(24, 19);
-            lblOpTimeTitle.Margin = new Padding(5, 0, 5, 0);
-            lblOpTimeTitle.Name = "lblOpTimeTitle";
-            lblOpTimeTitle.Size = new Size(385, 32);
-            lblOpTimeTitle.TabIndex = 0;
-            lblOpTimeTitle.Text = "TOTAL OPERATING TIME (Today)";
-            // 
-            // cardMaintenance
-            // 
-            cardMaintenance.BackColor = Color.White;
-            cardMaintenance.Controls.Add(lblMaintSub);
-            cardMaintenance.Controls.Add(lblMaintVal);
-            cardMaintenance.Controls.Add(lblMaintTitle);
-            cardMaintenance.Dock = DockStyle.Fill;
-            cardMaintenance.Location = new Point(2206, 10);
-            cardMaintenance.Margin = new Padding(10);
-            cardMaintenance.Name = "cardMaintenance";
-            cardMaintenance.Padding = new Padding(24);
-            cardMaintenance.Size = new Size(358, 170);
-            cardMaintenance.TabIndex = 2;
-            // 
-            // lblMaintSub
-            // 
-            lblMaintSub.AutoSize = true;
-            lblMaintSub.Font = new Font("Segoe UI", 9F);
-            lblMaintSub.ForeColor = Color.FromArgb(100, 116, 139);
-            lblMaintSub.Location = new Point(24, 120);
-            lblMaintSub.Margin = new Padding(5, 0, 5, 0);
-            lblMaintSub.Name = "lblMaintSub";
-            lblMaintSub.Size = new Size(174, 32);
-            lblMaintSub.TabIndex = 2;
-            lblMaintSub.Text = "Or 6,500 Hours";
-            // 
-            // lblMaintVal
-            // 
-            lblMaintVal.AutoSize = true;
-            lblMaintVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblMaintVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblMaintVal.Location = new Point(20, 51);
-            lblMaintVal.Margin = new Padding(5, 0, 5, 0);
-            lblMaintVal.Name = "lblMaintVal";
-            lblMaintVal.Size = new Size(260, 72);
-            lblMaintVal.TabIndex = 1;
-            lblMaintVal.Text = "145 Days";
-            // 
-            // lblMaintTitle
-            // 
-            lblMaintTitle.AutoSize = true;
-            lblMaintTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblMaintTitle.ForeColor = Color.FromArgb(100, 116, 139);
-            lblMaintTitle.Location = new Point(24, 19);
-            lblMaintTitle.Margin = new Padding(5, 0, 5, 0);
-            lblMaintTitle.Name = "lblMaintTitle";
-            lblMaintTitle.Size = new Size(223, 32);
-            lblMaintTitle.TabIndex = 0;
-            lblMaintTitle.Text = "Next Maintenance";
-            // 
             // Dashboard
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
@@ -1095,7 +1122,9 @@ namespace AssemblyLineTester.Views.Pages
             cardSummary.ResumeLayout(false);
             cardSummary.PerformLayout();
             tblCharts.ResumeLayout(false);
+            cardChartHistory.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)chartHistory).EndInit();
+            cardFailReason.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)chartFailReason).EndInit();
             tblKpi.ResumeLayout(false);
             kpiTotalTested.ResumeLayout(false);
@@ -1111,7 +1140,10 @@ namespace AssemblyLineTester.Views.Pages
             cardHistory.ResumeLayout(false);
             cardHistory.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)gridRecent).EndInit();
-            tblBottom.ResumeLayout(false);
+            cardOperatingTime.ResumeLayout(false);
+            cardOperatingTime.PerformLayout();
+            cardMaintenance.ResumeLayout(false);
+            cardMaintenance.PerformLayout();
             cardModules.ResumeLayout(false);
             cardModules.PerformLayout();
             tblModules.ResumeLayout(false);
@@ -1123,10 +1155,6 @@ namespace AssemblyLineTester.Views.Pages
             pnlMod3.PerformLayout();
             pnlMod4.ResumeLayout(false);
             pnlMod4.PerformLayout();
-            cardOperatingTime.ResumeLayout(false);
-            cardOperatingTime.PerformLayout();
-            cardMaintenance.ResumeLayout(false);
-            cardMaintenance.PerformLayout();
             ResumeLayout(false);
 
 
@@ -1219,8 +1247,10 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.TableLayoutPanel tblCharts;
 
+        private System.Windows.Forms.Panel cardChartHistory;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartHistory;
 
+        private System.Windows.Forms.Panel cardFailReason;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartFailReason;
 
         private System.Windows.Forms.Panel cardHistory;

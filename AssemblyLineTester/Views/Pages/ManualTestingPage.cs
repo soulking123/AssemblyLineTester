@@ -108,6 +108,7 @@ namespace AssemblyLineTester.Views.Pages
             InitializeComponent();
             EnableDoubleBuffering();
             SetupEvents();
+            btnAbort.Enabled = false;
         }
 
         private void EnableDoubleBuffering()
@@ -306,9 +307,12 @@ namespace AssemblyLineTester.Views.Pages
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
 
+            string originalText = btnLearnConnection.Text;
+            btnLearnConnection.Text = "Loading.....";
             btnLearnConnection.Enabled = false;
             btnStartAll.Enabled = false;
             btnStartSelected.Enabled = false;
+            btnAbort.Enabled = true;
 
             
             try
@@ -352,9 +356,11 @@ namespace AssemblyLineTester.Views.Pages
             }
             finally
             {
+                btnLearnConnection.Text = originalText;
                 btnLearnConnection.Enabled = true;
                 btnStartAll.Enabled = true;
                 btnStartSelected.Enabled = true;
+                btnAbort.Enabled = false;
             }
         }
 
@@ -363,9 +369,13 @@ namespace AssemblyLineTester.Views.Pages
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
+
+            string originalText = btnStartAll.Text;
+            btnStartAll.Text = "Loading.....";
             btnLearnConnection.Enabled = false;
             btnStartAll.Enabled = false;
             btnStartSelected.Enabled = false;
+            btnAbort.Enabled = true;
 
             try
             {
@@ -389,9 +399,11 @@ namespace AssemblyLineTester.Views.Pages
             }
             finally
             {
+                btnStartAll.Text = originalText;
                 btnLearnConnection.Enabled = true;
                 btnStartAll.Enabled = true;
                 btnStartSelected.Enabled = true;
+                btnAbort.Enabled = false;
             }
         }
 
@@ -401,9 +413,12 @@ namespace AssemblyLineTester.Views.Pages
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
 
+            string originalText = btnStartSelected.Text;
+            btnStartSelected.Text = "Loading.....";
             btnLearnConnection.Enabled = false;
             btnStartAll.Enabled = false;
             btnStartSelected.Enabled = false;
+            btnAbort.Enabled = true;
 
             try
             {
@@ -427,9 +442,11 @@ namespace AssemblyLineTester.Views.Pages
             }
             finally
             {
+                btnStartSelected.Text = originalText;
                 btnLearnConnection.Enabled = true;
                 btnStartAll.Enabled = true;
                 btnStartSelected.Enabled = true;
+                btnAbort.Enabled = false;
             }
         }
 
