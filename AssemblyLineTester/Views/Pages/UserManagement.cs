@@ -450,7 +450,7 @@ namespace AssemblyLineTester.Views.Pages
 
             if (dialog.ShowDialog() != DialogResult.OK) return;
 
-            Cursor previous = Cursor;
+            System.Windows.Forms.Cursor previous = Cursor;
             Cursor = Cursors.WaitCursor;
             try
             {

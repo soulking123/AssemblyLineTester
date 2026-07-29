@@ -11,6 +11,8 @@ using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using static AssemblyLineTester.Models.SystemLog;
 
+
+
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class SystemLog : UserControl
@@ -88,7 +90,7 @@ namespace AssemblyLineTester.Views.Pages
 
             if (dialog.ShowDialog() != DialogResult.OK) return;
 
-            Cursor previous = Cursor;
+            System.Windows.Forms.Cursor previous = Cursor;
             Cursor = Cursors.WaitCursor;
             try
             {
