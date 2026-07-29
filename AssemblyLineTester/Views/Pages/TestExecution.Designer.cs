@@ -996,6 +996,5 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Panel cardNotes;
         private System.Windows.Forms.Label lblNotesTitle;
         private ListBox listBoxTestSummary;
-        private TextBox textBox1;
     }
 }

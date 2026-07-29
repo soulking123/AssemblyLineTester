@@ -378,6 +378,7 @@ namespace AssemblyLineTester.Migrations
                     RoleId = table.Column<int>(type: "INTEGER", nullable: false),
                     Department = table.Column<string>(type: "TEXT", nullable: false),
                     StatusId = table.Column<int>(type: "INTEGER", nullable: false),
+                    MustChangePassword = table.Column<bool>(type: "INTEGER", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
@@ -400,34 +401,9 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Connectors",
-                columns: new[] { "ConnectorId", "ContactQuantity", "ContactType", "CurrentRating", "ImagePath", "MountingStyle", "PartNumber", "Perf", "WireSize" },
-                values: new object[,]
-                {
-                    { 1, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" },
-                    { 2, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", "18 AWG" },
-                    { 3, 32, "Female", 3.0, null, "Free Hanging", "D507F1", "Standard", "20 AWG" },
-                    { 4, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" },
-                    { 5, 64, "Male", 5.0, null, "Panel Mount", "D507F2", "Standard", "18 AWG" },
-                    { 6, 16, "Female", 2.0, null, "Panel Mount", "D507F3", "Standard", "22 AWG" },
-                    { 7, 64, "Female", 5.0, null, "Panel Mount", "D507F1", "Standard", "18 AWG" }
-                });
-
-            migrationBuilder.InsertData(
                 table: "MaintenanceStates",
                 columns: new[] { "Id", "LastUsageDate", "OperatingSecondsToday", "RemainingMaintDays", "RemainingMaintHours" },
                 values: new object[] { 1, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0.0, 180, 2160.0 });
-
-            migrationBuilder.InsertData(
-                table: "ProductHarnesses",
-                columns: new[] { "ProductHarnessId", "Area", "ConnectorListName", "ImagePaths", "LastUpdate", "Name", "ProductModel", "ProductType" },
-                values: new object[,]
-                {
-                    { 1, "Engine Control", "[\"J1\",\"J2\"]", "[\"Assets/img/Harness/6040.png\"]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Main Engine Harness 6020", "6020", "AC" },
-                    { 2, "Cabin Interior", "[\"J1\"]", "[]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Cabin Interior Harness 6030", "6030", "AC" },
-                    { 3, "Chassis", "[\"J1\",\"J2\",\"J3\"]", "[\"Assets/img/Harness/6040.png\"]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Chassis Harness 6040", "6040", "AC" },
-                    { 4, "Dashboard", "[\"J1\"]", "[]", new DateTime(2026, 6, 1, 15, 0, 0, 0, DateTimeKind.Local), "Dashboard Harness 6060", "6060", "AC" }
-                });
 
             migrationBuilder.InsertData(
                 table: "Roles",
@@ -472,20 +448,6 @@ namespace AssemblyLineTester.Migrations
                     { 1, "User is active and allowed to log in", "Active" },
                     { 2, "User is inactive and disabled", "Inactive" },
                     { 3, "User is locked out due to multiple failed login attempts", "Locked" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "HarnessConnectors",
-                columns: new[] { "HarnessConnectorId", "ConnectorId", "Position", "ProductHarnessId" },
-                values: new object[,]
-                {
-                    { 1, 1, 1, 1 },
-                    { 2, 2, 2, 1 },
-                    { 3, 3, 1, 2 },
-                    { 4, 4, 1, 3 },
-                    { 5, 5, 2, 3 },
-                    { 6, 6, 3, 3 },
-                    { 7, 7, 1, 4 }
                 });
 
             migrationBuilder.InsertData(
@@ -587,14 +549,8 @@ namespace AssemblyLineTester.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "UserId", "CompanyId", "CreatedAt", "Department", "FullName", "LastLogin", "PasswordHash", "RoleId", "StatusId", "UpdatedAt", "Username" },
-                values: new object[,]
-                {
-                    { 1, "CAT0100", new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local), "Engineering", "System Administrator", null, "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS", 1, 1, new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local), "admin" },
-                    { 2, "CAT0001", new DateTime(2026, 3, 10, 9, 15, 22, 0, DateTimeKind.Unspecified), "Engineering", "Faiz", new DateTime(2026, 3, 15, 10, 28, 41, 0, DateTimeKind.Unspecified), "$2b$11$VAO3CvR8UbFBe9Pn2sNrG.1Wg5vA7FpwVqPyxQeME/5PGTQ4PYk2u", 1, 1, new DateTime(2026, 3, 15, 10, 28, 41, 0, DateTimeKind.Unspecified), "faiz" },
-                    { 3, "CAT0002", new DateTime(2026, 3, 11, 8, 23, 15, 0, DateTimeKind.Unspecified), "Engineering", "Khen", new DateTime(2026, 3, 15, 9, 41, 12, 0, DateTimeKind.Unspecified), "$2b$11$JzVT2cjdgorN0AVlQHKv5uNCt1fNbQvlW7J1nEqd0pk2hDCAihDPe", 3, 1, new DateTime(2026, 3, 15, 9, 41, 12, 0, DateTimeKind.Unspecified), "khen" },
-                    { 4, "CAT0003", new DateTime(2026, 3, 12, 14, 10, 5, 0, DateTimeKind.Unspecified), "Production", "Tegar", new DateTime(2026, 3, 15, 9, 55, 33, 0, DateTimeKind.Unspecified), "$2b$11$SsUZzVTYh87OPBYbFMYNO.JNJ44jLe3wBxLq2cg7WFPWl.yHAIi6O", 2, 1, new DateTime(2026, 3, 15, 9, 55, 33, 0, DateTimeKind.Unspecified), "tegar" }
-                });
+                columns: new[] { "UserId", "CompanyId", "CreatedAt", "Department", "FullName", "LastLogin", "MustChangePassword", "PasswordHash", "RoleId", "StatusId", "UpdatedAt", "Username" },
+                values: new object[] { 1, "CAT0100", new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local), "Engineering", "System Administrator", null, true, "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS", 1, 1, new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local), "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_HarnessConnectors_ConnectorId",

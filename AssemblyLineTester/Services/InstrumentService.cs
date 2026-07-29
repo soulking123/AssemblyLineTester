@@ -226,7 +226,7 @@ namespace AssemblyLineTester.Services
 
         public CtaCommandResultCode PutTestProgram(string testName, string testText, bool setAsActive = true)
         {
-            if (!IsConnected) return (CtaCommandResultCode)(-1);
+            if (!IsConnected) return (CtaCommandResultCode.ConnectionFailed);
             lock (_lockObj)
             {
                 try
@@ -235,14 +235,14 @@ namespace AssemblyLineTester.Services
                 }
                 catch
                 {
-                    return (CtaCommandResultCode)(-2);
+                    return (CtaCommandResultCode.UnknownError);
                 }
             }
         }
 
         public CtaTestResult RunSingleTest(bool runHipot, bool runShorts)
         {
-            if (!IsConnected) return null!;
+            if (!IsConnected) return new CtaTestResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
             lock (_lockObj)
             {
                 try
@@ -251,7 +251,7 @@ namespace AssemblyLineTester.Services
                 }
                 catch
                 {
-                    return null!;
+                    return new CtaTestResult { DllCallResult = CtaCommandResultCode.UnknownError };
                 }
             }
         }
@@ -274,7 +274,7 @@ namespace AssemblyLineTester.Services
 
         public DllDualValueReturnObject<CtaMeasuredValuesResult> GetMeasuredValues()
         {
-            if (!IsConnected) return null!;
+            if (!IsConnected) return new DllDualValueReturnObject<CtaMeasuredValuesResult> { DllCallResult = CtaCommandResultCode.ConnectionFailed };
             lock (_lockObj)
             {
                 try
@@ -293,7 +293,7 @@ namespace AssemblyLineTester.Services
         /// </summary>
         public CtaStringResult GetServerInformation()
         {
-            if (!IsConnected) return null!;
+            if (!IsConnected) return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
             lock (_lockObj)
             {
                 try
@@ -302,7 +302,7 @@ namespace AssemblyLineTester.Services
                 }
                 catch
                 {
-                    return null!;
+                    return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
                 }
             }
         }
@@ -326,12 +326,28 @@ namespace AssemblyLineTester.Services
             }
         }
 
+        public CtaCommandResultCode LearnComplexConnection(string testName, byte component)
+        {
+            if (!IsConnected) return (CtaCommandResultCode)(-1);
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.ComplexLearn(_connectionId, testName, component);
+                }
+                catch
+                {
+                    return (CtaCommandResultCode)(-2);
+                }
+            }
+        }
+
         /// <summary>
         /// Retrieves the learned connection or test program text from the connected CTA Server.
         /// </summary>
         public CtaStringResult GetLearnedConnection(string testName = "")
         {
-            if (!IsConnected) return null!;
+            if (!IsConnected) return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
             lock (_lockObj)
             {
                 try
@@ -340,7 +356,23 @@ namespace AssemblyLineTester.Services
                 }
                 catch
                 {
-                    return null!;
+                    return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+                }
+            }
+        }
+
+        public CtaStringResult GetLastError()
+        {
+            if (!IsConnected) return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.GetLastError(_connectionId);
+                }
+                catch
+                {
+                    return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
                 }
             }
         }
