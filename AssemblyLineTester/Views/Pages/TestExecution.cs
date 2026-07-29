@@ -3,6 +3,7 @@ using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using CtaDotNet.Enums;
+using DocumentFormat.OpenXml.Office2010.CustomUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +14,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using static AssemblyLineTester.Models.SystemLog;
 
 using Timer = System.Windows.Forms.Timer;
 
@@ -33,6 +35,7 @@ namespace AssemblyLineTester.Views.Pages
         private Timer _elapsedTimer = new Timer();
         private DateTime _startTime;
         private DateTime _endTime;
+        private readonly SystemLogService logService = new();
 
         public TestExecution()
         {
@@ -52,7 +55,6 @@ namespace AssemblyLineTester.Views.Pages
 
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 var configService = new TestConfigService();
                 var activeConfig = configService.GetActiveConfig();
                 if (activeConfig != null)
@@ -289,105 +291,174 @@ namespace AssemblyLineTester.Views.Pages
 
         private void ExecuteTest(TestConfiguration config ,System.Threading.CancellationToken token = default)
         {
-            if (token.IsCancellationRequested) return;
-
-            bool isConnected = _instrument.Connect();
-            if (!isConnected)
-            {
-                MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (token.IsCancellationRequested) return;
-            _customTestText = _configService.ConvertToProgramText(config);
-            Debug.WriteLine(_customTestText);
-
-            if (token.IsCancellationRequested) return;
             try
             {
-                if (!string.IsNullOrEmpty(_customTestText))
+                if (token.IsCancellationRequested) return;
+
+                bool isConnected = _instrument.Connect();
+                if (!isConnected)
                 {
-                    var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
-                }
-                else
-                {
+                    logService.Log(LogSeverity.Error, "Instrument", "Cirris Tester API Is Disconnected",
+                        $"Failed to start test becauses Cirris Tester API is disconnected", SessionManager.CurrentUser.Username);
+                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-            }
-            catch (Exception)
-            {
-                return;
-            }
 
-            if (token.IsCancellationRequested) return;
-            Debug.WriteLine("Run Test");
-            var testResult = _instrument.RunSingleTest(false, true);
-            string testResultStatusText = testResult.TestResultCode.ToString();
+                if (token.IsCancellationRequested) return;
+                _customTestText = _configService.ConvertToProgramText(config);
+                //_customTestText = ""; 
+                Debug.WriteLine(_customTestText);
 
-            if (token.IsCancellationRequested) return;
+                if (token.IsCancellationRequested) return;
 
-            if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
-            {
-                return;
-            }
-
-            Debug.WriteLine("Get Measured Value");
-            var measuredValuesResult = _instrument.GetMeasuredValues();
-            if (token.IsCancellationRequested) return;
-            _loadedRows = new List<LiveTestDetailRowDto>();
-
-            if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaDotNet.Enums.CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
-            {
-                var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
-                if (list != null)
+                // ======================= put test =======================
+                var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
+                string errorText = "";
+                try
                 {
-                    int step = 1;
-                    foreach (var measurement in list)
+
+                    if (putResult == CtaCommandResultCode.Success)
                     {
-                        var status = LiveTestStatus.Pending;
-                        string statusStr = measurement.Status1?.Trim() ?? "";
-                        if (measurement.Value1 <= _continuityResistance)
-                        {
-                            status = LiveTestStatus.Pass;
-                        }
-                        else
-                        {
-                            status = LiveTestStatus.Fail;
-                        }
-
-                        string rowTestType = "WIRE";
-                        if (!string.IsNullOrEmpty(measurement.Instruction))
-                        {
-                            string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
-                            if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
-                            {
-                                rowTestType = "WIRE";
-                            }
-                            else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
-                            {
-                                rowTestType = "OPEN";
-                            }
-                            else
-                            {
-                                rowTestType = measurement.Instruction;
-                            }
-                        }
-
-                        _loadedRows.Add(new LiveTestDetailRowDto
-                        {
-                            StepNo = step++,
-                            NetId = measurement.Instruction ?? "",
-                            TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
-                            FromPoint = $"{measurement.Point1}",
-                            ToPoint = $"{measurement.Point2}",
-                            TestType = rowTestType,
-                            MeasuredValue = Math.Round(measurement.Value1, 3),
-                            Status = status
-                        });
+                        logService.Log(LogSeverity.Info, "Instrument", "Put Test Program Success.",
+                        $"Generated Program is valid", SessionManager.CurrentUser.Username);
+                    }
+                    else
+                    {
+                        errorText = _instrument.GetLastError()?.Result ?? "";
+                        logService.Log(LogSeverity.Warning, "Instrument", "Put Test Program Failed.",
+                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
                     }
                 }
-            }
+                catch (Exception ex)
+                {
+                    logService.Log(LogSeverity.Warning, "Instrument", "Convert Program Failed.",
+                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                    MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
+                if (token.IsCancellationRequested) return;
+
+                // ======================= single test =======================
+                var testResult = _instrument.RunSingleTest(false, true);
+                try
+                {
+                    if (testResult.DllCallResult == CtaCommandResultCode.Success)
+                    {
+                        logService.Log(LogSeverity.Info, "Instrument", "Run Test Program Success.",
+                        $"Success running Test Program with test result : {testResult.TestResultCode}", SessionManager.CurrentUser.Username);
+                    }
+                    else
+                    {
+                        errorText = _instrument.GetLastError()?.Result ?? "";
+                        logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Failed.",
+                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        if (errorText != "ctaSingleTest Command Failed with Error: Command Aborted")
+                        {
+                            MessageBox.Show($"Failed running Test Program with error message {testResult.DllCallResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                        }
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Failed.",
+                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                    MessageBox.Show($"Failed running Test Program with error message2 {testResult.DllCallResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                if (token.IsCancellationRequested) return;
+
+                // ======================= Measured Values =======================
+                var measuredValuesResult = _instrument.GetMeasuredValues();
+                _loadedRows = new List<LiveTestDetailRowDto>();
+                try
+                {
+                    if (measuredValuesResult.DllCallResult == CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
+                    {
+                        var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
+                        if (list != null)
+                        {
+                            int step = 1;
+                            foreach (var measurement in list)
+                            {
+                                var status = LiveTestStatus.Pending;
+                                string statusStr = measurement.Status1?.Trim() ?? "";
+                                if (measurement.Value1 <= _continuityResistance)
+                                {
+                                    status = LiveTestStatus.Pass;
+                                }
+                                else
+                                {
+                                    status = LiveTestStatus.Fail;
+                                }
+
+                                string rowTestType = "WIRE";
+                                if (!string.IsNullOrEmpty(measurement.Instruction))
+                                {
+                                    string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
+                                    if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
+                                    {
+                                        rowTestType = "WIRE";
+                                    }
+                                    else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
+                                    {
+                                        rowTestType = "OPEN";
+                                    }
+                                    else
+                                    {
+                                        rowTestType = measurement.Instruction;
+                                    }
+                                }
+
+                                _loadedRows.Add(new LiveTestDetailRowDto
+                                {
+                                    StepNo = step++,
+                                    NetId = measurement.Instruction ?? "",
+                                    TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
+                                    FromPoint = $"{measurement.Point1}",
+                                    ToPoint = $"{measurement.Point2}",
+                                    TestType = rowTestType,
+                                    MeasuredValue = Math.Round(measurement.Value1, 3),
+                                    Status = status
+                                });
+                            }
+                        }
+
+                        logService.Log(LogSeverity.Info, "Instrument", "Get Test Masurement Success.",
+                        $"Success getting test measurement with test result", SessionManager.CurrentUser.Username);
+                    }
+                    else
+                    {
+                        errorText = _instrument.GetLastError()?.Result ?? "";
+                        logService.Log(LogSeverity.Warning, "Instrument", "Get Test Masurement Failed.",
+                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logService.Log(LogSeverity.Warning, "Instrument", "Get Test Masurement Failed.",
+                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                    MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                logService.Log(LogSeverity.Info, "Text Execution", "Start Test Success",
+                        $"Success execute Start Test", SessionManager.CurrentUser.Username);
+            }
+            catch (Exception ex)
+            {
+                logService.Log(LogSeverity.Error, "Text Execution", "Start Test Failed",
+                        $"Start Test Failed with error message {ex.Message}", SessionManager.CurrentUser.Username);
+                MessageBox.Show($"Start Test Failed with error message {ex.Message}", "Start Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            
         }
 
         private void ShowSummary(List<LiveTestDetailRowDto> rows, string overallResultStatus)
@@ -403,36 +474,62 @@ namespace AssemblyLineTester.Views.Pages
              })
              .ToList();
 
-            var errorResult = _instrument.GetTestErrors().ObjectReturnValue;
-            listBoxTestSummary.Items.Clear();
 
+            listBoxTestSummary.Items.Clear();
             listBoxTestSummary.Items.Add($"TEST RESULT = {overallResultStatus}");
 
-            foreach (var summary in summaryList)
+            var errorResult = _instrument.GetTestErrors().ObjectReturnValue;
+            string errorText = "";
+            try
             {
-                if (summary.Pass == summary.Total)
+                if (errorResult.DllCallResult == CtaCommandResultCode.Success)
                 {
-                    listBoxTestSummary.Items.Add($"✔ {summary.TestType} ({summary.Pass}/{summary.Total})");
+                    foreach (var summary in summaryList)
+                    {
+                        if (summary.Pass == summary.Total)
+                        {
+                            listBoxTestSummary.Items.Add($"✔ {summary.TestType} ({summary.Pass}/{summary.Total})");
+                        }
+                        else
+                        {
+                            listBoxTestSummary.Items.Add($"✖ {summary.TestType} ({summary.Pass}/{summary.Total})");
+                        }
+                    }
+
+                    if (errorResult?.ErrorList != null && errorResult.ErrorList.Count > 0)
+                    {
+
+
+                        listBoxTestSummary.Items.Add("");
+                        listBoxTestSummary.Items.Add("TEST ERRORS");
+                        listBoxTestSummary.Items.Add("");
+                        foreach (var error in errorResult.ErrorList)
+                        {
+                            listBoxTestSummary.Items.Add(error.Message);
+                        }
+                    }
+
+                    logService.Log(LogSeverity.Info, "Instrument", "Get Test Errors Success.",
+                    $"Success getting Test Error", SessionManager.CurrentUser.Username);
                 }
                 else
                 {
-                    listBoxTestSummary.Items.Add($"✖ {summary.TestType} ({summary.Pass}/{summary.Total})");
+                    errorText = _instrument.GetLastError()?.Result ?? "";
+                    logService.Log(LogSeverity.Warning, "Instrument", "Get Test Errors Failed.",
+                    $"Failed getting Test Errors with error message {errorResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                    MessageBox.Show($"Failed getting Test Errors with error message {errorResult.DllCallResult.ToString()}, {errorText}", "Get Test Errors Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
-            }
 
-            // Add Error Messages
-            if (errorResult?.ErrorList != null && errorResult.ErrorList.Count > 0)
-            {
-                
-                
-                listBoxTestSummary.Items.Add("");
-                listBoxTestSummary.Items.Add("TEST ERRORS");
-                listBoxTestSummary.Items.Add("");
-                foreach (var error in errorResult.ErrorList)
-                {
-                    listBoxTestSummary.Items.Add(error.Message);
-                }
             }
+            catch (Exception Ex)
+            {
+                logService.Log(LogSeverity.Error, "Text Execution", "Display Test Execute Result Failed",
+                        $"Display Test Execute Result Failed with error message {Ex.Message}", SessionManager.CurrentUser.Username);
+                MessageBox.Show($"Display Test Execute Result Failed with error message {Ex.Message}", "Display Test Execute Result Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            
         }
         private async void btnStopTest_Click(object sender, EventArgs e)
         {
@@ -440,21 +537,42 @@ namespace AssemblyLineTester.Views.Pages
 
             // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
-            if (abortResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
+            string errorText = "";
+            try
             {
-                lblStatusRunning.Text = "Aborted";
-                lblStatusRunning.ForeColor = Color.Red;
-                StopTestTiming();
-                lblStartTimeVal.Text = "-";
-                lblElapsedTimeVal.Text = "-";
-                lblEndTimeVal.Text = "-";
-                gridLiveDetails.Rows.Clear();
-                _loadedRows.Clear();
-                MessageBox.Show("Test operation successfully aborted.", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (abortResult == CtaCommandResultCode.Success)
+                {
+                    lblStatusRunning.Text = "Aborted";
+                    lblStatusRunning.ForeColor = Color.Red;
+                    StopTestTiming();
+                    lblStartTimeVal.Text = "-";
+                    lblElapsedTimeVal.Text = "-";
+                    lblEndTimeVal.Text = "-";
+                    listBoxTestSummary.Items.Clear();
+                    gridLiveDetails.Rows.Clear();
+                    _loadedRows.Clear();
+
+                    MessageBox.Show("Test operation successfully aborted.", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    logService.Log(LogSeverity.Info, "Text Execution", "Stop Test Program Success.",
+                    $"Success stop test Program with test result : {abortResult}", SessionManager.CurrentUser.Username);
+                }
+                else
+                {
+                    errorText = _instrument.GetLastError()?.Result ?? "";
+                    logService.Log(LogSeverity.Error, "Text Execution", "Stop Test Failed",
+                    $"Stop Test Failed with error message {abortResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                    MessageBox.Show($"Stop Test Failed with error message {abortResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show($"Failed to send abort command to instrument. Error: {abortResult}", "Abort Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                logService.Log(LogSeverity.Error, "Text Execution", "Stop Test Failed",
+                        $"Stop Test Failed with error message {ex.Message}", SessionManager.CurrentUser.Username);
+                MessageBox.Show($"Stop Test Failed with error message {ex.Message}", "Start Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+
             }
         }
 

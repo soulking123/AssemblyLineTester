@@ -340,8 +340,14 @@ namespace AssemblyLineTester.Views.Pages
                             break; // Caught it!
                     }
 
+                    // Fallback: If the API completely refuses to give the error, force a generic message
+                    if (string.IsNullOrWhiteSpace(errorMessage) || errorMessage == "No Error")
+                    {
+                        errorMessage = "Hardware Learn Aborted. Please check the physical instrument display for details (e.g., resistance too high).";
+                    }
+
                     Debug.WriteLine(errorMessage);
-                    MessageBox.Show(this, $"Failed to execute learn operation on instrument. Error: {learnResult} = {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(this, $"Failed to execute learn operation on instrument.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
