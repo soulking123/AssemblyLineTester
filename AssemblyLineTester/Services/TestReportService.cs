@@ -665,13 +665,15 @@ namespace AssemblyLineTester.Services
                 HarnessGroup = d.HarnessGroup,
                 FromPin = d.FromPin,
                 ToPin = d.ToPin,
-                Color = d.Color,
                 TestType = d.TestTypeName,
-                Limit = FormatLimit(d.LowerLimit, d.UpperLimit, d.Unit),
+                LowerLimit = d.LowerLimit,
+                UpperLimit = d.UpperLimit,
+                Unit = d.Unit,
                 Measured = d.MeasuredValue.HasValue ? $"{d.MeasuredValue.Value} {d.Unit}" : "N/A",
                 Result = FormatResult(d.Result, d.MeasuredValue),
                 ErrorDetail = d.ErrorDetail
             }).ToList();
+
 
             TimeSpan? duration = report.EndDateTime.HasValue ? report.EndDateTime.Value - report.TestDateTime : null;
 
