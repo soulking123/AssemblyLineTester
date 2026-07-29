@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -8,29 +8,17 @@ using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Services
 {
-    /// <summary>
-    /// Packs the log files and a short machine summary into one zip the operator can send.
-    /// </summary>
-    /// <remarks>
-    /// This is the stand-in for remote debugging: a factory PC is not somewhere an engineer can
-    /// attach a debugger, so the machine has to be able to describe itself in one file.
-    /// The database is deliberately not included - it holds test results and password hashes, and
-    /// bundles travel over chat apps.
-    /// </remarks>
+    // Logs plus a machine summary in one zip. The database is left out; bundles travel over chat.
     public static class DiagnosticsService
     {
-        /// <summary>Log files newer than this go in the bundle. Older ones are rarely the cause.</summary>
+        // Log files newer than this go in the bundle.
         public const int DaysIncluded = 7;
 
-        /// <summary>Suggested file name, stamped so two bundles from one machine cannot collide.</summary>
+        // Stamped so two bundles from one machine cannot collide.
         public static string SuggestedFileName() =>
             $"ASL-diagnostics-{AppInfo.MachineName}-{DateTime.Now:yyyyMMdd-HHmmss}.zip";
 
-        /// <summary>
-        /// Writes the bundle to <paramref name="destinationPath"/> and returns how many log files
-        /// went in. A bundle with zero log files is still worth sending: the summary alone names
-        /// the version and the machine.
-        /// </summary>
+        // Writes the bundle and returns how many log files went in.
         public static int CreateBundle(string destinationPath)
         {
             if (string.IsNullOrWhiteSpace(destinationPath))
@@ -58,8 +46,7 @@ namespace AssemblyLineTester.Services
                 {
                     if (File.GetLastWriteTime(path) < cutoff) continue;
 
-                    // Copied through a shared-read stream rather than CreateEntryFromFile, because
-                    // today's log is open for append by this very process.
+                    // Shared-read stream, because today's log is open for append by this process.
                     using Stream source = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     using Stream target = zip.CreateEntry($"logs/{Path.GetFileName(path)}").Open();
                     source.CopyTo(target);

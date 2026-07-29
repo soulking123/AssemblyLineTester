@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -7,16 +7,15 @@ using AssemblyLineTester.Models;
 
 namespace AssemblyLineTester.Services
 {
-    /// Provides database operations for user accounts.
+    // Database operations for user accounts.
     public class UserService
     {
-        /// Retrieves all user accounts from the database.
-        /// Throws an UnauthorizedAccessException if the current user is not an administrator.
+        // Every account, with role and status loaded.
         public List<User> GetAllUsers()
         {
-            if (SessionManager.CurrentUser?.Role?.Name != "Administrator")
+            if (!SessionManager.HasPermission("Page.UserManagement"))
             {
-                throw new UnauthorizedAccessException("Access denied. Only administrators can view user data.");
+                throw new UnauthorizedAccessException("Access denied. You are not allowed to view user data.");
             }
 
             using (var db = new AppDbContext())
@@ -28,13 +27,12 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// Creates a new user account in the database after validating permissions and uniqueness.
-        /// Throws an UnauthorizedAccessException if the current user is not an administrator.
+        // Creates an account after checking permission and uniqueness.
         public void CreateUser(User newUser, string plainPassword = DefaultNewUserPassword)
         {
-            if (SessionManager.CurrentUser?.Role?.Name != "Administrator")
+            if (!SessionManager.HasPermission("Action.UserManagement.Edit"))
             {
-                throw new UnauthorizedAccessException("Access denied. Only administrators can create new users.");
+                throw new UnauthorizedAccessException("Access denied. You are not allowed to manage user accounts.");
             }
 
             if (newUser == null) throw new ArgumentNullException(nameof(newUser));
@@ -63,19 +61,16 @@ namespace AssemblyLineTester.Services
 
                 newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(plainPassword);
 
-                // The administrator picked this password, so two people know it from the start.
                 newUser.MustChangePassword = true;
 
                 newUser.CreatedAt = DateTime.UtcNow;
                 newUser.UpdatedAt = DateTime.UtcNow;
 
-                // Prevent EF Core from attempting to insert duplicate navigation entities
+                // Cleared so EF does not try to insert the navigation entities again.
                 newUser.Role = null!;
                 newUser.Status = null!;
 
-                // UserId is left at 0 so SQLite assigns it. Picking MAX+1 by hand reused the id of a
-                // deleted account, which would silently repoint that account's old test reports at
-                // whoever was created next.
+                // Left at 0 so SQLite assigns it; MAX+1 by hand reused ids of deleted accounts.
                 db.Users.Add(newUser);
                 db.SaveChanges();
 
@@ -90,31 +85,13 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>Shortest password the application will accept.</summary>
+        // Shortest password the application will accept.
         public const int MinimumPasswordLength = 8;
 
-        /// <summary>
-        /// Password every new account starts with. The account is created with
-        /// <see cref="Models.User.MustChangePassword"/> set, so the holder replaces it on first
-        /// sign-in and this value never survives past handover.
-        /// </summary>
-        /// <remarks>
-        /// A known constant rather than something random, so the administrator can hand an account
-        /// over without also having to transmit a secret. The trade is real and worth naming: until
-        /// the new user first signs in, anyone who knows this value can sign in as them and set the
-        /// password themselves. Keep the gap short - create accounts when they are about to be used,
-        /// not in a batch weeks ahead.
-        /// </remarks>
+        // Known on purpose so handover needs no secret; MustChangePassword closes the gap at first sign-in.
         public const string DefaultNewUserPassword = "Cat12345";
 
-        /// <summary>
-        /// Rejects a password that is too short or blank. Returns null when it is acceptable.
-        /// </summary>
-        /// <remarks>
-        /// One rule, applied at both the self-service change and the administrator reset, so the two
-        /// paths cannot drift apart. Deliberately not a complexity ruleset: length is what actually
-        /// costs an attacker time, and character-class rules mostly produce Password1!.
-        /// </remarks>
+        // Returns null when the password is acceptable. Length only, no character-class rules.
         public static string? ValidatePassword(string? plainPassword)
         {
             if (string.IsNullOrWhiteSpace(plainPassword))
@@ -126,9 +103,7 @@ namespace AssemblyLineTester.Services
             return null;
         }
 
-        /// <summary>
-        /// Changes the signed-in user's own password after checking the current one.
-        /// </summary>
+        // Changes the signed-in user's own password after checking the current one.
         public void ChangeOwnPassword(string currentPassword, string newPassword)
         {
             User? session = SessionManager.CurrentUser
@@ -141,8 +116,7 @@ namespace AssemblyLineTester.Services
             var user = db.Users.FirstOrDefault(u => u.UserId == session.UserId)
                 ?? throw new InvalidOperationException("Account not found.");
 
-            // Verified against the stored hash, not against the session, so a machine left unlocked
-            // is not enough on its own to take the account over.
+            // Checked against the stored hash, not the session.
             if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
                 throw new UnauthorizedAccessException("The current password is incorrect.");
 
@@ -154,8 +128,7 @@ namespace AssemblyLineTester.Services
             user.UpdatedAt = DateTime.UtcNow;
             db.SaveChanges();
 
-            // The session carries a copy of the row, so it has to be told as well or the forced
-            // change would be demanded again on the next check.
+            // The session holds a copy of the row and has to be told too.
             session.MustChangePassword = false;
             session.PasswordHash = user.PasswordHash;
 
@@ -164,10 +137,7 @@ namespace AssemblyLineTester.Services
                 $"User '{user.Username}' changed their own password.");
         }
 
-        /// <summary>
-        /// Sets another account's password. The recipient is required to change it at next sign-in,
-        /// because from that moment two people know it.
-        /// </summary>
+        // Sets another account's password and forces a change at next sign-in.
         public void ResetPassword(int userId, string newPassword)
         {
             if (!SessionManager.HasPermission("Action.UserManagement.Edit"))
@@ -182,6 +152,9 @@ namespace AssemblyLineTester.Services
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             user.MustChangePassword = true;
+            // The lockout message points here, so the reset has to release the lock.
+            user.FailedLoginCount = 0;
+            user.LockoutUntil = null;
             user.UpdatedAt = DateTime.UtcNow;
             db.SaveChanges();
 
@@ -190,9 +163,7 @@ namespace AssemblyLineTester.Services
                 $"Password reset for account '{user.Username}'. A change is required at next sign-in.");
         }
 
-        /// Changes a user account's status. Only an Active account may sign in, so this is the
-        /// switch that grants and withdraws access to the application.
-        /// Throws an UnauthorizedAccessException if the current user may not manage accounts.
+        // The switch that grants and withdraws access: only an Active account may sign in.
         public void UpdateUserStatus(int userId, int newStatusId)
         {
             if (!SessionManager.HasPermission("Action.UserManagement.Edit"))
@@ -200,8 +171,7 @@ namespace AssemblyLineTester.Services
                 throw new UnauthorizedAccessException("Access denied. You are not allowed to manage user accounts.");
             }
 
-            // Refuse to let someone disable the account they are currently signed in with; there is
-            // no second administrator guaranteed to exist to undo it.
+            // Nobody may disable the account they are signed in with; no second admin is guaranteed.
             if (SessionManager.CurrentUser?.UserId == userId)
             {
                 throw new InvalidOperationException("You cannot change the status of your own account.");
@@ -229,8 +199,6 @@ namespace AssemblyLineTester.Services
             user.UpdatedAt = DateTime.UtcNow;
             db.SaveChanges();
 
-            // Granting or withdrawing access is exactly the kind of change that needs to be
-            // answerable later, so it goes in the system log rather than only in the row itself.
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Warning,
                 "User Management",

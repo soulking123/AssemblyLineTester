@@ -1,4 +1,4 @@
-using System.Drawing.Drawing2D;
+﻿using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -21,8 +22,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private readonly HarnessService _harnessService = new();
 
-        // "Connector & Pin" tab state
-        private readonly ConnectorService _connectorService = new();
         private readonly Dictionary<int, Connector> _connectorCache = new();
         private List<string> _connectorImagePaths = [];
         private int _connectorImageIndex = 0;
@@ -33,17 +32,18 @@ namespace AssemblyLineTester.Views.Pages
         private Image? _customHarnessImage = null;
         private Image? _customMachineImage = null;
 
-        // General tab image galleries (harness images, and the selected connector's images) -
-        // same paging pattern as the "Connector & Pin" tab's picConnectorImage gallery.
         private List<string> _harnessImagePaths = [];
         private int _harnessImageIndex = 0;
         private List<string> _genConnectorImagePaths = [];
         private int _genConnectorImageIndex = 0;
 
-        // Carousel States
         private int _currentHarnessSlide = 0;
         private int _currentMachineSlide = 0;
         private const int TotalSlides = 3;
+
+        // Connector catalogue is a separate tab, unrelated to the selected harness; load it once
+        // it is actually opened instead of on every harness click.
+        private bool _connectorCatalogNeedsReload = true;
 
         public HarnessDatabase()
         {
@@ -60,13 +60,13 @@ namespace AssemblyLineTester.Views.Pages
             InitializeCustomStyles();
             SetupEvents();
             SetupPagination();
-            InitializeConnectorGrid(); // from origin/dashboard - fills the previously empty "Connector & Pin" tab
+            InitializeConnectorGrid();
             PopulateHarnessData();
 
             DoubleBuffered = true;
         }
 
-        // Fires when the user clicks a row in the harness list - loads that harness into the General tab.
+        // Loads the clicked harness into the General tab.
         private void DataGridViewList_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -76,7 +76,7 @@ namespace AssemblyLineTester.Views.Pages
             if (harness != null)
             {
                 RenderHarnessSelected(harness);
-                tabControlDetail.SelectedIndex = 0; // always jump back to the General tab on a new selection
+                tabControlDetail.SelectedIndex = 0;
             }
         }
 
@@ -135,7 +135,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 if (!HasConnectorEditPermission()) return;
 
-                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _connectorService);
+                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService);
                 if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     PopulateHarnessData();
@@ -158,7 +158,7 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
 
-                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _connectorService, _selectedHarness);
+                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _selectedHarness);
                 if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     int editedId = _selectedHarness.ProductHarnessId;
@@ -211,8 +211,7 @@ namespace AssemblyLineTester.Views.Pages
             };
         }
 
-        // Filters _allHarnessEntities by Product Model, Product Type, Area, and Part Number,
-        // then refreshes the grid from page 1.
+        // Applies the four filter dropdowns and reloads the grid from page 1.
         private void ApplyFilters()
         {
             SuspendLayout();
@@ -233,7 +232,7 @@ namespace AssemblyLineTester.Views.Pages
                 ).ToList();
 
                 _currentPage = 1;
-                ShowNoHarnessSelectedState(); // selected harness may no longer be in the filtered result
+                ShowNoHarnessSelectedState();
                 PopulateGrid();
             }
             finally
@@ -272,7 +271,6 @@ namespace AssemblyLineTester.Views.Pages
             btnConnectorSearch.Click += (s, e) => ApplyConnectorFilter();
             txtConnectorSearch.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ApplyConnectorFilter(); } };
 
-            // UI styling
             txtConnectorSearch.PlaceholderText = "Search by part number, type, wire size, or mounting...";
             txtConnectorSearch.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9;
             btnConnectorSearch.Text = "Search";
@@ -281,7 +279,20 @@ namespace AssemblyLineTester.Views.Pages
             picConnectorImage.Paint += PicConnectorImage_Paint;
             picConnectorImage.MouseClick += PicConnectorImage_MouseClick;
 
-            RefreshConnectorGrid();
+            PopulateConnectorInfo(null);
+            SetConnectorGalleryImages(null);
+
+            tabControlDetail.SelectedIndexChanged += TabControlDetail_SelectedIndexChanged;
+        }
+
+        // Loads the connector catalogue the first time its tab is opened, not on every harness click.
+        private void TabControlDetail_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (_connectorCatalogNeedsReload && tabControlDetail.SelectedTab == tabConnector)
+            {
+                RefreshConnectorGrid();
+                _connectorCatalogNeedsReload = false;
+            }
         }
 
         private void ApplyConnectorFilter()
@@ -311,13 +322,11 @@ namespace AssemblyLineTester.Views.Pages
                 _connectorCache[c.ConnectorId] = c;
             }
 
-            // Visual feedback: update result count in search status
             string query = txtConnectorSearch.Text.Trim();
             string status = string.IsNullOrEmpty(query)
                 ? $"Showing all {display.Count} connectors"
                 : $"Found {display.Count} of {_allConnectorsForHarness.Count} connectors";
 
-            // Try to find & update any status label, or just update button tooltip
             btnConnectorSearch.Text = display.Count > 0 ? $"Search ({display.Count})" : "Search (0)";
 
             if (dgvConnectors.Rows.Count > 0)
@@ -333,21 +342,18 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Reloads dgvConnectors with the entire connector catalog (every row in the Connectors
-        // table), independent of which harness is selected. Called on harness selection and after
-        // any Add/Edit/Delete connector action.
+        // Reloads the whole connector catalogue, independent of the selected harness.
         private void RefreshConnectorGrid()
         {
-            _allConnectorsForHarness = _connectorService.GetAllConnectors();
+            _allConnectorsForHarness = ConnectorService.GetAllConnectors();
             txtConnectorSearch.Text = string.Empty;
             ApplyConnectorFilter();
         }
 
-        // btnAddConnector/btnEditConnector/btnDeleteConnector share the same permission check used
-        // elsewhere on this page for modifying harness database records.
+        // The catalogue is harness specification data, so it is gated on Action.TestConfig.Edit.
         private bool HasConnectorEditPermission()
         {
-            if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator")
+            if (!SessionManager.HasPermission("Action.TestConfig.Edit"))
             {
                 MessageBox.Show("You do not have permission to modify connector records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -359,8 +365,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!HasConnectorEditPermission()) return;
 
-            // Add a connector to the shared catalog only - it's linked to harnesses later via the harness modal.
-            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService);
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm();
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
@@ -379,7 +384,7 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
-            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService, connector);
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(connector);
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
@@ -402,7 +407,7 @@ namespace AssemblyLineTester.Views.Pages
                 "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (confirm != DialogResult.Yes) return;
 
-            var (success, error) = _connectorService.DeleteConnector(connectorId);
+            var (success, error) = ConnectorService.DeleteConnector(connectorId);
             if (!success)
             {
                 MessageBox.Show(error ?? "Failed to delete connector.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -440,7 +445,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulateConnectorInfo(DataGridViewRow? row)
         {
-            tblConnectorInfo.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblConnectorInfo.Controls);
             if (row == null) return;
 
             var data = new (string Key, string Val)[]
@@ -480,17 +485,15 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Loads every image saved for the given connector and shows the first one. Called whenever
-        // the connector selection changes in the "Connector & Pin" tab.
+        // Loads a connector's images and shows the first one.
         private void SetConnectorGalleryImages(Connector? connector)
         {
-            _connectorImagePaths = _connectorService.GetConnectorImagePaths(connector);
+            _connectorImagePaths = ConnectorService.GetConnectorImagePaths(connector);
             _connectorImageIndex = 0;
             LoadGalleryImage(picConnectorImage, _connectorImagePaths, _connectorImageIndex);
         }
 
-        // Shared by every image gallery on this page (harness image, general-tab connector image,
-        // and the "Connector & Pin" tab image) so paging/loading logic isn't triplicated.
+        // Shared by all three image galleries on this page.
         private static void LoadGalleryImage(PictureBox pic, List<string> paths, int index)
         {
             var oldImage = pic.Image;
@@ -506,8 +509,6 @@ namespace AssemblyLineTester.Views.Pages
                 }
                 catch (Exception ex)
                 {
-                    // corrupt/unreadable file - leave the panel blank instead of crashing, but name
-                    // the file, or a missing harness image looks like a bug in the page instead.
                     FileLogService.Warn("HarnessDatabase.ShowImage",
                         $"Image '{paths[index]}' could not be loaded: {ex.Message}");
                 }
@@ -516,8 +517,7 @@ namespace AssemblyLineTester.Views.Pages
             pic.Invalidate();
         }
 
-        // Hit-tests a click against the left/right arrow zones of a gallery and advances index
-        // (wrapping around). Returns false (no change) for clicks in the middle.
+        // Advances the gallery index when the click lands on an arrow; false if it did not.
         private static bool HandleGalleryClick(Point location, int controlWidth, int count, ref int index)
         {
             const int arrowZoneWidth = 50;
@@ -534,7 +534,7 @@ namespace AssemblyLineTester.Views.Pages
             return false;
         }
 
-        // Draws paging arrows + a counter badge over a gallery image when it has more than one image.
+        // Draws paging arrows and a counter badge when a gallery holds more than one image.
         private static void DrawGalleryUI(Graphics g, Rectangle rect, int index, int count)
         {
             int arrowZoneWidth = 50;
@@ -565,8 +565,7 @@ namespace AssemblyLineTester.Views.Pages
             g.DrawString(counter, counterFont, Brushes.White, counterRect.X + 6, counterRect.Y + 3);
         }
 
-        // Draws a placeholder message when there's no image, or paging arrows + a counter when the
-        // connector has more than one image.
+        // Placeholder when there is no image, paging arrows when there is more than one.
         private void PicConnectorImage_Paint(object? sender, PaintEventArgs e)
         {
             if (sender is not Control ctrl || e.Graphics == null) return;
@@ -598,7 +597,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void SetupPagination()
         {
-            flpPages.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpPages.Controls);
             if (cmbShowEntries.Items.Count > 0) cmbShowEntries.SelectedIndex = 0;
             cmbShowEntries.SelectedIndexChanged += (s, e) =>
             {
@@ -634,7 +633,6 @@ namespace AssemblyLineTester.Views.Pages
                 var harnessService = new HarnessService();
                 _allHarnessEntities = harnessService.GetAllHarnesses();
 
-                // Populate filter ComboBoxes from actual data instead of hardcoded values
                 cmbProductModel.Items.Clear();
                 cmbProductModel.Items.Add("All");
                 cmbProductModel.Items.AddRange(_allHarnessEntities.Select(h => h.ProductModel).Distinct().OrderBy(m => m).ToArray());
@@ -679,7 +677,7 @@ namespace AssemblyLineTester.Views.Pages
                     : (h.ConnectorListName.Count > 0 ? string.Join(", ", h.ConnectorListName) : "-");
                 string lastUpdated = h.LastUpdate.ToString("dd MMM yyyy");
                 int rowIndex = dataGridViewList.Rows.Add(rowNo.ToString(), h.ProductModel, h.ProductType, h.Area, partNumbers, lastUpdated);
-                dataGridViewList.Rows[rowIndex].Tag = h.ProductHarnessId; // used by DataGridViewList_CellClick to look up the entity
+                dataGridViewList.Rows[rowIndex].Tag = h.ProductHarnessId;
                 rowNo++;
             }
 
@@ -702,7 +700,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            flpPages.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpPages.Controls);
 
             float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
             float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
@@ -796,13 +794,13 @@ namespace AssemblyLineTester.Views.Pages
             return btn;
         }
 
-        // Shown before the user clicks any harness in the list.
+        // Shown before any harness has been picked.
         private void ShowNoHarnessSelectedState()
         {
             _selectedHarness = null;
             _selectedConnector = null;
 
-            tblGenInfo.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblGenInfo.Controls);
             tblGenInfo.RowStyles.Clear();
             tblGenInfo.RowCount = 1;
             tblGenInfo.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
@@ -821,18 +819,16 @@ namespace AssemblyLineTester.Views.Pages
 
             SetHarnessImage([]);
             SetConnectorImage([]);
-            RefreshConnectorGrid();
         }
 
-        // Called when a harness row is clicked. Shows harness fields, the harness image,
-        // and a Connector dropdown; connector-specific fields stay blank until a connector is picked.
+        // Fills the General tab; connector fields stay blank until one is picked from the dropdown.
         private void RenderHarnessSelected(ProductHarness harness)
         {
             _selectedHarness = harness;
             _selectedConnector = null;
             _genInfoRowIndex = 0;
 
-            tblGenInfo.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblGenInfo.Controls);
             tblGenInfo.RowStyles.Clear();
             tblGenInfo.RowCount = 0;
 
@@ -853,10 +849,9 @@ namespace AssemblyLineTester.Views.Pages
 
             SetHarnessImage(harness.ImagePaths);
             SetConnectorImage([]);
-            RefreshConnectorGrid();
         }
 
-        // Adds a key/value row to tblGenInfo and returns the value Label so its text can be updated later.
+        // Adds a key/value row to tblGenInfo and returns the value Label for later updates.
         private Label AddGenInfoValueRow(string key, string value)
         {
             tblGenInfo.RowCount++;
@@ -886,16 +881,13 @@ namespace AssemblyLineTester.Views.Pages
             return lblVal;
         }
 
-        // Pairs a "J1"/"J2"/... label with the connector it refers to. connectorNames and connectors
-        // are always built together (same order, same length) by HarnessService.GetAllHarnesses, so
-        // zipping them here by index is safe - unlike storing/matching them separately.
+        // Names and connectors are built together in the same order, so zipping by index is safe.
         private sealed record ConnectorOption(string Label, Connector Connector)
         {
             public override string ToString() => Label;
         }
 
-        // Adds the Connector dropdown row. Shows "J1", "J2", ... (the position each connector was
-        // attached to this harness), not the part number - selecting one loads that connector's info/image.
+        // Dropdown lists attach positions "J1", "J2", ... rather than part numbers.
         private void AddConnectorDropdownRow(List<string> connectorNames, List<Connector> connectors)
         {
             tblGenInfo.RowCount++;
@@ -943,7 +935,7 @@ namespace AssemblyLineTester.Views.Pages
             _genInfoRowIndex++;
         }
 
-        // Fires when the user picks a connector from the dropdown - fills in connector fields and the connector image.
+        // Fills the connector fields and image for the picked dropdown entry.
         private void OnConnectorSelected(Connector? conn)
         {
             _selectedConnector = conn;
@@ -955,7 +947,7 @@ namespace AssemblyLineTester.Views.Pages
                 _lblConnWireSize!.Text = conn.WireSize;
                 _lblConnCurrentRating!.Text = $"{conn.CurrentRating} A";
                 _lblConnMountingStyle!.Text = conn.MountingStyle;
-                SetConnectorImage(_connectorService.GetConnectorImagePaths(conn));
+                SetConnectorImage(ConnectorService.GetConnectorImagePaths(conn));
             }
             else
             {
@@ -969,8 +961,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Top image (picHarnessImage) shows the harness's own pictures - can be more than one,
-        // pageable the same way as the "Connector & Pin" tab's gallery.
+        // Top gallery: the harness's own pictures.
         private void SetHarnessImage(List<string> relativePaths)
         {
             _harnessImagePaths = relativePaths.Select(ResolveHarnessImagePath).Where(p => p != null).Select(p => p!).ToList();
@@ -978,8 +969,7 @@ namespace AssemblyLineTester.Views.Pages
             LoadGalleryImage(picHarnessImage, _harnessImagePaths, _harnessImageIndex);
         }
 
-        // Bottom image (picMachineArea, labeled "CONNECTOR") shows the selected connector's
-        // pictures - also pageable when there's more than one.
+        // Bottom gallery: the selected connector's pictures.
         private void SetConnectorImage(List<string> fullPaths)
         {
             _genConnectorImagePaths = fullPaths;
@@ -987,8 +977,7 @@ namespace AssemblyLineTester.Views.Pages
             LoadGalleryImage(picMachineArea, _genConnectorImagePaths, _genConnectorImageIndex);
         }
 
-        // Resolves a harness image's stored relative path against the app base directory, the
-        // current directory, and the AppData Images folder (in that order). Returns null if not found.
+        // Tries the app base dir, the current dir, then AppData Images. Null when nowhere.
         private static string? ResolveHarnessImagePath(string relativePath)
         {
             if (string.IsNullOrWhiteSpace(relativePath)) return null;
@@ -1008,7 +997,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulateBottomCards()
         {
-            tblSpecsContent.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblSpecsContent.Controls);
             var leftSpecs = new (string Key, string Val)[]
             {
                 ("Total Connector", ": 6"),
@@ -1069,7 +1058,7 @@ namespace AssemblyLineTester.Views.Pages
                 tblSpecsContent.Controls.Add(lblRightVal, 3, i);
             }
 
-            tblTestSummaryContent.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblTestSummaryContent.Controls);
             var summaryData = new (string Key, string Val, Color? ColorOverride)[]
             {
                 ("Total Tested", ": 215", null),
@@ -1108,7 +1097,6 @@ namespace AssemblyLineTester.Views.Pages
             if (sender is not Control ctrl || e.Graphics == null) return;
             if (ctrl is PictureBox pic && pic.Image != null)
             {
-                // real image already rendered by the control itself - just overlay paging if there's more than one
                 if (_harnessImagePaths.Count > 1)
                     DrawGalleryUI(e.Graphics, ctrl.ClientRectangle, _harnessImageIndex, _harnessImagePaths.Count);
                 return;
@@ -1179,7 +1167,6 @@ namespace AssemblyLineTester.Views.Pages
             if (sender is not Control ctrl || e.Graphics == null) return;
             if (ctrl is PictureBox pic && pic.Image != null)
             {
-                // real image already rendered by the control itself - just overlay paging if there's more than one
                 if (_genConnectorImagePaths.Count > 1)
                     DrawGalleryUI(e.Graphics, ctrl.ClientRectangle, _genConnectorImageIndex, _genConnectorImagePaths.Count);
                 return;

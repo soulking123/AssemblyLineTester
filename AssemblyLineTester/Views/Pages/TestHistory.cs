@@ -1,10 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 
@@ -75,8 +74,6 @@ namespace AssemblyLineTester.Views.Pages
             gridData.CellPainting += gridData_CellPainting;
             gridData.CellClick += GridData_CellClick;
             gridSteps.CellFormatting += gridSteps_CellFormatting;
-            
-            chartSummary.PostPaint += ChartSummary_PostPaint;
 
             btnRefresh.Click += (s, ev) => LoadHistoryData();
 
@@ -488,7 +485,11 @@ namespace AssemblyLineTester.Views.Pages
             lblLegProgText.Text = $"In Progress : {FormatCountWithPercent(_summary.InProgressCount)}";
             lblLegStopText.Text = $"Stop : {FormatCountWithPercent(_summary.StopCount)}";
 
-            LoadSummaryChart();
+
+            pnlChartContainer.Controls.Clear();
+            var chartPanel = new Panel { Dock = DockStyle.Fill, BackColor = Color.White };
+            chartPanel.Paint += (s, e) => DrawSummaryDoughnut(e, chartPanel);
+            pnlChartContainer.Controls.Add(chartPanel);
         }
 
         private string FormatCountWithPercent(int count)
@@ -497,66 +498,36 @@ namespace AssemblyLineTester.Views.Pages
             return $"{count} ({pct:F1}%)";
         }
 
-        private void LoadSummaryChart()
+        private void DrawSummaryDoughnut(PaintEventArgs e, Panel container)
         {
-            chartSummary.ChartAreas.Clear();
-            chartSummary.Series.Clear();
-            chartSummary.Legends.Clear();
-            chartSummary.BackColor = Color.White;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            int size = Math.Min(container.Width, container.Height) - 20;
+            if (size <= 0) return;
+            int x = (container.Width - size) / 2;
+            int y = (container.Height - size) / 2;
+            var rect = new Rectangle(x, y, size, size);
 
-            ChartArea areaPie = new("PieArea") { BackColor = Color.White };
-            chartSummary.ChartAreas.Add(areaPie);
+            double total = _summary.TotalTested;
+            float passSweep = total <= 0 ? 0 : (float)(_summary.PassCount / total * 360.0);
+            float failSweep = total <= 0 ? 0 : (float)(_summary.FailCount / total * 360.0);
+            float progSweep = total <= 0 ? 0 : (float)(_summary.InProgressCount / total * 360.0);
+            float stopSweep = total <= 0 ? 0 : (float)(_summary.StopCount / total * 360.0);
 
-            Series sSummary = new("Summary") { ChartType = SeriesChartType.Doughnut };
-            sSummary["DoughnutRadius"] = "25";
+            using var penPass = new Pen(Color.FromArgb(76, 175, 80), 18);
+            using var penFail = new Pen(Color.FromArgb(244, 67, 54), 18);
+            using var penProg = new Pen(Color.FromArgb(245, 158, 11), 18);
+            using var penStop = new Pen(Color.FromArgb(148, 163, 184), 18);
 
-            if (_summary.TotalTested == 0)
-            {
-                int emptyIdx = sSummary.Points.AddY(1);
-                sSummary.Points[emptyIdx].Color = Color.FromArgb(226, 232, 240);
-                sSummary.Points[emptyIdx].IsVisibleInLegend = false;
-            }
-            else
-            {
-                var summaryData = new (int Count, Color Color)[]
-                {
-                    (_summary.PassCount, Color.FromArgb(76, 175, 80)),
-                    (_summary.FailCount, Color.FromArgb(244, 67, 54)),
-                    (_summary.InProgressCount, Color.FromArgb(245, 158, 11)),
-                    (_summary.StopCount, Color.FromArgb(148, 163, 184))
-                };
+            float angle = -90f;
+            e.Graphics.DrawArc(penPass, rect, angle, passSweep); angle += passSweep;
+            e.Graphics.DrawArc(penFail, rect, angle, failSweep); angle += failSweep;
+            e.Graphics.DrawArc(penProg, rect, angle, progSweep); angle += progSweep;
+            e.Graphics.DrawArc(penStop, rect, angle, stopSweep);
 
-                foreach (var data in summaryData)
-                {
-                    if (data.Count > 0)
-                    {
-                        int idx = sSummary.Points.AddY(data.Count);
-                        sSummary.Points[idx].Color = data.Color;
-                    }
-                }
-            }
-
-            chartSummary.Series.Add(sSummary);
-        }
-
-        private void ChartSummary_PostPaint(object? sender, ChartPaintEventArgs e)
-        {
-            if (e.ChartElement is ChartArea area)
-            {
-                string numText = _summary.TotalTested.ToString();
-                string subText = "TOTAL";
-
-                using SolidBrush brushNum = new(Color.FromArgb(30, 41, 59));
-                using SolidBrush brushSub = new(Color.FromArgb(100, 116, 139));
-                using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-
-                RectangleF chartRect = e.ChartGraphics.GetAbsoluteRectangle(area.Position.ToRectangleF());
-                float centerX = chartRect.Left + (chartRect.Width * 0.50f);
-                float centerY = chartRect.Top + (chartRect.Height * 0.5f);
-
-                e.ChartGraphics.Graphics.DrawString(numText, AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold, brushNum, centerX, centerY - 14, sf);
-                e.ChartGraphics.Graphics.DrawString(subText, AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold, brushSub, centerX, centerY + 14, sf);
-            }
+            string text = $"{_summary.TotalTested}\nTOTAL";
+            using var brush = new SolidBrush(Color.FromArgb(30, 41, 59));
+            using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            e.Graphics.DrawString(text, AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, brush, new RectangleF(x, y, size, size), format);
         }
 
         private static void gridData_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)

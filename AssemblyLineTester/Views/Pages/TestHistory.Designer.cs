@@ -113,7 +113,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryContent = new TableLayoutPanel();
             lblSummaryTitle = new Label();
             tblSummaryBody = new TableLayoutPanel();
-            chartSummary = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            pnlChartContainer = new Panel();
             tblSummaryLegend = new TableLayoutPanel();
             lblLegPassIcon = new Label();
             lblLegPassText = new Label();
@@ -139,7 +139,6 @@ namespace AssemblyLineTester.Views.Pages
             tblLeftHeader.SuspendLayout();
             flpLeftButtons.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridData).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)chartSummary).BeginInit();
             tblPagination.SuspendLayout();
             flpPageInfo.SuspendLayout();
             rightLayout.SuspendLayout();
@@ -1251,7 +1250,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryBody.ColumnCount = 2;
             tblSummaryBody.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
             tblSummaryBody.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
-            tblSummaryBody.Controls.Add(chartSummary, 0, 0);
+            tblSummaryBody.Controls.Add(pnlChartContainer, 0, 0);
             tblSummaryBody.Controls.Add(tblSummaryLegend, 1, 0);
             tblSummaryBody.Dock = DockStyle.Fill;
             tblSummaryBody.Location = new Point(0, 45);
@@ -1262,16 +1261,14 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryBody.Size = new Size(777, 216);
             tblSummaryBody.TabIndex = 1;
             // 
-            // chartSummary
+            // pnlChartContainer
             // 
-            chartSummary.BackColor = Color.White;
-            chartSummary.Dock = DockStyle.Fill;
-            chartSummary.Location = new Point(0, 0);
-            chartSummary.Margin = new Padding(0);
-            chartSummary.Name = "chartSummary";
-            chartSummary.Size = new Size(310, 216);
-            chartSummary.TabIndex = 0;
-            chartSummary.Text = "chartSummary";
+            pnlChartContainer.Dock = DockStyle.Fill;
+            pnlChartContainer.Location = new Point(0, 0);
+            pnlChartContainer.Margin = new Padding(0);
+            pnlChartContainer.Name = "pnlChartContainer";
+            pnlChartContainer.Size = new Size(310, 216);
+            pnlChartContainer.TabIndex = 0;
             // 
             // tblSummaryLegend
             // 
@@ -1503,7 +1500,6 @@ namespace AssemblyLineTester.Views.Pages
             pnlSteps.ResumeLayout(false);
             tblStepsContent.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)gridSteps).EndInit();
-            ((System.ComponentModel.ISupportInitialize)chartSummary).EndInit();
             ResumeLayout(false);
 
         }
@@ -1667,7 +1663,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.TableLayoutPanel tblSummaryBody;
 
-        private System.Windows.Forms.DataVisualization.Charting.Chart chartSummary;
+        private System.Windows.Forms.Panel pnlChartContainer;
 
         private System.Windows.Forms.TableLayoutPanel tblSummaryLegend;
 

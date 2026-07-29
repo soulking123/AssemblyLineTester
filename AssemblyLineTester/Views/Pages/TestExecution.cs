@@ -1,4 +1,4 @@
-using AssemblyLineTester.Data;
+﻿using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
@@ -219,7 +219,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
         }
-      
+
         private async void btnStartTest_Click(object? sender, EventArgs e)
         {
             _testCts?.Cancel();
@@ -232,20 +232,17 @@ namespace AssemblyLineTester.Views.Pages
 
             try
             {
-                TestConfiguration? activeConfig = _configService.GetActiveConfig();
-                if (activeConfig != null)
-                {
-                    lblStatusRunning.Text = "Running";
-                    lblStatusRunning.ForeColor = Color.Yellow;
-                    _startTime = DateTime.Now;
-                    lblStartTimeVal.Text = _startTime.ToString("dd MMM yyyy hh:mm:ss tt");
-                    lblEndTimeVal.Text = "-";
+                TestConfiguration activeConfig = _configService.GetActiveConfig();
+                lblStatusRunning.Text = "Running";
+                lblStatusRunning.ForeColor = Color.Yellow;
+                _startTime = DateTime.Now;
+                lblStartTimeVal.Text = _startTime.ToString("dd MMM yyyy hh:mm:ss tt");
+                lblEndTimeVal.Text = "-";
 
-                    _testStopwatch.Reset();
-                    _testStopwatch.Start();
-                    _elapsedTimer.Start();
-                    await Task.Run(() => ExecuteTest(activeConfig), token);
-                }
+                _testStopwatch.Reset();
+                _testStopwatch.Start();
+                _elapsedTimer.Start();
+                await Task.Run(() => ExecuteTest(activeConfig), token);
                 if (token.IsCancellationRequested) return;
 
 
@@ -284,7 +281,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 // Task was canceled via btnAbort
             }
-            finally 
+            finally
             {
                 btnLoadProgram.Enabled = true;
                 btnStartTest.Enabled = true;
@@ -292,7 +289,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void ExecuteTest(TestConfiguration config ,System.Threading.CancellationToken token = default)
+        private void ExecuteTest(TestConfiguration config, System.Threading.CancellationToken token = default)
         {
             try
             {
@@ -461,7 +458,7 @@ namespace AssemblyLineTester.Views.Pages
                 MessageBox.Show($"Start Test Failed with error message {ex.Message}", "Start Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            
+
         }
 
         private void ShowSummary(List<LiveTestDetailRowDto> rows, string overallResultStatus)
@@ -532,7 +529,7 @@ namespace AssemblyLineTester.Views.Pages
                 MessageBox.Show($"Display Test Execute Result Failed with error message {Ex.Message}", "Display Test Execute Result Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            
+
         }
         private async void btnStopTest_Click(object sender, EventArgs e)
         {
@@ -639,7 +636,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             gridLiveDetails.Refresh();
         }
-      
+
         private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)
         {
             switch (status)
@@ -659,7 +656,7 @@ namespace AssemblyLineTester.Views.Pages
                     break;
             }
         }
-     
+
         private void SetupDiagramPointers()
         {
             picMachineOverview.Paint += PicMachineOverview_Paint;
@@ -790,6 +787,6 @@ namespace AssemblyLineTester.Views.Pages
             modal.ShowDialog(this);
         }
 
-        
+
     }
 }

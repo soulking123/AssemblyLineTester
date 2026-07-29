@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -108,7 +108,6 @@ namespace AssemblyLineTester.Views.Controls
 
             RectangleF rectSurface = new RectangleF(0.5f, 0.5f, Width - 1f, Height - 1f);
 
-            // Clear background with parent's backcolor for smooth anti-aliased rounded corners
             if (Parent != null && Parent.BackColor != Color.Transparent)
             {
                 using (Brush parentBrush = new SolidBrush(Parent.BackColor))
@@ -121,7 +120,6 @@ namespace AssemblyLineTester.Views.Controls
                 e.Graphics.Clear(Color.Transparent);
             }
 
-            // Draw rounded card surface
             using (GraphicsPath pathSurface = GetFigurePath(rectSurface, borderRadius))
             using (Brush surfaceBrush = new SolidBrush(BackColor))
             {

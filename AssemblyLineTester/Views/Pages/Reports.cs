@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -13,7 +13,8 @@ namespace AssemblyLineTester.Views.Pages
     public partial class Reports : UserControl
     {
         private readonly TestReportService _reportService = new();
-        private readonly ReportExportService _exportService = new();
+        private readonly ReportExcelExportService _excelExportService = new();
+        private readonly ReportPdfExportService _pdfExportService = new();
         private int _currentPage = 1;
         private readonly int _pageSize = 10;
         private int _totalPages = 1;
@@ -22,7 +23,6 @@ namespace AssemblyLineTester.Views.Pages
         private ReportFilter _appliedFilter = new();
         private Chart chartTrend = null!;
 
-        // --- Report Edit/Delete feature ---
         private bool _isEditingReport;
         private TextBox _txtEditSn = null!;
 
@@ -46,8 +46,7 @@ namespace AssemblyLineTester.Views.Pages
             InitializeCustomStyles();
             WireEvents();
 
-            // Designer fonts sit out WinForms' AutoScale pass; without this the text keeps its
-            // authored size inside containers that were already scaled, and overflows them.
+            // Designer fonts skip the AutoScale pass, so they are scaled explicitly here.
             UIStyleHelper.ScaleExplicitFonts(this, UIStyleHelper.GetHostScaleFactor(this));
 
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
@@ -66,7 +65,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void InitializeCustomStyles()
         {
-            // Create Chart programmatically to avoid WinForms Designer serialization issues
+            // Built in code; the Designer cannot serialise a Chart cleanly.
             chartTrend = new Chart
             {
                 Dock = DockStyle.Fill,
@@ -81,7 +80,6 @@ namespace AssemblyLineTester.Views.Pages
             if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
-            // Plain date picker, no checkbox - dd/MM/yy format, user picks whenever they want.
             dtpStart.Format = DateTimePickerFormat.Custom;
             dtpStart.CustomFormat = "dd/MM/yy";
             dtpEnd.Format = DateTimePickerFormat.Custom;
@@ -97,12 +95,10 @@ namespace AssemblyLineTester.Views.Pages
 
             if (gridReports.Columns["colNo"] is { } colNo)
                 colNo.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            if (gridReports.Columns["colReportType"] is { } colReportType)
-                colReportType.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             if (gridReports.Columns["colDateGenerated"] is { } colDateGenerated)
                 colDateGenerated.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            if (gridReports.Columns["colSize"] is { } colSize)
-                colSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            if (gridReports.Columns["colResult"] is { } colResult)
+                colResult.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             if (gridReports.Columns["colAction"] is { } colAction)
                 colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             gridReports.CellFormatting += GridReports_CellFormatting;
@@ -117,7 +113,6 @@ namespace AssemblyLineTester.Views.Pages
                 btnCancelReportEdit.Visible = false;
 
                 _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
-                _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
 
                 btnEditReport.Click += (s, e) => EnterEditMode();
                 btnSaveReportEdit.Click += (s, e) => SaveReportEdit();
@@ -125,6 +120,8 @@ namespace AssemblyLineTester.Views.Pages
 
                 btnDeleteReport.Click += (s, e) =>
                 {
+                    if (!HasReportEditPermission()) return;
+
                     if (_selectedReportId is null)
                     {
                         MessageBox.Show("Please select a report to delete.", "Delete Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -162,8 +159,20 @@ namespace AssemblyLineTester.Views.Pages
             return tb;
         }
 
+        // Shared by Edit and Delete; both rewrite or destroy a signed test record.
+        private static bool HasReportEditPermission()
+        {
+            if (SessionManager.HasPermission("Action.Reports.Edit")) return true;
+
+            MessageBox.Show("You do not have permission to amend or delete saved test reports.",
+                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
         private void EnterEditMode()
         {
+            if (!HasReportEditPermission()) return;
+
             if (_selectedReportId is null)
             {
                 MessageBox.Show("Please select a report to edit.", "Edit Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -214,7 +223,7 @@ namespace AssemblyLineTester.Views.Pages
 
             try
             {
-                _reportService.UpdateSerialNumber(_selectedReportId.Value, _txtEditSn.Text.Trim());
+                _reportService.AmendSerialNumber(_selectedReportId.Value, _txtEditSn.Text.Trim());
 
                 ExitEditMode(refresh: true);
                 LoadReportsGrid(_appliedFilter);
@@ -226,6 +235,9 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        // Shared: this runs per grid row, and a Font is a GDI handle nothing here disposes.
+        private static readonly Font ActionButtonFont = new("Segoe UI", 7.5F, FontStyle.Bold);
+
         private static Button CreateActionButton(string text, Color backColor)
         {
             return new Button
@@ -236,14 +248,13 @@ namespace AssemblyLineTester.Views.Pages
                 FlatStyle = FlatStyle.Flat,
                 Size = new Size(64, 30),
                 Margin = new Padding(3, 2, 0, 0),
-                Font = new Font("Segoe UI", 7.5F, FontStyle.Bold),
+                Font = ActionButtonFont,
                 UseVisualStyleBackColor = false
             };
         }
 
         private void WireEvents()
         {
-            // Generate = read current control values and apply them as the new filter.
             btnGenerate.Click += (s, e) =>
             {
                 _currentPage = 1;
@@ -252,7 +263,6 @@ namespace AssemblyLineTester.Views.Pages
                 RenderReportData(_appliedFilter);
             };
 
-            // Reset = clear controls back to defaults AND clear the applied filter (show everything again).
             btnReset.Click += (s, e) =>
             {
                 ResetFilterControls();
@@ -297,7 +307,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 try
                 {
-                    _reportService.GenerateReportPdf(_selectedReportId.Value, sfd.FileName);
+                    _pdfExportService.ExportReportToPdf(_selectedReportId.Value, sfd.FileName);
                     MessageBox.Show("Report exported to PDF successfully.", "Export PDF", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -330,7 +340,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 try
                 {
-                    _exportService.ExportReportToExcel(_selectedReportId.Value, sfd.FileName);
+                    _excelExportService.ExportReportToExcel(_selectedReportId.Value, sfd.FileName);
                     MessageBox.Show("Report exported to Excel successfully.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -515,10 +525,9 @@ namespace AssemblyLineTester.Views.Pages
                 int rowIdx = gridReports.Rows.Add(
                     no++,
                     r.ReportName,
-                    r.ReportType,
-                    r.DateGenerated.ToString("dd MMM yyyy, HH:mm"),
+                    AppTime.ToLocal(r.DateGenerated).ToString("dd MMM yyyy, HH:mm"),
                     r.GeneratedBy,
-                    $"{r.SizeKb:N0} KB",
+                    r.OverallResult,
                     "View / Export");
                 gridReports.Rows[rowIdx].Tag = r.ReportId;
                 gridReports.Rows[rowIdx].Height = gridReports.RowTemplate.Height;
@@ -564,10 +573,9 @@ namespace AssemblyLineTester.Views.Pages
                 lblPageInfo.Text = $"Showing {start} to {end} of {totalCount} entries";
             }
 
-            flpPageButtons.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpPageButtons.Controls);
 
-            // These buttons are built after the page was laid out, so they carry designer-era
-            // sizes that nothing has scaled yet.
+            // Built after layout, so they still carry designer-era sizes and need scaling.
             float scale = UIStyleHelper.GetHostScaleFactor(this);
 
             var btnLast = CreatePageButton("»", false, _currentPage < _totalPages, (s, e) => GoToPage(_totalPages), scale);
@@ -645,7 +653,6 @@ namespace AssemblyLineTester.Views.Pages
                 btn.Click += onClick;
             }
 
-            // Set from the shared statics above, so it is explicit and will not scale on its own.
             btn.Font = UIStyleHelper.ScaleFont(btn.Font, scale);
 
             return btn;
@@ -757,20 +764,24 @@ namespace AssemblyLineTester.Views.Pages
 
             string colName = gridReports.Columns[e.ColumnIndex].Name;
 
-            if (colName == "colReportType")
+            if (colName == "colResult")
             {
-                string? val = e.Value.ToString();
-                if (val == "Summary Report")
+                e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
+
+                switch (e.Value.ToString())
                 {
-                    e.CellStyle.BackColor = Color.FromArgb(224, 242, 254);
-                    e.CellStyle.ForeColor = Color.FromArgb(3, 105, 161);
-                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
-                }
-                else
-                {
-                    e.CellStyle.BackColor = Color.FromArgb(241, 245, 249);
-                    e.CellStyle.ForeColor = Color.FromArgb(51, 65, 85);
-                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
+                    case "PASS":
+                        e.CellStyle.BackColor = Color.FromArgb(220, 252, 231);
+                        e.CellStyle.ForeColor = Color.FromArgb(22, 101, 52);
+                        break;
+                    case "FAIL":
+                        e.CellStyle.BackColor = Color.FromArgb(254, 226, 226);
+                        e.CellStyle.ForeColor = Color.FromArgb(153, 27, 27);
+                        break;
+                    default:
+                        e.CellStyle.BackColor = Color.FromArgb(241, 245, 249);
+                        e.CellStyle.ForeColor = Color.FromArgb(51, 65, 85);
+                        break;
                 }
             }
             else if (colName == "colAction")

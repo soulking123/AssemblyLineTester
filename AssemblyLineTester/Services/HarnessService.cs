@@ -10,15 +10,11 @@ namespace AssemblyLineTester.Services
 {
     public class HarnessService
     {
-        // Base folder for harness images: <app>/assets/img/harness/<folder>/<file>.
-        // ImagesRootRelative is what gets stored in ImagePaths so the path resolves the same way
-        // whether against the app base dir or the seed data (which also stores the full relative path).
+        // Harness images live at <app>/assets/img/harness/<folder>/<file>.
         private static string ImagesRootRelative => Path.Combine("assets", "img", "harness");
         private static string ImagesRoot => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ImagesRootRelative);
 
-        // Loads every harness with its connectors, ordered by the position each connector was
-        // attached in ("J1", "J2", ...). ConnectorList/ConnectorListName are derived fresh here every
-        // time instead of trusted from storage, so the two can never drift out of sync.
+        // Loads every harness with its connectors, ordered by attach position.
         public List<ProductHarness> GetAllHarnesses()
         {
             using var db = new AppDbContext();
@@ -31,18 +27,12 @@ namespace AssemblyLineTester.Services
             foreach (var h in harnesses)
             {
                 h.ConnectorList = h.HarnessConnectors.OrderBy(hc => hc.Position).Select(hc => hc.Connector!).ToList();
-                h.ConnectorListName = BuildConnectorListNames(h.ConnectorList.Count);
             }
 
             return harnesses;
         }
 
-        // "J1", "J2", ... one per connector, matching ConnectorList's order.
-        private static List<string> BuildConnectorListNames(int count) => Enumerable.Range(1, count).Select(i => $"J{i}").ToList();
-
-        // Inserts the harness, copies any freshly-picked images into its own folder, and links the
-        // selected (shared-catalog) connectors to it in the order they were picked.
-        // harness.ImagePaths may contain absolute paths (freshly picked via OpenFileDialog).
+        // Inserts the harness, copies its images in, and links the chosen connectors in order.
         public (bool success, string? error) AddHarness(ProductHarness harness)
         {
             try
@@ -57,12 +47,11 @@ namespace AssemblyLineTester.Services
                     ProductType = harness.ProductType,
                     Area = harness.Area,
                     LastUpdate = DateTime.UtcNow,
-                    ImagePaths = new List<string>(), // resolved after insert, once ProductHarnessId is known
-                    ConnectorListName = BuildConnectorListNames(selectedConnectorIds.Count)
+                    ImagePaths = new List<string>()
                 };
 
                 db.ProductHarnesses.Add(newHarness);
-                db.SaveChanges(); // need the generated ProductHarnessId before creating the image folder
+                db.SaveChanges();
 
                 newHarness.ImagePaths = ResolveImagePaths(newHarness, harness.ImagePaths);
                 db.SaveChanges();
@@ -82,10 +71,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // Updates harness fields. harness.ImagePaths may be a mix of: absolute paths (freshly
-        // picked, need copying in) and relative paths (already stored, kept as-is). Any previously
-        // stored path missing from this list was removed by the user in the modal - it is simply
-        // dropped from the DB list here; the file itself is left on disk untouched.
+        // Updates harness fields; a path dropped from ImagePaths is unlinked, not deleted from disk.
         public (bool success, string? error) UpdateHarness(ProductHarness harness)
         {
             try
@@ -101,7 +87,6 @@ namespace AssemblyLineTester.Services
                 existing.ProductType = harness.ProductType;
                 existing.Area = harness.Area;
                 existing.LastUpdate = DateTime.UtcNow;
-                existing.ConnectorListName = BuildConnectorListNames(selectedConnectorIds.Count);
                 existing.ImagePaths = ResolveImagePaths(existing, harness.ImagePaths);
 
                 db.SaveChanges();
@@ -121,8 +106,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // Deletes the harness row (its harness<->connector links cascade-delete per the FK config -
-        // the connectors themselves are left alone since other harnesses may still use them) and its image folder.
+        // Deletes the harness and its image folder; connectors survive, other harnesses may use them.
         public (bool success, string? error) DeleteHarness(int productHarnessId)
         {
             try
@@ -132,15 +116,16 @@ namespace AssemblyLineTester.Services
                 if (existing == null) return (false, "Harness not found.");
 
                 string folderPath = Path.Combine(ImagesRoot, BuildFolderName(existing));
-                if (Directory.Exists(folderPath))
-                {
-                    Directory.Delete(folderPath, recursive: true);
-                }
-
                 string harnessName = existing.Name;
 
                 db.ProductHarnesses.Remove(existing);
                 db.SaveChanges();
+
+                // Folder goes only after the row, or a failed save destroys images for nothing.
+                if (Directory.Exists(folderPath))
+                {
+                    Directory.Delete(folderPath, recursive: true);
+                }
 
                 new SystemLogService().Log(
                     Models.SystemLog.LogSeverity.Warning, "Harness Database", "Delete Harness",
@@ -155,8 +140,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // Walks the submitted path list: freshly-picked absolute files get copied into the harness's
-        // image folder; already-relative (previously stored) paths are kept as-is.
+        // Absolute paths are freshly picked and get copied in; relative ones are already stored.
         private static List<string> ResolveImagePaths(ProductHarness harness, List<string> submittedPaths)
         {
             var resolved = new List<string>();
@@ -170,7 +154,7 @@ namespace AssemblyLineTester.Services
                 }
                 else
                 {
-                    resolved.Add(path); // already a stored relative path
+                    resolved.Add(path);
                 }
             }
             return resolved;
@@ -195,12 +179,10 @@ namespace AssemblyLineTester.Services
             }
 
             File.Copy(sourceFile, destPath, overwrite: false);
-            // Store the full relative path (incl. assets/img/harness) so it resolves against the app base dir.
             return Path.Combine(ImagesRootRelative, folderName, Path.GetFileName(destPath));
         }
 
-        // Folder name = sanitized harness Name + ProductHarnessId, so it stays unique/stable
-        // even if two harnesses share the same Name.
+        // Name plus id, so two harnesses sharing a name still get separate folders.
         private static string BuildFolderName(ProductHarness harness)
         {
             string safeName = string.Join("_", harness.Name.Split(Path.GetInvalidFileNameChars()));
@@ -208,9 +190,7 @@ namespace AssemblyLineTester.Services
             return $"{safeName}_{harness.ProductHarnessId}";
         }
 
-        // Replaces this harness's connector links with the given set, in order (Position 1..n -
-        // "J1".."Jn"). A connector can be linked to several harnesses at once, so this only ever
-        // touches links for this harnessId - other harnesses using the same connectors are untouched.
+        // Replaces only this harness's connector links, in order; other harnesses are untouched.
         private static void SyncHarnessConnectors(AppDbContext db, int harnessId, List<int> orderedConnectorIds)
         {
             var existingLinks = db.HarnessConnectors.Where(hc => hc.ProductHarnessId == harnessId);

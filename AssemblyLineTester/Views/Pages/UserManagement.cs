@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -8,14 +8,17 @@ using System.Windows.Forms.DataVisualization.Charting;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views.Modals;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Pages
 {
-    /// Represents the User Management page control for managing system users.
     public partial class UserManagement : UserControl
     {
         private readonly UserService _userService;
         private List<User> _allUsers = [];
+
+        // The rows currently listed, after search and the three filter dropdowns.
+        private List<User> _visibleUsers = [];
         private Dictionary<string, int> _roleCounts = [];
         private int _totalUserCount;
         private int _currentPage = 1;
@@ -25,18 +28,16 @@ namespace AssemblyLineTester.Views.Pages
         private const string ActivateLabel = "Activate";
         private const string DeactivateLabel = "Deactivate";
 
-        /// Row whose action button the pointer is over, or -1. Drives the hover fill.
+        // Row whose action button the pointer is over, or -1.
         private int _hoveredActionRow = -1;
 
-        /// Pill text is drawn, not assigned to a control, so it never passes through the
-        /// AutoScale pass that ScaleExplicitFonts applies to the rest of the page.
+        // Pill text is drawn, so it never passes through the page's AutoScale pass.
         private Font _pillFont = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
         private float _uiScale = 1f;
 
-        /// Height the filter inputs settled on, so the action buttons can match them.
+        // Height the filter inputs settled on, so the action buttons can match them.
         private int _filterInputHeight;
 
-        /// Initializes a new instance of the UserManagement class.
         public UserManagement(UserService userService)
         {
             _userService = userService;
@@ -45,7 +46,6 @@ namespace AssemblyLineTester.Views.Pages
             SetupGridColumns();
             InitializePaginationControls();
 
-            // Wire up event listeners for filters and controls
             txtSearch.TextChanged += FilterChanged;
             cmbFilterStatus.SelectedIndexChanged += FilterChanged;
             cmbFilterRole.SelectedIndexChanged += FilterChanged;
@@ -64,7 +64,7 @@ namespace AssemblyLineTester.Views.Pages
 
             chartRole.PostPaint += ChartRole_PostPaint;
 
-            // Wire up the Load event to fetch database records only when the page is displayed on screen
+            // Loaded on display, not in the constructor.
             this.Load += UserManagement_Load;
             SetupEvents();
         }
@@ -130,7 +130,7 @@ namespace AssemblyLineTester.Views.Pages
             tblPagination.Controls.Add(flpPageSize, 1, 0);
         }
 
-        /// Configures initial items for the Status, Role, and Department filter dropdowns.
+        // Fills the Status, Role and Department filter dropdowns.
         private void InitializeFilters()
         {
             cmbFilterStatus.Items.Clear();
@@ -146,25 +146,25 @@ namespace AssemblyLineTester.Views.Pages
             cmbFilterDept.SelectedIndex = 0;
         }
 
-        /// Fetches user accounts from the SQLite database and updates KPIs, chart, and grid.
+        // Reloads accounts and refreshes the KPIs, chart and grid.
         private void LoadDatabaseData()
         {
             try
             {
-                // The admin account is listed like any other. Hiding it meant its password could
-                // never be changed from the UI, while the shipped default is identical on every
-                // installation - the one account that most needed to be reachable was the one
-                // account that was not.
+                // The admin account is listed like any other, or its shipped password is unreachable.
                 _allUsers = [.. _userService.GetAllUsers().OrderBy(u => u.UserId)];
 
                 _totalUserCount = _allUsers.Count;
-                int activeUsers = _allUsers.Count(u => u.Status.Name == "Active");
-                int inactiveUsers = _allUsers.Count(u => u.Status.Name == "Inactive");
-                int lockedUsers = _allUsers.Count(u => u.Status.Name == "Locked");
-                int newUsersThisMonth = _allUsers.Count(u => u.CreatedAt.Month == DateTime.Now.Month && u.CreatedAt.Year == DateTime.Now.Year);
+                // Counted by seeded id; the names are editable and renaming one zeroed these.
+                int activeUsers = _allUsers.Count(u => u.StatusId == UserStatus.Active);
+                int inactiveUsers = _allUsers.Count(u => u.StatusId == UserStatus.Inactive);
+                int lockedUsers = _allUsers.Count(u => u.StatusId == UserStatus.Locked);
+                // Local on both sides; CreatedAt is UTC and drifted across the month boundary.
+                int newUsersThisMonth = _allUsers.Count(u =>
+                    AppTime.ToLocal(u.CreatedAt).Month == DateTime.Now.Month &&
+                    AppTime.ToLocal(u.CreatedAt).Year == DateTime.Now.Year);
                 var latestUser = _allUsers.Where(u => u.LastLogin.HasValue).OrderByDescending(u => u.LastLogin).FirstOrDefault();
 
-                // Update KPI Cards
                 lblKpiVal1.Text = _totalUserCount.ToString();
                 lblKpiVal2.Text = activeUsers.ToString();
                 lblKpiSub2.Text = $"Users ({(_totalUserCount > 0 ? (activeUsers * 100.0 / _totalUserCount) : 0):0.0}%)";
@@ -173,15 +173,13 @@ namespace AssemblyLineTester.Views.Pages
                 lblKpiVal4.Text = lockedUsers.ToString();
                 lblKpiSub4.Text = $"Users ({(_totalUserCount > 0 ? (lockedUsers * 100.0 / _totalUserCount) : 0):0.0}%)";
                 lblKpiVal5.Text = latestUser?.FullName ?? "-";
-                lblKpiSub5.Text = latestUser?.LastLogin?.ToString("dd MMM yyyy hh:mm:ss tt") ?? "No logins";
+                lblKpiSub5.Text = AppTime.ToLocal(latestUser?.LastLogin)?.ToString("dd MMM yyyy hh:mm:ss tt") ?? "No logins";
                 lblKpiVal6.Text = newUsersThisMonth.ToString();
 
-                // Calculate users per role
                 _roleCounts = _allUsers
                     .GroupBy(u => u.Role.Name)
                     .ToDictionary(g => g.Key, g => g.Count());
 
-                // Update Role Summary Legend Numbers
                 lblLegendVal1.Text = _roleCounts.GetValueOrDefault("Administrator", 0).ToString();
                 lblLegendVal2.Text = _roleCounts.GetValueOrDefault("Engineer", 0).ToString();
                 lblLegendVal3.Text = _roleCounts.GetValueOrDefault("Operator", 0).ToString();
@@ -198,11 +196,11 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        /// Refreshes the DataGridView rows by applying search parameters and combobox filter selections.
+        // Reapplies the search box and filter dropdowns, then repaints the grid.
         private void PopulateUserGrid()
         {
             gridUsers.Rows.Clear();
-            _hoveredActionRow = -1; // the row it pointed at no longer exists
+            _hoveredActionRow = -1;
 
             string searchText = txtSearch.Text.Trim();
             string filterStatus = cmbFilterStatus.SelectedItem?.ToString() ?? "Status: All";
@@ -235,6 +233,10 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             List<User> filteredList = [.. filtered];
+
+            // Kept so Export writes what the user is looking at, not the whole company.
+            _visibleUsers = filteredList;
+
             int totalFiltered = filteredList.Count;
 
             lblUserListTitle.Text = $"USER LIST (Total: {totalFiltered})";
@@ -250,7 +252,6 @@ namespace AssemblyLineTester.Views.Pages
             int index = (_currentPage - 1) * _pageSize + 1;
             foreach (var user in pageItems)
             {
-                // The button is labelled with what the click will do, not with the state it is in.
                 int rowIndex = gridUsers.Rows.Add(
                     index++,
                     user.Username,
@@ -259,13 +260,13 @@ namespace AssemblyLineTester.Views.Pages
                     user.Role.Name,
                     user.Department,
                     user.Status.Name,
-                    user.LastLogin?.ToString("dd MMM yyyy\r\nhh:mm:ss tt") ?? "-",
-                    user.CreatedAt.ToString("dd MMM yyyy\r\nhh:mm:ss tt") ?? "-",
+                    // Both converted from storage; these two used to sit seven hours apart.
+                    AppTime.ToLocal(user.LastLogin)?.ToString("dd MMM yyyy\r\nhh:mm:ss tt") ?? "-",
+                    AppTime.ToLocal(user.CreatedAt).ToString("dd MMM yyyy\r\nhh:mm:ss tt"),
                     user.StatusId == UserStatus.Active ? DeactivateLabel : ActivateLabel
                 );
 
-                // Carries the account through paging and filtering, so the click handler never has
-                // to reconstruct which user a row index belongs to.
+                // Carries the account through paging, so no handler maps a row index back.
                 gridUsers.Rows[rowIndex].Tag = user;
             }
         }
@@ -283,7 +284,7 @@ namespace AssemblyLineTester.Views.Pages
                 lblPaginationInfo.Text = $"Showing {start} to {end} of {totalFiltered} users";
             }
 
-            flpPaginationButtons.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpPaginationButtons.Controls);
 
             float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
             float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
@@ -366,16 +367,13 @@ namespace AssemblyLineTester.Views.Pages
             return btn;
         }
 
-        /// Event handler to refresh grid when search criteria or dropdown options change.
         private void FilterChanged(object? sender, EventArgs e)
         {
             _currentPage = 1;
             PopulateUserGrid();
         }
 
-        /// Event handler to query fresh database data when refresh button is clicked.
-        /// Activates or deactivates the account on the clicked row. Only an Active account can
-        /// sign in, so this is where access is granted and withdrawn.
+        // Activates or deactivates the clicked account, granting or withdrawing access.
         private void GridUsers_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
@@ -425,8 +423,7 @@ namespace AssemblyLineTester.Views.Pages
             SetHoveredActionRow(-1);
         }
 
-        /// Repaints only the rows entering and leaving the hover state, so moving the pointer down
-        /// a long list does not redraw the whole grid on every step.
+        // Repaints only the rows entering and leaving hover, not the whole grid.
         private void SetHoveredActionRow(int rowIndex)
         {
             if (rowIndex == _hoveredActionRow) return;
@@ -438,8 +435,7 @@ namespace AssemblyLineTester.Views.Pages
             if (rowIndex >= 0 && rowIndex < gridUsers.Rows.Count) gridUsers.InvalidateRow(rowIndex);
         }
 
-        /// Writes the accounts currently listed to an .xlsx. The button existed and was styled but
-        /// had never been wired to anything.
+        // Writes the accounts currently listed to an .xlsx.
         private void BtnExport_Click(object? sender, EventArgs e)
         {
             using var dialog = new SaveFileDialog
@@ -468,7 +464,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 int r = 2;
-                foreach (var user in _allUsers)
+                foreach (var user in _visibleUsers)
                 {
                     ws.Cell(r, 1).Value = r - 1;
                     ws.Cell(r, 2).Value = user.Username;
@@ -477,10 +473,10 @@ namespace AssemblyLineTester.Views.Pages
                     ws.Cell(r, 5).Value = user.Department;
                     ws.Cell(r, 6).Value = user.Status.Name;
 
-                    // Real DateTime values, so the columns sort by time rather than alphabetically.
+                    // Real DateTime values, so the column sorts by time.
                     if (user.LastLogin.HasValue)
                     {
-                        ws.Cell(r, 7).Value = user.LastLogin.Value;
+                        ws.Cell(r, 7).Value = AppTime.ToLocal(user.LastLogin.Value);
                         ws.Cell(r, 7).Style.DateFormat.Format = "yyyy-mm-dd hh:mm";
                     }
                     else
@@ -488,21 +484,21 @@ namespace AssemblyLineTester.Views.Pages
                         ws.Cell(r, 7).Value = "never";
                     }
 
-                    ws.Cell(r, 8).Value = user.CreatedAt;
+                    ws.Cell(r, 8).Value = AppTime.ToLocal(user.CreatedAt);
                     ws.Cell(r, 8).Style.DateFormat.Format = "yyyy-mm-dd hh:mm";
                     r++;
                 }
 
                 ws.Columns().AdjustToContents();
                 ws.SheetView.FreezeRows(1);
-                if (_allUsers.Count > 0) ws.Range(1, 1, r - 1, headers.Length).SetAutoFilter();
+                if (_visibleUsers.Count > 0) ws.Range(1, 1, r - 1, headers.Length).SetAutoFilter();
 
                 wb.SaveAs(dialog.FileName);
 
                 new SystemLogService().Log(Models.SystemLog.LogSeverity.Info, "User Management",
-                    "Export Users", $"{_allUsers.Count} user accounts exported to Excel.");
+                    "Export Users", $"{_visibleUsers.Count} user accounts exported to Excel.");
 
-                MessageBox.Show($"{_allUsers.Count} accounts exported.", "Export complete",
+                MessageBox.Show($"{_visibleUsers.Count} accounts exported.", "Export complete",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -521,7 +517,7 @@ namespace AssemblyLineTester.Views.Pages
             LoadDatabaseData();
         }
 
-        /// Opens the Add User modal dialog and refreshes database records if a new user was created.
+        // Opens the Add User modal and reloads if an account was created.
         private void BtnAddUser_Click(object? sender, EventArgs e)
         {
             using var modal = new AddUserModalForm(_userService);
@@ -531,7 +527,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        /// Handles displaying user details on the side panel when a grid row is selected.
+        // Fills the side panel from the selected row.
         private void GridUsers_SelectionChanged(object? sender, EventArgs e)
         {
             if (gridUsers.SelectedRows.Count > 0)
@@ -553,7 +549,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        /// Builds user management grid columns dynamically on page initialization.
+        // Builds the grid columns in code.
         private void SetupGridColumns()
         {
             gridUsers.Columns.Clear();
@@ -605,11 +601,11 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.Columns[cCreated].FillWeight = 110F;
 
             var cAction = gridUsers.Columns.Add("colAction", "Action");
-            gridUsers.Columns[cAction].FillWeight = 95F; // fits "Deactivate" without the button touching the cell edges
+            gridUsers.Columns[cAction].FillWeight = 95F;
             gridUsers.Columns[cAction].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
-        /// Configures custom status cell background and text styling based on active state.
+        // Colours the status pill from the account state.
         private void GridUsers_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.ColumnIndex >= 0 && gridUsers.Columns[e.ColumnIndex].Name == "colAction" && e.CellStyle is not null)
@@ -658,8 +654,7 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
 
-                // Outlined, not filled. The status column right next to it uses solid pills, and a
-                // control the operator can press has to read differently from a label they cannot.
+                // Outlined, so a pressable control reads apart from the solid status pill beside it.
                 bool activates = label == ActivateLabel;
                 bool hovered = e.RowIndex == _hoveredActionRow;
 
@@ -691,9 +686,8 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        /// Converts a pixel measurement picked at design time into this machine's pixels.
+        // Converts a design-time pixel measurement into this machine's pixels.
         private int Scaled(int value) => Math.Max(1, (int)Math.Round(value * _uiScale));
-
 
 
         private void LoadRoleChart()
@@ -781,19 +775,7 @@ namespace AssemblyLineTester.Views.Pages
             StyleActionBar();
         }
 
-        /// <summary>
-        /// Gives the filter row one consistent treatment across its inputs, labels and buttons.
-        /// </summary>
-        /// <remarks>
-        /// The row read as lopsided for two reasons. The search box was the only input without a
-        /// label, so the label line above it was blank on the left and populated on the right. And
-        /// the inputs still wore the default sunken WinForms chrome while the buttons beside them
-        /// had been given flat rounded surfaces, so the two halves looked like different products.
-        /// <para>
-        /// Everything here is measured through the DPI scale, since the designer's fixed heights
-        /// were what clipped this row on machines with different display scaling.
-        /// </para>
-        /// </remarks>
+        // One treatment for the whole filter row, measured through the DPI scale.
         private void StyleFilterSection()
         {
             float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
@@ -809,7 +791,6 @@ namespace AssemblyLineTester.Views.Pages
             Color surface = Color.FromArgb(248, 250, 252);
             int inputHeight = S(46);
 
-            // The search column had no caption, which is what left the label line half empty.
             var lblFilterSearch = new Label
             {
                 Text = "SEARCH",
@@ -821,8 +802,6 @@ namespace AssemblyLineTester.Views.Pages
             };
             tblFilterInputs.Controls.Add(lblFilterSearch, 0, 0);
 
-            // Short, upper-case captions read as field labels rather than as sentences competing
-            // with the values underneath them.
             lblFilterStatus.Text = "STATUS";
             lblFilterRole.Text = "ROLE";
             lblFilterDept.Text = "DEPARTMENT";
@@ -844,8 +823,7 @@ namespace AssemblyLineTester.Views.Pages
                 combo.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
             }
 
-            // A ComboBox sizes itself from its font and refuses a Height, so the text box is matched
-            // to the combos rather than all four being forced to a number of my choosing.
+            // A ComboBox refuses a Height, so the text box matches the combos instead.
             inputHeight = cmbFilterStatus.Height;
 
             txtSearch.Font = inputFont;
@@ -859,19 +837,7 @@ namespace AssemblyLineTester.Views.Pages
             _filterInputHeight = inputHeight;
         }
 
-        /// <summary>
-        /// Rebuilds the four action-bar buttons with one visual hierarchy.
-        /// </summary>
-        /// <remarks>
-        /// Two things were wrong. Every size was a fixed pixel count, so the labels clipped on any
-        /// machine whose display scaling differed from the one they were drawn on. And two buttons
-        /// were filled solids - a yellow "Add New User" next to a blue "Manage Role Permissions" -
-        /// which left the row with no single obvious action.
-        /// <para>
-        /// One filled button now, the one that creates something. Everything else is outlined, and
-        /// every width comes from the measured caption.
-        /// </para>
-        /// </remarks>
+        // One filled button, the rest outlined; every width comes from the measured caption.
         private void StyleActionBar()
         {
             float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
@@ -885,8 +851,7 @@ namespace AssemblyLineTester.Views.Pages
             btnManageRolePermissions.Text = "Role Permissions";
             btnAddUser.Text = "＋  Add New User";
 
-            // Buttons take their height from the inputs beside them, so the whole row shares one
-            // baseline instead of two slightly different ones.
+            // Height comes from the inputs beside them, so the row shares one baseline.
             int height = _filterInputHeight > 0 ? _filterInputHeight : S(46);
             var bar = new[] { btnExport, btnRefresh, btnManageRolePermissions, btnAddUser };
 
@@ -896,21 +861,16 @@ namespace AssemblyLineTester.Views.Pages
                 button.Cursor = Cursors.Hand;
                 button.Margin = new Padding(0, 0, S(10), 0);
 
-                // Width follows the caption, with even padding either side, so the row keeps a
-                // consistent rhythm instead of four arbitrary widths.
                 int textWidth = TextRenderer.MeasureText(button.Text, label).Width;
                 button.Size = new Size(textWidth + S(46), height);
             }
 
             btnAddUser.Margin = new Padding(0);
 
-            // Buttons sit on the same baseline as the inputs beside them. Anchoring them to the
-            // bottom of the card instead left the two halves of the row visibly out of line.
             flpActionButtons.Anchor = AnchorStyles.Right | AnchorStyles.Top;
             flpActionButtons.Margin = new Padding(S(20), 0, 0, 0);
             flpActionButtons.Padding = new Padding(0, S(31), 0, 0);
 
-            // Secondary: white surface, grey outline. Present but quiet.
             foreach (Button button in new[] { btnExport, btnRefresh, btnManageRolePermissions })
             {
                 button.ForeColor = Color.FromArgb(51, 65, 85);
@@ -921,7 +881,6 @@ namespace AssemblyLineTester.Views.Pages
                     Color.FromArgb(203, 213, 225));
             }
 
-            // Primary: the only filled button on the page.
             btnAddUser.ForeColor = Color.FromArgb(15, 23, 42);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddUser, 10,
                 Color.FromArgb(250, 204, 21),

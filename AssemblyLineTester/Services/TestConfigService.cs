@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,9 +19,7 @@ namespace AssemblyLineTester.Services
             NumberHandling = JsonNumberHandling.AllowReadingFromString
         };
 
-        // Test types that behave like "continuity" checks: pass/fail against a single
-        // max-resistance threshold, rather than an Expected Value ± Tolerance band.
-
+        // Types judged against one max-resistance threshold rather than an expected value band.
         public static readonly string[] ContinuityLikeTestTypes =
             { "WIRE", "4WIRE", "TWISTED PAIR", "SIGNATURE WIRE" };
 
@@ -29,12 +27,13 @@ namespace AssemblyLineTester.Services
         {
             using (var db = new AppDbContext())
             {
-                // Convert every net's Expected/Lower/Upper values into the canonical base unit
-                // for its test type BEFORE persisting (e.g. 1 "kΩ" entered -> stored as 1000 "Ω").
+                // Looked up once for the whole batch, not per net.
+                var testTypeNamesById = db.TestTypes.ToDictionary(t => t.Id, t => t.TestTypeName);
                 foreach (var net in config.Nets)
                 {
-                    NormalizeNetUnits(net);
+                    NormalizeNetUnits(net, testTypeNamesById);
                 }
+
                 var existingProgram = db.TestConfigurations
                     .Include(c => c.Nets)
                     .FirstOrDefault(c => c.ConfigName == config.ConfigName);
@@ -45,16 +44,22 @@ namespace AssemblyLineTester.Services
                     existingProgram.Description = config.Description;
                     existingProgram.UpdatedAt = DateTime.UtcNow;
 
+                    // Delete is committed before the replacements attach, or EF reconciles both at once.
                     db.TestConfigNets.RemoveRange(existingProgram.Nets);
-                    existingProgram.Nets = config.Nets;
+                    db.SaveChanges();
+
+                    foreach (var net in config.Nets)
+                    {
+                        net.NetConfigId = 0;
+                        net.ConfigId = existingProgram.ConfigId;
+                    }
+
+                    db.TestConfigNets.AddRange(config.Nets);
                 }
                 else
                 {
-
-                    // Ensure CreatedAt/UpdatedAt are set for new configs
                     config.CreatedAt = DateTime.UtcNow;
                     config.UpdatedAt = DateTime.UtcNow;
-                    //config.CreatedBy = User.
 
                     db.TestConfigurations.Add(config);
                 }
@@ -68,24 +73,24 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // Converts a net's ExpectedValue/LowerLimit/UpperLimit from whatever unit the user
-        // picked in the grid into the canonical base unit for that test type, and overwrites
-        // the Unit field to the base unit. Tolerance is a percentage and is left untouched.
-
-        private static void NormalizeNetUnits(TestConfigNet net)
+        // Rewrites a net's values into the base unit for its test type; Tolerance is a percentage.
+        private static void NormalizeNetUnits(TestConfigNet net, IReadOnlyDictionary<int, string> testTypeNamesById)
         {
-            // Determine the test type name to use for unit conversion.
             string? testTypeName = net.TestType?.TestTypeName;
             if (string.IsNullOrWhiteSpace(testTypeName) && net.TestTypeId != 0)
             {
-                using var db = new AppDbContext();
-                var tt = db.TestTypes.Find(net.TestTypeId);
-                if (tt != null) testTypeName = tt.TestTypeName;
+                testTypeNamesById.TryGetValue(net.TestTypeId, out testTypeName);
             }
 
-            // Normalize to map keys (UnitConversionHelper expects keys like "CAPACITOR", "4WIRE", etc.)
             string key = string.IsNullOrWhiteSpace(testTypeName) ? string.Empty : testTypeName.Trim().ToUpperInvariant();
             string enteredUnit = net.MeasurementUnit;
+
+            // No unit means it is already in base units, and the converter would now throw.
+            if (string.IsNullOrWhiteSpace(enteredUnit))
+            {
+                net.MeasurementUnit = UnitConversionHelper.GetBaseUnit(key);
+                return;
+            }
 
             if (net.ExpectedValue.HasValue)
                 net.ExpectedValue = UnitConversionHelper.ConvertToBaseUnit(key, net.ExpectedValue.Value, enteredUnit);
@@ -101,15 +106,14 @@ namespace AssemblyLineTester.Services
 
         public void SetActiveConfig(string configName)
         {
-            using (var db = new AppDbContext())
-            {
-                var allPrograms = db.TestConfigurations.ToList();
-                foreach (var p in allPrograms)
-                {
-                    p.IsActive = p.ConfigName == configName;
-                }
-                db.SaveChanges();
-            }
+            using var db = new AppDbContext();
+
+            // Two statements, no rows pulled across.
+            db.TestConfigurations.Where(c => c.IsActive && c.ConfigName != configName)
+                .ExecuteUpdate(s => s.SetProperty(c => c.IsActive, false));
+
+            db.TestConfigurations.Where(c => c.ConfigName == configName)
+                .ExecuteUpdate(s => s.SetProperty(c => c.IsActive, true));
         }
 
         public TestConfiguration? GetActiveConfig()
@@ -131,32 +135,7 @@ namespace AssemblyLineTester.Services
                 .FirstOrDefault(c => c.ConfigName == configName);
         }
 
-        public List<TestConfiguration> GetAllConfigurations()
-        {
-            return GetConfigurations(null);
-        }
-
-        /// <summary>
-        /// Retrieve configurations optionally filtered by config name (case-insensitive)
-        /// and ordered by most-recently updated (or created) first.
-        /// This performs filtering at the database level for efficiency.
-        /// </summary>
-        //public List<TestConfiguration> GetConfigurations(string? configNameFilter)
-        //{
-        //    using var db = new AppDbContext();
-        //    var q = db.TestConfigurations
-        //        .Include(c => c.Nets)
-        //        .ThenInclude(n => n.TestType)
-        //        .OrderByDescending(c => c.CreatedAt)
-        //        .ToList();
-        //    return GetConfigurations(null);
-        //}
-
-        /// <summary>
-        /// Retrieve configurations optionally filtered by config name (case-insensitive)
-        /// and ordered by most-recently updated (or created) first.
-        /// This performs filtering at the database level for efficiency.
-        /// </summary>
+        // Configurations filtered by name, newest first, filtered in the database.
         public List<TestConfiguration> GetConfigurations(string? configNameFilter)
         {
             using var db = new AppDbContext();
@@ -168,11 +147,10 @@ namespace AssemblyLineTester.Services
             if (!string.IsNullOrWhiteSpace(configNameFilter))
             {
                 string key = configNameFilter.Trim().ToUpperInvariant();
-                // Use ToUpper + Contains so EF Core can translate to SQL UPPER(...) LIKE ...
+                // ToUpper + Contains is what EF can translate to SQL UPPER(...) LIKE.
                 q = q.Where(c => c.ConfigName != null && c.ConfigName.ToUpper().Contains(key));
             }
 
-            // Order by UpdatedAt if available, otherwise by CreatedAt. Newest first.
             q = q.OrderByDescending(c => (c.UpdatedAt ?? c.CreatedAt));
 
             return q.ToList();
@@ -191,7 +169,7 @@ namespace AssemblyLineTester.Services
 
             int netCount = cfg.Nets.Count;
 
-            db.TestConfigNets.RemoveRange(cfg.Nets);
+            // Nets cascade now that ConfigId is a real foreign key.
             db.TestConfigurations.Remove(cfg);
             db.SaveChanges();
 
@@ -202,7 +180,6 @@ namespace AssemblyLineTester.Services
             return true;
         }
 
-        // TestType helpers
         public TestType? GetTestTypeByName(string testTypeName)
         {
             if (string.IsNullOrWhiteSpace(testTypeName)) return null;
@@ -211,23 +188,14 @@ namespace AssemblyLineTester.Services
             return db.TestTypes.FirstOrDefault(t => t.TestTypeName != null && t.TestTypeName.ToUpper() == key);
         }
 
-        public string? GetTestTypeNameById(int id)
-        {
-            if (id <= 0) return null;
-            using var db = new AppDbContext();
-            var tt = db.TestTypes.Find(id);
-            return tt?.TestTypeName;
-        }
-
-        // Populates colTestType's dropdown items - reads live from the TestTypes table.
+        // Dropdown items for colTestType, read live from the TestTypes table.
         public List<string> GetTestTypeNames()
         {
             using var db = new AppDbContext();
             return db.TestTypes.OrderBy(t => t.TestTypeName).Select(t => t.TestTypeName).ToList();
         }
 
-        // Reads and parses a test config file from disk (flat JSON array of nets),
-        // e.g. AutomatedTestConfig3.json / AutomatedTestConfig4.json.
+        // Parses a flat JSON array of nets from disk.
         public List<TestConfigNetDto> LoadConfigFile(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))

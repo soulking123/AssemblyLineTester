@@ -1,4 +1,4 @@
-namespace AssemblyLineTester.Views.Pages
+﻿namespace AssemblyLineTester.Views.Pages
 {
     partial class TestExecution
     {

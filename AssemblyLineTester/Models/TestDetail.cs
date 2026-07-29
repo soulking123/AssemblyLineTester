@@ -14,7 +14,6 @@ namespace AssemblyLineTester.Models
         public string HarnessGroup { get; set; } = string.Empty;
         public string FromPin { get; set; } = string.Empty;
         public string ToPin { get; set; } = string.Empty;
-        public string Color { get; set; } = string.Empty;
 
         public string TestTypeName { get; set; } = string.Empty;
         public TestType? TestTypeInfo { get; set; }

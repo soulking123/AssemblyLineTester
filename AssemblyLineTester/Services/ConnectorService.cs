@@ -1,6 +1,5 @@
 ﻿using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
-using DocumentFormat.OpenXml.InkML;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,43 +8,22 @@ using System.Linq;
 
 namespace AssemblyLineTester.Services
 {
-    /// Handles CRUD for Connector records and the image folder that belongs to each connector.
-    /// Every connector gets its own folder at Assets/img/connector/{PartNumber}/,
-    /// created automatically the first time images are attached.
-    public class ConnectorService
+    // CRUD for connectors plus the image folder each one owns.
+    public static class ConnectorService
     {
         private static readonly string[] AllowedImageExtensions = { ".jpg", ".jpeg", ".png" };
-        private const long MaxImageSizeBytes = 2 * 1024 * 1024; // 2MB
+        private const long MaxImageSizeBytes = 2 * 1024 * 1024;
         private static readonly string ConnectorImageRoot = Path.Combine("Assets", "img", "connector");
 
-        // Connectors linked to a harness, in the order they were attached ("J1", "J2", ...).
-        public List<Connector> GetConnectorsByHarness(int harnessId)
-        {
-            using var db = new AppDbContext();
-            return db.HarnessConnectors
-                .Where(hc => hc.ProductHarnessId == harnessId)
-                .OrderBy(hc => hc.Position)
-                .Include(hc => hc.Connector)
-                .Select(hc => hc.Connector!)
-                .ToList();
-        }
-
-        // Every connector in the shared catalog - used to populate the "add connector" picker,
-        // since any connector can be attached to any number of harnesses.
-        public List<Connector> GetAllConnectors()
+        // The whole shared catalog, for the add-connector picker.
+        public static List<Connector> GetAllConnectors()
         {
             using var db = new AppDbContext();
             return db.Connectors.OrderBy(c => c.PartNumber).ToList();
         }
 
-        public Connector? GetById(int connectorId)
-        {
-            using var db = new AppDbContext();
-            return db.Connectors.FirstOrDefault(c => c.ConnectorId == connectorId);
-        }
-
-        /// Returns the full path of every image belonging to a connector.
-        public List<string> GetConnectorImagePaths(Connector? connector)
+        // Full path of every image belonging to one connector.
+        public static List<string> GetConnectorImagePaths(Connector? connector)
         {
             var result = new List<string>();
             if (connector == null || string.IsNullOrWhiteSpace(connector.ImagePath)) return result;
@@ -55,9 +33,7 @@ namespace AssemblyLineTester.Services
 
             if (Directory.Exists(fullPath))
             {
-                // The folder is keyed by PartNumber, which several connectors can share, so files are
-                // named "{ConnectorId}_{i}.ext". Filter by that prefix so a connector only shows its
-                // own images, not those of siblings that happen to share the same part number.
+                // Folder is keyed by PartNumber, which siblings share, so filter by id prefix.
                 result.AddRange(
                     Directory.GetFiles(fullPath)
                         .Where(f => AllowedImageExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
@@ -66,31 +42,39 @@ namespace AssemblyLineTester.Services
             }
             else if (File.Exists(fullPath))
             {
-                result.Add(fullPath); // legacy fallback
+                result.Add(fullPath);
             }
 
             return result;
         }
 
-        /// Inserts a new connector into the shared catalog (no harness link - that happens later via
-        /// the harness modal), creates Assets/img/connector/{PartNumber}/ folder, and copies images
-        /// with filename pattern: {ConnectorId}_{i}.ext
-        public (Connector? Connector, string? Error) AddConnector(Connector connector, List<string> sourceImagePaths)
+        // Inserts a connector into the shared catalog and copies its images in.
+        public static (Connector? Connector, string? Error) AddConnector(Connector connector, List<string> sourceImagePaths)
         {
             string? validationError = Validate(connector);
             if (validationError != null) return (null, validationError);
+
+            // Validated before the insert, or a rejected image leaves a committed row behind.
+            string? imageError = ValidateImages(sourceImagePaths);
+            if (imageError != null) return (null, imageError);
 
             using var db = new AppDbContext();
 
             connector.ConnectorId = 0;
             connector.ImagePath = null;
             db.Connectors.Add(connector);
-            db.SaveChanges(); // ConnectorId is now populated
+            db.SaveChanges();
 
             if (sourceImagePaths.Count > 0)
             {
                 var (relativeFolder, error) = SaveImagesToFolder(connector, sourceImagePaths);
-                if (error != null) return (null, error);
+                if (error != null)
+                {
+                    // The copy failed, so the row it belongs to goes with it.
+                    db.Connectors.Remove(connector);
+                    db.SaveChanges();
+                    return (null, error);
+                }
 
                 connector.ImagePath = relativeFolder;
                 db.SaveChanges();
@@ -103,11 +87,14 @@ namespace AssemblyLineTester.Services
             return (connector, null);
         }
 
-        /// Updates a connector's fields, deletes any images the user removed, and copies in new images.
-        public (bool Success, string? Error) UpdateConnector(Connector connector, List<string> newSourceImagePaths, List<string> removedImageFileNames)
+        // Updates fields, copies in new images, then removes the ones the user unticked.
+        public static (bool Success, string? Error) UpdateConnector(Connector connector, List<string> newSourceImagePaths, List<string> removedImageFileNames)
         {
             string? validationError = Validate(connector);
             if (validationError != null) return (false, validationError);
+
+            string? imageError = ValidateImages(newSourceImagePaths);
+            if (imageError != null) return (false, imageError);
 
             using var db = new AppDbContext();
             var existing = db.Connectors.FirstOrDefault(c => c.ConnectorId == connector.ConnectorId);
@@ -121,31 +108,7 @@ namespace AssemblyLineTester.Services
             existing.CurrentRating = connector.CurrentRating;
             existing.MountingStyle = connector.MountingStyle;
 
-            if (removedImageFileNames.Count > 0 && !string.IsNullOrWhiteSpace(existing.ImagePath))
-            {
-                string folderFull = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, existing.ImagePath);
-                if (Directory.Exists(folderFull))
-                {
-                    foreach (var fileName in removedImageFileNames)
-                    {
-                        string target = Path.Combine(folderFull, fileName);
-                        if (File.Exists(target))
-                        {
-                            try
-                            {
-                                File.Delete(target);
-                            }
-                            catch (Exception ex)
-                            {
-                                // File locked or in use - non-fatal, but the image stays on disk
-                                // after the user asked for it to go, and that needs a trail.
-                                FileLogService.Warn("ConnectorService.UpdateConnector",
-                                    $"Image '{target}' could not be deleted: {ex.Message}");
-                            }
-                        }
-                    }
-                }
-            }
+            string? folderBeforeUpdate = existing.ImagePath;
 
             if (newSourceImagePaths.Count > 0)
             {
@@ -156,6 +119,9 @@ namespace AssemblyLineTester.Services
 
             db.SaveChanges();
 
+            // Deleted last, after the commit: a stray copy is recoverable, a deleted image is not.
+            DeleteRemovedImages(folderBeforeUpdate, removedImageFileNames);
+
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Info, "Harness Database", "Update Connector",
                 $"Connector '{existing.PartNumber}' updated: {newSourceImagePaths.Count} images added, {removedImageFileNames.Count} removed.");
@@ -163,8 +129,8 @@ namespace AssemblyLineTester.Services
             return (true, null);
         }
 
-        /// Deletes the connector row and its image folder.
-        public (bool Success, string? Error) DeleteConnector(int connectorId)
+        // Deletes the connector row and its image folder.
+        public static (bool Success, string? Error) DeleteConnector(int connectorId)
         {
             using var db = new AppDbContext();
             var existing = db.Connectors.FirstOrDefault(c => c.ConnectorId == connectorId);
@@ -187,8 +153,6 @@ namespace AssemblyLineTester.Services
                     }
                     catch (Exception ex)
                     {
-                        // Non-fatal if a file is locked, but the folder is now orphaned and someone
-                        // has to be able to find out why the disk did not shrink.
                         FileLogService.Warn("ConnectorService.DeleteConnector",
                             $"Connector row removed but image folder '{folderFull}' could not be deleted: {ex.Message}");
                     }
@@ -209,8 +173,49 @@ namespace AssemblyLineTester.Services
             return null;
         }
 
-        /// Creates folder: Assets/img/connector/{PartNumber}/
-        /// and saves images as: {ConnectorId}_{i}.ext (e.g. 15_1.jpg, 15_2.png)
+        // Returns null when every file is acceptable, otherwise the first problem found.
+        private static string? ValidateImages(List<string> sourceImagePaths)
+        {
+            foreach (var sourcePath in sourceImagePaths)
+            {
+                if (!File.Exists(sourcePath)) continue;
+
+                if (!AllowedImageExtensions.Contains(Path.GetExtension(sourcePath).ToLowerInvariant()))
+                    return $"Unsupported image type: {Path.GetFileName(sourcePath)}";
+
+                if (new FileInfo(sourcePath).Length > MaxImageSizeBytes)
+                    return $"Image too large (max 2MB): {Path.GetFileName(sourcePath)}";
+            }
+
+            return null;
+        }
+
+        // Removes the unticked files. Never throws - the row is already saved.
+        private static void DeleteRemovedImages(string? relativeFolder, List<string> removedImageFileNames)
+        {
+            if (removedImageFileNames.Count == 0 || string.IsNullOrWhiteSpace(relativeFolder)) return;
+
+            string folderFull = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativeFolder);
+            if (!Directory.Exists(folderFull)) return;
+
+            foreach (var fileName in removedImageFileNames)
+            {
+                string target = Path.Combine(folderFull, fileName);
+                if (!File.Exists(target)) continue;
+
+                try
+                {
+                    File.Delete(target);
+                }
+                catch (Exception ex)
+                {
+                    FileLogService.Warn("ConnectorService.DeleteRemovedImages",
+                        $"Image '{target}' could not be deleted: {ex.Message}");
+                }
+            }
+        }
+
+        // Copies images into Assets/img/connector/{PartNumber}/ as {ConnectorId}_{i}.ext.
         private static (string? RelativeFolderPath, string? Error) SaveImagesToFolder(Connector connector, List<string> sourceImagePaths)
         {
             string partFolderName = SanitizeFolderName(connector.PartNumber);
@@ -230,14 +235,7 @@ namespace AssemblyLineTester.Services
                 if (!File.Exists(sourcePath)) continue;
 
                 string ext = Path.GetExtension(sourcePath).ToLowerInvariant();
-                if (!AllowedImageExtensions.Contains(ext))
-                    return (null, $"Unsupported image type: {Path.GetFileName(sourcePath)}");
 
-                var info = new FileInfo(sourcePath);
-                if (info.Length > MaxImageSizeBytes)
-                    return (null, $"Image too large (max 2MB): {Path.GetFileName(sourcePath)}");
-
-                // Penamaan baru: {connectorId}_{i}.ext
                 string destFileName = $"{connector.ConnectorId}_{index}{ext}";
                 string destPath = Path.Combine(fullFolder, destFileName);
 
@@ -248,7 +246,17 @@ namespace AssemblyLineTester.Services
                     destPath = Path.Combine(fullFolder, destFileName);
                 }
 
-                File.Copy(sourcePath, destPath, overwrite: false);
+                try
+                {
+                    File.Copy(sourcePath, destPath, overwrite: false);
+                }
+                catch (Exception ex)
+                {
+                    FileLogService.Warn("ConnectorService.SaveImagesToFolder",
+                        $"Image '{sourcePath}' could not be copied: {ex.Message}");
+                    return (null, $"Could not save image {Path.GetFileName(sourcePath)}: {ex.Message}");
+                }
+
                 index++;
             }
 

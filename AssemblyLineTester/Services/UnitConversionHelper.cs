@@ -3,8 +3,7 @@ using System.Linq;
 
 namespace AssemblyLineTester.Services
 {
-    // ASSUMPTION: unit mapping per vendor test type - confirm and adjust as needed.
-    // OPEN/CLOSE/LINK/PROBE/COMMENT/LUA COMPONENT are non-measurement types with no unit.
+    // ASSUMPTION: vendor unit mapping, unconfirmed. Non-measurement types carry no unit.
     public static class UnitConversionHelper
     {
         private static readonly Dictionary<string, (string BaseUnit, Dictionary<string, double> Multipliers)> Map = new()
@@ -35,10 +34,19 @@ namespace AssemblyLineTester.Services
             return Map.TryGetValue(testTypeName, out var info) ? info.BaseUnit : NoMeasurement.BaseUnit;
         }
 
+        // Throws on a unit that does not belong to the test type, rather than silently not converting.
         public static double ConvertToBaseUnit(string testTypeName, double value, string fromUnit)
         {
             var info = Map.TryGetValue(testTypeName, out var found) ? found : NoMeasurement;
-            double multiplier = info.Multipliers.TryGetValue(fromUnit, out var m) ? m : 1;
+
+            if (!info.Multipliers.TryGetValue(fromUnit, out double multiplier))
+            {
+                throw new ArgumentException(
+                    $"'{fromUnit}' is not a valid unit for test type '{testTypeName}'. " +
+                    $"Expected one of: {string.Join(", ", info.Multipliers.Keys)}.",
+                    nameof(fromUnit));
+            }
+
             return value * multiplier;
         }
     }

@@ -1,7 +1,9 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace AssemblyLineTester.Helpers
@@ -29,17 +31,41 @@ namespace AssemblyLineTester.Helpers
         public static readonly Font Font22Bold = new("Segoe UI", 22F, FontStyle.Bold);
         public static readonly Font Font48Regular = new("Segoe UI", 48F, FontStyle.Regular);
 
-        /// <summary>
-        /// Flags for text centred in a button or badge.
-        /// </summary>
-        /// <remarks>
-        /// <c>SingleLine</c> is not optional: GDI honours DT_VCENTER only together with
-        /// DT_SINGLELINE, so pairing <c>VerticalCenter</c> with <c>WordBreak</c> - as this helper
-        /// used to - silently drops the vertical centring and leaves the caption sitting against
-        /// the top edge. <c>NoPadding</c> drops the few pixels GDI otherwise adds on the left and
-        /// right, which pull horizontally centred text off centre on narrow controls.
-        /// <c>EndEllipsis</c> trims a caption that will not fit instead of slicing a glyph in half.
-        /// </remarks>
+        // RULE: rebuilding a control list must go through here. Controls.Clear() only unparents,
+        // and Control has no finaliser that frees the window handle, so the USER objects of every
+        // discarded pagination button and card leak for the life of the process. Painting degrades
+        // as the process nears the 10,000 handle cap, which is the "flickers after a long shift".
+        public static void ClearAndDispose(Control.ControlCollection controls)
+        {
+            while (controls.Count > 0)
+            {
+                Control child = controls[0];
+                controls.RemoveAt(0);
+                child.Dispose();
+            }
+        }
+
+        // Looked up once. This walks a whole page - Reports alone is 113 controls - and resolving
+        // the property per control put a reflection lookup on the navigation path.
+        private static readonly PropertyInfo? DoubleBufferedProperty =
+            typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        // Panels and grids created after MainForm ran its own pass never got double buffering,
+        // so anything custom-painted on a page flickered on every repaint.
+        public static void EnableDoubleBuffering(Control root)
+        {
+            if (root is Panel or TableLayoutPanel or FlowLayoutPanel or SplitContainer or SplitterPanel or DataGridView or UserControl)
+            {
+                DoubleBufferedProperty?.SetValue(root, true);
+            }
+
+            foreach (Control child in root.Controls)
+            {
+                EnableDoubleBuffering(child);
+            }
+        }
+
+        // RULE: SingleLine is mandatory - GDI honours DT_VCENTER only alongside DT_SINGLELINE.
         private const TextFormatFlags CenteredText =
             TextFormatFlags.HorizontalCenter
             | TextFormatFlags.VerticalCenter
@@ -82,9 +108,8 @@ namespace AssemblyLineTester.Helpers
         {
             if (grid == null) return;
 
-            // Enable DoubleBuffered via reflection to prevent visual flicker during updates/scrolling
-            typeof(DataGridView).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                                ?.SetValue(grid, true);
+            // DoubleBuffered is protected, so reflection is the only way in.
+            DoubleBufferedProperty?.SetValue(grid, true);
 
             grid.BorderStyle = BorderStyle.FixedSingle;
             grid.BackgroundColor = Color.White;
@@ -99,21 +124,17 @@ namespace AssemblyLineTester.Helpers
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             grid.EnableHeadersVisualStyles = false;
 
-            // Header Style
             grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
             grid.ColumnHeadersDefaultCellStyle.Font = Font95Bold;
             grid.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(248, 250, 252);
             grid.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(71, 85, 105);
-            // Row and header metrics are absolute pixels, so they do not follow the grid when
-            // WinForms scales it. Left alone they leave the text floating in an oversized row on
-            // one machine and clipped in a cramped one on the next.
+            // Absolute pixels do not follow the grid when WinForms scales it, so they are scaled here.
             float scale = GetHostScaleFactor(grid);
 
             grid.ColumnHeadersDefaultCellStyle.Padding = ScalePadding(new Padding(10, 4, 10, 4), scale);
             grid.ColumnHeadersHeight = (int)Math.Round(46 * scale);
 
-            // Row Style
             grid.DefaultCellStyle.BackColor = Color.White;
             grid.DefaultCellStyle.ForeColor = Color.FromArgb(30, 41, 59);
             grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(241, 245, 249);
@@ -133,9 +154,7 @@ namespace AssemblyLineTester.Helpers
             if (card.Tag is string tag && tag.Contains("STYLED_CARD")) return;
             card.Tag = (card.Tag?.ToString() ?? "") + " STYLED_CARD";
 
-            // Enable double buffering on the card control
-            typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                           ?.SetValue(card, true);
+            DoubleBufferedProperty?.SetValue(card, true);
 
             if (card is TableLayoutPanel || card.Padding.Left < 4 || card.Padding.Top < 4 || card.Padding.Right < 4 || card.Padding.Bottom < 4)
             {
@@ -186,8 +205,7 @@ namespace AssemblyLineTester.Helpers
             if (btn.Tag is string tag && tag.Contains("STYLED_BTN")) return;
             btn.Tag = (btn.Tag?.ToString() ?? "") + " STYLED_BTN";
 
-            typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                           ?.SetValue(btn, true);
+            DoubleBufferedProperty?.SetValue(btn, true);
 
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
@@ -247,8 +265,7 @@ namespace AssemblyLineTester.Helpers
             if (badge.Tag is string tag && tag.Contains("STYLED_BADGE")) return;
             badge.Tag = (badge.Tag?.ToString() ?? "") + " STYLED_BADGE";
 
-            typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                           ?.SetValue(badge, true);
+            DoubleBufferedProperty?.SetValue(badge, true);
 
             badge.Paint += (s, e) =>
             {
@@ -285,18 +302,11 @@ namespace AssemblyLineTester.Helpers
             };
         }
 
-        /// <summary>
-        /// The factor the host form's AutoScale applied to this control's bounds at runtime.
-        /// </summary>
-        /// <remarks>
-        /// Forms in this project were authored on machines with different display scaling, so
-        /// their designer <c>AutoScaleDimensions</c> disagree (7x15, 8x20, 13x32). WinForms
-        /// scales Bounds, Padding and Margin by <c>CurrentAutoScaleDimensions / AutoScaleDimensions</c>
-        /// but does <b>not</b> touch a font that was assigned explicitly in the designer or in code.
-        /// On a machine whose scaling differs from the authoring machine the containers shrink
-        /// while those fonts stay put, and the text overflows and clips.
-        /// Returns 1 when there is nothing to correct.
-        /// </remarks>
+        // RULE: designer AutoScaleDimensions disagree (7x15, 8x20, 13x32) because each form was
+        // authored at a different Windows scaling. WinForms scales Bounds/Padding/Margin by this
+        // factor but never an explicitly-set Font, which is why text overflows its container on a
+        // machine that did not author it. Set Windows scaling to 100% before opening a Designer,
+        // or Visual Studio rewrites AutoScaleDimensions and the divergence comes back.
         public static float GetHostScaleFactor(Control control)
         {
             Form? host = control?.FindForm();
@@ -309,26 +319,14 @@ namespace AssemblyLineTester.Helpers
             return actual / authored;
         }
 
-        /// <summary>
-        /// Corner radius in the units the caller authored it in, converted to the pixels this
-        /// machine is actually drawing at.
-        /// </summary>
-        /// <remarks>
-        /// The 138 <c>Setup*RoundedEdges</c> calls pass a literal 8, 10 or 12. Those numbers were
-        /// picked against the authoring machine's scaling; the control they decorate is scaled at
-        /// runtime but a literal is not, so without this the corner is a fixed pixel count on a
-        /// control of varying size and the rounding reads differently on every machine.
-        /// </remarks>
+        // The literal 8/10/12 passed by every Setup*RoundedEdges call was picked at one scaling.
         public static int ScaleRadius(Control control, int radius)
         {
             if (radius <= 0) return 0;
             return Math.Max(1, (int)Math.Round(radius * GetHostScaleFactor(control)));
         }
 
-        /// <summary>
-        /// Scales a hard-coded <see cref="Padding"/> the same way. A non-zero side never rounds
-        /// away to nothing, or the gap it was holding open disappears.
-        /// </summary>
+        // A non-zero side never rounds away to nothing, or the gap it held open vanishes.
         public static Padding ScalePadding(Padding padding, float factor)
         {
             if (factor <= 0f || Math.Abs(factor - 1f) < 0.01f) return padding;
@@ -342,27 +340,26 @@ namespace AssemblyLineTester.Helpers
                 Side(padding.Bottom, factor));
         }
 
-        /// <summary>
-        /// Returns <paramref name="font"/> resized by <paramref name="factor"/>. The original is
-        /// never disposed: designer fonts are frequently the shared statics above, shared by many
-        /// controls.
-        /// </summary>
+        // Memoised: pagination rebuilds call this per button, and a Font is a GDI handle that
+        // Control.Dispose does not release, so every page change used to leak one per button.
+        private static readonly Dictionary<(string Family, float Size, FontStyle Style, GraphicsUnit Unit), Font> ScaledFonts = new();
+
+        // The original is never disposed; designer fonts are often the shared statics above.
         public static Font ScaleFont(Font font, float factor)
         {
             if (font is null || factor <= 0f) return font!;
-            return new Font(font.FontFamily, font.Size * factor, font.Style, font.Unit);
+
+            var key = (font.FontFamily.Name, font.Size * factor, font.Style, font.Unit);
+            if (!ScaledFonts.TryGetValue(key, out Font? scaled))
+            {
+                scaled = new Font(key.Item1, key.Item2, key.Style, key.Unit);
+                ScaledFonts[key] = scaled;
+            }
+
+            return scaled;
         }
 
-        /// <summary>
-        /// Multiplies every explicitly-set font under <paramref name="root"/> by <paramref name="factor"/>,
-        /// so text tracks the containers WinForms already scaled. See <see cref="GetHostScaleFactor"/>.
-        /// Fonts inherited from a parent are skipped - those already followed the parent chain, and
-        /// scaling them here would scale them a second time.
-        /// </summary>
-        /// <remarks>
-        /// Call once per control tree, after the control has a parent and has been laid out (its
-        /// <c>Load</c> handler). Calling it twice on the same tree compounds the factor.
-        /// </remarks>
+        // RULE: call once per tree, from Load. Twice compounds the factor; inherited fonts are skipped.
         public static void ScaleExplicitFonts(Control root, float factor)
         {
             if (root is null || factor <= 0f) return;
@@ -370,15 +367,13 @@ namespace AssemblyLineTester.Helpers
 
             foreach (Control control in Descendants(root))
             {
-                // Control.Font hands back the parent's own instance when no local font was set,
-                // so reference equality is what separates "explicit" from "inherited".
+                // Control.Font returns the parent's instance when unset, so identity means inherited.
                 bool inherited = control.Parent is not null && ReferenceEquals(control.Font, control.Parent.Font);
                 if (!inherited)
                 {
                     control.Font = ScaleFont(control.Font, factor);
                 }
 
-                // Grid text lives in cell styles, not in Control.Font.
                 if (control is DataGridView grid)
                 {
                     grid.DefaultCellStyle.Font = ScaleFont(grid.DefaultCellStyle.Font ?? grid.Font, factor);
@@ -400,10 +395,7 @@ namespace AssemblyLineTester.Helpers
             }
         }
 
-        /// <summary>
-        /// Guards the one rule that is easy to get wrong: explicit fonts scale, inherited ones
-        /// must not. Debug builds only.
-        /// </summary>
+        // Debug-only guard: explicit fonts scale, inherited ones must not.
         [Conditional("DEBUG")]
         public static void SelfCheckFontScaling()
         {
@@ -422,19 +414,16 @@ namespace AssemblyLineTester.Helpers
             ScaleExplicitFonts(root, 1f);
             Debug.Assert(Math.Abs(explicitFont.Font.Size - 5F) < 0.01f, "factor 1 must be a no-op");
 
-            // An unparented control has no host form, so the factor is 1 and the radius passes through.
             using Button orphan = new();
             Debug.Assert(ScaleRadius(orphan, 12) == 12, "no host form means no scaling");
             Debug.Assert(ScaleRadius(orphan, 0) == 0, "square stays square");
 
-            // A rounded shape must never collapse to a rectangle just because the factor is small.
             Debug.Assert(ScaleRadius(orphan, 1) >= 1, "radius must survive rounding down");
 
             Padding squeezed = ScalePadding(new Padding(10, 4, 10, 0), 0.1f);
             Debug.Assert(squeezed.Left >= 1 && squeezed.Top >= 1, "a real gap must not round away to zero");
             Debug.Assert(squeezed.Bottom == 0, "a zero side must stay zero");
 
-            // GDI ignores DT_VCENTER unless DT_SINGLELINE rides along - the whole point of this set.
             Debug.Assert(CenteredText.HasFlag(TextFormatFlags.SingleLine), "VerticalCenter needs SingleLine");
         }
     }

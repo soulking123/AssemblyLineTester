@@ -14,17 +14,14 @@ public class ProductHarness
 
     public List<string> ImagePaths { get; set; } = new();
 
-    // "J1", "J2", ... - one label per entry in ConnectorList, in the order each connector was
-    // attached to this harness (not the connector's part number).
-    public List<String> ConnectorListName { get; set; } = new();
+    // "J1", "J2", ... one per connector in attach order. Derived, never stored.
+    [NotMapped]
+    public List<string> ConnectorListName => Enumerable.Range(1, ConnectorList.Count).Select(i => $"J{i}").ToList();
 
-    // The join rows backing the many-to-many relationship with Connector (a connector can belong to
-    // several harnesses). Query/order this via HarnessConnectorId->Position; consumers should use
-    // ConnectorList below instead of touching this directly.
+    // The join rows; consumers should read ConnectorList below instead of these.
     public List<HarnessConnector> HarnessConnectors { get; set; } = new();
 
-    // Not EF-mapped: populated by HarnessService (Position-ordered) when a harness is loaded, and
-    // used as a plain DTO when building a ProductHarness to hand to HarnessService.AddHarness/UpdateHarness.
+    // Not EF-mapped; HarnessService fills it in Position order when a harness is loaded.
     [NotMapped]
     public List<Connector> ConnectorList { get; set; } = new();
 }

@@ -22,15 +22,6 @@ namespace AssemblyLineTester.Models
 
         public string Message { get; set; } = string.Empty;
 
-        /// <summary>
-        /// PC that produced the entry. Tells apart bundles coming from two machines at the same site.
-        /// </summary>
-        /// <remarks>
-        /// Mapped onto the existing <c>IPAddress</c> column. This is a desktop application on a
-        /// factory PC, so the IP it was originally meant to hold was always null and the column was
-        /// dead weight; reusing it renames the field in code without spending a migration.
-        /// ponytail: rename the column for real whenever the next schema migration is written.
-        /// </remarks>
         [Column("IPAddress")]
         public string? MachineName { get; set; }
 

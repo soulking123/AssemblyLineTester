@@ -1,4 +1,4 @@
-using AssemblyLineTester.Models;
+﻿using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using FontAwesome.Sharp;
 using System;
@@ -64,10 +64,6 @@ namespace AssemblyLineTester.Views.Pages
             btnExport.Click += (s, e) => MessageBox.Show("Export feature not implemented yet.", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
             btnImport.Click += (s, e) => MessageBox.Show("Import feature not implemented yet.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            //btnStart.Click += (s, e) => MessageBox.Show("Starting manual test...", "Start Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //btnStartSelected.Click += (s, e) => MessageBox.Show("Starting selected...", "Start Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //btnAbort.Click += (s, e) => MessageBox.Show("Aborting test...", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
             gridConfig.CellValueChanged += GridConfig_CellValueChanged;
             gridConfig.RowsRemoved += GridConfig_RowsChanged;
             gridConfig.RowsAdded += GridConfig_RowsChanged;
@@ -121,7 +117,6 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch { /* ignore */ }
         }
-
 
 
         private void RenumberRows()
@@ -217,7 +212,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 string trimmed = line.Trim();
 
-                // Skip comments, header metadata, parameters, and closing bracket
+                // Comments, header metadata, parameters and the closing bracket.
                 if (trimmed.StartsWith("*") || trimmed.StartsWith("(") || trimmed.StartsWith(")") ||
                     trimmed.StartsWith("J1 ") || trimmed.StartsWith("J3 ") ||
                     trimmed.StartsWith("CONNECTION RESIS", StringComparison.OrdinalIgnoreCase) ||
@@ -230,7 +225,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 var tokens = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
-                // Expected format: [SeqNo, FromPin, ToPin]  (e.g., "1", "J1-040", "J3-040")
+                // A net line reads: SeqNo FromPin ToPin, e.g. 1 J1-040 J3-040.
                 if (tokens.Length >= 3 && int.TryParse(tokens[0], out int seqNo))
                 {
                     string fromPin = tokens[1];
@@ -373,7 +368,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch (OperationCanceledException)
             {
-                // Task was canceled via btnAbort
+                // Aborted from btnAbort, nothing left to report.
             }
             finally
             {
@@ -416,7 +411,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch (OperationCanceledException)
             {
-                // Task was canceled via btnAbort
+                // Aborted from btnAbort, nothing left to report.
             }
             finally
             {
@@ -459,7 +454,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch (OperationCanceledException)
             {
-                // Task was canceled via btnAbort
+                // Aborted from btnAbort, nothing left to report.
             }
             finally
             {
@@ -473,10 +468,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void btnAbort_Click(object sender, EventArgs e)
         {
-            // 1. Cancel software task execution loop
             _testCts?.Cancel();
 
-            // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
             if (abortResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
             {
@@ -755,9 +748,9 @@ namespace AssemblyLineTester.Views.Pages
             {
                 DataGridViewRow row = gridConfig.Rows[i];
                 string fromAddr = row.Cells["colFromAddr"].Value?.ToString() ?? "0";
-                string fromLabel = fromAddr; // Use same for label
+                string fromLabel = fromAddr;
                 string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
-                string toLabel = toAddr; // Use same for label
+                string toLabel = toAddr;
 
                 DiagramNode lNode = new() { RowIndex = i, Address = fromAddr, Label = fromLabel, IsLeft = true };
                 rawLeftNodes.Add(lNode);
