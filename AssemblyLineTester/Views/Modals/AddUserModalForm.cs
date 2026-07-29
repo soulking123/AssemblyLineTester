@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -17,7 +18,6 @@ namespace AssemblyLineTester.Views.Modals
             InitializeDropdowns();
 
             btnSave.Click += BtnSave_Click;
-            ReplacePasswordFieldsWithNotice();
 
             btnClose.Click += (s, e) => this.Close();
             btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
@@ -62,10 +62,6 @@ namespace AssemblyLineTester.Views.Modals
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
 
         private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
         {
@@ -74,8 +70,7 @@ namespace AssemblyLineTester.Views.Modals
                 ActiveControl = pnlCustomHeader;
                 ValidateChildren();
 
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
+            NativeMethods.DragWindow(Handle);
             }
         }
 
@@ -92,36 +87,6 @@ namespace AssemblyLineTester.Views.Modals
             cmbStatus.Items.Clear();
             cmbStatus.Items.AddRange(["Active", "Inactive", "Locked"]);
             cmbStatus.SelectedIndex = 0;
-        }
-
-        // Hides the password inputs and fills the gap with a notice; the designer file is left alone.
-        private void ReplacePasswordFieldsWithNotice()
-        {
-            foreach (Control control in new Control[] { lblPassword, txtPassword, lblConfirmPassword, txtConfirmPassword })
-            {
-                control.Visible = false;
-            }
-
-            var notice = new Label
-            {
-                Text = $"🔑   Starting password:  {UserService.DefaultNewUserPassword}\r\n" +
-                       "        They choose their own the first time they sign in.",
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-                ForeColor = Color.FromArgb(71, 85, 105),
-                BackColor = Color.FromArgb(248, 250, 252),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(18, 0, 0, 0),
-                Location = lblPassword.Location,
-                Size = new Size(
-                    txtConfirmPassword.Right - lblPassword.Left,
-                    txtPassword.Bottom - lblPassword.Top)
-            };
-
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(
-                notice, 8, Color.FromArgb(226, 232, 240), 1.2f);
-
-            Controls.Add(notice);
-            notice.BringToFront();
         }
 
         private void BtnSave_Click(object? sender, EventArgs e)

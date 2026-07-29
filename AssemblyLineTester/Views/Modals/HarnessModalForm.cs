@@ -15,7 +15,6 @@ namespace AssemblyLineTester.Views.Modals
         private const int MaxFileNameDisplayLength = 30;
 
         private readonly HarnessService _harnessService;
-        private readonly ConnectorService _connectorService;
         private readonly ProductHarness? _editingHarness;
         private readonly List<string> _selectedImagePaths = new();
         private readonly List<Connector> _selectedConnectors = new();
@@ -24,10 +23,9 @@ namespace AssemblyLineTester.Views.Modals
         private TextBox? _connectorSearchBox;
         private List<Connector> _allConnectorsCache = new();
 
-        public HarnessModalForm(HarnessService harnessService, ConnectorService connectorService)
+        public HarnessModalForm(HarnessService harnessService)
         {
             _harnessService = harnessService;
-            _connectorService = connectorService;
             _editingHarness = null;
 
             InitializeComponent();
@@ -36,10 +34,9 @@ namespace AssemblyLineTester.Views.Modals
             ApplyFormRounding();
         }
 
-        public HarnessModalForm(HarnessService harnessService, ConnectorService connectorService, ProductHarness harnessToEdit)
+        public HarnessModalForm(HarnessService harnessService, ProductHarness harnessToEdit)
         {
             _harnessService = harnessService;
-            _connectorService = connectorService;
             _editingHarness = harnessToEdit;
 
             InitializeComponent();
@@ -177,7 +174,7 @@ namespace AssemblyLineTester.Views.Modals
         {
             EnsureConnectorPickerBuilt();
 
-            _allConnectorsCache = _connectorService.GetAllConnectors();
+            _allConnectorsCache = ConnectorService.GetAllConnectors();
 
             _connectorSearchBox!.TextChanged -= ConnectorSearchBox_TextChanged;
             _connectorSearchBox.Text = string.Empty;
@@ -427,17 +424,12 @@ namespace AssemblyLineTester.Views.Modals
             this.Region = new Region(path);
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
 
         private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
+            NativeMethods.DragWindow(Handle);
             }
         }
     }

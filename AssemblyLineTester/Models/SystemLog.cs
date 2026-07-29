@@ -22,7 +22,6 @@ namespace AssemblyLineTester.Models
 
         public string Message { get; set; } = string.Empty;
 
-        // ponytail: reuses the dead IPAddress column; rename it in the next schema migration.
         [Column("IPAddress")]
         public string? MachineName { get; set; }
 

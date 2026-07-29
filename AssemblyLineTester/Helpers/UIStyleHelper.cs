@@ -45,14 +45,18 @@ namespace AssemblyLineTester.Helpers
             }
         }
 
+        // Looked up once. This walks a whole page - Reports alone is 113 controls - and resolving
+        // the property per control put a reflection lookup on the navigation path.
+        private static readonly PropertyInfo? DoubleBufferedProperty =
+            typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+
         // Panels and grids created after MainForm ran its own pass never got double buffering,
         // so anything custom-painted on a page flickered on every repaint.
         public static void EnableDoubleBuffering(Control root)
         {
             if (root is Panel or TableLayoutPanel or FlowLayoutPanel or SplitContainer or SplitterPanel or DataGridView or UserControl)
             {
-                typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic)
-                               ?.SetValue(root, true);
+                DoubleBufferedProperty?.SetValue(root, true);
             }
 
             foreach (Control child in root.Controls)
@@ -105,8 +109,7 @@ namespace AssemblyLineTester.Helpers
             if (grid == null) return;
 
             // DoubleBuffered is protected, so reflection is the only way in.
-            typeof(DataGridView).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                                ?.SetValue(grid, true);
+            DoubleBufferedProperty?.SetValue(grid, true);
 
             grid.BorderStyle = BorderStyle.FixedSingle;
             grid.BackgroundColor = Color.White;
@@ -151,8 +154,7 @@ namespace AssemblyLineTester.Helpers
             if (card.Tag is string tag && tag.Contains("STYLED_CARD")) return;
             card.Tag = (card.Tag?.ToString() ?? "") + " STYLED_CARD";
 
-            typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                           ?.SetValue(card, true);
+            DoubleBufferedProperty?.SetValue(card, true);
 
             if (card is TableLayoutPanel || card.Padding.Left < 4 || card.Padding.Top < 4 || card.Padding.Right < 4 || card.Padding.Bottom < 4)
             {
@@ -203,8 +205,7 @@ namespace AssemblyLineTester.Helpers
             if (btn.Tag is string tag && tag.Contains("STYLED_BTN")) return;
             btn.Tag = (btn.Tag?.ToString() ?? "") + " STYLED_BTN";
 
-            typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                           ?.SetValue(btn, true);
+            DoubleBufferedProperty?.SetValue(btn, true);
 
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
@@ -264,8 +265,7 @@ namespace AssemblyLineTester.Helpers
             if (badge.Tag is string tag && tag.Contains("STYLED_BADGE")) return;
             badge.Tag = (badge.Tag?.ToString() ?? "") + " STYLED_BADGE";
 
-            typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                           ?.SetValue(badge, true);
+            DoubleBufferedProperty?.SetValue(badge, true);
 
             badge.Paint += (s, e) =>
             {

@@ -33,10 +33,6 @@ namespace AssemblyLineTester.Views.Modals
             txtCompanyId = new TextBox();
             lblFullName = new Label();
             txtFullName = new TextBox();
-            lblPassword = new Label();
-            txtPassword = new TextBox();
-            lblConfirmPassword = new Label();
-            txtConfirmPassword = new TextBox();
             lblRole = new Label();
             cmbRole = new ComboBox();
             lblDepartment = new Label();
@@ -209,56 +205,12 @@ namespace AssemblyLineTester.Views.Modals
             txtFullName.Size = new Size(826, 45);
             txtFullName.TabIndex = 6;
             // 
-            // lblPassword
-            // 
-            lblPassword.AutoSize = true;
-            lblPassword.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblPassword.ForeColor = Color.FromArgb(51, 65, 85);
-            lblPassword.Location = new Point(57, 496);
-            lblPassword.Margin = new Padding(5, 0, 5, 0);
-            lblPassword.Name = "lblPassword";
-            lblPassword.Size = new Size(148, 36);
-            lblPassword.TabIndex = 7;
-            lblPassword.Text = "Password *";
-            // 
-            // txtPassword
-            // 
-            txtPassword.Font = new Font("Segoe UI", 10.5F);
-            txtPassword.Location = new Point(57, 536);
-            txtPassword.Margin = new Padding(5, 5, 5, 5);
-            txtPassword.Name = "txtPassword";
-            txtPassword.Size = new Size(388, 45);
-            txtPassword.TabIndex = 8;
-            txtPassword.UseSystemPasswordChar = true;
-            // 
-            // lblConfirmPassword
-            // 
-            lblConfirmPassword.AutoSize = true;
-            lblConfirmPassword.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblConfirmPassword.ForeColor = Color.FromArgb(51, 65, 85);
-            lblConfirmPassword.Location = new Point(496, 496);
-            lblConfirmPassword.Margin = new Padding(5, 0, 5, 0);
-            lblConfirmPassword.Name = "lblConfirmPassword";
-            lblConfirmPassword.Size = new Size(254, 36);
-            lblConfirmPassword.TabIndex = 9;
-            lblConfirmPassword.Text = "Confirm Password *";
-            // 
-            // txtConfirmPassword
-            // 
-            txtConfirmPassword.Font = new Font("Segoe UI", 10.5F);
-            txtConfirmPassword.Location = new Point(496, 536);
-            txtConfirmPassword.Margin = new Padding(5, 5, 5, 5);
-            txtConfirmPassword.Name = "txtConfirmPassword";
-            txtConfirmPassword.Size = new Size(388, 45);
-            txtConfirmPassword.TabIndex = 10;
-            txtConfirmPassword.UseSystemPasswordChar = true;
-            // 
             // lblRole
             // 
             lblRole.AutoSize = true;
             lblRole.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblRole.ForeColor = Color.FromArgb(51, 65, 85);
-            lblRole.Location = new Point(57, 616);
+            lblRole.Location = new Point(57, 496);
             lblRole.Margin = new Padding(5, 0, 5, 0);
             lblRole.Name = "lblRole";
             lblRole.Size = new Size(87, 36);
@@ -270,7 +222,7 @@ namespace AssemblyLineTester.Views.Modals
             cmbRole.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbRole.Font = new Font("Segoe UI", 10F);
             cmbRole.FormattingEnabled = true;
-            cmbRole.Location = new Point(57, 656);
+            cmbRole.Location = new Point(57, 536);
             cmbRole.Margin = new Padding(5, 5, 5, 5);
             cmbRole.Name = "cmbRole";
             cmbRole.Size = new Size(388, 45);
@@ -281,7 +233,7 @@ namespace AssemblyLineTester.Views.Modals
             lblDepartment.AutoSize = true;
             lblDepartment.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblDepartment.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDepartment.Location = new Point(496, 616);
+            lblDepartment.Location = new Point(496, 496);
             lblDepartment.Margin = new Padding(5, 0, 5, 0);
             lblDepartment.Name = "lblDepartment";
             lblDepartment.Size = new Size(182, 36);
@@ -293,7 +245,7 @@ namespace AssemblyLineTester.Views.Modals
             cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbDepartment.Font = new Font("Segoe UI", 10F);
             cmbDepartment.FormattingEnabled = true;
-            cmbDepartment.Location = new Point(496, 656);
+            cmbDepartment.Location = new Point(496, 536);
             cmbDepartment.Margin = new Padding(5, 5, 5, 5);
             cmbDepartment.Name = "cmbDepartment";
             cmbDepartment.Size = new Size(388, 45);
@@ -304,7 +256,7 @@ namespace AssemblyLineTester.Views.Modals
             lblStatus.AutoSize = true;
             lblStatus.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblStatus.ForeColor = Color.FromArgb(51, 65, 85);
-            lblStatus.Location = new Point(57, 736);
+            lblStatus.Location = new Point(57, 616);
             lblStatus.Margin = new Padding(5, 0, 5, 0);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(109, 36);
@@ -316,7 +268,7 @@ namespace AssemblyLineTester.Views.Modals
             cmbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbStatus.Font = new Font("Segoe UI", 10F);
             cmbStatus.FormattingEnabled = true;
-            cmbStatus.Location = new Point(57, 776);
+            cmbStatus.Location = new Point(57, 656);
             cmbStatus.Margin = new Padding(5, 5, 5, 5);
             cmbStatus.Name = "cmbStatus";
             cmbStatus.Size = new Size(388, 45);
@@ -328,7 +280,7 @@ namespace AssemblyLineTester.Views.Modals
             pnlFooter.Controls.Add(btnCancel);
             pnlFooter.Controls.Add(btnSave);
             pnlFooter.Dock = DockStyle.Bottom;
-            pnlFooter.Location = new Point(0, 880);
+            pnlFooter.Location = new Point(0, 760);
             pnlFooter.Margin = new Padding(5, 5, 5, 5);
             pnlFooter.Name = "pnlFooter";
             pnlFooter.Size = new Size(942, 128);
@@ -378,7 +330,7 @@ namespace AssemblyLineTester.Views.Modals
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(248, 250, 252);
             CancelButton = btnCancel;
-            ClientSize = new Size(942, 1008);
+            ClientSize = new Size(942, 888);
             Controls.Add(pnlFooter);
             Controls.Add(cmbStatus);
             Controls.Add(lblStatus);
@@ -386,10 +338,6 @@ namespace AssemblyLineTester.Views.Modals
             Controls.Add(lblDepartment);
             Controls.Add(cmbRole);
             Controls.Add(lblRole);
-            Controls.Add(txtConfirmPassword);
-            Controls.Add(lblConfirmPassword);
-            Controls.Add(txtPassword);
-            Controls.Add(lblPassword);
             Controls.Add(txtFullName);
             Controls.Add(lblFullName);
             Controls.Add(txtCompanyId);
@@ -427,10 +375,6 @@ namespace AssemblyLineTester.Views.Modals
         private System.Windows.Forms.TextBox txtCompanyId;
         private System.Windows.Forms.Label lblFullName;
         private System.Windows.Forms.TextBox txtFullName;
-        private System.Windows.Forms.Label lblPassword;
-        private System.Windows.Forms.TextBox txtPassword;
-        private System.Windows.Forms.Label lblConfirmPassword;
-        private System.Windows.Forms.TextBox txtConfirmPassword;
         private System.Windows.Forms.Label lblRole;
         private System.Windows.Forms.ComboBox cmbRole;
         private System.Windows.Forms.Label lblDepartment;

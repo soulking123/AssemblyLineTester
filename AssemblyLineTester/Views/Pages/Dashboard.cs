@@ -286,7 +286,6 @@ namespace AssemblyLineTester.Views.Pages
         // Fills the ACTIVE PROGRAM card from the config currently marked active.
         private void LoadActiveProgram()
         {
-            var currentUser = SessionManager.CurrentUser?.Username ?? "Unknown";
             var activeConfig = _configService.GetActiveConfig();
 
             lblProgDetails.Text = activeConfig is null

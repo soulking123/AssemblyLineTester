@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using FontAwesome.Sharp;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Models;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -115,10 +116,6 @@ namespace AssemblyLineTester.Views.Modals
             lblCustomTitle.DoubleClick += (s, e) => ToggleMaximize();
         }
 
-        [DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
 
         private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
         {
@@ -127,8 +124,7 @@ namespace AssemblyLineTester.Views.Modals
                 ActiveControl = pnlCustomHeader;
                 ValidateChildren();
 
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
+            NativeMethods.DragWindow(Handle);
             }
         }
 

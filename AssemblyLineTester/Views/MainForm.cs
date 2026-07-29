@@ -9,18 +9,18 @@ namespace AssemblyLineTester.Views
     {
         private readonly UserService _userService = new();
         private bool isSidebarExpanded = true;
-        private int expandedWidth = 380;
-        private int collapsedWidth = 90;
+        private readonly int expandedWidth = 380;
+        private readonly int collapsedWidth = 90;
 
-        private Size _expandedLogoSize;
-        private Point _expandedToggleLoc;
-        private Size _expandedToggleSize;
-        private Size _expandedLblMenuSize;
-        private Point _expandedLblMenuLoc;
-        private int _expandedMenuStartY;
-        private int _expandedMenuX;
-        private int _expandedMenuWidth;
-        private int _expandedMenuGap;
+        private readonly Size _expandedLogoSize;
+        private readonly Point _expandedToggleLoc;
+        private readonly Size _expandedToggleSize;
+        private readonly Size _expandedLblMenuSize;
+        private readonly Point _expandedLblMenuLoc;
+        private readonly int _expandedMenuStartY;
+        private readonly int _expandedMenuX;
+        private readonly int _expandedMenuWidth;
+        private readonly int _expandedMenuGap;
 
         public bool IsLoggingOut { get; private set; } = false;
 
@@ -153,28 +153,8 @@ namespace AssemblyLineTester.Views
 
         private void EnableDoubleBuffering()
         {
-            try
-            {
-                this.DoubleBuffered = true;
-                EnableDoubleBufferingRecursive(this);
-            }
-            catch { /* ignore */ }
-        }
-
-        private static void EnableDoubleBufferingRecursive(Control control)
-        {
-            if (control is SplitContainer || control is SplitterPanel || control is Panel || control is TableLayoutPanel || control is FlowLayoutPanel)
-            {
-                try
-                {
-                    typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(control, true, null);
-                }
-                catch { /* ignore */ }
-            }
-            foreach (Control child in control.Controls)
-            {
-                EnableDoubleBufferingRecursive(child);
-            }
+            this.DoubleBuffered = true;
+            UIStyleHelper.EnableDoubleBuffering(this);
         }
 
         private void InitializeUserInfo()
@@ -273,13 +253,41 @@ namespace AssemblyLineTester.Views
             };
         }
 
+        // ponytail: timing left in on purpose while page-switch lag is being chased. Remove the
+        // three Stopwatch lines once the numbers stop being interesting.
         private void BtnMenu_Click(object sender, EventArgs e)
         {
             if (sender is not AssemblyLineTester.Views.Controls.MenuButton clickedButton) return;
 
+            bool firstVisit = GetCachedPage(clickedButton.Name) is null;
+
+            var built = System.Diagnostics.Stopwatch.StartNew();
             UserControl? targetPage = GetOrInitPage(clickedButton.Name);
+            built.Stop();
+
+            var shown = System.Diagnostics.Stopwatch.StartNew();
             SetActiveMenu(clickedButton, targetPage);
+            shown.Stop();
+
+            FileLogService.Info("Navigation",
+                $"{clickedButton.Name,-22} construct {built.ElapsedMilliseconds,5} ms   show {shown.ElapsedMilliseconds,5} ms" +
+                (firstVisit ? "   (first visit)" : ""));
         }
+
+        // Whether a page has already been built, without building it as a side effect.
+        private UserControl? GetCachedPage(string buttonName) => buttonName switch
+        {
+            "btnDashboard" => pageDashboard,
+            "btnTestExecution" => pageTestExecution,
+            "btnManualTesting" => pageManualTesting,
+            "btnHarnessDatabase" => pageHarnessDb,
+            "btnTestHistory" => pageTestHistory,
+            "btnReports" => pageReports,
+            "btnSystemLog" => pageSystemLog,
+            "btnSettings" => pageSettings,
+            "btnUserManagement" => pageUserManagement,
+            _ => null
+        };
 
         // Jumps to Settings, Users and Roles tab.
         public void OpenRolePermissionsSettings()
@@ -311,7 +319,7 @@ namespace AssemblyLineTester.Views
             }
 
             if (pnlContent == null) return;
-            SendMessage(pnlContent.Handle, 0x000B, 0, 0);
+            NativeMethods.SetRedraw(pnlContent.Handle, false);
             pnlContent.SuspendLayout();
             try
             {
@@ -365,7 +373,7 @@ namespace AssemblyLineTester.Views
             finally
             {
                 pnlContent.ResumeLayout(true);
-                SendMessage(pnlContent.Handle, 0x000B, 1, 0);
+                NativeMethods.SetRedraw(pnlContent.Handle, true);
                 pnlContent.Invalidate(true);
             }
         }
@@ -405,7 +413,7 @@ namespace AssemblyLineTester.Views
         {
             var menuButtons = SidebarMenuButtons;
 
-            SendMessage(this.Handle, 0x000B, 0, 0);
+            NativeMethods.SetRedraw(this.Handle, false);
             this.SuspendLayout();
             splitContainer1.SuspendLayout();
             splitContainer1.Panel1.SuspendLayout();
@@ -466,7 +474,7 @@ namespace AssemblyLineTester.Views
                 splitContainer1.Panel1.ResumeLayout(true);
                 splitContainer1.ResumeLayout(true);
                 this.ResumeLayout(true);
-                SendMessage(this.Handle, 0x000B, 1, 0); 
+                NativeMethods.SetRedraw(this.Handle, true); 
                 this.Refresh();
             }
         }
@@ -670,14 +678,6 @@ namespace AssemblyLineTester.Views
             if (!IsLoggingOut) Application.Exit();
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        public static extern bool ReleaseCapture();
-
-        public const int WM_NCLBUTTONDOWN = 0xA1;
-        public const int HT_CAPTION = 0x2;
 
         private void Header_MouseDown(object? sender, MouseEventArgs e)
         {
@@ -689,8 +689,7 @@ namespace AssemblyLineTester.Views
                     ToggleMaximize();
                     return;
                 }
-                ReleaseCapture();
-                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+                NativeMethods.DragWindow(this.Handle);
             }
         }
 

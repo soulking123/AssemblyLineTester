@@ -1,0 +1,29 @@
+root = true
+
+[*.cs]
+
+# Suggestions that only rewrite syntax into shorter syntax. They never change what the code does,
+# and 36 of them in the Error List hide the handful of messages that are worth reading.
+dotnet_diagnostic.IDE0031.severity = none   # null check can be simplified
+dotnet_diagnostic.IDE0090.severity = none   # 'new' expression can be simplified
+dotnet_diagnostic.IDE0300.severity = none   # collection initialization can be simplified
+dotnet_diagnostic.IDE0305.severity = none   # collection initialization can be simplified
+
+# "Use LibraryImportAttribute instead of DllImportAttribute". Its generator emits unsafe code, so
+# taking the suggestion means AllowUnsafeBlocks for the whole project - too high a price for the
+# two user32 calls in Helpers/NativeMethods.cs. Both ids are listed because the analyser has been
+# renumbered across SDK versions.
+dotnet_diagnostic.SYSLIB1054.severity = none
+dotnet_diagnostic.SYSLIB1010.severity = none
+
+# Kept on purpose - these catch real problems:
+#   IDE0044  make field readonly
+#   IDE0059  unnecessary assignment (dead code)
+#   CA1401   P/Invoke must not be public
+#   CA1806   ignored return value
+#   CA1822   member can be static
+
+# Generated designer files answer to Visual Studio, not to us.
+[*.Designer.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none

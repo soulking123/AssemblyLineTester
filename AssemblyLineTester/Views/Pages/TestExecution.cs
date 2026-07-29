@@ -82,7 +82,7 @@ namespace AssemblyLineTester.Views.Pages
             _elapsedTimer.Tick += ElapsedTimer_Tick;
         }
 
-        private void ElapsedTimer_Tick(object sender, EventArgs e)
+        private void ElapsedTimer_Tick(object? sender, EventArgs e)
         {
             lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
@@ -227,7 +227,17 @@ namespace AssemblyLineTester.Views.Pages
 
             try
             {
-                TestConfiguration activeConfig = _configService.GetActiveConfig();
+                // GetActiveConfig returns null when no program is loaded, and ExecuteTest would
+                // have dereferenced it. Refused here, with the reason, rather than crashed.
+                TestConfiguration? activeConfig = _configService.GetActiveConfig();
+                if (activeConfig is null)
+                {
+                    MessageBox.Show(this,
+                        "No test program is active. Load a program before starting a test.",
+                        "No Active Program", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 lblStatusRunning.Text = "Running";
                 lblStatusRunning.ForeColor = Color.Yellow;
                 _startTime = DateTime.Now;

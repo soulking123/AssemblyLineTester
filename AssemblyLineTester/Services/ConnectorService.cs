@@ -9,21 +9,21 @@ using System.Linq;
 namespace AssemblyLineTester.Services
 {
     // CRUD for connectors plus the image folder each one owns.
-    public class ConnectorService
+    public static class ConnectorService
     {
         private static readonly string[] AllowedImageExtensions = { ".jpg", ".jpeg", ".png" };
         private const long MaxImageSizeBytes = 2 * 1024 * 1024;
         private static readonly string ConnectorImageRoot = Path.Combine("Assets", "img", "connector");
 
         // The whole shared catalog, for the add-connector picker.
-        public List<Connector> GetAllConnectors()
+        public static List<Connector> GetAllConnectors()
         {
             using var db = new AppDbContext();
             return db.Connectors.OrderBy(c => c.PartNumber).ToList();
         }
 
         // Full path of every image belonging to one connector.
-        public List<string> GetConnectorImagePaths(Connector? connector)
+        public static List<string> GetConnectorImagePaths(Connector? connector)
         {
             var result = new List<string>();
             if (connector == null || string.IsNullOrWhiteSpace(connector.ImagePath)) return result;
@@ -49,7 +49,7 @@ namespace AssemblyLineTester.Services
         }
 
         // Inserts a connector into the shared catalog and copies its images in.
-        public (Connector? Connector, string? Error) AddConnector(Connector connector, List<string> sourceImagePaths)
+        public static (Connector? Connector, string? Error) AddConnector(Connector connector, List<string> sourceImagePaths)
         {
             string? validationError = Validate(connector);
             if (validationError != null) return (null, validationError);
@@ -88,7 +88,7 @@ namespace AssemblyLineTester.Services
         }
 
         // Updates fields, copies in new images, then removes the ones the user unticked.
-        public (bool Success, string? Error) UpdateConnector(Connector connector, List<string> newSourceImagePaths, List<string> removedImageFileNames)
+        public static (bool Success, string? Error) UpdateConnector(Connector connector, List<string> newSourceImagePaths, List<string> removedImageFileNames)
         {
             string? validationError = Validate(connector);
             if (validationError != null) return (false, validationError);
@@ -130,7 +130,7 @@ namespace AssemblyLineTester.Services
         }
 
         // Deletes the connector row and its image folder.
-        public (bool Success, string? Error) DeleteConnector(int connectorId)
+        public static (bool Success, string? Error) DeleteConnector(int connectorId)
         {
             using var db = new AppDbContext();
             var existing = db.Connectors.FirstOrDefault(c => c.ConnectorId == connectorId);

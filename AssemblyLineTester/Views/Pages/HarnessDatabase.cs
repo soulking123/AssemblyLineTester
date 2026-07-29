@@ -22,7 +22,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private readonly HarnessService _harnessService = new();
 
-        private readonly ConnectorService _connectorService = new();
         private readonly Dictionary<int, Connector> _connectorCache = new();
         private List<string> _connectorImagePaths = [];
         private int _connectorImageIndex = 0;
@@ -41,6 +40,10 @@ namespace AssemblyLineTester.Views.Pages
         private int _currentHarnessSlide = 0;
         private int _currentMachineSlide = 0;
         private const int TotalSlides = 3;
+
+        // Connector catalogue is a separate tab, unrelated to the selected harness; load it once
+        // it is actually opened instead of on every harness click.
+        private bool _connectorCatalogNeedsReload = true;
 
         public HarnessDatabase()
         {
@@ -132,7 +135,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 if (!HasConnectorEditPermission()) return;
 
-                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _connectorService);
+                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService);
                 if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     PopulateHarnessData();
@@ -155,7 +158,7 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
 
-                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _connectorService, _selectedHarness);
+                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _selectedHarness);
                 if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     int editedId = _selectedHarness.ProductHarnessId;
@@ -276,7 +279,20 @@ namespace AssemblyLineTester.Views.Pages
             picConnectorImage.Paint += PicConnectorImage_Paint;
             picConnectorImage.MouseClick += PicConnectorImage_MouseClick;
 
-            RefreshConnectorGrid();
+            PopulateConnectorInfo(null);
+            SetConnectorGalleryImages(null);
+
+            tabControlDetail.SelectedIndexChanged += TabControlDetail_SelectedIndexChanged;
+        }
+
+        // Loads the connector catalogue the first time its tab is opened, not on every harness click.
+        private void TabControlDetail_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (_connectorCatalogNeedsReload && tabControlDetail.SelectedTab == tabConnector)
+            {
+                RefreshConnectorGrid();
+                _connectorCatalogNeedsReload = false;
+            }
         }
 
         private void ApplyConnectorFilter()
@@ -329,7 +345,7 @@ namespace AssemblyLineTester.Views.Pages
         // Reloads the whole connector catalogue, independent of the selected harness.
         private void RefreshConnectorGrid()
         {
-            _allConnectorsForHarness = _connectorService.GetAllConnectors();
+            _allConnectorsForHarness = ConnectorService.GetAllConnectors();
             txtConnectorSearch.Text = string.Empty;
             ApplyConnectorFilter();
         }
@@ -349,7 +365,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!HasConnectorEditPermission()) return;
 
-            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService);
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm();
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
@@ -368,7 +384,7 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
-            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService, connector);
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(connector);
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
@@ -391,7 +407,7 @@ namespace AssemblyLineTester.Views.Pages
                 "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (confirm != DialogResult.Yes) return;
 
-            var (success, error) = _connectorService.DeleteConnector(connectorId);
+            var (success, error) = ConnectorService.DeleteConnector(connectorId);
             if (!success)
             {
                 MessageBox.Show(error ?? "Failed to delete connector.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -472,7 +488,7 @@ namespace AssemblyLineTester.Views.Pages
         // Loads a connector's images and shows the first one.
         private void SetConnectorGalleryImages(Connector? connector)
         {
-            _connectorImagePaths = _connectorService.GetConnectorImagePaths(connector);
+            _connectorImagePaths = ConnectorService.GetConnectorImagePaths(connector);
             _connectorImageIndex = 0;
             LoadGalleryImage(picConnectorImage, _connectorImagePaths, _connectorImageIndex);
         }
@@ -803,7 +819,6 @@ namespace AssemblyLineTester.Views.Pages
 
             SetHarnessImage([]);
             SetConnectorImage([]);
-            RefreshConnectorGrid();
         }
 
         // Fills the General tab; connector fields stay blank until one is picked from the dropdown.
@@ -834,7 +849,6 @@ namespace AssemblyLineTester.Views.Pages
 
             SetHarnessImage(harness.ImagePaths);
             SetConnectorImage([]);
-            RefreshConnectorGrid();
         }
 
         // Adds a key/value row to tblGenInfo and returns the value Label for later updates.
@@ -933,7 +947,7 @@ namespace AssemblyLineTester.Views.Pages
                 _lblConnWireSize!.Text = conn.WireSize;
                 _lblConnCurrentRating!.Text = $"{conn.CurrentRating} A";
                 _lblConnMountingStyle!.Text = conn.MountingStyle;
-                SetConnectorImage(_connectorService.GetConnectorImagePaths(conn));
+                SetConnectorImage(ConnectorService.GetConnectorImagePaths(conn));
             }
             else
             {
