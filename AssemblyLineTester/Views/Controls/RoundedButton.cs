@@ -119,7 +119,7 @@ namespace AssemblyLineTester.Views.Controls
         private GraphicsPath GetFigurePath(RectangleF rect, float radius)
         {
             GraphicsPath path = new GraphicsPath();
-            if (radius <= 0)
+            if (radius <= 0 || rect.Width <= 0 || rect.Height <= 0)
             {
                 path.AddRectangle(rect);
                 return path;
@@ -128,6 +128,12 @@ namespace AssemblyLineTester.Views.Controls
             float d = radius * 2f;
             if (d > rect.Height) d = rect.Height;
             if (d > rect.Width) d = rect.Width;
+            
+            if (d <= 0)
+            {
+                path.AddRectangle(rect);
+                return path;
+            }
 
             path.StartFigure();
             path.AddArc(rect.X, rect.Y, d, d, 180, 90);
@@ -158,6 +164,8 @@ namespace AssemblyLineTester.Views.Controls
 
         protected override void OnPaint(PaintEventArgs pevent)
         {
+            if (Width <= 1 || Height <= 1) return;
+
             pevent.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             pevent.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
