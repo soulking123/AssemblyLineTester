@@ -92,10 +92,6 @@ namespace AssemblyLineTester.Views.Pages
             if (btnImport != null) btnImport.Click += BtnImport_Click;
             if (btnReset != null) btnReset.Click += BtnReset_Click;
             
-            if (btnLearnConnection != null) btnLearnConnection.Click += btnLearnConnection_Click;
-            if (btnStartAll != null) btnStartAll.Click += btnStartAll_Click;
-            if (btnStartSelected != null) btnStartSelected.Click += btnStartSelected_Click;
-            if (btnAbort != null) btnAbort.Click += btnAbort_Click;
         }
 
         private static string[] GetUnitsForTestType(string testType) => UnitConversionHelper.GetUnitsForTestType(testType);
@@ -1268,6 +1264,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 _customTestText = getTestResult.Result;
+                Debug.WriteLine(_customTestText);
                 ParseAndPopulateGridFromProgramText(_customTestText);
 
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
