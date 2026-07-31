@@ -41,6 +41,12 @@ namespace AssemblyLineTester.Services
             AddInfo("Operator", detail.Operator);
             AddInfo("Result", detail.OverallResult);
 
+            int notesRow = r;
+            AddInfo("Notes", string.IsNullOrWhiteSpace(detail.Notes) ? "-" : detail.Notes.Trim());
+            ws.Range(notesRow, 3, notesRow, 5).Merge();
+            ws.Cell(notesRow, 3).Style.Alignment.WrapText = true;
+            ws.Cell(notesRow, 3).Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+
             r += 1;
 
             ws.Cell(r, 1).Value = "TEST RESULT SUMMARY";

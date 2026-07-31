@@ -156,6 +156,7 @@ namespace AssemblyLineTester.Services
                 Operator = report.Operator,
                 TestTime = duration.HasValue ? duration.Value.ToString(@"hh\:mm\:ss") : "-",
                 OverallResult = report.OverallResult?.ToString().ToUpperInvariant() ?? "-",
+                Notes = report.Notes,
                 TotalNets = report.TotalNets,
                 PassCount = report.PassCount,
                 FailCount = report.FailCount,
@@ -164,7 +165,7 @@ namespace AssemblyLineTester.Services
             };
         }
 
-        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false)
+        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false, string? notes = null)
         {
             using var db = new AppDbContext();
 
@@ -175,7 +176,7 @@ namespace AssemblyLineTester.Services
 
             var report = new TestReport
             {
-                ReportNumber = $"TR-{DateTime.Now:yyyyMMdd-HHmmss}",
+                ReportNumber = NextReportNumber(db),
                 ProductModel = productModel ?? "",
                 ProductType = productType ?? "",
                 Area = area ?? "",
@@ -192,6 +193,7 @@ namespace AssemblyLineTester.Services
                 FailCount = failCount,
                 Status = TestStatus.Completed,
                 OverallResult = isPass ? TestResult.Pass : TestResult.Fail,
+                Notes = notes?.Trim() ?? "",
                 IsDraft = isDraft,
                 CreatedAt = DateTime.UtcNow
             };
@@ -258,6 +260,21 @@ namespace AssemblyLineTester.Services
             return report.ReportId;
         }
 
+        // The timestamp only resolves to a second, so same-second saves get a -2, -3 suffix.
+        // ponytail: one process only; two app instances could still race the unique index.
+        private static string NextReportNumber(AppDbContext db)
+        {
+            string basis = $"TR-{DateTime.Now:yyyyMMdd-HHmmss}";
+            string number = basis;
+
+            for (int i = 2; db.TestReports.Any(r => r.ReportNumber == number); i++)
+            {
+                number = $"{basis}-{i}";
+            }
+
+            return number;
+        }
+
         private static string FormatResult(bool result, double? measured)
         {
             if (result) return "PASS";
@@ -299,9 +316,9 @@ namespace AssemblyLineTester.Services
         }
 
         // Last step of running a test, so deliberately not permission-gated.
-        public void ConfirmDraft(int reportId, string serialNumber)
+        public void ConfirmDraft(int reportId, string serialNumber, string? notes = null)
         {
-            var report = SetSerialNumber(reportId, serialNumber, markConfirmed: true);
+            var report = SetSerialNumber(reportId, serialNumber, markConfirmed: true, notes);
 
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Info, "Test Report", "Confirm Report",
@@ -321,13 +338,14 @@ namespace AssemblyLineTester.Services
                 $"Report {report.ReportNumber} serial amended to {report.SerialNumber}.");
         }
 
-        private static TestReport SetSerialNumber(int reportId, string serialNumber, bool markConfirmed)
+        private static TestReport SetSerialNumber(int reportId, string serialNumber, bool markConfirmed, string? notes = null)
         {
             using var db = new AppDbContext();
             var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId)
                 ?? throw new InvalidOperationException($"Report {reportId} not found.");
 
             if (!string.IsNullOrWhiteSpace(serialNumber)) report.SerialNumber = serialNumber.Trim();
+            if (notes is not null) report.Notes = notes.Trim();
             if (markConfirmed) report.IsDraft = false;
 
             db.SaveChanges();

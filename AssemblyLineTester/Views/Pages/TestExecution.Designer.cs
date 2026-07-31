@@ -84,6 +84,7 @@
             listBoxTestSummary = new ListBox();
             lblTestSummaryTitle = new Label();
             cardNotes = new Panel();
+            txtNotes = new TextBox();
             lblNotesTitle = new Label();
             tblMain.SuspendLayout();
             pnlTopBar.SuspendLayout();
@@ -874,6 +875,7 @@
             // cardNotes
             // 
             cardNotes.BackColor = Color.White;
+            cardNotes.Controls.Add(txtNotes);
             cardNotes.Controls.Add(lblNotesTitle);
             cardNotes.Dock = DockStyle.Fill;
             cardNotes.Location = new Point(2007, 2);
@@ -894,6 +896,20 @@
             lblNotesTitle.TabIndex = 0;
             lblNotesTitle.Text = "NOTES";
             lblNotesTitle.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // txtNotes
+            //
+            txtNotes.BorderStyle = BorderStyle.FixedSingle;
+            txtNotes.Dock = DockStyle.Fill;
+            txtNotes.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            txtNotes.ForeColor = Color.FromArgb(30, 41, 59);
+            txtNotes.Location = new Point(10, 57);
+            txtNotes.MaxLength = 2000;
+            txtNotes.Multiline = true;
+            txtNotes.Name = "txtNotes";
+            txtNotes.ScrollBars = ScrollBars.Vertical;
+            txtNotes.Size = new Size(638, 888);
+            txtNotes.TabIndex = 1;
             // 
             // TestExecution
             // 
@@ -995,6 +1011,7 @@
         private System.Windows.Forms.Label lblTestSummaryTitle;
         private System.Windows.Forms.Panel cardNotes;
         private System.Windows.Forms.Label lblNotesTitle;
+        private System.Windows.Forms.TextBox txtNotes;
         private ListBox listBoxTestSummary;
     }
 }

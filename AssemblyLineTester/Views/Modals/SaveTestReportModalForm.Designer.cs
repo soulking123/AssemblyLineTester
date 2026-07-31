@@ -48,6 +48,8 @@ namespace AssemblyLineTester.Views.Modals
             txtGenSnVal = new TextBox();
             lblGenResKey = new Label();
             lblGenResVal = new Label();
+            lblGenNotesKey = new Label();
+            txtGenNotesVal = new TextBox();
             lblGenTitle = new Label();
             lblInstruction = new Label();
             pnlFooter = new Panel();
@@ -165,16 +167,20 @@ namespace AssemblyLineTester.Views.Modals
             tblGenGrid.Controls.Add(txtGenSnVal, 1, 4);
             tblGenGrid.Controls.Add(lblGenResKey, 2, 4);
             tblGenGrid.Controls.Add(lblGenResVal, 3, 4);
+            tblGenGrid.Controls.Add(lblGenNotesKey, 0, 5);
+            tblGenGrid.Controls.Add(txtGenNotesVal, 1, 5);
+            tblGenGrid.SetColumnSpan(txtGenNotesVal, 3);
             tblGenGrid.Dock = DockStyle.Fill;
             tblGenGrid.Location = new Point(30, 102);
             tblGenGrid.Margin = new Padding(0);
             tblGenGrid.Name = "tblGenGrid";
-            tblGenGrid.RowCount = 5;
-            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
+            tblGenGrid.RowCount = 6;
+            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 16.66F));
+            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 16.66F));
+            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 16.66F));
+            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 16.66F));
+            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 16.66F));
+            tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 16.70F));
             tblGenGrid.Size = new Size(1633, 568);
             tblGenGrid.TabIndex = 1;
             // 
@@ -433,6 +439,31 @@ namespace AssemblyLineTester.Views.Modals
             lblGenResVal.TabIndex = 19;
             lblGenResVal.Text = "PASS";
             lblGenResVal.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // lblGenNotesKey
+            //
+            lblGenNotesKey.Dock = DockStyle.Fill;
+            lblGenNotesKey.Font = new Font("Segoe UI", 9F);
+            lblGenNotesKey.ForeColor = Color.FromArgb(100, 116, 139);
+            lblGenNotesKey.Margin = new Padding(6, 0, 6, 0);
+            lblGenNotesKey.Name = "lblGenNotesKey";
+            lblGenNotesKey.TabIndex = 20;
+            lblGenNotesKey.Text = "Notes:";
+            lblGenNotesKey.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // txtGenNotesVal
+            //
+            txtGenNotesVal.BackColor = Color.FromArgb(241, 245, 249);
+            txtGenNotesVal.Dock = DockStyle.Fill;
+            txtGenNotesVal.Font = new Font("Segoe UI", 9F);
+            txtGenNotesVal.ForeColor = Color.FromArgb(30, 41, 59);
+            txtGenNotesVal.Margin = new Padding(6);
+            txtGenNotesVal.Multiline = true;
+            txtGenNotesVal.Name = "txtGenNotesVal";
+            txtGenNotesVal.ReadOnly = true;
+            txtGenNotesVal.ScrollBars = ScrollBars.Vertical;
+            txtGenNotesVal.TabIndex = 21;
+            txtGenNotesVal.TabStop = false;
             // lblGenTitle
             // 
             lblGenTitle.Dock = DockStyle.Top;
@@ -557,6 +588,8 @@ namespace AssemblyLineTester.Views.Modals
         private TextBox txtGenSnVal;
         private Label lblGenResKey;
         private Label lblGenResVal;
+        private Label lblGenNotesKey;
+        private TextBox txtGenNotesVal;
         private Panel pnlFooter;
         private Button btnConfirmSave;
         private Button btnCancel;

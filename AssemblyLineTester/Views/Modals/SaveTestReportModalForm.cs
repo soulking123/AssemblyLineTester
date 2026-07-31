@@ -23,6 +23,7 @@ namespace AssemblyLineTester.Views.Modals
         private readonly string _overallResult;
         private readonly DateTime _testTime;
         private readonly int? _existingReportId;
+        private readonly string _notes;
 
         public SaveTestReportModalForm(
             string productModel,
@@ -36,7 +37,8 @@ namespace AssemblyLineTester.Views.Modals
             string overallResult,
             DateTime testTime,
             List<LiveTestDetailRowDto> rows,
-            int? existingReportId = null)
+            int? existingReportId = null,
+            string? notes = null)
         {
             _productModel = productModel;
             _ecnNumber = ecnNumber;
@@ -48,6 +50,7 @@ namespace AssemblyLineTester.Views.Modals
             _testTime = testTime;
             _rows = rows;
             _existingReportId = existingReportId;
+            _notes = notes?.Trim() ?? string.Empty;
 
             InitializeComponent();
 
@@ -65,6 +68,9 @@ namespace AssemblyLineTester.Views.Modals
             txtGenOpVal.Enabled = false;
             txtGenOpVal.BackColor = Color.FromArgb(241, 245, 249); 
             txtGenOpVal.TabStop = false;
+
+            // Read-only here; notes are typed on the Test Execution page.
+            txtGenNotesVal.Text = _notes.Length == 0 ? "-" : _notes;
 
             if (string.Equals(_overallResult, "PASS", StringComparison.OrdinalIgnoreCase))
             {
@@ -119,13 +125,13 @@ namespace AssemblyLineTester.Views.Modals
             {
                 if (_existingReportId.HasValue)
                 {
-                    _reportService.ConfirmDraft(_existingReportId.Value, finalSn);
+                    _reportService.ConfirmDraft(_existingReportId.Value, finalSn, _notes);
                 }
                 else
                 {
                     _reportService.SaveLiveTestReport(
                         _productModel, _productType, _area, _ecnNumber, _revision, _partNumber,
-                        finalSn, finalOp, _testTime, _rows, _overallResult);
+                        finalSn, finalOp, _testTime, _rows, _overallResult, notes: _notes);
                 }
 
                 this.DialogResult = DialogResult.OK;

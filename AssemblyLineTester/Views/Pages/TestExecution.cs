@@ -14,11 +14,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Xml.Linq;
-<<<<<<< HEAD
 using AssemblyLineTester.Helpers;
-=======
 using static AssemblyLineTester.Models.SystemLog;
->>>>>>> main
 
 using Timer = System.Windows.Forms.Timer;
 
@@ -229,6 +226,7 @@ namespace AssemblyLineTester.Views.Pages
             btnLoadProgram.Enabled = false;
             btnStartTest.Enabled = false;
             btnSaveReport.Enabled = false;
+            txtNotes.Clear();
 
             try
             {
@@ -329,49 +327,6 @@ namespace AssemblyLineTester.Views.Pages
 
                     if (putResult == CtaCommandResultCode.Success)
                     {
-<<<<<<< HEAD
-                        var status = LiveTestStatus.Pending;
-                        string statusStr = measurement.Status1?.Trim() ?? "";
-                        if (measurement.Value1 <= _continuityResistance)
-                        {
-                            status = LiveTestStatus.Pass;
-                        }
-                        else
-                        {
-                            status = LiveTestStatus.Fail;
-                        }
-
-                        string rowTestType = "WIRE";
-                        if (!string.IsNullOrEmpty(measurement.Instruction))
-                        {
-                            string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
-                            if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
-                            {
-                                rowTestType = "WIRE";
-                            }
-                            else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
-                            {
-                                rowTestType = "OPEN";
-                            }
-                            else
-                            {
-                                rowTestType = measurement.Instruction;
-                            }
-                        }
-
-                        _loadedRows.Add(new LiveTestDetailRowDto
-                        {
-                            StepNo = step++,
-                            NetId = measurement.Instruction ?? "",
-                            TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
-                            FromPoint = $"{measurement.Point1}",
-                            ToPoint = $"{measurement.Point2}",
-                            TestType = rowTestType,
-                            MeasuredValue = Math.Round(measurement.Value1, 3),
-                            UpperLimit = _continuityResistance,
-                            Status = status
-                        });
-=======
                         logService.Log(LogSeverity.Info, "Instrument", "Put Test Program Success.",
                         $"Generated Program is valid", SessionManager.CurrentUser.Username);
                     }
@@ -382,7 +337,6 @@ namespace AssemblyLineTester.Views.Pages
                         $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
                         MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
->>>>>>> main
                     }
                 }
                 catch (Exception ex)
@@ -478,6 +432,7 @@ namespace AssemblyLineTester.Views.Pages
                                     ToPoint = $"{measurement.Point2}",
                                     TestType = rowTestType,
                                     MeasuredValue = Math.Round(measurement.Value1, 3),
+                                    UpperLimit = _continuityResistance,
                                     Status = status
                                 });
                             }
@@ -654,7 +609,8 @@ namespace AssemblyLineTester.Views.Pages
                 overallResult,
                 AppTime.UtcNow,
                 _loadedRows ?? new List<LiveTestDetailRowDto>(),
-                _currentReportId
+                _currentReportId,
+                txtNotes.Text
             );
 
             if (modal.ShowDialog(this) == DialogResult.OK)
@@ -662,6 +618,7 @@ namespace AssemblyLineTester.Views.Pages
                 lblStatusRunning.Text = "Idle";
                 lblStatusRunning.ForeColor = Color.Gray;
                 listBoxTestSummary.Items.Clear();
+                txtNotes.Clear();
 
                 MessageBox.Show("Test Report saved successfully to the database!\nIt can now be viewed in Reports and Test History.", "Report Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

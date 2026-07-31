@@ -44,6 +44,8 @@ namespace AssemblyLineTester.Models
         public TestStatus Status { get; set; } = TestStatus.Completed;
         public TestResult? OverallResult { get; set; }
 
+        public string Notes { get; set; } = string.Empty;
+
         public bool IsDraft { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

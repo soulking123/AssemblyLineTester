@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using AssemblyLineTester.Models.Dto;
 using PdfSharp.Drawing;
+using PdfSharp.Drawing.Layout;
 using PdfSharp.Pdf;
 
 namespace AssemblyLineTester.Services
@@ -55,7 +56,24 @@ namespace AssemblyLineTester.Services
 
             y = DrawGeneralInformation(gfx, page, detail, font, fontBold, y);
             y = DrawTypeSummaryTable(gfx, detail, font, fontBold, y);
-            DrawOverallResultBox(gfx, page, detail, y);
+            y = DrawOverallResultBox(gfx, page, detail, y);
+            DrawNotes(gfx, page, detail, font, fontBold, y);
+        }
+
+        // Operator notes as a wrapped paragraph under the result box.
+        private static void DrawNotes(XGraphics gfx, PdfPage page, ReportDetailDto detail, XFont font, XFont fontBold, double y)
+        {
+            gfx.DrawString("NOTES", fontBold, XBrushes.Black, new XRect(Margin, y, 400, 16), XStringFormats.TopLeft);
+            y += 18;
+
+            double width = page.Width - Margin * 2;
+            double height = Math.Max(0, page.Height - Margin - FooterReserve - y);
+            if (height <= 0) return;
+
+            string text = string.IsNullOrWhiteSpace(detail.Notes) ? "-" : detail.Notes.Trim();
+
+            var formatter = new XTextFormatter(gfx) { Alignment = XParagraphAlignment.Left };
+            formatter.DrawString(text, font, XBrushes.Black, new XRect(Margin, y, width, height), XStringFormats.TopLeft);
         }
 
         private static double DrawGeneralInformation(XGraphics gfx, PdfPage page, ReportDetailDto detail, XFont font, XFont fontBold, double y)
@@ -186,7 +204,7 @@ namespace AssemblyLineTester.Services
             return y + rowH + 12;
         }
 
-        private static void DrawOverallResultBox(XGraphics gfx, PdfPage page, ReportDetailDto detail, double y)
+        private static double DrawOverallResultBox(XGraphics gfx, PdfPage page, ReportDetailDto detail, double y)
         {
             double boxW = 280;
             double boxH = 60;
@@ -203,6 +221,8 @@ namespace AssemblyLineTester.Services
             double textY = y + Math.Max(0, (boxH - measuredSize.Height) / 2.0);
             gfx.DrawString(detail.OverallResult, resultFont, new XSolidBrush(borderColor),
                 new XRect(boxX, textY, boxW, measuredSize.Height), XStringFormats.Center);
+
+            return y + boxH + 20;
         }
 
         // Page 2 onwards: detail rows in landscape, spilling onto as many pages as needed.

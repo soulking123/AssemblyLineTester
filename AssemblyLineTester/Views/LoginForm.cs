@@ -10,11 +10,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using static AssemblyLineTester.Models.SystemLog;
-<<<<<<< HEAD
 using AssemblyLineTester.Helpers;
-=======
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
->>>>>>> main
 
 namespace AssemblyLineTester.Views
 {

@@ -1311,6 +1311,10 @@ namespace AssemblyLineTester.Migrations
                     b.Property<bool>("IsDraft")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Operator")
                         .IsRequired()
                         .HasColumnType("TEXT");
