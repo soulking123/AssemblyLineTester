@@ -1585,7 +1585,7 @@ namespace AssemblyLineTester.Migrations
                             FailedLoginCount = 0,
                             FullName = "System Administrator",
                             MustChangePassword = true,
-                            PasswordHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS",
+                            PasswordHash = "$2a$11$Hcpu0fJL6xvHgmbYJNv/s.QMrlL8F9ALRHip20cUQLY6OSro3YIhC",
                             RoleId = 1,
                             StatusId = 1,
                             UpdatedAt = new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local),

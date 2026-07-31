@@ -41,8 +41,6 @@ namespace AssemblyLineTester.Views.Pages
         private int _currentMachineSlide = 0;
         private const int TotalSlides = 3;
 
-        // Connector catalogue is a separate tab, unrelated to the selected harness; load it once
-        // it is actually opened instead of on every harness click.
         private bool _connectorCatalogNeedsReload = true;
 
         public HarnessDatabase()

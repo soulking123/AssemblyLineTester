@@ -1590,7 +1590,7 @@ namespace AssemblyLineTester.Views.Pages
             lblLicKeyKey.Name = "lblLicKeyKey";
             lblLicKeyKey.Size = new Size(269, 49);
             lblLicKeyKey.TabIndex = 2;
-            lblLicKeyKey.Text = "License Key";
+            lblLicKeyKey.Text = "Machine ID";
             lblLicKeyKey.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblLicValKey

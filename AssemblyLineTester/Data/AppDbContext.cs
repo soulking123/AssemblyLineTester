@@ -204,8 +204,8 @@ namespace AssemblyLineTester.Data
                 new UserStatus { Id = 3, Name = "Locked", Description = "User is locked out due to multiple failed login attempts" }
             );
 
-            // One seeded account only; the developer accounts that sat here were personal.
-            const string adminHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS";
+            // Same starting password as UserService.DefaultNewUserPassword ("Cat12345")
+            const string adminHash = "$2a$11$Hcpu0fJL6xvHgmbYJNv/s.QMrlL8F9ALRHip20cUQLY6OSro3YIhC";
 
             modelBuilder.Entity<User>().HasData(
                 new User

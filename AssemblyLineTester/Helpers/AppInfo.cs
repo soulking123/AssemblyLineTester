@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 
 namespace AssemblyLineTester.Helpers
@@ -13,6 +16,12 @@ namespace AssemblyLineTester.Helpers
 
         // Name of the PC, carried on every log line.
         public static string MachineName { get; } = SafeMachineName();
+
+        // MAC addresses of the physical adapters; a licence is locked to one of these.
+        public static IReadOnlyList<string> MachineIds { get; } = ReadMachineIds();
+
+        // The one quoted when requesting a licence, and shown on the Settings page.
+        public static string PrimaryMachineId { get; } = MachineIds.Count > 0 ? MachineIds[0] : "";
 
         // ProgramData, not LocalApplicationData: logs must survive the next shift's Windows user.
         public static string DataDirectory { get; } = Path.Combine(
@@ -61,6 +70,44 @@ namespace AssemblyLineTester.Helpers
             {
                 Debug.WriteLine($"AppInfo.SafeMachineName failed: {ex}");
                 return "unknown";
+            }
+        }
+
+        // Hex only, uppercase - the shape LicenseGenerator writes into a licence.
+        public static string NormalizeMachineId(string? raw) =>
+            new string((raw ?? "").Where(Uri.IsHexDigit).ToArray()).ToUpperInvariant();
+
+        // AABBCCDDEEFF -> AA-BB-CC-DD-EE-FF, for display only.
+        public static string FormatMachineId(string id) =>
+            id.Length == 12
+                ? string.Join('-', Enumerable.Range(0, 6).Select(i => id.Substring(i * 2, 2)))
+                : id;
+
+        // Virtual adapters come and go with VPNs and hypervisors, so a licence must never ride on one.
+        private static bool IsVirtual(string description)
+        {
+            string[] markers = ["virtual", "vmware", "hyper-v", "vbox", "tap-", "tunnel", "loopback", "pseudo", "bluetooth", "wan miniport"];
+            return markers.Any(m => description.Contains(m, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Sorted so the same adapter stays "primary" across reboots and cable changes.
+        private static string[] ReadMachineIds()
+        {
+            try
+            {
+                return NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(n => n.NetworkInterfaceType is NetworkInterfaceType.Ethernet or NetworkInterfaceType.Wireless80211)
+                    .Where(n => !IsVirtual(n.Description))
+                    .Select(n => n.GetPhysicalAddress().ToString())
+                    .Where(mac => mac.Length == 12)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(mac => mac, StringComparer.Ordinal)
+                    .ToArray();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"AppInfo.ReadMachineIds failed: {ex}");
+                return [];
             }
         }
     }

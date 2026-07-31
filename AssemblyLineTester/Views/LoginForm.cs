@@ -241,51 +241,12 @@ namespace AssemblyLineTester.Views
                         return;
                     }
 
-                    // Before the password, so a password list gets no verdict on each guess.
-                    User.SelfCheck();
-                    if (user.IsLockedOut(DateTime.UtcNow))
-                    {
-                        int minutesLeft = (int)Math.Ceiling((user.LockoutUntil!.Value - DateTime.UtcNow).TotalMinutes);
-                        logService.Log(LogSeverity.Warning, "Authentication", "Login Blocked",
-                            $"Sign-in refused for '{user.Username}': account locked for {minutesLeft} more minute(s).", user.Username);
-
-                        MessageBox.Show(
-                            $"Too many failed sign-in attempts. Try again in {minutesLeft} minute(s), " +
-                            $"or ask an administrator to reset the password.",
-                            "Account locked",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                        return;
-                    }
-
                     bool isCorrect = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
 
                     if (!isCorrect)
                     {
-                        user.FailedLoginCount++;
-
-                        if (user.FailedLoginCount >= User.MaxFailedLogins)
-                        {
-                            // Cleared with the lock, so an expired lock gives a fresh run of attempts.
-                            user.FailedLoginCount = 0;
-                            user.LockoutUntil = DateTime.UtcNow.AddMinutes(User.LockoutMinutes);
-                            db.SaveChanges();
-
-                            logService.Log(LogSeverity.Warning, "Authentication", "Account Locked",
-                                $"Account '{user.Username}' locked for {User.LockoutMinutes} minutes after {User.MaxFailedLogins} failed sign-in attempts.", user.Username);
-
-                            MessageBox.Show(
-                                $"Too many failed sign-in attempts. This account is locked for {User.LockoutMinutes} minutes.",
-                                "Account locked",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
-                            return;
-                        }
-
-                        db.SaveChanges();
-
                         logService.Log(LogSeverity.Warning, "Authentication", "Login Failed",
-                            $"Failed sign-in for '{user.Username}': incorrect password ({user.FailedLoginCount} of {User.MaxFailedLogins}).", user.Username);
+                            $"Failed sign-in for '{user.Username}': incorrect password.", user.Username);
                         MessageBox.Show("Invalid Login");
                         return;
                     }

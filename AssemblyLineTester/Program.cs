@@ -19,6 +19,7 @@ namespace AssemblyLineTester
 
             FileLogService.SelfCheck();
             AppTime.SelfCheck();
+            LicenseService.SelfCheck();
             FileLogService.Info("Startup", AppInfo.Describe());
 
             // PdfSharp needs code page 1252, which .NET does not register by default.
@@ -31,6 +32,24 @@ namespace AssemblyLineTester
             if (!DbInitialize.Initialize())
             {
                 FileLogService.Error("Startup", "Aborted: the database could not be initialised.");
+                return;
+            }
+
+            var (licenseResult, _) = LicenseService.Validate();
+            if (licenseResult != LicenseValidationResult.Valid)
+            {
+                FileLogService.Error("Startup", $"Aborted: license check failed ({licenseResult}).");
+
+                // The machine id is printed here because a licence is issued against it, and this
+                // dialog is the only place the operator can read it while startup is refused.
+                MessageBox.Show(
+                    $"{DescribeLicenseFailure(licenseResult)}\r\n\r\n" +
+                    $"Machine ID: {AppInfo.FormatMachineId(AppInfo.PrimaryMachineId)}\r\n\r\n" +
+                    $"Contact your AssemblyLineTester vendor for a new license file, quoting the machine ID above.",
+                    "License Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
                 return;
             }
 
@@ -86,6 +105,17 @@ namespace AssemblyLineTester
                 FileLogService.Error("Report", "Could not write the crash to the database log.", logFailure);
             }
         }
+
+        private static string DescribeLicenseFailure(LicenseValidationResult result) => result switch
+        {
+            LicenseValidationResult.MissingFile => "No license file was found for this installation.",
+            LicenseValidationResult.InvalidSignature => "The license file is missing, corrupted, or was not issued for this application.",
+            LicenseValidationResult.Expired => "This license has expired.",
+            LicenseValidationResult.WrongMachine => "This license was issued for a different machine.",
+            LicenseValidationResult.ClockRolledBack => "The system clock appears to have been moved backward, which this application does not allow.",
+            LicenseValidationResult.CorruptState => "The application's saved license state could not be verified.",
+            _ => "The license could not be validated."
+        };
 
         private static void ShowCrashDialog(Exception ex)
         {

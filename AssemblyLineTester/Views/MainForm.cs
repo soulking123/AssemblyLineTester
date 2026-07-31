@@ -706,9 +706,21 @@ namespace AssemblyLineTester.Views
             UpdateMaximizeButtonText();
         }
 
+        private FormWindowState _lastWindowState = FormWindowState.Normal;
+
         private void MainForm_Resize(object? sender, EventArgs e)
         {
             UpdateMaximizeButtonText();
+
+            // Forces one clean repaint on restore instead of a staged one.
+            if (_lastWindowState == FormWindowState.Minimized && WindowState != FormWindowState.Minimized)
+            {
+                NativeMethods.SetRedraw(this.Handle, false);
+                NativeMethods.SetRedraw(this.Handle, true);
+                this.Refresh();
+            }
+
+            _lastWindowState = WindowState;
         }
 
         private void UpdateMaximizeButtonText()

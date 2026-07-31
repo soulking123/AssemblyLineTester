@@ -54,7 +54,7 @@ namespace AssemblyLineTester.Helpers
         // so anything custom-painted on a page flickered on every repaint.
         public static void EnableDoubleBuffering(Control root)
         {
-            if (root is Panel or TableLayoutPanel or FlowLayoutPanel or SplitContainer or SplitterPanel or DataGridView or UserControl)
+            if (root is Panel or TableLayoutPanel or FlowLayoutPanel or SplitContainer or SplitterPanel or DataGridView or UserControl or PictureBox or TabControl)
             {
                 DoubleBufferedProperty?.SetValue(root, true);
             }

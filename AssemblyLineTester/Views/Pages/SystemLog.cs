@@ -234,8 +234,11 @@ namespace AssemblyLineTester.Views.Pages
                         string.IsNullOrEmpty(log.MachineName) ? "-" : log.MachineName);
                 }
 
+                lblTableTitle.Text = $"LOG LIST (Total: {_totalCount:N0})";
+
                 UpdateLegendLabels();
                 UpdatePaginationUI(_totalCount, _totalPages);
+                UpdateLogDetail();
             }
             finally
             {
@@ -244,6 +247,27 @@ namespace AssemblyLineTester.Views.Pages
                 pnlLevelStats.Invalidate();
                 _moduleScroll.Invalidate();
             }
+        }
+
+        // Mirrors the selected row; the grid already carries every field this panel shows.
+        private void UpdateLogDetail()
+        {
+            var row = gridData.CurrentRow;
+
+            if (row is null || row.Index < 0 || gridData.Rows.Count == 0)
+            {
+                lblLogDetailContent.Text = _totalCount == 0
+                    ? "No entries match the current filter."
+                    : "Select a row in the list above to see its detail.";
+                return;
+            }
+
+            var cells = row.Cells;
+            lblLogDetailContent.Text =
+                $"Date & Time: {cells["Date"].Value}   |   Log Level: {cells["Level"].Value}   |   " +
+                $"Module: {cells["Module"].Value}   |   User: {cells["User"].Value}   |   " +
+                $"Machine: {cells["Machine"].Value}   |   Action: {cells["Action"].Value}   |   " +
+                $"Description: {cells["Description"].Value}";
         }
 
         private void UpdateLegendLabels()
@@ -439,6 +463,18 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+
+            gridData.SelectionChanged += (s, e) => UpdateLogDetail();
+
+            // A long Description would otherwise run off the panel: cap the width so the label wraps.
+            pnlLogDetail.Resize += (s, e) => CapLogDetailWidth();
+            CapLogDetailWidth();
+        }
+
+        private void CapLogDetailWidth()
+        {
+            int available = pnlLogDetail.ClientSize.Width - lblLogDetailContent.Left - 20;
+            lblLogDetailContent.MaximumSize = new Size(Math.Max(200, available), 0);
         }
 
         private void PnlChartContainer_Paint(object? sender, PaintEventArgs e)
