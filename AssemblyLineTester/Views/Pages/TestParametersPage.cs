@@ -1139,10 +1139,18 @@ namespace AssemblyLineTester.Views.Pages
                     int toAddr = ParsePinAddress(toPin);
 
                     gridConfig.Rows.Add(
-                        seqNo.ToString(),
-                        fromAddr.ToString(),
-                        toAddr.ToString(),
-                        "WIRE",
+                        seqNo.ToString(),       //No
+                        "",                     //Net-ID
+                        "",                     //Harness Group
+                        fromAddr.ToString(),    // from
+                        "",                     // from label
+                        toAddr.ToString(),      // to
+                        "",                     // to label
+                        "WIRE",                 // test type
+                        "",                     // lower limit
+                        "",                     // upper limit
+                        "",                     // expected value
+                        "",                     // tolerance
                         "-"
                     );
                 }
@@ -1203,7 +1211,6 @@ namespace AssemblyLineTester.Views.Pages
                 //    return;
                 //}
 
-                Debug.WriteLine("debuggin2");
                 var learnResult = await Task.Run(() => _instrument.LearnConnection(), token);
                 if (token.IsCancellationRequested) return;
 
@@ -1236,7 +1243,6 @@ namespace AssemblyLineTester.Views.Pages
 
                 var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);
                 if (token.IsCancellationRequested) return;
-                Debug.WriteLine("debuggin");
                 Debug.WriteLine(getTestResult);
                 if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
                 {
