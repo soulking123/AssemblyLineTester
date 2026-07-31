@@ -21,7 +21,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader = new Panel();
             lblCustomTitle = new Label();
             iconLogo = new FontAwesome.Sharp.IconPictureBox();
-            btnClose = new FontAwesome.Sharp.IconButton();
             pnlHeader = new Panel();
             lblSubtitle = new Label();
             lblTitle = new Label();
@@ -57,7 +56,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
             pnlCustomHeader.Controls.Add(lblCustomTitle);
             pnlCustomHeader.Controls.Add(iconLogo);
-            pnlCustomHeader.Controls.Add(btnClose);
             pnlCustomHeader.Dock = DockStyle.Top;
             pnlCustomHeader.Location = new Point(0, 0);
             pnlCustomHeader.Name = "pnlCustomHeader";
@@ -88,22 +86,6 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.Size = new Size(52, 51);
             iconLogo.TabIndex = 1;
             iconLogo.TabStop = false;
-            // 
-            // btnClose
-            // 
-            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnClose.BackColor = Color.Transparent;
-            btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.FlatStyle = FlatStyle.Flat;
-            btnClose.IconChar = FontAwesome.Sharp.IconChar.Close;
-            btnClose.IconColor = Color.FromArgb(203, 213, 225);
-            btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnClose.IconSize = 24;
-            btnClose.Location = new Point(861, 0);
-            btnClose.Name = "btnClose";
-            btnClose.Size = new Size(81, 80);
-            btnClose.TabIndex = 2;
-            btnClose.UseVisualStyleBackColor = false;
             // 
             // pnlHeader
             // 
@@ -202,7 +184,7 @@ namespace AssemblyLineTester.Views.Modals
             lblContactQuantity.ForeColor = Color.FromArgb(51, 65, 85);
             lblContactQuantity.Location = new Point(496, 336);
             lblContactQuantity.Name = "lblContactQuantity";
-            lblContactQuantity.Size = new Size(223, 36);
+            lblContactQuantity.Size = new Size(242, 36);
             lblContactQuantity.TabIndex = 12;
             lblContactQuantity.Text = "Contact Quantity *";
             // 
@@ -274,19 +256,19 @@ namespace AssemblyLineTester.Views.Modals
             // lblImage
             // 
             lblImage.AutoSize = true;
-            lblImage.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblImage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblImage.ForeColor = Color.FromArgb(51, 65, 85);
             lblImage.Location = new Point(496, 536);
             lblImage.MaximumSize = new Size(388, 0);
             lblImage.Name = "lblImage";
-            lblImage.Size = new Size(362, 36);
+            lblImage.Size = new Size(372, 64);
             lblImage.TabIndex = 4;
             lblImage.Text = "Images (multiple allowed, max 2MB each, JPG/PNG)";
             // 
             // btnChooseImage
             // 
             btnChooseImage.Font = new Font("Segoe UI", 9F);
-            btnChooseImage.Location = new Point(500, 575);
+            btnChooseImage.Location = new Point(500, 601);
             btnChooseImage.Name = "btnChooseImage";
             btnChooseImage.Size = new Size(384, 42);
             btnChooseImage.TabIndex = 3;
@@ -296,7 +278,7 @@ namespace AssemblyLineTester.Views.Modals
             // 
             lstImages.Font = new Font("Segoe UI", 8.5F);
             lstImages.IntegralHeight = false;
-            lstImages.Location = new Point(500, 625);
+            lstImages.Location = new Point(500, 649);
             lstImages.Name = "lstImages";
             lstImages.Size = new Size(384, 195);
             lstImages.TabIndex = 2;
@@ -305,7 +287,7 @@ namespace AssemblyLineTester.Views.Modals
             // 
             btnRemoveImage.Font = new Font("Segoe UI", 8.5F);
             btnRemoveImage.ForeColor = Color.FromArgb(239, 68, 68);
-            btnRemoveImage.Location = new Point(500, 828);
+            btnRemoveImage.Location = new Point(500, 850);
             btnRemoveImage.Name = "btnRemoveImage";
             btnRemoveImage.Size = new Size(384, 38);
             btnRemoveImage.TabIndex = 6;
@@ -435,6 +417,5 @@ namespace AssemblyLineTester.Views.Modals
         private System.Windows.Forms.Panel pnlCustomHeader;
         private FontAwesome.Sharp.IconPictureBox iconLogo;
         private System.Windows.Forms.Label lblCustomTitle;
-        private FontAwesome.Sharp.IconButton btnClose;
     }
 }

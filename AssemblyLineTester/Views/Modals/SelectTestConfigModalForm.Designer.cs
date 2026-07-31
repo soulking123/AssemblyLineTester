@@ -20,200 +20,195 @@ namespace AssemblyLineTester.Views.Modals
 
         private void InitializeComponent()
         {
-            this.pnlCustomHeader = new System.Windows.Forms.Panel();
-            this.lblCustomTitle = new System.Windows.Forms.Label();
-            this.iconLogo = new FontAwesome.Sharp.IconPictureBox();
-            this.btnClose = new FontAwesome.Sharp.IconButton();
-            this.pnlHeader = new System.Windows.Forms.Panel();
-            this.lblSubtitle = new System.Windows.Forms.Label();
-            this.lblTitle = new System.Windows.Forms.Label();
-            this.gridConfigs = new System.Windows.Forms.DataGridView();
-            this.pnlFooter = new System.Windows.Forms.Panel();
-            this.btnCancel = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.btnSelect = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.pnlCustomHeader.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.iconLogo)).BeginInit();
-            this.pnlHeader.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridConfigs)).BeginInit();
-            this.pnlFooter.SuspendLayout();
-            this.SuspendLayout();
+            pnlCustomHeader = new Panel();
+            lblCustomTitle = new Label();
+            iconLogo = new FontAwesome.Sharp.IconPictureBox();
+            pnlHeader = new Panel();
+            lblSubtitle = new Label();
+            lblTitle = new Label();
+            gridConfigs = new DataGridView();
+            pnlFooter = new Panel();
+            btnCancel = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnSelect = new AssemblyLineTester.Views.Controls.RoundedButton();
+            pnlCustomHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)iconLogo).BeginInit();
+            pnlHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)gridConfigs).BeginInit();
+            pnlFooter.SuspendLayout();
+            SuspendLayout();
             // 
             // pnlCustomHeader
             // 
-            this.pnlCustomHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(40)))), ((int)(((byte)(49)))));
-            this.pnlCustomHeader.Controls.Add(this.lblCustomTitle);
-            this.pnlCustomHeader.Controls.Add(this.iconLogo);
-            this.pnlCustomHeader.Controls.Add(this.btnClose);
-            this.pnlCustomHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlCustomHeader.Location = new System.Drawing.Point(0, 0);
-            this.pnlCustomHeader.Name = "pnlCustomHeader";
-            this.pnlCustomHeader.Size = new System.Drawing.Size(650, 50);
-            this.pnlCustomHeader.TabIndex = 0;
+            pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
+            pnlCustomHeader.Controls.Add(lblCustomTitle);
+            pnlCustomHeader.Controls.Add(iconLogo);
+            pnlCustomHeader.Dock = DockStyle.Top;
+            pnlCustomHeader.Location = new Point(0, 0);
+            pnlCustomHeader.Margin = new Padding(6);
+            pnlCustomHeader.Name = "pnlCustomHeader";
+            pnlCustomHeader.Size = new Size(1207, 107);
+            pnlCustomHeader.TabIndex = 0;
             // 
             // lblCustomTitle
             // 
-            this.lblCustomTitle.AutoSize = true;
-            this.lblCustomTitle.Font = new System.Drawing.Font("Segoe UI", 11.5F, System.Drawing.FontStyle.Bold);
-            this.lblCustomTitle.ForeColor = System.Drawing.Color.White;
-            this.lblCustomTitle.Location = new System.Drawing.Point(55, 14);
-            this.lblCustomTitle.Name = "lblCustomTitle";
-            this.lblCustomTitle.Size = new System.Drawing.Size(200, 21);
-            this.lblCustomTitle.TabIndex = 1;
-            this.lblCustomTitle.Text = "SELECT TEST PROGRAM";
+            lblCustomTitle.AutoSize = true;
+            lblCustomTitle.Font = new Font("Segoe UI", 11.5F, FontStyle.Bold);
+            lblCustomTitle.ForeColor = Color.White;
+            lblCustomTitle.Location = new Point(102, 30);
+            lblCustomTitle.Margin = new Padding(6, 0, 6, 0);
+            lblCustomTitle.Name = "lblCustomTitle";
+            lblCustomTitle.Size = new Size(367, 42);
+            lblCustomTitle.TabIndex = 1;
+            lblCustomTitle.Text = "SELECT TEST PROGRAM";
             // 
             // iconLogo
             // 
-            this.iconLogo.BackColor = System.Drawing.Color.Transparent;
-            this.iconLogo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(204)))), ((int)(((byte)(21)))));
-            this.iconLogo.IconChar = FontAwesome.Sharp.IconChar.Tasks;
-            this.iconLogo.IconColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(204)))), ((int)(((byte)(21)))));
-            this.iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.iconLogo.IconSize = 32;
-            this.iconLogo.Location = new System.Drawing.Point(15, 9);
-            this.iconLogo.Name = "iconLogo";
-            this.iconLogo.Size = new System.Drawing.Size(32, 32);
-            this.iconLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.iconLogo.TabIndex = 0;
-            this.iconLogo.TabStop = false;
-            // 
-            // btnClose
-            // 
-            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClose.BackColor = System.Drawing.Color.Transparent;
-            this.btnClose.FlatAppearance.BorderSize = 0;
-            this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnClose.IconChar = FontAwesome.Sharp.IconChar.Times;
-            this.btnClose.IconColor = System.Drawing.Color.FromArgb(((int)(((byte)(203)))), ((int)(((byte)(213)))), ((int)(((byte)(225)))));
-            this.btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.btnClose.IconSize = 20;
-            this.btnClose.Location = new System.Drawing.Point(600, 5);
-            this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(40, 40);
-            this.btnClose.TabIndex = 2;
-            this.btnClose.UseVisualStyleBackColor = false;
+            iconLogo.BackColor = Color.Transparent;
+            iconLogo.ForeColor = Color.FromArgb(250, 204, 21);
+            iconLogo.IconChar = FontAwesome.Sharp.IconChar.Tasks;
+            iconLogo.IconColor = Color.FromArgb(250, 204, 21);
+            iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            iconLogo.IconSize = 59;
+            iconLogo.Location = new Point(28, 19);
+            iconLogo.Margin = new Padding(6);
+            iconLogo.Name = "iconLogo";
+            iconLogo.Size = new Size(59, 68);
+            iconLogo.SizeMode = PictureBoxSizeMode.CenterImage;
+            iconLogo.TabIndex = 0;
+            iconLogo.TabStop = false;
             // 
             // pnlHeader
             // 
-            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-            this.pnlHeader.Controls.Add(this.lblSubtitle);
-            this.pnlHeader.Controls.Add(this.lblTitle);
-            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlHeader.Location = new System.Drawing.Point(0, 50);
-            this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(650, 70);
-            this.pnlHeader.TabIndex = 1;
+            pnlHeader.BackColor = Color.FromArgb(241, 245, 249);
+            pnlHeader.Controls.Add(lblSubtitle);
+            pnlHeader.Controls.Add(lblTitle);
+            pnlHeader.Dock = DockStyle.Top;
+            pnlHeader.Location = new Point(0, 107);
+            pnlHeader.Margin = new Padding(6);
+            pnlHeader.Name = "pnlHeader";
+            pnlHeader.Size = new Size(1207, 149);
+            pnlHeader.TabIndex = 1;
             // 
             // lblSubtitle
             // 
-            this.lblSubtitle.AutoSize = true;
-            this.lblSubtitle.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblSubtitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(148)))), ((int)(((byte)(163)))), ((int)(((byte)(184)))));
-            this.lblSubtitle.Location = new System.Drawing.Point(20, 42);
-            this.lblSubtitle.Name = "lblSubtitle";
-            this.lblSubtitle.Size = new System.Drawing.Size(326, 15);
-            this.lblSubtitle.TabIndex = 1;
-            this.lblSubtitle.Text = "Choose an active harness wiring program to load on the tester.";
+            lblSubtitle.AutoSize = true;
+            lblSubtitle.Font = new Font("Segoe UI", 9F);
+            lblSubtitle.ForeColor = Color.FromArgb(148, 163, 184);
+            lblSubtitle.Location = new Point(37, 90);
+            lblSubtitle.Margin = new Padding(6, 0, 6, 0);
+            lblSubtitle.Name = "lblSubtitle";
+            lblSubtitle.Size = new Size(685, 32);
+            lblSubtitle.TabIndex = 1;
+            lblSubtitle.Text = "Choose an active harness wiring program to load on the tester.";
             // 
             // lblTitle
             // 
-            this.lblTitle.AutoSize = true;
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-            this.lblTitle.ForeColor = System.Drawing.Color.White;
-            this.lblTitle.Location = new System.Drawing.Point(18, 15);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(176, 25);
-            this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "Harness Programs";
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.DimGray;
+            lblTitle.Location = new Point(33, 32);
+            lblTitle.Margin = new Padding(6, 0, 6, 0);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(346, 51);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "Harness Programs";
             // 
             // gridConfigs
             // 
-            this.gridConfigs.AllowUserToAddRows = false;
-            this.gridConfigs.AllowUserToDeleteRows = false;
-            this.gridConfigs.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.gridConfigs.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.gridConfigs.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.gridConfigs.ColumnHeadersHeight = 35;
-            this.gridConfigs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            this.gridConfigs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridConfigs.Location = new System.Drawing.Point(0, 120);
-            this.gridConfigs.Name = "gridConfigs";
-            this.gridConfigs.ReadOnly = true;
-            this.gridConfigs.RowHeadersVisible = false;
-            this.gridConfigs.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gridConfigs.Size = new System.Drawing.Size(650, 310);
-            this.gridConfigs.TabIndex = 2;
+            gridConfigs.AllowUserToAddRows = false;
+            gridConfigs.AllowUserToDeleteRows = false;
+            gridConfigs.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            gridConfigs.BackgroundColor = Color.White;
+            gridConfigs.BorderStyle = BorderStyle.None;
+            gridConfigs.ColumnHeadersHeight = 35;
+            gridConfigs.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            gridConfigs.Dock = DockStyle.Fill;
+            gridConfigs.Location = new Point(0, 256);
+            gridConfigs.Margin = new Padding(6);
+            gridConfigs.Name = "gridConfigs";
+            gridConfigs.ReadOnly = true;
+            gridConfigs.RowHeadersVisible = false;
+            gridConfigs.RowHeadersWidth = 82;
+            gridConfigs.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            gridConfigs.Size = new Size(1207, 662);
+            gridConfigs.TabIndex = 2;
             // 
             // pnlFooter
             // 
-            this.pnlFooter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-            this.pnlFooter.Controls.Add(this.btnCancel);
-            this.pnlFooter.Controls.Add(this.btnSelect);
-            this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlFooter.Location = new System.Drawing.Point(0, 430);
-            this.pnlFooter.Name = "pnlFooter";
-            this.pnlFooter.Size = new System.Drawing.Size(650, 70);
-            this.pnlFooter.TabIndex = 3;
+            pnlFooter.BackColor = Color.FromArgb(34, 40, 49);
+            pnlFooter.Controls.Add(btnCancel);
+            pnlFooter.Controls.Add(btnSelect);
+            pnlFooter.Dock = DockStyle.Bottom;
+            pnlFooter.Location = new Point(0, 918);
+            pnlFooter.Margin = new Padding(6);
+            pnlFooter.Name = "pnlFooter";
+            pnlFooter.Size = new Size(1207, 149);
+            pnlFooter.TabIndex = 3;
             // 
             // btnCancel
             // 
-            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-            this.btnCancel.BorderRadius = 16;
-            this.btnCancel.FlatAppearance.BorderSize = 0;
-            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnCancel.ForeColor = System.Drawing.Color.White;
-            this.btnCancel.HoverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-            this.btnCancel.Location = new System.Drawing.Point(392, 15);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.NormalBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-            this.btnCancel.PressedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.btnCancel.Size = new System.Drawing.Size(110, 40);
-            this.btnCancel.TabIndex = 1;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = false;
+            btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnCancel.BackColor = Color.FromArgb(241, 245, 249);
+            btnCancel.BorderRadius = 16;
+            btnCancel.FlatAppearance.BorderSize = 0;
+            btnCancel.FlatStyle = FlatStyle.Flat;
+            btnCancel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnCancel.ForeColor = Color.Black;
+            btnCancel.HoverBackColor = Color.FromArgb(226, 232, 240);
+            btnCancel.HoverForeColor = Color.Empty;
+            btnCancel.Location = new Point(728, 32);
+            btnCancel.Margin = new Padding(6);
+            btnCancel.Name = "btnCancel";
+            btnCancel.NormalBackColor = Color.FromArgb(241, 245, 249);
+            btnCancel.PressedBackColor = Color.FromArgb(203, 213, 225);
+            btnCancel.PressedForeColor = Color.Empty;
+            btnCancel.Size = new Size(204, 85);
+            btnCancel.TabIndex = 1;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = false;
             // 
             // btnSelect
             // 
-            this.btnSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSelect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(204)))), ((int)(((byte)(21)))));
-            this.btnSelect.BorderRadius = 16;
-            this.btnSelect.FlatAppearance.BorderSize = 0;
-            this.btnSelect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSelect.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnSelect.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-            this.btnSelect.HoverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(216)))), ((int)(((byte)(53)))));
-            this.btnSelect.Location = new System.Drawing.Point(518, 15);
-            this.btnSelect.Name = "btnSelect";
-            this.btnSelect.NormalBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(204)))), ((int)(((byte)(21)))));
-            this.btnSelect.PressedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(186)))), ((int)(((byte)(10)))));
-            this.btnSelect.Size = new System.Drawing.Size(110, 40);
-            this.btnSelect.TabIndex = 0;
-            this.btnSelect.Text = "Select Program";
-            this.btnSelect.UseVisualStyleBackColor = false;
+            btnSelect.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnSelect.BackColor = Color.FromArgb(250, 204, 21);
+            btnSelect.BorderRadius = 16;
+            btnSelect.FlatAppearance.BorderSize = 0;
+            btnSelect.FlatStyle = FlatStyle.Flat;
+            btnSelect.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnSelect.ForeColor = Color.FromArgb(30, 41, 59);
+            btnSelect.HoverForeColor = Color.Empty;
+            btnSelect.Location = new Point(944, 32);
+            btnSelect.Margin = new Padding(6);
+            btnSelect.Name = "btnSelect";
+            btnSelect.PressedForeColor = Color.Empty;
+            btnSelect.Size = new Size(222, 85);
+            btnSelect.TabIndex = 0;
+            btnSelect.Text = "Select Program";
+            btnSelect.UseVisualStyleBackColor = false;
             // 
             // SelectTestConfigModalForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.ClientSize = new System.Drawing.Size(650, 500);
-            this.Controls.Add(this.gridConfigs);
-            this.Controls.Add(this.pnlHeader);
-            this.Controls.Add(this.pnlCustomHeader);
-            this.Controls.Add(this.pnlFooter);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "SelectTestConfigModalForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Select Test Program";
-            this.pnlCustomHeader.ResumeLayout(false);
-            this.pnlCustomHeader.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.iconLogo)).EndInit();
-            this.pnlHeader.ResumeLayout(false);
-            this.pnlHeader.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridConfigs)).EndInit();
-            this.pnlFooter.ResumeLayout(false);
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(15, 23, 42);
+            ClientSize = new Size(1207, 1067);
+            Controls.Add(gridConfigs);
+            Controls.Add(pnlHeader);
+            Controls.Add(pnlCustomHeader);
+            Controls.Add(pnlFooter);
+            FormBorderStyle = FormBorderStyle.None;
+            Margin = new Padding(6);
+            Name = "SelectTestConfigModalForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Select Test Program";
+            pnlCustomHeader.ResumeLayout(false);
+            pnlCustomHeader.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)iconLogo).EndInit();
+            pnlHeader.ResumeLayout(false);
+            pnlHeader.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)gridConfigs).EndInit();
+            pnlFooter.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion
@@ -221,7 +216,6 @@ namespace AssemblyLineTester.Views.Modals
         private System.Windows.Forms.Panel pnlCustomHeader;
         private System.Windows.Forms.Label lblCustomTitle;
         private FontAwesome.Sharp.IconPictureBox iconLogo;
-        private FontAwesome.Sharp.IconButton btnClose;
         private System.Windows.Forms.Panel pnlHeader;
         private System.Windows.Forms.Label lblSubtitle;
         private System.Windows.Forms.Label lblTitle;
