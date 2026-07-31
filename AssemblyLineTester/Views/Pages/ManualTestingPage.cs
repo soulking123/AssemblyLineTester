@@ -308,12 +308,12 @@ namespace AssemblyLineTester.Views.Pages
             
             try
             {
-                bool isConnected = _instrument.Connect();
-                if (!isConnected)
-                {
-                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                //bool isConnected = _instrument.Connect();
+                //if (!isConnected)
+                //{
+                //    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //    return;
+                //}
 
                 Debug.WriteLine("debuggin2");
                 var learnResult = await Task.Run(() => _instrument.LearnConnection(), token);
@@ -321,7 +321,28 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                 {
-                    MessageBox.Show(this, $"Failed to execute learn operation on instrument. Error: {learnResult}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    string errorMessage = "No Error";
+                    
+                    // Fast loop: check 4 times, wait 300ms each, to beat the race condition 
+                    // but not so long that the buffer clears itself!
+                    for (int i = 0; i < 4; i++)
+                    {
+                        await Task.Delay(300, token);
+                        var lastErrorObj = _instrument.GetLastError();
+                        errorMessage = lastErrorObj?.Result;
+
+                        if (!string.IsNullOrWhiteSpace(errorMessage) && errorMessage != "No Error")
+                            break; // Caught it!
+                    }
+
+                    // Fallback: If the API completely refuses to give the error, force a generic message
+                    if (string.IsNullOrWhiteSpace(errorMessage) || errorMessage == "No Error")
+                    {
+                        errorMessage = "Hardware Learn Aborted. Please check the physical instrument display for details (e.g., resistance too high).";
+                    }
+
+                    Debug.WriteLine(errorMessage);
+                    MessageBox.Show(this, $"Failed to execute learn operation on instrument.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 

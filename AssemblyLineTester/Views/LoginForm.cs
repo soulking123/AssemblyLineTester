@@ -2,38 +2,49 @@
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views.Modals;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using static AssemblyLineTester.Models.SystemLog;
+<<<<<<< HEAD
 using AssemblyLineTester.Helpers;
+=======
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+>>>>>>> main
 
 namespace AssemblyLineTester.Views
 {
     public partial class LoginForm : Form
     {
         private readonly InstrumentService _instrument = new();
+        private readonly SystemLogService logService = new ();
+
         public LoginForm()
         {
-            try
+            var processes = System.Diagnostics.Process.GetProcessesByName("easywire");
+            foreach (var process in processes)
             {
-                var processes = System.Diagnostics.Process.GetProcessesByName("easywire");
-                foreach (var process in processes)
+                try
                 {
                     process.Kill();
                     process.WaitForExit(3000);
+                    logService.Log(LogSeverity.Info, "Instrument", "Cirris Tester API Terminated",
+                        $"Cirris Tester API Already Running, terminating Cirris Tester API / Easy Wire for App Initialization ", "-");
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error terminate easywire process: {ex.Message}");
+                catch (Exception ex)
+                {
+                    logService.Log(LogSeverity.Info, "Instrument", "Failed Terminating Cirris Tester API",
+                        $"Failed to terminate running Cirris Tester API with error message : {ex.Message}\n Please Terminate Cirris Tester API / Easy Wire manually", "-");
+                }     
             }
 
-            _instrument.Connect();
+            _instrument.Connect(); //run the first Connect, it will initiate Cirris Tester API, but will return faise (first initialization)
+            
+
             InitializeComponent();
 
             try
@@ -212,6 +223,17 @@ namespace AssemblyLineTester.Views
 
         private void BtnLogin_Click(object? sender, EventArgs e)
         {
+            if (_instrument.Connect())
+            {
+                logService.Log(LogSeverity.Info, "Instrument", "Cirris Tester API Connected",
+                    $"Cirris Tester API Connected Successfully", "-");
+            }
+            else
+            {
+                logService.Log(LogSeverity.Error, "Instrument", "Cirris Tester API Connection Failed",
+                    $"Failed to connect to Cirris Tester API, Check whether Cirris Tester API / Easy Wire is installed", "-");
+            }
+
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text;
 
@@ -230,7 +252,7 @@ namespace AssemblyLineTester.Views
                         .Include(u => u.Status)
                         .FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
 
-                    var logService = new SystemLogService();
+                    
 
                     if (user == null)
                     {
