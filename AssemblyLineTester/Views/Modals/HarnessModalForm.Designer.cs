@@ -21,7 +21,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader = new Panel();
             lblCustomTitle = new Label();
             iconLogo = new FontAwesome.Sharp.IconPictureBox();
-            btnClose = new FontAwesome.Sharp.IconButton();
             pnlHeader = new Panel();
             lblSubtitle = new Label();
             lblTitle = new Label();
@@ -56,11 +55,11 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
             pnlCustomHeader.Controls.Add(lblCustomTitle);
             pnlCustomHeader.Controls.Add(iconLogo);
-            pnlCustomHeader.Controls.Add(btnClose);
             pnlCustomHeader.Dock = DockStyle.Top;
             pnlCustomHeader.Location = new Point(0, 0);
+            pnlCustomHeader.Margin = new Padding(5, 5, 5, 5);
             pnlCustomHeader.Name = "pnlCustomHeader";
-            pnlCustomHeader.Size = new Size(942, 80);
+            pnlCustomHeader.Size = new Size(1531, 128);
             pnlCustomHeader.TabIndex = 0;
             // 
             // lblCustomTitle
@@ -68,9 +67,11 @@ namespace AssemblyLineTester.Views.Modals
             lblCustomTitle.AutoSize = true;
             lblCustomTitle.Font = new Font("Segoe UI", 11.5F, FontStyle.Bold);
             lblCustomTitle.ForeColor = Color.White;
-            lblCustomTitle.Location = new Point(89, 22);
+            lblCustomTitle.Location = new Point(145, 35);
+            lblCustomTitle.Margin = new Padding(5, 0, 5, 0);
             lblCustomTitle.Name = "lblCustomTitle";
-            lblCustomTitle.Size = new Size(220, 25);
+            lblCustomTitle.Size = new Size(318, 42);
+            lblCustomTitle.TabIndex = 0;
             lblCustomTitle.Text = "ADD/EDIT HARNESS";
             // 
             // iconLogo
@@ -80,28 +81,13 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.IconChar = FontAwesome.Sharp.IconChar.DiagramProject;
             iconLogo.IconColor = Color.FromArgb(250, 204, 21);
             iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconLogo.IconSize = 45;
-            iconLogo.Location = new Point(24, 18);
+            iconLogo.IconSize = 72;
+            iconLogo.Location = new Point(39, 29);
+            iconLogo.Margin = new Padding(5, 5, 5, 5);
             iconLogo.Name = "iconLogo";
-            iconLogo.Size = new Size(48, 45);
+            iconLogo.Size = new Size(78, 72);
             iconLogo.TabIndex = 1;
             iconLogo.TabStop = false;
-            // 
-            // btnClose
-            // 
-            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnClose.BackColor = Color.Transparent;
-            btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.FlatStyle = FlatStyle.Flat;
-            btnClose.IconChar = FontAwesome.Sharp.IconChar.Close;
-            btnClose.IconColor = Color.FromArgb(203, 213, 225);
-            btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnClose.IconSize = 24;
-            btnClose.Location = new Point(861, 0);
-            btnClose.Name = "btnClose";
-            btnClose.Size = new Size(81, 80);
-            btnClose.TabIndex = 2;
-            btnClose.UseVisualStyleBackColor = false;
             // 
             // pnlHeader
             // 
@@ -109,9 +95,10 @@ namespace AssemblyLineTester.Views.Modals
             pnlHeader.Controls.Add(lblSubtitle);
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Dock = DockStyle.Top;
-            pnlHeader.Location = new Point(0, 80);
+            pnlHeader.Location = new Point(0, 128);
+            pnlHeader.Margin = new Padding(5, 5, 5, 5);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(942, 110);
+            pnlHeader.Size = new Size(1531, 176);
             pnlHeader.TabIndex = 1;
             // 
             // lblSubtitle
@@ -119,9 +106,11 @@ namespace AssemblyLineTester.Views.Modals
             lblSubtitle.AutoSize = true;
             lblSubtitle.Font = new Font("Segoe UI", 9.5F);
             lblSubtitle.ForeColor = Color.FromArgb(100, 116, 139);
-            lblSubtitle.Location = new Point(52, 65);
+            lblSubtitle.Location = new Point(84, 104);
+            lblSubtitle.Margin = new Padding(5, 0, 5, 0);
             lblSubtitle.Name = "lblSubtitle";
-            lblSubtitle.Size = new Size(310, 21);
+            lblSubtitle.Size = new Size(513, 36);
+            lblSubtitle.TabIndex = 0;
             lblSubtitle.Text = "Fill in product harness configuration details.";
             // 
             // lblTitle
@@ -129,9 +118,11 @@ namespace AssemblyLineTester.Views.Modals
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblTitle.Location = new Point(49, 20);
+            lblTitle.Location = new Point(80, 32);
+            lblTitle.Margin = new Padding(5, 0, 5, 0);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(280, 35);
+            lblTitle.Size = new Size(444, 54);
+            lblTitle.TabIndex = 1;
             lblTitle.Text = "Harness Specifications";
             // 
             // lblName
@@ -139,17 +130,20 @@ namespace AssemblyLineTester.Views.Modals
             lblName.AutoSize = true;
             lblName.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblName.ForeColor = Color.FromArgb(51, 65, 85);
-            lblName.Location = new Point(57, 215);
+            lblName.Location = new Point(93, 344);
+            lblName.Margin = new Padding(5, 0, 5, 0);
             lblName.Name = "lblName";
-            lblName.Size = new Size(125, 21);
+            lblName.Size = new Size(210, 36);
+            lblName.TabIndex = 15;
             lblName.Text = "Harness Name *";
             // 
             // txtName
             // 
             txtName.Font = new Font("Segoe UI", 10.5F);
-            txtName.Location = new Point(57, 245);
+            txtName.Location = new Point(93, 392);
+            txtName.Margin = new Padding(5, 5, 5, 5);
             txtName.Name = "txtName";
-            txtName.Size = new Size(388, 31);
+            txtName.Size = new Size(628, 45);
             txtName.TabIndex = 2;
             // 
             // lblProductModel
@@ -157,17 +151,20 @@ namespace AssemblyLineTester.Views.Modals
             lblProductModel.AutoSize = true;
             lblProductModel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblProductModel.ForeColor = Color.FromArgb(51, 65, 85);
-            lblProductModel.Location = new Point(496, 215);
+            lblProductModel.Location = new Point(806, 344);
+            lblProductModel.Margin = new Padding(5, 0, 5, 0);
             lblProductModel.Name = "lblProductModel";
-            lblProductModel.Size = new Size(134, 21);
+            lblProductModel.Size = new Size(215, 36);
+            lblProductModel.TabIndex = 14;
             lblProductModel.Text = "Product Model *";
             // 
             // txtProductModel
             // 
             txtProductModel.Font = new Font("Segoe UI", 10.5F);
-            txtProductModel.Location = new Point(496, 245);
+            txtProductModel.Location = new Point(806, 392);
+            txtProductModel.Margin = new Padding(5, 5, 5, 5);
             txtProductModel.Name = "txtProductModel";
-            txtProductModel.Size = new Size(388, 31);
+            txtProductModel.Size = new Size(628, 45);
             txtProductModel.TabIndex = 3;
             // 
             // lblProductType
@@ -175,17 +172,20 @@ namespace AssemblyLineTester.Views.Modals
             lblProductType.AutoSize = true;
             lblProductType.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblProductType.ForeColor = Color.FromArgb(51, 65, 85);
-            lblProductType.Location = new Point(57, 305);
+            lblProductType.Location = new Point(93, 488);
+            lblProductType.Margin = new Padding(5, 0, 5, 0);
             lblProductType.Name = "lblProductType";
-            lblProductType.Size = new Size(110, 21);
+            lblProductType.Size = new Size(176, 36);
+            lblProductType.TabIndex = 13;
             lblProductType.Text = "Product Type";
             // 
             // txtProductType
             // 
             txtProductType.Font = new Font("Segoe UI", 10.5F);
-            txtProductType.Location = new Point(57, 335);
+            txtProductType.Location = new Point(93, 536);
+            txtProductType.Margin = new Padding(5, 5, 5, 5);
             txtProductType.Name = "txtProductType";
-            txtProductType.Size = new Size(388, 31);
+            txtProductType.Size = new Size(628, 45);
             txtProductType.TabIndex = 4;
             // 
             // lblArea
@@ -193,17 +193,20 @@ namespace AssemblyLineTester.Views.Modals
             lblArea.AutoSize = true;
             lblArea.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblArea.ForeColor = Color.FromArgb(51, 65, 85);
-            lblArea.Location = new Point(496, 305);
+            lblArea.Location = new Point(806, 488);
+            lblArea.Margin = new Padding(5, 0, 5, 0);
             lblArea.Name = "lblArea";
-            lblArea.Size = new Size(45, 21);
+            lblArea.Size = new Size(71, 36);
+            lblArea.TabIndex = 12;
             lblArea.Text = "Area";
             // 
             // txtArea
             // 
             txtArea.Font = new Font("Segoe UI", 10.5F);
-            txtArea.Location = new Point(496, 335);
+            txtArea.Location = new Point(806, 536);
+            txtArea.Margin = new Padding(5, 5, 5, 5);
             txtArea.Name = "txtArea";
-            txtArea.Size = new Size(388, 31);
+            txtArea.Size = new Size(628, 45);
             txtArea.TabIndex = 5;
             // 
             // lblConnectors
@@ -211,24 +214,25 @@ namespace AssemblyLineTester.Views.Modals
             lblConnectors.AutoSize = true;
             lblConnectors.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblConnectors.ForeColor = Color.FromArgb(51, 65, 85);
-            lblConnectors.Location = new Point(57, 395);
+            lblConnectors.Location = new Point(93, 632);
+            lblConnectors.Margin = new Padding(5, 0, 5, 0);
             lblConnectors.Name = "lblConnectors";
-            lblConnectors.Size = new Size(215, 21);
+            lblConnectors.Size = new Size(439, 36);
+            lblConnectors.TabIndex = 11;
             lblConnectors.Text = "Harness Connector(s) - click to add";
             // 
             // pnlConnectorPicker
             // 
-            // Single box that both displays picked connectors as chips AND acts as the click target
-            // that opens the multi-select checklist popup. Replaces the old ComboBox + separate list.
             pnlConnectorPicker.BackColor = Color.White;
             pnlConnectorPicker.BorderStyle = BorderStyle.FixedSingle;
             pnlConnectorPicker.Controls.Add(flpConnectorChips);
             pnlConnectorPicker.Controls.Add(lblConnectorArrow);
             pnlConnectorPicker.Cursor = Cursors.Hand;
-            pnlConnectorPicker.Location = new Point(57, 425);
-            pnlConnectorPicker.MinimumSize = new Size(388, 42);
+            pnlConnectorPicker.Location = new Point(93, 680);
+            pnlConnectorPicker.Margin = new Padding(5, 5, 5, 5);
+            pnlConnectorPicker.MinimumSize = new Size(629, 66);
             pnlConnectorPicker.Name = "pnlConnectorPicker";
-            pnlConnectorPicker.Size = new Size(388, 42);
+            pnlConnectorPicker.Size = new Size(629, 66);
             pnlConnectorPicker.TabIndex = 6;
             // 
             // flpConnectorChips
@@ -236,19 +240,23 @@ namespace AssemblyLineTester.Views.Modals
             flpConnectorChips.BackColor = Color.White;
             flpConnectorChips.Cursor = Cursors.Hand;
             flpConnectorChips.Dock = DockStyle.Fill;
-            flpConnectorChips.FlowDirection = FlowDirection.LeftToRight;
+            flpConnectorChips.Location = new Point(0, 0);
+            flpConnectorChips.Margin = new Padding(5, 5, 5, 5);
             flpConnectorChips.Name = "flpConnectorChips";
-            flpConnectorChips.Padding = new Padding(6, 6, 24, 6);
-            flpConnectorChips.WrapContents = true;
+            flpConnectorChips.Padding = new Padding(10, 10, 39, 10);
+            flpConnectorChips.Size = new Size(627, 64);
+            flpConnectorChips.TabIndex = 0;
             // 
             // lblConnectorArrow
             // 
             lblConnectorArrow.Cursor = Cursors.Hand;
             lblConnectorArrow.Font = new Font("Segoe UI", 8F);
             lblConnectorArrow.ForeColor = Color.FromArgb(100, 116, 139);
-            lblConnectorArrow.Location = new Point(362, 12);
+            lblConnectorArrow.Location = new Point(588, 19);
+            lblConnectorArrow.Margin = new Padding(5, 0, 5, 0);
             lblConnectorArrow.Name = "lblConnectorArrow";
-            lblConnectorArrow.Size = new Size(20, 20);
+            lblConnectorArrow.Size = new Size(32, 32);
+            lblConnectorArrow.TabIndex = 1;
             lblConnectorArrow.Text = "▼";
             lblConnectorArrow.TextAlign = ContentAlignment.MiddleCenter;
             // 
@@ -257,18 +265,21 @@ namespace AssemblyLineTester.Views.Modals
             lblImage.AutoSize = true;
             lblImage.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblImage.ForeColor = Color.FromArgb(51, 65, 85);
-            lblImage.Location = new Point(496, 395);
-            lblImage.MaximumSize = new Size(388, 0);
+            lblImage.Location = new Point(806, 632);
+            lblImage.Margin = new Padding(5, 0, 5, 0);
+            lblImage.MaximumSize = new Size(630, 0);
             lblImage.Name = "lblImage";
-            lblImage.Size = new Size(362, 21);
+            lblImage.Size = new Size(529, 72);
+            lblImage.TabIndex = 10;
             lblImage.Text = "Images (multiple allowed, max 2MB each, JPG/PNG)";
             // 
             // btnChooseImage
             // 
             btnChooseImage.Font = new Font("Segoe UI", 9F);
-            btnChooseImage.Location = new Point(496, 425);
+            btnChooseImage.Location = new Point(806, 709);
+            btnChooseImage.Margin = new Padding(5, 5, 5, 5);
             btnChooseImage.Name = "btnChooseImage";
-            btnChooseImage.Size = new Size(388, 42);
+            btnChooseImage.Size = new Size(630, 67);
             btnChooseImage.TabIndex = 7;
             btnChooseImage.Text = "Choose Images...";
             // 
@@ -276,18 +287,20 @@ namespace AssemblyLineTester.Views.Modals
             // 
             lstImages.Font = new Font("Segoe UI", 8.5F);
             lstImages.IntegralHeight = false;
-            lstImages.Location = new Point(496, 477);
+            lstImages.Location = new Point(806, 808);
+            lstImages.Margin = new Padding(5, 5, 5, 5);
             lstImages.Name = "lstImages";
-            lstImages.Size = new Size(388, 220);
+            lstImages.Size = new Size(628, 305);
             lstImages.TabIndex = 8;
             // 
             // btnRemoveImage
             // 
             btnRemoveImage.Font = new Font("Segoe UI", 8.5F);
             btnRemoveImage.ForeColor = Color.FromArgb(239, 68, 68);
-            btnRemoveImage.Location = new Point(496, 707);
+            btnRemoveImage.Location = new Point(806, 1131);
+            btnRemoveImage.Margin = new Padding(5, 5, 5, 5);
             btnRemoveImage.Name = "btnRemoveImage";
-            btnRemoveImage.Size = new Size(388, 38);
+            btnRemoveImage.Size = new Size(630, 61);
             btnRemoveImage.TabIndex = 9;
             btnRemoveImage.Text = "Remove Selected";
             // 
@@ -297,9 +310,10 @@ namespace AssemblyLineTester.Views.Modals
             pnlFooter.Controls.Add(btnCancel);
             pnlFooter.Controls.Add(btnSave);
             pnlFooter.Dock = DockStyle.Bottom;
-            pnlFooter.Location = new Point(0, 780);
+            pnlFooter.Location = new Point(0, 1248);
+            pnlFooter.Margin = new Padding(5, 5, 5, 5);
             pnlFooter.Name = "pnlFooter";
-            pnlFooter.Size = new Size(942, 100);
+            pnlFooter.Size = new Size(1531, 160);
             pnlFooter.TabIndex = 8;
             // 
             // btnCancel
@@ -311,9 +325,15 @@ namespace AssemblyLineTester.Views.Modals
             btnCancel.FlatStyle = FlatStyle.Flat;
             btnCancel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnCancel.ForeColor = Color.FromArgb(71, 85, 105);
-            btnCancel.Location = new Point(528, 22);
+            btnCancel.HoverBackColor = Color.FromArgb(226, 232, 240);
+            btnCancel.HoverForeColor = Color.Empty;
+            btnCancel.Location = new Point(858, 35);
+            btnCancel.Margin = new Padding(5, 5, 5, 5);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(171, 55);
+            btnCancel.NormalBackColor = Color.FromArgb(241, 245, 249);
+            btnCancel.PressedBackColor = Color.FromArgb(203, 213, 225);
+            btnCancel.PressedForeColor = Color.Empty;
+            btnCancel.Size = new Size(278, 88);
             btnCancel.TabIndex = 0;
             btnCancel.Text = "Cancel";
             btnCancel.UseVisualStyleBackColor = false;
@@ -326,9 +346,12 @@ namespace AssemblyLineTester.Views.Modals
             btnSave.FlatStyle = FlatStyle.Flat;
             btnSave.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnSave.ForeColor = Color.FromArgb(15, 23, 42);
-            btnSave.Location = new Point(715, 22);
+            btnSave.HoverForeColor = Color.Empty;
+            btnSave.Location = new Point(1162, 35);
+            btnSave.Margin = new Padding(5, 5, 5, 5);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(171, 55);
+            btnSave.PressedForeColor = Color.Empty;
+            btnSave.Size = new Size(278, 88);
             btnSave.TabIndex = 1;
             btnSave.Text = "Save";
             btnSave.UseVisualStyleBackColor = false;
@@ -336,11 +359,11 @@ namespace AssemblyLineTester.Views.Modals
             // HarnessModalForm
             // 
             AcceptButton = btnSave;
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(248, 250, 252);
             CancelButton = btnCancel;
-            ClientSize = new Size(942, 880);
+            ClientSize = new Size(1531, 1408);
             Controls.Add(pnlFooter);
             Controls.Add(btnRemoveImage);
             Controls.Add(lstImages);
@@ -360,6 +383,7 @@ namespace AssemblyLineTester.Views.Modals
             Controls.Add(pnlCustomHeader);
             Font = new Font("Segoe UI", 9F);
             FormBorderStyle = FormBorderStyle.None;
+            Margin = new Padding(5, 5, 5, 5);
             Name = "HarnessModalForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Harness Details";
@@ -377,7 +401,6 @@ namespace AssemblyLineTester.Views.Modals
         private Panel pnlCustomHeader;
         private Label lblCustomTitle;
         private FontAwesome.Sharp.IconPictureBox iconLogo;
-        private FontAwesome.Sharp.IconButton btnClose;
         private Panel pnlHeader;
         private Label lblTitle;
         private Label lblSubtitle;

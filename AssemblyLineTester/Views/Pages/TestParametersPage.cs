@@ -1190,6 +1190,22 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void btnLearnConnection_Click(object? sender, EventArgs e)
         {
+            // Show the Learn Connection Modal Options
+            using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
+            {
+                if (modal.ShowDialog(this) != DialogResult.OK)
+                {
+                    return; // User cancelled
+                }
+
+                // Store options in local variables as requested
+                bool learnWire = modal.IncludeWire;
+                bool learnResistor = modal.IncludeResistor;
+                bool learnCapacitor = modal.IncludeCapacitor;
+                bool learnDiode = modal.IncludeDiode;
+                bool learnTwistedPair = modal.IncludeTwistedPair;
+            }
+
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;

@@ -81,11 +81,7 @@ namespace AssemblyLineTester.Views.Modals
 
         private void SetupEvents()
         {
-            btnClose.Click += (s, e) => { DialogResult = DialogResult.Cancel; Close(); };
             btnCancel.Click += (s, e) => { DialogResult = DialogResult.Cancel; Close(); };
-
-            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
-            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
 
             pnlCustomHeader.MouseDown += TitleBar_MouseDown;
             lblHeaderTitle.MouseDown += TitleBar_MouseDown;
