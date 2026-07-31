@@ -1180,7 +1180,7 @@ namespace AssemblyLineTester.Views.Pages
             return set.OrderBy(idx => idx).ToList();
         }
 
-        private async void btnLearnConnection_Click(object sender, EventArgs e)
+        private async void btnLearnConnection_Click(object? sender, EventArgs e)
         {
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
@@ -1264,7 +1264,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private async void btnStartAll_Click(object sender, EventArgs e)
+        private async void btnStartAll_Click(object? sender, EventArgs e)
         {
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
@@ -1307,7 +1307,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private async void btnStartSelected_Click(object sender, EventArgs e)
+        private async void btnStartSelected_Click(object? sender, EventArgs e)
         {
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
@@ -1350,7 +1350,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
     
-                private async void btnAbort_Click(object sender, EventArgs e)
+                private async void btnAbort_Click(object? sender, EventArgs e)
         {
             // 1. Cancel software task execution loop
             _testCts?.Cancel();

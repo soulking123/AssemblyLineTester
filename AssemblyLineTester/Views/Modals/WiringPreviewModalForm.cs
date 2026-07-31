@@ -8,16 +8,19 @@ using System.Windows.Forms;
 using FontAwesome.Sharp;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Models;
+using AssemblyLineTester.Models.Dto;
 
 namespace AssemblyLineTester.Views.Modals
 {
     public partial class WiringPreviewModalForm : Form
     {
         private readonly HashSet<int> highlightedRows = [];
+        private readonly HashSet<int> errorRows = [];
         private readonly List<DiagramNode> leftNodes = [];
         private readonly List<DiagramNode> rightNodes = [];
         private readonly List<DiagramConnection> connections = [];
         private readonly List<WiringNetInfo> netDefinitions = [];
+        private readonly List<LiveTestDetailRowDto>? testResults;
 
         private class WiringNetInfo
         {
@@ -49,8 +52,9 @@ namespace AssemblyLineTester.Views.Modals
             public DiagramNode RightNode { get; set; } = null!;
         }
 
-        public WiringPreviewModalForm()
+        public WiringPreviewModalForm(List<LiveTestDetailRowDto>? results = null)
         {
+            testResults = results;
             InitializeComponent();
             SetupEvents();
             LoadActiveWiringData();
@@ -96,12 +100,8 @@ namespace AssemblyLineTester.Views.Modals
             picPreview.Resize += (s, e) => picPreview.Invalidate();
             pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
 
-            btnClose.Click += (s, e) => Close();
             btnCloseModal.Click += (s, e) => Close();
             btnMaximize.Click += (s, e) => ToggleMaximize();
-
-            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(239, 68, 68); btnClose.IconColor = Color.White; };
-            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
 
             btnMaximize.MouseEnter += (s, e) => { btnMaximize.BackColor = Color.FromArgb(30, 41, 59); btnMaximize.IconColor = Color.White; };
             btnMaximize.MouseLeave += (s, e) => { btnMaximize.BackColor = Color.Transparent; btnMaximize.IconColor = Color.FromArgb(203, 213, 225); };
@@ -189,6 +189,7 @@ namespace AssemblyLineTester.Views.Modals
         {
             netDefinitions.Clear();
             highlightedRows.Clear();
+            errorRows.Clear();
 
             var configService = new TestConfigService();
             var activeConfig = configService.GetActiveConfig();
@@ -212,6 +213,50 @@ namespace AssemblyLineTester.Views.Modals
             {
                 // Fallback to sample data if no active config
                 LoadDefaultWiringData();
+            }
+
+            int nextRowIndex = netDefinitions.Count > 0 ? netDefinitions.Max(n => n.RowIndex) + 1 : 0;
+            if (testResults != null)
+            {
+                foreach (var result in testResults)
+                {
+                    if (result.Status == LiveTestStatus.Fail)
+                    {
+                        var existingNet = netDefinitions.FirstOrDefault(n => 
+                            (n.FromAddr == result.FromPoint && n.ToAddr == result.ToPoint) || 
+                            (n.FromAddr == result.ToPoint && n.ToAddr == result.FromPoint));
+                        
+                        if (existingNet != null)
+                        {
+                            errorRows.Add(existingNet.RowIndex);
+                        }
+                        else
+                        {
+                            // Unexpected connection
+                            string ExtractNumber(string point)
+                            {
+                                if (string.IsNullOrEmpty(point)) return point;
+                                var parts = point.Split('-');
+                                if (parts.Length == 2 && int.TryParse(parts[1], out int num))
+                                {
+                                    return num.ToString();
+                                }
+                                return point;
+                            }
+
+                            var newNet = new WiringNetInfo
+                            {
+                                RowIndex = nextRowIndex++,
+                                FromLabel = string.IsNullOrEmpty(result.NetId) ? "Unexpected" : result.NetId,
+                                FromAddr = ExtractNumber(result.FromPoint ?? ""),
+                                ToLabel = string.IsNullOrEmpty(result.NetId) ? "Unexpected" : result.NetId,
+                                ToAddr = ExtractNumber(result.ToPoint ?? "")
+                            };
+                            netDefinitions.Add(newNet);
+                            errorRows.Add(newNet.RowIndex);
+                        }
+                    }
+                }
             }
 
             UpdateDiagramSize();
@@ -441,10 +486,9 @@ namespace AssemblyLineTester.Views.Modals
             using Pen darkPen = new(Color.FromArgb(15, 23, 42), 3f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
             foreach (var conn in connections)
             {
-                if (!highlightedRows.Contains(conn.RowIndex))
+                if (!highlightedRows.Contains(conn.RowIndex) && !errorRows.Contains(conn.RowIndex))
                 {
-                    Pen p = (conn.RowIndex % 2 == 0) ? normalPen : darkPen;
-                    g.DrawBezier(p, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
+                    g.DrawBezier(normalPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
                 }
             }
 
@@ -455,17 +499,35 @@ namespace AssemblyLineTester.Views.Modals
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                if (!highlightedRows.Contains(node.RowIndex))
+                if (!highlightedRows.Contains(node.RowIndex) && !errorRows.Contains(node.RowIndex))
                 {
-                    DrawNodeAndLabel(g, node, false, fontLabel, fontAddr, sfLabel, sfAddr);
+                    DrawNodeAndLabel(g, node, false, false, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
             }
 
             using Pen glowPen = new(Color.FromArgb(254, 240, 138), 11f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
             using Pen innerPen = new(Color.FromArgb(13, 110, 253), 3.5f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
+            using Pen errorGlowPen = new(Color.FromArgb(254, 226, 226), 11f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
+            using Pen errorInnerPen = new(Color.FromArgb(239, 68, 68), 3.5f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
+            using Pen errorHighlightGlowPen = new(Color.FromArgb(244, 114, 182), 11f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
+            using Pen errorHighlightInnerPen = new(Color.FromArgb(219, 39, 119), 3.5f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
+
             foreach (var conn in connections)
             {
-                if (highlightedRows.Contains(conn.RowIndex))
+                if (errorRows.Contains(conn.RowIndex))
+                {
+                    if (highlightedRows.Contains(conn.RowIndex))
+                    {
+                        g.DrawBezier(errorHighlightGlowPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
+                        g.DrawBezier(errorHighlightInnerPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
+                    }
+                    else
+                    {
+                        g.DrawBezier(errorGlowPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
+                        g.DrawBezier(errorInnerPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
+                    }
+                }
+                else if (highlightedRows.Contains(conn.RowIndex))
                 {
                     g.DrawBezier(glowPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
                     g.DrawBezier(innerPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
@@ -474,16 +536,34 @@ namespace AssemblyLineTester.Views.Modals
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                if (highlightedRows.Contains(node.RowIndex))
+                if (errorRows.Contains(node.RowIndex))
                 {
-                    DrawNodeAndLabel(g, node, true, fontLabel, fontAddr, sfLabel, sfAddr);
+                    DrawNodeAndLabel(g, node, highlightedRows.Contains(node.RowIndex), true, fontLabel, fontAddr, sfLabel, sfAddr);
+                }
+                else if (highlightedRows.Contains(node.RowIndex))
+                {
+                    DrawNodeAndLabel(g, node, true, false, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
             }
         }
 
-        private static void DrawNodeAndLabel(Graphics g, DiagramNode node, bool isHighlight, Font fontLabel, Font fontAddr, StringFormat sfLabel, StringFormat sfAddr)
+        private static void DrawNodeAndLabel(Graphics g, DiagramNode node, bool isHighlight, bool isError, Font fontLabel, Font fontAddr, StringFormat sfLabel, StringFormat sfAddr)
         {
-            if (isHighlight)
+            if (isError && isHighlight)
+            {
+                RectangleF haloRect = RectangleF.Inflate(node.NodeRect, 6f, 6f);
+                using SolidBrush haloFill = new(Color.FromArgb(251, 207, 232)); // Pink-200
+                using Pen haloBorder = new(Color.FromArgb(219, 39, 119), 3f); // Pink-600
+                DrawRoundedRectangle(g, haloFill, haloBorder, haloRect, 24f);
+            }
+            else if (isError)
+            {
+                RectangleF haloRect = RectangleF.Inflate(node.NodeRect, 6f, 6f);
+                using SolidBrush haloFill = new(Color.FromArgb(254, 226, 226));
+                using Pen haloBorder = new(Color.FromArgb(239, 68, 68), 3f);
+                DrawRoundedRectangle(g, haloFill, haloBorder, haloRect, 24f);
+            }
+            else if (isHighlight)
             {
                 RectangleF haloRect = RectangleF.Inflate(node.NodeRect, 6f, 6f);
                 using SolidBrush haloFill = new(Color.FromArgb(254, 240, 138));
@@ -491,11 +571,14 @@ namespace AssemblyLineTester.Views.Modals
                 DrawRoundedRectangle(g, haloFill, haloBorder, haloRect, 24f);
             }
 
-            using SolidBrush labelBg = new(isHighlight ? Color.FromArgb(254, 249, 195) : Color.FromArgb(226, 232, 240));
-            using Pen labelBorder = new(isHighlight ? Color.FromArgb(245, 158, 11) : Color.FromArgb(203, 213, 225), 1.5f);
-            using SolidBrush labelText = new(Color.FromArgb(30, 41, 59));
-            DrawRoundedRectangle(g, labelBg, labelBorder, node.LabelRect, 8f);
-            g.DrawString(node.Label, fontLabel, labelText, node.LabelRect, sfLabel);
+            if (!string.IsNullOrEmpty(node.Label) && node.Label != "NC" && node.Label != "Unexpected" && node.Label.Trim() != "")
+            {
+                using SolidBrush labelBg = new(isError ? Color.FromArgb(254, 242, 242) : (isHighlight ? Color.FromArgb(254, 249, 195) : Color.FromArgb(226, 232, 240)));
+                using Pen labelBorder = new(isError ? Color.FromArgb(239, 68, 68) : (isHighlight ? Color.FromArgb(245, 158, 11) : Color.FromArgb(203, 213, 225)), 1.5f);
+                using SolidBrush labelText = new(Color.FromArgb(30, 41, 59));
+                DrawRoundedRectangle(g, labelBg, labelBorder, node.LabelRect, 8f);
+                g.DrawString(node.Label, fontLabel, labelText, node.LabelRect, sfLabel);
+            }
 
             Color nodeColor = node.IsLeft ? Color.FromArgb(0, 180, 216) : Color.FromArgb(74, 222, 128);
             using SolidBrush nodeFill = new(nodeColor);

@@ -25,9 +25,9 @@ namespace AssemblyLineTester.Views.Pages
         private readonly HarnessService _harnessService = new();
         private readonly ConnectorService _connectorService = new();
 
-        private HarnessGeneralTab _tabGeneral;
-        private HarnessConnectorTab _tabConnector;
-        private HarnessWiringTab _tabWiring;
+        private HarnessGeneralTab _tabGeneral = null!;
+        private HarnessConnectorTab _tabConnector = null!;
+        private HarnessWiringTab _tabWiring = null!;
 
         public HarnessDatabase()
         {

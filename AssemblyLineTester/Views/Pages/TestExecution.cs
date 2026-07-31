@@ -14,6 +14,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using System.Text.RegularExpressions;
 using static AssemblyLineTester.Models.SystemLog;
 
 using Timer = System.Windows.Forms.Timer;
@@ -84,7 +85,7 @@ namespace AssemblyLineTester.Views.Pages
             _elapsedTimer.Interval = 1000;
             _elapsedTimer.Tick += ElapsedTimer_Tick;
         }
-        private void ElapsedTimer_Tick(object sender, EventArgs e)
+        private void ElapsedTimer_Tick(object? sender, EventArgs e)
         {
             // Update Elapsed Time display every 1 second (HH:mm:ss format)
             lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
@@ -302,7 +303,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (!isConnected)
                 {
                     logService.Log(LogSeverity.Error, "Instrument", "Cirris Tester API Is Disconnected",
-                        $"Failed to start test becauses Cirris Tester API is disconnected", SessionManager.CurrentUser.Username);
+                        $"Failed to start test becauses Cirris Tester API is disconnected", SessionManager.CurrentUser?.Username ?? "Unknown");
                     MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -323,21 +324,21 @@ namespace AssemblyLineTester.Views.Pages
                     if (putResult == CtaCommandResultCode.Success)
                     {
                         logService.Log(LogSeverity.Info, "Instrument", "Put Test Program Success.",
-                        $"Generated Program is valid", SessionManager.CurrentUser.Username);
+                        $"Generated Program is valid", SessionManager.CurrentUser?.Username ?? "Unknown");
                     }
                     else
                     {
                         errorText = _instrument.GetLastError()?.Result ?? "";
                         logService.Log(LogSeverity.Warning, "Instrument", "Put Test Program Failed.",
-                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                         MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     logService.Log(LogSeverity.Warning, "Instrument", "Convert Program Failed.",
-                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                     MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -351,13 +352,13 @@ namespace AssemblyLineTester.Views.Pages
                     if (testResult.DllCallResult == CtaCommandResultCode.Success)
                     {
                         logService.Log(LogSeverity.Info, "Instrument", "Run Test Program Success.",
-                        $"Success running Test Program with test result : {testResult.TestResultCode}", SessionManager.CurrentUser.Username);
+                        $"Success running Test Program with test result : {testResult.TestResultCode}", SessionManager.CurrentUser?.Username ?? "Unknown");
                     }
                     else
                     {
                         errorText = _instrument.GetLastError()?.Result ?? "";
                         logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Failed.",
-                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                         if (errorText != "ctaSingleTest Command Failed with Error: Command Aborted")
                         {
                             MessageBox.Show($"Failed running Test Program with error message {testResult.DllCallResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -366,10 +367,10 @@ namespace AssemblyLineTester.Views.Pages
                         return;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Failed.",
-                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                     MessageBox.Show($"Failed running Test Program with error message2 {testResult.DllCallResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -433,31 +434,72 @@ namespace AssemblyLineTester.Views.Pages
                         }
 
                         logService.Log(LogSeverity.Info, "Instrument", "Get Test Masurement Success.",
-                        $"Success getting test measurement with test result", SessionManager.CurrentUser.Username);
+                        $"Success getting test measurement with test result", SessionManager.CurrentUser?.Username ?? "Unknown");
                     }
                     else
                     {
                         errorText = _instrument.GetLastError()?.Result ?? "";
                         logService.Log(LogSeverity.Warning, "Instrument", "Get Test Masurement Failed.",
-                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                         MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     logService.Log(LogSeverity.Warning, "Instrument", "Get Test Masurement Failed.",
-                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                     MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
                 logService.Log(LogSeverity.Info, "Text Execution", "Start Test Success",
-                        $"Success execute Start Test", SessionManager.CurrentUser.Username);
+                        $"Success execute Start Test", SessionManager.CurrentUser?.Username ?? "Unknown");
+
+                try 
+                {
+                    var errorResult = _instrument.GetTestErrors().ObjectReturnValue;
+                    if (errorResult != null && errorResult.DllCallResult == CtaCommandResultCode.Success && errorResult.ErrorList != null)
+                    {
+                        var regex = new Regex(@"Net\s+(?<net>.+?):\s+(?<type>SHORT|OPEN)\s+(?<p1>\S+)\s+to\s+(?<p2>\S+)", RegexOptions.IgnoreCase);
+                        foreach (var error in errorResult.ErrorList)
+                        {
+                            var match = regex.Match(error.Message);
+                            if (match.Success)
+                            {
+                                string p1 = match.Groups["p1"].Value;
+                                string p2 = match.Groups["p2"].Value;
+                                
+                                bool exists = _loadedRows.Any(r => 
+                                    (r.FromPoint == p1 && r.ToPoint == p2) || 
+                                    (r.FromPoint == p2 && r.ToPoint == p1));
+                                
+                                if (!exists)
+                                {
+                                    _loadedRows.Add(new LiveTestDetailRowDto
+                                    {
+                                        StepNo = _loadedRows.Count > 0 ? _loadedRows.Max(r => r.StepNo) + 1 : 1,
+                                        NetId = match.Groups["net"].Value,
+                                        TestPoint = $"{p1} \u2192 {p2}",
+                                        FromPoint = p1,
+                                        ToPoint = p2,
+                                        TestType = match.Groups["type"].Value.ToUpper(),
+                                        MeasuredValue = null,
+                                        Status = LiveTestStatus.Fail
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Failed to parse test errors: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
                 logService.Log(LogSeverity.Error, "Text Execution", "Start Test Failed",
-                        $"Start Test Failed with error message {ex.Message}", SessionManager.CurrentUser.Username);
+                        $"Start Test Failed with error message {ex.Message}", SessionManager.CurrentUser?.Username ?? "Unknown");
                 MessageBox.Show($"Start Test Failed with error message {ex.Message}", "Start Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -513,13 +555,13 @@ namespace AssemblyLineTester.Views.Pages
                     }
 
                     logService.Log(LogSeverity.Info, "Instrument", "Get Test Errors Success.",
-                    $"Success getting Test Error", SessionManager.CurrentUser.Username);
+                    $"Success getting Test Error", SessionManager.CurrentUser?.Username ?? "Unknown");
                 }
                 else
                 {
                     errorText = _instrument.GetLastError()?.Result ?? "";
                     logService.Log(LogSeverity.Warning, "Instrument", "Get Test Errors Failed.",
-                    $"Failed getting Test Errors with error message {errorResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                    $"Failed getting Test Errors with error message {errorResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                     MessageBox.Show($"Failed getting Test Errors with error message {errorResult.DllCallResult.ToString()}, {errorText}", "Get Test Errors Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -528,7 +570,7 @@ namespace AssemblyLineTester.Views.Pages
             catch (Exception Ex)
             {
                 logService.Log(LogSeverity.Error, "Text Execution", "Display Test Execute Result Failed",
-                        $"Display Test Execute Result Failed with error message {Ex.Message}", SessionManager.CurrentUser.Username);
+                        $"Display Test Execute Result Failed with error message {Ex.Message}", SessionManager.CurrentUser?.Username ?? "Unknown");
                 MessageBox.Show($"Display Test Execute Result Failed with error message {Ex.Message}", "Display Test Execute Result Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -558,13 +600,13 @@ namespace AssemblyLineTester.Views.Pages
                     MessageBox.Show("Test operation successfully aborted.", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     logService.Log(LogSeverity.Info, "Text Execution", "Stop Test Program Success.",
-                    $"Success stop test Program with test result : {abortResult}", SessionManager.CurrentUser.Username);
+                    $"Success stop test Program with test result : {abortResult}", SessionManager.CurrentUser?.Username ?? "Unknown");
                 }
                 else
                 {
                     errorText = _instrument.GetLastError()?.Result ?? "";
                     logService.Log(LogSeverity.Error, "Text Execution", "Stop Test Failed",
-                    $"Stop Test Failed with error message {abortResult.ToString()}, {errorText}", SessionManager.CurrentUser.Username);
+                    $"Stop Test Failed with error message {abortResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                     MessageBox.Show($"Stop Test Failed with error message {abortResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -572,7 +614,7 @@ namespace AssemblyLineTester.Views.Pages
             catch (Exception ex)
             {
                 logService.Log(LogSeverity.Error, "Text Execution", "Stop Test Failed",
-                        $"Stop Test Failed with error message {ex.Message}", SessionManager.CurrentUser.Username);
+                        $"Stop Test Failed with error message {ex.Message}", SessionManager.CurrentUser?.Username ?? "Unknown");
                 MessageBox.Show($"Stop Test Failed with error message {ex.Message}", "Start Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
 
@@ -786,7 +828,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnViewWiringDiagram_Click(object? sender, EventArgs e)
         {
-            using var modal = new AssemblyLineTester.Views.Modals.WiringPreviewModalForm();
+            using var modal = new AssemblyLineTester.Views.Modals.WiringPreviewModalForm(_loadedRows);
             modal.ShowDialog(this);
         }
 

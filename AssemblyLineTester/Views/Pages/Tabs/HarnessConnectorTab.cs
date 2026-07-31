@@ -134,7 +134,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
         private void BtnAddConnector_Click(object? sender, EventArgs e)
         {
             if (!HasConnectorEditPermission()) return;
-            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService);
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService!);
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
