@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260812035120_RenameProductModelToProductModelName")]
-    partial class RenameProductModelToProductModelName
+    [Migration("20260802110954_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,6 +63,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double>("DefaultMaxWireResistance")
                         .HasColumnType("REAL");
 
+                    b.Property<double>("DefaultMinInulationResistance")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("DefaultResistorTolerance")
                         .HasColumnType("INTEGER");
 
@@ -71,9 +74,6 @@ namespace AssemblyLineTester.Migrations
 
                     b.Property<int>("DefaultTestTypeId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<double>("DefaultWireInstallationResistance")
-                        .HasColumnType("REAL");
 
                     b.Property<int>("TotalTestPointsAvailable")
                         .HasColumnType("INTEGER");
@@ -125,7 +125,7 @@ namespace AssemblyLineTester.Migrations
                             DisplayName = "Resistance",
                             IsChecked = true,
                             TestTypeId = 11,
-                            TestTypeValue = 1
+                            TestTypeValue = 0
                         },
                         new
                         {
@@ -133,7 +133,7 @@ namespace AssemblyLineTester.Migrations
                             DisplayName = "Capacitor",
                             IsChecked = true,
                             TestTypeId = 3,
-                            TestTypeValue = 2
+                            TestTypeValue = 0
                         },
                         new
                         {
@@ -141,7 +141,7 @@ namespace AssemblyLineTester.Migrations
                             DisplayName = "Diode",
                             IsChecked = true,
                             TestTypeId = 6,
-                            TestTypeValue = 4
+                            TestTypeValue = 0
                         },
                         new
                         {
@@ -149,7 +149,7 @@ namespace AssemblyLineTester.Migrations
                             DisplayName = "Twisted Pair",
                             IsChecked = true,
                             TestTypeId = 14,
-                            TestTypeValue = 8
+                            TestTypeValue = 0
                         });
                 });
 
@@ -1903,6 +1903,9 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TestTypeValue")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TestTypeName")
@@ -1915,91 +1918,106 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 1,
                             DisplayName = "4RESISTOR",
-                            TestTypeName = "4RESISTOR"
+                            TestTypeName = "4RESISTOR",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 2,
                             DisplayName = "4WIRE",
-                            TestTypeName = "4WIRE"
+                            TestTypeName = "4WIRE",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 3,
                             DisplayName = "CAPACITOR",
-                            TestTypeName = "CAPACITOR"
+                            TestTypeName = "CAPACITOR",
+                            TestTypeValue = 2
                         },
                         new
                         {
                             Id = 4,
                             DisplayName = "CLOSE",
-                            TestTypeName = "CLOSE"
+                            TestTypeName = "CLOSE",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 5,
                             DisplayName = "COMMENT",
-                            TestTypeName = "COMMENT"
+                            TestTypeName = "COMMENT",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 6,
                             DisplayName = "DIODE",
-                            TestTypeName = "DIODE"
+                            TestTypeName = "DIODE",
+                            TestTypeValue = 4
                         },
                         new
                         {
                             Id = 7,
                             DisplayName = "LINK",
-                            TestTypeName = "LINK"
+                            TestTypeName = "LINK",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 8,
                             DisplayName = "LUA COMPONENT",
-                            TestTypeName = "LUA COMPONENT"
+                            TestTypeName = "LUA COMPONENT",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 9,
                             DisplayName = "OPEN",
-                            TestTypeName = "OPEN"
+                            TestTypeName = "OPEN",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 10,
                             DisplayName = "PROBE",
-                            TestTypeName = "PROBE"
+                            TestTypeName = "PROBE",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 11,
                             DisplayName = "RESISTOR",
-                            TestTypeName = "RESISTOR"
+                            TestTypeName = "RESISTOR",
+                            TestTypeValue = 1
                         },
                         new
                         {
                             Id = 12,
                             DisplayName = "SIGNATURE DIODE",
-                            TestTypeName = "SIGNATURE DIODE"
+                            TestTypeName = "SIGNATURE DIODE",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 13,
                             DisplayName = "SIGNATURE WIRE",
-                            TestTypeName = "SIGNATURE WIRE"
+                            TestTypeName = "SIGNATURE WIRE",
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 14,
                             DisplayName = "TWISTED PAIR",
-                            TestTypeName = "TWISTED PAIR"
+                            TestTypeName = "TWISTED PAIR",
+                            TestTypeValue = 8
                         },
                         new
                         {
                             Id = 15,
                             DisplayName = "WIRE",
-                            TestTypeName = "WIRE"
+                            TestTypeName = "WIRE",
+                            TestTypeValue = 0
                         });
                 });
 

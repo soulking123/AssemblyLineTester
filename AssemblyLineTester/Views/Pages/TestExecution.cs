@@ -40,6 +40,7 @@ namespace AssemblyLineTester.Views.Pages
         private DateTime _startTime;
         private DateTime _endTime;
         private readonly SystemLogService logService = new();
+        private TestConfiguration config = new();
 
         public TestExecution()
         {
@@ -179,6 +180,18 @@ namespace AssemblyLineTester.Views.Pages
                     configService.SetActiveConfig(dlg.SelectedConfiguration.ConfigName);
                     _customTestText = configService.ConvertToProgramText(dlg.SelectedConfiguration);
                     var resNet = dlg.SelectedConfiguration.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
+                    config = configService.GetConfigurationByName(dlg.SelectedConfiguration.ConfigName);
+                    Debug.WriteLine("==========================================================");
+                    Debug.WriteLine(config?.ConfigName ?? "null");
+                    if (config?.TestTypes != null)
+                    {
+                        foreach (var tt in config.TestTypes)
+                        {
+                            Debug.WriteLine(tt.TestTypeName);
+                            Debug.WriteLine(tt.TestTypeValue);
+                        }
+                    }
+
                     if (resNet != null && resNet.UpperLimit.HasValue)
                     {
                         _continuityResistance = resNet.UpperLimit.Value;

@@ -907,11 +907,11 @@ namespace AssemblyLineTester.Views.Pages
         // Returns false when the configuration was rejected or the operator backed out.
         private bool TrySaveConfigToDatabase()
         {
-            var selectedConnections = GetSelectedConnectionsFromGrid();
-            Debug.WriteLine("=== Selected Learn Connections from Grid ===");
-            foreach (var conn in selectedConnections)
+            var selectedTestTypes = GetSelectedTestTypesFromGrid();
+            Debug.WriteLine("=== Selected Test Types from Grid ===");
+            foreach (var tt in selectedTestTypes)
             {
-                Debug.WriteLine($"  - ID: {conn.Id}, DisplayName: {conn.DisplayName}, TestTypeId: {conn.TestTypeId}, TestTypeValue: {conn.TestTypeValue}");
+                Debug.WriteLine($"  - ID: {tt.Id}, DisplayName: {tt.DisplayName}, TestTypeName: {tt.TestTypeName}");
             }
 
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
@@ -1647,17 +1647,15 @@ namespace AssemblyLineTester.Views.Pages
             };
         }
 
-        public List<LearnConnection> GetSelectedConnectionsFromGrid()
+        public List<TestType> GetSelectedTestTypesFromGrid()
         {
-            var selectedList = new List<LearnConnection>();
+            var selectedList = new List<TestType>();
             try
             {
                 using var db = new Data.AppDbContext();
-                var allLearnConnections = db.LearnConnections
-                    .Include(c => c.TestType)
-                    .ToList();
+                var allTestTypes = db.TestTypes.ToList();
 
-                var gridTestTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var gridTestTypeNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 for (int i = 0; i < gridConfig.Rows.Count; i++)
                 {
@@ -1667,31 +1665,30 @@ namespace AssemblyLineTester.Views.Pages
                     string typeName = row.Cells["colTestType"].Value?.ToString()?.Trim() ?? "";
                     if (!string.IsNullOrEmpty(typeName))
                     {
-                        gridTestTypes.Add(typeName);
+                        gridTestTypeNames.Add(typeName);
                     }
                 }
 
-                foreach (var lc in allLearnConnections)
+                foreach (var tt in allTestTypes)
                 {
-                    string ttName = lc.TestType?.TestTypeName ?? "";
-                    bool isPresent = gridTestTypes.Any(gt =>
-                        string.Equals(gt, ttName, StringComparison.OrdinalIgnoreCase) ||
-                        (lc.DisplayName.Equals("Wire", StringComparison.OrdinalIgnoreCase) && (gt.Equals("WIRE", StringComparison.OrdinalIgnoreCase) || gt.Equals("4WIRE", StringComparison.OrdinalIgnoreCase) || gt.Equals("SIGNATURE WIRE", StringComparison.OrdinalIgnoreCase))) ||
-                        (lc.DisplayName.Equals("Resistance", StringComparison.OrdinalIgnoreCase) && (gt.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase) || gt.Equals("4RESISTOR", StringComparison.OrdinalIgnoreCase) || gt.Equals("RESIS", StringComparison.OrdinalIgnoreCase))) ||
-                        (lc.DisplayName.Equals("Capacitor", StringComparison.OrdinalIgnoreCase) && (gt.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) || gt.Equals("CAP", StringComparison.OrdinalIgnoreCase))) ||
-                        (lc.DisplayName.Equals("Diode", StringComparison.OrdinalIgnoreCase) && (gt.Equals("DIODE", StringComparison.OrdinalIgnoreCase) || gt.Equals("SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase))) ||
-                        (lc.DisplayName.Equals("Twisted Pair", StringComparison.OrdinalIgnoreCase) && gt.Equals("TWISTED PAIR", StringComparison.OrdinalIgnoreCase))
+                    bool isPresent = gridTestTypeNames.Any(gt =>
+                        string.Equals(gt, tt.TestTypeName, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(gt, tt.DisplayName, StringComparison.OrdinalIgnoreCase) ||
+                        (tt.TestTypeName.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase) && (gt.Equals("RESIS", StringComparison.OrdinalIgnoreCase) || gt.Equals("4RESISTOR", StringComparison.OrdinalIgnoreCase))) ||
+                        (tt.TestTypeName.Equals("WIRE", StringComparison.OrdinalIgnoreCase) && (gt.Equals("4WIRE", StringComparison.OrdinalIgnoreCase) || gt.Equals("SIGNATURE WIRE", StringComparison.OrdinalIgnoreCase))) ||
+                        (tt.TestTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) && gt.Equals("CAP", StringComparison.OrdinalIgnoreCase)) ||
+                        (tt.TestTypeName.Equals("DIODE", StringComparison.OrdinalIgnoreCase) && gt.Equals("SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase))
                     );
 
                     if (isPresent)
                     {
-                        selectedList.Add(lc);
+                        selectedList.Add(tt);
                     }
                 }
             }
             catch (Exception ex)
             {
-                FileLogService.Error("TestParametersPage.GetSelectedConnectionsFromGrid", "Failed to resolve grid connections", ex);
+                FileLogService.Error("TestParametersPage.GetSelectedTestTypesFromGrid", "Failed to resolve grid test types", ex);
             }
 
             return selectedList;
@@ -1832,8 +1829,10 @@ namespace AssemblyLineTester.Views.Pages
             }
             foreach (LearnConnection conn in selectedConnections)
             {
-                testLearnValue += (byte)conn.TestTypeValue;
+                testLearnValue += (byte)(conn.TestType?.TestTypeValue ?? conn.TestTypeValue);
             }
+            Debug.WriteLine("====================================================================");
+            Debug.WriteLine(testLearnValue);
 
             InstrumentService.StopMonitoring();
             _testCts?.Cancel();

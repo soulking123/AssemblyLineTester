@@ -124,20 +124,28 @@ namespace AssemblyLineTester.Services
         {
             using (var db = new AppDbContext())
             {
-                return db.TestConfigurations
+                var cfg = db.TestConfigurations
                     .Include(c => c.Nets)
                     .ThenInclude(n => n.TestType)
+                    .Include(c => c.TestTypes)
                     .FirstOrDefault(c => c.IsActive);
+
+                EnsureTestTypesPopulated(cfg);
+                return cfg;
             }
         }
 
         public TestConfiguration? GetConfigurationByName(string configName)
         {
             using var db = new AppDbContext();
-            return db.TestConfigurations
+            var cfg = db.TestConfigurations
                 .Include(c => c.Nets)
                 .ThenInclude(n => n.TestType)
+                .Include(c => c.TestTypes)
                 .FirstOrDefault(c => c.ConfigName == configName);
+
+            EnsureTestTypesPopulated(cfg);
+            return cfg;
         }
 
         // Configurations filtered by name, newest first, filtered in the database.
@@ -147,6 +155,7 @@ namespace AssemblyLineTester.Services
             var q = db.TestConfigurations
                 .Include(c => c.Nets)
                 .ThenInclude(n => n.TestType)
+                .Include(c => c.TestTypes)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(configNameFilter))
@@ -158,7 +167,26 @@ namespace AssemblyLineTester.Services
 
             q = q.OrderByDescending(c => (c.UpdatedAt ?? c.CreatedAt));
 
-            return q.ToList();
+            var list = q.ToList();
+            foreach (var cfg in list)
+            {
+                EnsureTestTypesPopulated(cfg);
+            }
+            return list;
+        }
+
+        private static void EnsureTestTypesPopulated(TestConfiguration? config)
+        {
+            if (config == null) return;
+            if (config.TestTypes == null || config.TestTypes.Count == 0)
+            {
+                config.TestTypes = config.Nets
+                    .Where(n => n.TestType != null)
+                    .Select(n => n.TestType!)
+                    .GroupBy(t => t.Id)
+                    .Select(g => g.First())
+                    .ToList();
+            }
         }
 
         public bool DeleteConfiguration(string configName)
