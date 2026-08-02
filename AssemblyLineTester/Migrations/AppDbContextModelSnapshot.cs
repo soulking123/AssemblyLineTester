@@ -1754,6 +1754,18 @@ namespace AssemblyLineTester.Migrations
                             Id = 12,
                             IsChecked = true,
                             TestResultName = "Measurement"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            IsChecked = true,
+                            TestResultName = "Color"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            IsChecked = true,
+                            TestResultName = "Gauge"
                         });
                 });
 

@@ -159,6 +159,8 @@ namespace AssemblyLineTester.Views.Pages
                 row.LowerLimit = net.LowerLimit;
                 row.Tolerance = net.Tolerance;
                 row.Unit = net.MeasurementUnit;
+                row.Color = net.Color;
+                row.Gauge = net.Gauge;
                 if (net.UpperLimit.HasValue) row.UpperLimit = net.UpperLimit;
                 if (net.ExpectedValue.HasValue) row.ExpectedValue = net.ExpectedValue.Value.ToString(CultureInfo.InvariantCulture);
                 if (string.IsNullOrWhiteSpace(row.NetId)) row.NetId = net.NetId;
@@ -711,6 +713,8 @@ namespace AssemblyLineTester.Views.Pages
             "To" => row.ToPoint,
             "Net To Label" => row.ToLabel,
             "Test Type" => row.TestType,
+            "Color" => row.Color,
+            "Gauge" => row.Gauge,
             "Lower Limit" => FormatNumber(row.LowerLimit),
             "Upper Limit" => FormatNumber(row.UpperLimit),
             "Expected Value" => row.ExpectedValue,
