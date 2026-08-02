@@ -295,7 +295,7 @@ namespace AssemblyLineTester.Views.Pages
             lblProgDetails.Text = activeConfig is null
                 ? "-\n-\n-\n-\n-"
                 : $"{activeConfig.ConfigName}\n" +
-                  $"{activeConfig.ProductModel}\n" +
+                  $"{activeConfig.ProductModelName}\n" +
                   $"{activeConfig.Nets.Count}\n" +
                   $"{activeConfig.CreatedBy}\n" +
                   $"{activeConfig.UpdatedAt:dd MMM yyyy HH:mm}";

@@ -48,7 +48,7 @@ namespace AssemblyLineTester.Views.Modals
                     {
                         c.ConfigId,
                         ConfigName = c.ConfigName,
-                        ProductModel = c.ProductModel,
+                        ProductModel = c.ProductModelName,
                         LastUpdate = AppTime.ToLocal(c.UpdatedAt ?? c.CreatedAt).ToString("yyyy-MM-dd HH:mm:ss")
                     })
                     .ToList();

@@ -23,7 +23,7 @@ namespace AssemblyLineTester.Services
             {
                 ReportId = r.ReportId,
                 TestTime = AppTime.ToLocal(r.TestDateTime),
-                ProductModel = r.ProductModel,
+                ProductModel = r.ProductModelName,
                 ProductType = r.ProductType,
                 Area = r.Area,
                 PartNumber = r.PartNumber,
@@ -102,7 +102,7 @@ namespace AssemblyLineTester.Services
                 StartTime = AppTime.ToLocal(report.TestDateTime),
                 EndTime = AppTime.ToLocal(report.EndDateTime),
                 TotalTime = FormatDuration(report.TestDateTime, report.EndDateTime),
-                ProductModel = report.ProductModel,
+                ProductModel = report.ProductModelName,
                 ProductType = report.ProductType,
                 Area = report.Area,
                 PartNumber = report.PartNumber,

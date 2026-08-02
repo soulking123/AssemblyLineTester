@@ -27,6 +27,8 @@ namespace AssemblyLineTester.Data
         public DbSet<LearnConnection> LearnConnections { get; set; } = null!;
         public DbSet<TestResultCheck> TestResultChecks { get; set; } = null!;
         public DbSet<TestTypeCheck> TestTypeChecks { get; set; } = null!;
+        public DbSet<ProductModel> ProductModels { get; set; } = null!;
+        public DbSet<Area> Areas { get; set; } = null!;
 
         // Folder holding the live database, its backups and the pre-restore copies.
         public static string DataFolder { get; } = Path.Combine(
@@ -204,6 +206,14 @@ namespace AssemblyLineTester.Data
                 .HasForeignKey(c => c.TestTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<ProductModel>().HasIndex(p => p.Name).IsUnique();
+            modelBuilder.Entity<Area>().HasIndex(a => a.Name).IsUnique();
+
+            // TestType carries no inverse collection, so the join table is left implicit.
+            modelBuilder.Entity<TestConfiguration>()
+                .HasMany(c => c.TestTypes)
+                .WithMany();
+
             // ---- Seed data ----
 
             modelBuilder.Entity<Role>().HasData(
@@ -305,6 +315,17 @@ namespace AssemblyLineTester.Data
                 // Appended, never slotted mid-list: seed ids follow position and would renumber.
                 new TestResultCheck { Id = 13, TestResultName = "Color", IsChecked = true },
                 new TestResultCheck { Id = 14, TestResultName = "Gauge", IsChecked = true }
+            );
+
+            modelBuilder.Entity<ProductModel>().HasData(
+                new ProductModel { Id = 1, Name = "6020" },
+                new ProductModel { Id = 2, Name = "6030" },
+                new ProductModel { Id = 3, Name = "6040" },
+                new ProductModel { Id = 4, Name = "6060" }
+            );
+
+            modelBuilder.Entity<Area>().HasData(
+                new Area { Id = 1, Name = "Riser Cabinet" }
             );
 
             modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());

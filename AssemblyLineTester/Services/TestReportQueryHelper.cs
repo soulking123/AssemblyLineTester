@@ -24,7 +24,7 @@ namespace AssemblyLineTester.Services
 
             // Typed by hand on the Reports page, so these match on substring like PartNumber does.
             if (!string.IsNullOrWhiteSpace(filter.ProductModel))
-                query = query.Where(r => r.ProductModel.Contains(filter.ProductModel));
+                query = query.Where(r => r.ProductModelName.Contains(filter.ProductModel));
 
             if (!string.IsNullOrWhiteSpace(filter.ProductType))
                 query = query.Where(r => r.ProductType.Contains(filter.ProductType));

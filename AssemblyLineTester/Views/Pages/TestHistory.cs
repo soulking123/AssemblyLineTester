@@ -40,6 +40,7 @@ namespace AssemblyLineTester.Views.Pages
                 AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 if (cmbPageSize.Items.Count > 0) cmbPageSize.SelectedIndex = 0;
 
+                PopulateFilterLookups();
                 ResetFilterControls();
                 LoadHistoryData();
             }
@@ -92,6 +93,15 @@ namespace AssemblyLineTester.Views.Pages
                 GoToPage(1);
             };
 
+            // Enter in the free-text box does what Search does, or the box reads like a dead end.
+            txtOperator.KeyDown += (s, ev) =>
+            {
+                if (ev.KeyCode != Keys.Enter) return;
+                ev.SuppressKeyPress = true;
+                _dateFilterApplied = true;
+                GoToPage(1);
+            };
+
             btnReset.Click += (s, ev) =>
             {
                 ResetFilterControls();
@@ -121,15 +131,27 @@ namespace AssemblyLineTester.Views.Pages
             };
         }
 
+        // Choices come from the ProductModels and Areas tables, so a row added there shows up here
+        // without a rebuild. "All" stays first and is what the filter reads as "no restriction".
+        private void PopulateFilterLookups()
+        {
+            cmbProductModel.Items.Clear();
+            cmbProductModel.Items.Add("All");
+            cmbProductModel.Items.AddRange(LookupService.GetProductModelNames().ToArray());
+
+            cmbArea.Items.Clear();
+            cmbArea.Items.Add("All");
+            cmbArea.Items.AddRange(LookupService.GetAreaNames().ToArray());
+        }
+
         private void ResetFilterControls()
         {
             dtpStart.Value = DateTime.Today;
             dtpEnd.Value = DateTime.Today;
             if (cmbProductModel.Items.Count > 0) cmbProductModel.SelectedIndex = 0;
-            if (cmbProductType.Items.Count > 0) cmbProductType.SelectedIndex = 0;
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
-            if (cmbOperator.Items.Count > 0) cmbOperator.SelectedIndex = 0;
+            txtOperator.Clear();
         }
 
         private void GoToPage(int page)
@@ -146,10 +168,10 @@ namespace AssemblyLineTester.Views.Pages
                 DateFrom = _dateFilterApplied ? dtpStart.Value.Date : (DateTime?)null,
                 DateTo = _dateFilterApplied ? dtpEnd.Value.Date : (DateTime?)null,
                 ProductModel = cmbProductModel.Text == "All" ? null : cmbProductModel.Text,
-                ProductType = cmbProductType.Text == "All" ? null : cmbProductType.Text,
                 Area = cmbArea.Text == "All" ? null : cmbArea.Text,
                 Result = cmbResult.Text == "All" ? null : cmbResult.Text,
-                Operator = cmbOperator.Text == "All" ? null : cmbOperator.Text,
+                // Typed by hand and matched on substring, so a surname or a username both land.
+                Operator = string.IsNullOrWhiteSpace(txtOperator.Text) ? null : txtOperator.Text.Trim(),
                 Page = page,
                 PageSize = _pageSize
             };

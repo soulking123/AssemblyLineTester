@@ -46,14 +46,12 @@ namespace AssemblyLineTester.Views.Pages
             dtpEnd = new DateTimePicker();
             lblProductModel = new Label();
             cmbProductModel = new ComboBox();
-            lblProductType = new Label();
-            cmbProductType = new ComboBox();
             lblArea = new Label();
             cmbArea = new ComboBox();
             lblResult = new Label();
             cmbResult = new ComboBox();
             lblOperator = new Label();
-            cmbOperator = new ComboBox();
+            txtOperator = new TextBox();
             flpActionButtons = new FlowLayoutPanel();
             btnSearch = new Button();
             btnReset = new Button();
@@ -199,25 +197,22 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblFilterInputs
             // 
-            tblFilterInputs.ColumnCount = 6;
-            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.5F));
-            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
-            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
-            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
-            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
-            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.3F));
+            tblFilterInputs.ColumnCount = 5;
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
             tblFilterInputs.Controls.Add(lblDateRange, 0, 0);
             tblFilterInputs.Controls.Add(tblDateRange, 0, 1);
             tblFilterInputs.Controls.Add(lblProductModel, 1, 0);
             tblFilterInputs.Controls.Add(cmbProductModel, 1, 1);
-            tblFilterInputs.Controls.Add(lblProductType, 2, 0);
-            tblFilterInputs.Controls.Add(cmbProductType, 2, 1);
-            tblFilterInputs.Controls.Add(lblArea, 3, 0);
-            tblFilterInputs.Controls.Add(cmbArea, 3, 1);
-            tblFilterInputs.Controls.Add(lblResult, 4, 0);
-            tblFilterInputs.Controls.Add(cmbResult, 4, 1);
-            tblFilterInputs.Controls.Add(lblOperator, 5, 0);
-            tblFilterInputs.Controls.Add(cmbOperator, 5, 1);
+            tblFilterInputs.Controls.Add(lblArea, 2, 0);
+            tblFilterInputs.Controls.Add(cmbArea, 2, 1);
+            tblFilterInputs.Controls.Add(lblResult, 3, 0);
+            tblFilterInputs.Controls.Add(cmbResult, 3, 1);
+            tblFilterInputs.Controls.Add(lblOperator, 4, 0);
+            tblFilterInputs.Controls.Add(txtOperator, 4, 1);
             tblFilterInputs.Dock = DockStyle.Fill;
             tblFilterInputs.Location = new Point(0, 0);
             tblFilterInputs.Margin = new Padding(0);
@@ -318,39 +313,11 @@ namespace AssemblyLineTester.Views.Pages
             cmbProductModel.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbProductModel.Font = new Font("Segoe UI", 9F);
             cmbProductModel.FormattingEnabled = true;
-            cmbProductModel.Items.AddRange(new object[] { "All", "6060", "797F", "D11T" });
             cmbProductModel.Location = new Point(542, 50);
             cmbProductModel.Margin = new Padding(4);
             cmbProductModel.Name = "cmbProductModel";
             cmbProductModel.Size = new Size(262, 40);
             cmbProductModel.TabIndex = 7;
-            // 
-            // lblProductType
-            // 
-            lblProductType.AutoSize = true;
-            lblProductType.Dock = DockStyle.Fill;
-            lblProductType.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblProductType.ForeColor = Color.FromArgb(51, 65, 85);
-            lblProductType.Location = new Point(812, 0);
-            lblProductType.Margin = new Padding(4, 0, 4, 2);
-            lblProductType.Name = "lblProductType";
-            lblProductType.Size = new Size(262, 34);
-            lblProductType.TabIndex = 8;
-            lblProductType.Text = "Product Type";
-            lblProductType.TextAlign = ContentAlignment.BottomLeft;
-            // 
-            // cmbProductType
-            // 
-            cmbProductType.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            cmbProductType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbProductType.Font = new Font("Segoe UI", 9F);
-            cmbProductType.FormattingEnabled = true;
-            cmbProductType.Items.AddRange(new object[] { "All", "AC", "DC" });
-            cmbProductType.Location = new Point(812, 50);
-            cmbProductType.Margin = new Padding(4);
-            cmbProductType.Name = "cmbProductType";
-            cmbProductType.Size = new Size(262, 40);
-            cmbProductType.TabIndex = 9;
             // 
             // lblArea
             // 
@@ -372,7 +339,6 @@ namespace AssemblyLineTester.Views.Pages
             cmbArea.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbArea.Font = new Font("Segoe UI", 9F);
             cmbArea.FormattingEnabled = true;
-            cmbArea.Items.AddRange(new object[] { "All", "Engine Control", "Cabin", "Main Frame", "Boom", "Power Module", "Lighting", "Hydraulic Control", "Monitoring System" });
             cmbArea.Location = new Point(1082, 50);
             cmbArea.Margin = new Padding(4);
             cmbArea.Name = "cmbArea";
@@ -417,21 +383,19 @@ namespace AssemblyLineTester.Views.Pages
             lblOperator.Name = "lblOperator";
             lblOperator.Size = new Size(264, 34);
             lblOperator.TabIndex = 14;
-            lblOperator.Text = "Operator";
+            lblOperator.Text = "Operator / User";
             lblOperator.TextAlign = ContentAlignment.BottomLeft;
-            // 
-            // cmbOperator
-            // 
-            cmbOperator.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            cmbOperator.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbOperator.Font = new Font("Segoe UI", 9F);
-            cmbOperator.FormattingEnabled = true;
-            cmbOperator.Items.AddRange(new object[] { "All", "Fally", "Hendra", "Budi" });
-            cmbOperator.Location = new Point(1622, 50);
-            cmbOperator.Margin = new Padding(4);
-            cmbOperator.Name = "cmbOperator";
-            cmbOperator.Size = new Size(264, 40);
-            cmbOperator.TabIndex = 15;
+            //
+            // txtOperator
+            //
+            txtOperator.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtOperator.Font = new Font("Segoe UI", 9F);
+            txtOperator.Location = new Point(1622, 50);
+            txtOperator.Margin = new Padding(4);
+            txtOperator.Name = "txtOperator";
+            txtOperator.PlaceholderText = "Search name or username";
+            txtOperator.Size = new Size(264, 40);
+            txtOperator.TabIndex = 15;
             // 
             // flpActionButtons
             // 
@@ -1534,10 +1498,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.ComboBox cmbProductModel;
 
-        private System.Windows.Forms.Label lblProductType;
-
-        private System.Windows.Forms.ComboBox cmbProductType;
-
         private System.Windows.Forms.Label lblArea;
 
         private System.Windows.Forms.ComboBox cmbArea;
@@ -1548,7 +1508,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.Label lblOperator;
 
-        private System.Windows.Forms.ComboBox cmbOperator;
+        private System.Windows.Forms.TextBox txtOperator;
 
         private System.Windows.Forms.Button btnSearch;
 
