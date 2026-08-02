@@ -220,7 +220,6 @@ namespace AssemblyLineTester.Views.Pages
             gridData.Columns.Add("Result", "Result");
             gridData.Columns.Add("TotalTime", "Total Time");
             gridData.Columns.Add("Operator", "Operator");
-            gridData.Columns.Add("Action", "Action");
 
             SetColumnWidth(gridData, "No", 45, DataGridViewContentAlignment.MiddleCenter);
             SetColumnWidth(gridData, "TestTime", 165);
@@ -232,7 +231,6 @@ namespace AssemblyLineTester.Views.Pages
             SetColumnWidth(gridData, "Result", 95, DataGridViewContentAlignment.MiddleCenter);
             SetColumnWidth(gridData, "TotalTime", 100, DataGridViewContentAlignment.MiddleCenter);
             SetColumnWidth(gridData, "Operator", 95);
-            SetColumnWidth(gridData, "Action", 60, DataGridViewContentAlignment.MiddleCenter);
         }
 
         private void PopulateHistoryGrid(PagedResult<TestHistoryListItem> paged)
@@ -258,8 +256,7 @@ namespace AssemblyLineTester.Views.Pages
                     item.SerialNumber,
                     displayResult,
                     item.TotalTime,
-                    item.Operator,
-                    "⋮");
+                    item.Operator);
 
                 // The row carries its report id, so a click needs no re-query to find it.
                 gridData.Rows[rowIndex].Tag = item.ReportId;

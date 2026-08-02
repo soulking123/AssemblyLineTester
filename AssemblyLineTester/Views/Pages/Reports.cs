@@ -3,8 +3,10 @@ using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using PdfSharp.Pdf.Content.Objects;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -107,8 +109,6 @@ namespace AssemblyLineTester.Views.Pages
                 colReportType.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             if (gridReports.Columns["colDateGenerated"] is { } colDateGenerated)
                 colDateGenerated.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            if (gridReports.Columns["colSize"] is { } colSize)
-                colSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             if (gridReports.Columns["colAction"] is { } colAction)
                 colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             gridReports.CellFormatting += GridReports_CellFormatting;
@@ -265,6 +265,13 @@ namespace AssemblyLineTester.Views.Pages
                 _currentPage = 1;
                 _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
                 RenderReportData(_appliedFilter);
+            };
+
+            gridReports.CellClick += (s, e) =>
+            {
+                if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+                if (gridReports.Columns[e.ColumnIndex].Name != "colAction") return;
+                if (gridReports.Rows[e.RowIndex].Tag is int reportId) OpenReportInViewer(reportId);
             };
 
             gridReports.SelectionChanged += (s, e) =>
@@ -519,8 +526,7 @@ namespace AssemblyLineTester.Views.Pages
                     r.OverallResult,
                     r.DateGenerated.ToString("dd MMM yyyy, HH:mm"),
                     r.GeneratedBy,
-                    "-",
-                    "View / Export");
+                    "View");
                 gridReports.Rows[rowIdx].Tag = r.ReportId;
                 gridReports.Rows[rowIdx].Height = gridReports.RowTemplate.Height;
             }
@@ -749,6 +755,40 @@ namespace AssemblyLineTester.Views.Pages
                 cName.Text = cTotal.Text = cPass.Text = cFail.Text = cRate.Text = "-";
                 cFail.ForeColor = Color.FromArgb(30, 41, 59);
                 cRate.ForeColor = Color.FromArgb(30, 41, 59);
+            }
+        }
+
+        // Renders the report to a temporary PDF and hands it to the shell, which opens it in
+        // whatever the machine uses for PDFs - Edge on a stock Windows 11. No Save dialog, so
+        // nothing lands in Downloads; the Export buttons are still the way to keep a copy.
+        //
+        // ponytail: each click writes a new timestamped file, because overwriting one already open
+        // in the viewer fails on a locked handle. Sweep the folder on startup if it ever matters.
+        private void OpenReportInViewer(int reportId)
+        {
+            if (!SessionManager.HasPermission("Action.Reports.Export"))
+            {
+                MessageBox.Show("You do not have permission to open reports.",
+                    "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                string folder = Path.Combine(Path.GetTempPath(), "AssemblyLineTester");
+                Directory.CreateDirectory(folder);
+                string path = Path.Combine(folder, $"Report_{reportId}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+
+                _pdfExportService.ExportReportToPdf(reportId, path);
+
+                // UseShellExecute is what routes the file to its registered handler; without it
+                // the framework tries to run the PDF as an executable and throws.
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Could not open the report:\n{ex.Message}",
+                    "View Report", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

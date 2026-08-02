@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AssemblyLineTester.Models
 {
-    // Default test parameters for a product model.
     public class DefaultTestSetting
     {
         [Key]

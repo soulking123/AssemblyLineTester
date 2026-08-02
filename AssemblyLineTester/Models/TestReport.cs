@@ -25,8 +25,6 @@ namespace AssemblyLineTester.Models
 
         public string ReportNumber { get; set; } = string.Empty;
 
-        // Named apart from the ProductModel entity it holds the name of; the column keeps its old
-        // name so the rename costs no migration.
         [Column("ProductModel")]
         public string ProductModelName { get; set; } = string.Empty;
 
