@@ -94,6 +94,14 @@ namespace AssemblyLineTester.Views.Pages
         {
             Label[] tabLabels = new[] { lblNavGeneral, lblNavConnector, lblNavWiring };
             activeTabLabel = lblNavGeneral;
+            
+            foreach (Label t in tabLabels)
+            {
+                t.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Regular;
+                t.ForeColor = Color.FromArgb(100, 116, 139);
+            }
+            lblNavGeneral.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Bold;
+            lblNavGeneral.ForeColor = Color.FromArgb(30, 41, 59);
 
             foreach (Label lbl in tabLabels)
             {
@@ -102,7 +110,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     if (lbl == activeTabLabel)
                     {
-                        using var brush = new SolidBrush(Color.FromArgb(245, 158, 11));
+                        using var brush = new SolidBrush(Color.FromArgb(250, 204, 21));
                         ev.Graphics.FillRectangle(brush, 0, lbl.Height - 6, lbl.Width, 6);
                     }
                 };
@@ -621,6 +629,14 @@ namespace AssemblyLineTester.Views.Pages
             {
                 var previous = activeTabLabel;
                 activeTabLabel = lbl;
+                Label[] allTabs = new[] { lblNavGeneral, lblNavConnector, lblNavWiring };
+                foreach (Label t in allTabs)
+                {
+                    t.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Regular;
+                    t.ForeColor = Color.FromArgb(100, 116, 139);
+                }
+                lbl.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Bold;
+                lbl.ForeColor = Color.FromArgb(30, 41, 59);
                 previous?.Invalidate();
                 lbl.Invalidate();
             }
@@ -637,6 +653,14 @@ namespace AssemblyLineTester.Views.Pages
             {
                 var previous = activeTabLabel;
                 activeTabLabel = lbl;
+                Label[] allTabs = new[] { lblNavGeneral, lblNavConnector, lblNavWiring };
+                foreach (Label t in allTabs)
+                {
+                    t.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Regular;
+                    t.ForeColor = Color.FromArgb(100, 116, 139);
+                }
+                lbl.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Bold;
+                lbl.ForeColor = Color.FromArgb(30, 41, 59);
                 previous?.Invalidate();
                 lbl.Invalidate();
             }
@@ -653,6 +677,14 @@ namespace AssemblyLineTester.Views.Pages
             {
                 var previous = activeTabLabel;
                 activeTabLabel = lbl;
+                Label[] allTabs = new[] { lblNavGeneral, lblNavConnector, lblNavWiring };
+                foreach (Label t in allTabs)
+                {
+                    t.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Regular;
+                    t.ForeColor = Color.FromArgb(100, 116, 139);
+                }
+                lbl.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Bold;
+                lbl.ForeColor = Color.FromArgb(30, 41, 59);
                 previous?.Invalidate();
                 lbl.Invalidate();
             }
