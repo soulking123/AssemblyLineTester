@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -42,6 +42,10 @@ namespace AssemblyLineTester.Services
                 {
                     existingProgram.ProductModelName = config.ProductModelName;
                     existingProgram.Description = config.Description;
+                    existingProgram.MaxWireResistance = config.MaxWireResistance;
+                    existingProgram.MinInsulationResistance = config.MinInsulationResistance;
+                    existingProgram.MinComponentResistance = config.MinComponentResistance;
+                    existingProgram.HipotVoltage = config.HipotVoltage;
                     existingProgram.UpdatedAt = DateTime.UtcNow;
 
                     // Delete is committed before the replacements attach, or EF reconciles both at once.
@@ -229,19 +233,35 @@ namespace AssemblyLineTester.Services
             sb.AppendLine(" J3 D507F1 *[AHED-64,0,0,0,0,0,0,0,0,64] 64 POS. .1\" FEM.");
             sb.AppendLine();
 
-            double connResist = 10.0;
-            var resNet = config.Nets.FirstOrDefault(n => n.UpperLimit.HasValue);
-            if (resNet != null && resNet.UpperLimit.HasValue)
+            double connResist = config.MaxWireResistance > 0 ? config.MaxWireResistance : 10.0;
+            if (config.MaxWireResistance <= 0)
             {
-                connResist = resNet.UpperLimit.Value;
+                var resNet = config.Nets.FirstOrDefault(n => n.UpperLimit.HasValue);
+                if (resNet != null && resNet.UpperLimit.HasValue)
+                {
+                    connResist = resNet.UpperLimit.Value;
+                }
             }
+
+            double compResist = config.MinComponentResistance > 0 ? config.MinComponentResistance : 10.1;
+            double insResist = config.MinInsulationResistance > 0 ? config.MinInsulationResistance : 100000.0;
+
+            string insResStr;
+            if (insResist >= 1e6)
+                insResStr = (insResist / 1e6).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " M ohm";
+            else if (insResist >= 1e3)
+                insResStr = (insResist / 1e3).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " K ohm";
+            else
+                insResStr = insResist.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " ohm";
+
+            string hipotStr = config.HipotVoltage ? "ON" : "OFF";
 
             sb.AppendLine("WIRE LIST SIGNATURE:80EF1F-8T8M0");
             sb.AppendLine("INSUL TEST PARM SIGNATURE:6F6F0");
             sb.AppendLine($"CONNECTION RESIS  {connResist.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} ohm");
-            sb.AppendLine("COMPONENT RESIS >  12.6 ohm");
-            sb.AppendLine("LV INSULATION RESIS  100 K ohm");
-            sb.AppendLine("HIPOT VOLTAGE  OFF");
+            sb.AppendLine($"COMPONENT RESIS >  {compResist.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} ohm");
+            sb.AppendLine($"LV INSULATION RESIS  {insResStr}");
+            sb.AppendLine($"HIPOT VOLTAGE  {hipotStr}");
             sb.AppendLine("** TEST METHOD SINGLE");
             sb.AppendLine();
 
@@ -343,23 +363,63 @@ namespace AssemblyLineTester.Services
                 string trimmed = line.Trim();
                 if (string.IsNullOrWhiteSpace(trimmed)) continue;
 
-                if (trimmed.StartsWith("(") && !trimmed.EndsWith(")"))
-                {
-                    config.ConfigName = trimmed.Substring(1).Trim();
-                    continue;
-                }
                 
                 if (trimmed == ")")
                 {
                     break;
                 }
 
-                if (trimmed.StartsWith("CONNECTION RESIS"))
+                if (trimmed.StartsWith("CONNECTION RESIS", StringComparison.OrdinalIgnoreCase))
                 {
                     var parts = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length >= 3 && double.TryParse(parts[2], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double cr))
                     {
-                        connResist = cr;
+                        double mult = GetUnitMultiplier(parts, 3);
+                        config.MaxWireResistance = cr * mult;
+                        connResist = config.MaxWireResistance;
+                    }
+                    continue;
+                }
+
+                if (trimmed.StartsWith("COMPONENT RESIS", StringComparison.OrdinalIgnoreCase))
+                {
+                    string cleanLine = trimmed.Replace(">", " ");
+                    var parts = cleanLine.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 3 && double.TryParse(parts[2], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double cr))
+                    {
+                        double mult = GetUnitMultiplier(parts, 3);
+                        config.MinComponentResistance = cr * mult;
+                    }
+                    continue;
+                }
+
+                if (trimmed.StartsWith("LV INSULATION", StringComparison.OrdinalIgnoreCase))
+                {
+                    var parts = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    int numIndex = -1;
+                    for (int idx = 2; idx < parts.Length; idx++)
+                    {
+                        if (double.TryParse(parts[idx], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _))
+                        {
+                            numIndex = idx;
+                            break;
+                        }
+                    }
+                    if (numIndex != -1 && double.TryParse(parts[numIndex], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double cr))
+                    {
+                        double mult = GetUnitMultiplier(parts, numIndex + 1);
+                        config.MinInsulationResistance = cr * mult;
+                    }
+                    continue;
+                }
+
+                if (trimmed.StartsWith("HIPOT VOLTAGE", StringComparison.OrdinalIgnoreCase))
+                {
+                    var parts = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 3)
+                    {
+                        string valStr = parts[2].Trim().ToUpperInvariant();
+                        config.HipotVoltage = valStr != "OFF" && valStr != "0" && valStr != "DISABLED";
                     }
                     continue;
                 }
@@ -499,6 +559,19 @@ namespace AssemblyLineTester.Services
             }
 
             return config;
+        }
+
+        private static double GetUnitMultiplier(string[] parts, int startIndex)
+        {
+            if (startIndex >= parts.Length) return 1.0;
+            string fullUnit = string.Join("", parts.Skip(startIndex));
+            if (fullUnit.StartsWith("K") || fullUnit.StartsWith("k")) return 1e3;
+            if (fullUnit.StartsWith("M")) return 1e6;
+            if (fullUnit.StartsWith("m")) return 1e-3;
+            if (fullUnit.StartsWith("u")) return 1e-6;
+            if (fullUnit.StartsWith("n")) return 1e-9;
+            if (fullUnit.StartsWith("p")) return 1e-12;
+            return 1.0;
         }
 
         private int ParsePin(string pin)

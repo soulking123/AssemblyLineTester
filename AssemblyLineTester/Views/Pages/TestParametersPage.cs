@@ -10,6 +10,7 @@ using System.Linq;
 using System.Windows.Forms;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace AssemblyLineTester.Views.Pages
@@ -25,7 +26,7 @@ namespace AssemblyLineTester.Views.Pages
         private string _customTestText = string.Empty;
         private System.Threading.CancellationTokenSource? _testCts;
         private string? _loadedConfigName = null;
-        private TestConfiguration complexConfig = new();
+        private TestConfiguration config = new();
         private DefaultTestSetting defaultTest = TestSettingService.GetDefaults();
         private int defaultTestPoint;
 
@@ -66,8 +67,8 @@ namespace AssemblyLineTester.Views.Pages
         {
             defaultTest = TestSettingService.GetDefaults();
             defaultTestPoint = defaultTest.TotalTestPointsAvailable;
-            txtConnectionResistance.Text = defaultTest.DefaultMaxWireResistance.ToString();
-            txtInsulationResistance.Text = defaultTest.DefaultMinInulationResistance.ToString();
+            txtConnectionResistance.Text = defaultTest.DefaultMaxWireResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            txtInsulationResistance.Text = defaultTest.DefaultMinInulationResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void SetupEvents()
@@ -151,8 +152,8 @@ namespace AssemblyLineTester.Views.Pages
             try
             {
                 using var db = new Data.AppDbContext();
-                var models = db.ProductHarnesses
-                    .Select(p => p.ProductModel)
+                var models = db.ProductModels
+                    .Select(p => p.Name)
                     .Where(m => !string.IsNullOrEmpty(m))
                     .Distinct()
                     .OrderBy(m => m)
@@ -774,6 +775,14 @@ namespace AssemblyLineTester.Views.Pages
             {
                 gridConfig.Rows.Clear();
                 highlightedRows.Clear();
+                txtConfigName.Text = "";
+                txtProductModel.SelectedIndex = -1;
+                txtProductModel.Text = "";
+                txtConnectionResistance.Text = "";
+                txtInsulationResistance.Text = "";
+                txtComponentResistance.Text = "";
+                _loadedConfigName = null;
+                loadDefaultParameter();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
                 picPreview.Invalidate();
@@ -807,14 +816,23 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.Rows.Clear();
             highlightedRows.Clear();
 
-            txtConfigName.Text = config.ConfigName;
-            txtProductModel.Text = config.ProductModelName;
+            txtConfigName.Text = config.ConfigName ?? "";
+            txtProductModel.Text = config.ProductModelName ?? "";
+            txtConnectionResistance.Text = config.MaxWireResistance > 0 
+                ? config.MaxWireResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
+                : "";
+            txtInsulationResistance.Text = config.MinInsulationResistance > 0 
+                ? config.MinInsulationResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
+                : "";
+            txtComponentResistance.Text = config.MinComponentResistance > 0 
+                ? config.MinComponentResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
+                : "";
 
             foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
             {
                 string testTypeName = net.TestType?.TestTypeName ?? "";
                 string expected = net.ExpectedValue.HasValue ? FormatLimit(net.ExpectedValue.Value) : "-";
-                string tolerance = net.Tolerance.HasValue ? $"±{FormatLimit(net.Tolerance.Value)}%" : "±0%";
+                string tolerance = net.Tolerance.HasValue ? $"±{net.Tolerance.Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture)}%" : "±0%";
 
                 int idx = gridConfig.Rows.Add(
                     net.SequenceNo.ToString(),
@@ -889,6 +907,13 @@ namespace AssemblyLineTester.Views.Pages
         // Returns false when the configuration was rejected or the operator backed out.
         private bool TrySaveConfigToDatabase()
         {
+            var selectedConnections = GetSelectedConnectionsFromGrid();
+            Debug.WriteLine("=== Selected Learn Connections from Grid ===");
+            foreach (var conn in selectedConnections)
+            {
+                Debug.WriteLine($"  - ID: {conn.Id}, DisplayName: {conn.DisplayName}, TestTypeId: {conn.TestTypeId}, TestTypeValue: {conn.TestTypeValue}");
+            }
+
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
             if (config == null)
             {
@@ -900,6 +925,12 @@ namespace AssemblyLineTester.Views.Pages
             if (string.IsNullOrWhiteSpace(config.ConfigName))
             {
                 MessageBox.Show("Config Name is required.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(config.ProductModelName))
+            {
+                MessageBox.Show("Product Model is required.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -1208,7 +1239,6 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (double.TryParse(expStr, out double expectedVal))
                 {
-                    Debug.WriteLine("success");
                     (double minTolPct, double maxTolPct, string formattedTol) = ParseClampAndFormatTolerance(tolStr);
 
                     if (row.Cells["colTolerance"].Value?.ToString() != formattedTol)
@@ -1244,12 +1274,13 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
-            if (double.TryParse(clean, out double val))
+            if (double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val) ||
+                double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out val))
             {
                 if (val > 100.0) val = 100.0;
                 if (val < -100.0) val = -100.0;
 
-                string numStr = FormatLimit(Math.Abs(val));
+                string numStr = Math.Abs(val).ToString("0", System.Globalization.CultureInfo.InvariantCulture);
                 if (tolStr.Contains("±") || (!tolStr.StartsWith("-") && !tolStr.StartsWith("+")))
                 {
                     return (-Math.Abs(val), Math.Abs(val), $"±{numStr}%");
@@ -1268,7 +1299,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private static string FormatLimit(double val)
         {
-            return val.ToString("0.############");
+            return val.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void GridConfig_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -1600,20 +1631,82 @@ namespace AssemblyLineTester.Views.Pages
                 });
             }
 
+            double.TryParse(txtConnectionResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double maxWireRes);
+            double.TryParse(txtInsulationResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minInsRes);
+            double.TryParse(txtComponentResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minCompRes);
+
             return new TestConfiguration
             {
                 ConfigName = configName,
                 ProductModelName = productModel,
                 Description = description,
+                MaxWireResistance = maxWireRes,
+                MinInsulationResistance = minInsRes,
+                MinComponentResistance = minCompRes,
                 Nets = nets
             };
+        }
+
+        public List<LearnConnection> GetSelectedConnectionsFromGrid()
+        {
+            var selectedList = new List<LearnConnection>();
+            try
+            {
+                using var db = new Data.AppDbContext();
+                var allLearnConnections = db.LearnConnections
+                    .Include(c => c.TestType)
+                    .ToList();
+
+                var gridTestTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                for (int i = 0; i < gridConfig.Rows.Count; i++)
+                {
+                    var row = gridConfig.Rows[i];
+                    if (row.IsNewRow) continue;
+
+                    string typeName = row.Cells["colTestType"].Value?.ToString()?.Trim() ?? "";
+                    if (!string.IsNullOrEmpty(typeName))
+                    {
+                        gridTestTypes.Add(typeName);
+                    }
+                }
+
+                foreach (var lc in allLearnConnections)
+                {
+                    string ttName = lc.TestType?.TestTypeName ?? "";
+                    bool isPresent = gridTestTypes.Any(gt =>
+                        string.Equals(gt, ttName, StringComparison.OrdinalIgnoreCase) ||
+                        (lc.DisplayName.Equals("Wire", StringComparison.OrdinalIgnoreCase) && (gt.Equals("WIRE", StringComparison.OrdinalIgnoreCase) || gt.Equals("4WIRE", StringComparison.OrdinalIgnoreCase) || gt.Equals("SIGNATURE WIRE", StringComparison.OrdinalIgnoreCase))) ||
+                        (lc.DisplayName.Equals("Resistance", StringComparison.OrdinalIgnoreCase) && (gt.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase) || gt.Equals("4RESISTOR", StringComparison.OrdinalIgnoreCase) || gt.Equals("RESIS", StringComparison.OrdinalIgnoreCase))) ||
+                        (lc.DisplayName.Equals("Capacitor", StringComparison.OrdinalIgnoreCase) && (gt.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) || gt.Equals("CAP", StringComparison.OrdinalIgnoreCase))) ||
+                        (lc.DisplayName.Equals("Diode", StringComparison.OrdinalIgnoreCase) && (gt.Equals("DIODE", StringComparison.OrdinalIgnoreCase) || gt.Equals("SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase))) ||
+                        (lc.DisplayName.Equals("Twisted Pair", StringComparison.OrdinalIgnoreCase) && gt.Equals("TWISTED PAIR", StringComparison.OrdinalIgnoreCase))
+                    );
+
+                    if (isPresent)
+                    {
+                        selectedList.Add(lc);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("TestParametersPage.GetSelectedConnectionsFromGrid", "Failed to resolve grid connections", ex);
+            }
+
+            return selectedList;
         }
 
         private static double? ParseTolerancePercent(string? tolStr)
         {
             if (string.IsNullOrWhiteSpace(tolStr) || tolStr == "-") return null;
             string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
-            return double.TryParse(clean, out double val) ? val : null;
+            if (double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val) ||
+                double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out val))
+            {
+                return val;
+            }
+            return null;
         }
         private void ParseAndPopulateGridFromProgramText(string programText, List<string>? allowedTestTypes = null)
         {
@@ -1741,8 +1834,6 @@ namespace AssemblyLineTester.Views.Pages
             {
                 testLearnValue += (byte)conn.TestTypeValue;
             }
-            Debug.WriteLine("===================================================");
-            Debug.WriteLine(testLearnValue);
 
             InstrumentService.StopMonitoring();
             _testCts?.Cancel();
@@ -1769,10 +1860,6 @@ namespace AssemblyLineTester.Views.Pages
                 //  CAPACITORS = 2  
                 //  DIODES = 4
                 //  TWISTED PAIRS = 8
-                //
-                //
-                //
-                //
 
                 var learnResult = testLearnValue == 0
                     ? await Task.Run(() => _instrument.LearnConnection(), token)
@@ -1789,17 +1876,13 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         errorMessage = "Hardware Learn Aborted. Please check the physical instrument display for details (e.g., resistance too high).";
                     }
-
-                    Debug.WriteLine(errorMessage);
                     MessageBox.Show(this, $"Failed to execute learn operation on instrument.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);
                 if (token.IsCancellationRequested) return;
-                Debug.WriteLine(getTestResult);
-                Debug.WriteLine("result :");
-                Debug.WriteLine(getTestResult.Result);
+
                 if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
                 {
 
@@ -1809,19 +1892,24 @@ namespace AssemblyLineTester.Views.Pages
 
                 _customTestText = getTestResult.Result;
                 Debug.WriteLine(_customTestText);
-                ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
+                //ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
 
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                complexConfig = _configService.ConvertToTestConfig(getTestResult.Result);
+                config = _configService.ConvertToTestConfig(getTestResult.Result);
 
-                if (complexConfig != null)
+                if (config != null)
                 {
-                    LoadConfigurationIntoGrid(complexConfig);
+                    LoadConfigurationIntoGrid(config);
                 }
-                string checkResult = _configService.ConvertToProgramText(complexConfig);
-                Debug.WriteLine("Convert  = ");
-                Debug.WriteLine(checkResult);
+                string checkResult = _configService.ConvertToProgramText(config);
+                txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                txtComponentResistance.Text = config.MinComponentResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+
+
+                //Debug.WriteLine("Convert  = ");
+                //Debug.WriteLine(checkResult);
             }
             catch (OperationCanceledException)
             {
@@ -2054,7 +2142,7 @@ namespace AssemblyLineTester.Views.Pages
                         if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
                         {
                             var measurement = list[k];
-                            string valStr = measurement.Value1.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+                            string valStr = measurement.Value1.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                             gridConfig.Rows[rowIndex].Cells["colUnit"].Value = valStr;
                         }
                     }
@@ -2118,98 +2206,6 @@ namespace AssemblyLineTester.Views.Pages
                 Description = description,
                 Nets = nets
             };
-        }
-
-        private async void btnComplex_Click(object sender, EventArgs e)
-        {
-            // Show the Learn Connection Modal Options
-            //using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
-            //{
-            //    if (modal.ShowDialog(this) != DialogResult.OK)
-            //    {
-            //        return; // User cancelled
-            //    }
-
-            //    // Store options in local variables as requested
-            //    bool learnWire = modal.IncludeWire;
-            //    bool learnResistor = modal.IncludeResistor;
-            //    bool learnCapacitor = modal.IncludeCapacitor;
-            //    bool learnDiode = modal.IncludeDiode;
-            //    bool learnTwistedPair = modal.IncludeTwistedPair;
-            //}
-            InstrumentService.StopMonitoring();
-            _testCts?.Cancel();
-            _testCts = new System.Threading.CancellationTokenSource();
-            var token = _testCts.Token;
-
-            string originalText = btnLearnConnection.Text;
-            btnLearnConnection.Text = "Loading.....";
-            btnLearnConnection.Enabled = false;
-            btnStartAll.Enabled = false;
-            btnStartSelected.Enabled = false;
-            btnAbort.Enabled = true;
-
-
-            try
-            {
-                bool isConnected = _instrument.Connect();
-                if (!isConnected)
-                {
-                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                var learnResult = await Task.Run(() => _instrument.LearnComplexConnection("",7), token);
-                if (token.IsCancellationRequested) return;
-
-                if (learnResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
-                {
-                    Debug.WriteLine("complex learn success");
-                }
-                else
-                {
-                    Debug.WriteLine("complex learn failed");
-                }
-
-                var getTestResult = await Task.Run(() =>  _instrument.GetLearnedConnection());
-                if (token.IsCancellationRequested) return;
-                Debug.WriteLine(getTestResult);
-                Debug.WriteLine(getTestResult.Result);
-                if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
-                {
-
-                    MessageBox.Show(this, "Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                complexConfig = _configService.ConvertToTestConfig(getTestResult.Result);
-                Debug.WriteLine("Learned Test Configuration:");
-                Debug.WriteLine(complexConfig);
-
-                if (complexConfig != null)
-                {
-                    LoadConfigurationIntoGrid(complexConfig);
-                }
-                string checkResult = _configService.ConvertToProgramText(complexConfig);
-                Debug.WriteLine("Convert  = ");
-                Debug.WriteLine(checkResult);
-                //_customTestText = getTestResult.Result;
-                //Debug.WriteLine(_customTestText);
-
-                MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (OperationCanceledException)
-            {
-                // Task was canceled via btnAbort
-            }
-            finally
-            {
-                InstrumentService.StartMonitoring();
-                btnLearnConnection.Text = originalText;
-                btnLearnConnection.Enabled = true;
-                btnStartAll.Enabled = true;
-                btnStartSelected.Enabled = true;
-                btnAbort.Enabled = false;
-            }
         }
     }
 }
