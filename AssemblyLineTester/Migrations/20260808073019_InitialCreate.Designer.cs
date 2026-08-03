@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260807045258_AddMaintenanceResetPermission")]
-    partial class AddMaintenanceResetPermission
+    [Migration("20260808073019_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,6 +35,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double>("DefaultMaxWireResistance")
                         .HasColumnType("REAL");
 
+                    b.Property<double>("DefaultMinInulationResistance")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("DefaultResistorTolerance")
                         .HasColumnType("INTEGER");
 
@@ -43,9 +46,6 @@ namespace AssemblyLineTester.Migrations
 
                     b.Property<int>("DefaultTestTypeId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<double>("DefaultWireInstallationResistance")
-                        .HasColumnType("REAL");
 
                     b.Property<int>("TotalTestPointsAvailable")
                         .HasColumnType("INTEGER");
@@ -123,6 +123,12 @@ namespace AssemblyLineTester.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("IntervalDays")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("IntervalHours")
+                        .HasColumnType("REAL");
+
                     b.Property<DateTime>("LastUsageDate")
                         .HasColumnType("TEXT");
 
@@ -143,6 +149,8 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
+                            IntervalDays = 180,
+                            IntervalHours = 2160.0,
                             LastUsageDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,

@@ -671,7 +671,7 @@ namespace AssemblyLineTester.Views.Pages
                 TotalTestPointsAvailable = (int)Number(txtTotalTestPoint),
                 DefaultTestTypeId = typeId,
                 DefaultMaxWireResistance = Number(txtDefMaxWireRes),
-                DefaultWireInstallationResistance = Number(txtDefWireInsRes),
+                DefaultMinInulationResistance = Number(txtDefWireInsRes),
                 DefaultResistorValue = Number(txtDefResistorVal),
                 DefaultResistorTolerance = (int)Number(txtDefResistorTol),
                 DefaultCapacitorValue = Number(txtDefCapacitorVal),
@@ -736,7 +736,7 @@ namespace AssemblyLineTester.Views.Pages
 
             txtTotalTestPoint.Text = defaults.TotalTestPointsAvailable.ToString(CultureInfo.InvariantCulture);
             txtDefMaxWireRes.Text = defaults.DefaultMaxWireResistance.ToString(CultureInfo.InvariantCulture);
-            txtDefWireInsRes.Text = defaults.DefaultWireInstallationResistance.ToString(CultureInfo.InvariantCulture);
+            txtDefWireInsRes.Text = defaults.DefaultMinInulationResistance.ToString(CultureInfo.InvariantCulture);
             txtDefResistorVal.Text = defaults.DefaultResistorValue.ToString(CultureInfo.InvariantCulture);
             txtDefResistorTol.Text = defaults.DefaultResistorTolerance.ToString(CultureInfo.InvariantCulture);
             txtDefCapacitorVal.Text = defaults.DefaultCapacitorValue.ToString(CultureInfo.InvariantCulture);

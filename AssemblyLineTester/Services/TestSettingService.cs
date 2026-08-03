@@ -104,7 +104,7 @@ namespace AssemblyLineTester.Services
                 // Keeping the stored type is better than refusing the whole save over it.
                 if (values.DefaultTestTypeId > 0) row.DefaultTestTypeId = values.DefaultTestTypeId;
                 row.DefaultMaxWireResistance = values.DefaultMaxWireResistance;
-                row.DefaultWireInstallationResistance = values.DefaultWireInstallationResistance;
+                row.DefaultMinInulationResistance = values.DefaultMinInulationResistance;
                 row.DefaultResistorValue = values.DefaultResistorValue;
                 row.DefaultResistorTolerance = values.DefaultResistorTolerance;
                 row.DefaultCapacitorValue = values.DefaultCapacitorValue;

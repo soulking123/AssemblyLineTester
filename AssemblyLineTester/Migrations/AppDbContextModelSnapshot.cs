@@ -32,6 +32,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double>("DefaultMaxWireResistance")
                         .HasColumnType("REAL");
 
+                    b.Property<double>("DefaultMinInulationResistance")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("DefaultResistorTolerance")
                         .HasColumnType("INTEGER");
 
@@ -40,9 +43,6 @@ namespace AssemblyLineTester.Migrations
 
                     b.Property<int>("DefaultTestTypeId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<double>("DefaultWireInstallationResistance")
-                        .HasColumnType("REAL");
 
                     b.Property<int>("TotalTestPointsAvailable")
                         .HasColumnType("INTEGER");

@@ -18,7 +18,7 @@ namespace AssemblyLineTester.Models
         public double DefaultMaxWireResistance { get; set; }
 
         [Range(0, double.MaxValue)]
-        public double DefaultWireInstallationResistance { get; set; }
+        public double DefaultMinInulationResistance { get; set; }
 
         [Range(0, double.MaxValue)]
         public double DefaultResistorValue { get; set; }

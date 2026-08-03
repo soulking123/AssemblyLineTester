@@ -26,6 +26,8 @@ namespace AssemblyLineTester.Views.Pages
         private System.Threading.CancellationTokenSource? _testCts;
         private string? _loadedConfigName = null;
         private TestConfiguration complexConfig = new();
+        private DefaultTestSetting defaultTest = TestSettingService.GetDefaults();
+        private int defaultTestPoint;
 
         private class DiagramNode
         {
@@ -56,8 +58,16 @@ namespace AssemblyLineTester.Views.Pages
                 AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
+                loadDefaultParameter();
                 picPreview.Invalidate();
             }
+        }
+        private void loadDefaultParameter()
+        {
+            defaultTest = TestSettingService.GetDefaults();
+            defaultTestPoint = defaultTest.TotalTestPointsAvailable;
+            txtConnectionResistance.Text = defaultTest.DefaultMaxWireResistance.ToString();
+            txtInsulationResistance.Text = defaultTest.DefaultMinInulationResistance.ToString();
         }
 
         private void SetupEvents()
@@ -125,11 +135,20 @@ namespace AssemblyLineTester.Views.Pages
             InitializeComponent();
             EnableDoubleBuffering();
             SetupEvents();
+            this.VisibleChanged += TestParameterPage_VisibleChanged;
+
             if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
             {
                 LoadTestTypeColumnItems();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
+            }
+        }
+        private void TestParameterPage_VisibleChanged(object? sender, EventArgs e)
+        {
+            if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                loadDefaultParameter();
             }
         }
         private void EnableDoubleBuffering()
@@ -627,14 +646,29 @@ namespace AssemblyLineTester.Views.Pages
             int newIdx = gridConfig.Rows.Count + 1;
             string defaultType = ResolveDefaultTestType();
             string defaultUnit = UnitConversionHelper.GetBaseUnit(defaultType);
+            int tolerance = defaultType == "RESISTOR" ? defaultTest.DefaultResistorTolerance : defaultType == "CAPACITOR" ? defaultTest.DefaultCapacitorTolerance : 0;
+            double expectedValue = defaultType == "RESISTOR" ? defaultTest.DefaultResistorValue : defaultType == "CAPACITOR" ? defaultTest.DefaultCapacitorValue: 5;
+            double lowerLimit = expectedValue - (tolerance * expectedValue / 100);
+            double upperLimit = expectedValue + (tolerance * expectedValue / 100);
 
             int nextFromAddr = GetNextAvailableAddress();
-            int nextToAddr = nextFromAddr + 1;
-
+            int nextToAddr = nextFromAddr + defaultTestPoint/2;
             int idx = gridConfig.Rows.Add(
-                newIdx.ToString(), "Elec-Control-001", "", "", "Low Voltage Supply",
-                nextFromAddr.ToString(), $"X1-0{newIdx}", nextToAddr.ToString(), $"Y1-0{newIdx}",
-                defaultType, "0", "0", "0", "-", defaultUnit);
+                newIdx.ToString(), 
+                "",                             // harness group
+                "",                             // color
+                "",                             // gauge
+                "",                             // Net-ID
+                nextFromAddr.ToString(),                                    // From
+                "J" + ((nextFromAddr - 1) / 64 + 1).ToString()+ "-" + ((nextFromAddr-1)%64+1).ToString("D3"),                   // Net-From Label
+                nextToAddr.ToString(),                                      // To
+                "J" + ((nextToAddr - 1) / 64 + 1).ToString()+ "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // To-From Label
+                defaultType,                                                // Test Type
+                lowerLimit.ToString(),                                      // Lower Limit
+                upperLimit.ToString(),                                      // Upper Limit
+                expectedValue.ToString() ,       // Expected Value
+                tolerance.ToString(),                                       // Tolerance
+                defaultUnit);                                               // Measurement
 
             UpdateRowUnitDropdown(idx);
             gridConfig.Rows[idx].Cells["colUnit"].Value = defaultUnit;
@@ -649,12 +683,12 @@ namespace AssemblyLineTester.Views.Pages
         // Next address unused in either column; From and To share one pool.
         private int GetNextAvailableAddress()
         {
-            int max = -1;
+            int max = -0;
             foreach (DataGridViewRow row in gridConfig.Rows)
             {
                 if (row.IsNewRow) continue;
                 if (int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int fromVal) && fromVal > max) max = fromVal;
-                if (int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toVal) && toVal > max) max = toVal;
+                //if (int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toVal) && toVal > max) max = toVal;
             }
             return max + 1;
         }
@@ -746,7 +780,7 @@ namespace AssemblyLineTester.Views.Pages
             foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
             {
                 string testTypeName = net.TestType?.TestTypeName ?? "";
-                string expected = net.ExpectedValue.HasValue ? FormatLimit(net.ExpectedValue.Value) : "0";
+                string expected = net.ExpectedValue.HasValue ? FormatLimit(net.ExpectedValue.Value) : "-";
                 string tolerance = net.Tolerance.HasValue ? $"±{FormatLimit(net.Tolerance.Value)}%" : "±0%";
 
                 int idx = gridConfig.Rows.Add(
@@ -927,6 +961,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
         {
+            Debug.WriteLine("1233");
             if (e.RowIndex >= 0 && e.RowIndex < gridConfig.Rows.Count)
             {
                 var colTestType = gridConfig.Columns["colTestType"];
@@ -935,7 +970,11 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (colTestType != null && e.ColumnIndex == colTestType.Index)
                 {
+                    Debug.WriteLine(e.ColumnIndex);
                     UpdateRowUnitDropdown(e.RowIndex);
+                    
+                    gridConfig.Rows[e.RowIndex].Cells["colExpectedValue"].Value = "0";
+                    gridConfig.Rows[e.RowIndex].Cells["colTolerance"].Value = "0";
                     RecalculateRowLimits(gridConfig.Rows[e.RowIndex]);
                 }
                 else if ((colExpected != null && e.ColumnIndex == colExpected.Index) ||
@@ -1102,9 +1141,10 @@ namespace AssemblyLineTester.Views.Pages
 
             string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
 
-            if (ContinuityLikeTypes.Contains(testType, StringComparer.OrdinalIgnoreCase))
+
+            if (testType == "WIRE")
             {
-                row.Cells["colExpectedValue"].Value = "0";
+                row.Cells["colExpectedValue"].Value = "-";
                 row.Cells["colExpectedValue"].ReadOnly = true;
 
                 row.Cells["colTolerance"].Value = "-";
@@ -1113,13 +1153,30 @@ namespace AssemblyLineTester.Views.Pages
                 row.Cells["colLowerLimit"].Value = "0";
                 row.Cells["colUpperLimit"].Value = txtConnectionResistance.Text?.Trim() ?? "0";
             }
+            else if (testType == "SIGNATURE WIRE")
+            {
+                row.Cells["colExpectedValue"].Value = "-";
+                row.Cells["colExpectedValue"].ReadOnly = true;
+
+                row.Cells["colTolerance"].Value = "-";
+                row.Cells["colTolerance"].ReadOnly = true;
+
+
+                row.Cells["colLowerLimit"].ReadOnly = false;
+                row.Cells["colUpperLimit"].ReadOnly = false;
+                row.Cells["colLowerLimit"].Value = "0";
+                row.Cells["colUpperLimit"].Value = txtConnectionResistance.Text?.Trim() ?? "0";
+            }
             else
             {
                 row.Cells["colExpectedValue"].ReadOnly = false;
                 row.Cells["colTolerance"].ReadOnly = false;
 
-                string expStr = row.Cells["colExpectedValue"].Value?.ToString() ?? "0";
-                string tolStr = row.Cells["colTolerance"].Value?.ToString() ?? "±0%";
+
+                string expStr = row.Cells["colExpectedValue"].ToString();
+                string tolStr = row.Cells["colTolerance"].ToString();
+                //string expStr = row.Cells["colExpectedValue"].Value?.ToString() ?? "0";
+                //string tolStr = row.Cells["colTolerance"].Value?.ToString() ?? "±0%";
 
                 if (double.TryParse(expStr, out double expectedVal))
                 {
@@ -1575,11 +1632,11 @@ namespace AssemblyLineTester.Views.Pages
                     int toAddr = ParsePinAddress(toPin);
 
                     gridConfig.Rows.Add(
-                        seqNo.ToString(),       //No
-                        "",                     //Harness Group
-                        "",                     //Color
-                        "",                     //Gauge
-                        "",                     //Net-ID
+                        seqNo.ToString(),       // No
+                        "",                     // Harness Group
+                        "",                     // Color
+                        "",                     // Gauge
+                        "",                     // Net-ID
                         fromAddr.ToString(),    // from
                         "",                     // from label
                         toAddr.ToString(),      // to
