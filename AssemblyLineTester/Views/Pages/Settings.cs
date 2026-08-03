@@ -38,11 +38,7 @@ namespace AssemblyLineTester.Views.Pages
             if (cmbDateFormat.Items.Count > 0) cmbDateFormat.SelectedIndex = 0;
             if (cmbTimeFormat.Items.Count > 0) cmbTimeFormat.SelectedIndex = 0;
             if (cmbAutoLogout.Items.Count > 0) cmbAutoLogout.SelectedIndex = 0;
-            if (cmbTestType.Items.Count > 0) cmbTestType.SelectedIndex = 0;
-            if (cmbDefaultArea.Items.Count > 0) cmbDefaultArea.SelectedIndex = 0;
-            if (cmbDefaultOp.Items.Count > 0) cmbDefaultOp.SelectedIndex = 0;
             if (cmbRefresh.Items.Count > 0) cmbRefresh.SelectedIndex = 0;
-            if (cmbTimeZone.Items.Count > 0) cmbTimeZone.SelectedIndex = 0;
             SetupEvents();
         }
 
@@ -232,6 +228,7 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.BringToFront();
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    settingSystemInfo.Visible = false;
                 }
                 else if (clickedLabel == lblTabUsers)
                 {
@@ -249,11 +246,28 @@ namespace AssemblyLineTester.Views.Pages
                     }
                     _usersAndRolesPage.Visible = true;
                     _usersAndRolesPage.BringToFront();
+                    settingSystemInfo.Visible = false;
+                }
+                else if (clickedLabel == lblTabSysInfo)
+                {
+                    tblContent.Visible = false;
+                    if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
+
+                    if (!pnlPageContainer.Controls.Contains(settingSystemInfo))
+                    {
+                        settingSystemInfo.Dock = DockStyle.Fill;
+                        settingSystemInfo.Margin = new Padding(0);
+                        pnlPageContainer.Controls.Add(settingSystemInfo);
+                    }
+                    settingSystemInfo.Visible = true;
+                    settingSystemInfo.BringToFront();
                 }
                 else
                 {
                     tblContent.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
+                    settingSystemInfo.Visible = false;
                     if (tblUcContainer != null && lblUnderConstructionTitle != null)
                     {
                         lblUnderConstructionTitle.Text = $"{clickedLabel.Text.Trim()} — Under Construction";
@@ -273,16 +287,60 @@ namespace AssemblyLineTester.Views.Pages
         {
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardGeneral, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardTestSettings, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardFileSettings, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardAppSettings, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardSystemStatus, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardLicenseInfo, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardSystemTime, 12, Color.FromArgb(34, 40, 49), 2.5f);
-
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnBrowseData, 8, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnBrowseReport, 8, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnManageLicense, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSyncTime, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
+
+            txtTotalTestPoint.KeyPress += NumericTextBox_KeyPress;
+            txtDefResistorVal.KeyPress += NumericTextBox_KeyPress;
+            txtDefMaxWireRes.KeyPress += NumericTextBox_KeyPress;
+            txtDefResistorTol.KeyPress += NumericTextBox_KeyPress;
+            txtDefWireInsRes.KeyPress += NumericTextBox_KeyPress;
+            txtDefCapacitorVal.KeyPress += NumericTextBox_KeyPress;
+            txtDefCapacitorTol.KeyPress += NumericTextBox_KeyPress;
+
+            PopulateTestTypes();
+        }
+
+        private void NumericTextBox_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            // Allow control characters (backspace, etc.) and digits.
+            // Also allow a single decimal point if not already present.
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.')
+            {
+                e.Handled = true;
+            }
+            if (e.KeyChar == '.' && sender is TextBox txt && txt.Text.Contains('.'))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void PopulateTestTypes()
+        {
+            // Placeholder: Loop from TestType Column in database/enum
+            string[] dummyTestTypes = { "Standard Electrical", "Automated", "Quick Diagnostics", "Burn-in", "High Voltage" };
+            
+            // Populate ComboBox
+            cmbDefTestType.Items.Clear();
+            cmbDefTestType.Items.AddRange(dummyTestTypes);
+            if (cmbDefTestType.Items.Count > 0) cmbDefTestType.SelectedIndex = 0;
+
+            // Populate FlowLayoutPanel CheckBoxes
+            flpTestTypeAvail.Controls.Clear();
+            foreach (string tt in dummyTestTypes)
+            {
+                CheckBox cb = new CheckBox
+                {
+                    Text = tt,
+                    AutoSize = true,
+                    Font = new Font("Segoe UI", 9.5F),
+                    ForeColor = Color.FromArgb(30, 41, 59),
+                    Margin = new Padding(0, 5, 0, 5),
+                    UseVisualStyleBackColor = true
+                };
+                flpTestTypeAvail.Controls.Add(cb);
+            }
         }
     }
 }
