@@ -14,6 +14,7 @@ namespace AssemblyLineTester.Views.Pages
         private TableLayoutPanel? tblUcContainer;
         private Label? lblUnderConstructionTitle;
         private SettingsUsersAndRolesPage? _usersAndRolesPage;
+        private SettingBackupRestore? _backupRestorePage;
 
         /// <summary>
         /// Programmatically switches directly to the Users & Roles tab.
@@ -227,6 +228,7 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = true;
                     tblContent.BringToFront();
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
+                    if (_backupRestorePage != null) _backupRestorePage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
                     settingSystemInfo.Visible = false;
                 }
@@ -234,6 +236,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    if (_backupRestorePage != null) _backupRestorePage.Visible = false;
                     if (_usersAndRolesPage == null)
                     {
                         _usersAndRolesPage = new SettingsUsersAndRolesPage
@@ -253,6 +256,7 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
+                    if (_backupRestorePage != null) _backupRestorePage.Visible = false;
 
                     if (!pnlPageContainer.Controls.Contains(settingSystemInfo))
                     {
@@ -263,10 +267,31 @@ namespace AssemblyLineTester.Views.Pages
                     settingSystemInfo.Visible = true;
                     settingSystemInfo.BringToFront();
                 }
+                else if (clickedLabel == lblTabBackup)
+                {
+                    tblContent.Visible = false;
+                    if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
+                    settingSystemInfo.Visible = false;
+
+                    if (_backupRestorePage == null)
+                    {
+                        _backupRestorePage = new SettingBackupRestore
+                        {
+                            Dock = DockStyle.Fill,
+                            Visible = true,
+                            Margin = new Padding(0)
+                        };
+                        pnlPageContainer.Controls.Add(_backupRestorePage);
+                    }
+                    _backupRestorePage.Visible = true;
+                    _backupRestorePage.BringToFront();
+                }
                 else
                 {
                     tblContent.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
+                    if (_backupRestorePage != null) _backupRestorePage.Visible = false;
                     settingSystemInfo.Visible = false;
                     if (tblUcContainer != null && lblUnderConstructionTitle != null)
                     {
