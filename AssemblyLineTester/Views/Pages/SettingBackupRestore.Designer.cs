@@ -54,8 +54,8 @@ namespace AssemblyLineTester.Views
             tblMainLayout.Name = "tblMainLayout";
             tblMainLayout.Padding = new Padding(13);
             tblMainLayout.RowCount = 2;
-            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 52.5547447F));
-            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 47.4452553F));
+            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 47.34098F));
+            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 52.65902F));
             tblMainLayout.Size = new Size(1733, 985);
             tblMainLayout.TabIndex = 0;
             // 
@@ -69,7 +69,7 @@ namespace AssemblyLineTester.Views
             cardBackupRestore.Location = new Point(13, 13);
             cardBackupRestore.Margin = new Padding(0, 0, 0, 19);
             cardBackupRestore.Name = "cardBackupRestore";
-            cardBackupRestore.Size = new Size(1707, 485);
+            cardBackupRestore.Size = new Size(1707, 435);
             cardBackupRestore.TabIndex = 1;
             // 
             // tblBackupRestore
@@ -144,7 +144,7 @@ namespace AssemblyLineTester.Views
             cboAutoRecap.Font = new Font("Segoe UI", 9.5F);
             cboAutoRecap.FormattingEnabled = true;
             cboAutoRecap.Items.AddRange(new object[] { "Everyday", "7 days", "2 weeks", "1 month" });
-            cboAutoRecap.Location = new Point(15, 100);
+            cboAutoRecap.Location = new Point(15, 101);
             cboAutoRecap.Margin = new Padding(0, 0, 15, 14);
             cboAutoRecap.Name = "cboAutoRecap";
             cboAutoRecap.Size = new Size(822, 43);
