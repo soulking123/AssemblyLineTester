@@ -155,9 +155,11 @@ namespace AssemblyLineTester.Views.Pages
                 EnableDoubleBufferingRecursive(child);
             }
         }
-        private void LoadTestTypeColumnItems()
+        // Offers only the test types ticked under Settings, falling back to every type if none are.
+        public void LoadTestTypeColumnItems()
         {
-            var names = _configService.GetTestTypeNames();
+            var names = TestSettingService.GetEnabledTestTypeNames();
+            if (names.Count == 0) names = _configService.GetTestTypeNames();
 
             if (gridConfig.Columns["colTestType"] is DataGridViewComboBoxColumn testTypeCol)
             {
@@ -1092,7 +1094,8 @@ namespace AssemblyLineTester.Views.Pages
             return double.TryParse(clean, out double val) ? val : null;
         }
     
-        private void ParseAndPopulateGridFromProgramText(string programText)
+        // allowedTestTypes null keeps every parsed row; a list keeps only rows of those types.
+        private void ParseAndPopulateGridFromProgramText(string programText, List<string>? allowedTestTypes = null)
         {
             if (string.IsNullOrWhiteSpace(programText)) return;
 
@@ -1121,6 +1124,15 @@ namespace AssemblyLineTester.Views.Pages
                 // Expected format: [SeqNo, FromPin, ToPin]  (e.g., "1", "J1-040", "J3-040")
                 if (tokens.Length >= 3 && int.TryParse(tokens[0], out int seqNo))
                 {
+                    // ponytail: the instrument's learned program only ever describes wire nets, so every
+                    // parsed row is WIRE. Widen this once the program text carries a per-row type.
+                    const string rowTestType = "WIRE";
+                    if (allowedTestTypes != null &&
+                        !allowedTestTypes.Contains(rowTestType, StringComparer.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
                     string fromPin = tokens[1];
                     string toPin = tokens[2];
 
@@ -1135,7 +1147,7 @@ namespace AssemblyLineTester.Views.Pages
                         "",                     // from label
                         toAddr.ToString(),      // to
                         "",                     // to label
-                        "WIRE",                 // test type
+                        rowTestType,            // test type
                         "",                     // lower limit
                         "",                     // upper limit
                         "",                     // expected value
@@ -1179,6 +1191,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void btnLearnConnection_Click(object? sender, EventArgs e)
         {
+            List<string> learnTestTypes;
+
             // Show the Learn Connection Modal Options
             using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
             {
@@ -1187,12 +1201,16 @@ namespace AssemblyLineTester.Views.Pages
                     return; // User cancelled
                 }
 
-                // Store options in local variables as requested
-                bool learnWire = modal.IncludeWire;
-                bool learnResistor = modal.IncludeResistor;
-                bool learnCapacitor = modal.IncludeCapacitor;
-                bool learnDiode = modal.IncludeDiode;
-                bool learnTwistedPair = modal.IncludeTwistedPair;
+                learnTestTypes = modal.SelectedTypes
+                    .Select(c => c.TestType?.TestTypeName ?? string.Empty)
+                    .Where(name => name.Length > 0)
+                    .ToList();
+                if (learnTestTypes.Count == 0)
+                {
+                    MessageBox.Show(this, "Select at least one connection type to learn.",
+                        "Nothing Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
             }
 
             _testCts?.Cancel();
@@ -1258,7 +1276,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 _customTestText = getTestResult.Result;
                 Debug.WriteLine(_customTestText);
-                ParseAndPopulateGridFromProgramText(_customTestText);
+                ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
 
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

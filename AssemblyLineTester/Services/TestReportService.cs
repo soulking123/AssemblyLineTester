@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
@@ -131,9 +132,13 @@ namespace AssemblyLineTester.Services
                 HarnessGroup = d.HarnessGroup,
                 FromPin = d.FromPin,
                 ToPin = d.ToPin,
+                FromLabel = d.FromLabel,
+                ToLabel = d.ToLabel,
                 TestType = d.TestTypeName,
                 LowerLimit = d.LowerLimit,
                 UpperLimit = d.UpperLimit,
+                ExpectedValue = d.ExpectedValue,
+                ToleranceValue = d.Tolerance,
                 Unit = d.Unit,
                 Measured = d.MeasuredValue.HasValue ? $"{d.MeasuredValue.Value} {d.Unit}" : "N/A",
                 Result = FormatResult(d.Result, d.MeasuredValue),
@@ -223,11 +228,15 @@ namespace AssemblyLineTester.Services
                         HarnessGroup = r.HarnessGroup,
                         FromPin = string.IsNullOrEmpty(r.FromPoint) ? "-" : r.FromPoint,
                         ToPin = string.IsNullOrEmpty(r.ToPoint) ? "-" : r.ToPoint,
+                        FromLabel = r.FromLabel,
+                        ToLabel = r.ToLabel,
                         TestTypeName = rowTypeName,
                         MeasuredValue = r.MeasuredValue,
-                        LowerLimit = null,
+                        LowerLimit = r.LowerLimit,
                         UpperLimit = r.UpperLimit,
-                        Unit = "Ω",
+                        ExpectedValue = double.TryParse(r.ExpectedValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double expected) ? expected : null,
+                        Tolerance = r.Tolerance,
+                        Unit = string.IsNullOrWhiteSpace(r.Unit) ? "Ω" : r.Unit,
                         Result = rowPass,
                         ErrorDetail = rowPass ? null : "Measurement out of limits"
                     });

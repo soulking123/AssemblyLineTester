@@ -109,7 +109,9 @@ namespace AssemblyLineTester.Services
             // Sheet 2: one row per net.
             var ws2 = wb.Worksheets.Add("Details");
             int rr = 1;
-            var dHdr = new[] { "#", "Net ID", "Harness Group", "From", "To", "Test Type", "Lower", "Upper", "Measure", "Tolerance", "Result" };
+            // "#" and "Result" frame the sheet; the columns between them follow the Settings tick list.
+            var columns = TestSettingService.GetEnabledResultColumns();
+            var dHdr = new[] { "#" }.Concat(columns).Concat(new[] { "Result" }).ToArray();
             for (int c = 0; c < dHdr.Length; c++)
             {
                 ws2.Cell(rr, c + 1).Value = dHdr[c];
@@ -123,33 +125,38 @@ namespace AssemblyLineTester.Services
             int idx = 1;
             foreach (var d in detail.Details)
             {
+                int resultCol = dHdr.Length;
                 ws2.Cell(rr, 1).Value = idx;
-                ws2.Cell(rr, 2).Value = d.NetId;
-                ws2.Cell(rr, 3).Value = d.HarnessGroup;
-                ws2.Cell(rr, 4).Value = d.FromPin;
-                ws2.Cell(rr, 5).Value = d.ToPin;
-                ws2.Cell(rr, 6).Value = d.TestType;
-                // Written as numbers so the columns sort numerically.
-                if (d.LowerLimit.HasValue) ws2.Cell(rr, 7).Value = d.LowerLimit.Value; else ws2.Cell(rr, 7).Value = "-";
-                if (d.UpperLimit.HasValue) ws2.Cell(rr, 8).Value = d.UpperLimit.Value; else ws2.Cell(rr, 8).Value = "-";
-                ws2.Cell(rr, 9).Value = d.Measured;
-                ws2.Cell(rr, 10).Value = d.Tolerance;
-                ws2.Cell(rr, 11).Value = d.Result;
 
-                ws2.Range(rr, 1, rr, 11).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                ws2.Range(rr, 1, rr, 11).Style.Alignment.WrapText = false;
+                for (int c = 0; c < columns.Count; c++)
+                {
+                    var cell = ws2.Cell(rr, c + 2);
+                    // Limits stay numeric so the columns sort numerically; everything else is text.
+                    switch (columns[c])
+                    {
+                        case "Lower Limit" when d.LowerLimit.HasValue: cell.Value = d.LowerLimit.Value; break;
+                        case "Upper Limit" when d.UpperLimit.HasValue: cell.Value = d.UpperLimit.Value; break;
+                        case "Expected Value" when d.ExpectedValue.HasValue: cell.Value = d.ExpectedValue.Value; break;
+                        default: cell.Value = d.Column(columns[c]); break;
+                    }
+                }
+
+                ws2.Cell(rr, resultCol).Value = d.Result;
+
+                ws2.Range(rr, 1, rr, resultCol).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                ws2.Range(rr, 1, rr, resultCol).Style.Alignment.WrapText = false;
 
                 if (string.Equals(d.Result, "PASS", StringComparison.OrdinalIgnoreCase))
                 {
-                    ws2.Cell(rr, 11).Style.Font.FontColor = XLColor.DarkGreen;
+                    ws2.Cell(rr, resultCol).Style.Font.FontColor = XLColor.DarkGreen;
                 }
                 else if (string.Equals(d.Result, "OPEN", StringComparison.OrdinalIgnoreCase))
                 {
-                    ws2.Cell(rr, 11).Style.Font.FontColor = XLColor.DarkOrange;
+                    ws2.Cell(rr, resultCol).Style.Font.FontColor = XLColor.DarkOrange;
                 }
                 else
                 {
-                    ws2.Cell(rr, 11).Style.Font.FontColor = XLColor.DarkRed;
+                    ws2.Cell(rr, resultCol).Style.Font.FontColor = XLColor.DarkRed;
                 }
 
                 rr++;
@@ -157,10 +164,10 @@ namespace AssemblyLineTester.Services
             }
 
             ws2.Columns().AdjustToContents();
-            ws2.Column(2).Width = Math.Max(ws2.Column(2).Width, 12);
-            ws2.Column(3).Width = Math.Max(ws2.Column(3).Width, 24);
-            ws2.Column(6).Width = Math.Max(ws2.Column(6).Width, 18);
-            ws2.Column(9).Width = Math.Max(ws2.Column(9).Width, 14);
+            for (int c = 2; c <= dHdr.Length; c++)
+            {
+                ws2.Column(c).Width = Math.Max(ws2.Column(c).Width, 12);
+            }
 
             ws2.SheetView.FreezeRows(1);
             ws.SheetView.FreezeRows(1);

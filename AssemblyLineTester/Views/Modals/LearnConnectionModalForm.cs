@@ -1,20 +1,26 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
+using AssemblyLineTester.Models;
+using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views.Modals
 {
     public partial class LearnConnectionModalForm : Form
     {
-        public bool IncludeWire => chkWire.Checked;
-        public bool IncludeResistor => chkResistor.Checked;
-        public bool IncludeCapacitor => chkCapacitor.Checked;
-        public bool IncludeDiode => chkDiode.Checked;
-        public bool IncludeTwistedPair => chkTwistedPair.Checked;
+        private readonly List<(LearnConnection Connection, CheckBox Box)> _options = new();
+        private FlowLayoutPanel? _optionsFlow;
+
+        // The types the operator left ticked when they pressed Proceed.
+        public List<LearnConnection> SelectedTypes =>
+            _options.Where(o => o.Box.Checked).Select(o => o.Connection).ToList();
 
         public LearnConnectionModalForm()
         {
             InitializeComponent();
+            BuildOptions();
 
             btnCancel.Click += (s, e) => this.Close();
             btnProceed.Click += BtnProceed_Click;
@@ -32,7 +38,65 @@ namespace AssemblyLineTester.Views.Modals
             if (!DesignMode)
             {
                 AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+                FitHeightToOptions();
             }
+        }
+
+        // Only the types enabled in Settings are offered here; their tick state seeds the boxes.
+        private void BuildOptions()
+        {
+            var flow = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                AutoScroll = true,
+                BackColor = Color.Transparent,
+                Padding = new Padding(56, 43, 12, 12)
+            };
+
+            foreach (var connection in TestSettingService.GetLearnConnections().Where(c => c.IsChecked))
+            {
+                var box = new CheckBox
+                {
+                    Text = connection.DisplayName,
+                    Checked = true,
+                    AutoSize = true,
+                    BackColor = Color.Transparent,
+                    Font = new Font("Segoe UI", 12F),
+                    ForeColor = Color.Black,
+                    Margin = new Padding(6),
+                    UseVisualStyleBackColor = false
+                };
+                flow.Controls.Add(box);
+                _options.Add((connection, box));
+            }
+
+            if (_options.Count == 0)
+            {
+                flow.Controls.Add(new Label
+                {
+                    Text = "No connection types are enabled. Turn them on under Settings > Test.",
+                    AutoSize = true,
+                    Font = new Font("Segoe UI", 12F),
+                    ForeColor = Color.FromArgb(100, 116, 139),
+                    Margin = new Padding(6)
+                });
+                btnProceed.Enabled = false;
+            }
+
+            pnlContent.Controls.Add(flow);
+            _optionsFlow = flow;
+        }
+
+        // Shrinks the dialog to the number of enabled options, so a short list is not a half-empty
+        // box. The designer height stays the ceiling - past it the flow scrolls instead of growing.
+        private void FitHeightToOptions()
+        {
+            if (_optionsFlow == null) return;
+
+            int wanted = Math.Min(_optionsFlow.PreferredSize.Height, pnlContent.Height);
+            ClientSize = new Size(ClientSize.Width, pnlCustomHeader.Height + wanted + pnlBottom.Height);
         }
 
         private void BtnProceed_Click(object? sender, EventArgs e)

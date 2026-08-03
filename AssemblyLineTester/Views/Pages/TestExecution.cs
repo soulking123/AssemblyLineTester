@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
@@ -28,6 +29,7 @@ namespace AssemblyLineTester.Views.Pages
     {
         private readonly InstrumentService _instrument = new();
         private List<LiveTestDetailRowDto> _loadedRows = new();
+        private List<string> _resultColumns = new();
         private readonly TestConfigService _configService = new TestConfigService();
         private string _customTestText = string.Empty;
         private double _continuityResistance;
@@ -134,28 +136,58 @@ namespace AssemblyLineTester.Views.Pages
             cmbEcnNo.SelectedIndex = 0;
         }
 
+        // Rebuilds the live grid header after the result-column ticks were saved in Settings.
+        public void ReloadResultColumns() => SetupGridLiveDetails();
+
         // Columns and styling only; rows arrive when a program is loaded.
         private void SetupGridLiveDetails()
         {
             gridLiveDetails.Columns.Clear();
+            _resultColumns = TestSettingService.GetEnabledResultColumns();
 
             gridLiveDetails.Columns.Add("StepNo", "#");
-            gridLiveDetails.Columns.Add("TestPoint", "Test Point");
-            gridLiveDetails.Columns.Add("TestType", "Test Type");
-            gridLiveDetails.Columns.Add("Measured", "Measured Value");
+            foreach (string column in _resultColumns)
+            {
+                gridLiveDetails.Columns.Add(column, column);
+                gridLiveDetails.Columns[column]!.MinimumWidth = 110;
+            }
             gridLiveDetails.Columns.Add("Status", "Status");
 
             gridLiveDetails.AllowUserToResizeColumns = true;
             gridLiveDetails.Columns["StepNo"]!.Width = 55;
-            gridLiveDetails.Columns["TestPoint"]!.Width = 240;
-            gridLiveDetails.Columns["TestType"]!.Width = 180;
-            gridLiveDetails.Columns["Measured"]!.Width = 240;
             gridLiveDetails.Columns["Status"]!.MinimumWidth = 140;
             gridLiveDetails.Columns["Status"]!.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
             AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridLiveDetails);
             gridLiveDetails.RowTemplate.Height = 36;
             gridLiveDetails.ColumnHeadersHeight = 40;
+        }
+
+        // The instrument reports measurements but knows nothing about labels, limits or tolerance;
+        // those live on the loaded program, so each row is filled from its net.
+        //
+        // ponytail: matched by position, which assumes the instrument returns measurements in program
+        // order. Swap for a pin-address match if that assumption ever breaks.
+        private void ApplyConfigNets(TestConfiguration config)
+        {
+            var nets = config.Nets?.OrderBy(n => n.SequenceNo).ToList();
+            if (nets == null || nets.Count != _loadedRows.Count) return;
+
+            for (int i = 0; i < _loadedRows.Count; i++)
+            {
+                var row = _loadedRows[i];
+                var net = nets[i];
+
+                row.FromLabel = net.FromLabel;
+                row.ToLabel = net.ToLabel;
+                row.LowerLimit = net.LowerLimit;
+                row.Tolerance = net.Tolerance;
+                row.Unit = net.MeasurementUnit;
+                if (net.UpperLimit.HasValue) row.UpperLimit = net.UpperLimit;
+                if (net.ExpectedValue.HasValue) row.ExpectedValue = net.ExpectedValue.Value.ToString(CultureInfo.InvariantCulture);
+                if (string.IsNullOrWhiteSpace(row.NetId)) row.NetId = net.NetId;
+                if (string.IsNullOrWhiteSpace(row.HarnessGroup)) row.HarnessGroup = net.HarnessGroup;
+            }
         }
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
@@ -440,6 +472,8 @@ namespace AssemblyLineTester.Views.Pages
                             }
                         }
 
+                        ApplyConfigNets(config);
+
                         logService.Log(LogSeverity.Info, "Instrument", "Get Test Masurement Success.",
                         $"Success getting test measurement with test result", SessionManager.CurrentUser?.Username ?? "Unknown");
                     }
@@ -676,12 +710,11 @@ namespace AssemblyLineTester.Views.Pages
 
             foreach (var row in rows)
             {
-                int idx = gridLiveDetails.Rows.Add(
-                    row.StepNo.ToString(),
-                    row.TestPoint,
-                    row.TestType,
-                    row.MeasuredValue?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "",
-                    row.Status.ToString().ToUpperInvariant());
+                var values = new List<string> { row.StepNo.ToString() };
+                values.AddRange(_resultColumns.Select(column => ResultCellValue(row, column)));
+                values.Add(row.Status.ToString().ToUpperInvariant());
+
+                int idx = gridLiveDetails.Rows.Add(values.ToArray());
 
                 ApplyStatusStyle(gridLiveDetails.Rows[idx], row.Status);
 
@@ -689,6 +722,27 @@ namespace AssemblyLineTester.Views.Pages
             }
             gridLiveDetails.Refresh();
         }
+
+        // Maps a configurable column name onto the live row it is rendered from.
+        private static string ResultCellValue(LiveTestDetailRowDto row, string column) => column switch
+        {
+            "Net-ID" => row.NetId,
+            "Harness Group" => row.HarnessGroup,
+            "From" => row.FromPoint,
+            "Net From Label" => row.FromLabel,
+            "To" => row.ToPoint,
+            "Net To Label" => row.ToLabel,
+            "Test Type" => row.TestType,
+            "Lower Limit" => FormatNumber(row.LowerLimit),
+            "Upper Limit" => FormatNumber(row.UpperLimit),
+            "Expected Value" => row.ExpectedValue,
+            "Tolerance" => row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
+            "Measurement" => FormatNumber(row.MeasuredValue, "F3"),
+            _ => ""
+        };
+
+        private static string FormatNumber(double? value, string format = "0.##") =>
+            value?.ToString(format, CultureInfo.InvariantCulture) ?? "";
       
         private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)
         {

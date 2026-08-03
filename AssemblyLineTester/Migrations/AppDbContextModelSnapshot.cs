@@ -75,6 +75,43 @@ namespace AssemblyLineTester.Migrations
                     b.HasIndex("TestTypeId");
 
                     b.ToTable("LearnConnections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DisplayName = "Wire",
+                            IsChecked = true,
+                            TestTypeId = 15
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DisplayName = "Resistance",
+                            IsChecked = true,
+                            TestTypeId = 11
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DisplayName = "Capacitor",
+                            IsChecked = true,
+                            TestTypeId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DisplayName = "Diode",
+                            IsChecked = true,
+                            TestTypeId = 6
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DisplayName = "Twisted Pair",
+                            IsChecked = true,
+                            TestTypeId = 14
+                        });
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.MaintenanceState", b =>
@@ -1297,6 +1334,13 @@ namespace AssemblyLineTester.Migrations
                     b.Property<string>("ErrorDetail")
                         .HasColumnType("TEXT");
 
+                    b.Property<double?>("ExpectedValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("FromLabel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FromPin")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1325,9 +1369,16 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ToLabel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ToPin")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<double?>("Tolerance")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Unit")
                         .IsRequired()
@@ -1444,6 +1495,80 @@ namespace AssemblyLineTester.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TestResultChecks");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsChecked = true,
+                            TestResultName = "Net-ID"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsChecked = true,
+                            TestResultName = "Harness Group"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IsChecked = true,
+                            TestResultName = "From"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            IsChecked = true,
+                            TestResultName = "Net From Label"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            IsChecked = true,
+                            TestResultName = "To"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            IsChecked = true,
+                            TestResultName = "Net To Label"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            IsChecked = true,
+                            TestResultName = "Test Type"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            IsChecked = true,
+                            TestResultName = "Lower Limit"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            IsChecked = true,
+                            TestResultName = "Upper Limit"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            IsChecked = true,
+                            TestResultName = "Expected Value"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            IsChecked = true,
+                            TestResultName = "Tolerance"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            IsChecked = true,
+                            TestResultName = "Measurement"
+                        });
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.TestStep", b =>
@@ -1612,6 +1737,113 @@ namespace AssemblyLineTester.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TestTypeChecks");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DisplayName = "4RESISTOR",
+                            IsChecked = true,
+                            TestTypeName = "4RESISTOR"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DisplayName = "4WIRE",
+                            IsChecked = true,
+                            TestTypeName = "4WIRE"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DisplayName = "CAPACITOR",
+                            IsChecked = true,
+                            TestTypeName = "CAPACITOR"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DisplayName = "CLOSE",
+                            IsChecked = true,
+                            TestTypeName = "CLOSE"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DisplayName = "COMMENT",
+                            IsChecked = true,
+                            TestTypeName = "COMMENT"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DisplayName = "DIODE",
+                            IsChecked = true,
+                            TestTypeName = "DIODE"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DisplayName = "LINK",
+                            IsChecked = true,
+                            TestTypeName = "LINK"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DisplayName = "LUA COMPONENT",
+                            IsChecked = true,
+                            TestTypeName = "LUA COMPONENT"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            DisplayName = "OPEN",
+                            IsChecked = true,
+                            TestTypeName = "OPEN"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            DisplayName = "PROBE",
+                            IsChecked = true,
+                            TestTypeName = "PROBE"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            DisplayName = "RESISTOR",
+                            IsChecked = true,
+                            TestTypeName = "RESISTOR"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            DisplayName = "SIGNATURE DIODE",
+                            IsChecked = true,
+                            TestTypeName = "SIGNATURE DIODE"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            DisplayName = "SIGNATURE WIRE",
+                            IsChecked = true,
+                            TestTypeName = "SIGNATURE WIRE"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            DisplayName = "TWISTED PAIR",
+                            IsChecked = true,
+                            TestTypeName = "TWISTED PAIR"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            DisplayName = "WIRE",
+                            IsChecked = true,
+                            TestTypeName = "WIRE"
+                        });
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.User", b =>

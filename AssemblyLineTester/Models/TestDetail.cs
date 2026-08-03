@@ -14,6 +14,8 @@ namespace AssemblyLineTester.Models
         public string HarnessGroup { get; set; } = string.Empty;
         public string FromPin { get; set; } = string.Empty;
         public string ToPin { get; set; } = string.Empty;
+        public string FromLabel { get; set; } = string.Empty;
+        public string ToLabel { get; set; } = string.Empty;
 
         public string TestTypeName { get; set; } = string.Empty;
         public TestType? TestTypeInfo { get; set; }
@@ -21,6 +23,8 @@ namespace AssemblyLineTester.Models
         public double? MeasuredValue { get; set; }
         public double? LowerLimit { get; set; }
         public double? UpperLimit { get; set; }
+        public double? ExpectedValue { get; set; }
+        public double? Tolerance { get; set; }
         public string Unit { get; set; } = string.Empty;
 
         public bool Result { get; set; }

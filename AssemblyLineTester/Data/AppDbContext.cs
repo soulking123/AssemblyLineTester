@@ -259,6 +259,50 @@ namespace AssemblyLineTester.Data
                 new TestType { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE" }
             );
 
+            // One check row per test type, so the Settings list is complete the first time it opens.
+            modelBuilder.Entity<TestTypeCheck>().HasData(
+                new TestTypeCheck { Id = 1, TestTypeName = "4RESISTOR", DisplayName = "4RESISTOR", IsChecked = true },
+                new TestTypeCheck { Id = 2, TestTypeName = "4WIRE", DisplayName = "4WIRE", IsChecked = true },
+                new TestTypeCheck { Id = 3, TestTypeName = "CAPACITOR", DisplayName = "CAPACITOR", IsChecked = true },
+                new TestTypeCheck { Id = 4, TestTypeName = "CLOSE", DisplayName = "CLOSE", IsChecked = true },
+                new TestTypeCheck { Id = 5, TestTypeName = "COMMENT", DisplayName = "COMMENT", IsChecked = true },
+                new TestTypeCheck { Id = 6, TestTypeName = "DIODE", DisplayName = "DIODE", IsChecked = true },
+                new TestTypeCheck { Id = 7, TestTypeName = "LINK", DisplayName = "LINK", IsChecked = true },
+                new TestTypeCheck { Id = 8, TestTypeName = "LUA COMPONENT", DisplayName = "LUA COMPONENT", IsChecked = true },
+                new TestTypeCheck { Id = 9, TestTypeName = "OPEN", DisplayName = "OPEN", IsChecked = true },
+                new TestTypeCheck { Id = 10, TestTypeName = "PROBE", DisplayName = "PROBE", IsChecked = true },
+                new TestTypeCheck { Id = 11, TestTypeName = "RESISTOR", DisplayName = "RESISTOR", IsChecked = true },
+                new TestTypeCheck { Id = 12, TestTypeName = "SIGNATURE DIODE", DisplayName = "SIGNATURE DIODE", IsChecked = true },
+                new TestTypeCheck { Id = 13, TestTypeName = "SIGNATURE WIRE", DisplayName = "SIGNATURE WIRE", IsChecked = true },
+                new TestTypeCheck { Id = 14, TestTypeName = "TWISTED PAIR", DisplayName = "TWISTED PAIR", IsChecked = true },
+                new TestTypeCheck { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE", IsChecked = true }
+            );
+
+            // The five types the Learn Connection modal offers, pointed at their TestType rows.
+            modelBuilder.Entity<LearnConnection>().HasData(
+                new LearnConnection { Id = 1, TestTypeId = 15, DisplayName = "Wire", IsChecked = true },
+                new LearnConnection { Id = 2, TestTypeId = 11, DisplayName = "Resistance", IsChecked = true },
+                new LearnConnection { Id = 3, TestTypeId = 3, DisplayName = "Capacitor", IsChecked = true },
+                new LearnConnection { Id = 4, TestTypeId = 6, DisplayName = "Diode", IsChecked = true },
+                new LearnConnection { Id = 5, TestTypeId = 14, DisplayName = "Twisted Pair", IsChecked = true }
+            );
+
+            // TestResultName doubles as the column header wherever a result row is rendered.
+            modelBuilder.Entity<TestResultCheck>().HasData(
+                new TestResultCheck { Id = 1, TestResultName = "Net-ID", IsChecked = true },
+                new TestResultCheck { Id = 2, TestResultName = "Harness Group", IsChecked = true },
+                new TestResultCheck { Id = 3, TestResultName = "From", IsChecked = true },
+                new TestResultCheck { Id = 4, TestResultName = "Net From Label", IsChecked = true },
+                new TestResultCheck { Id = 5, TestResultName = "To", IsChecked = true },
+                new TestResultCheck { Id = 6, TestResultName = "Net To Label", IsChecked = true },
+                new TestResultCheck { Id = 7, TestResultName = "Test Type", IsChecked = true },
+                new TestResultCheck { Id = 8, TestResultName = "Lower Limit", IsChecked = true },
+                new TestResultCheck { Id = 9, TestResultName = "Upper Limit", IsChecked = true },
+                new TestResultCheck { Id = 10, TestResultName = "Expected Value", IsChecked = true },
+                new TestResultCheck { Id = 11, TestResultName = "Tolerance", IsChecked = true },
+                new TestResultCheck { Id = 12, TestResultName = "Measurement", IsChecked = true }
+            );
+
             modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());
         }
 

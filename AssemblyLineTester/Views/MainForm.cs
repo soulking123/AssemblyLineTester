@@ -150,6 +150,14 @@ namespace AssemblyLineTester.Views
             RepositionSidebarButtons();
         }
 
+        // Pushes saved Default Test Settings into the pages that were built from them. Both are
+        // cached for the life of the session, so without this the ticks only take effect on restart.
+        public void ApplyTestSettings()
+        {
+            pageTestExecution?.ReloadResultColumns();
+            pageTestParameters?.LoadTestTypeColumnItems();
+        }
+
         private void EnableDoubleBuffering()
         {
             this.DoubleBuffered = true;

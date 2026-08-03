@@ -24,6 +24,13 @@
         // The threshold this row's verdict was decided against, so the report can state it.
         public double? UpperLimit { get; set; }
 
+        // Carried over from the loaded TestConfigNet; blank on a run with no matching config row.
+        public string FromLabel { get; set; } = string.Empty;
+        public string ToLabel { get; set; } = string.Empty;
+        public double? LowerLimit { get; set; }
+        public double? Tolerance { get; set; }
+        public string Unit { get; set; } = string.Empty;
+
         // Empty for an instrument-driven run, which knows nothing about harness groups.
         public string HarnessGroup { get; set; } = string.Empty;
     }

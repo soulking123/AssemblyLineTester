@@ -20,6 +20,13 @@ namespace AssemblyLineTester.Views.Pages
         private SettingsUsersAndRolesPage? _usersAndRolesPage;
         private TableLayoutPanel? _backupPage;
 
+        private readonly List<(int Id, CheckBox Box)> _typeBoxes = new();
+        private readonly List<(int Id, CheckBox Box)> _learnBoxes = new();
+        private readonly List<(int Id, CheckBox Box)> _resultBoxes = new();
+        private Button? _btnEditTicks;
+        private Button? _btnSaveTicks;
+        private Button? _btnCancelTicks;
+
         // Jumps straight to the Users & Roles tab.
         public void OpenUsersAndRolesTab()
         {
@@ -31,11 +38,6 @@ namespace AssemblyLineTester.Views.Pages
         private Panel? pnlPageContainer;
         private Label? activeTabLabel;
         private bool isLoaded = false;
-        private System.Windows.Forms.Timer? _clock;
-
-        private static readonly DateTime _processStart = Process.GetCurrentProcess().StartTime;
-        private static readonly Color Ok = Color.FromArgb(22, 163, 74);
-        private static readonly Color Bad = Color.FromArgb(220, 38, 38);
 
         public Settings()
         {
@@ -46,178 +48,26 @@ namespace AssemblyLineTester.Views.Pages
             if (cmbDateFormat.Items.Count > 0) cmbDateFormat.SelectedIndex = 0;
             if (cmbTimeFormat.Items.Count > 0) cmbTimeFormat.SelectedIndex = 0;
             if (cmbAutoLogout.Items.Count > 0) cmbAutoLogout.SelectedIndex = 0;
-            if (cmbTestType.Items.Count > 0) cmbTestType.SelectedIndex = 0;
-            if (cmbDefaultArea.Items.Count > 0) cmbDefaultArea.SelectedIndex = 0;
-            if (cmbDefaultOp.Items.Count > 0) cmbDefaultOp.SelectedIndex = 0;
             if (cmbRefresh.Items.Count > 0) cmbRefresh.SelectedIndex = 0;
-            if (cmbTimeZone.Items.Count > 0) cmbTimeZone.SelectedIndex = 0;
             SetupEvents();
-            LoadLicenseInfo();
-            LoadSystemStatus();
             LoadFileSettings();
-            StartClock();
         }
 
-        // These four came from the mockup. Only the folders and the two retention windows exist in code,
-        // so they are shown read-only rather than pretending an edit here changes anything.
+        // These came from the mockup. Only the folders exist in code, so they are shown read-only
+        // rather than pretending an edit here changes anything.
         private void LoadFileSettings()
         {
             txtDataPath.Text = Data.AppDbContext.DataFolder;
             txtReportPath.Text = AppInfo.LogDirectory;
-            txtLogRet.Text = SystemLogService.RetentionDays.ToString();
-            txtMaxSize.Text = FileLogService.RetentionDays.ToString();
 
             lblReportStorage.Text = "Log Storage Path";
-            lblLogRet.Text = "System Log Retention (Days)";
-            lblMaxSize.Text = "File Log Retention (Days)";
 
-            foreach (TextBox box in new[] { txtDataPath, txtReportPath, txtLogRet, txtMaxSize })
+            foreach (TextBox box in new[] { txtDataPath, txtReportPath })
             {
                 box.ReadOnly = true;
                 box.BackColor = Color.FromArgb(241, 245, 249);
             }
-
-            chkAutoDelete.Checked = true;
-            chkAutoDelete.Enabled = false;
-            chkAutoDelete.Text = "Auto delete logs older than retention (runs at startup)";
         }
-
-        // Ticks the two values that go stale while the page is open: wall clock and uptime.
-        private void StartClock()
-        {
-            UpdateClock();
-            _clock = new System.Windows.Forms.Timer { Interval = 1000 };
-            _clock.Tick += (s, e) => UpdateClock();
-            _clock.Start();
-            Disposed += (s, e) => _clock?.Dispose();
-        }
-
-        private void UpdateClock()
-        {
-            DateTime now = DateTime.Now;
-            lblTimeValDate.Text = now.ToString("dd MMM yyyy");
-            lblTimeValTime.Text = now.ToString("hh:mm:ss tt");
-
-            TimeSpan up = now - _processStart;
-            lblStValUptime.Text = $"{(int)up.TotalHours:D2}:{up.Minutes:D2}:{up.Seconds:D2}";
-        }
-
-        // Fills the status card from the process, the database file and the data folder.
-        private void LoadSystemStatus()
-        {
-            lblStValApp.Text = $"Running {AppInfo.Version}";
-            lblStValApp.ForeColor = Ok;
-
-            var (dbText, dbOk) = DescribeDatabase();
-            lblStValDb.Text = dbText;
-            lblStValDb.ForeColor = dbOk ? Ok : Bad;
-
-            var (fileText, fileOk) = DescribeFileStorage();
-            lblStValFile.Text = fileText;
-            lblStValFile.ForeColor = fileOk ? Ok : Bad;
-
-            lblStValStart.Text = _processStart.ToString("dd MMM yyyy hh:mm:ss tt");
-
-            SelectCurrentTimeZone();
-        }
-
-        private static (string Text, bool Ok) DescribeDatabase()
-        {
-            try
-            {
-                using var db = new Data.AppDbContext();
-                if (!db.Database.CanConnect()) return ("Unreachable", false);
-
-                var size = new FileInfo(Data.AppDbContext.DbPath).Length / (1024d * 1024d);
-                return ($"Connected ({size:0.0} MB)", true);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Settings.DescribeDatabase failed: {ex}");
-                return ("Unreachable", false);
-            }
-        }
-
-        // Free space matters here: the log writer and the report exporter both fail silently when the disk fills.
-        private static (string Text, bool Ok) DescribeFileStorage()
-        {
-            try
-            {
-                if (!Directory.Exists(AppInfo.DataDirectory)) return ("Missing", false);
-
-                var drive = new DriveInfo(Path.GetPathRoot(AppInfo.DataDirectory)!);
-                double freeGb = drive.AvailableFreeSpace / (1024d * 1024d * 1024d);
-                return freeGb < 1
-                    ? ($"Low space ({freeGb:0.0} GB free)", false)
-                    : ($"Healthy ({freeGb:0.0} GB free)", true);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Settings.DescribeFileStorage failed: {ex}");
-                return ("Unknown", false);
-            }
-        }
-
-        // The list is a fixed set of offsets, so match on offset rather than on the zone's name.
-        private void SelectCurrentTimeZone()
-        {
-            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
-            string tag = $"(UTC{(offset < TimeSpan.Zero ? "-" : "+")}{Math.Abs(offset.Hours):D2}:{Math.Abs(offset.Minutes):D2})";
-
-            for (int i = 0; i < cmbTimeZone.Items.Count; i++)
-            {
-                if (cmbTimeZone.Items[i]?.ToString()?.StartsWith(tag, StringComparison.Ordinal) == true)
-                {
-                    cmbTimeZone.SelectedIndex = i;
-                    return;
-                }
-            }
-
-            cmbTimeZone.Items.Insert(0, $"{tag} {TimeZoneInfo.Local.Id}");
-            cmbTimeZone.SelectedIndex = 0;
-        }
-
-        // Fills the licence card and the status row from the signed licence on disk.
-        private void LoadLicenseInfo()
-        {
-            var (result, payload) = LicenseService.Validate();
-
-            bool valid = result == LicenseValidationResult.Valid;
-            lblStValLic.Text = DescribeLicenseStatus(result);
-            lblStValLic.ForeColor = valid ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38);
-
-            lblLicValKey.Text = AppInfo.MachineIds.Count > 0
-                ? AppInfo.FormatMachineId(AppInfo.PrimaryMachineId)
-                : "No physical adapter found";
-
-            if (payload == null)
-            {
-                lblLicValType.Text = "-";
-                lblLicValFrom.Text = "-";
-                lblLicValTo.Text = "-";
-                lblLicValToOrg.Text = "-";
-                lblLicValType.ForeColor = Color.FromArgb(220, 38, 38);
-                return;
-            }
-
-            lblLicValType.Text = payload.ExpiryUtc.HasValue ? "Time-limited" : "Perpetual";
-            lblLicValType.ForeColor = valid ? Color.FromArgb(16, 185, 129) : Color.FromArgb(220, 38, 38);
-            lblLicValFrom.Text = payload.IssuedUtc.ToLocalTime().ToString("dd MMM yyyy");
-            lblLicValTo.Text = payload.ExpiryUtc?.ToLocalTime().ToString("dd MMM yyyy") ?? "No expiry";
-            lblLicValToOrg.Text = string.IsNullOrWhiteSpace(payload.Customer) ? "-" : payload.Customer;
-        }
-
-        private static string DescribeLicenseStatus(LicenseValidationResult result) => result switch
-        {
-            LicenseValidationResult.Valid => "Valid",
-            LicenseValidationResult.MissingFile => "Not installed",
-            LicenseValidationResult.InvalidSignature => "Invalid signature",
-            LicenseValidationResult.Expired => "Expired",
-            LicenseValidationResult.WrongMachine => "Wrong machine",
-            LicenseValidationResult.ClockRolledBack => "Clock rolled back",
-            LicenseValidationResult.CorruptState => "State unreadable",
-            _ => "Unknown"
-        };
 
         private void EnableDoubleBuffering()
         {
@@ -252,7 +102,44 @@ namespace AssemblyLineTester.Views.Pages
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
                 AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+                LayoutTickLists();
                 isLoaded = true;
+            }
+        }
+
+        // Boxes added in code never went through the form's autoscale pass, so their margins stay
+        // at the unscaled designer value while the ones placed in the designer have shrunk. Copying
+        // the margin from a designer box is what makes all three lists share one row pitch.
+        private void MatchTickMarginsToDesigner()
+        {
+            foreach (var (_, box) in _typeBoxes.Concat(_learnBoxes))
+            {
+                box.Margin = chkResNetId.Margin;
+                box.Font = chkResNetId.Font;
+            }
+        }
+
+        // Keeps the designer's column height and widens the panel to the columns that height
+        // produces. The old MaximumSize width cut the last column off mid-label, which is why the
+        // third Test Type column rendered as checkboxes with no text.
+        private void LayoutTickLists()
+        {
+            MatchTickMarginsToDesigner();
+
+            foreach (var flow in new[] { flpTestTypeAvail, flpLearnConn, flpTestResultCol })
+            {
+                flow.PerformLayout();
+
+                var boxes = flow.Controls.Cast<Control>().ToList();
+                if (boxes.Count == 0 || flow.MaximumSize.Height <= 0) continue;
+
+                int widest = boxes.Max(b => b.Width + b.Margin.Horizontal);
+                int pitch = boxes.Max(b => b.Height + b.Margin.Vertical);
+
+                int perColumn = Math.Max(1, flow.MaximumSize.Height / Math.Max(1, pitch));
+                int columns = (int)Math.Ceiling(boxes.Count / (double)perColumn);
+
+                flow.MaximumSize = new Size(columns * widest, flow.MaximumSize.Height);
             }
         }
 
@@ -401,6 +288,7 @@ namespace AssemblyLineTester.Views.Pages
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupPage != null) _backupPage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    settingSystemInfo.Visible = false;
                 }
                 else if (clickedLabel == lblTabUsers)
                 {
@@ -419,6 +307,22 @@ namespace AssemblyLineTester.Views.Pages
                     }
                     _usersAndRolesPage.Visible = true;
                     _usersAndRolesPage.BringToFront();
+                    settingSystemInfo.Visible = false;
+                }
+                else if (clickedLabel == lblTabSysInfo)
+                {
+                    tblContent.Visible = false;
+                    if (tblUcContainer != null) tblUcContainer.Visible = false;
+                    if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
+
+                    if (!pnlPageContainer.Controls.Contains(settingSystemInfo))
+                    {
+                        settingSystemInfo.Dock = DockStyle.Fill;
+                        settingSystemInfo.Margin = new Padding(0);
+                        pnlPageContainer.Controls.Add(settingSystemInfo);
+                    }
+                    settingSystemInfo.Visible = true;
+                    settingSystemInfo.BringToFront();
                 }
                 else if (clickedLabel == lblTabBackup)
                 {
@@ -438,6 +342,7 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupPage != null) _backupPage.Visible = false;
+                    settingSystemInfo.Visible = false;
                     if (tblUcContainer != null && lblUnderConstructionTitle != null)
                     {
                         lblUnderConstructionTitle.Text = $"{clickedLabel.Text.Trim()} — Under Construction";
@@ -622,19 +527,222 @@ namespace AssemblyLineTester.Views.Pages
         {
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardGeneral, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardTestSettings, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardFileSettings, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardAppSettings, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardSystemStatus, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardLicenseInfo, 12, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardSystemTime, 12, Color.FromArgb(34, 40, 49), 2.5f);
-
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnBrowseData, 8, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnBrowseReport, 8, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnManageLicense, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSyncTime, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
 
-            btnSyncTime.Click += (s, e) => { UpdateClock(); SelectCurrentTimeZone(); };
-            btnManageLicense.Click += (s, e) => { LoadLicenseInfo(); LoadSystemStatus(); };
+            txtTotalTestPoint.KeyPress += NumericTextBox_KeyPress;
+            txtDefResistorVal.KeyPress += NumericTextBox_KeyPress;
+            txtDefMaxWireRes.KeyPress += NumericTextBox_KeyPress;
+            txtDefResistorTol.KeyPress += NumericTextBox_KeyPress;
+            txtDefWireInsRes.KeyPress += NumericTextBox_KeyPress;
+            txtDefCapacitorVal.KeyPress += NumericTextBox_KeyPress;
+            txtDefCapacitorTol.KeyPress += NumericTextBox_KeyPress;
+
+            PopulateTestTypes();
+            PopulateLearnConnections();
+            PopulateTestResultColumns();
+            BuildTickListEditButtons();
+            SetTickListsEditable(false);
+        }
+
+        // Gives the card a real header row - title left, actions right, one baseline - instead of
+        // dropping the buttons into a designer cell whose 50px absolute height clipped them.
+        private void BuildTickListEditButtons()
+        {
+            _btnEditTicks = BuildCardButton("✏️  Edit", Color.FromArgb(250, 204, 21), Color.FromArgb(30, 41, 59));
+            _btnSaveTicks = BuildCardButton("💾  Save", Color.FromArgb(250, 204, 21), Color.FromArgb(30, 41, 59));
+            _btnCancelTicks = BuildCardButton("Cancel", Color.FromArgb(241, 245, 249), Color.FromArgb(71, 85, 105));
+
+            _btnEditTicks.Click += (s, e) => SetTickListsEditable(true);
+            _btnCancelTicks.Click += (s, e) => { ReloadTickLists(); SetTickListsEditable(false); };
+            _btnSaveTicks.Click += BtnSaveTicks_Click;
+
+            var actions = new FlowLayoutPanel
+            {
+                Anchor = AnchorStyles.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                BackColor = Color.Transparent,
+                Margin = new Padding(0)
+            };
+            actions.Controls.Add(_btnCancelTicks);
+            actions.Controls.Add(_btnSaveTicks);
+            actions.Controls.Add(_btnEditTicks);
+
+            var header = new TableLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                ColumnCount = 2,
+                RowCount = 1,
+                BackColor = Color.Transparent,
+                Padding = new Padding(15, 14, 24, 10),
+                Margin = new Padding(0)
+            };
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            header.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+            // The title moves out of the grid so it shares a row with the actions; its old row is
+            // collapsed rather than left behind as a 50px gap.
+            tblTestCard.Controls.Remove(lblTestTitle);
+            lblTestTitle.Dock = DockStyle.None;
+            lblTestTitle.Anchor = AnchorStyles.Left;
+            lblTestTitle.AutoSize = true;
+            lblTestTitle.Margin = new Padding(0);
+            tblTestCard.RowStyles[0] = new RowStyle(SizeType.Absolute, 0F);
+
+            header.Controls.Add(lblTestTitle, 0, 0);
+            header.Controls.Add(actions, 1, 0);
+
+            cardTestSettings.Controls.Add(header);
+        }
+
+        // AutoSize rather than a fixed width: ScaleExplicitFonts grows the caption at Load and a
+        // hardcoded button would clip it, which is what hid these buttons in the first place.
+        private static Button BuildCardButton(string text, Color back, Color fore)
+        {
+            var button = new Button
+            {
+                Text = text,
+                Font = UIStyleHelper.Font9Bold,
+                ForeColor = fore,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Padding = new Padding(16, 7, 16, 7),
+                Margin = new Padding(8, 0, 0, 0)
+            };
+            UIStyleHelper.SetupButtonRoundedEdges(button, 8, back, ControlPaint.Light(back, 0.3f), ControlPaint.Dark(back, 0.05f), Color.Transparent);
+            return button;
+        }
+
+        private void SetTickListsEditable(bool editable)
+        {
+            foreach (var (_, box) in _typeBoxes.Concat(_learnBoxes).Concat(_resultBoxes))
+            {
+                box.Enabled = editable;
+            }
+
+            if (_btnEditTicks is not null) _btnEditTicks.Visible = !editable;
+            if (_btnSaveTicks is not null) _btnSaveTicks.Visible = editable;
+            if (_btnCancelTicks is not null) _btnCancelTicks.Visible = editable;
+        }
+
+        private void ReloadTickLists()
+        {
+            PopulateTestTypes();
+            PopulateLearnConnections();
+            PopulateTestResultColumns();
+        }
+
+        // Writes all three tick lists, then pushes them into the pages already built from them.
+        private void BtnSaveTicks_Click(object? sender, EventArgs e)
+        {
+            bool allSaved = true;
+
+            foreach (var (id, box) in _typeBoxes) allSaved &= TestSettingService.SetTestTypeChecked(id, box.Checked);
+            foreach (var (id, box) in _learnBoxes) allSaved &= TestSettingService.SetLearnConnectionChecked(id, box.Checked);
+            foreach (var (id, box) in _resultBoxes) allSaved &= TestSettingService.SetTestResultChecked(id, box.Checked);
+
+            if (!allSaved)
+            {
+                MessageBox.Show("Some settings could not be saved. Check the log and try again.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            Application.OpenForms.OfType<MainForm>().FirstOrDefault()?.ApplyTestSettings();
+            SetTickListsEditable(false);
+
+            MessageBox.Show("Default test settings saved.", "Default Test Settings",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void NumericTextBox_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            // Allow control characters (backspace, etc.) and digits.
+            // Also allow a single decimal point if not already present.
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.')
+            {
+                e.Handled = true;
+            }
+            if (e.KeyChar == '.' && sender is TextBox txt && txt.Text.Contains('.'))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void PopulateTestTypes()
+        {
+            cmbDefTestType.Items.Clear();
+            foreach (var type in TestSettingService.GetTestTypes())
+            {
+                cmbDefTestType.Items.Add(type.DisplayName);
+            }
+            if (cmbDefTestType.Items.Count > 0) cmbDefTestType.SelectedIndex = 0;
+
+            UIStyleHelper.ClearAndDispose(flpTestTypeAvail.Controls);
+            _typeBoxes.Clear();
+            foreach (var check in TestSettingService.GetTestTypeChecks())
+            {
+                var box = BuildCheck(check.DisplayName, check.IsChecked);
+                flpTestTypeAvail.Controls.Add(box);
+                _typeBoxes.Add((check.Id, box));
+            }
+        }
+
+        private void PopulateLearnConnections()
+        {
+            UIStyleHelper.ClearAndDispose(flpLearnConn.Controls);
+            _learnBoxes.Clear();
+            foreach (var conn in TestSettingService.GetLearnConnections())
+            {
+                var box = BuildCheck(conn.DisplayName, conn.IsChecked);
+                flpLearnConn.Controls.Add(box);
+                _learnBoxes.Add((conn.Id, box));
+            }
+        }
+
+        // The twelve boxes stay in the designer for their layout; only their state comes from the table.
+        private void PopulateTestResultColumns()
+        {
+            var checks = TestSettingService.GetTestResultChecks();
+            _resultBoxes.Clear();
+
+            foreach (Control control in flpTestResultCol.Controls)
+            {
+                if (control is not CheckBox box) continue;
+
+                var check = checks.FirstOrDefault(c => c.TestResultName == box.Text);
+                if (check == null)
+                {
+                    box.Enabled = false;
+                    continue;
+                }
+
+                box.Checked = check.IsChecked;
+                _resultBoxes.Add((check.Id, box));
+            }
+        }
+
+        private static CheckBox BuildCheck(string text, bool isChecked)
+        {
+            return new CheckBox
+            {
+                Text = text,
+                Checked = isChecked,
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9.5F),
+                ForeColor = Color.FromArgb(30, 41, 59),
+                Margin = new Padding(0, 5, 0, 5),
+                UseVisualStyleBackColor = true
+            };
         }
     }
 }
