@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace AssemblyLineTester.Views.Modals
@@ -23,7 +23,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader = new Panel();
             lblCustomTitle = new Label();
             iconLogo = new FontAwesome.Sharp.IconPictureBox();
-            btnClose = new FontAwesome.Sharp.IconButton();
             pnlHeader = new Panel();
             lblSubtitle = new Label();
             lblTitle = new Label();
@@ -53,10 +52,9 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
             pnlCustomHeader.Controls.Add(lblCustomTitle);
             pnlCustomHeader.Controls.Add(iconLogo);
-            pnlCustomHeader.Controls.Add(btnClose);
             pnlCustomHeader.Dock = DockStyle.Top;
             pnlCustomHeader.Location = new Point(0, 0);
-            pnlCustomHeader.Margin = new Padding(5, 5, 5, 5);
+            pnlCustomHeader.Margin = new Padding(5);
             pnlCustomHeader.Name = "pnlCustomHeader";
             pnlCustomHeader.Size = new Size(942, 80);
             pnlCustomHeader.TabIndex = 0;
@@ -82,29 +80,12 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconLogo.IconSize = 51;
             iconLogo.Location = new Point(24, 14);
-            iconLogo.Margin = new Padding(5, 5, 5, 5);
+            iconLogo.Margin = new Padding(5);
             iconLogo.Name = "iconLogo";
             iconLogo.Size = new Size(52, 51);
             iconLogo.SizeMode = PictureBoxSizeMode.CenterImage;
             iconLogo.TabIndex = 0;
             iconLogo.TabStop = false;
-            // 
-            // btnClose
-            // 
-            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnClose.BackColor = Color.Transparent;
-            btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.FlatStyle = FlatStyle.Flat;
-            btnClose.IconChar = FontAwesome.Sharp.IconChar.Close;
-            btnClose.IconColor = Color.FromArgb(203, 213, 225);
-            btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnClose.IconSize = 24;
-            btnClose.Location = new Point(861, 0);
-            btnClose.Margin = new Padding(5, 5, 5, 5);
-            btnClose.Name = "btnClose";
-            btnClose.Size = new Size(81, 80);
-            btnClose.TabIndex = 2;
-            btnClose.UseVisualStyleBackColor = false;
             // 
             // pnlHeader
             // 
@@ -113,7 +94,7 @@ namespace AssemblyLineTester.Views.Modals
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 80);
-            pnlHeader.Margin = new Padding(5, 5, 5, 5);
+            pnlHeader.Margin = new Padding(5);
             pnlHeader.Name = "pnlHeader";
             pnlHeader.Size = new Size(942, 136);
             pnlHeader.TabIndex = 0;
@@ -158,7 +139,7 @@ namespace AssemblyLineTester.Views.Modals
             // 
             txtUsername.Font = new Font("Segoe UI", 10.5F);
             txtUsername.Location = new Point(57, 296);
-            txtUsername.Margin = new Padding(5, 5, 5, 5);
+            txtUsername.Margin = new Padding(5);
             txtUsername.Name = "txtUsername";
             txtUsername.Size = new Size(388, 45);
             txtUsername.TabIndex = 2;
@@ -179,7 +160,7 @@ namespace AssemblyLineTester.Views.Modals
             // 
             txtCompanyId.Font = new Font("Segoe UI", 10.5F);
             txtCompanyId.Location = new Point(496, 296);
-            txtCompanyId.Margin = new Padding(5, 5, 5, 5);
+            txtCompanyId.Margin = new Padding(5);
             txtCompanyId.Name = "txtCompanyId";
             txtCompanyId.Size = new Size(388, 45);
             txtCompanyId.TabIndex = 4;
@@ -200,7 +181,7 @@ namespace AssemblyLineTester.Views.Modals
             // 
             txtFullName.Font = new Font("Segoe UI", 10.5F);
             txtFullName.Location = new Point(57, 416);
-            txtFullName.Margin = new Padding(5, 5, 5, 5);
+            txtFullName.Margin = new Padding(5);
             txtFullName.Name = "txtFullName";
             txtFullName.Size = new Size(826, 45);
             txtFullName.TabIndex = 6;
@@ -297,11 +278,13 @@ namespace AssemblyLineTester.Views.Modals
             btnCancel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnCancel.ForeColor = Color.FromArgb(71, 85, 105);
             btnCancel.HoverBackColor = Color.FromArgb(226, 232, 240);
+            btnCancel.HoverForeColor = Color.Empty;
             btnCancel.Location = new Point(528, 29);
-            btnCancel.Margin = new Padding(5, 5, 5, 5);
+            btnCancel.Margin = new Padding(5);
             btnCancel.Name = "btnCancel";
             btnCancel.NormalBackColor = Color.FromArgb(241, 245, 249);
             btnCancel.PressedBackColor = Color.FromArgb(203, 213, 225);
+            btnCancel.PressedForeColor = Color.Empty;
             btnCancel.Size = new Size(171, 70);
             btnCancel.TabIndex = 0;
             btnCancel.Text = "Cancel";
@@ -315,9 +298,11 @@ namespace AssemblyLineTester.Views.Modals
             btnSave.FlatStyle = FlatStyle.Flat;
             btnSave.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnSave.ForeColor = Color.FromArgb(15, 23, 42);
+            btnSave.HoverForeColor = Color.Empty;
             btnSave.Location = new Point(715, 29);
-            btnSave.Margin = new Padding(5, 5, 5, 5);
+            btnSave.Margin = new Padding(5);
             btnSave.Name = "btnSave";
+            btnSave.PressedForeColor = Color.Empty;
             btnSave.Size = new Size(171, 70);
             btnSave.TabIndex = 1;
             btnSave.Text = "Create User";
@@ -348,7 +333,7 @@ namespace AssemblyLineTester.Views.Modals
             Controls.Add(pnlCustomHeader);
             Font = new Font("Segoe UI", 9F);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(5, 5, 5, 5);
+            Margin = new Padding(5);
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "AddUserModalForm";
@@ -387,6 +372,5 @@ namespace AssemblyLineTester.Views.Modals
         private System.Windows.Forms.Panel pnlCustomHeader;
         private FontAwesome.Sharp.IconPictureBox iconLogo;
         private System.Windows.Forms.Label lblCustomTitle;
-        private FontAwesome.Sharp.IconButton btnClose;
     }
 }

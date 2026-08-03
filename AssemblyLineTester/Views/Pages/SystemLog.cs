@@ -6,10 +6,13 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using static AssemblyLineTester.Models.SystemLog;
 using AssemblyLineTester.Helpers;
+
+
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -29,9 +32,9 @@ namespace AssemblyLineTester.Views.Pages
         {
             InitializeComponent();
             SetupEvents();
-            if (pnlChartContainer is not null)
+            if (chartSummary is not null)
             {
-                pnlChartContainer.Paint += PnlChartContainer_Paint;
+                chartSummary.PostPaint += ChartSummary_PostPaint;
             }
             pnlLevelStats.Paint += PnlLevelStats_Paint;
 
@@ -100,7 +103,7 @@ namespace AssemblyLineTester.Views.Pages
 
             if (dialog.ShowDialog() != DialogResult.OK) return;
 
-            Cursor previous = Cursor;
+            System.Windows.Forms.Cursor previous = Cursor;
             Cursor = Cursors.WaitCursor;
             try
             {
@@ -243,7 +246,7 @@ namespace AssemblyLineTester.Views.Pages
             finally
             {
                 ResumeLayout(true);
-                pnlChartContainer?.Invalidate();
+                LoadSummaryChart();
                 pnlLevelStats.Invalidate();
                 _moduleScroll.Invalidate();
             }
@@ -477,44 +480,66 @@ namespace AssemblyLineTester.Views.Pages
             lblLogDetailContent.MaximumSize = new Size(Math.Max(200, available), 0);
         }
 
-        private void PnlChartContainer_Paint(object? sender, PaintEventArgs e)
+        private void LoadSummaryChart()
         {
-            if (sender is not Control container) return;
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            if (chartSummary is null) return;
+            chartSummary.ChartAreas.Clear();
+            chartSummary.Series.Clear();
+            chartSummary.Legends.Clear();
+            chartSummary.BackColor = Color.White;
 
-            int size = Math.Min(container.Width, container.Height) - 20;
-            if (size <= 0) return;
-            int x = (container.Width - size) / 2;
-            int y = (container.Height - size) / 2;
-            var rect = new Rectangle(x, y, size, size);
+            ChartArea areaPie = new("PieArea") { BackColor = Color.White };
+            chartSummary.ChartAreas.Add(areaPie);
+
+            Series sSummary = new("Summary") { ChartType = SeriesChartType.Doughnut };
+            sSummary["DoughnutRadius"] = "25";
 
             if (_summary.Total == 0)
             {
-                using var penEmpty = new Pen(Color.FromArgb(226, 232, 240), 18);
-                e.Graphics.DrawArc(penEmpty, rect, -90, 359.9f);
+                int emptyIdx = sSummary.Points.AddY(1);
+                sSummary.Points[emptyIdx].Color = Color.FromArgb(226, 232, 240);
+                sSummary.Points[emptyIdx].IsVisibleInLegend = false;
             }
             else
             {
-                float infoSweep = 360f * _summary.InfoCount / _summary.Total;
-                float warnSweep = 360f * _summary.WarningCount / _summary.Total;
-                float errSweep = 360f * _summary.ErrorCount / _summary.Total;
-                float start = -90f;
+                var summaryData = new (int Count, Color Color)[]
+                {
+                    (_summary.InfoCount, Color.FromArgb(59, 130, 246)),
+                    (_summary.WarningCount, Color.FromArgb(245, 158, 11)),
+                    (_summary.ErrorCount, Color.FromArgb(239, 68, 68))
+                };
 
-                using var penInfo = new Pen(Color.FromArgb(59, 130, 246), 18);
-                using var penWarn = new Pen(Color.FromArgb(245, 158, 11), 18);
-                using var penErr = new Pen(Color.FromArgb(239, 68, 68), 18);
-
-                if (infoSweep > 0) e.Graphics.DrawArc(penInfo, rect, start, infoSweep);
-                start += infoSweep;
-                if (warnSweep > 0) e.Graphics.DrawArc(penWarn, rect, start, warnSweep);
-                start += warnSweep;
-                if (errSweep > 0) e.Graphics.DrawArc(penErr, rect, start, errSweep);
+                foreach (var data in summaryData)
+                {
+                    if (data.Count > 0)
+                    {
+                        int idx = sSummary.Points.AddY(data.Count);
+                        sSummary.Points[idx].Color = data.Color;
+                    }
+                }
             }
 
-            string text = $"{_summary.Total:N0}\nTOTAL";
-            using var brush = new SolidBrush(Color.FromArgb(30, 41, 59));
-            using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-            e.Graphics.DrawString(text, AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, brush, new RectangleF(x, y, size, size), format);
+            chartSummary.Series.Add(sSummary);
+        }
+
+        private void ChartSummary_PostPaint(object? sender, ChartPaintEventArgs e)
+        {
+            if (e.ChartElement is ChartArea area)
+            {
+                string numText = _summary.Total.ToString("N0");
+                string subText = "TOTAL";
+
+                using SolidBrush brushNum = new(Color.FromArgb(30, 41, 59));
+                using SolidBrush brushSub = new(Color.FromArgb(100, 116, 139));
+                using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+
+                RectangleF chartRect = e.ChartGraphics.GetAbsoluteRectangle(area.Position.ToRectangleF());
+                float centerX = chartRect.Left + (chartRect.Width * 0.50f);
+                float centerY = chartRect.Top + (chartRect.Height * 0.5f);
+
+                e.ChartGraphics.Graphics.DrawString(numText, AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold, brushNum, centerX, centerY - 14, sf);
+                e.ChartGraphics.Graphics.DrawString(subText, AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold, brushSub, centerX, centerY + 14, sf);
+            }
         }
 
         private void PnlLevelStats_Paint(object? sender, PaintEventArgs e)

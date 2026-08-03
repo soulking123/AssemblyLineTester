@@ -81,12 +81,8 @@ namespace AssemblyLineTester.Views.Modals
                 lblGenResVal.ForeColor = Color.FromArgb(220, 38, 38);
             }
 
-            btnClose.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
             btnCancel.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
             btnConfirmSave.Click += BtnConfirmSave_Click;
-
-            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.ForeColor = Color.White; };
-            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.ForeColor = Color.FromArgb(203, 213, 225); };
 
             pnlCustomHeader.MouseDown += TitleBar_MouseDown;
             lblHeaderTitle.MouseDown += TitleBar_MouseDown;

@@ -76,10 +76,6 @@ namespace AssemblyLineTester.Views.Modals
         {
             btnSave.Click += BtnSave_Click;
 
-            btnClose.Click += (s, e) => this.Close();
-            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
-            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
-
             btnChooseImage.Click += BtnChooseImage_Click;
             btnRemoveImage.Click += BtnRemoveImage_Click;
             lstImages.MouseMove += LstImages_MouseMove;

@@ -18,13 +18,9 @@ namespace AssemblyLineTester.Views.Modals
             _db = db;
             InitializeComponent();
 
-            btnClose.Click += (s, e) => this.Close();
             btnCancel.Click += (s, e) => this.Close();
             btnSelect.Click += BtnSelect_Click;
             gridConfigs.CellDoubleClick += GridConfigs_CellDoubleClick;
-
-            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
-            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
 
             pnlCustomHeader.MouseDown += TitleBar_MouseDown;
             iconLogo.MouseDown += TitleBar_MouseDown;
@@ -80,17 +76,6 @@ namespace AssemblyLineTester.Views.Modals
                     gridConfigs.Columns["LastUpdate"]!.HeaderText = "Last Update";
                 }
 
-                // Grid Styling to match modern look
-                gridConfigs.EnableHeadersVisualStyles = false;
-                gridConfigs.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(30, 41, 59);
-                gridConfigs.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-                gridConfigs.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-                gridConfigs.DefaultCellStyle.BackColor = Color.FromArgb(15, 23, 42);
-                gridConfigs.DefaultCellStyle.ForeColor = Color.FromArgb(241, 245, 249);
-                gridConfigs.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
-                gridConfigs.DefaultCellStyle.SelectionBackColor = Color.FromArgb(250, 204, 21);
-                gridConfigs.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 41, 59);
-                gridConfigs.GridColor = Color.FromArgb(33, 41, 54);
             }
             catch (Exception ex)
             {

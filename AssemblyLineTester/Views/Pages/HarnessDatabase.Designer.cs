@@ -50,50 +50,11 @@ namespace AssemblyLineTester.Views.Pages
             panelDetailCard = new TableLayoutPanel();
             panelDetailTop = new Panel();
             lblDetailTitle = new Label();
-            tabControlDetail = new TabControl();
-            tabGeneral = new TabPage();
-            tableLayoutPanelGeneral = new TableLayoutPanel();
-            panelGeneralInfo = new Panel();
-            tblGenInfo = new TableLayoutPanel();
-            panelGeneralTop = new Panel();
-            btnDeleteHarness = new Button();
-            btnEditGeneral = new Button();
-            panelImages = new Panel();
-            tblImages = new TableLayoutPanel();
-            lblHarnessImage = new Label();
-            picHarnessImage = new PictureBox();
-            btnChangeHarnessImage = new Button();
-            lblMachineArea = new Label();
-            picMachineArea = new PictureBox();
-            btnChangeMachineImage = new Button();
-            tabConnector = new TabPage();
-            tableLayoutPanelConnector = new TableLayoutPanel();
-            panelConnectorList = new Panel();
-            tblConnectorListLayout = new TableLayoutPanel();
-            panelConnectorTop = new Panel();
-            btnAddConnector = new Button();
-            btnEditConnector = new Button();
-            btnDeleteConnector = new Button();
-            panelConnectorSearch = new Panel();
-            txtConnectorSearch = new TextBox();
-            btnConnectorSearch = new Button();
-            dgvConnectors = new DataGridView();
-            tblConnectorPagination = new TableLayoutPanel();
-            flpConnectorPages = new FlowLayoutPanel();
-            flpConnectorShowEntries = new FlowLayoutPanel();
-            lblConnectorShowEntries2 = new Label();
-            cmbConnectorShowEntries = new ComboBox();
-            lblConnectorShowEntries1 = new Label();
-            panelConnectorDetail = new Panel();
-            tableLayoutPanelConnectorDetail = new TableLayoutPanel();
-            panelConnectorInfo = new Panel();
-            tblConnectorInfo = new TableLayoutPanel();
-            panelConnectorImage = new Panel();
-            btnChangeConnectorImage = new Button();
-            tblConnectorImages = new TableLayoutPanel();
-            lblConnectorImage = new Label();
-            picConnectorImage = new PictureBox();
-            tabWiring = new TabPage();
+            flpNavigation = new FlowLayoutPanel();
+            lblNavGeneral = new Label();
+            lblNavConnector = new Label();
+            lblNavWiring = new Label();
+            panelTabContent = new Panel();
             tableLayoutPanelBottomRight = new TableLayoutPanel();
             panelCardSpecs = new Panel();
             tblSpecsContent = new TableLayoutPanel();
@@ -130,32 +91,7 @@ namespace AssemblyLineTester.Views.Pages
             tableLayoutPanelRight.SuspendLayout();
             panelDetailCard.SuspendLayout();
             panelDetailTop.SuspendLayout();
-            tabControlDetail.SuspendLayout();
-            tabGeneral.SuspendLayout();
-            tableLayoutPanelGeneral.SuspendLayout();
-            panelGeneralInfo.SuspendLayout();
-            panelGeneralTop.SuspendLayout();
-            panelImages.SuspendLayout();
-            tblImages.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picHarnessImage).BeginInit();
-            picHarnessImage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picMachineArea).BeginInit();
-            picMachineArea.SuspendLayout();
-            tabConnector.SuspendLayout();
-            tableLayoutPanelConnector.SuspendLayout();
-            panelConnectorList.SuspendLayout();
-            tblConnectorListLayout.SuspendLayout();
-            panelConnectorTop.SuspendLayout();
-            panelConnectorSearch.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvConnectors).BeginInit();
-            tblConnectorPagination.SuspendLayout();
-            flpConnectorShowEntries.SuspendLayout();
-            panelConnectorDetail.SuspendLayout();
-            tableLayoutPanelConnectorDetail.SuspendLayout();
-            panelConnectorInfo.SuspendLayout();
-            panelConnectorImage.SuspendLayout();
-            tblConnectorImages.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picConnectorImage).BeginInit();
+            flpNavigation.SuspendLayout();
             tableLayoutPanelBottomRight.SuspendLayout();
             panelCardSpecs.SuspendLayout();
             panelCardTestSummary.SuspendLayout();
@@ -234,7 +170,7 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
             dataGridViewList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-
+            dataGridViewList.Columns.AddRange(new DataGridViewColumn[] { colNo, colProductModel, colProductType, colArea, colPartNumber, colLastUpdated });
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = Color.White;
             dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
@@ -243,9 +179,6 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(30, 41, 59);
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
             dataGridViewList.DefaultCellStyle = dataGridViewCellStyle2;
-
-            dataGridViewList.Columns.AddRange(new DataGridViewColumn[] { colNo, colProductModel, colProductType, colArea, colPartNumber, colLastUpdated });
-
             dataGridViewList.Dock = DockStyle.Fill;
             dataGridViewList.EnableHeadersVisualStyles = false;
             dataGridViewList.GridColor = Color.FromArgb(203, 213, 225);
@@ -336,7 +269,7 @@ namespace AssemblyLineTester.Views.Pages
             flpPages.Location = new Point(0, 0);
             flpPages.Margin = new Padding(0);
             flpPages.Name = "flpPages";
-            flpPages.Size = new Size(838, 114);
+            flpPages.Size = new Size(652, 114);
             flpPages.TabIndex = 0;
             // 
             // flpShowEntries
@@ -346,10 +279,10 @@ namespace AssemblyLineTester.Views.Pages
             flpShowEntries.Controls.Add(lblShowEntries1);
             flpShowEntries.Dock = DockStyle.Fill;
             flpShowEntries.FlowDirection = FlowDirection.RightToLeft;
-            flpShowEntries.Location = new Point(838, 0);
+            flpShowEntries.Location = new Point(652, 0);
             flpShowEntries.Margin = new Padding(0);
             flpShowEntries.Name = "flpShowEntries";
-            flpShowEntries.Size = new Size(1025, 114);
+            flpShowEntries.Size = new Size(1211, 114);
             flpShowEntries.TabIndex = 1;
             flpShowEntries.WrapContents = false;
             // 
@@ -358,7 +291,7 @@ namespace AssemblyLineTester.Views.Pages
             lblShowEntries2.AutoSize = true;
             lblShowEntries2.Font = new Font("Segoe UI", 9F);
             lblShowEntries2.ForeColor = Color.FromArgb(71, 85, 105);
-            lblShowEntries2.Location = new Point(939, 19);
+            lblShowEntries2.Location = new Point(1125, 19);
             lblShowEntries2.Margin = new Padding(6, 19, 0, 0);
             lblShowEntries2.Name = "lblShowEntries2";
             lblShowEntries2.Size = new Size(86, 32);
@@ -371,7 +304,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbShowEntries.Font = new Font("Segoe UI", 9F);
             cmbShowEntries.FormattingEnabled = true;
             cmbShowEntries.Items.AddRange(new object[] { "10", "25", "50" });
-            cmbShowEntries.Location = new Point(829, 13);
+            cmbShowEntries.Location = new Point(1015, 13);
             cmbShowEntries.Margin = new Padding(6, 13, 6, 0);
             cmbShowEntries.Name = "cmbShowEntries";
             cmbShowEntries.Size = new Size(98, 40);
@@ -382,7 +315,7 @@ namespace AssemblyLineTester.Views.Pages
             lblShowEntries1.AutoSize = true;
             lblShowEntries1.Font = new Font("Segoe UI", 9F);
             lblShowEntries1.ForeColor = Color.FromArgb(71, 85, 105);
-            lblShowEntries1.Location = new Point(745, 19);
+            lblShowEntries1.Location = new Point(931, 19);
             lblShowEntries1.Margin = new Padding(0, 19, 6, 0);
             lblShowEntries1.Name = "lblShowEntries1";
             lblShowEntries1.Size = new Size(72, 32);
@@ -400,8 +333,8 @@ namespace AssemblyLineTester.Views.Pages
             tableLayoutPanelRight.Margin = new Padding(0);
             tableLayoutPanelRight.Name = "tableLayoutPanelRight";
             tableLayoutPanelRight.RowCount = 2;
-            tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 58F));
-            tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 70F));
+            tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 30F));
             tableLayoutPanelRight.Size = new Size(3311, 2815);
             tableLayoutPanelRight.TabIndex = 0;
             // 
@@ -411,7 +344,7 @@ namespace AssemblyLineTester.Views.Pages
             panelDetailCard.ColumnCount = 1;
             panelDetailCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             panelDetailCard.Controls.Add(panelDetailTop, 0, 0);
-            panelDetailCard.Controls.Add(tabControlDetail, 0, 1);
+            panelDetailCard.Controls.Add(panelTabContent, 0, 1);
             panelDetailCard.Dock = DockStyle.Fill;
             panelDetailCard.Location = new Point(0, 0);
             panelDetailCard.Margin = new Padding(0, 0, 0, 26);
@@ -426,6 +359,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             panelDetailTop.BackColor = Color.Transparent;
             panelDetailTop.Controls.Add(lblDetailTitle);
+            panelDetailTop.Controls.Add(flpNavigation);
             panelDetailTop.Dock = DockStyle.Fill;
             panelDetailTop.Location = new Point(0, 0);
             panelDetailTop.Margin = new Padding(0);
@@ -436,6 +370,7 @@ namespace AssemblyLineTester.Views.Pages
             // lblDetailTitle
             // 
             lblDetailTitle.AutoSize = true;
+            lblDetailTitle.BackColor = Color.Transparent;
             lblDetailTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblDetailTitle.ForeColor = Color.FromArgb(15, 23, 42);
             lblDetailTitle.Location = new Point(26, 21);
@@ -445,590 +380,63 @@ namespace AssemblyLineTester.Views.Pages
             lblDetailTitle.TabIndex = 0;
             lblDetailTitle.Text = "HARNESSES DETAIL";
             // 
-            // tabControlDetail
-            // 
-            tabControlDetail.Controls.Add(tabGeneral);
-            tabControlDetail.Controls.Add(tabConnector);
-            tabControlDetail.Controls.Add(tabWiring);
-            tabControlDetail.Dock = DockStyle.Fill;
-            tabControlDetail.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            tabControlDetail.Location = new Point(20, 86);
-            tabControlDetail.Margin = new Padding(20, 0, 20, 19);
-            tabControlDetail.Name = "tabControlDetail";
-            tabControlDetail.SelectedIndex = 0;
-            tabControlDetail.Size = new Size(3271, 1836);
-            tabControlDetail.TabIndex = 1;
-            // 
-            // tabGeneral
-            // 
-            tabGeneral.BackColor = Color.White;
-            tabGeneral.Controls.Add(tableLayoutPanelGeneral);
-            tabGeneral.Location = new Point(8, 49);
-            tabGeneral.Margin = new Padding(0);
-            tabGeneral.Name = "tabGeneral";
-            tabGeneral.Padding = new Padding(26);
-            tabGeneral.Size = new Size(3255, 1779);
-            tabGeneral.TabIndex = 0;
-            tabGeneral.Text = "General";
-            // 
-            // tableLayoutPanelGeneral
-            // 
-            tableLayoutPanelGeneral.ColumnCount = 2;
-            tableLayoutPanelGeneral.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanelGeneral.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanelGeneral.Controls.Add(panelGeneralInfo, 0, 0);
-            tableLayoutPanelGeneral.Controls.Add(panelImages, 1, 0);
-            tableLayoutPanelGeneral.Dock = DockStyle.Fill;
-            tableLayoutPanelGeneral.Location = new Point(26, 26);
-            tableLayoutPanelGeneral.Margin = new Padding(0);
-            tableLayoutPanelGeneral.Name = "tableLayoutPanelGeneral";
-            tableLayoutPanelGeneral.RowCount = 1;
-            tableLayoutPanelGeneral.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelGeneral.Size = new Size(3203, 1727);
-            tableLayoutPanelGeneral.TabIndex = 0;
-            // 
-            // panelGeneralInfo
-            // 
-            panelGeneralInfo.Controls.Add(tblGenInfo);
-            panelGeneralInfo.Controls.Add(panelGeneralTop);
-            panelGeneralInfo.Dock = DockStyle.Fill;
-            panelGeneralInfo.Location = new Point(0, 0);
-            panelGeneralInfo.Margin = new Padding(0, 0, 26, 0);
-            panelGeneralInfo.Name = "panelGeneralInfo";
-            panelGeneralInfo.Size = new Size(1575, 1727);
-            panelGeneralInfo.TabIndex = 0;
-            // 
-            // tblGenInfo
-            // 
-            tblGenInfo.AutoScroll = true;
-            tblGenInfo.ColumnCount = 2;
-            tblGenInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
-            tblGenInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
-            tblGenInfo.Dock = DockStyle.Fill;
-            tblGenInfo.Location = new Point(0, 90);
-            tblGenInfo.Margin = new Padding(0);
-            tblGenInfo.Name = "tblGenInfo";
-            tblGenInfo.RowCount = 12;
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.RowStyles.Add(new RowStyle());
-            tblGenInfo.Size = new Size(1575, 1637);
-            tblGenInfo.TabIndex = 0;
-            // 
-            // panelGeneralTop
-            // 
-            panelGeneralTop.Controls.Add(btnDeleteHarness);
-            panelGeneralTop.Controls.Add(btnEditGeneral);
-            panelGeneralTop.Dock = DockStyle.Top;
-            panelGeneralTop.Location = new Point(0, 0);
-            panelGeneralTop.Name = "panelGeneralTop";
-            panelGeneralTop.Size = new Size(1575, 90);
-            panelGeneralTop.TabIndex = 1;
-            // 
-            // btnDeleteHarness
-            // 
-            btnDeleteHarness.BackColor = Color.FromArgb(254, 242, 242);
-            btnDeleteHarness.FlatAppearance.BorderColor = Color.FromArgb(254, 202, 202);
-            btnDeleteHarness.FlatStyle = FlatStyle.Flat;
-            btnDeleteHarness.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnDeleteHarness.ForeColor = Color.FromArgb(239, 68, 68);
-            btnDeleteHarness.Location = new Point(260, 10);
-            btnDeleteHarness.Name = "btnDeleteHarness";
-            btnDeleteHarness.Size = new Size(240, 60);
-            btnDeleteHarness.TabIndex = 0;
-            btnDeleteHarness.Text = "🗑 Delete";
-            btnDeleteHarness.UseVisualStyleBackColor = false;
-            // 
-            // btnEditGeneral
-            // 
-            btnEditGeneral.BackColor = Color.FromArgb(248, 250, 252);
-            btnEditGeneral.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnEditGeneral.FlatStyle = FlatStyle.Flat;
-            btnEditGeneral.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnEditGeneral.Location = new Point(0, 10);
-            btnEditGeneral.Name = "btnEditGeneral";
-            btnEditGeneral.Size = new Size(240, 60);
-            btnEditGeneral.TabIndex = 1;
-            btnEditGeneral.Text = "✏ Edit General";
-            btnEditGeneral.UseVisualStyleBackColor = false;
-            // 
-            // panelImages
-            // 
-            panelImages.Controls.Add(tblImages);
-            panelImages.Dock = DockStyle.Fill;
-            panelImages.Location = new Point(1627, 0);
-            panelImages.Margin = new Padding(26, 0, 0, 0);
-            panelImages.Name = "panelImages";
-            panelImages.Size = new Size(1576, 1727);
-            panelImages.TabIndex = 1;
-            // 
-            // tblImages
-            // 
-            tblImages.ColumnCount = 1;
-            tblImages.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblImages.Controls.Add(lblHarnessImage, 0, 0);
-            tblImages.Controls.Add(picHarnessImage, 0, 1);
-            tblImages.Controls.Add(lblMachineArea, 0, 2);
-            tblImages.Controls.Add(picMachineArea, 0, 3);
-            tblImages.Dock = DockStyle.Fill;
-            tblImages.Location = new Point(0, 0);
-            tblImages.Margin = new Padding(0);
-            tblImages.Name = "tblImages";
-            tblImages.RowCount = 4;
-            tblImages.RowStyles.Add(new RowStyle(SizeType.Absolute, 51F));
-            tblImages.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblImages.RowStyles.Add(new RowStyle(SizeType.Absolute, 51F));
-            tblImages.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblImages.Size = new Size(1576, 1727);
-            tblImages.TabIndex = 0;
-            // 
-            // lblHarnessImage
-            // 
-            lblHarnessImage.AutoSize = true;
-            lblHarnessImage.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblHarnessImage.ForeColor = Color.FromArgb(51, 65, 85);
-            lblHarnessImage.Location = new Point(0, 0);
-            lblHarnessImage.Margin = new Padding(0);
-            lblHarnessImage.Name = "lblHarnessImage";
-            lblHarnessImage.Size = new Size(225, 36);
-            lblHarnessImage.TabIndex = 1;
-            lblHarnessImage.Text = "HARNESS IMAGE";
-            // 
-            // picHarnessImage
-            // 
-            picHarnessImage.BackColor = Color.FromArgb(248, 250, 252);
-            picHarnessImage.Controls.Add(btnChangeHarnessImage);
-            picHarnessImage.Dock = DockStyle.Fill;
-            picHarnessImage.Location = new Point(0, 51);
-            picHarnessImage.Margin = new Padding(0, 0, 0, 26);
-            picHarnessImage.Name = "picHarnessImage";
-            picHarnessImage.Size = new Size(1576, 786);
-            picHarnessImage.TabIndex = 0;
-            picHarnessImage.TabStop = false;
-            // 
-            // btnChangeHarnessImage
-            // 
-            btnChangeHarnessImage.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnChangeHarnessImage.BackColor = Color.FromArgb(248, 250, 252);
-            btnChangeHarnessImage.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnChangeHarnessImage.FlatStyle = FlatStyle.Flat;
-            btnChangeHarnessImage.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnChangeHarnessImage.Location = new Point(2862, 10);
-            btnChangeHarnessImage.Name = "btnChangeHarnessImage";
-            btnChangeHarnessImage.Size = new Size(180, 40);
-            btnChangeHarnessImage.TabIndex = 0;
-            btnChangeHarnessImage.Text = "📷 Change Image";
-            btnChangeHarnessImage.UseVisualStyleBackColor = false;
-            btnChangeHarnessImage.Visible = false;
-            // 
-            // lblMachineArea
-            // 
-            lblMachineArea.AutoSize = true;
-            lblMachineArea.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblMachineArea.ForeColor = Color.FromArgb(51, 65, 85);
-            lblMachineArea.Location = new Point(0, 863);
-            lblMachineArea.Margin = new Padding(0);
-            lblMachineArea.Name = "lblMachineArea";
-            lblMachineArea.Size = new Size(211, 36);
-            lblMachineArea.TabIndex = 3;
-            lblMachineArea.Text = "CONNECTOR";
-            // 
-            // picMachineArea
-            // 
-            picMachineArea.BackColor = Color.FromArgb(248, 250, 252);
-            picMachineArea.Controls.Add(btnChangeMachineImage);
-            picMachineArea.Dock = DockStyle.Fill;
-            picMachineArea.Location = new Point(0, 914);
-            picMachineArea.Margin = new Padding(0, 0, 0, 26);
-            picMachineArea.Name = "picMachineArea";
-            picMachineArea.Size = new Size(1576, 787);
-            picMachineArea.TabIndex = 2;
-            picMachineArea.TabStop = false;
-            // 
-            // btnChangeMachineImage
-            // 
-            btnChangeMachineImage.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnChangeMachineImage.BackColor = Color.FromArgb(248, 250, 252);
-            btnChangeMachineImage.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnChangeMachineImage.FlatStyle = FlatStyle.Flat;
-            btnChangeMachineImage.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnChangeMachineImage.Location = new Point(2862, 10);
-            btnChangeMachineImage.Name = "btnChangeMachineImage";
-            btnChangeMachineImage.Size = new Size(180, 40);
-            btnChangeMachineImage.TabIndex = 0;
-            btnChangeMachineImage.Text = "📷 Change Image";
-            btnChangeMachineImage.UseVisualStyleBackColor = false;
-            btnChangeMachineImage.Visible = false;
-            // 
-            // tabConnector
-            // 
-            tabConnector.Controls.Add(tableLayoutPanelConnector);
-            tabConnector.Location = new Point(8, 49);
-            tabConnector.Margin = new Padding(10);
-            tabConnector.Name = "tabConnector";
-            tabConnector.Padding = new Padding(26);
-            tabConnector.Size = new Size(3255, 1779);
-            tabConnector.TabIndex = 1;
-            tabConnector.Text = "Connector & Pin";
-            tabConnector.UseVisualStyleBackColor = true;
-            // 
-            // tableLayoutPanelConnector
-            // 
-            tableLayoutPanelConnector.ColumnCount = 2;
-            tableLayoutPanelConnector.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanelConnector.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanelConnector.Controls.Add(panelConnectorList, 0, 0);
-            tableLayoutPanelConnector.Controls.Add(panelConnectorDetail, 1, 0);
-            tableLayoutPanelConnector.Dock = DockStyle.Fill;
-            tableLayoutPanelConnector.Location = new Point(26, 26);
-            tableLayoutPanelConnector.Margin = new Padding(0);
-            tableLayoutPanelConnector.Name = "tableLayoutPanelConnector";
-            tableLayoutPanelConnector.RowCount = 1;
-            tableLayoutPanelConnector.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelConnector.Size = new Size(3203, 1727);
-            tableLayoutPanelConnector.TabIndex = 0;
-            // 
-            // panelConnectorList
-            // 
-            panelConnectorList.Controls.Add(tblConnectorListLayout);
-            panelConnectorList.Dock = DockStyle.Fill;
-            panelConnectorList.Location = new Point(0, 0);
-            panelConnectorList.Margin = new Padding(0, 0, 26, 0);
-            panelConnectorList.Name = "panelConnectorList";
-            panelConnectorList.Size = new Size(1575, 1727);
-            panelConnectorList.TabIndex = 0;
-            // 
-            // tblConnectorListLayout
-            // 
-            tblConnectorListLayout.ColumnCount = 1;
-            tblConnectorListLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblConnectorListLayout.Controls.Add(panelConnectorTop, 0, 0);
-            tblConnectorListLayout.Controls.Add(panelConnectorSearch, 0, 1);
-            tblConnectorListLayout.Controls.Add(dgvConnectors, 0, 2);
-            tblConnectorListLayout.Controls.Add(tblConnectorPagination, 0, 3);
-            tblConnectorListLayout.Dock = DockStyle.Fill;
-            tblConnectorListLayout.Location = new Point(0, 0);
-            tblConnectorListLayout.Margin = new Padding(0);
-            tblConnectorListLayout.Name = "tblConnectorListLayout";
-            tblConnectorListLayout.RowCount = 4;
-            tblConnectorListLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
-            tblConnectorListLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 74F));
-            tblConnectorListLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblConnectorListLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 114F));
-            tblConnectorListLayout.Size = new Size(1575, 1727);
-            tblConnectorListLayout.TabIndex = 0;
-            // 
-            // panelConnectorTop
-            // 
-            panelConnectorTop.Controls.Add(btnAddConnector);
-            panelConnectorTop.Controls.Add(btnEditConnector);
-            panelConnectorTop.Controls.Add(btnDeleteConnector);
-            panelConnectorTop.Dock = DockStyle.Fill;
-            panelConnectorTop.Location = new Point(0, 0);
-            panelConnectorTop.Margin = new Padding(0);
-            panelConnectorTop.Name = "panelConnectorTop";
-            panelConnectorTop.Size = new Size(1575, 90);
-            panelConnectorTop.TabIndex = 0;
-            // 
-            // btnAddConnector
-            // 
-            btnAddConnector.BackColor = Color.FromArgb(250, 204, 21);
-            btnAddConnector.FlatAppearance.BorderSize = 0;
-            btnAddConnector.FlatStyle = FlatStyle.Flat;
-            btnAddConnector.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnAddConnector.Location = new Point(0, 10);
-            btnAddConnector.Name = "btnAddConnector";
-            btnAddConnector.Size = new Size(240, 60);
-            btnAddConnector.TabIndex = 0;
-            btnAddConnector.Text = "➕ Add Connector";
-            btnAddConnector.UseVisualStyleBackColor = false;
-            // 
-            // btnEditConnector
-            // 
-            btnEditConnector.BackColor = Color.FromArgb(241, 245, 249);
-            btnEditConnector.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnEditConnector.FlatStyle = FlatStyle.Flat;
-            btnEditConnector.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnEditConnector.Location = new Point(260, 10);
-            btnEditConnector.Name = "btnEditConnector";
-            btnEditConnector.Size = new Size(240, 60);
-            btnEditConnector.TabIndex = 1;
-            btnEditConnector.Text = "✏ Edit Connector";
-            btnEditConnector.UseVisualStyleBackColor = false;
-            // 
-            // btnDeleteConnector
-            // 
-            btnDeleteConnector.BackColor = Color.FromArgb(254, 242, 242);
-            btnDeleteConnector.FlatAppearance.BorderColor = Color.FromArgb(254, 202, 202);
-            btnDeleteConnector.FlatStyle = FlatStyle.Flat;
-            btnDeleteConnector.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnDeleteConnector.ForeColor = Color.FromArgb(239, 68, 68);
-            btnDeleteConnector.Location = new Point(520, 10);
-            btnDeleteConnector.Name = "btnDeleteConnector";
-            btnDeleteConnector.Size = new Size(240, 60);
-            btnDeleteConnector.TabIndex = 2;
-            btnDeleteConnector.Text = "🗑 Delete";
-            btnDeleteConnector.UseVisualStyleBackColor = false;
-            // 
-            // panelConnectorSearch
-            // 
-            panelConnectorSearch.Controls.Add(txtConnectorSearch);
-            panelConnectorSearch.Controls.Add(btnConnectorSearch);
-            panelConnectorSearch.Dock = DockStyle.Fill;
-            panelConnectorSearch.Location = new Point(0, 90);
-            panelConnectorSearch.Margin = new Padding(0);
-            panelConnectorSearch.Name = "panelConnectorSearch";
-            panelConnectorSearch.Size = new Size(1575, 74);
-            panelConnectorSearch.TabIndex = 1;
-            // 
-            // txtConnectorSearch
-            // 
-            txtConnectorSearch.Font = new Font("Segoe UI", 9.5F);
-            txtConnectorSearch.Location = new Point(0, 12);
-            txtConnectorSearch.Name = "txtConnectorSearch";
-            txtConnectorSearch.PlaceholderText = "Search by Part Number...";
-            txtConnectorSearch.Size = new Size(1315, 31);
-            txtConnectorSearch.TabIndex = 0;
-            // 
-            // btnConnectorSearch
-            // 
-            btnConnectorSearch.BackColor = Color.FromArgb(241, 245, 249);
-            btnConnectorSearch.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnConnectorSearch.FlatStyle = FlatStyle.Flat;
-            btnConnectorSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnConnectorSearch.Location = new Point(1325, 8);
-            btnConnectorSearch.Name = "btnConnectorSearch";
-            btnConnectorSearch.Size = new Size(250, 40);
-            btnConnectorSearch.TabIndex = 1;
-            btnConnectorSearch.Text = "🔍 Search";
-            btnConnectorSearch.UseVisualStyleBackColor = false;
-            // 
-            // dgvConnectors
-            // 
-            dgvConnectors.BackgroundColor = Color.White;
-            dgvConnectors.BorderStyle = BorderStyle.None;
-            dgvConnectors.ColumnHeadersHeight = 46;
-            dgvConnectors.Dock = DockStyle.Fill;
-            dgvConnectors.Location = new Point(0, 164);
-            dgvConnectors.Margin = new Padding(0);
-            dgvConnectors.Name = "dgvConnectors";
-            dgvConnectors.RowHeadersWidth = 82;
-            dgvConnectors.Size = new Size(1575, 1439);
-            dgvConnectors.TabIndex = 2;
-            // 
-            // tblConnectorPagination
-            // 
-            tblConnectorPagination.ColumnCount = 2;
-            tblConnectorPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
-            tblConnectorPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
-            tblConnectorPagination.Controls.Add(flpConnectorPages, 0, 0);
-            tblConnectorPagination.Controls.Add(flpConnectorShowEntries, 1, 0);
-            tblConnectorPagination.Dock = DockStyle.Fill;
-            tblConnectorPagination.Location = new Point(0, 1603);
-            tblConnectorPagination.Margin = new Padding(0);
-            tblConnectorPagination.Name = "tblConnectorPagination";
-            tblConnectorPagination.RowCount = 1;
-            tblConnectorPagination.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblConnectorPagination.Size = new Size(1575, 114);
-            tblConnectorPagination.TabIndex = 3;
-            // 
-            // flpConnectorPages
-            // 
-            flpConnectorPages.Dock = DockStyle.Fill;
-            flpConnectorPages.Location = new Point(0, 0);
-            flpConnectorPages.Margin = new Padding(0);
-            flpConnectorPages.Name = "flpConnectorPages";
-            flpConnectorPages.Size = new Size(686, 114);
-            flpConnectorPages.TabIndex = 0;
-            // 
-            // flpConnectorShowEntries
-            // 
-            flpConnectorShowEntries.Controls.Add(lblConnectorShowEntries2);
-            flpConnectorShowEntries.Controls.Add(cmbConnectorShowEntries);
-            flpConnectorShowEntries.Controls.Add(lblConnectorShowEntries1);
-            flpConnectorShowEntries.Dock = DockStyle.Fill;
-            flpConnectorShowEntries.FlowDirection = FlowDirection.RightToLeft;
-            flpConnectorShowEntries.Location = new Point(686, 0);
-            flpConnectorShowEntries.Margin = new Padding(0);
-            flpConnectorShowEntries.Name = "flpConnectorShowEntries";
-            flpConnectorShowEntries.Size = new Size(889, 114);
-            flpConnectorShowEntries.TabIndex = 1;
-            flpConnectorShowEntries.WrapContents = false;
-            // 
-            // lblConnectorShowEntries2
-            // 
-            lblConnectorShowEntries2.AutoSize = true;
-            lblConnectorShowEntries2.Font = new Font("Segoe UI", 9F);
-            lblConnectorShowEntries2.ForeColor = Color.FromArgb(100, 116, 139);
-            lblConnectorShowEntries2.Location = new Point(778, 19);
-            lblConnectorShowEntries2.Margin = new Padding(6, 19, 0, 0);
-            lblConnectorShowEntries2.Name = "lblConnectorShowEntries2";
-            lblConnectorShowEntries2.Text = "entries";
-            // 
-            // cmbConnectorShowEntries
-            // 
-            cmbConnectorShowEntries.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbConnectorShowEntries.Font = new Font("Segoe UI", 9F);
-            cmbConnectorShowEntries.FormattingEnabled = true;
-            cmbConnectorShowEntries.Items.AddRange(new object[] { "10", "25", "50" });
-            cmbConnectorShowEntries.Location = new Point(674, 13);
-            cmbConnectorShowEntries.Margin = new Padding(6, 13, 6, 0);
-            cmbConnectorShowEntries.Name = "cmbConnectorShowEntries";
-            cmbConnectorShowEntries.Size = new Size(98, 40);
-            cmbConnectorShowEntries.TabIndex = 1;
-            // 
-            // lblConnectorShowEntries1
-            // 
-            lblConnectorShowEntries1.AutoSize = true;
-            lblConnectorShowEntries1.Font = new Font("Segoe UI", 9F);
-            lblConnectorShowEntries1.ForeColor = Color.FromArgb(100, 116, 139);
-            lblConnectorShowEntries1.Location = new Point(586, 19);
-            lblConnectorShowEntries1.Margin = new Padding(0, 19, 6, 0);
-            lblConnectorShowEntries1.Name = "lblConnectorShowEntries1";
-            lblConnectorShowEntries1.Text = "Show";
-            // 
-            // panelConnectorDetail
-            // 
-            panelConnectorDetail.Controls.Add(tableLayoutPanelConnectorDetail);
-            panelConnectorDetail.Dock = DockStyle.Fill;
-            panelConnectorDetail.Location = new Point(1601, 0);
-            panelConnectorDetail.Margin = new Padding(0);
-            panelConnectorDetail.Name = "panelConnectorDetail";
-            panelConnectorDetail.Size = new Size(1602, 1727);
-            panelConnectorDetail.TabIndex = 1;
-            // 
-            // tableLayoutPanelConnectorDetail
-            // 
-            tableLayoutPanelConnectorDetail.ColumnCount = 1;
-            tableLayoutPanelConnectorDetail.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanelConnectorDetail.Controls.Add(panelConnectorInfo, 0, 0);
-            tableLayoutPanelConnectorDetail.Controls.Add(panelConnectorImage, 0, 1);
-            tableLayoutPanelConnectorDetail.Dock = DockStyle.Fill;
-            tableLayoutPanelConnectorDetail.Location = new Point(0, 0);
-            tableLayoutPanelConnectorDetail.Margin = new Padding(0);
-            tableLayoutPanelConnectorDetail.Name = "tableLayoutPanelConnectorDetail";
-            tableLayoutPanelConnectorDetail.RowCount = 2;
-            tableLayoutPanelConnectorDetail.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanelConnectorDetail.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanelConnectorDetail.Size = new Size(1602, 1727);
-            tableLayoutPanelConnectorDetail.TabIndex = 0;
-            // 
-            // panelConnectorInfo
-            // 
-            panelConnectorInfo.Controls.Add(tblConnectorInfo);
-            panelConnectorInfo.Dock = DockStyle.Fill;
-            panelConnectorInfo.Location = new Point(0, 0);
-            panelConnectorInfo.Margin = new Padding(0, 0, 0, 13);
-            panelConnectorInfo.Name = "panelConnectorInfo";
-            panelConnectorInfo.Size = new Size(1602, 850);
-            panelConnectorInfo.TabIndex = 0;
-            // 
-            // tblConnectorInfo
-            // 
-            tblConnectorInfo.AutoScroll = true;
-            tblConnectorInfo.ColumnCount = 2;
-            tblConnectorInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
-            tblConnectorInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
-            tblConnectorInfo.Dock = DockStyle.Fill;
-            tblConnectorInfo.Location = new Point(0, 0);
-            tblConnectorInfo.Margin = new Padding(0);
-            tblConnectorInfo.Name = "tblConnectorInfo";
-            tblConnectorInfo.RowCount = 6;
-            tblConnectorInfo.RowStyles.Add(new RowStyle());
-            tblConnectorInfo.RowStyles.Add(new RowStyle());
-            tblConnectorInfo.RowStyles.Add(new RowStyle());
-            tblConnectorInfo.RowStyles.Add(new RowStyle());
-            tblConnectorInfo.RowStyles.Add(new RowStyle());
-            tblConnectorInfo.RowStyles.Add(new RowStyle());
-            tblConnectorInfo.RowStyles.Add(new RowStyle());
-            tblConnectorInfo.RowStyles.Add(new RowStyle());
-            tblConnectorInfo.Size = new Size(1602, 850);
-            tblConnectorInfo.TabIndex = 0;
-            // 
-            // panelConnectorImage
-            // 
-            panelConnectorImage.Controls.Add(btnChangeConnectorImage);
-            panelConnectorImage.Controls.Add(tblConnectorImages);
-            panelConnectorImage.Dock = DockStyle.Fill;
-            panelConnectorImage.Location = new Point(0, 876);
-            panelConnectorImage.Margin = new Padding(0, 13, 0, 0);
-            panelConnectorImage.Name = "panelConnectorImage";
-            panelConnectorImage.Size = new Size(1602, 851);
-            panelConnectorImage.TabIndex = 1;
-            // 
-            // btnChangeConnectorImage
-            // 
-            btnChangeConnectorImage.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnChangeConnectorImage.BackColor = Color.FromArgb(248, 250, 252);
-            btnChangeConnectorImage.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnChangeConnectorImage.FlatStyle = FlatStyle.Flat;
-            btnChangeConnectorImage.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnChangeConnectorImage.Location = new Point(1402, 10);
-            btnChangeConnectorImage.Name = "btnChangeConnectorImage";
-            btnChangeConnectorImage.Size = new Size(180, 40);
-            btnChangeConnectorImage.TabIndex = 0;
-            btnChangeConnectorImage.Text = "📷 Change Image";
-            btnChangeConnectorImage.UseVisualStyleBackColor = false;
-            btnChangeConnectorImage.Visible = false;
-            // 
-            // tblConnectorImages
-            // 
-            tblConnectorImages.ColumnCount = 1;
-            tblConnectorImages.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblConnectorImages.Controls.Add(lblConnectorImage, 0, 0);
-            tblConnectorImages.Controls.Add(picConnectorImage, 0, 1);
-            tblConnectorImages.Dock = DockStyle.Fill;
-            tblConnectorImages.Location = new Point(0, 0);
-            tblConnectorImages.Margin = new Padding(0);
-            tblConnectorImages.Name = "tblConnectorImages";
-            tblConnectorImages.RowCount = 2;
-            tblConnectorImages.RowStyles.Add(new RowStyle(SizeType.Absolute, 51F));
-            tblConnectorImages.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblConnectorImages.Size = new Size(1602, 851);
-            tblConnectorImages.TabIndex = 0;
-            // 
-            // lblConnectorImage
-            // 
-            lblConnectorImage.AutoSize = true;
-            lblConnectorImage.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblConnectorImage.ForeColor = Color.FromArgb(51, 65, 85);
-            lblConnectorImage.Location = new Point(0, 0);
-            lblConnectorImage.Margin = new Padding(0);
-            lblConnectorImage.Name = "lblConnectorImage";
-            lblConnectorImage.Size = new Size(264, 36);
-            lblConnectorImage.TabIndex = 1;
-            lblConnectorImage.Text = "CONNECTOR IMAGE";
-            // 
-            // picConnectorImage
-            // 
-            picConnectorImage.BackColor = Color.FromArgb(248, 250, 252);
-            picConnectorImage.Dock = DockStyle.Fill;
-            picConnectorImage.Location = new Point(0, 51);
-            picConnectorImage.Margin = new Padding(0);
-            picConnectorImage.Name = "picConnectorImage";
-            picConnectorImage.Size = new Size(1602, 800);
-            picConnectorImage.SizeMode = PictureBoxSizeMode.CenterImage;
-            picConnectorImage.TabIndex = 2;
-            picConnectorImage.TabStop = false;
-            // 
-            // tabWiring
-            // 
-            tabWiring.Location = new Point(8, 49);
-            tabWiring.Margin = new Padding(10);
-            tabWiring.Name = "tabWiring";
-            tabWiring.Size = new Size(3255, 1779);
-            tabWiring.TabIndex = 2;
-            tabWiring.Text = "Wiring & Test Parameter";
-            tabWiring.UseVisualStyleBackColor = true;
+            // flpNavigation
+            // 
+            flpNavigation.Controls.Add(lblNavGeneral);
+            flpNavigation.Controls.Add(lblNavConnector);
+            flpNavigation.Controls.Add(lblNavWiring);
+            flpNavigation.Location = new Point(400, 20);
+            flpNavigation.Name = "flpNavigation";
+            flpNavigation.Size = new Size(1000, 50);
+            flpNavigation.TabIndex = 1;
+            // 
+            // lblNavGeneral
+            // 
+            lblNavGeneral.AutoSize = true;
+            lblNavGeneral.Cursor = Cursors.Hand;
+            lblNavGeneral.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
+            lblNavGeneral.ForeColor = Color.FromArgb(30, 41, 59);
+            lblNavGeneral.Location = new Point(0, 5);
+            lblNavGeneral.Margin = new Padding(0, 5, 40, 0);
+            lblNavGeneral.Name = "lblNavGeneral";
+            lblNavGeneral.Size = new Size(118, 38);
+            lblNavGeneral.TabIndex = 0;
+            lblNavGeneral.Text = "General";
+            // 
+            // lblNavConnector
+            // 
+            lblNavConnector.AutoSize = true;
+            lblNavConnector.Cursor = Cursors.Hand;
+            lblNavConnector.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
+            lblNavConnector.ForeColor = Color.FromArgb(30, 41, 59);
+            lblNavConnector.Location = new Point(158, 5);
+            lblNavConnector.Margin = new Padding(0, 5, 40, 0);
+            lblNavConnector.Name = "lblNavConnector";
+            lblNavConnector.Size = new Size(234, 38);
+            lblNavConnector.TabIndex = 1;
+            lblNavConnector.Text = "Connector && Pin";
+            // 
+            // lblNavWiring
+            // 
+            lblNavWiring.AutoSize = true;
+            lblNavWiring.Cursor = Cursors.Hand;
+            lblNavWiring.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
+            lblNavWiring.ForeColor = Color.FromArgb(30, 41, 59);
+            lblNavWiring.Location = new Point(432, 5);
+            lblNavWiring.Margin = new Padding(0, 5, 40, 0);
+            lblNavWiring.Name = "lblNavWiring";
+            lblNavWiring.Size = new Size(340, 38);
+            lblNavWiring.TabIndex = 2;
+            lblNavWiring.Text = "Wiring && Test Parameter";
+            // 
+            // panelTabContent
+            // 
+            panelTabContent.Dock = DockStyle.Fill;
+            panelTabContent.Location = new Point(20, 86);
+            panelTabContent.Margin = new Padding(20, 0, 20, 19);
+            panelTabContent.Name = "panelTabContent";
+            panelTabContent.Size = new Size(3271, 1891);
+            panelTabContent.TabIndex = 1;
             // 
             // tableLayoutPanelBottomRight
             // 
@@ -1038,12 +446,12 @@ namespace AssemblyLineTester.Views.Pages
             tableLayoutPanelBottomRight.Controls.Add(panelCardSpecs, 0, 0);
             tableLayoutPanelBottomRight.Controls.Add(panelCardTestSummary, 1, 0);
             tableLayoutPanelBottomRight.Dock = DockStyle.Fill;
-            tableLayoutPanelBottomRight.Location = new Point(0, 1967);
+            tableLayoutPanelBottomRight.Location = new Point(0, 1996);
             tableLayoutPanelBottomRight.Margin = new Padding(0);
             tableLayoutPanelBottomRight.Name = "tableLayoutPanelBottomRight";
             tableLayoutPanelBottomRight.RowCount = 1;
             tableLayoutPanelBottomRight.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelBottomRight.Size = new Size(3311, 848);
+            tableLayoutPanelBottomRight.Size = new Size(3311, 819);
             tableLayoutPanelBottomRight.TabIndex = 2;
             // 
             // panelCardSpecs
@@ -1056,7 +464,7 @@ namespace AssemblyLineTester.Views.Pages
             panelCardSpecs.Margin = new Padding(0, 0, 16, 0);
             panelCardSpecs.Name = "panelCardSpecs";
             panelCardSpecs.Padding = new Padding(24, 70, 24, 24);
-            panelCardSpecs.Size = new Size(1805, 848);
+            panelCardSpecs.Size = new Size(1805, 819);
             panelCardSpecs.TabIndex = 0;
             // 
             // tblSpecsContent
@@ -1075,7 +483,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblSpecsContent.Size = new Size(1757, 754);
+            tblSpecsContent.Size = new Size(1757, 725);
             tblSpecsContent.TabIndex = 1;
             // 
             // lblSpecsTitle
@@ -1099,7 +507,7 @@ namespace AssemblyLineTester.Views.Pages
             panelCardTestSummary.Margin = new Padding(0);
             panelCardTestSummary.Name = "panelCardTestSummary";
             panelCardTestSummary.Padding = new Padding(24, 70, 24, 24);
-            panelCardTestSummary.Size = new Size(1490, 848);
+            panelCardTestSummary.Size = new Size(1490, 819);
             panelCardTestSummary.TabIndex = 1;
             // 
             // tblTestSummaryContent
@@ -1116,7 +524,7 @@ namespace AssemblyLineTester.Views.Pages
             tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblTestSummaryContent.Size = new Size(1442, 754);
+            tblTestSummaryContent.Size = new Size(1442, 725);
             tblTestSummaryContent.TabIndex = 1;
             // 
             // lblTestSummaryTitle
@@ -1392,36 +800,8 @@ namespace AssemblyLineTester.Views.Pages
             panelDetailCard.ResumeLayout(false);
             panelDetailTop.ResumeLayout(false);
             panelDetailTop.PerformLayout();
-            tabControlDetail.ResumeLayout(false);
-            tabGeneral.ResumeLayout(false);
-            tableLayoutPanelGeneral.ResumeLayout(false);
-            panelGeneralInfo.ResumeLayout(false);
-            panelGeneralTop.ResumeLayout(false);
-            panelImages.ResumeLayout(false);
-            tblImages.ResumeLayout(false);
-            tblImages.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)picHarnessImage).EndInit();
-            picHarnessImage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)picMachineArea).EndInit();
-            picMachineArea.ResumeLayout(false);
-            tabConnector.ResumeLayout(false);
-            tableLayoutPanelConnector.ResumeLayout(false);
-            panelConnectorList.ResumeLayout(false);
-            tblConnectorListLayout.ResumeLayout(false);
-            panelConnectorTop.ResumeLayout(false);
-            panelConnectorSearch.ResumeLayout(false);
-            panelConnectorSearch.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvConnectors).EndInit();
-            tblConnectorPagination.ResumeLayout(false);
-            flpConnectorShowEntries.ResumeLayout(false);
-            flpConnectorShowEntries.PerformLayout();
-            panelConnectorDetail.ResumeLayout(false);
-            tableLayoutPanelConnectorDetail.ResumeLayout(false);
-            panelConnectorInfo.ResumeLayout(false);
-            panelConnectorImage.ResumeLayout(false);
-            tblConnectorImages.ResumeLayout(false);
-            tblConnectorImages.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)picConnectorImage).EndInit();
+            flpNavigation.ResumeLayout(false);
+            flpNavigation.PerformLayout();
             tableLayoutPanelBottomRight.ResumeLayout(false);
             panelCardSpecs.ResumeLayout(false);
             panelCardSpecs.PerformLayout();
@@ -1504,13 +884,6 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSearch, 10, System.Drawing.Color.FromArgb(250, 204, 21), System.Drawing.Color.FromArgb(254, 216, 53), System.Drawing.Color.FromArgb(234, 186, 10), System.Drawing.Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, System.Drawing.Color.FromArgb(241, 245, 249), System.Drawing.Color.FromArgb(226, 232, 240), System.Drawing.Color.FromArgb(203, 213, 225), System.Drawing.Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddHarness, 10, System.Drawing.Color.FromArgb(250, 204, 21), System.Drawing.Color.FromArgb(254, 216, 53), System.Drawing.Color.FromArgb(234, 186, 10), System.Drawing.Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnEditGeneral, 10, System.Drawing.Color.FromArgb(248, 250, 252), System.Drawing.Color.FromArgb(241, 245, 249), System.Drawing.Color.FromArgb(226, 232, 240), System.Drawing.Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnDeleteHarness, 10, System.Drawing.Color.FromArgb(254, 242, 242), System.Drawing.Color.FromArgb(254, 226, 226), System.Drawing.Color.FromArgb(254, 202, 202), System.Drawing.Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnAddConnector, 10, System.Drawing.Color.FromArgb(250, 204, 21), System.Drawing.Color.FromArgb(254, 216, 53), System.Drawing.Color.FromArgb(234, 186, 10), System.Drawing.Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnEditConnector, 10, System.Drawing.Color.FromArgb(241, 245, 249), System.Drawing.Color.FromArgb(226, 232, 240), System.Drawing.Color.FromArgb(203, 213, 225), System.Drawing.Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnDeleteConnector, 10, System.Drawing.Color.FromArgb(254, 242, 242), System.Drawing.Color.FromArgb(254, 226, 226), System.Drawing.Color.FromArgb(254, 202, 202), System.Drawing.Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnChangeHarnessImage, 10, System.Drawing.Color.FromArgb(248, 250, 252), System.Drawing.Color.FromArgb(241, 245, 249), System.Drawing.Color.FromArgb(226, 232, 240), System.Drawing.Color.Transparent);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnChangeMachineImage, 10, System.Drawing.Color.FromArgb(248, 250, 252), System.Drawing.Color.FromArgb(241, 245, 249), System.Drawing.Color.FromArgb(226, 232, 240), System.Drawing.Color.Transparent);
         }
 
         #endregion
@@ -1526,27 +899,17 @@ namespace AssemblyLineTester.Views.Pages
         private DataGridViewTextBoxColumn colPartNumber;
         private DataGridViewTextBoxColumn colLastUpdated;
         private TableLayoutPanel tableLayoutPanelRight;
+        private TableLayoutPanel panelDetailCard;
         private Panel panelDetailTop;
         private Label lblDetailTitle;
-        private TabControl tabControlDetail;
-        private TabPage tabGeneral;
-        private TableLayoutPanel tableLayoutPanelGeneral;
-        private Panel panelGeneralInfo;
-        private Panel panelGeneralTop;
-        private Button btnEditGeneral;
-        private Button btnDeleteHarness;
-        private TableLayoutPanel panelDetailCard;
-        private TableLayoutPanel tblGenInfo;
-        private TableLayoutPanel tblImages;
-        private Panel panelImages;
-        private Label lblMachineArea;
-        private PictureBox picMachineArea;
-        private Button btnChangeMachineImage;
-        private Label lblHarnessImage;
-        private PictureBox picHarnessImage;
-        private Button btnChangeHarnessImage;
-        private TabPage tabConnector;
-        private TabPage tabWiring;
+        private System.Windows.Forms.Panel panelTabContent;
+        private FlowLayoutPanel flpNavigation;
+        private Label lblNavGeneral;
+        private Label lblNavConnector;
+        private Label lblNavWiring;
+        
+        
+        
         private TabPage tabTestParams;
         private TabPage tabHistory;
         private TableLayoutPanel tableLayoutPanelBottomRight;
@@ -1578,32 +941,6 @@ namespace AssemblyLineTester.Views.Pages
         private Label lblShowEntries1;
         private ComboBox cmbShowEntries;
         private Label lblShowEntries2;
-        private Panel panelConnectorTop;
-        private Button btnAddConnector;
-        private Button btnEditConnector;
-        private Button btnDeleteConnector;
-        private DataGridView dgvConnectors;
-        private TableLayoutPanel tableLayoutPanelConnector;
-        private Panel panelConnectorList;
-        private TableLayoutPanel tblConnectorListLayout;
-        private Panel panelConnectorSearch;
-        private TextBox txtConnectorSearch;
-        private Button btnConnectorSearch;
-        private TableLayoutPanel tblConnectorPagination;
-        private FlowLayoutPanel flpConnectorPages;
-        private FlowLayoutPanel flpConnectorShowEntries;
-        private Label lblConnectorShowEntries1;
-        private ComboBox cmbConnectorShowEntries;
-        private Label lblConnectorShowEntries2;
-        private Panel panelConnectorDetail;
-        private TableLayoutPanel tableLayoutPanelConnectorDetail;
-        private Panel panelConnectorInfo;
-        private TableLayoutPanel tblConnectorInfo;
-        private Panel panelConnectorImage;
-        private TableLayoutPanel tblConnectorImages;
-        private Label lblConnectorImage;
-        private PictureBox picConnectorImage;
-        private Button btnChangeConnectorImage;
 
     }
 }

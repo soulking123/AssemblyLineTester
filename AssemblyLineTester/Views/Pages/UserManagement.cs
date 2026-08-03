@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views.Modals;
@@ -61,7 +62,7 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.CellMouseMove += GridUsers_CellMouseMove;
             gridUsers.MouseLeave += GridUsers_MouseLeave;
 
-            pnlRoleChart.Paint += PnlRoleChart_Paint;
+            chartRole.PostPaint += ChartRole_PostPaint;
 
             // Loaded on display, not in the constructor.
             this.Load += UserManagement_Load;
@@ -186,7 +187,7 @@ namespace AssemblyLineTester.Views.Pages
                 lblLegendVal5.Text = _roleCounts.GetValueOrDefault("Quality", 0).ToString();
                 lblLegendVal6.Text = _roleCounts.GetValueOrDefault("Supervisor", 0).ToString();
 
-                pnlRoleChart?.Invalidate();
+                LoadRoleChart();
                 PopulateUserGrid();
             }
             catch (Exception ex)
@@ -445,7 +446,7 @@ namespace AssemblyLineTester.Views.Pages
 
             if (dialog.ShowDialog() != DialogResult.OK) return;
 
-            Cursor previous = Cursor;
+            System.Windows.Forms.Cursor previous = Cursor;
             Cursor = Cursors.WaitCursor;
             try
             {
@@ -689,55 +690,71 @@ namespace AssemblyLineTester.Views.Pages
         private int Scaled(int value) => Math.Max(1, (int)Math.Round(value * _uiScale));
 
 
-        // Draws the role-proportion doughnut.
-        private void PnlRoleChart_Paint(object? sender, PaintEventArgs e)
+        // Rebuilds the role-proportion doughnut from the current role counts.
+        private void LoadRoleChart()
         {
-            Graphics g = e.Graphics;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            Rectangle rect = new(5, 5, pnlRoleChart.Width - 10, pnlRoleChart.Height - 10);
-            if (rect.Width <= 0 || rect.Height <= 0) return;
-            int size = Math.Min(rect.Width, rect.Height);
-            Rectangle chartRect = new(rect.X + (rect.Width - size) / 2, rect.Y + (rect.Height - size) / 2, size, size);
+            chartRole.ChartAreas.Clear();
+            chartRole.Series.Clear();
+            chartRole.Legends.Clear();
+            chartRole.BackColor = Color.White;
 
-            float startAngle = 270f;
-            if (_totalUserCount > 0)
+            ChartArea areaPie = new("PieArea") { BackColor = Color.White };
+            chartRole.ChartAreas.Add(areaPie);
+
+            Series sRole = new("Roles") { ChartType = SeriesChartType.Doughnut };
+            // Make the Doughnut ring relatively thin to match previous visual style
+            sRole["DoughnutRadius"] = "25";
+
+            var roleColors = new Dictionary<string, Color>
             {
-                var roleColors = new Dictionary<string, Color>
-                {
-                    { "Administrator", Color.FromArgb(250, 204, 21) },
-                    { "Engineer", Color.FromArgb(34, 197, 94) },
-                    { "Operator", Color.FromArgb(59, 130, 246) },
-                    { "Technician", Color.FromArgb(168, 85, 247) },
-                    { "Quality", Color.FromArgb(239, 68, 68) },
-                    { "Supervisor", Color.FromArgb(148, 163, 184) }
-                };
+                { "Administrator", Color.FromArgb(250, 204, 21) },
+                { "Engineer", Color.FromArgb(34, 197, 94) },
+                { "Operator", Color.FromArgb(59, 130, 246) },
+                { "Technician", Color.FromArgb(168, 85, 247) },
+                { "Quality", Color.FromArgb(239, 68, 68) },
+                { "Supervisor", Color.FromArgb(148, 163, 184) }
+            };
 
+            if (_totalUserCount == 0)
+            {
+                int emptyIdx = sRole.Points.AddY(1);
+                sRole.Points[emptyIdx].Color = Color.FromArgb(226, 232, 240);
+                sRole.Points[emptyIdx].IsVisibleInLegend = false;
+            }
+            else
+            {
                 foreach (var role in roleColors)
                 {
                     int count = _roleCounts.GetValueOrDefault(role.Key, 0);
                     if (count > 0)
                     {
-                        float sweepAngle = (count * 360f) / _totalUserCount;
-                        using SolidBrush brush = new(role.Value);
-                        g.FillPie(brush, chartRect, startAngle, sweepAngle);
-                        startAngle += sweepAngle;
+                        int idx = sRole.Points.AddY(count);
+                        sRole.Points[idx].Color = role.Value;
                     }
                 }
             }
-            else
+
+            chartRole.Series.Add(sRole);
+        }
+
+        private void ChartRole_PostPaint(object? sender, ChartPaintEventArgs e)
+        {
+            if (e.ChartElement is ChartArea area)
             {
-                using SolidBrush placeholderBrush = new(Color.FromArgb(226, 232, 240));
-                g.FillEllipse(placeholderBrush, chartRect);
+                string numText = _totalUserCount.ToString();
+                string subText = "TOTAL";
+
+                using SolidBrush brushNum = new(Color.FromArgb(30, 41, 59));
+                using SolidBrush brushSub = new(Color.FromArgb(100, 116, 139));
+                using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+
+                RectangleF chartRect = e.ChartGraphics.GetAbsoluteRectangle(area.Position.ToRectangleF());
+                float centerX = chartRect.Left + (chartRect.Width * 0.50f);
+                float centerY = chartRect.Top + (chartRect.Height * 0.5f);
+
+                e.ChartGraphics.Graphics.DrawString(numText, AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold, brushNum, centerX, centerY - 14, sf);
+                e.ChartGraphics.Graphics.DrawString(subText, AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold, brushSub, centerX, centerY + 14, sf);
             }
-
-            int innerSize = (int)(size * 0.85);
-            Rectangle innerRect = new(chartRect.X + (size - innerSize) / 2, chartRect.Y + (size - innerSize) / 2, innerSize, innerSize);
-            using SolidBrush bCenter = new(Color.White);
-            g.FillEllipse(bCenter, innerRect);
-
-            using SolidBrush bTxt = new(Color.FromArgb(30, 41, 59));
-            using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-            g.DrawString($"{_totalUserCount}" + Environment.NewLine + "TOTAL", AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold, bTxt, chartRect, sf);
         }
 
         private void SetupEvents()

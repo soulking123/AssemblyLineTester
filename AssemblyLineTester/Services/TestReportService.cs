@@ -140,6 +140,7 @@ namespace AssemblyLineTester.Services
                 ErrorDetail = d.ErrorDetail
             }).ToList();
 
+
             TimeSpan? duration = report.EndDateTime.HasValue ? report.EndDateTime.Value - report.TestDateTime : null;
 
             return new ReportDetailDto

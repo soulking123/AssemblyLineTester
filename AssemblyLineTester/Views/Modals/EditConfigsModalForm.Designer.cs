@@ -23,7 +23,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader = new Panel();
             iconLogo = new FontAwesome.Sharp.IconPictureBox();
             lblHeaderTitle = new Label();
-            btnClose = new FontAwesome.Sharp.IconButton();
             pnlFooter = new Panel();
             btnLoad = new Button();
             btnDelete = new Button();
@@ -50,7 +49,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
             pnlCustomHeader.Controls.Add(iconLogo);
             pnlCustomHeader.Controls.Add(lblHeaderTitle);
-            pnlCustomHeader.Controls.Add(btnClose);
             pnlCustomHeader.Dock = DockStyle.Top;
             pnlCustomHeader.Location = new Point(0, 0);
             pnlCustomHeader.Margin = new Padding(6);
@@ -85,23 +83,6 @@ namespace AssemblyLineTester.Views.Modals
             lblHeaderTitle.Size = new Size(507, 47);
             lblHeaderTitle.TabIndex = 1;
             lblHeaderTitle.Text = "EDIT TEST CONFIGURATIONS";
-            // 
-            // btnClose
-            // 
-            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnClose.BackColor = Color.Transparent;
-            btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.FlatStyle = FlatStyle.Flat;
-            btnClose.IconChar = FontAwesome.Sharp.IconChar.Close;
-            btnClose.IconColor = Color.FromArgb(203, 213, 225);
-            btnClose.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnClose.IconSize = 24;
-            btnClose.Location = new Point(1365, 0);
-            btnClose.Margin = new Padding(6);
-            btnClose.Name = "btnClose";
-            btnClose.Size = new Size(130, 99);
-            btnClose.TabIndex = 2;
-            btnClose.UseVisualStyleBackColor = false;
             // 
             // pnlFooter
             // 
@@ -305,7 +286,6 @@ namespace AssemblyLineTester.Views.Modals
         private Panel pnlCustomHeader;
         private FontAwesome.Sharp.IconPictureBox iconLogo;
         private Label lblHeaderTitle;
-        private FontAwesome.Sharp.IconButton btnClose;
         private Panel pnlFooter;
         private Button btnLoad;
         private Button btnDelete;

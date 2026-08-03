@@ -28,7 +28,7 @@ namespace AssemblyLineTester.Views
         private HarnessDatabase? pageHarnessDb;
         private Dashboard? pageDashboard;
         private TestExecution? pageTestExecution;
-        private ManualTestingPage? pageManualTesting;
+        private TestParametersPage? pageTestParameters;
         private Label? _lblPlaceholder;
         private Reports? pageReports;
         private Settings? pageSettings;
@@ -205,8 +205,8 @@ namespace AssemblyLineTester.Views
             btnTestExecution.Text = "  ⚡    Test Execution";
 
             btnManualTesting.EmojiIcon = "🕹️";
-            btnManualTesting.FullText = "  🕹️    Manual Testing";
-            btnManualTesting.Text = "  🕹️    Manual Testing";
+            btnManualTesting.FullText = "  🕹️    Test Parameters";
+            btnManualTesting.Text = "  🕹️    Test Parameters";
 
             btnHarnessDatabase.EmojiIcon = "🗄️";
             btnHarnessDatabase.FullText = "  🗄️    Harness Database";
@@ -241,7 +241,7 @@ namespace AssemblyLineTester.Views
             {
                 "btnDashboard" => pageDashboard ??= new Dashboard(),
                 "btnTestExecution" => pageTestExecution ??= new TestExecution(),
-                "btnManualTesting" => pageManualTesting ??= new ManualTestingPage(),
+                "btnManualTesting" => pageTestParameters ??= new TestParametersPage(),
                 "btnHarnessDatabase" => pageHarnessDb ??= new HarnessDatabase(),
                 "btnTestHistory" => pageTestHistory ??= new TestHistory(),
                 "btnReports" => pageReports ??= new Reports(),
@@ -278,7 +278,7 @@ namespace AssemblyLineTester.Views
         {
             "btnDashboard" => pageDashboard,
             "btnTestExecution" => pageTestExecution,
-            "btnManualTesting" => pageManualTesting,
+            "btnManualTesting" => pageTestParameters,
             "btnHarnessDatabase" => pageHarnessDb,
             "btnTestHistory" => pageTestHistory,
             "btnReports" => pageReports,

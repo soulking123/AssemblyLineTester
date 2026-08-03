@@ -17,7 +17,6 @@ namespace AssemblyLineTester.Views.Pages
     {
         private TableLayoutPanel? tblUcContainer;
         private Label? lblUnderConstructionTitle;
-        private SettingsTestParametersPage? testParametersPage;
         private SettingsUsersAndRolesPage? _usersAndRolesPage;
         private TableLayoutPanel? _backupPage;
 
@@ -399,35 +398,14 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     tblContent.Visible = true;
                     tblContent.BringToFront();
-                    if (testParametersPage != null) testParametersPage.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupPage != null) _backupPage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
-                }
-                else if (clickedLabel == lblTabTest)
-                {
-                    tblContent.Visible = false;
-                    if (tblUcContainer != null) tblUcContainer.Visible = false;
-                    if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
-                    if (_backupPage != null) _backupPage.Visible = false;
-                    if (testParametersPage == null)
-                    {
-                        testParametersPage = new SettingsTestParametersPage
-                        {
-                            Dock = DockStyle.Fill,
-                            Visible = true,
-                            Margin = new Padding(0)
-                        };
-                        pnlPageContainer.Controls.Add(testParametersPage);
-                    }
-                    testParametersPage.Visible = true;
-                    testParametersPage.BringToFront();
                 }
                 else if (clickedLabel == lblTabUsers)
                 {
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
-                    if (testParametersPage != null) testParametersPage.Visible = false;
                     if (_backupPage != null) _backupPage.Visible = false;
                     if (_usersAndRolesPage == null)
                     {
@@ -446,7 +424,6 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
-                    if (testParametersPage != null) testParametersPage.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupPage == null)
                     {
@@ -459,7 +436,6 @@ namespace AssemblyLineTester.Views.Pages
                 else
                 {
                     tblContent.Visible = false;
-                    if (testParametersPage != null) testParametersPage.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupPage != null) _backupPage.Visible = false;
                     if (tblUcContainer != null && lblUnderConstructionTitle != null)

@@ -107,10 +107,6 @@ namespace AssemblyLineTester.Views.Modals
             flpConnectorChips.Click += (s, e) => OpenConnectorPicker();
             lblConnectorArrow.Click += (s, e) => OpenConnectorPicker();
 
-            btnClose.Click += (s, e) => this.Close();
-            btnClose.MouseEnter += (s, e) => { btnClose.BackColor = Color.FromArgb(225, 29, 72); btnClose.IconColor = Color.White; };
-            btnClose.MouseLeave += (s, e) => { btnClose.BackColor = Color.Transparent; btnClose.IconColor = Color.FromArgb(203, 213, 225); };
-
             pnlCustomHeader.MouseDown += TitleBar_MouseDown;
             iconLogo.MouseDown += TitleBar_MouseDown;
         }

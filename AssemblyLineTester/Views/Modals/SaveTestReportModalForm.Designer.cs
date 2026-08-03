@@ -1,4 +1,4 @@
-using AssemblyLineTester.Services;
+﻿using AssemblyLineTester.Services;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -24,7 +24,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader = new Panel();
             iconLogo = new Label();
             lblHeaderTitle = new Label();
-            btnClose = new Button();
             pnlMainContainer = new Panel();
             pnlGenInfoBox = new Panel();
             tblGenGrid = new TableLayoutPanel();
@@ -67,7 +66,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader.BackColor = Color.FromArgb(34, 40, 49);
             pnlCustomHeader.Controls.Add(iconLogo);
             pnlCustomHeader.Controls.Add(lblHeaderTitle);
-            pnlCustomHeader.Controls.Add(btnClose);
             pnlCustomHeader.Dock = DockStyle.Top;
             pnlCustomHeader.Location = new Point(0, 0);
             pnlCustomHeader.Margin = new Padding(6);
@@ -98,21 +96,6 @@ namespace AssemblyLineTester.Views.Modals
             lblHeaderTitle.Size = new Size(386, 41);
             lblHeaderTitle.TabIndex = 1;
             lblHeaderTitle.Text = "Save Test Execution Report";
-            // 
-            // btnClose
-            // 
-            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.FlatStyle = FlatStyle.Flat;
-            btnClose.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnClose.ForeColor = Color.FromArgb(203, 213, 225);
-            btnClose.Location = new Point(1694, 21);
-            btnClose.Margin = new Padding(6);
-            btnClose.Name = "btnClose";
-            btnClose.Size = new Size(67, 77);
-            btnClose.TabIndex = 2;
-            btnClose.Text = "✕";
-            btnClose.UseVisualStyleBackColor = true;
             // 
             // pnlMainContainer
             // 
@@ -503,7 +486,6 @@ namespace AssemblyLineTester.Views.Modals
             // 
             // btnConfirmSave
             // 
-            btnConfirmSave.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             btnConfirmSave.BackColor = Color.FromArgb(22, 163, 74);
             btnConfirmSave.FlatAppearance.BorderSize = 0;
             btnConfirmSave.FlatStyle = FlatStyle.Flat;
@@ -519,7 +501,6 @@ namespace AssemblyLineTester.Views.Modals
             // 
             // btnCancel
             // 
-            btnCancel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             btnCancel.BackColor = Color.FromArgb(226, 232, 240);
             btnCancel.FlatAppearance.BorderSize = 0;
             btnCancel.FlatStyle = FlatStyle.Flat;
@@ -562,7 +543,6 @@ namespace AssemblyLineTester.Views.Modals
         private Panel pnlCustomHeader;
         private Label iconLogo;
         private Label lblHeaderTitle;
-        private Button btnClose;
         private Panel pnlMainContainer;
         private Label lblInstruction;
         private Panel pnlGenInfoBox;
