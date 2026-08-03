@@ -261,7 +261,7 @@ namespace AssemblyLineTester.Views.Pages
                         cmbProductModel.Text, cmbProductType.Text, cmbArea.Text, cmbEcnNo.Text, "1.0",
                         cmbPartNumber.Text, DateTime.Now, _loadedRows, overallResult);
 
-                    ShowSummary(_loadedRows, overallResult);
+                    //ShowSummary(_loadedRows, overallResult);
 
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
@@ -310,7 +310,6 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (token.IsCancellationRequested) return;
                 _customTestText = _configService.ConvertToProgramText(config);
-                //_customTestText = ""; 
                 Debug.WriteLine(_customTestText);
 
                 if (token.IsCancellationRequested) return;

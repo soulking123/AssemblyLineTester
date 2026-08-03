@@ -25,6 +25,7 @@ namespace AssemblyLineTester.Views.Pages
         private string _customTestText = string.Empty;
         private System.Threading.CancellationTokenSource? _testCts;
         private string? _loadedConfigName = null;
+        private TestConfiguration complexConfig = new();
 
         private class DiagramNode
         {
@@ -70,7 +71,8 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.DataError += (s, e) => { e.ThrowException = false; };
             gridConfig.CellClick += GridConfig_CellClick;
             gridConfig.Leave += GridConfig_Leave;
-            gridConfig.CellBeginEdit += (s, e) => {
+            gridConfig.CellBeginEdit += (s, e) =>
+            {
                 if (!SessionManager.HasPermission("Action.TestConfig.Edit"))
                 {
                     e.Cancel = true;
@@ -91,7 +93,7 @@ namespace AssemblyLineTester.Views.Pages
             if (btnExport != null) btnExport.Click += BtnExport_Click;
             if (btnImport != null) btnImport.Click += BtnImport_Click;
             if (btnReset != null) btnReset.Click += BtnReset_Click;
-            
+
         }
 
         private static string[] GetUnitsForTestType(string testType) => UnitConversionHelper.GetUnitsForTestType(testType);
@@ -690,7 +692,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (double.TryParse(expStr, out double expectedVal))
                 {
                     (double minTolPct, double maxTolPct, string formattedTol) = ParseClampAndFormatTolerance(tolStr);
-                    
+
                     if (row.Cells["colTolerance"].Value?.ToString() != formattedTol)
                     {
                         row.Cells["colTolerance"].Value = formattedTol;
@@ -747,11 +749,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private static string FormatLimit(double val)
         {
-            if (Math.Abs(val - Math.Round(val)) < 1e-6)
-            {
-                return ((long)Math.Round(val)).ToString();
-            }
-            return val.ToString("0.###");
+            return val.ToString("0.############");
         }
 
         private void GridConfig_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -1079,7 +1077,7 @@ namespace AssemblyLineTester.Views.Pages
                     LowerLimit = lower,
                     UpperLimit = upper,
                     Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "" 
+                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? ""
                 });
             }
 
@@ -1098,7 +1096,7 @@ namespace AssemblyLineTester.Views.Pages
             string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
             return double.TryParse(clean, out double val) ? val : null;
         }
-    
+
         private void ParseAndPopulateGridFromProgramText(string programText)
         {
             if (string.IsNullOrWhiteSpace(programText)) return;
@@ -1213,7 +1211,7 @@ namespace AssemblyLineTester.Views.Pages
             btnStartSelected.Enabled = false;
             btnAbort.Enabled = true;
 
-            
+
             try
             {
                 //bool isConnected = _instrument.Connect();
@@ -1229,7 +1227,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                 {
                     string errorMessage = "No Error";
-                    
+
                     // Fast loop: check 4 times, wait 300ms each, to beat the race condition 
                     // but not so long that the buffer clears itself!
                     for (int i = 0; i < 4; i++)
@@ -1268,6 +1266,16 @@ namespace AssemblyLineTester.Views.Pages
                 ParseAndPopulateGridFromProgramText(_customTestText);
 
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                complexConfig = _configService.ConvertToTestConfig(getTestResult.Result);
+
+                if (complexConfig != null)
+                {
+                    LoadConfigurationIntoGrid(complexConfig);
+                }
+                string checkResult = _configService.ConvertToProgramText(complexConfig);
+                Debug.WriteLine("Convert  = ");
+                Debug.WriteLine(checkResult);
             }
             catch (OperationCanceledException)
             {
@@ -1368,8 +1376,8 @@ namespace AssemblyLineTester.Views.Pages
                 btnAbort.Enabled = false;
             }
         }
-    
-                private async void btnAbort_Click(object? sender, EventArgs e)
+
+        private async void btnAbort_Click(object? sender, EventArgs e)
         {
             // 1. Cancel software task execution loop
             _testCts?.Cancel();
@@ -1386,9 +1394,9 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        
-    
-                private static int ParsePinAddress(string pinStr)
+
+
+        private static int ParsePinAddress(string pinStr)
         {
             if (string.IsNullOrWhiteSpace(pinStr)) return 0;
             string trimmed = pinStr.Trim();
@@ -1409,9 +1417,9 @@ namespace AssemblyLineTester.Views.Pages
             return 0;
         }
 
-        
-    
-                private void ExecuteTestForRows(List<int> targetRowIndices, System.Threading.CancellationToken token = default)
+
+
+        private void ExecuteTestForRows(List<int> targetRowIndices, System.Threading.CancellationToken token = default)
         {
             if (token.IsCancellationRequested) return;
 
@@ -1445,7 +1453,7 @@ namespace AssemblyLineTester.Views.Pages
                     var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
                     if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                     {
-                        _instrument.Disconnect();
+                        //_instrument.Disconnect();
                         MessageBox.Show(this, $"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
@@ -1509,10 +1517,10 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-    
-        
-    
-                private TestConfiguration? BuildConfigurationForRows(List<int> targetRowIndices, string configName, string productModel, string? description)
+
+
+
+        private TestConfiguration? BuildConfigurationForRows(List<int> targetRowIndices, string configName, string productModel, string? description)
         {
             var nets = new List<TestConfigNet>();
 
@@ -1559,5 +1567,96 @@ namespace AssemblyLineTester.Views.Pages
             };
         }
 
+        private async void btnComplex_Click(object sender, EventArgs e)
+        {
+            // Show the Learn Connection Modal Options
+            //using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
+            //{
+            //    if (modal.ShowDialog(this) != DialogResult.OK)
+            //    {
+            //        return; // User cancelled
+            //    }
+
+            //    // Store options in local variables as requested
+            //    bool learnWire = modal.IncludeWire;
+            //    bool learnResistor = modal.IncludeResistor;
+            //    bool learnCapacitor = modal.IncludeCapacitor;
+            //    bool learnDiode = modal.IncludeDiode;
+            //    bool learnTwistedPair = modal.IncludeTwistedPair;
+            //}
+            InstrumentService.StopMonitoring();
+            _testCts?.Cancel();
+            _testCts = new System.Threading.CancellationTokenSource();
+            var token = _testCts.Token;
+
+            string originalText = btnLearnConnection.Text;
+            btnLearnConnection.Text = "Loading.....";
+            btnLearnConnection.Enabled = false;
+            btnStartAll.Enabled = false;
+            btnStartSelected.Enabled = false;
+            btnAbort.Enabled = true;
+
+
+            try
+            {
+                bool isConnected = _instrument.Connect();
+                if (!isConnected)
+                {
+                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                var learnResult = await Task.Run(() => _instrument.LearnComplexConnection("",7), token);
+                if (token.IsCancellationRequested) return;
+
+                if (learnResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
+                {
+                    Debug.WriteLine("complex learn success");
+                }
+                else
+                {
+                    Debug.WriteLine("complex learn failed");
+                }
+
+                var getTestResult = await Task.Run(() =>  _instrument.GetLearnedConnection());
+                if (token.IsCancellationRequested) return;
+                Debug.WriteLine(getTestResult);
+                Debug.WriteLine(getTestResult.Result);
+                if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
+                {
+
+                    MessageBox.Show(this, "Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                complexConfig = _configService.ConvertToTestConfig(getTestResult.Result);
+                Debug.WriteLine("Learned Test Configuration:");
+                Debug.WriteLine(complexConfig);
+
+                if (complexConfig != null)
+                {
+                    LoadConfigurationIntoGrid(complexConfig);
+                }
+                string checkResult = _configService.ConvertToProgramText(complexConfig);
+                Debug.WriteLine("Convert  = ");
+                Debug.WriteLine(checkResult);
+                //_customTestText = getTestResult.Result;
+                //Debug.WriteLine(_customTestText);
+
+                MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (OperationCanceledException)
+            {
+                // Task was canceled via btnAbort
+            }
+            finally
+            {
+                InstrumentService.StartMonitoring();
+                btnLearnConnection.Text = originalText;
+                btnLearnConnection.Enabled = true;
+                btnStartAll.Enabled = true;
+                btnStartSelected.Enabled = true;
+                btnAbort.Enabled = false;
+            }
+        }
     }
 }
