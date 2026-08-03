@@ -76,9 +76,6 @@ namespace AssemblyLineTester.Views.Pages
             cardTrend.Controls.SetChildIndex(chartTrend, 0);
 
             if (cmbReportType.Items.Count > 0) cmbReportType.SelectedIndex = 0;
-            if (cmbModel.Items.Count > 0) cmbModel.SelectedIndex = 0;
-            if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
-            if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
             dtpStart.Format = DateTimePickerFormat.Custom;
             dtpStart.CustomFormat = "dd/MM/yy";
@@ -366,10 +363,10 @@ namespace AssemblyLineTester.Views.Pages
         {
             dtpStart.Value = DateTime.Now.AddDays(-30);
             dtpEnd.Value = DateTime.Now;
-            cmbModel.SelectedIndex = 0;
-            cmbType.SelectedIndex = 0;
-            cmbArea.SelectedIndex = 0;
-            cmbOperator.SelectedIndex = 0;
+            txtModel.Text = string.Empty;
+            txtType.Text = string.Empty;
+            txtArea.Text = string.Empty;
+            txtOperator.Text = string.Empty;
             cmbResult.SelectedIndex = 0;
             txtPartNumber.Text = string.Empty;
         }
@@ -383,18 +380,17 @@ namespace AssemblyLineTester.Views.Pages
                 PageSize = _pageSize
             };
 
-            if (!string.Equals(cmbModel.Text, "All Models", StringComparison.OrdinalIgnoreCase))
-                filter.ProductModel = cmbModel.Text;
+            if (!string.IsNullOrWhiteSpace(txtModel.Text))
+                filter.ProductModel = txtModel.Text.Trim();
 
-            if (!string.Equals(cmbType.Text, "All Types", StringComparison.OrdinalIgnoreCase))
-                filter.ProductType = cmbType.Text;
+            if (!string.IsNullOrWhiteSpace(txtType.Text))
+                filter.ProductType = txtType.Text.Trim();
 
-            if (!string.Equals(cmbArea.Text, "All Areas", StringComparison.OrdinalIgnoreCase))
-                filter.Area = cmbArea.Text;
+            if (!string.IsNullOrWhiteSpace(txtArea.Text))
+                filter.Area = txtArea.Text.Trim();
 
-            if (!string.IsNullOrWhiteSpace(cmbOperator.Text)
-                && !string.Equals(cmbOperator.Text, "All Operators", StringComparison.OrdinalIgnoreCase))
-                filter.Operator = cmbOperator.Text;
+            if (!string.IsNullOrWhiteSpace(txtOperator.Text))
+                filter.Operator = txtOperator.Text.Trim();
 
             if (!string.Equals(cmbResult.Text, "All Results", StringComparison.OrdinalIgnoreCase))
                 filter.Result = cmbResult.Text.ToUpperInvariant();

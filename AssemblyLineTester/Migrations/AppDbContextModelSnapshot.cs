@@ -17,6 +17,66 @@ namespace AssemblyLineTester.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
 
+            modelBuilder.Entity("AssemblyLineTester.Models.DefaultTestSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DefaultCapacitorTolerance")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("DefaultCapacitorValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("DefaultMaxWireResistance")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("DefaultResistorTolerance")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("DefaultResistorValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("DefaultTestTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("DefaultWireInstallationResistance")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("TotalTestPointsAvailable")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DefaultTestTypeId");
+
+                    b.ToTable("DefaultTestSettings");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.LearnConnection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TestTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestTypeId");
+
+                    b.ToTable("LearnConnections");
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.MaintenanceState", b =>
                 {
                     b.Property<int>("Id")
@@ -1368,6 +1428,24 @@ namespace AssemblyLineTester.Migrations
                     b.ToTable("TestReports");
                 });
 
+            modelBuilder.Entity("AssemblyLineTester.Models.TestResultCheck", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestResultName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TestResultChecks");
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.TestStep", b =>
                 {
                     b.Property<int>("StepId")
@@ -1512,6 +1590,28 @@ namespace AssemblyLineTester.Migrations
                             DisplayName = "WIRE",
                             TestTypeName = "WIRE"
                         });
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestTypeCheck", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestTypeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TestTypeChecks");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.User", b =>
@@ -1735,6 +1835,28 @@ namespace AssemblyLineTester.Migrations
                     b.HasKey("ProductHarnessId");
 
                     b.ToTable("ProductHarnesses");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.DefaultTestSetting", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestType", "DefaultTestType")
+                        .WithMany()
+                        .HasForeignKey("DefaultTestTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DefaultTestType");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.LearnConnection", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestType", "TestType")
+                        .WithMany()
+                        .HasForeignKey("TestTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("TestType");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.ReportTestTypeSummary", b =>

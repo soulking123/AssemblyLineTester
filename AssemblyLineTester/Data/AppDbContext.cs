@@ -23,6 +23,10 @@ namespace AssemblyLineTester.Data
         public DbSet<ProductHarness> ProductHarnesses { get; set; } = null!;
         public DbSet<Connector> Connectors { get; set; } = null!;
         public DbSet<HarnessConnector> HarnessConnectors { get; set; } = null!;
+        public DbSet<DefaultTestSetting> DefaultTestSettings { get; set; } = null!;
+        public DbSet<LearnConnection> LearnConnections { get; set; } = null!;
+        public DbSet<TestResultCheck> TestResultChecks { get; set; } = null!;
+        public DbSet<TestTypeCheck> TestTypeChecks { get; set; } = null!;
 
         // Folder holding the live database, its backups and the pre-restore copies.
         public static string DataFolder { get; } = Path.Combine(
@@ -186,6 +190,19 @@ namespace AssemblyLineTester.Data
             modelBuilder.Entity<HarnessConnector>()
                 .HasIndex(hc => new { hc.ProductHarnessId, hc.ConnectorId })
                 .IsUnique();
+
+            // Restrict, so deleting a test type cannot orphan default settings or learn connections that reference it.
+            modelBuilder.Entity<DefaultTestSetting>()
+                .HasOne(s => s.DefaultTestType)
+                .WithMany()
+                .HasForeignKey(s => s.DefaultTestTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LearnConnection>()
+                .HasOne(c => c.TestType)
+                .WithMany()
+                .HasForeignKey(c => c.TestTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // ---- Seed data ----
 

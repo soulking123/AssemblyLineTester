@@ -84,13 +84,13 @@
             tblFilterGrid1 = new TableLayoutPanel();
             lblFilterModel = new Label();
             lblFilterType = new Label();
-            cmbModel = new ComboBox();
-            cmbType = new ComboBox();
+            txtModel = new TextBox();
+            txtType = new TextBox();
             tblFilterGrid2 = new TableLayoutPanel();
             lblFilterArea = new Label();
             lblFilterOperator = new Label();
-            cmbArea = new ComboBox();
-            cmbOperator = new ComboBox();
+            txtArea = new TextBox();
+            txtOperator = new TextBox();
             tblFilterGrid3 = new TableLayoutPanel();
             lblFilterResult = new Label();
             lblFilterPart = new Label();
@@ -546,8 +546,8 @@
             tblFilterGrid1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblFilterGrid1.Controls.Add(lblFilterModel, 0, 0);
             tblFilterGrid1.Controls.Add(lblFilterType, 1, 0);
-            tblFilterGrid1.Controls.Add(cmbModel, 0, 1);
-            tblFilterGrid1.Controls.Add(cmbType, 1, 1);
+            tblFilterGrid1.Controls.Add(txtModel, 0, 1);
+            tblFilterGrid1.Controls.Add(txtType, 1, 1);
             tblFilterGrid1.Dock = DockStyle.Fill;
             tblFilterGrid1.Location = new Point(0, 113);
             tblFilterGrid1.Margin = new Padding(0, 0, 0, 5);
@@ -582,31 +582,27 @@
             lblFilterType.TabIndex = 1;
             lblFilterType.Text = "Product Type";
             // 
-            // cmbModel
-            // 
-            cmbModel.Dock = DockStyle.Fill;
-            cmbModel.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbModel.Font = new Font("Segoe UI", 9F);
-            cmbModel.FormattingEnabled = true;
-            cmbModel.Items.AddRange(new object[] { "All Models", "Model X-100", "Model Y-200", "Model Z-300" });
-            cmbModel.Location = new Point(0, 14);
-            cmbModel.Margin = new Padding(0, 0, 3, 0);
-            cmbModel.Name = "cmbModel";
-            cmbModel.Size = new Size(248, 23);
-            cmbModel.TabIndex = 2;
-            // 
-            // cmbType
-            // 
-            cmbType.Dock = DockStyle.Fill;
-            cmbType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbType.Font = new Font("Segoe UI", 9F);
-            cmbType.FormattingEnabled = true;
-            cmbType.Items.AddRange(new object[] { "All Types", "Standard", "Premium", "Industrial" });
-            cmbType.Location = new Point(254, 14);
-            cmbType.Margin = new Padding(3, 0, 0, 0);
-            cmbType.Name = "cmbType";
-            cmbType.Size = new Size(249, 23);
-            cmbType.TabIndex = 3;
+            // txtModel
+            //
+            txtModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtModel.Font = new Font("Segoe UI", 9F);
+            txtModel.Location = new Point(0, 14);
+            txtModel.Margin = new Padding(0, 0, 3, 0);
+            txtModel.Name = "txtModel";
+            txtModel.PlaceholderText = "Search by Product Model...";
+            txtModel.Size = new Size(248, 23);
+            txtModel.TabIndex = 2;
+            //
+            // txtType
+            //
+            txtType.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtType.Font = new Font("Segoe UI", 9F);
+            txtType.Location = new Point(254, 14);
+            txtType.Margin = new Padding(3, 0, 0, 0);
+            txtType.Name = "txtType";
+            txtType.PlaceholderText = "Search by Product Type...";
+            txtType.Size = new Size(249, 23);
+            txtType.TabIndex = 3;
             // 
             // tblFilterGrid2
             // 
@@ -617,8 +613,8 @@
             tblFilterGrid2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblFilterGrid2.Controls.Add(lblFilterArea, 0, 0);
             tblFilterGrid2.Controls.Add(lblFilterOperator, 1, 0);
-            tblFilterGrid2.Controls.Add(cmbArea, 0, 1);
-            tblFilterGrid2.Controls.Add(cmbOperator, 1, 1);
+            tblFilterGrid2.Controls.Add(txtArea, 0, 1);
+            tblFilterGrid2.Controls.Add(txtOperator, 1, 1);
             tblFilterGrid2.Dock = DockStyle.Fill;
             tblFilterGrid2.Location = new Point(0, 155);
             tblFilterGrid2.Margin = new Padding(0, 0, 0, 7);
@@ -653,31 +649,27 @@
             lblFilterOperator.TabIndex = 1;
             lblFilterOperator.Text = "Operator";
             // 
-            // cmbArea
-            // 
-            cmbArea.Dock = DockStyle.Fill;
-            cmbArea.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbArea.Font = new Font("Segoe UI", 9F);
-            cmbArea.FormattingEnabled = true;
-            cmbArea.Items.AddRange(new object[] { "All Areas", "Assembly Bay A", "Inspection Line 1", "Packaging Station" });
-            cmbArea.Location = new Point(0, 14);
-            cmbArea.Margin = new Padding(0, 0, 3, 0);
-            cmbArea.Name = "cmbArea";
-            cmbArea.Size = new Size(248, 23);
-            cmbArea.TabIndex = 2;
-            // 
-            // cmbOperator
-            // 
-            cmbOperator.Dock = DockStyle.Fill;
-            cmbOperator.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbOperator.Font = new Font("Segoe UI", 9F);
-            cmbOperator.FormattingEnabled = true;
-            cmbOperator.Items.AddRange(new object[] { "All Operators", "John Doe (OP-101)", "Jane Smith (OP-102)", "Robert Johnson (OP-103)" });
-            cmbOperator.Location = new Point(254, 14);
-            cmbOperator.Margin = new Padding(3, 0, 0, 0);
-            cmbOperator.Name = "cmbOperator";
-            cmbOperator.Size = new Size(249, 23);
-            cmbOperator.TabIndex = 3;
+            // txtArea
+            //
+            txtArea.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtArea.Font = new Font("Segoe UI", 9F);
+            txtArea.Location = new Point(0, 14);
+            txtArea.Margin = new Padding(0, 0, 3, 0);
+            txtArea.Name = "txtArea";
+            txtArea.PlaceholderText = "Search by Area...";
+            txtArea.Size = new Size(248, 23);
+            txtArea.TabIndex = 2;
+            //
+            // txtOperator
+            //
+            txtOperator.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtOperator.Font = new Font("Segoe UI", 9F);
+            txtOperator.Location = new Point(254, 14);
+            txtOperator.Margin = new Padding(3, 0, 0, 0);
+            txtOperator.Name = "txtOperator";
+            txtOperator.PlaceholderText = "Search by Operator...";
+            txtOperator.Size = new Size(249, 23);
+            txtOperator.TabIndex = 3;
             // 
             // tblFilterGrid3
             // 
@@ -2563,9 +2555,9 @@
 
         private System.Windows.Forms.Label lblFilterType;
 
-        private System.Windows.Forms.ComboBox cmbModel;
+        private System.Windows.Forms.TextBox txtModel;
 
-        private System.Windows.Forms.ComboBox cmbType;
+        private System.Windows.Forms.TextBox txtType;
 
         private System.Windows.Forms.TableLayoutPanel tblFilterGrid2;
 
@@ -2573,9 +2565,9 @@
 
         private System.Windows.Forms.Label lblFilterOperator;
 
-        private System.Windows.Forms.ComboBox cmbArea;
+        private System.Windows.Forms.TextBox txtArea;
 
-        private System.Windows.Forms.ComboBox cmbOperator;
+        private System.Windows.Forms.TextBox txtOperator;
 
         private System.Windows.Forms.TableLayoutPanel tblFilterGrid3;
 

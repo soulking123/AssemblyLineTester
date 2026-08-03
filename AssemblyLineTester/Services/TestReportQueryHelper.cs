@@ -22,14 +22,15 @@ namespace AssemblyLineTester.Services
             if (toUtc.HasValue)
                 query = query.Where(r => r.TestDateTime < toUtc.Value);
 
+            // Typed by hand on the Reports page, so these match on substring like PartNumber does.
             if (!string.IsNullOrWhiteSpace(filter.ProductModel))
-                query = query.Where(r => r.ProductModel == filter.ProductModel);
+                query = query.Where(r => r.ProductModel.Contains(filter.ProductModel));
 
             if (!string.IsNullOrWhiteSpace(filter.ProductType))
-                query = query.Where(r => r.ProductType == filter.ProductType);
+                query = query.Where(r => r.ProductType.Contains(filter.ProductType));
 
             if (!string.IsNullOrWhiteSpace(filter.Area))
-                query = query.Where(r => r.Area == filter.Area);
+                query = query.Where(r => r.Area.Contains(filter.Area));
 
             if (!string.IsNullOrWhiteSpace(filter.Result)
                 && Enum.TryParse<TestResult>(filter.Result, true, out var resultEnum))
@@ -38,7 +39,7 @@ namespace AssemblyLineTester.Services
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Operator))
-                query = query.Where(r => r.Operator == filter.Operator);
+                query = query.Where(r => r.Operator.Contains(filter.Operator));
 
             if (!string.IsNullOrWhiteSpace(filter.PartNumberKeyword))
                 query = query.Where(r => r.PartNumber.Contains(filter.PartNumberKeyword));
