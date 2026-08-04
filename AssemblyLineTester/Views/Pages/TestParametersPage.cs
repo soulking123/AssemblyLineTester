@@ -990,7 +990,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void GridConfig_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
         {
-            Debug.WriteLine("1233");
             if (e.RowIndex >= 0 && e.RowIndex < gridConfig.Rows.Count)
             {
                 var colTestType = gridConfig.Columns["colTestType"];
@@ -1202,13 +1201,14 @@ namespace AssemblyLineTester.Views.Pages
                 row.Cells["colTolerance"].ReadOnly = false;
 
 
-                string expStr = row.Cells["colExpectedValue"].ToString();
-                string tolStr = row.Cells["colTolerance"].ToString();
-                //string expStr = row.Cells["colExpectedValue"].Value?.ToString() ?? "0";
-                //string tolStr = row.Cells["colTolerance"].Value?.ToString() ?? "±0%";
+                //string expStr = row.Cells["colExpectedValue"].ToString();
+                //string tolStr = row.Cells["colTolerance"].ToString();
+                string expStr = row.Cells["colExpectedValue"].Value?.ToString() ?? "0";
+                string tolStr = row.Cells["colTolerance"].Value?.ToString() ?? "±0%";
 
                 if (double.TryParse(expStr, out double expectedVal))
                 {
+                    Debug.WriteLine("success");
                     (double minTolPct, double maxTolPct, string formattedTol) = ParseClampAndFormatTolerance(tolStr);
 
                     if (row.Cells["colTolerance"].Value?.ToString() != formattedTol)
@@ -1229,6 +1229,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
                 else
                 {
+                    Debug.WriteLine("fail");
                     row.Cells["colLowerLimit"].Value = "0";
                     row.Cells["colUpperLimit"].Value = "0";
                 }
@@ -1713,6 +1714,8 @@ namespace AssemblyLineTester.Views.Pages
         private async void btnLearnConnection_Click(object? sender, EventArgs e)
         {
             List<string> learnTestTypes;
+            List<LearnConnection> selectedConnections;
+            byte testLearnValue = 0;
 
             // Show the Learn Connection Modal Options
             using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
@@ -1721,6 +1724,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     return; // User cancelled
                 }
+                selectedConnections = modal.SelectedTypes;
 
                 learnTestTypes = modal.SelectedTypes
                     .Select(c => c.TestType?.TestTypeName ?? string.Empty)
@@ -1733,6 +1737,12 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
             }
+            foreach (LearnConnection conn in selectedConnections)
+            {
+                testLearnValue += (byte)conn.TestTypeValue;
+            }
+            Debug.WriteLine("===================================================");
+            Debug.WriteLine(testLearnValue);
 
             InstrumentService.StopMonitoring();
             _testCts?.Cancel();
@@ -1763,7 +1773,6 @@ namespace AssemblyLineTester.Views.Pages
                 //
                 //
                 //
-                byte testLearnValue = 3;
 
                 var learnResult = testLearnValue == 0
                     ? await Task.Run(() => _instrument.LearnConnection(), token)
@@ -1962,7 +1971,7 @@ namespace AssemblyLineTester.Views.Pages
 
 
 
-        private void ExecuteTestForRows(List<int> targetRowIndices, System.Threading.CancellationToken token = default)
+        private async void ExecuteTestForRows(List<int> targetRowIndices, System.Threading.CancellationToken token = default)
         {
             if (token.IsCancellationRequested) return;
 
@@ -1981,7 +1990,8 @@ namespace AssemblyLineTester.Views.Pages
 
             if (token.IsCancellationRequested) return;
 
-            var manualConfig = BuildConfigurationForRows(targetRowIndices, txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
+            //var manualConfig = BuildConfigurationForRows(targetRowIndices, txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
+            var manualConfig = BuildConfigurationForRows(targetRowIndices, txtConfigName.Text?.Trim() ?? "", "", null);
             if (manualConfig == null || manualConfig.Nets.Count == 0) return;
 
             _customTestText = _configService.ConvertToProgramText(manualConfig);
