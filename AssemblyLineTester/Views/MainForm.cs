@@ -751,7 +751,26 @@ namespace AssemblyLineTester.Views
         protected override void WndProc(ref Message m)
         {
             const int WM_NCHITTEST = 0x0084;
+            const int WM_SIZE = 0x0005;
+            const int SIZE_RESTORED = 0;
+            const int SIZE_MAXIMIZED = 2;
             const int resizeAreaSize = 10;
+
+            // Fix visual glitching when restoring from minimized (alt+tab or taskbar click).
+            // WS_EX_COMPOSITED's off-screen buffer goes stale while the window is minimized;
+            // the DWM does not recompose it on restore for borderless forms, so we force a
+            // full invalidation of every control in the tree.
+            if (m.Msg == WM_SIZE)
+            {
+                int sizeType = m.WParam.ToInt32();
+                if (sizeType == SIZE_RESTORED || sizeType == SIZE_MAXIMIZED)
+                {
+                    base.WndProc(ref m);
+                    this.Invalidate(true);
+                    this.Update();
+                    return;
+                }
+            }
 
             if (m.Msg == WM_NCHITTEST && this.WindowState == FormWindowState.Normal)
             {
