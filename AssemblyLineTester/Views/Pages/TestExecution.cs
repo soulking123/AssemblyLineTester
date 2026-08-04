@@ -703,31 +703,74 @@ namespace AssemblyLineTester.Views.Pages
      
         private void SetupDiagramPointers()
         {
-            picMachineOverview.Paint += PicMachineOverview_Paint;
             picAreaDetail.Paint += PicAreaDetail_Paint;
-            picHarnessConn.Paint += PicHarnessConn_Paint;
+            
+            picMachineOverview.Click += PicMachineOverview_Click;
+            picHarnessConn.Click += PicHarnessConn_Click;
+            picMachineOverview.Cursor = Cursors.Hand;
+            picHarnessConn.Cursor = Cursors.Hand;
+            
+            picMachineOverview.Paint += Pic_Paint_NoImage;
+            picHarnessConn.Paint += Pic_Paint_NoImage;
+
+            LoadImagesFromConfig();
         }
 
-        private void PicMachineOverview_Paint(object? sender, PaintEventArgs e)
+        private void Pic_Paint_NoImage(object? sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            Rectangle r = picMachineOverview.ClientRectangle;
-
-            using (LinearGradientBrush brush = new LinearGradientBrush(r, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), 45F))
+            if (sender is PictureBox pb && pb.Image == null)
             {
-                g.FillRectangle(brush, r);
+                Graphics g = e.Graphics;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                Rectangle r = pb.ClientRectangle;
+
+                using (SolidBrush bgBrush = new SolidBrush(Color.FromArgb(241, 245, 249)))
+                {
+                    g.FillRectangle(bgBrush, r);
+                }
+
+                using (Brush textBrush = new SolidBrush(Color.FromArgb(148, 163, 184)))
+                {
+                    StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                    g.DrawString("No Image Available", AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold, textBrush, r, sf);
+                }
             }
+        }
 
-            using (Pen pen = new Pen(Color.FromArgb(148, 163, 184), 2))
+        private void LoadImagesFromConfig()
+        {
+            var configService = new TestConfigService();
+            var activeConfig = configService.GetActiveConfig();
+            if (activeConfig != null)
             {
-                g.DrawRectangle(pen, 20, 20, r.Width - 40, r.Height - 40);
-            }
+                var harnessService = new AssemblyLineTester.Services.HarnessService();
+                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModel || h.Name == activeConfig.ConfigName);
+                if (harness != null && harness.ImagePaths != null && harness.ImagePaths.Count > 0)
+                {
+                    try
+                    {
+                        if (System.IO.File.Exists(harness.ImagePaths[0]))
+                            picMachineOverview.Image = Image.FromFile(harness.ImagePaths[0]);
+                    } catch { }
+                }
 
-            using (Brush b = new SolidBrush(Color.FromArgb(71, 85, 105)))
-            {
-                StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString("🖥️ Assembly Test Station #4\n[Online & Active]", AssemblyLineTester.Helpers.UIStyleHelper.Font11Bold, b, r, sf);
+                if (harness != null)
+                {
+                    var connectorService = new AssemblyLineTester.Services.ConnectorService();
+                    var connectors = connectorService.GetConnectorsByHarness(harness.ProductHarnessId);
+                    if (connectors != null && connectors.Count > 0)
+                    {
+                        var firstConn = System.Linq.Enumerable.FirstOrDefault(connectors, c => !string.IsNullOrEmpty(c.ImagePath));
+                        if (firstConn != null && !string.IsNullOrEmpty(firstConn.ImagePath))
+                        {
+                            try
+                            {
+                                if (System.IO.File.Exists(firstConn.ImagePath))
+                                    picHarnessConn.Image = Image.FromFile(firstConn.ImagePath);
+                            } catch { }
+                        }
+                    }
+                }
             }
         }
 
@@ -784,22 +827,51 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void PicHarnessConn_Paint(object? sender, PaintEventArgs e)
+        private void PicMachineOverview_Click(object? sender, EventArgs e)
         {
-            Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            Rectangle r = picHarnessConn.ClientRectangle;
-
-            using (SolidBrush brush = new SolidBrush(Color.FromArgb(241, 245, 249)))
+            System.Collections.Generic.List<string> paths = new System.Collections.Generic.List<string>();
+            var configService = new TestConfigService();
+            var activeConfig = configService.GetActiveConfig();
+            if (activeConfig != null)
             {
-                g.FillRectangle(brush, r);
+                var harnessService = new AssemblyLineTester.Services.HarnessService();
+                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModel || h.Name == activeConfig.ConfigName);
+                if (harness != null && harness.ImagePaths != null)
+                {
+                    paths.AddRange(harness.ImagePaths);
+                }
             }
 
-            using (Brush b = new SolidBrush(Color.FromArgb(51, 65, 85)))
+            using var modal = new AssemblyLineTester.Views.Modals.ImagePreviewModalForm(paths, "HARNESS PREVIEW");
+            modal.ShowDialog(this);
+        }
+
+        private void PicHarnessConn_Click(object? sender, EventArgs e)
+        {
+            System.Collections.Generic.List<string> paths = new System.Collections.Generic.List<string>();
+            var configService = new TestConfigService();
+            var activeConfig = configService.GetActiveConfig();
+            if (activeConfig != null)
             {
-                StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString("🔌 Connector Pinout: 24-Pin ECU Harness\nActive Pin: J1-23 ➔ J3-16", AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold, b, r, sf);
+                var harnessService = new AssemblyLineTester.Services.HarnessService();
+                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModel || h.Name == activeConfig.ConfigName);
+                if (harness != null)
+                {
+                    var connectorService = new AssemblyLineTester.Services.ConnectorService();
+                    var connectors = connectorService.GetConnectorsByHarness(harness.ProductHarnessId);
+                    if (connectors != null)
+                    {
+                        foreach(var conn in connectors)
+                        {
+                            if (!string.IsNullOrEmpty(conn.ImagePath))
+                                paths.Add(conn.ImagePath);
+                        }
+                    }
+                }
             }
+
+            using var modal = new AssemblyLineTester.Views.Modals.ImagePreviewModalForm(paths, "CONNECTOR PREVIEW");
+            modal.ShowDialog(this);
         }
 
         private void SetupEvents()
