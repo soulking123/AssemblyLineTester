@@ -1,9 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-// Join entity for the many-to-many relationship between ProductHarness and Connector - a Connector
-// is a standalone catalog item that can be reused by several harnesses. Position records the order a
-// connector was attached to a given harness (1st attached = "J1", 2nd = "J2", ...), since that order
-// can't be recovered from the FK relationship alone.
+// Join entity; Position records attach order ("J1", "J2", ...), which the FK alone cannot recover.
 public class HarnessConnector
 {
     [Key]

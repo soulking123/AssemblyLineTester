@@ -1,4 +1,4 @@
-namespace AssemblyLineTester.Views.Modals
+﻿namespace AssemblyLineTester.Views.Modals
 {
     partial class LearnConnectionModalForm
     {
@@ -19,11 +19,6 @@ namespace AssemblyLineTester.Views.Modals
             lblTitle = new Label();
             iconLogo = new FontAwesome.Sharp.IconPictureBox();
             pnlContent = new Panel();
-            chkTwistedPair = new CheckBox();
-            chkDiode = new CheckBox();
-            chkCapacitor = new CheckBox();
-            chkResistor = new CheckBox();
-            chkWire = new CheckBox();
             pnlBottom = new Panel();
             btnCancel = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnProceed = new AssemblyLineTester.Views.Controls.RoundedButton();
@@ -76,89 +71,12 @@ namespace AssemblyLineTester.Views.Modals
             // pnlContent
             // 
             pnlContent.BackColor = Color.White;
-            pnlContent.Controls.Add(chkTwistedPair);
-            pnlContent.Controls.Add(chkDiode);
-            pnlContent.Controls.Add(chkCapacitor);
-            pnlContent.Controls.Add(chkResistor);
-            pnlContent.Controls.Add(chkWire);
             pnlContent.Dock = DockStyle.Fill;
             pnlContent.Location = new Point(0, 85);
             pnlContent.Margin = new Padding(6);
             pnlContent.Name = "pnlContent";
             pnlContent.Size = new Size(743, 427);
             pnlContent.TabIndex = 1;
-            // 
-            // chkTwistedPair
-            // 
-            chkTwistedPair.AutoSize = true;
-            chkTwistedPair.BackColor = Color.Transparent;
-            chkTwistedPair.Font = new Font("Segoe UI", 12F);
-            chkTwistedPair.ForeColor = Color.Black;
-            chkTwistedPair.Location = new Point(56, 299);
-            chkTwistedPair.Margin = new Padding(6);
-            chkTwistedPair.Name = "chkTwistedPair";
-            chkTwistedPair.Size = new Size(220, 49);
-            chkTwistedPair.TabIndex = 4;
-            chkTwistedPair.Text = "Twisted Pair";
-            chkTwistedPair.UseVisualStyleBackColor = false;
-            // 
-            // chkDiode
-            // 
-            chkDiode.AutoSize = true;
-            chkDiode.BackColor = Color.Transparent;
-            chkDiode.Font = new Font("Segoe UI", 12F);
-            chkDiode.ForeColor = Color.Black;
-            chkDiode.Location = new Point(56, 235);
-            chkDiode.Margin = new Padding(6);
-            chkDiode.Name = "chkDiode";
-            chkDiode.Size = new Size(137, 49);
-            chkDiode.TabIndex = 3;
-            chkDiode.Text = "Diode";
-            chkDiode.UseVisualStyleBackColor = false;
-            // 
-            // chkCapacitor
-            // 
-            chkCapacitor.AutoSize = true;
-            chkCapacitor.BackColor = Color.Transparent;
-            chkCapacitor.Font = new Font("Segoe UI", 12F);
-            chkCapacitor.ForeColor = Color.Black;
-            chkCapacitor.Location = new Point(56, 171);
-            chkCapacitor.Margin = new Padding(6);
-            chkCapacitor.Name = "chkCapacitor";
-            chkCapacitor.Size = new Size(187, 49);
-            chkCapacitor.TabIndex = 2;
-            chkCapacitor.Text = "Capacitor";
-            chkCapacitor.UseVisualStyleBackColor = false;
-            // 
-            // chkResistor
-            // 
-            chkResistor.AutoSize = true;
-            chkResistor.BackColor = Color.Transparent;
-            chkResistor.Font = new Font("Segoe UI", 12F);
-            chkResistor.ForeColor = Color.Black;
-            chkResistor.Location = new Point(56, 107);
-            chkResistor.Margin = new Padding(6);
-            chkResistor.Name = "chkResistor";
-            chkResistor.Size = new Size(164, 49);
-            chkResistor.TabIndex = 1;
-            chkResistor.Text = "Resistor";
-            chkResistor.UseVisualStyleBackColor = false;
-            // 
-            // chkWire
-            // 
-            chkWire.AutoSize = true;
-            chkWire.BackColor = Color.Transparent;
-            chkWire.Checked = true;
-            chkWire.CheckState = CheckState.Checked;
-            chkWire.Font = new Font("Segoe UI", 12F);
-            chkWire.ForeColor = Color.Black;
-            chkWire.Location = new Point(56, 43);
-            chkWire.Margin = new Padding(6);
-            chkWire.Name = "chkWire";
-            chkWire.Size = new Size(118, 49);
-            chkWire.TabIndex = 0;
-            chkWire.Text = "Wire";
-            chkWire.UseVisualStyleBackColor = false;
             // 
             // pnlBottom
             // 
@@ -243,11 +161,6 @@ namespace AssemblyLineTester.Views.Modals
         private System.Windows.Forms.Label lblTitle;
         private FontAwesome.Sharp.IconPictureBox iconLogo;
         private System.Windows.Forms.Panel pnlContent;
-        private System.Windows.Forms.CheckBox chkTwistedPair;
-        private System.Windows.Forms.CheckBox chkDiode;
-        private System.Windows.Forms.CheckBox chkCapacitor;
-        private System.Windows.Forms.CheckBox chkResistor;
-        private System.Windows.Forms.CheckBox chkWire;
         private System.Windows.Forms.Panel pnlBottom;
         private AssemblyLineTester.Views.Controls.RoundedButton btnCancel;
         private AssemblyLineTester.Views.Controls.RoundedButton btnProceed;

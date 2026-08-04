@@ -1,16 +1,16 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Modals
 {
     public partial class ConnectorModalForm : Form
     {
-        private readonly ConnectorService _connectorService;
         private readonly Connector? _editingConnector;
 
         private readonly System.Collections.Generic.List<ImageEntry> _imageEntries = new();
@@ -25,9 +25,8 @@ namespace AssemblyLineTester.Views.Modals
         }
 
 
-        public ConnectorModalForm(ConnectorService connectorService)
+        public ConnectorModalForm()
         {
-            _connectorService = connectorService;
             _editingConnector = null;
 
             InitializeComponent();
@@ -36,11 +35,9 @@ namespace AssemblyLineTester.Views.Modals
             ApplyFormRounding();
         }
 
-        // Edit mode: prefill fields and existing images from the given connector. Editing modifies
-        // the shared catalog entry, so it's visible from every harness that uses this connector.
-        public ConnectorModalForm(ConnectorService connectorService, Connector connectorToEdit)
+        // Edit mode. Changes hit the shared catalogue, so every harness using it sees them.
+        public ConnectorModalForm(Connector connectorToEdit)
         {
-            _connectorService = connectorService;
             _editingConnector = connectorToEdit;
 
             InitializeComponent();
@@ -111,10 +108,6 @@ namespace AssemblyLineTester.Views.Modals
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
 
         private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
         {
@@ -123,12 +116,11 @@ namespace AssemblyLineTester.Views.Modals
                 ActiveControl = pnlCustomHeader;
                 ValidateChildren();
 
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
+            NativeMethods.DragWindow(Handle);
             }
         }
 
-        // Prefills the form from an existing connector and loads its saved images into the list.
+        // Prefills the form and image list from an existing connector.
         private void LoadConnectorForEdit(Connector c)
         {
             txtPerf.Text = c.Perf;
@@ -139,7 +131,7 @@ namespace AssemblyLineTester.Views.Modals
             txtCurrentRating.Text = FormatCurrentRating(c.CurrentRating);
             txtMountingStyle.Text = c.MountingStyle;
 
-            foreach (var path in _connectorService.GetConnectorImagePaths(c))
+            foreach (var path in ConnectorService.GetConnectorImagePaths(c))
             {
                 _imageEntries.Add(new ImageEntry { FileName = Path.GetFileName(path), SourcePath = null });
             }
@@ -271,7 +263,7 @@ namespace AssemblyLineTester.Views.Modals
             {
                 if (_editingConnector == null)
                 {
-                    var (saved, error) = _connectorService.AddConnector(connector, newImagePaths);
+                    var (saved, error) = ConnectorService.AddConnector(connector, newImagePaths);
                     if (saved == null)
                     {
                         MessageBox.Show(error ?? "Failed to save connector.", "Save Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -280,7 +272,7 @@ namespace AssemblyLineTester.Views.Modals
                 }
                 else
                 {
-                    var (success, error) = _connectorService.UpdateConnector(connector, newImagePaths, _removedExistingFileNames);
+                    var (success, error) = ConnectorService.UpdateConnector(connector, newImagePaths, _removedExistingFileNames);
                     if (!success)
                     {
                         MessageBox.Show(error ?? "Failed to save connector.", "Save Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);

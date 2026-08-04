@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -14,7 +15,6 @@ namespace AssemblyLineTester.Views.Modals
         private const int MaxFileNameDisplayLength = 30;
 
         private readonly HarnessService _harnessService;
-        private readonly ConnectorService _connectorService;
         private readonly ProductHarness? _editingHarness;
         private readonly List<string> _selectedImagePaths = new();
         private readonly List<Connector> _selectedConnectors = new();
@@ -23,10 +23,9 @@ namespace AssemblyLineTester.Views.Modals
         private TextBox? _connectorSearchBox;
         private List<Connector> _allConnectorsCache = new();
 
-        public HarnessModalForm(HarnessService harnessService, ConnectorService connectorService)
+        public HarnessModalForm(HarnessService harnessService)
         {
             _harnessService = harnessService;
-            _connectorService = connectorService;
             _editingHarness = null;
 
             InitializeComponent();
@@ -35,10 +34,9 @@ namespace AssemblyLineTester.Views.Modals
             ApplyFormRounding();
         }
 
-        public HarnessModalForm(HarnessService harnessService, ConnectorService connectorService, ProductHarness harnessToEdit)
+        public HarnessModalForm(HarnessService harnessService, ProductHarness harnessToEdit)
         {
             _harnessService = harnessService;
-            _connectorService = connectorService;
             _editingHarness = harnessToEdit;
 
             InitializeComponent();
@@ -81,7 +79,7 @@ namespace AssemblyLineTester.Views.Modals
             txtArea.Text = h.Area;
 
             _selectedConnectors.Clear();
-            flpConnectorChips.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpConnectorChips.Controls);
             if (h.ConnectorList != null)
             {
                 foreach (var conn in h.ConnectorList)
@@ -105,9 +103,6 @@ namespace AssemblyLineTester.Views.Modals
             btnChooseImage.Click += BtnChooseImage_Click;
             btnRemoveImage.Click += BtnRemoveImage_Click;
 
-            // Clicking anywhere on the picker box (background or arrow) opens the multi-select
-            // popup. Clicks on an individual chip's delete button don't bubble up to these, since
-            // WinForms Click events aren't routed - so this is safe.
             pnlConnectorPicker.Click += (s, e) => OpenConnectorPicker();
             flpConnectorChips.Click += (s, e) => OpenConnectorPicker();
             lblConnectorArrow.Click += (s, e) => OpenConnectorPicker();
@@ -116,9 +111,7 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.MouseDown += TitleBar_MouseDown;
         }
 
-        // Builds the popup checklist once and reuses it; the ToolStripDropDown itself persists,
-        // only the CheckedListBox's Items get refreshed on every open (so newly added connectors
-        // elsewhere in the app show up without reopening the form).
+        // Built once and reused; only the item list is refreshed on each open.
         private void EnsureConnectorPickerBuilt()
         {
             if (_connectorDropdown != null) return;
@@ -140,9 +133,8 @@ namespace AssemblyLineTester.Views.Modals
                 Font = AssemblyLineTester.Helpers.UIStyleHelper.Font9,
                 BorderStyle = BorderStyle.None,
                 DisplayMember = "PartNumber",
-                IntegralHeight = true // snaps height so the last visible row never gets cut in half
+                IntegralHeight = true
             };
-            // Only 5 rows show at once; anything beyond that scrolls (built into CheckedListBox).
             _connectorCheckList.Height = (_connectorCheckList.ItemHeight * 5) + 4;
 
             var searchHost = new ToolStripControlHost(_connectorSearchBox)
@@ -173,14 +165,12 @@ namespace AssemblyLineTester.Views.Modals
             _connectorDropdown.Items.Add(listHost);
         }
 
-        // Opens the popup with every connector in the shared catalog, checkbox pre-ticked for
-        // whatever's already attached to this harness. A connector can be attached to several
-        // harnesses at once, so picking one here never affects any other harness.
+        // Opens the picker with the connectors already attached to this harness pre-ticked.
         private void OpenConnectorPicker()
         {
             EnsureConnectorPickerBuilt();
 
-            _allConnectorsCache = _connectorService.GetAllConnectors();
+            _allConnectorsCache = ConnectorService.GetAllConnectors();
 
             _connectorSearchBox!.TextChanged -= ConnectorSearchBox_TextChanged;
             _connectorSearchBox.Text = string.Empty;
@@ -194,8 +184,7 @@ namespace AssemblyLineTester.Views.Modals
 
         private void ConnectorSearchBox_TextChanged(object? sender, EventArgs e) => PopulateCheckList(_connectorSearchBox!.Text);
 
-        // Filters the checklist by part number (case-insensitive). Runs on every keystroke in the
-        // search box, and once with an empty term each time the popup opens.
+        // Filters the checklist by part number, case-insensitive.
         private void PopulateCheckList(string searchTerm)
         {
             _connectorCheckList!.ItemCheck -= ConnectorCheckList_ItemCheck;
@@ -219,7 +208,7 @@ namespace AssemblyLineTester.Views.Modals
         {
             if (_connectorCheckList!.Items[e.Index] is not Connector connector) return;
 
-            // ItemCheck fires before the box's own state updates, so defer to after this call returns.
+            // ItemCheck fires before the box updates itself, so defer past this call.
             BeginInvoke(new Action(() =>
             {
                 if (e.NewValue == CheckState.Checked)
@@ -229,8 +218,10 @@ namespace AssemblyLineTester.Views.Modals
             }));
         }
 
-        // Adds a removable "chip" (part number + delete button) inside pnlConnectorPicker.
-        // Ignores connectors already picked.
+        // Shared: one chip is created per connector on every picker change.
+        private static readonly Font ChipCloseFont = new("Segoe UI", 8F, FontStyle.Bold);
+
+        // Adds a removable chip for one connector; ignores ones already picked.
         private void AddConnectorChip(Connector connector)
         {
             if (_selectedConnectors.Any(c => c.ConnectorId == connector.ConnectorId)) return;
@@ -267,7 +258,7 @@ namespace AssemblyLineTester.Views.Modals
             var btnDelete = new Button
             {
                 Text = "\u2715", // ✕
-                Font = new Font("Segoe UI", 8F, FontStyle.Bold),
+                Font = ChipCloseFont,
                 ForeColor = Color.FromArgb(148, 163, 184),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
@@ -286,8 +277,7 @@ namespace AssemblyLineTester.Views.Modals
             flpConnectorChips.Controls.Add(chip);
         }
 
-        // Removes a connector's chip and, if the picker popup is open/built, unchecks it there too
-        // so both stay in sync.
+        // Removes the chip and unticks the matching item in the picker.
         private void RemoveConnectorChip(int connectorId)
         {
             _selectedConnectors.RemoveAll(c => c.ConnectorId == connectorId);
@@ -377,7 +367,7 @@ namespace AssemblyLineTester.Views.Modals
                 return;
             }
 
-            // Order matters here: it's what HarnessService uses to number the connectors "J1", "J2", ...
+            // Order matters - HarnessService numbers the connectors J1, J2, ... from it.
             var selectedConnectors = new List<Connector>(_selectedConnectors);
 
             var harness = new ProductHarness
@@ -430,17 +420,12 @@ namespace AssemblyLineTester.Views.Modals
             this.Region = new Region(path);
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
 
         private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
+            NativeMethods.DragWindow(Handle);
             }
         }
     }

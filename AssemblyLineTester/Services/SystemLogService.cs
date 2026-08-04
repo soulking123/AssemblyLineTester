@@ -14,17 +14,7 @@ namespace AssemblyLineTester.Services
 {
     public class SystemLogService
     {
-        /// <summary>
-        /// Records one business event for the System Log page.
-        /// </summary>
-        /// <remarks>
-        /// This is the customer's log: plain language, readable by a supervisor asking who changed
-        /// what. Stack traces and technical detail belong in <see cref="FileLogService"/> instead.
-        /// <para>
-        /// Never throws. A log call sits inside the operation it is recording, so letting it fail
-        /// would turn an audit gap into a lost test result.
-        /// </para>
-        /// </remarks>
+        // One business event for the System Log page. Never throws; technical detail goes to FileLogService.
         public void Log(LogSeverity level, string moduleName, string actionName, string message, string? userName = null)
         {
             if (string.IsNullOrWhiteSpace(moduleName))
@@ -56,10 +46,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Deletes entries older than <paramref name="days"/> and returns how many went.
-        /// Call once at startup; without it the table grows for the life of the installation.
-        /// </summary>
+        // Deletes entries past the retention window; call once at startup.
         public int PurgeOlderThan(int days = RetentionDays)
         {
             if (days < 1) throw new ArgumentOutOfRangeException(nameof(days), "Retention must be at least one day.");
@@ -85,16 +72,10 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>How long entries are kept on the System Log page.</summary>
+        // How long entries are kept on the System Log page.
         public const int RetentionDays = 180;
 
-        /// <summary>
-        /// Writes every entry matching <paramref name="filter"/> to an .xlsx and returns the row count.
-        /// </summary>
-        /// <remarks>
-        /// Exports the whole filtered set, not the page on screen. A spreadsheet holding ten rows of
-        /// a four-hundred-row result reads as the complete answer and is not one.
-        /// </remarks>
+        // Writes the whole filtered set to an .xlsx, not just the page on screen.
         public int ExportToExcel(SystemLogFilter filter, string outputPath)
         {
             ArgumentNullException.ThrowIfNull(filter);
@@ -123,8 +104,7 @@ namespace AssemblyLineTester.Services
             {
                 ws.Cell(r, 1).Value = r - 1;
 
-                // Written as a real DateTime, not a string, so the column sorts and filters by time
-                // rather than alphabetically.
+                // A real DateTime, so the column sorts by time rather than alphabetically.
                 ws.Cell(r, 2).Value = log.Timestamp.ToLocalTime();
                 ws.Cell(r, 2).Style.DateFormat.Format = "yyyy-mm-dd hh:mm:ss";
 
@@ -139,7 +119,7 @@ namespace AssemblyLineTester.Services
                 ws.Cell(r, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                 ws.Range(r, 1, r, headers.Length).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
-                // Severity is what the reader scans for, so it carries the colour rather than the row.
+                // Severity carries the colour; it is what the reader scans for.
                 var level = ws.Cell(r, 3).Style;
                 level.Font.Bold = true;
                 switch (log.SeverityLevel)
@@ -166,7 +146,6 @@ namespace AssemblyLineTester.Services
             ws.Column(4).Width = Math.Max(ws.Column(4).Width, 18);
             ws.Column(6).Width = Math.Max(ws.Column(6).Width, 22);
 
-            // Long messages would otherwise stretch the sheet far past the screen.
             ws.Column(7).Width = 70;
             ws.Column(7).Style.Alignment.WrapText = true;
 
@@ -185,10 +164,7 @@ namespace AssemblyLineTester.Services
             return rows.Count;
         }
 
-        /// <summary>
-        /// Records which filter produced the export, alongside counts by level and module.
-        /// Without it a reader cannot tell a quiet week from a narrow filter.
-        /// </summary>
+        // Records which filter produced the export, so a quiet week reads apart from a narrow filter.
         private static void WriteContextSheet(XLWorkbook wb, SystemLogFilter filter, List<SystemLog> rows)
         {
             var ws = wb.Worksheets.Add("Export Info");
@@ -250,36 +226,16 @@ namespace AssemblyLineTester.Services
             ws.Column(1).Width = Math.Max(ws.Column(1).Width, 20);
         }
 
-        /// Pulls every page, because PageSize is capped at 200 by the DTO.
-        private List<SystemLog> GetAllMatching(SystemLogFilter filter)
+        // Every matching entry, newest first, unpaged; the page-size cap belongs to the grid.
+        private static List<SystemLog> GetAllMatching(SystemLogFilter filter)
         {
-            var probe = new SystemLogFilter
-            {
-                DateFrom = filter.DateFrom,
-                DateTo = filter.DateTo,
-                SeverityLevel = filter.SeverityLevel,
-                ModuleName = filter.ModuleName,
-                UserName = filter.UserName,
-                ActionName = filter.ActionName,
-                Keyword = filter.Keyword,
-                Page = 1,
-                PageSize = 200
-            };
-
-            var all = new List<SystemLog>();
-            while (true)
-            {
-                PagedResult<SystemLog> page = GetLogs(probe);
-                all.AddRange(page.Items);
-
-                if (page.Items.Count == 0 || all.Count >= page.TotalCount) break;
-                probe.Page++;
-            }
-
-            return all;
+            using var db = new AppDbContext();
+            return ApplyFilter(db.SystemLogs.AsQueryable(), filter)
+                .OrderByDescending(l => l.Timestamp)
+                .ToList();
         }
 
-        // RETRIEVES PAGINATED LOG DATA ACCORDING TO THE ACTIVE FILTER.
+        // One page of entries plus the total count for the active filter.
         public PagedResult<SystemLog> GetLogs(SystemLogFilter filter)
         {
             if (filter == null) throw new ArgumentNullException(nameof(filter));
@@ -288,8 +244,7 @@ namespace AssemblyLineTester.Services
             {
                 var query = ApplyFilter(db.SystemLogs.AsQueryable(), filter);
 
-                // Count the total BEFORE Skip/Take. Counting after paging
-                // would only reflect the current page, not the full filtered result.
+                // Counted before Skip/Take, or it would only describe the current page.
                 int totalCount = query.Count();
 
                 var items = query
@@ -308,7 +263,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // COMPUTES THE SUMMARY (TOTAL PER LEVEL, TOTAL PER MODULE) FOR THE ACTIVE FILTER
+        // Totals per level and per module for the active filter.
         public SystemLogSummary GetSummary(SystemLogFilter filter)
         {
             if (filter == null) throw new ArgumentNullException(nameof(filter));
@@ -344,19 +299,20 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // APPLIES ALL ACTIVE FILTER CRITERIA TO THE QUERY, SHARED BY GETLOGS AND GETSUMMARY.
+        // Shared by GetLogs and GetSummary so the two can never disagree.
         private static IQueryable<SystemLog> ApplyFilter(IQueryable<SystemLog> query, SystemLogFilter filter)
         {
-            if (filter.DateFrom.HasValue)
+            // Timestamps are UTC and the pickers give local dates, so the range is converted first.
+            var (fromUtc, toUtc) = AppTime.LocalDateRangeToUtc(filter.DateFrom, filter.DateTo);
+
+            if (fromUtc.HasValue)
             {
-                var from = filter.DateFrom.Value.Date;
-                query = query.Where(l => l.Timestamp >= from);
+                query = query.Where(l => l.Timestamp >= fromUtc.Value);
             }
 
-            if (filter.DateTo.HasValue)
+            if (toUtc.HasValue)
             {
-                var to = filter.DateTo.Value.Date.AddDays(1).AddTicks(-1);
-                query = query.Where(l => l.Timestamp <= to);
+                query = query.Where(l => l.Timestamp < toUtc.Value);
             }
 
             if (filter.SeverityLevel.HasValue)

@@ -2,6 +2,7 @@
 using System.Linq;
 using AssemblyLineTester.Data;
 using AssemblyLineTester.Models.Dto;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Services
 {
@@ -21,7 +22,7 @@ namespace AssemblyLineTester.Services
             var items = page.Select(r => new TestHistoryListItem
             {
                 ReportId = r.ReportId,
-                TestTime = r.TestDateTime,
+                TestTime = AppTime.ToLocal(r.TestDateTime),
                 ProductModel = r.ProductModel,
                 ProductType = r.ProductType,
                 Area = r.Area,
@@ -42,41 +43,38 @@ namespace AssemblyLineTester.Services
             };
         }
 
+        // Removes a report and everything cascading from it; false if it was not there.
         public bool DeleteHistory(int reportId)
         {
+            // Checked here, not only on the page, which Operator can reach by default.
+            if (!SessionManager.HasPermission("Action.TestHistory.Delete"))
+                throw new UnauthorizedAccessException("You are not allowed to delete test history records.");
+
             using var db = new AppDbContext();
             var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId);
             if (report == null) return false;
 
-            using var tx = db.Database.BeginTransaction();
+            // Captured before the row goes, or the log entry cannot name it.
+            string reportNumber = report.ReportNumber;
+
             try
             {
-                var steps = db.TestSteps.Where(s => s.ReportId == reportId);
-                db.TestSteps.RemoveRange(steps);
                 db.TestReports.Remove(report);
                 db.SaveChanges();
-                tx.Commit();
-                return true;
             }
             catch (Exception ex)
             {
-                FileLogService.Error("TestHistoryService.DeleteReport",
-                    $"Could not delete report {reportId}; rolling back.", ex);
-
-                try
-                {
-                    tx.Rollback();
-                }
-                catch (Exception rollbackFailure)
-                {
-                    // A failed rollback can leave the report half-deleted, so it is worse than the
-                    // original error and must not be the one that disappears.
-                    FileLogService.Error("TestHistoryService.DeleteReport",
-                        $"Rollback failed after a delete error on report {reportId}.", rollbackFailure);
-                }
-
+                FileLogService.Error("TestHistoryService.DeleteHistory",
+                    $"Could not delete report {reportId}.", ex);
                 return false;
             }
+
+            // After the save, so a failed delete never leaves an entry claiming it happened.
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning, "Test History", "Delete History",
+                $"Test history {reportNumber} deleted along with its steps.");
+
+            return true;
         }
 
         public TestHistoryDetailDto? GetHistoryDetail(int reportId)
@@ -101,8 +99,8 @@ namespace AssemblyLineTester.Services
             return new TestHistoryDetailDto
             {
                 ReportNumber = report.ReportNumber,
-                StartTime = report.TestDateTime,
-                EndTime = report.EndDateTime,
+                StartTime = AppTime.ToLocal(report.TestDateTime),
+                EndTime = AppTime.ToLocal(report.EndDateTime),
                 TotalTime = FormatDuration(report.TestDateTime, report.EndDateTime),
                 ProductModel = report.ProductModel,
                 ProductType = report.ProductType,

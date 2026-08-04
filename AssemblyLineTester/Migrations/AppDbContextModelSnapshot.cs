@@ -17,6 +17,103 @@ namespace AssemblyLineTester.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
 
+            modelBuilder.Entity("AssemblyLineTester.Models.DefaultTestSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DefaultCapacitorTolerance")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("DefaultCapacitorValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("DefaultMaxWireResistance")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("DefaultResistorTolerance")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("DefaultResistorValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("DefaultTestTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("DefaultWireInstallationResistance")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("TotalTestPointsAvailable")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DefaultTestTypeId");
+
+                    b.ToTable("DefaultTestSettings");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.LearnConnection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TestTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestTypeId");
+
+                    b.ToTable("LearnConnections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DisplayName = "Wire",
+                            IsChecked = true,
+                            TestTypeId = 15
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DisplayName = "Resistance",
+                            IsChecked = true,
+                            TestTypeId = 11
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DisplayName = "Capacitor",
+                            IsChecked = true,
+                            TestTypeId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DisplayName = "Diode",
+                            IsChecked = true,
+                            TestTypeId = 6
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DisplayName = "Twisted Pair",
+                            IsChecked = true,
+                            TestTypeId = 14
+                        });
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.MaintenanceState", b =>
                 {
                     b.Property<int>("Id")
@@ -311,132 +408,150 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 16,
-                            Description = "Access Dashboard Page",
+                            Description = "Amend and Delete Saved Test Reports",
                             IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Dashboard",
-                            RoleId = 2
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 1
                         },
                         new
                         {
                             Id = 17,
-                            Description = "Access Test Execution Page",
+                            Description = "Delete Test History Records",
                             IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestExecution",
-                            RoleId = 2
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
+                            RoleId = 1
                         },
                         new
                         {
                             Id = 18,
-                            Description = "Access Harness Database Page",
-                            IsGranted = false,
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.HarnessDatabase",
+                            PermissionKey = "Page.Dashboard",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 19,
-                            Description = "Access Test History Page",
+                            Description = "Access Test Execution Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestHistory",
+                            PermissionKey = "Page.TestExecution",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 20,
-                            Description = "Access Reports Page",
+                            Description = "Access Harness Database Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Reports",
+                            PermissionKey = "Page.HarnessDatabase",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 21,
-                            Description = "Access System Log Page",
-                            IsGranted = false,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.SystemLog",
+                            PermissionKey = "Page.TestHistory",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 22,
-                            Description = "Access Settings Page",
+                            Description = "Access Reports Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Settings",
+                            PermissionKey = "Page.Reports",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 23,
-                            Description = "Access User Management Page",
+                            Description = "Access System Log Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.UserManagement",
+                            PermissionKey = "Page.SystemLog",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 24,
-                            Description = "Start and Run Testing Operations",
-                            IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestExecution.Run",
+                            Description = "Access Settings Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 25,
-                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            Description = "Access User Management Page",
                             IsGranted = false,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestConfig.Edit",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 26,
-                            Description = "Calibrate and Configure Hardware Instruments",
-                            IsGranted = false,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
                             PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.Instruments.Calibrate",
+                            PermissionKey = "Action.TestExecution.Run",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 27,
-                            Description = "Add, Edit, and Manage System User Accounts",
+                            Description = "Add and Edit Test Parameters & Harness Specs",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.UserManagement.Edit",
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 28,
-                            Description = "Export and Print Test Reports & Analytics",
+                            Description = "Calibrate and Configure Hardware Instruments",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Export",
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 29,
-                            Description = "Clear and Purge System Activity Logs",
+                            Description = "Add, Edit, and Manage System User Accounts",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.SystemLog.Clear",
+                            PermissionKey = "Action.UserManagement.Edit",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 30,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 31,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 32,
                             Description = "Create and Restore Database Backups",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -445,133 +560,151 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 31,
-                            Description = "Access Dashboard Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Dashboard",
-                            RoleId = 3
-                        },
-                        new
-                        {
-                            Id = 32,
-                            Description = "Access Test Execution Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestExecution",
-                            RoleId = 3
-                        },
-                        new
-                        {
                             Id = 33,
-                            Description = "Access Harness Database Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.HarnessDatabase",
-                            RoleId = 3
+                            Description = "Amend and Delete Saved Test Reports",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 2
                         },
                         new
                         {
                             Id = 34,
-                            Description = "Access Test History Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestHistory",
-                            RoleId = 3
+                            Description = "Delete Test History Records",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
+                            RoleId = 2
                         },
                         new
                         {
                             Id = 35,
-                            Description = "Access Reports Page",
+                            Description = "Access Dashboard Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Reports",
+                            PermissionKey = "Page.Dashboard",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 36,
-                            Description = "Access System Log Page",
+                            Description = "Access Test Execution Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.SystemLog",
+                            PermissionKey = "Page.TestExecution",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 37,
-                            Description = "Access Settings Page",
+                            Description = "Access Harness Database Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Settings",
+                            PermissionKey = "Page.HarnessDatabase",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 38,
-                            Description = "Access User Management Page",
-                            IsGranted = false,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.UserManagement",
+                            PermissionKey = "Page.TestHistory",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 39,
-                            Description = "Start and Run Testing Operations",
+                            Description = "Access Reports Page",
                             IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestExecution.Run",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 40,
-                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            Description = "Access System Log Page",
                             IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestConfig.Edit",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 41,
-                            Description = "Calibrate and Configure Hardware Instruments",
+                            Description = "Access Settings Page",
                             IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.Instruments.Calibrate",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 42,
-                            Description = "Add, Edit, and Manage System User Accounts",
+                            Description = "Access User Management Page",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.UserManagement.Edit",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 43,
-                            Description = "Export and Print Test Reports & Analytics",
+                            Description = "Start and Run Testing Operations",
                             IsGranted = true,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Export",
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 44,
-                            Description = "Clear and Purge System Activity Logs",
-                            IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.SystemLog.Clear",
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 45,
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 46,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 47,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 48,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 49,
                             Description = "Create and Restore Database Backups",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -580,133 +713,151 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 46,
-                            Description = "Access Dashboard Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Dashboard",
-                            RoleId = 4
-                        },
-                        new
-                        {
-                            Id = 47,
-                            Description = "Access Test Execution Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestExecution",
-                            RoleId = 4
-                        },
-                        new
-                        {
-                            Id = 48,
-                            Description = "Access Harness Database Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.HarnessDatabase",
-                            RoleId = 4
-                        },
-                        new
-                        {
-                            Id = 49,
-                            Description = "Access Test History Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestHistory",
-                            RoleId = 4
-                        },
-                        new
-                        {
                             Id = 50,
-                            Description = "Access Reports Page",
-                            IsGranted = false,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Reports",
-                            RoleId = 4
+                            Description = "Amend and Delete Saved Test Reports",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 3
                         },
                         new
                         {
                             Id = 51,
-                            Description = "Access System Log Page",
+                            Description = "Delete Test History Records",
                             IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.SystemLog",
-                            RoleId = 4
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
+                            RoleId = 3
                         },
                         new
                         {
                             Id = 52,
-                            Description = "Access Settings Page",
+                            Description = "Access Dashboard Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Settings",
+                            PermissionKey = "Page.Dashboard",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 53,
-                            Description = "Access User Management Page",
-                            IsGranted = false,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.UserManagement",
+                            PermissionKey = "Page.TestExecution",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 54,
-                            Description = "Start and Run Testing Operations",
+                            Description = "Access Harness Database Page",
                             IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestExecution.Run",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 55,
-                            Description = "Add and Edit Test Parameters & Harness Specs",
-                            IsGranted = false,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestConfig.Edit",
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 56,
-                            Description = "Calibrate and Configure Hardware Instruments",
-                            IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.Instruments.Calibrate",
+                            Description = "Access Reports Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 57,
-                            Description = "Add, Edit, and Manage System User Accounts",
-                            IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.UserManagement.Edit",
+                            Description = "Access System Log Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 58,
-                            Description = "Export and Print Test Reports & Analytics",
+                            Description = "Access Settings Page",
                             IsGranted = true,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Export",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 59,
-                            Description = "Clear and Purge System Activity Logs",
+                            Description = "Access User Management Page",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.SystemLog.Clear",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 60,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 61,
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 62,
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 63,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 64,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 65,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 66,
                             Description = "Create and Restore Database Backups",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -715,88 +866,106 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 61,
-                            Description = "Access Dashboard Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Dashboard",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 62,
-                            Description = "Access Test Execution Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestExecution",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 63,
-                            Description = "Access Harness Database Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.HarnessDatabase",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 64,
-                            Description = "Access Test History Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestHistory",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 65,
-                            Description = "Access Reports Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Reports",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 66,
-                            Description = "Access System Log Page",
-                            IsGranted = false,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.SystemLog",
-                            RoleId = 5
-                        },
-                        new
-                        {
                             Id = 67,
-                            Description = "Access Settings Page",
+                            Description = "Amend and Delete Saved Test Reports",
                             IsGranted = false,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Settings",
-                            RoleId = 5
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 4
                         },
                         new
                         {
                             Id = 68,
-                            Description = "Access User Management Page",
+                            Description = "Delete Test History Records",
                             IsGranted = false,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.UserManagement",
-                            RoleId = 5
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
+                            RoleId = 4
                         },
                         new
                         {
                             Id = 69,
-                            Description = "Start and Run Testing Operations",
-                            IsGranted = false,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestExecution.Run",
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Dashboard",
                             RoleId = 5
                         },
                         new
                         {
                             Id = 70,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestExecution",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 71,
+                            Description = "Access Harness Database Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 72,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 73,
+                            Description = "Access Reports Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 74,
+                            Description = "Access System Log Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 75,
+                            Description = "Access Settings Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 76,
+                            Description = "Access User Management Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 77,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 78,
                             Description = "Add and Edit Test Parameters & Harness Specs",
                             IsGranted = false,
                             PermissionGroup = "Test Operations",
@@ -805,7 +974,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 71,
+                            Id = 79,
                             Description = "Calibrate and Configure Hardware Instruments",
                             IsGranted = false,
                             PermissionGroup = "Test Operations",
@@ -814,7 +983,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 72,
+                            Id = 80,
                             Description = "Add, Edit, and Manage System User Accounts",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -823,7 +992,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 73,
+                            Id = 81,
                             Description = "Export and Print Test Reports & Analytics",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
@@ -832,7 +1001,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 74,
+                            Id = 82,
                             Description = "Clear and Purge System Activity Logs",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -841,7 +1010,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 75,
+                            Id = 83,
                             Description = "Create and Restore Database Backups",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -850,7 +1019,25 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 76,
+                            Id = 84,
+                            Description = "Amend and Delete Saved Test Reports",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 85,
+                            Description = "Delete Test History Records",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 86,
                             Description = "Access Dashboard Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -859,7 +1046,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 77,
+                            Id = 87,
                             Description = "Access Test Execution Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -868,7 +1055,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 78,
+                            Id = 88,
                             Description = "Access Harness Database Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -877,7 +1064,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 79,
+                            Id = 89,
                             Description = "Access Test History Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -886,7 +1073,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 80,
+                            Id = 90,
                             Description = "Access Reports Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -895,7 +1082,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 81,
+                            Id = 91,
                             Description = "Access System Log Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -904,7 +1091,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 82,
+                            Id = 92,
                             Description = "Access Settings Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
@@ -913,7 +1100,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 83,
+                            Id = 93,
                             Description = "Access User Management Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
@@ -922,7 +1109,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 84,
+                            Id = 94,
                             Description = "Start and Run Testing Operations",
                             IsGranted = true,
                             PermissionGroup = "Test Operations",
@@ -931,7 +1118,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 85,
+                            Id = 95,
                             Description = "Add and Edit Test Parameters & Harness Specs",
                             IsGranted = false,
                             PermissionGroup = "Test Operations",
@@ -940,7 +1127,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 86,
+                            Id = 96,
                             Description = "Calibrate and Configure Hardware Instruments",
                             IsGranted = false,
                             PermissionGroup = "Test Operations",
@@ -949,7 +1136,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 87,
+                            Id = 97,
                             Description = "Add, Edit, and Manage System User Accounts",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -958,7 +1145,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 88,
+                            Id = 98,
                             Description = "Export and Print Test Reports & Analytics",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
@@ -967,7 +1154,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 89,
+                            Id = 99,
                             Description = "Clear and Purge System Activity Logs",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -976,11 +1163,29 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 90,
+                            Id = 100,
                             Description = "Create and Restore Database Backups",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
                             PermissionKey = "Action.Database.Backup",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 101,
+                            Description = "Amend and Delete Saved Test Reports",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 102,
+                            Description = "Delete Test History Records",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
                             RoleId = 6
                         });
                 });
@@ -1018,6 +1223,8 @@ namespace AssemblyLineTester.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Timestamp");
+
                     b.ToTable("SystemLogs");
                 });
 
@@ -1028,9 +1235,6 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ConfigId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ConfigurationConfigId")
                         .HasColumnType("INTEGER");
 
                     b.Property<double?>("ExpectedValue")
@@ -1079,7 +1283,7 @@ namespace AssemblyLineTester.Migrations
 
                     b.HasKey("NetConfigId");
 
-                    b.HasIndex("ConfigurationConfigId");
+                    b.HasIndex("ConfigId");
 
                     b.HasIndex("TestTypeId");
 
@@ -1091,10 +1295,6 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("ConfigId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ConfigCode")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConfigName")
                         .IsRequired()
@@ -1131,11 +1331,14 @@ namespace AssemblyLineTester.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Color")
-                        .IsRequired()
+                    b.Property<string>("ErrorDetail")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ErrorDetail")
+                    b.Property<double?>("ExpectedValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("FromLabel")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FromPin")
@@ -1166,9 +1369,16 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ToLabel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ToPin")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<double?>("Tolerance")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Unit")
                         .IsRequired()
@@ -1209,11 +1419,12 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("FailCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("FilePath")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("IsDraft")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Operator")
                         .IsRequired()
@@ -1255,10 +1466,6 @@ namespace AssemblyLineTester.Migrations
                     b.Property<DateTime>("TestDateTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("TesterModel")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("TotalNets")
                         .HasColumnType("INTEGER");
 
@@ -1270,6 +1477,98 @@ namespace AssemblyLineTester.Migrations
                     b.HasIndex("TestDateTime");
 
                     b.ToTable("TestReports");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.TestResultCheck", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestResultName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TestResultChecks");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsChecked = true,
+                            TestResultName = "Net-ID"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsChecked = true,
+                            TestResultName = "Harness Group"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IsChecked = true,
+                            TestResultName = "From"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            IsChecked = true,
+                            TestResultName = "Net From Label"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            IsChecked = true,
+                            TestResultName = "To"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            IsChecked = true,
+                            TestResultName = "Net To Label"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            IsChecked = true,
+                            TestResultName = "Test Type"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            IsChecked = true,
+                            TestResultName = "Lower Limit"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            IsChecked = true,
+                            TestResultName = "Upper Limit"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            IsChecked = true,
+                            TestResultName = "Expected Value"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            IsChecked = true,
+                            TestResultName = "Tolerance"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            IsChecked = true,
+                            TestResultName = "Measurement"
+                        });
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.TestStep", b =>
@@ -1418,6 +1717,135 @@ namespace AssemblyLineTester.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AssemblyLineTester.Models.TestTypeCheck", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestTypeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TestTypeChecks");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DisplayName = "4RESISTOR",
+                            IsChecked = true,
+                            TestTypeName = "4RESISTOR"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DisplayName = "4WIRE",
+                            IsChecked = true,
+                            TestTypeName = "4WIRE"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DisplayName = "CAPACITOR",
+                            IsChecked = true,
+                            TestTypeName = "CAPACITOR"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DisplayName = "CLOSE",
+                            IsChecked = true,
+                            TestTypeName = "CLOSE"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DisplayName = "COMMENT",
+                            IsChecked = true,
+                            TestTypeName = "COMMENT"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DisplayName = "DIODE",
+                            IsChecked = true,
+                            TestTypeName = "DIODE"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DisplayName = "LINK",
+                            IsChecked = true,
+                            TestTypeName = "LINK"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DisplayName = "LUA COMPONENT",
+                            IsChecked = true,
+                            TestTypeName = "LUA COMPONENT"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            DisplayName = "OPEN",
+                            IsChecked = true,
+                            TestTypeName = "OPEN"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            DisplayName = "PROBE",
+                            IsChecked = true,
+                            TestTypeName = "PROBE"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            DisplayName = "RESISTOR",
+                            IsChecked = true,
+                            TestTypeName = "RESISTOR"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            DisplayName = "SIGNATURE DIODE",
+                            IsChecked = true,
+                            TestTypeName = "SIGNATURE DIODE"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            DisplayName = "SIGNATURE WIRE",
+                            IsChecked = true,
+                            TestTypeName = "SIGNATURE WIRE"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            DisplayName = "TWISTED PAIR",
+                            IsChecked = true,
+                            TestTypeName = "TWISTED PAIR"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            DisplayName = "WIRE",
+                            IsChecked = true,
+                            TestTypeName = "WIRE"
+                        });
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -1435,11 +1863,17 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("FailedLoginCount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LockoutUntil")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("MustChangePassword")
@@ -1464,6 +1898,10 @@ namespace AssemblyLineTester.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("CompanyId")
+                        .IsUnique()
+                        .HasFilter("\"CompanyId\" <> ''");
+
                     b.HasIndex("RoleId");
 
                     b.HasIndex("StatusId");
@@ -1480,9 +1918,10 @@ namespace AssemblyLineTester.Migrations
                             CompanyId = "CAT0100",
                             CreatedAt = new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local),
                             Department = "Engineering",
+                            FailedLoginCount = 0,
                             FullName = "System Administrator",
                             MustChangePassword = true,
-                            PasswordHash = "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS",
+                            PasswordHash = "$2a$11$Hcpu0fJL6xvHgmbYJNv/s.QMrlL8F9ALRHip20cUQLY6OSro3YIhC",
                             RoleId = 1,
                             StatusId = 1,
                             UpdatedAt = new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local),
@@ -1606,10 +2045,6 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.PrimitiveCollection<string>("ConnectorListName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.PrimitiveCollection<string>("ImagePaths")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1632,6 +2067,28 @@ namespace AssemblyLineTester.Migrations
                     b.HasKey("ProductHarnessId");
 
                     b.ToTable("ProductHarnesses");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.DefaultTestSetting", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestType", "DefaultTestType")
+                        .WithMany()
+                        .HasForeignKey("DefaultTestTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DefaultTestType");
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.LearnConnection", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestType", "TestType")
+                        .WithMany()
+                        .HasForeignKey("TestTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("TestType");
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.ReportTestTypeSummary", b =>
@@ -1669,7 +2126,9 @@ namespace AssemblyLineTester.Migrations
                 {
                     b.HasOne("AssemblyLineTester.Models.TestConfiguration", "Configuration")
                         .WithMany("Nets")
-                        .HasForeignKey("ConfigurationConfigId");
+                        .HasForeignKey("ConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AssemblyLineTester.Models.TestType", "TestType")
                         .WithMany()

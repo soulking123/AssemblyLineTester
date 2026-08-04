@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AssemblyLineTester.Data;
+using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 
@@ -12,20 +13,24 @@ namespace AssemblyLineTester.Services
         {
             var query = db.TestReports.AsQueryable();
 
-            if (filter.DateFrom.HasValue)
-                query = query.Where(r => r.TestDateTime >= filter.DateFrom.Value.Date);
+            // Pickers give local dates, TestDateTime is UTC, so the range is converted first.
+            var (fromUtc, toUtc) = AppTime.LocalDateRangeToUtc(filter.DateFrom, filter.DateTo);
 
-            if (filter.DateTo.HasValue)
-                query = query.Where(r => r.TestDateTime < filter.DateTo.Value.Date.AddDays(1));
+            if (fromUtc.HasValue)
+                query = query.Where(r => r.TestDateTime >= fromUtc.Value);
 
+            if (toUtc.HasValue)
+                query = query.Where(r => r.TestDateTime < toUtc.Value);
+
+            // Typed by hand on the Reports page, so these match on substring like PartNumber does.
             if (!string.IsNullOrWhiteSpace(filter.ProductModel))
-                query = query.Where(r => r.ProductModel == filter.ProductModel);
+                query = query.Where(r => r.ProductModel.Contains(filter.ProductModel));
 
             if (!string.IsNullOrWhiteSpace(filter.ProductType))
-                query = query.Where(r => r.ProductType == filter.ProductType);
+                query = query.Where(r => r.ProductType.Contains(filter.ProductType));
 
             if (!string.IsNullOrWhiteSpace(filter.Area))
-                query = query.Where(r => r.Area == filter.Area);
+                query = query.Where(r => r.Area.Contains(filter.Area));
 
             if (!string.IsNullOrWhiteSpace(filter.Result)
                 && Enum.TryParse<TestResult>(filter.Result, true, out var resultEnum))
@@ -34,7 +39,7 @@ namespace AssemblyLineTester.Services
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Operator))
-                query = query.Where(r => r.Operator == filter.Operator);
+                query = query.Where(r => r.Operator.Contains(filter.Operator));
 
             if (!string.IsNullOrWhiteSpace(filter.PartNumberKeyword))
                 query = query.Where(r => r.PartNumber.Contains(filter.PartNumberKeyword));

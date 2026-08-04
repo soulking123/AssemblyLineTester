@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using AssemblyLineTester.Helpers;
@@ -6,14 +6,7 @@ using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views.Modals
 {
-    /// <summary>
-    /// Lets the signed-in user change their own password.
-    /// </summary>
-    /// <remarks>
-    /// Built in code rather than with a designer file so the whole dialog is one file. It is small
-    /// and static, and a hand-written .Designer.cs is a liability nobody can safely reopen in the
-    /// designer afterwards.
-    /// </remarks>
+    // Lets the signed-in user change their own password. Built in code, no designer file.
     public class ChangePasswordModalForm : Form
     {
         private readonly UserService _userService;
@@ -90,7 +83,6 @@ namespace AssemblyLineTester.Views.Modals
             };
             show.CheckedChanged += (s, e) =>
             {
-                // Typing a password you cannot see, twice, is where most retries come from.
                 foreach (TextBox box in new[] { _txtCurrent, _txtNew, _txtConfirm })
                 {
                     box.UseSystemPasswordChar = !show.Checked;
@@ -137,8 +129,7 @@ namespace AssemblyLineTester.Views.Modals
 
             AcceptButton = _btnSave;
 
-            // Live feedback while typing, so the first press of Save is not the first news of a
-            // mismatch.
+            // Live feedback, so Save is not the first news of a mismatch.
             _txtNew.TextChanged += (s, e) => UpdateHint();
             _txtConfirm.TextChanged += (s, e) => UpdateHint();
 
@@ -164,8 +155,7 @@ namespace AssemblyLineTester.Views.Modals
             box.Location = new Point(left + S(10), y + S(28));
             Controls.Add(box);
 
-            // A drawn box rather than FixedSingle, so the border can pick up focus and match the
-            // rest of the application's rounded surfaces.
+            // Drawn rather than FixedSingle, so the border can show focus.
             var frame = new Panel
             {
                 Size = new Size(width, S(42)),
@@ -228,7 +218,7 @@ namespace AssemblyLineTester.Views.Modals
                 return;
             }
 
-            // The service owns the rules, so the dialog does not get its own copy to drift from.
+            // The service owns the rules; no second copy here to drift from.
             string? invalid = UserService.ValidatePassword(_txtNew.Text);
             if (invalid is not null)
             {
@@ -246,8 +236,7 @@ namespace AssemblyLineTester.Views.Modals
             }
             catch (Exception ex)
             {
-                // Shown inline rather than in a message box: the user is mid-form and has to correct
-                // a field, not acknowledge an event.
+                // Inline, not a message box: there is a field to correct, not an event to acknowledge.
                 SetHint(ex.Message, warning: true);
                 FileLogService.Warn("ChangePasswordModalForm", $"Password change refused: {ex.Message}");
             }
@@ -259,7 +248,6 @@ namespace AssemblyLineTester.Views.Modals
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            // Alt+F4 and the taskbar can still close a borderless form.
             if (_mandatory && DialogResult != DialogResult.OK && e.CloseReason == CloseReason.UserClosing)
             {
                 e.Cancel = true;

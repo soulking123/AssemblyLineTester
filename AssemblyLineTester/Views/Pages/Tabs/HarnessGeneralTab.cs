@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 
@@ -15,7 +16,6 @@ namespace AssemblyLineTester.Views.Pages.Tabs
         private ProductHarness? _selectedHarness;
         private Connector? _selectedConnector;
         private int _genInfoRowIndex;
-        private ConnectorService? _connectorService;
         
         private List<string> _harnessImagePaths = new();
         private int _harnessImageIndex = 0;
@@ -39,9 +39,8 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             picMachineArea.MouseClick += PicMachineArea_MouseClick;
         }
 
-        public void Initialize(ConnectorService connectorService, EventHandler onEditHarness, EventHandler onDeleteHarness)
+        public void Initialize(EventHandler onEditHarness, EventHandler onDeleteHarness)
         {
-            _connectorService = connectorService;
             btnEditGeneral.Click += onEditHarness;
             btnDeleteHarness.Click += onDeleteHarness;
         }
@@ -51,7 +50,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             _selectedHarness = null;
             _selectedConnector = null;
 
-            tblGenInfo.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblGenInfo.Controls);
             tblGenInfo.RowStyles.Clear();
             tblGenInfo.RowCount = 1;
             tblGenInfo.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
@@ -78,7 +77,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             _selectedConnector = null;
             _genInfoRowIndex = 0;
 
-            tblGenInfo.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblGenInfo.Controls);
             tblGenInfo.RowStyles.Clear();
             tblGenInfo.RowCount = 0;
 
@@ -193,7 +192,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
                 _lblConnWireSize!.Text = conn.WireSize;
                 _lblConnCurrentRating!.Text = $"{conn.CurrentRating} A";
                 _lblConnMountingStyle!.Text = conn.MountingStyle;
-                SetConnectorImage(_connectorService?.GetConnectorImagePaths(conn) ?? new List<string>());
+                SetConnectorImage(ConnectorService.GetConnectorImagePaths(conn));
             }
             else
             {

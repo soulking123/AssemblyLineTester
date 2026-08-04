@@ -4,13 +4,13 @@ using System.Linq;
 using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Services
 {
     public class DashboardService
     {
-        // Converts the KPI time-range selector into a ReportFilter so we reuse the
-        // exact same filtering logic already used by Reports/Test History pages.
+        // Reuses the same ReportFilter the Reports and Test History pages already filter with.
         private static ReportFilter BuildRangeFilter(DashboardTimeRange range)
         {
             DateTime from = range switch
@@ -27,8 +27,7 @@ namespace AssemblyLineTester.Services
             return new ReportFilter { DateFrom = from, DateTo = DateTime.Today };
         }
 
-        // Longer ranges get coarser buckets so the bar chart stays readable
-        // (365 daily bars for a 1-year view would be unreadable).
+        // Coarser buckets on longer ranges, or a one-year view would draw 365 bars.
         private static TrendGranularity GetGranularityForRange(DashboardTimeRange range) => range switch
         {
             DashboardTimeRange.Today => TrendGranularity.Daily,
@@ -45,7 +44,6 @@ namespace AssemblyLineTester.Services
             switch (granularity)
             {
                 case TrendGranularity.Weekly:
-                    // Bucket by the Monday of that week.
                     int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
                     return date.Date.AddDays(-diff);
 
@@ -57,14 +55,12 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // "HISTORY" bar chart: Pass/Fail/Total grouped adaptively (day/week/month) based on the range.
-        public DashboardTrendResult GetHistoryTrend(DashboardTimeRange range)
+        // Shared with TestReportService.GetResultTrend, which is this same grouping at Daily.
+        internal static List<ReportTrendPoint> BuildTrendPoints(IQueryable<TestReport> reports, TrendGranularity granularity)
         {
-            using var db = new AppDbContext();
-            var filter = BuildRangeFilter(range);
-            var granularity = GetGranularityForRange(range);
-            var reports = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft).ToList();
-            var points = reports
+            return reports
+                .Select(r => new { r.TestDateTime, r.Status, r.OverallResult })
+                .AsEnumerable()
                 .GroupBy(r => BucketKey(r.TestDateTime, granularity))
                 .OrderBy(g => g.Key)
                 .Select(g => new ReportTrendPoint
@@ -75,18 +71,28 @@ namespace AssemblyLineTester.Services
                     TotalCount = g.Count()
                 })
                 .ToList();
+        }
+
+        // Pass/Fail/Total per bucket for the HISTORY bar chart.
+        public DashboardTrendResult GetHistoryTrend(DashboardTimeRange range)
+        {
+            using var db = new AppDbContext();
+            var granularity = GetGranularityForRange(range);
+            var points = BuildTrendPoints(
+                TestReportQueryHelper.ApplyFilter(db, BuildRangeFilter(range)).Where(r => !r.IsDraft),
+                granularity);
 
             return new DashboardTrendResult { Granularity = granularity, Points = points };
         }
 
-        // "SUMMARY" KPI cards: Total Tested, Pass, Fail, Yield %, Avg Cycle Time.
+        // Totals behind the SUMMARY KPI cards.
         public DashboardKpiDto GetKpiSummary(DashboardTimeRange range)
         {
             using var db = new AppDbContext();
             var filter = BuildRangeFilter(range);
-            var reports = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft).ToList();
+            var reports = TestReportQueryHelper.ApplyFilter(db, filter).Where(r => !r.IsDraft);
 
-            int total = reports.Count;
+            int total = reports.Count();
             int pass = reports.Count(r => r.Status == TestStatus.Completed && r.OverallResult == TestResult.Pass);
             int fail = reports.Count(r => r.Status == TestStatus.Completed && r.OverallResult == TestResult.Fail);
 
@@ -109,8 +115,7 @@ namespace AssemblyLineTester.Services
         }
 
 
-        // "FAIL BY REASON" doughnut: counts, per test type, how many reports had at least one fail
-        // of that type - a report failing a type contributes 1 no matter how many nets failed in it.
+        // Per test type, how many reports had at least one failure of it - not the net-fail total.
         public List<FailReasonSliceDto> GetFailReasonBreakdown(DashboardTimeRange range)
         {
             using var db = new AppDbContext();
@@ -123,7 +128,7 @@ namespace AssemblyLineTester.Services
                 .Select(g => new
                 {
                     TestType = g.Key,
-                    FailCount = g.Count(s => s.FailCount > 0) // 1 per report that failed this type, not the net-fail total
+                    FailCount = g.Count(s => s.FailCount > 0)
                 })
                 .Where(g => g.FailCount > 0)
                 .OrderByDescending(g => g.FailCount)
@@ -142,7 +147,7 @@ namespace AssemblyLineTester.Services
                 .ToList();
         }
 
-        // "RECENT TEST HISTORY" grid: latest N reports regardless of range selector.
+        // Latest N reports for the RECENT TEST HISTORY grid, ignoring the range selector.
         public List<RecentTestItemDto> GetRecentTests(int count = 8)
         {
             using var db = new AppDbContext();
@@ -153,7 +158,7 @@ namespace AssemblyLineTester.Services
                 .Select(r => new RecentTestItemDto
                 {
                     ReportId = r.ReportId,
-                    TestTime = r.TestDateTime,
+                    TestTime = AppTime.ToLocal(r.TestDateTime),
                     PartNumber = r.PartNumber,
                     SerialNumber = r.SerialNumber,
                     Result = r.Status == TestStatus.Completed
@@ -164,34 +169,5 @@ namespace AssemblyLineTester.Services
                 .ToList();
         }
 
-        // "ACTIVE PROGRAM" card: prioritizes a report currently InProgress, else the most recent one.
-        public ActiveProgramDto? GetActiveProgram()
-        {
-            using var db = new AppDbContext();
-
-            var running = db.TestReports
-                .Where(r => r.Status == TestStatus.InProgress)
-                .OrderByDescending(r => r.TestDateTime)
-                .FirstOrDefault();
-
-            var report = running ?? db.TestReports
-                .OrderByDescending(r => r.TestDateTime)
-                .FirstOrDefault();
-
-            if (report is null) return null;
-
-            return new ActiveProgramDto
-            {
-                PartNumber = report.PartNumber,
-                ProductModel = report.ProductModel,
-                StatusLabel = report.Status switch
-                {
-                    TestStatus.InProgress => "Running",
-                    TestStatus.Stopped => "Stopped",
-                    _ => "Idle"
-                },
-                LastRunAt = report.TestDateTime
-            };
-        }
     }
 }

@@ -60,8 +60,7 @@ namespace AssemblyLineTester.Migrations
                     ProductType = table.Column<string>(type: "TEXT", nullable: false),
                     Area = table.Column<string>(type: "TEXT", nullable: false),
                     LastUpdate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ImagePaths = table.Column<string>(type: "TEXT", nullable: false),
-                    ConnectorListName = table.Column<string>(type: "TEXT", nullable: false)
+                    ImagePaths = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -107,7 +106,6 @@ namespace AssemblyLineTester.Migrations
                 {
                     ConfigId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ConfigCode = table.Column<string>(type: "TEXT", nullable: false),
                     ConfigName = table.Column<string>(type: "TEXT", nullable: false),
                     ProductModel = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
@@ -136,7 +134,6 @@ namespace AssemblyLineTester.Migrations
                     PartNumber = table.Column<string>(type: "TEXT", nullable: false),
                     SerialNumber = table.Column<string>(type: "TEXT", nullable: false),
                     Operator = table.Column<string>(type: "TEXT", nullable: false),
-                    TesterModel = table.Column<string>(type: "TEXT", nullable: false),
                     TestDateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EndDateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
                     TotalNets = table.Column<int>(type: "INTEGER", nullable: false),
@@ -144,13 +141,42 @@ namespace AssemblyLineTester.Migrations
                     FailCount = table.Column<int>(type: "INTEGER", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     OverallResult = table.Column<int>(type: "INTEGER", nullable: true),
+                    Notes = table.Column<string>(type: "TEXT", nullable: false),
                     IsDraft = table.Column<bool>(type: "INTEGER", nullable: false),
-                    FilePath = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TestReports", x => x.ReportId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestResultChecks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TestResultName = table.Column<string>(type: "TEXT", nullable: false),
+                    IsChecked = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestResultChecks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestTypeChecks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TestTypeName = table.Column<string>(type: "TEXT", nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: false),
+                    IsChecked = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestTypeChecks", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -233,6 +259,53 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DefaultTestSettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TotalTestPointsAvailable = table.Column<int>(type: "INTEGER", nullable: false),
+                    DefaultTestTypeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    DefaultMaxWireResistance = table.Column<double>(type: "REAL", nullable: false),
+                    DefaultWireInstallationResistance = table.Column<double>(type: "REAL", nullable: false),
+                    DefaultResistorValue = table.Column<double>(type: "REAL", nullable: false),
+                    DefaultResistorTolerance = table.Column<int>(type: "INTEGER", nullable: false),
+                    DefaultCapacitorValue = table.Column<double>(type: "REAL", nullable: false),
+                    DefaultCapacitorTolerance = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DefaultTestSettings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DefaultTestSettings_TestTypes_DefaultTestTypeId",
+                        column: x => x.DefaultTestTypeId,
+                        principalTable: "TestTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LearnConnections",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TestTypeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsChecked = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LearnConnections", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LearnConnections_TestTypes_TestTypeId",
+                        column: x => x.TestTypeId,
+                        principalTable: "TestTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ReportTestTypeSummaries",
                 columns: table => new
                 {
@@ -268,7 +341,6 @@ namespace AssemblyLineTester.Migrations
                     NetConfigId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ConfigId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConfigurationConfigId = table.Column<int>(type: "INTEGER", nullable: true),
                     NetId = table.Column<string>(type: "TEXT", nullable: false),
                     SequenceNo = table.Column<int>(type: "INTEGER", nullable: false),
                     HarnessGroup = table.Column<string>(type: "TEXT", nullable: false),
@@ -287,10 +359,11 @@ namespace AssemblyLineTester.Migrations
                 {
                     table.PrimaryKey("PK_TestConfigNets", x => x.NetConfigId);
                     table.ForeignKey(
-                        name: "FK_TestConfigNets_TestConfigurations_ConfigurationConfigId",
-                        column: x => x.ConfigurationConfigId,
+                        name: "FK_TestConfigNets_TestConfigurations_ConfigId",
+                        column: x => x.ConfigId,
                         principalTable: "TestConfigurations",
-                        principalColumn: "ConfigId");
+                        principalColumn: "ConfigId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TestConfigNets_TestTypes_TestTypeId",
                         column: x => x.TestTypeId,
@@ -310,7 +383,6 @@ namespace AssemblyLineTester.Migrations
                     HarnessGroup = table.Column<string>(type: "TEXT", nullable: false),
                     FromPin = table.Column<string>(type: "TEXT", nullable: false),
                     ToPin = table.Column<string>(type: "TEXT", nullable: false),
-                    Color = table.Column<string>(type: "TEXT", nullable: false),
                     TestTypeName = table.Column<string>(type: "TEXT", nullable: false),
                     MeasuredValue = table.Column<double>(type: "REAL", nullable: true),
                     LowerLimit = table.Column<double>(type: "REAL", nullable: true),
@@ -379,6 +451,8 @@ namespace AssemblyLineTester.Migrations
                     Department = table.Column<string>(type: "TEXT", nullable: false),
                     StatusId = table.Column<int>(type: "INTEGER", nullable: false),
                     MustChangePassword = table.Column<bool>(type: "INTEGER", nullable: false),
+                    FailedLoginCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    LockoutUntil = table.Column<DateTime>(type: "TEXT", nullable: true),
                     LastLogin = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
@@ -470,87 +544,104 @@ namespace AssemblyLineTester.Migrations
                     { 13, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 1 },
                     { 14, "Clear and Purge System Activity Logs", true, "System & Logs", "Action.SystemLog.Clear", 1 },
                     { 15, "Create and Restore Database Backups", true, "System & Logs", "Action.Database.Backup", 1 },
-                    { 16, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 2 },
-                    { 17, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 2 },
-                    { 18, "Access Harness Database Page", false, "Page Access", "Page.HarnessDatabase", 2 },
-                    { 19, "Access Test History Page", true, "Page Access", "Page.TestHistory", 2 },
-                    { 20, "Access Reports Page", false, "Page Access", "Page.Reports", 2 },
-                    { 21, "Access System Log Page", false, "Page Access", "Page.SystemLog", 2 },
-                    { 22, "Access Settings Page", false, "Page Access", "Page.Settings", 2 },
-                    { 23, "Access User Management Page", false, "Page Access", "Page.UserManagement", 2 },
-                    { 24, "Start and Run Testing Operations", true, "Test Operations", "Action.TestExecution.Run", 2 },
-                    { 25, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 2 },
-                    { 26, "Calibrate and Configure Hardware Instruments", false, "Test Operations", "Action.Instruments.Calibrate", 2 },
-                    { 27, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 2 },
-                    { 28, "Export and Print Test Reports & Analytics", false, "System & Logs", "Action.Reports.Export", 2 },
-                    { 29, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 2 },
-                    { 30, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 2 },
-                    { 31, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 3 },
-                    { 32, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 3 },
-                    { 33, "Access Harness Database Page", true, "Page Access", "Page.HarnessDatabase", 3 },
-                    { 34, "Access Test History Page", true, "Page Access", "Page.TestHistory", 3 },
-                    { 35, "Access Reports Page", true, "Page Access", "Page.Reports", 3 },
-                    { 36, "Access System Log Page", true, "Page Access", "Page.SystemLog", 3 },
-                    { 37, "Access Settings Page", true, "Page Access", "Page.Settings", 3 },
-                    { 38, "Access User Management Page", false, "Page Access", "Page.UserManagement", 3 },
-                    { 39, "Start and Run Testing Operations", true, "Test Operations", "Action.TestExecution.Run", 3 },
-                    { 40, "Add and Edit Test Parameters & Harness Specs", true, "Test Operations", "Action.TestConfig.Edit", 3 },
-                    { 41, "Calibrate and Configure Hardware Instruments", true, "Test Operations", "Action.Instruments.Calibrate", 3 },
-                    { 42, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 3 },
-                    { 43, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 3 },
-                    { 44, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 3 },
-                    { 45, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 3 },
-                    { 46, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 4 },
-                    { 47, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 4 },
-                    { 48, "Access Harness Database Page", true, "Page Access", "Page.HarnessDatabase", 4 },
-                    { 49, "Access Test History Page", true, "Page Access", "Page.TestHistory", 4 },
-                    { 50, "Access Reports Page", false, "Page Access", "Page.Reports", 4 },
-                    { 51, "Access System Log Page", true, "Page Access", "Page.SystemLog", 4 },
-                    { 52, "Access Settings Page", true, "Page Access", "Page.Settings", 4 },
-                    { 53, "Access User Management Page", false, "Page Access", "Page.UserManagement", 4 },
-                    { 54, "Start and Run Testing Operations", true, "Test Operations", "Action.TestExecution.Run", 4 },
-                    { 55, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 4 },
-                    { 56, "Calibrate and Configure Hardware Instruments", true, "Test Operations", "Action.Instruments.Calibrate", 4 },
-                    { 57, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 4 },
-                    { 58, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 4 },
-                    { 59, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 4 },
-                    { 60, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 4 },
-                    { 61, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 5 },
-                    { 62, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 5 },
-                    { 63, "Access Harness Database Page", true, "Page Access", "Page.HarnessDatabase", 5 },
-                    { 64, "Access Test History Page", true, "Page Access", "Page.TestHistory", 5 },
-                    { 65, "Access Reports Page", true, "Page Access", "Page.Reports", 5 },
-                    { 66, "Access System Log Page", false, "Page Access", "Page.SystemLog", 5 },
-                    { 67, "Access Settings Page", false, "Page Access", "Page.Settings", 5 },
-                    { 68, "Access User Management Page", false, "Page Access", "Page.UserManagement", 5 },
-                    { 69, "Start and Run Testing Operations", false, "Test Operations", "Action.TestExecution.Run", 5 },
-                    { 70, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 5 },
-                    { 71, "Calibrate and Configure Hardware Instruments", false, "Test Operations", "Action.Instruments.Calibrate", 5 },
-                    { 72, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 5 },
-                    { 73, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 5 },
-                    { 74, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 5 },
-                    { 75, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 5 },
-                    { 76, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 6 },
-                    { 77, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 6 },
-                    { 78, "Access Harness Database Page", true, "Page Access", "Page.HarnessDatabase", 6 },
-                    { 79, "Access Test History Page", true, "Page Access", "Page.TestHistory", 6 },
-                    { 80, "Access Reports Page", true, "Page Access", "Page.Reports", 6 },
-                    { 81, "Access System Log Page", true, "Page Access", "Page.SystemLog", 6 },
-                    { 82, "Access Settings Page", false, "Page Access", "Page.Settings", 6 },
-                    { 83, "Access User Management Page", false, "Page Access", "Page.UserManagement", 6 },
-                    { 84, "Start and Run Testing Operations", true, "Test Operations", "Action.TestExecution.Run", 6 },
-                    { 85, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 6 },
-                    { 86, "Calibrate and Configure Hardware Instruments", false, "Test Operations", "Action.Instruments.Calibrate", 6 },
-                    { 87, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 6 },
-                    { 88, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 6 },
-                    { 89, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 6 },
-                    { 90, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 6 }
+                    { 16, "Amend and Delete Saved Test Reports", true, "System & Logs", "Action.Reports.Edit", 1 },
+                    { 17, "Delete Test History Records", true, "System & Logs", "Action.TestHistory.Delete", 1 },
+                    { 18, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 2 },
+                    { 19, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 2 },
+                    { 20, "Access Harness Database Page", false, "Page Access", "Page.HarnessDatabase", 2 },
+                    { 21, "Access Test History Page", true, "Page Access", "Page.TestHistory", 2 },
+                    { 22, "Access Reports Page", false, "Page Access", "Page.Reports", 2 },
+                    { 23, "Access System Log Page", false, "Page Access", "Page.SystemLog", 2 },
+                    { 24, "Access Settings Page", false, "Page Access", "Page.Settings", 2 },
+                    { 25, "Access User Management Page", false, "Page Access", "Page.UserManagement", 2 },
+                    { 26, "Start and Run Testing Operations", true, "Test Operations", "Action.TestExecution.Run", 2 },
+                    { 27, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 2 },
+                    { 28, "Calibrate and Configure Hardware Instruments", false, "Test Operations", "Action.Instruments.Calibrate", 2 },
+                    { 29, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 2 },
+                    { 30, "Export and Print Test Reports & Analytics", false, "System & Logs", "Action.Reports.Export", 2 },
+                    { 31, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 2 },
+                    { 32, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 2 },
+                    { 33, "Amend and Delete Saved Test Reports", false, "System & Logs", "Action.Reports.Edit", 2 },
+                    { 34, "Delete Test History Records", false, "System & Logs", "Action.TestHistory.Delete", 2 },
+                    { 35, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 3 },
+                    { 36, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 3 },
+                    { 37, "Access Harness Database Page", true, "Page Access", "Page.HarnessDatabase", 3 },
+                    { 38, "Access Test History Page", true, "Page Access", "Page.TestHistory", 3 },
+                    { 39, "Access Reports Page", true, "Page Access", "Page.Reports", 3 },
+                    { 40, "Access System Log Page", true, "Page Access", "Page.SystemLog", 3 },
+                    { 41, "Access Settings Page", true, "Page Access", "Page.Settings", 3 },
+                    { 42, "Access User Management Page", false, "Page Access", "Page.UserManagement", 3 },
+                    { 43, "Start and Run Testing Operations", true, "Test Operations", "Action.TestExecution.Run", 3 },
+                    { 44, "Add and Edit Test Parameters & Harness Specs", true, "Test Operations", "Action.TestConfig.Edit", 3 },
+                    { 45, "Calibrate and Configure Hardware Instruments", true, "Test Operations", "Action.Instruments.Calibrate", 3 },
+                    { 46, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 3 },
+                    { 47, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 3 },
+                    { 48, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 3 },
+                    { 49, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 3 },
+                    { 50, "Amend and Delete Saved Test Reports", true, "System & Logs", "Action.Reports.Edit", 3 },
+                    { 51, "Delete Test History Records", true, "System & Logs", "Action.TestHistory.Delete", 3 },
+                    { 52, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 4 },
+                    { 53, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 4 },
+                    { 54, "Access Harness Database Page", true, "Page Access", "Page.HarnessDatabase", 4 },
+                    { 55, "Access Test History Page", true, "Page Access", "Page.TestHistory", 4 },
+                    { 56, "Access Reports Page", false, "Page Access", "Page.Reports", 4 },
+                    { 57, "Access System Log Page", true, "Page Access", "Page.SystemLog", 4 },
+                    { 58, "Access Settings Page", true, "Page Access", "Page.Settings", 4 },
+                    { 59, "Access User Management Page", false, "Page Access", "Page.UserManagement", 4 },
+                    { 60, "Start and Run Testing Operations", true, "Test Operations", "Action.TestExecution.Run", 4 },
+                    { 61, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 4 },
+                    { 62, "Calibrate and Configure Hardware Instruments", true, "Test Operations", "Action.Instruments.Calibrate", 4 },
+                    { 63, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 4 },
+                    { 64, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 4 },
+                    { 65, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 4 },
+                    { 66, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 4 },
+                    { 67, "Amend and Delete Saved Test Reports", false, "System & Logs", "Action.Reports.Edit", 4 },
+                    { 68, "Delete Test History Records", false, "System & Logs", "Action.TestHistory.Delete", 4 },
+                    { 69, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 5 },
+                    { 70, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 5 },
+                    { 71, "Access Harness Database Page", true, "Page Access", "Page.HarnessDatabase", 5 },
+                    { 72, "Access Test History Page", true, "Page Access", "Page.TestHistory", 5 },
+                    { 73, "Access Reports Page", true, "Page Access", "Page.Reports", 5 },
+                    { 74, "Access System Log Page", false, "Page Access", "Page.SystemLog", 5 },
+                    { 75, "Access Settings Page", false, "Page Access", "Page.Settings", 5 },
+                    { 76, "Access User Management Page", false, "Page Access", "Page.UserManagement", 5 },
+                    { 77, "Start and Run Testing Operations", false, "Test Operations", "Action.TestExecution.Run", 5 },
+                    { 78, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 5 },
+                    { 79, "Calibrate and Configure Hardware Instruments", false, "Test Operations", "Action.Instruments.Calibrate", 5 },
+                    { 80, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 5 },
+                    { 81, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 5 },
+                    { 82, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 5 },
+                    { 83, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 5 },
+                    { 84, "Amend and Delete Saved Test Reports", false, "System & Logs", "Action.Reports.Edit", 5 },
+                    { 85, "Delete Test History Records", false, "System & Logs", "Action.TestHistory.Delete", 5 },
+                    { 86, "Access Dashboard Page", true, "Page Access", "Page.Dashboard", 6 },
+                    { 87, "Access Test Execution Page", true, "Page Access", "Page.TestExecution", 6 },
+                    { 88, "Access Harness Database Page", true, "Page Access", "Page.HarnessDatabase", 6 },
+                    { 89, "Access Test History Page", true, "Page Access", "Page.TestHistory", 6 },
+                    { 90, "Access Reports Page", true, "Page Access", "Page.Reports", 6 },
+                    { 91, "Access System Log Page", true, "Page Access", "Page.SystemLog", 6 },
+                    { 92, "Access Settings Page", false, "Page Access", "Page.Settings", 6 },
+                    { 93, "Access User Management Page", false, "Page Access", "Page.UserManagement", 6 },
+                    { 94, "Start and Run Testing Operations", true, "Test Operations", "Action.TestExecution.Run", 6 },
+                    { 95, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 6 },
+                    { 96, "Calibrate and Configure Hardware Instruments", false, "Test Operations", "Action.Instruments.Calibrate", 6 },
+                    { 97, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 6 },
+                    { 98, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 6 },
+                    { 99, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 6 },
+                    { 100, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 6 },
+                    { 101, "Amend and Delete Saved Test Reports", true, "System & Logs", "Action.Reports.Edit", 6 },
+                    { 102, "Delete Test History Records", true, "System & Logs", "Action.TestHistory.Delete", 6 }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "UserId", "CompanyId", "CreatedAt", "Department", "FullName", "LastLogin", "MustChangePassword", "PasswordHash", "RoleId", "StatusId", "UpdatedAt", "Username" },
-                values: new object[] { 1, "CAT0100", new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local), "Engineering", "System Administrator", null, true, "$2b$11$yGJN27FWp/BWcUo0M4ZOW.mWsQGCKQwQfVoemKJyPF2MFLP9ickMS", 1, 1, new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local), "admin" });
+                columns: new[] { "UserId", "CompanyId", "CreatedAt", "Department", "FailedLoginCount", "FullName", "LastLogin", "LockoutUntil", "MustChangePassword", "PasswordHash", "RoleId", "StatusId", "UpdatedAt", "Username" },
+                values: new object[] { 1, "CAT0100", new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local), "Engineering", 0, "System Administrator", null, null, true, "$2a$11$Hcpu0fJL6xvHgmbYJNv/s.QMrlL8F9ALRHip20cUQLY6OSro3YIhC", 1, 1, new DateTime(2026, 3, 1, 15, 0, 0, 0, DateTimeKind.Local), "admin" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DefaultTestSettings_DefaultTestTypeId",
+                table: "DefaultTestSettings",
+                column: "DefaultTestTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_HarnessConnectors_ConnectorId",
@@ -562,6 +653,11 @@ namespace AssemblyLineTester.Migrations
                 table: "HarnessConnectors",
                 columns: new[] { "ProductHarnessId", "ConnectorId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LearnConnections_TestTypeId",
+                table: "LearnConnections",
+                column: "TestTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReportTestTypeSummaries_ReportId_TestTypeName",
@@ -587,9 +683,14 @@ namespace AssemblyLineTester.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestConfigNets_ConfigurationConfigId",
+                name: "IX_SystemLogs_Timestamp",
+                table: "SystemLogs",
+                column: "Timestamp");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestConfigNets_ConfigId",
                 table: "TestConfigNets",
-                column: "ConfigurationConfigId");
+                column: "ConfigId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TestConfigNets_TestTypeId",
@@ -635,6 +736,13 @@ namespace AssemblyLineTester.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_CompanyId",
+                table: "Users",
+                column: "CompanyId",
+                unique: true,
+                filter: "\"CompanyId\" <> ''");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
                 table: "Users",
                 column: "RoleId");
@@ -661,7 +769,13 @@ namespace AssemblyLineTester.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "DefaultTestSettings");
+
+            migrationBuilder.DropTable(
                 name: "HarnessConnectors");
+
+            migrationBuilder.DropTable(
+                name: "LearnConnections");
 
             migrationBuilder.DropTable(
                 name: "MaintenanceStates");
@@ -682,7 +796,13 @@ namespace AssemblyLineTester.Migrations
                 name: "TestDetails");
 
             migrationBuilder.DropTable(
+                name: "TestResultChecks");
+
+            migrationBuilder.DropTable(
                 name: "TestSteps");
+
+            migrationBuilder.DropTable(
+                name: "TestTypeChecks");
 
             migrationBuilder.DropTable(
                 name: "Users");

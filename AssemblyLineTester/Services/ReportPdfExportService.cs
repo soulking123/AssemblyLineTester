@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using AssemblyLineTester.Models.Dto;
 using PdfSharp.Drawing;
+using PdfSharp.Drawing.Layout;
 using PdfSharp.Pdf;
 
 namespace AssemblyLineTester.Services
@@ -55,7 +56,24 @@ namespace AssemblyLineTester.Services
 
             y = DrawGeneralInformation(gfx, page, detail, font, fontBold, y);
             y = DrawTypeSummaryTable(gfx, detail, font, fontBold, y);
-            DrawOverallResultBox(gfx, page, detail, y);
+            y = DrawOverallResultBox(gfx, page, detail, y);
+            DrawNotes(gfx, page, detail, font, fontBold, y);
+        }
+
+        // Operator notes as a wrapped paragraph under the result box.
+        private static void DrawNotes(XGraphics gfx, PdfPage page, ReportDetailDto detail, XFont font, XFont fontBold, double y)
+        {
+            gfx.DrawString("NOTES", fontBold, XBrushes.Black, new XRect(Margin, y, 400, 16), XStringFormats.TopLeft);
+            y += 18;
+
+            double width = page.Width - Margin * 2;
+            double height = Math.Max(0, page.Height - Margin - FooterReserve - y);
+            if (height <= 0) return;
+
+            string text = string.IsNullOrWhiteSpace(detail.Notes) ? "-" : detail.Notes.Trim();
+
+            var formatter = new XTextFormatter(gfx) { Alignment = XParagraphAlignment.Left };
+            formatter.DrawString(text, font, XBrushes.Black, new XRect(Margin, y, width, height), XStringFormats.TopLeft);
         }
 
         private static double DrawGeneralInformation(XGraphics gfx, PdfPage page, ReportDetailDto detail, XFont font, XFont fontBold, double y)
@@ -186,7 +204,7 @@ namespace AssemblyLineTester.Services
             return y + rowH + 12;
         }
 
-        private static void DrawOverallResultBox(XGraphics gfx, PdfPage page, ReportDetailDto detail, double y)
+        private static double DrawOverallResultBox(XGraphics gfx, PdfPage page, ReportDetailDto detail, double y)
         {
             double boxW = 280;
             double boxH = 60;
@@ -203,6 +221,8 @@ namespace AssemblyLineTester.Services
             double textY = y + Math.Max(0, (boxH - measuredSize.Height) / 2.0);
             gfx.DrawString(detail.OverallResult, resultFont, new XSolidBrush(borderColor),
                 new XRect(boxX, textY, boxW, measuredSize.Height), XStringFormats.Center);
+
+            return y + boxH + 20;
         }
 
         // Page 2 onwards: detail rows in landscape, spilling onto as many pages as needed.
@@ -212,9 +232,11 @@ namespace AssemblyLineTester.Services
             var fontBold = new XFont("Arial", 9, XFontStyle.Bold);
             double rowH = 18;
 
+            var columns = TestSettingService.GetEnabledResultColumns();
+
             var page = AddDetailPage(doc);
             XGraphics g = XGraphics.FromPdfPage(page);
-            double y = DrawDetailPageTop(g, page, detail, logoPath, fontBold, rowH);
+            double y = DrawDetailPageTop(g, page, detail, logoPath, fontBold, rowH, columns);
 
             bool alt = false;
             foreach (var d in detail.Details)
@@ -225,10 +247,10 @@ namespace AssemblyLineTester.Services
                     g.Dispose();
                     page = AddDetailPage(doc);
                     g = XGraphics.FromPdfPage(page);
-                    y = DrawDetailPageTop(g, page, detail, logoPath, fontBold, rowH);
+                    y = DrawDetailPageTop(g, page, detail, logoPath, fontBold, rowH, columns);
                 }
 
-                y = DrawDetailRow(g, page, d, font, fontBold, y, rowH, ref alt);
+                y = DrawDetailRow(g, page, d, font, fontBold, y, rowH, ref alt, columns);
             }
 
             g.Dispose();
@@ -243,15 +265,15 @@ namespace AssemblyLineTester.Services
         }
 
         // Header, section title and column headings. Returns the y the first row starts at.
-        private static double DrawDetailPageTop(XGraphics g, PdfPage page, ReportDetailDto detail, string logoPath, XFont fontBold, double rowH)
+        private static double DrawDetailPageTop(XGraphics g, PdfPage page, ReportDetailDto detail, string logoPath, XFont fontBold, double rowH, List<string> columns)
         {
             double y = DrawPageHeader(g, page, detail, 0, 0, logoPath);
 
             g.DrawString("DETAILED TEST RESULTS", fontBold, XBrushes.Black, new XRect(Margin, y, 400, 16), XStringFormats.TopLeft);
             y += 18;
 
-            double[] cols = DetailColumnWidths(page);
-            string[] headers = { "Net ID", "Harness Group", "From", "To", "Test Type", "Lower", "Upper", "Measure", "Tolerance", "Result" };
+            double[] cols = DetailColumnWidths(page, columns);
+            string[] headers = columns.Concat(new[] { "Result" }).ToArray();
             var hdrBg = new XSolidBrush(XColor.FromArgb(28, 230, 230, 230));
 
             double x = Margin;
@@ -267,27 +289,40 @@ namespace AssemblyLineTester.Services
         }
 
         // Column widths as fractions of the printable width, so they follow the page size.
-        private static double[] DetailColumnWidths(PdfPage page)
+        // Relative widths per configurable column; anything unlisted gets an even share.
+        private static readonly Dictionary<string, double> DetailColumnWeights = new()
+        {
+            ["Net-ID"] = 0.9,
+            ["Harness Group"] = 2.5,
+            ["From"] = 1.0,
+            ["Net From Label"] = 1.4,
+            ["To"] = 1.0,
+            ["Net To Label"] = 1.4,
+            ["Test Type"] = 1.8,
+            ["Lower Limit"] = 0.9,
+            ["Upper Limit"] = 0.9,
+            ["Expected Value"] = 1.0,
+            ["Tolerance"] = 0.9,
+            ["Measurement"] = 1.2
+        };
+
+        // The trailing entry is the Result column, which is always drawn.
+        private static double[] DetailColumnWidths(PdfPage page, List<string> columns)
         {
             double w = page.Width - Margin * 2;
-            return new[]
-            {
-                w * 0.07,
-                w * 0.25,
-                w * 0.08,
-                w * 0.08,
-                w * 0.15,
-                w * 0.07,
-                w * 0.07,
-                w * 0.10,
-                w * 0.07,
-                w * 0.06
-            };
+
+            var weights = columns
+                .Select(c => DetailColumnWeights.TryGetValue(c, out double weight) ? weight : 1.0)
+                .ToList();
+            weights.Add(0.8);
+
+            double total = weights.Sum();
+            return weights.Select(weight => w * weight / total).ToArray();
         }
 
-        private static double DrawDetailRow(XGraphics g, PdfPage page, TestDetailDto d, XFont font, XFont fontBold, double y, double rowH, ref bool alt)
+        private static double DrawDetailRow(XGraphics g, PdfPage page, TestDetailDto d, XFont font, XFont fontBold, double y, double rowH, ref bool alt, List<string> columns)
         {
-            double[] cols = DetailColumnWidths(page);
+            double[] cols = DetailColumnWidths(page, columns);
 
             bool isPass = string.Equals(d.Result, "PASS", StringComparison.OrdinalIgnoreCase);
             bool isOpen = string.Equals(d.Result, "OPEN", StringComparison.OrdinalIgnoreCase);
@@ -318,17 +353,15 @@ namespace AssemblyLineTester.Services
                 x += cols[i];
             }
 
-            Cell(0, d.NetId, XStringFormats.Center);
-            Cell(1, d.HarnessGroup, XStringFormats.CenterLeft);
-            Cell(2, d.FromPin, XStringFormats.CenterLeft);
-            Cell(3, d.ToPin, XStringFormats.CenterLeft);
-            Cell(4, d.TestType, XStringFormats.CenterLeft);
-            Cell(5, d.LowerLimit?.ToString(), XStringFormats.Center);
-            Cell(6, d.UpperLimit?.ToString(), XStringFormats.Center);
-            Cell(7, d.Measured, XStringFormats.Center);
-            Cell(8, d.Tolerance, XStringFormats.Center);
+            for (int i = 0; i < columns.Count; i++)
+            {
+                var align = columns[i] is "Harness Group" or "From" or "To" or "Test Type" or "Net From Label" or "Net To Label"
+                    ? XStringFormats.CenterLeft
+                    : XStringFormats.Center;
+                Cell(i, d.Column(columns[i]), align);
+            }
 
-            var resultRect = new XRect(x, y, cols[9], rowH);
+            var resultRect = new XRect(x, y, cols[columns.Count], rowH);
             XColor resultFill;
             XBrush resultText;
             if (isPass)

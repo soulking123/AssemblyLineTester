@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -8,21 +8,10 @@ using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Services
 {
-    /// <summary>
-    /// Technical log written to disk, one file per day under <see cref="AppInfo.LogDirectory"/>.
-    /// </summary>
-    /// <remarks>
-    /// This is the engineer's log, not the customer's. Stack traces and startup detail go here;
-    /// business events that a supervisor would ask about go to <see cref="SystemLogService"/> and
-    /// show up on the System Log page. Errors go to both - a summary there, the detail here.
-    /// <para>
-    /// It is a file rather than a table on purpose: when the database is what broke, a log kept
-    /// inside it is gone exactly when it is needed.
-    /// </para>
-    /// </remarks>
+    // Engineer's log, one file per day. A file, not a table, so it survives a broken database.
     public static class FileLogService
     {
-        /// <summary>How long daily files are kept. Old ones are swept once per run.</summary>
+        // How long daily files are kept.
         public const int RetentionDays = 30;
 
         private const string FilePrefix = "asl-";
@@ -37,11 +26,11 @@ namespace AssemblyLineTester.Services
 
         public static void Error(string context, string message, Exception? ex = null) => Write("ERROR", context, message, ex);
 
-        /// <summary>Full path of today's log file.</summary>
+        // Full path of today's log file.
         public static string CurrentFile =>
             Path.Combine(AppInfo.LogDirectory, $"{FilePrefix}{DateTime.Now:yyyy-MM-dd}{FileSuffix}");
 
-        /// <summary>Daily log files still on disk, newest first. Used to build a diagnostics bundle.</summary>
+        // Daily log files still on disk, newest first.
         public static string[] LogFiles()
         {
             try
@@ -61,8 +50,7 @@ namespace AssemblyLineTester.Services
 
         private static void Write(string level, string context, string message, Exception? ex)
         {
-            // Logging must never be the reason the application falls over, so every failure in
-            // here is swallowed - but into the debugger, not into nothing.
+            // Logging must never be why the application falls over.
             try
             {
                 var line = new StringBuilder()
@@ -94,10 +82,7 @@ namespace AssemblyLineTester.Services
         private static string Indent(string block) =>
             string.Join(Environment.NewLine, block.Split('\n').Select(l => "    " + l.TrimEnd('\r')));
 
-        /// <summary>
-        /// Deletes files past the retention window. Runs at most once per process: a factory PC
-        /// stays open all shift, so doing it per-line would be pure waste.
-        /// </summary>
+        // Deletes files past the retention window, at most once per process.
         private static void SweepOnce()
         {
             if (_sweptThisRun) return;
@@ -111,8 +96,7 @@ namespace AssemblyLineTester.Services
                 {
                     string stamp = Path.GetFileNameWithoutExtension(path)[FilePrefix.Length..];
 
-                    // Parse the date out of the name rather than trusting the file timestamp, which
-                    // a copy or a restore would have reset.
+                    // Read from the name, not the file timestamp, which a copy would have reset.
                     if (DateTime.TryParseExact(stamp, "yyyy-MM-dd", CultureInfo.InvariantCulture,
                                                DateTimeStyles.None, out DateTime day)
                         && day < cutoff)
@@ -127,10 +111,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Writes a line, reads it back, and checks the retention cutoff is computed the way the
-        /// name-based sweep expects. Debug builds only.
-        /// </summary>
+        // Debug-only: writes a line, reads it back, and checks the retention cutoff.
         [Conditional("DEBUG")]
         public static void SelfCheck()
         {

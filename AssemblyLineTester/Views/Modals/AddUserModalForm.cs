@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Modals
 {
@@ -17,7 +18,6 @@ namespace AssemblyLineTester.Views.Modals
             InitializeDropdowns();
 
             btnSave.Click += BtnSave_Click;
-            ReplacePasswordFieldsWithNotice();
 
             pnlCustomHeader.MouseDown += TitleBar_MouseDown;
             iconLogo.MouseDown += TitleBar_MouseDown;
@@ -58,10 +58,6 @@ namespace AssemblyLineTester.Views.Modals
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
 
         private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
         {
@@ -70,8 +66,7 @@ namespace AssemblyLineTester.Views.Modals
                 ActiveControl = pnlCustomHeader;
                 ValidateChildren();
 
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
+            NativeMethods.DragWindow(Handle);
             }
         }
 
@@ -79,53 +74,15 @@ namespace AssemblyLineTester.Views.Modals
         {
             cmbRole.Items.Clear();
             cmbRole.Items.AddRange(["Administrator", "Operator", "Engineer", "Technician", "Quality", "Supervisor"]);
-            cmbRole.SelectedIndex = 1; // Default to Operator
+            cmbRole.SelectedIndex = 1;
 
             cmbDepartment.Items.Clear();
             cmbDepartment.Items.AddRange(["Engineering", "Production", "Maintenance", "Quality Assurance"]);
-            cmbDepartment.SelectedIndex = 1; // Default to Production
+            cmbDepartment.SelectedIndex = 1;
 
             cmbStatus.Items.Clear();
             cmbStatus.Items.AddRange(["Active", "Inactive", "Locked"]);
-            cmbStatus.SelectedIndex = 0; // Default to Active
-        }
-
-        /// <summary>
-        /// Hides the password inputs and puts a notice in the space they occupied.
-        /// </summary>
-        /// <remarks>
-        /// The administrator no longer chooses a password, so asking for one twice was two fields
-        /// of work producing a value that gets replaced at first sign-in anyway. The controls are
-        /// hidden rather than deleted from the designer file, which is Visual Studio's to own; the
-        /// notice fills the gap that hiding them would otherwise leave.
-        /// </remarks>
-        private void ReplacePasswordFieldsWithNotice()
-        {
-            foreach (Control control in new Control[] { lblPassword, txtPassword, lblConfirmPassword, txtConfirmPassword })
-            {
-                control.Visible = false;
-            }
-
-            var notice = new Label
-            {
-                Text = $"🔑   Starting password:  {UserService.DefaultNewUserPassword}\r\n" +
-                       "        They choose their own the first time they sign in.",
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-                ForeColor = Color.FromArgb(71, 85, 105),
-                BackColor = Color.FromArgb(248, 250, 252),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(18, 0, 0, 0),
-                Location = lblPassword.Location,
-                Size = new Size(
-                    txtConfirmPassword.Right - lblPassword.Left,
-                    txtPassword.Bottom - lblPassword.Top)
-            };
-
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(
-                notice, 8, Color.FromArgb(226, 232, 240), 1.2f);
-
-            Controls.Add(notice);
-            notice.BringToFront();
+            cmbStatus.SelectedIndex = 0;
         }
 
         private void BtnSave_Click(object? sender, EventArgs e)
@@ -150,8 +107,8 @@ namespace AssemblyLineTester.Views.Modals
 
             try
             {
-                int roleId = cmbRole.SelectedIndex + 1; // 1 to 6
-                int statusId = cmbStatus.SelectedIndex + 1; // 1 to 3
+                int roleId = cmbRole.SelectedIndex + 1;
+                int statusId = cmbStatus.SelectedIndex + 1;
                 string dept = cmbDepartment.SelectedItem?.ToString() ?? "Production";
 
                 var newUser = new User
@@ -164,8 +121,7 @@ namespace AssemblyLineTester.Views.Modals
                     StatusId = statusId
                 };
 
-                // No password is asked for: every account starts on the shared default and the
-                // holder is made to replace it the first time they sign in.
+                // Every account starts on the shared default and must replace it at first sign-in.
                 _userService.CreateUser(newUser);
 
                 MessageBox.Show(

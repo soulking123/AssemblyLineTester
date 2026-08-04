@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -75,7 +75,6 @@ namespace AssemblyLineTester.Views.Controls
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            // Clear with parent background
             if (Parent != null && Parent.BackColor != Color.Transparent)
             {
                 using (Brush parentBrush = new SolidBrush(Parent.BackColor))
@@ -101,7 +100,6 @@ namespace AssemblyLineTester.Views.Controls
 
                 if (isMinimized)
                 {
-                    // When minimized, draw yellow header box with rounded bottom corners
                     path.StartFigure();
                     path.AddLine(0, 0, w, 0);
                     path.AddLine(w, 0, w, h - r);
@@ -116,19 +114,14 @@ namespace AssemblyLineTester.Views.Controls
                     if (slope > w / 2f) slope = w / 2f;
 
                     path.StartFigure();
-                    // Top edge from (0, 0) right to (w - slope, 0)
                     path.AddLine(0, 0, w - slope, 0);
 
-                    // Diagonal line sloping down-left towards (w - slope - r, h - r)
                     path.AddLine(w - slope, 0, w - slope - (r * 0.5f), h - r);
 
-                    // Smooth rounded bend turning from the slope into the flat bottom edge
                     path.AddArc(w - slope - (r * 1.5f), h - (r * 2f), r * 2f, r * 2f, 25f, 65f);
 
-                    // Flat bottom edge from bottom arc back to (0, h)
                     path.AddLine(w - slope - (r * 1.5f), h, 0, h);
 
-                    // Left vertical edge back up to (0, 0)
                     path.AddLine(0, h, 0, 0);
                     path.CloseFigure();
                 }

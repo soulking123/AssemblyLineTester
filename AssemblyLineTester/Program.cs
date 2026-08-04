@@ -1,4 +1,4 @@
-using AssemblyLineTester.Data;
+﻿using AssemblyLineTester.Data;
 using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views;
@@ -12,45 +12,58 @@ namespace AssemblyLineTester
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            // Installed before anything else can throw, so a failure during startup still leaves a
-            // trace instead of a bare Windows crash dialog on the factory floor.
+            // Installed first, so a startup failure still leaves a trace.
             InstallCrashHandlers();
 
             FileLogService.SelfCheck();
+            AppTime.SelfCheck();
+            LicenseService.SelfCheck();
             FileLogService.Info("Startup", AppInfo.Describe());
 
-            // Register code pages provider so PdfSharp and other libraries can use code page encodings (e.g., 1252)
+            // PdfSharp needs code page 1252, which .NET does not register by default.
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            // Stop here if the schema is not usable. Carrying on would write test results into a
-            // half-built database and the damage would not surface for weeks.
+            // Before migrations run: a data-rewriting migration has no undo.
+            DatabaseBackupService.RunAutomaticBackup();
+
+            // A half-built schema would corrupt test results in ways that surface weeks later.
             if (!DbInitialize.Initialize())
             {
                 FileLogService.Error("Startup", "Aborted: the database could not be initialised.");
                 return;
             }
 
-            // Once per run is enough, and startup is the only moment nothing else is mid-write.
+            var (licenseResult, _) = LicenseService.Validate();
+            if (licenseResult != LicenseValidationResult.Valid)
+            {
+                FileLogService.Error("Startup", $"Aborted: license check failed ({licenseResult}).");
+
+                // The machine id is printed here because a licence is issued against it, and this
+                // dialog is the only place the operator can read it while startup is refused.
+                MessageBox.Show(
+                    $"{DescribeLicenseFailure(licenseResult)}\r\n\r\n" +
+                    $"Machine ID: {AppInfo.FormatMachineId(AppInfo.PrimaryMachineId)}\r\n\r\n" +
+                    $"Contact your AssemblyLineTester vendor for a new license file, quoting the machine ID above.",
+                    "License Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return;
+            }
+
             new SystemLogService().PurgeOlderThan();
+
+            // Drafts are started-but-never-saved tests; nothing in the UI ever shows them.
+            new TestReportService().PurgeOldDrafts();
 
             Application.Run(new LoginForm());
 
             FileLogService.Info("Shutdown", "Application closed normally.");
         }
 
-        /// <summary>
-        /// Routes every exception that nothing else caught into the log before the user sees it.
-        /// </summary>
-        /// <remarks>
-        /// Two handlers are needed and they are not interchangeable: <c>ThreadException</c> catches
-        /// what escapes a WinForms message-loop handler and the application can carry on, while
-        /// <c>UnhandledException</c> catches everything else - background threads included - and by
-        /// then the process is already going down, so it can only record.
-        /// </remarks>
+        // Both handlers are needed: ThreadException survives, UnhandledException only records.
         private static void InstallCrashHandlers()
         {
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
@@ -76,9 +89,7 @@ namespace AssemblyLineTester
 
         private static void Report(string origin, Exception ex)
         {
-            // The file gets the stack trace; the System Log page gets a one-line summary a
-            // supervisor can read. Writing to the database can itself fail here - the disk log is
-            // the one that has to survive, so it goes first.
+            // Disk log first: writing to the database can itself be what failed.
             FileLogService.Error(origin, "Unhandled exception", ex);
 
             try
@@ -94,6 +105,17 @@ namespace AssemblyLineTester
                 FileLogService.Error("Report", "Could not write the crash to the database log.", logFailure);
             }
         }
+
+        private static string DescribeLicenseFailure(LicenseValidationResult result) => result switch
+        {
+            LicenseValidationResult.MissingFile => "No license file was found for this installation.",
+            LicenseValidationResult.InvalidSignature => "The license file is missing, corrupted, or was not issued for this application.",
+            LicenseValidationResult.Expired => "This license has expired.",
+            LicenseValidationResult.WrongMachine => "This license was issued for a different machine.",
+            LicenseValidationResult.ClockRolledBack => "The system clock appears to have been moved backward, which this application does not allow.",
+            LicenseValidationResult.CorruptState => "The application's saved license state could not be verified.",
+            _ => "The license could not be validated."
+        };
 
         private static void ShowCrashDialog(Exception ex)
         {

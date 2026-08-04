@@ -1,4 +1,4 @@
-
+﻿
 using AssemblyLineTester.Services;
 using FontAwesome.Sharp;
 using System;
@@ -132,7 +132,6 @@ namespace AssemblyLineTester.Views.Pages
         }
         private void EnableDoubleBuffering()
         {
-            // Enable double buffering improvements from dashboard branch for smoother rendering
             try
             {
                 typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(gridConfig, true, null);
@@ -158,9 +157,11 @@ namespace AssemblyLineTester.Views.Pages
                 EnableDoubleBufferingRecursive(child);
             }
         }
-        private void LoadTestTypeColumnItems()
+        // Offers only the test types ticked under Settings, falling back to every type if none are.
+        public void LoadTestTypeColumnItems()
         {
-            var names = _configService.GetTestTypeNames();
+            var names = TestSettingService.GetEnabledTestTypeNames();
+            if (names.Count == 0) names = _configService.GetTestTypeNames();
 
             if (gridConfig.Columns["colTestType"] is DataGridViewComboBoxColumn testTypeCol)
             {
@@ -211,10 +212,10 @@ namespace AssemblyLineTester.Views.Pages
             if (!CheckEditPermission()) return;
 
             int newIdx = gridConfig.Rows.Count + 1;
-            string defaultUnit = UnitConversionHelper.GetBaseUnit("WIRE"); // "Ω"
+            string defaultUnit = UnitConversionHelper.GetBaseUnit("WIRE");
 
             int nextFromAddr = GetNextAvailableAddress();
-            int nextToAddr = nextFromAddr + 1; // must differ from nextFromAddr too, since it's the same address pool
+            int nextToAddr = nextFromAddr + 1;
 
             int idx = gridConfig.Rows.Add(
                 newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply",
@@ -231,7 +232,7 @@ namespace AssemblyLineTester.Views.Pages
             picPreview.Invalidate();
         }
 
-        // Finds the next address not yet used anywhere in colFromAddr or colToAddr (shared pool).
+        // Next address unused in either column; From and To share one pool.
         private int GetNextAvailableAddress()
         {
             int max = -1;
@@ -244,7 +245,7 @@ namespace AssemblyLineTester.Views.Pages
             return max + 1;
         }
 
-        // Finds the next unused address for the given column (max existing value + 1).
+        // Next unused address for one column: the highest existing value plus one.
         private int GetNextAvailableAddress(string columnName)
         {
             int max = -1;
@@ -301,7 +302,6 @@ namespace AssemblyLineTester.Views.Pages
         private void BtnImport_Click(object? sender, EventArgs e)
         {
             if (!CheckEditPermission()) return;
-            // Open the Edit Config modal (lists saved configurations from DB)
             ShowEditConfigsDialog();
         }
 
@@ -389,7 +389,6 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
-            // Save current grid configuration to the database.
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
             if (config == null)
             {
@@ -411,7 +410,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 if (existing != null)
                 {
-                    // Allow overwrite only when the user explicitly loaded this config for editing
+                    // Overwrite only what the user explicitly loaded for editing.
                     if (!string.IsNullOrWhiteSpace(_loadedConfigName) && string.Equals(_loadedConfigName, config.ConfigName, StringComparison.OrdinalIgnoreCase))
                     {
                         var res = MessageBox.Show($"Overwrite existing configuration '{config.ConfigName}'?", "Confirm Overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -427,7 +426,6 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
 
-                // New config
                 Debug.WriteLine($"curernt userrr : {config.CreatedBy}");
                 _configService.SaveConfig(config);
                 _loadedConfigName = config.ConfigName;
@@ -563,9 +561,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Checks `value` against BOTH colFromAddr and colToAddr across ALL rows (shared address pool),
-        // excluding only the exact cell currently being edited - same-row cross-column collisions
-        // (From == To in one row) ARE checked and blocked.
+        // Checks both columns across all rows, skipping only the cell being edited.
         private bool IsAddressUsedElsewhere(string value, int currentRowIndex, string currentColumnName)
         {
             for (int i = 0; i < gridConfig.Rows.Count; i++)
@@ -587,7 +583,7 @@ namespace AssemblyLineTester.Views.Pages
             return false;
         }
 
-        // Scans the whole grid (both columns combined) for any address used more than once.
+        // Any address used more than once across both columns.
         private List<string> GetDuplicateAddresses()
         {
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -613,7 +609,7 @@ namespace AssemblyLineTester.Views.Pages
             return duplicates;
         }
 
-        // Checks whether `value` already exists in any OTHER row's given column.
+        // Whether the value already exists in another row of the same column.
         private bool IsAddressDuplicate(string columnName, string value, int currentRowIndex)
         {
             for (int i = 0; i < gridConfig.Rows.Count; i++)
@@ -631,8 +627,7 @@ namespace AssemblyLineTester.Views.Pages
             return false;
         }
 
-        // Scans the whole grid and returns any address values used more than once in the given column.
-        // Catches cases CellValidating can't - e.g. rows added/loaded programmatically.
+        // Catches duplicates CellValidating cannot see, such as rows loaded programmatically.
         private List<string> GetDuplicateAddresses(string columnName)
         {
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1096,8 +1091,7 @@ namespace AssemblyLineTester.Views.Pages
             string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
             return double.TryParse(clean, out double val) ? val : null;
         }
-
-        private void ParseAndPopulateGridFromProgramText(string programText)
+        private void ParseAndPopulateGridFromProgramText(string programText, List<string>? allowedTestTypes = null)
         {
             if (string.IsNullOrWhiteSpace(programText)) return;
 
@@ -1126,6 +1120,15 @@ namespace AssemblyLineTester.Views.Pages
                 // Expected format: [SeqNo, FromPin, ToPin]  (e.g., "1", "J1-040", "J3-040")
                 if (tokens.Length >= 3 && int.TryParse(tokens[0], out int seqNo))
                 {
+                    // ponytail: the instrument's learned program only ever describes wire nets, so every
+                    // parsed row is WIRE. Widen this once the program text carries a per-row type.
+                    const string rowTestType = "WIRE";
+                    if (allowedTestTypes != null &&
+                        !allowedTestTypes.Contains(rowTestType, StringComparer.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
                     string fromPin = tokens[1];
                     string toPin = tokens[2];
 
@@ -1140,7 +1143,7 @@ namespace AssemblyLineTester.Views.Pages
                         "",                     // from label
                         toAddr.ToString(),      // to
                         "",                     // to label
-                        "WIRE",                 // test type
+                        rowTestType,            // test type
                         "",                     // lower limit
                         "",                     // upper limit
                         "",                     // expected value
@@ -1184,6 +1187,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void btnLearnConnection_Click(object? sender, EventArgs e)
         {
+            List<string> learnTestTypes;
+
             // Show the Learn Connection Modal Options
             using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
             {
@@ -1192,12 +1197,16 @@ namespace AssemblyLineTester.Views.Pages
                     return; // User cancelled
                 }
 
-                // Store options in local variables as requested
-                bool learnWire = modal.IncludeWire;
-                bool learnResistor = modal.IncludeResistor;
-                bool learnCapacitor = modal.IncludeCapacitor;
-                bool learnDiode = modal.IncludeDiode;
-                bool learnTwistedPair = modal.IncludeTwistedPair;
+                learnTestTypes = modal.SelectedTypes
+                    .Select(c => c.TestType?.TestTypeName ?? string.Empty)
+                    .Where(name => name.Length > 0)
+                    .ToList();
+                if (learnTestTypes.Count == 0)
+                {
+                    MessageBox.Show(this, "Select at least one connection type to learn.",
+                        "Nothing Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
             }
 
             _testCts?.Cancel();
@@ -1263,7 +1272,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 _customTestText = getTestResult.Result;
                 Debug.WriteLine(_customTestText);
-                ParseAndPopulateGridFromProgramText(_customTestText);
+                ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
 
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 

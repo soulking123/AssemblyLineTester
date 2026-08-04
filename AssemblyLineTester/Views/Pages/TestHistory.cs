@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -53,8 +54,7 @@ namespace AssemblyLineTester.Views.Pages
         }
 
 
-
-        // Registers all filter/pagination/selection controls to a single reload flow.
+        // Points every filter, pagination and selection control at the same reload.
         private void SetupEvents()
         {
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlFilterCard, 12, Color.FromArgb(34, 40, 49), 2.5f);
@@ -69,6 +69,12 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewReport, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
 
+            // Tinted, not solid: the weight belongs to View Report, and a dialog guards the delete.
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnDeleteHistory, 10, Color.FromArgb(254, 242, 242), Color.FromArgb(254, 226, 226), Color.FromArgb(254, 202, 202), Color.FromArgb(254, 202, 202));
+
+            // Red-700 for 4.5:1 contrast on the red-50 fill; red-500 falls short at this size.
+            btnDeleteHistory.ForeColor = Color.FromArgb(185, 28, 28);
+
             AssemblyLineTester.Helpers.UIStyleHelper.SetupBadgeRoundedEdges(lblDetailBadge, 10);
 
             gridData.CellFormatting += gridData_CellFormatting;
@@ -82,21 +88,16 @@ namespace AssemblyLineTester.Views.Pages
 
             btnSearch.Click += (s, ev) =>
             {
-                _dateFilterApplied = true; // user explicitly asked for this date range now
+                _dateFilterApplied = true;
                 GoToPage(1);
             };
 
             btnReset.Click += (s, ev) =>
             {
                 ResetFilterControls();
-                _dateFilterApplied = false; // back to showing everything
+                _dateFilterApplied = false;
                 GoToPage(1);
             };
-            {
-                ResetFilterControls();
-                GoToPage(1);
-            }
-            ;
 
             cmbPageSize.SelectedIndexChanged += (s, ev) =>
             {
@@ -137,7 +138,7 @@ namespace AssemblyLineTester.Views.Pages
             LoadHistoryData();
         }
 
-        // Builds the filter DTO from current filter control values.
+        // Reads the filter controls into a ReportFilter.
         private ReportFilter BuildFilter(int page)
         {
             return new ReportFilter
@@ -154,7 +155,7 @@ namespace AssemblyLineTester.Views.Pages
             };
         }
 
-        // Main entry point: pulls the page of history rows and the summary, refreshes the whole UI.
+        // Pulls the page of rows and the summary, then refreshes the whole page.
         private void LoadHistoryData()
         {
             var filter = BuildFilter(_currentPage);
@@ -178,7 +179,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Sets up grid columns and styling once; called from the constructor only.
+        // Columns and styling only, once, from the constructor.
         private void SetupGridColumns()
         {
             AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridData);
@@ -238,7 +239,7 @@ namespace AssemblyLineTester.Views.Pages
                     item.Operator,
                     "⋮");
 
-                // Store the report id on the row so a click can load its detail without a re-query.
+                // The row carries its report id, so a click needs no re-query to find it.
                 gridData.Rows[rowIndex].Tag = item.ReportId;
             }
 
@@ -272,7 +273,7 @@ namespace AssemblyLineTester.Views.Pages
             if (_currentPage < 1) _currentPage = 1;
 
             if (flpPageNav is null) return;
-            flpPageNav.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpPageNav.Controls);
 
             float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
             float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
@@ -415,12 +416,18 @@ namespace AssemblyLineTester.Views.Pages
             btnViewReport.Enabled = true;
             PopulateStepsGrid(detail.Steps);
 
-            // Enable delete button when a detail is loaded
             btnDeleteHistory.Enabled = true;
         }
 
         private void BtnDeleteHistory_Click(object? sender, EventArgs e)
         {
+            if (!SessionManager.HasPermission("Action.TestHistory.Delete"))
+            {
+                MessageBox.Show("You do not have permission to delete test history records.",
+                    "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (gridData.CurrentRow == null || gridData.CurrentRow.Tag is not int reportId)
             {
                 MessageBox.Show("Please select a history item to delete.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -474,7 +481,7 @@ namespace AssemblyLineTester.Views.Pages
                     badge.BackColor = Color.FromArgb(254, 243, 199);
                     badge.ForeColor = Color.FromArgb(146, 64, 14);
                     break;
-                default: // STOPPED or unknown
+                default:
                     badge.BackColor = Color.FromArgb(226, 232, 240);
                     badge.ForeColor = Color.FromArgb(71, 85, 105);
                     break;
@@ -561,7 +568,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private static void gridData_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            // Badge rendering handled entirely by gridData_CellPainting below.
+            // Badges are drawn by gridData_CellPainting.
         }
 
         private void gridData_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
@@ -584,7 +591,7 @@ namespace AssemblyLineTester.Views.Pages
                     case "STOPPED":
                         bgCol = Color.FromArgb(226, 232, 240); fgCol = Color.FromArgb(71, 85, 105);
                         break;
-                    default: // PASS
+                    default:
                         bgCol = Color.FromArgb(209, 231, 221); fgCol = Color.FromArgb(15, 81, 50);
                         break;
                 }

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views.Pages.Tabs;
@@ -23,7 +24,6 @@ namespace AssemblyLineTester.Views.Pages
         private Label? _lblPageInfo;
 
         private readonly HarnessService _harnessService = new();
-        private readonly ConnectorService _connectorService = new();
 
         private HarnessGeneralTab _tabGeneral = null!;
         private HarnessConnectorTab _tabConnector = null!;
@@ -68,8 +68,8 @@ namespace AssemblyLineTester.Views.Pages
             panelTabContent.Controls.Add(_tabConnector);
             panelTabContent.Controls.Add(_tabWiring);
 
-            _tabGeneral.Initialize(_connectorService, OnEditHarness_Click, OnDeleteHarness_Click);
-            _tabConnector.Initialize(_connectorService);
+            _tabGeneral.Initialize(OnEditHarness_Click, OnDeleteHarness_Click);
+            _tabConnector.Initialize();
             
             EnableDoubleBufferingRecursive(panelTabContent);
         }
@@ -182,7 +182,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 if (!HasHarnessEditPermission()) return;
 
-                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _connectorService);
+                using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService);
                 if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     PopulateHarnessData();
@@ -227,7 +227,7 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
-            using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _connectorService, _selectedHarness);
+            using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _selectedHarness);
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 int editedId = _selectedHarness.ProductHarnessId;
@@ -312,7 +312,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void SetupPagination()
         {
-            flpPages.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpPages.Controls);
             if (cmbShowEntries.Items.Count > 0) cmbShowEntries.SelectedIndex = 0;
             cmbShowEntries.SelectedIndexChanged += (s, e) =>
             {
@@ -416,7 +416,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            flpPages.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpPages.Controls);
 
             float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
             float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
@@ -512,7 +512,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulateBottomCards()
         {
-            tblSpecsContent.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblSpecsContent.Controls);
             var leftSpecs = new (string Key, string Val)[]
             {
                 ("Total Connector", $": {(_selectedHarness?.ConnectorList.Count ?? 0)}"),
@@ -573,7 +573,7 @@ namespace AssemblyLineTester.Views.Pages
                 tblSpecsContent.Controls.Add(lblRightVal, 3, i);
             }
 
-            tblTestSummaryContent.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblTestSummaryContent.Controls);
             var summaryData = new (string Key, string Val, Color? ColorOverride)[]
             {
                 ("Total Tested", ": 215", null),

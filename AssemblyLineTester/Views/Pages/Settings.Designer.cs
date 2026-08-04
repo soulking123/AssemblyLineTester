@@ -1,4 +1,4 @@
-namespace AssemblyLineTester.Views.Pages
+﻿namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -77,11 +77,6 @@ namespace AssemblyLineTester.Views.Pages
             lblTestResultCol = new Label();
             flpTestTypeAvail = new FlowLayoutPanel();
             flpLearnConn = new FlowLayoutPanel();
-            chkLearnWire = new CheckBox();
-            chkLearnCapacitor = new CheckBox();
-            chkLearnTwistedPair = new CheckBox();
-            chkLearnResistance = new CheckBox();
-            chkLearnDiode = new CheckBox();
             lblDataStorage = new Label();
             lblReportStorage = new Label();
             tblDataBrowse = new TableLayoutPanel();
@@ -866,89 +861,20 @@ namespace AssemblyLineTester.Views.Pages
             flpTestTypeAvail.FlowDirection = FlowDirection.TopDown;
             flpTestTypeAvail.Location = new Point(15, 300);
             flpTestTypeAvail.Margin = new Padding(0, 0, 15, 14);
+            flpTestTypeAvail.MaximumSize = new Size(460, 400);
             flpTestTypeAvail.Name = "flpTestTypeAvail";
-            flpTestTypeAvail.Size = new Size(0, 0);
+            flpTestTypeAvail.Size = new Size(460, 400);
             flpTestTypeAvail.TabIndex = 13;
             // 
             // flpLearnConn
             // 
             flpLearnConn.AutoSize = true;
-            flpLearnConn.Controls.Add(chkLearnWire);
-            flpLearnConn.Controls.Add(chkLearnCapacitor);
-            flpLearnConn.Controls.Add(chkLearnTwistedPair);
-            flpLearnConn.Controls.Add(chkLearnResistance);
-            flpLearnConn.Controls.Add(chkLearnDiode);
             flpLearnConn.FlowDirection = FlowDirection.TopDown;
             flpLearnConn.Location = new Point(499, 300);
             flpLearnConn.Margin = new Padding(0, 0, 15, 14);
             flpLearnConn.Name = "flpLearnConn";
             flpLearnConn.Size = new Size(183, 250);
             flpLearnConn.TabIndex = 21;
-            // 
-            // chkLearnWire
-            // 
-            chkLearnWire.AutoSize = true;
-            chkLearnWire.Font = new Font("Segoe UI", 9.5F);
-            chkLearnWire.ForeColor = Color.FromArgb(30, 41, 59);
-            chkLearnWire.Location = new Point(0, 5);
-            chkLearnWire.Margin = new Padding(0, 5, 0, 5);
-            chkLearnWire.Name = "chkLearnWire";
-            chkLearnWire.Size = new Size(100, 40);
-            chkLearnWire.TabIndex = 0;
-            chkLearnWire.Text = "Wire";
-            chkLearnWire.UseVisualStyleBackColor = true;
-            // 
-            // chkLearnCapacitor
-            // 
-            chkLearnCapacitor.AutoSize = true;
-            chkLearnCapacitor.Font = new Font("Segoe UI", 9.5F);
-            chkLearnCapacitor.ForeColor = Color.FromArgb(30, 41, 59);
-            chkLearnCapacitor.Location = new Point(0, 55);
-            chkLearnCapacitor.Margin = new Padding(0, 5, 0, 5);
-            chkLearnCapacitor.Name = "chkLearnCapacitor";
-            chkLearnCapacitor.Size = new Size(155, 40);
-            chkLearnCapacitor.TabIndex = 1;
-            chkLearnCapacitor.Text = "Capacitor";
-            chkLearnCapacitor.UseVisualStyleBackColor = true;
-            // 
-            // chkLearnTwistedPair
-            // 
-            chkLearnTwistedPair.AutoSize = true;
-            chkLearnTwistedPair.Font = new Font("Segoe UI", 9.5F);
-            chkLearnTwistedPair.ForeColor = Color.FromArgb(30, 41, 59);
-            chkLearnTwistedPair.Location = new Point(0, 105);
-            chkLearnTwistedPair.Margin = new Padding(0, 5, 0, 5);
-            chkLearnTwistedPair.Name = "chkLearnTwistedPair";
-            chkLearnTwistedPair.Size = new Size(183, 40);
-            chkLearnTwistedPair.TabIndex = 2;
-            chkLearnTwistedPair.Text = "Twisted Pair";
-            chkLearnTwistedPair.UseVisualStyleBackColor = true;
-            // 
-            // chkLearnResistance
-            // 
-            chkLearnResistance.AutoSize = true;
-            chkLearnResistance.Font = new Font("Segoe UI", 9.5F);
-            chkLearnResistance.ForeColor = Color.FromArgb(30, 41, 59);
-            chkLearnResistance.Location = new Point(0, 155);
-            chkLearnResistance.Margin = new Padding(0, 5, 0, 5);
-            chkLearnResistance.Name = "chkLearnResistance";
-            chkLearnResistance.Size = new Size(167, 40);
-            chkLearnResistance.TabIndex = 3;
-            chkLearnResistance.Text = "Resistance";
-            chkLearnResistance.UseVisualStyleBackColor = true;
-            // 
-            // chkLearnDiode
-            // 
-            chkLearnDiode.AutoSize = true;
-            chkLearnDiode.Font = new Font("Segoe UI", 9.5F);
-            chkLearnDiode.ForeColor = Color.FromArgb(30, 41, 59);
-            chkLearnDiode.Location = new Point(0, 205);
-            chkLearnDiode.Margin = new Padding(0, 5, 0, 5);
-            chkLearnDiode.Name = "chkLearnDiode";
-            chkLearnDiode.Size = new Size(115, 40);
-            chkLearnDiode.TabIndex = 4;
-            chkLearnDiode.Text = "Diode";
-            chkLearnDiode.UseVisualStyleBackColor = true;
             // 
             // lblDataStorage
             // 
@@ -1073,7 +999,7 @@ namespace AssemblyLineTester.Views.Pages
             btnBrowseReport.TabIndex = 1;
             btnBrowseReport.Text = "Browse";
             btnBrowseReport.UseVisualStyleBackColor = false;
-            // 
+            //
             // flpTestResultCol
             // 
             flpTestResultCol.AutoSize = true;
@@ -1556,11 +1482,6 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.FlowLayoutPanel flpLearnConn;
         private System.Windows.Forms.FlowLayoutPanel flpTestResultCol;
 
-        private System.Windows.Forms.CheckBox chkLearnWire;
-        private System.Windows.Forms.CheckBox chkLearnCapacitor;
-        private System.Windows.Forms.CheckBox chkLearnTwistedPair;
-        private System.Windows.Forms.CheckBox chkLearnResistance;
-        private System.Windows.Forms.CheckBox chkLearnDiode;
 
         private System.Windows.Forms.CheckBox chkResNetId;
         private System.Windows.Forms.CheckBox chkResHarnessGrp;

@@ -1,4 +1,4 @@
-using AssemblyLineTester.Models.Dto;
+﻿using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Data;
 using AssemblyLineTester.Views.Modals;
@@ -49,11 +49,11 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        // Designer only ships "Today" in cmbTimeRange, so the full range list is built here.
         private void InitializeCustomStyles()
         {
             SetupEvents();
 
-            // cmbTimeRange only has "Today" in the Designer - expand it here without touching the Designer file.
             cmbTimeRange.Items.Clear();
             cmbTimeRange.Items.AddRange(new object[]
             {
@@ -62,16 +62,9 @@ namespace AssemblyLineTester.Views.Pages
             cmbTimeRange.SelectedIndex = 0;
             cmbTimeRange.SelectedIndexChanged += CmbTimeRange_SelectedIndexChanged;
 
-            // DataGridView Modern Styling
             AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridRecent);
             gridRecent.CellFormatting += GridRecent_CellFormatting;
-
-            // Attach PostPaint for center text in Doughnut Chart
             chartFailReason.PostPaint += ChartFailReason_PostPaint;
-
-            // NOTE: cardTester / cardMachine / cardDatabase / cardModules status labels are left as
-            // static Designer defaults (ONLINE / READY / CONNECTED, etc.) for now - there is no
-            // hardware/connection status table in the schema yet, so this is intentionally hardcoded.
         }
 
         private void CmbTimeRange_SelectedIndexChanged(object? sender, EventArgs e)
@@ -100,7 +93,7 @@ namespace AssemblyLineTester.Views.Pages
         private void SetTesterOfflineUI()
         {
             lblTesterStatus.Text = "OFFLINE";
-            lblTesterStatus.ForeColor = Color.FromArgb(244, 67, 54); // Red
+            lblTesterStatus.ForeColor = Color.FromArgb(244, 67, 54);
             lblTesterSub.Text = "No active connection to tester server";
         }
 
@@ -122,8 +115,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSummaryTitle.Text = $"SUMMARY REPORT ({cmbTimeRange.Text})";
         }
 
-        // Bar Chart (History): Pass/Fail grouped adaptively (day/week/month) based on the range,
-        // from DashboardService.GetHistoryTrend.
+        // Pass/Fail bars, bucketed per day, week or month depending on the selected range.
         private void LoadHistoryChart()
         {
             var trend = _dashboardService.GetHistoryTrend(_selectedRange);
@@ -198,7 +190,7 @@ namespace AssemblyLineTester.Views.Pages
             chartHistory.Series.Add(sFail);
         }
 
-        // Doughnut Chart (Fail By Reason): grouped by test type, from DashboardService.GetFailReasonBreakdown.
+        // Doughnut of failures grouped by test type.
         private void LoadFailReasonChart()
         {
             var reasons = _dashboardService.GetFailReasonBreakdown(_selectedRange);
@@ -253,7 +245,7 @@ namespace AssemblyLineTester.Views.Pages
             chartFailReason.Series.Add(sReason);
         }
 
-        // DataGridView (Recent Test History): latest reports, from DashboardService.GetRecentTests.
+        // Latest eight reports, newest first.
         private void LoadRecentGrid()
         {
             var recent = _dashboardService.GetRecentTests(8);
@@ -295,10 +287,9 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // "ACTIVE PROGRAM" card: prioritizes an in-progress report, falls back to the latest one.
+        // Fills the ACTIVE PROGRAM card from the config currently marked active.
         private void LoadActiveProgram()
         {
-            var currentUser = SessionManager.CurrentUser?.Username ?? "Unknown";
             var activeConfig = _configService.GetActiveConfig();
 
             lblProgDetails.Text = activeConfig is null
@@ -361,19 +352,17 @@ namespace AssemblyLineTester.Views.Pages
             _uiRefreshTimer = new() { Interval = 1000 };
             _uiRefreshTimer.Tick += (s, e) => UpdateMaintenanceLabels();
             _uiRefreshTimer.Start();
-            UpdateMaintenanceLabels(); // Initial update on load
+            UpdateMaintenanceLabels();
         }
 
+        // Ticks the operating-time and maintenance countdown labels once a second.
         private void UpdateMaintenanceLabels()
         {
-            // Update Operating Time today (hh:mm:ss)
             TimeSpan timeToday = TimeSpan.FromSeconds(MaintenanceService.ActiveOperatingSeconds);
             lblOpTimeVal.Text = timeToday.ToString(@"hh\:mm\:ss");
 
-            // Update Next Maintenance remaining days
             lblMaintVal.Text = $"{MaintenanceService.RemainingDays} Days";
 
-            // Update Next Maintenance remaining hours (ticking down in real-time)
             double currentRemainingHours = Math.Max(0, MaintenanceService.RemainingHours - (MaintenanceService.ActiveOperatingSeconds / 3600.0));
             lblMaintSub.Text = $"Or {currentRemainingHours:N1} Hours";
         }
@@ -431,7 +420,6 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnChangeProg, 8, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             btnChangeProg.Click += BtnChangeProg_Click;
 
-            // Subscribe to status changes globally
             InstrumentService.OnConnectionStatusChanged += InstrumentService_OnConnectionStatusChanged;
             UpdateTesterStatusUI(InstrumentService.IsOnline);
         }
@@ -453,7 +441,7 @@ namespace AssemblyLineTester.Views.Pages
             if (isOnline)
             {
                 lblTesterStatus.Text = "ONLINE";
-                lblTesterStatus.ForeColor = Color.FromArgb(76, 175, 80); // Green
+                lblTesterStatus.ForeColor = Color.FromArgb(76, 175, 80);
                 lblTesterSub.Text = "All tester modules are operational";
             }
             else
@@ -476,7 +464,6 @@ namespace AssemblyLineTester.Views.Pages
                         var configService = new TestConfigService();
                         configService.SetActiveConfig(selectedConfig.ConfigName);
 
-                        // Reload display
                         LoadActiveProgram();
 
                         MessageBox.Show($"Successfully changed active program to: {selectedConfig.ConfigName}", "Change Program", MessageBoxButtons.OK, MessageBoxIcon.Information);

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -23,6 +23,7 @@ namespace AssemblyLineTester.Views.Modals
         private readonly string _overallResult;
         private readonly DateTime _testTime;
         private readonly int? _existingReportId;
+        private readonly string _notes;
 
         public SaveTestReportModalForm(
             string productModel,
@@ -36,7 +37,8 @@ namespace AssemblyLineTester.Views.Modals
             string overallResult,
             DateTime testTime,
             List<LiveTestDetailRowDto> rows,
-            int? existingReportId = null)
+            int? existingReportId = null,
+            string? notes = null)
         {
             _productModel = productModel;
             _ecnNumber = ecnNumber;
@@ -48,6 +50,7 @@ namespace AssemblyLineTester.Views.Modals
             _testTime = testTime;
             _rows = rows;
             _existingReportId = existingReportId;
+            _notes = notes?.Trim() ?? string.Empty;
 
             InitializeComponent();
 
@@ -66,13 +69,16 @@ namespace AssemblyLineTester.Views.Modals
             txtGenOpVal.BackColor = Color.FromArgb(241, 245, 249); 
             txtGenOpVal.TabStop = false;
 
+            // Read-only here; notes are typed on the Test Execution page.
+            txtGenNotesVal.Text = _notes.Length == 0 ? "-" : _notes;
+
             if (string.Equals(_overallResult, "PASS", StringComparison.OrdinalIgnoreCase))
             {
-                lblGenResVal.ForeColor = Color.FromArgb(4, 120, 87); // Green
+                lblGenResVal.ForeColor = Color.FromArgb(4, 120, 87);
             }
             else
             {
-                lblGenResVal.ForeColor = Color.FromArgb(220, 38, 38); // Red
+                lblGenResVal.ForeColor = Color.FromArgb(220, 38, 38);
             }
 
             btnCancel.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
@@ -115,13 +121,13 @@ namespace AssemblyLineTester.Views.Modals
             {
                 if (_existingReportId.HasValue)
                 {
-                    _reportService.UpdateSerialNumber(_existingReportId.Value, finalSn);
+                    _reportService.ConfirmDraft(_existingReportId.Value, finalSn, _notes);
                 }
                 else
                 {
                     _reportService.SaveLiveTestReport(
                         _productModel, _productType, _area, _ecnNumber, _revision, _partNumber,
-                        finalSn, finalOp, _testTime, _rows, _overallResult);
+                        finalSn, finalOp, _testTime, _rows, _overallResult, notes: _notes);
                 }
 
                 this.DialogResult = DialogResult.OK;
@@ -143,8 +149,8 @@ namespace AssemblyLineTester.Views.Modals
         private void UpdateFooterButtonPositions()
         {
             if (pnlFooter == null || btnConfirmSave == null || btnCancel == null) return;
-            int marginRight = 45; // match pnlFooter right padding
-            int gap = 19;         // gap between Cancel and Confirm Save
+            int marginRight = 45;
+            int gap = 19;
             int btnY = (pnlFooter.Height - btnConfirmSave.Height) / 2;
 
             btnConfirmSave.Location = new Point(pnlFooter.Width - btnConfirmSave.Width - marginRight, btnY);
@@ -169,17 +175,12 @@ namespace AssemblyLineTester.Views.Modals
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
 
         private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
+            NativeMethods.DragWindow(Handle);
             }
         }
     }

@@ -33,7 +33,6 @@ namespace AssemblyLineTester.Models
         public string PartNumber { get; set; } = string.Empty;
         public string SerialNumber { get; set; } = string.Empty;
         public string Operator { get; set; } = string.Empty;
-        public string TesterModel { get; set; } = string.Empty;
 
         public DateTime TestDateTime { get; set; }
         public DateTime? EndDateTime { get; set; }
@@ -45,9 +44,10 @@ namespace AssemblyLineTester.Models
         public TestStatus Status { get; set; } = TestStatus.Completed;
         public TestResult? OverallResult { get; set; }
 
+        public string Notes { get; set; } = string.Empty;
+
         public bool IsDraft { get; set; } = true;
 
-        public string? FilePath { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public List<TestDetail> Details { get; set; } = new();

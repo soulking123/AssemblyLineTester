@@ -1,8 +1,8 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace AssemblyLineTester.Models
 {
-    // Detail: one row per net/pin pair to be tested within a TestConfiguration.
+    // One row per net or pin pair inside a TestConfiguration.
     public class TestConfigNet
     {
         [Key]
@@ -10,17 +10,17 @@ namespace AssemblyLineTester.Models
 
         public int ConfigId { get; set; }                                   
         public TestConfiguration? Configuration { get; set; }
-        public string NetId { get; set; } = string.Empty;                   // Elec-Control-001
+        public string NetId { get; set; } = string.Empty;
 
         public int SequenceNo { get; set; }                                 // 1,2,3,4,
 
-        public string HarnessGroup { get; set; } = string.Empty;            // Low Voltage Supply
+        public string HarnessGroup { get; set; } = string.Empty;
 
         public int FromAddress { get; set; }                                // 0,1,2,3,4  
-        public string FromLabel { get; set; } = string.Empty;               // X1=01
+        public string FromLabel { get; set; } = string.Empty;
 
         public int ToAddress { get; set; }                                  // 0,1,2,3,4
-        public string ToLabel { get; set; } = string.Empty;                 // Y1=01
+        public string ToLabel { get; set; } = string.Empty;
         public int TestTypeId { get; set; }                                 // 
 
         public TestType? TestType { get; set; }
@@ -29,7 +29,7 @@ namespace AssemblyLineTester.Models
         
         public double? UpperLimit { get; set; }                             //10
 
-        public string MeasurementUnit { get; set; } = string.Empty;         //ohm
+        public string MeasurementUnit { get; set; } = string.Empty;
         
         public double? ExpectedValue { get; set; }                          //100
         

@@ -13,7 +13,7 @@ namespace AssemblyLineTester.Models.Dto
         public string SerialNumber { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public string? Result { get; set; }
-        public string TotalTime { get; set; } = "-"; // formatted HH:mm:ss, "-" if still running/stopped early
+        public string TotalTime { get; set; } = "-";
         public string Operator { get; set; } = string.Empty;
     }
 }

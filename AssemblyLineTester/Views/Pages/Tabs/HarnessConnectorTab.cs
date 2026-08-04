@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 
@@ -12,7 +13,6 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 {
     public partial class HarnessConnectorTab : UserControl
     {
-        private ConnectorService? _connectorService;
         private Dictionary<int, Connector> _connectorCache = new();
         private List<string> _connectorImagePaths = new();
         private int _connectorImageIndex = 0;
@@ -27,9 +27,8 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             picConnectorImage.MouseClick += PicConnectorImage_MouseClick;
         }
 
-        public void Initialize(ConnectorService connectorService)
+        public void Initialize()
         {
-            _connectorService = connectorService;
             InitializeConnectorGrid();
         }
 
@@ -73,8 +72,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         public void RefreshConnectorGrid()
         {
-            if (_connectorService == null) return;
-            _allConnectorsForHarness = _connectorService.GetAllConnectors();
+            _allConnectorsForHarness = ConnectorService.GetAllConnectors();
             txtConnectorSearch.Text = string.Empty;
             ApplyConnectorFilter();
         }
@@ -134,7 +132,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
         private void BtnAddConnector_Click(object? sender, EventArgs e)
         {
             if (!HasConnectorEditPermission()) return;
-            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService!);
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm();
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
@@ -152,7 +150,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
                 return;
             }
 
-            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(_connectorService, connector);
+            using var modal = new AssemblyLineTester.Views.Modals.ConnectorModalForm(connector);
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
@@ -174,7 +172,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
                 "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (confirm != DialogResult.Yes) return;
 
-            var (success, error) = _connectorService!.DeleteConnector(connectorId);
+            var (success, error) = ConnectorService.DeleteConnector(connectorId);
             if (!success)
             {
                 MessageBox.Show(error ?? "Failed to delete connector.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -212,7 +210,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         private void PopulateConnectorInfo(DataGridViewRow? row)
         {
-            tblConnectorInfo.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(tblConnectorInfo.Controls);
             if (row == null) return;
 
             var data = new (string Key, string Val)[]
@@ -254,8 +252,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         private void SetConnectorGalleryImages(Connector? connector)
         {
-            if (_connectorService == null) return;
-            _connectorImagePaths = _connectorService.GetConnectorImagePaths(connector);
+            _connectorImagePaths = ConnectorService.GetConnectorImagePaths(connector);
             _connectorImageIndex = 0;
             LoadGalleryImage(picConnectorImage, _connectorImagePaths, _connectorImageIndex);
         }

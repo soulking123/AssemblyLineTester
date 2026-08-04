@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -10,6 +10,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using static AssemblyLineTester.Models.SystemLog;
+using AssemblyLineTester.Helpers;
 
 
 
@@ -24,6 +25,9 @@ namespace AssemblyLineTester.Views.Pages
         private int _totalPages = 1;
         private int _totalCount = 0;
 
+        // AutoScroll never moves what a Paint handler drew, so the rows live in this child panel.
+        private readonly Panel _moduleScroll = new() { AutoScroll = true, BackColor = Color.White, Dock = DockStyle.Fill };
+
         public SystemLog()
         {
             InitializeComponent();
@@ -33,7 +37,17 @@ namespace AssemblyLineTester.Views.Pages
                 chartSummary.PostPaint += ChartSummary_PostPaint;
             }
             pnlLevelStats.Paint += PnlLevelStats_Paint;
-            pnlModuleStats.Paint += PnlModuleStats_Paint;
+
+            // Docking applies last-control-first, so the Fill panel must sit at the front.
+            lblModuleStatsTitle.Dock = DockStyle.Top;
+            lblModuleStatsTitle.Padding = new Padding(32, 28, 0, 12);
+            pnlModuleStats.Controls.Add(_moduleScroll);
+            _moduleScroll.BringToFront();
+            _moduleScroll.Paint += PnlModuleStats_Paint;
+
+            // A Panel does not repaint on resize, so the rows would keep their first geometry.
+            pnlLevelStats.Resize += (s, ev) => pnlLevelStats.Invalidate();
+            _moduleScroll.Resize += (s, ev) => _moduleScroll.Invalidate();
 
             gridData.CellPainting += gridData_CellPainting;
             InitializeGridColumns();
@@ -57,8 +71,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        /// Offers the two things anyone asks this page for: the visible log as a spreadsheet, and a
-        /// bundle to send when something has gone wrong.
+        // Two exports: the filtered log as a spreadsheet, or a diagnostics bundle to send.
         private void BtnExport_Click(object? sender, EventArgs e)
         {
             if (!SessionManager.HasPermission("Action.SystemLog.Clear"))
@@ -143,7 +156,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // RESETS FILTER CONTROLS TO DEFAULT (LAST 30 DAYS, NO FILTER).
+        // Puts the filter controls back to the last 30 days with nothing else set.
         private void ResetFilters()
         {
             dtpEnd.Value = DateTime.Now;
@@ -155,7 +168,7 @@ namespace AssemblyLineTester.Views.Pages
             txtKeyword.Text = string.Empty;
         }
 
-        // BUILDS A SystemLogFilter FROM THE CURRENT STATE OF THE FILTER CONTROLS.
+        // Reads the filter controls into a SystemLogFilter.
         private SystemLogFilter BuildFilterFromControls()
         {
             var filter = new SystemLogFilter
@@ -187,7 +200,7 @@ namespace AssemblyLineTester.Views.Pages
             return filter;
         }
 
-        // LOADS REAL LOG DATA AND SUMMARY FROM SystemLogService, THEN REFRESHES ALL VISUALS.
+        // Reloads the page of entries and the summary, then repaints everything.
         public void LoadLogData()
         {
             SuspendLayout();
@@ -199,7 +212,7 @@ namespace AssemblyLineTester.Views.Pages
                 _totalCount = paged.TotalCount;
                 _totalPages = Math.Max(1, paged.TotalPages);
 
-                // clamp if filter shrank the result set below the current page
+                // The filter may have shrunk the result below the current page.
                 if (_currentPage > _totalPages)
                 {
                     _currentPage = _totalPages;
@@ -224,16 +237,40 @@ namespace AssemblyLineTester.Views.Pages
                         string.IsNullOrEmpty(log.MachineName) ? "-" : log.MachineName);
                 }
 
+                lblTableTitle.Text = $"LOG LIST (Total: {_totalCount:N0})";
+
                 UpdateLegendLabels();
                 UpdatePaginationUI(_totalCount, _totalPages);
+                UpdateLogDetail();
             }
             finally
             {
                 ResumeLayout(true);
                 LoadSummaryChart();
                 pnlLevelStats.Invalidate();
-                pnlModuleStats.Invalidate();
+                _moduleScroll.Invalidate();
             }
+        }
+
+        // Mirrors the selected row; the grid already carries every field this panel shows.
+        private void UpdateLogDetail()
+        {
+            var row = gridData.CurrentRow;
+
+            if (row is null || row.Index < 0 || gridData.Rows.Count == 0)
+            {
+                lblLogDetailContent.Text = _totalCount == 0
+                    ? "No entries match the current filter."
+                    : "Select a row in the list above to see its detail.";
+                return;
+            }
+
+            var cells = row.Cells;
+            lblLogDetailContent.Text =
+                $"Date & Time: {cells["Date"].Value}   |   Log Level: {cells["Level"].Value}   |   " +
+                $"Module: {cells["Module"].Value}   |   User: {cells["User"].Value}   |   " +
+                $"Machine: {cells["Machine"].Value}   |   Action: {cells["Action"].Value}   |   " +
+                $"Description: {cells["Description"].Value}";
         }
 
         private void UpdateLegendLabels()
@@ -247,7 +284,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private static float Ratio(int count, int total) => total == 0 ? 0f : (float)count / total;
 
-        // ONE-TIME GRID COLUMN/STYLE SETUP. ROW DATA IS POPULATED SEPARATELY IN LoadLogData().
+        // Columns and styling only; rows come from LoadLogData.
         private void InitializeGridColumns()
         {
             gridData.Columns.Clear();
@@ -275,10 +312,9 @@ namespace AssemblyLineTester.Views.Pages
             SetColumnWidth(gridData, "Machine", 130);
 
 
-
         }
 
-        // BUILDS THE "Showing X to Y of Z" TEXT AND THE DYNAMIC PAGE-NUMBER BUTTONS.
+        // Builds the "Showing X to Y of Z" line and the page buttons.
         private void UpdatePaginationUI(int totalFiltered, int totalPages)
         {
             if (totalFiltered == 0)
@@ -293,7 +329,7 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             if (flpPages is null) return;
-            flpPages.Controls.Clear();
+            UIStyleHelper.ClearAndDispose(flpPages.Controls);
 
             float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
             float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
@@ -430,6 +466,18 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRefresh, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
+
+            gridData.SelectionChanged += (s, e) => UpdateLogDetail();
+
+            // A long Description would otherwise run off the panel: cap the width so the label wraps.
+            pnlLogDetail.Resize += (s, e) => CapLogDetailWidth();
+            CapLogDetailWidth();
+        }
+
+        private void CapLogDetailWidth()
+        {
+            int available = pnlLogDetail.ClientSize.Width - lblLogDetailContent.Left - 20;
+            lblLogDetailContent.MaximumSize = new Size(Math.Max(200, available), 0);
         }
 
         private void LoadSummaryChart()
@@ -499,11 +547,13 @@ namespace AssemblyLineTester.Views.Pages
             if (sender is not Control card) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            int startY = 75;
-            int rowStep = 65;
+            // Measured from the title and the card height, never fixed pixels.
+            int startY = lblLevelStatsTitle.Bottom + 6;
             int leftMargin = 36;
             int w = card.Width - (leftMargin * 2);
             if (w <= 0) return;
+
+            int rowStep = Math.Max(38, (card.Height - startY - 20) / 3);
 
             DrawStatRow(e.Graphics, leftMargin, startY, w, "INFO",
                 $"{_summary.InfoCount:N0} ({FormatPct(_summary.InfoCount, _summary.Total)})",
@@ -542,27 +592,33 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PnlModuleStats_Paint(object? sender, PaintEventArgs e)
         {
-            if (sender is not Control card) return;
+            if (sender is not Panel card) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            int startY = 65;
+            var modules = _summary.CountByModule
+                .OrderByDescending(m => m.Value)
+                .ToList();
+            if (modules.Count == 0)
+            {
+                card.AutoScrollMinSize = Size.Empty;
+                return;
+            }
+
+            // Row pitch comes from the font, so a long module list scrolls instead of squeezing.
+            int rowStep = AssemblyLineTester.Helpers.UIStyleHelper.Font9Bold.Height + 26;
+            card.AutoScrollMinSize = new Size(0, modules.Count * rowStep);
+
+            // Without this the rows stay put while the scrollbar moves.
+            e.Graphics.TranslateTransform(card.AutoScrollPosition.X, card.AutoScrollPosition.Y);
+
             int leftMargin = 36;
-            int w = card.Width - (leftMargin * 2);
+            int w = card.ClientSize.Width - (leftMargin * 2) - SystemInformation.VerticalScrollBarWidth;
             if (w <= 0) return;
 
-            var topModules = _summary.CountByModule
-                .OrderByDescending(m => m.Value)
-                .Take(6)
-                .ToList();
-            if (topModules.Count == 0) return;
-
-            int availableHeight = card.Height - startY - 20;
-            int rowStep = Math.Max(38, availableHeight / topModules.Count);
-
-            for (int i = 0; i < topModules.Count; i++)
+            for (int i = 0; i < modules.Count; i++)
             {
-                var (module, count) = (topModules[i].Key, topModules[i].Value);
-                DrawStatRow(e.Graphics, leftMargin, startY + (i * rowStep), w, module,
+                var (module, count) = (modules[i].Key, modules[i].Value);
+                DrawStatRow(e.Graphics, leftMargin, i * rowStep, w, module,
                     $"{count:N0} ({FormatPct(count, _summary.Total)})",
                     Ratio(count, _summary.Total), Color.FromArgb(99, 102, 241));
             }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -136,7 +136,7 @@ namespace AssemblyLineTester.Views.Modals
                 int idx = gridConfigs.Rows.Add(
                     c.ConfigName,
                     c.ProductModel,
-                    c.CreatedAt.ToString("g"),
+                    AppTime.ToLocal(c.CreatedAt).ToString("g"),
                     c.UpdatedAt?.ToString("g") ?? "-",
                     c.IsActive ? "Yes" : "No",
                     c.Nets?.Count ?? 0
@@ -228,17 +228,12 @@ namespace AssemblyLineTester.Views.Modals
             this.Region = new Region(path);
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
 
         private void TitleBar_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                ReleaseCapture();
-                SendMessage(Handle, 0xA1, 0x2, 0);
+            NativeMethods.DragWindow(Handle);
             }
         }
     }

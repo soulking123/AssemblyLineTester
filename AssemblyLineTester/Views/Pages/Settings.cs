@@ -1,11 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using AssemblyLineTester.Helpers;
+using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -16,9 +20,14 @@ namespace AssemblyLineTester.Views.Pages
         private SettingsUsersAndRolesPage? _usersAndRolesPage;
         private SettingBackupRestore? _backupRestorePage;
 
-        /// <summary>
-        /// Programmatically switches directly to the Users & Roles tab.
-        /// </summary>
+        private readonly List<(int Id, CheckBox Box)> _typeBoxes = new();
+        private readonly List<(int Id, CheckBox Box)> _learnBoxes = new();
+        private readonly List<(int Id, CheckBox Box)> _resultBoxes = new();
+        private Button? _btnEditTicks;
+        private Button? _btnSaveTicks;
+        private Button? _btnCancelTicks;
+
+        // Jumps straight to the Users & Roles tab.
         public void OpenUsersAndRolesTab()
         {
             if (lblTabUsers != null)
@@ -41,6 +50,23 @@ namespace AssemblyLineTester.Views.Pages
             if (cmbAutoLogout.Items.Count > 0) cmbAutoLogout.SelectedIndex = 0;
             if (cmbRefresh.Items.Count > 0) cmbRefresh.SelectedIndex = 0;
             SetupEvents();
+            LoadFileSettings();
+        }
+
+        // These came from the mockup. Only the folders exist in code, so they are shown read-only
+        // rather than pretending an edit here changes anything.
+        private void LoadFileSettings()
+        {
+            txtDataPath.Text = Data.AppDbContext.DataFolder;
+            txtReportPath.Text = AppInfo.LogDirectory;
+
+            lblReportStorage.Text = "Log Storage Path";
+
+            foreach (TextBox box in new[] { txtDataPath, txtReportPath })
+            {
+                box.ReadOnly = true;
+                box.BackColor = Color.FromArgb(241, 245, 249);
+            }
         }
 
         private void EnableDoubleBuffering()
@@ -76,10 +102,46 @@ namespace AssemblyLineTester.Views.Pages
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
                 AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+                LayoutTickLists();
                 isLoaded = true;
             }
         }
 
+        // Boxes added in code never went through the form's autoscale pass, so their margins stay
+        // at the unscaled designer value while the ones placed in the designer have shrunk. Copying
+        // the margin from a designer box is what makes all three lists share one row pitch.
+        private void MatchTickMarginsToDesigner()
+        {
+            foreach (var (_, box) in _typeBoxes.Concat(_learnBoxes))
+            {
+                box.Margin = chkResNetId.Margin;
+                box.Font = chkResNetId.Font;
+            }
+        }
+
+        // Keeps the designer's column height and widens the panel to the columns that height
+        // produces. The old MaximumSize width cut the last column off mid-label, which is why the
+        // third Test Type column rendered as checkboxes with no text.
+        private void LayoutTickLists()
+        {
+            MatchTickMarginsToDesigner();
+
+            foreach (var flow in new[] { flpTestTypeAvail, flpLearnConn, flpTestResultCol })
+            {
+                flow.PerformLayout();
+
+                var boxes = flow.Controls.Cast<Control>().ToList();
+                if (boxes.Count == 0 || flow.MaximumSize.Height <= 0) continue;
+
+                int widest = boxes.Max(b => b.Width + b.Margin.Horizontal);
+                int pitch = boxes.Max(b => b.Height + b.Margin.Vertical);
+
+                int perColumn = Math.Max(1, flow.MaximumSize.Height / Math.Max(1, pitch));
+                int columns = (int)Math.Ceiling(boxes.Count / (double)perColumn);
+
+                flow.MaximumSize = new Size(columns * widest, flow.MaximumSize.Height);
+            }
+        }
 
 
         private void SetupInteractiveTabs()
@@ -111,7 +173,7 @@ namespace AssemblyLineTester.Views.Pages
                 flpTabs.ResumeLayout(true);
             }
 
-            // Create page container to isolate Z-order and eliminate multiple controls occupying the same TableLayoutPanel cell
+            // Own container, so tab pages never share a TableLayoutPanel cell.
             pnlPageContainer = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -126,7 +188,6 @@ namespace AssemblyLineTester.Views.Pages
             tblContent.Dock = DockStyle.Fill;
             pnlPageContainer.Controls.Add(tblContent);
 
-            // Build Under Construction panel container
             tblUcContainer = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -209,20 +270,17 @@ namespace AssemblyLineTester.Views.Pages
                 Label[] tabLabels = [lblTabGen, lblTabTest, lblTabHw, lblTabUsers, lblTabNotif, lblTabBackup, lblTabSysInfo];
                 activeTabLabel = clickedLabel;
 
-                // Reset visual states of all tabs
                 foreach (Label lbl in tabLabels)
                 {
                     lbl.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Regular;
                     lbl.ForeColor = Color.FromArgb(100, 116, 139);
                 }
 
-                // Highlight active tab
                 clickedLabel.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font105Bold;
                 clickedLabel.ForeColor = Color.FromArgb(30, 41, 59);
 
                 flpTabs.Invalidate(true);
 
-                // Switch content view cleanly inside pnlPageContainer
                 if (clickedLabel == lblTabGen)
                 {
                     tblContent.Visible = true;
@@ -325,6 +383,128 @@ namespace AssemblyLineTester.Views.Pages
             txtDefCapacitorTol.KeyPress += NumericTextBox_KeyPress;
 
             PopulateTestTypes();
+            PopulateLearnConnections();
+            PopulateTestResultColumns();
+            BuildTickListEditButtons();
+            SetTickListsEditable(false);
+        }
+
+        // Gives the card a real header row - title left, actions right, one baseline - instead of
+        // dropping the buttons into a designer cell whose 50px absolute height clipped them.
+        private void BuildTickListEditButtons()
+        {
+            _btnEditTicks = BuildCardButton("✏️  Edit", Color.FromArgb(250, 204, 21), Color.FromArgb(30, 41, 59));
+            _btnSaveTicks = BuildCardButton("💾  Save", Color.FromArgb(250, 204, 21), Color.FromArgb(30, 41, 59));
+            _btnCancelTicks = BuildCardButton("Cancel", Color.FromArgb(241, 245, 249), Color.FromArgb(71, 85, 105));
+
+            _btnEditTicks.Click += (s, e) => SetTickListsEditable(true);
+            _btnCancelTicks.Click += (s, e) => { ReloadTickLists(); SetTickListsEditable(false); };
+            _btnSaveTicks.Click += BtnSaveTicks_Click;
+
+            var actions = new FlowLayoutPanel
+            {
+                Anchor = AnchorStyles.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                BackColor = Color.Transparent,
+                Margin = new Padding(0)
+            };
+            actions.Controls.Add(_btnCancelTicks);
+            actions.Controls.Add(_btnSaveTicks);
+            actions.Controls.Add(_btnEditTicks);
+
+            var header = new TableLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                ColumnCount = 2,
+                RowCount = 1,
+                BackColor = Color.Transparent,
+                Padding = new Padding(15, 14, 24, 10),
+                Margin = new Padding(0)
+            };
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            header.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+            // The title moves out of the grid so it shares a row with the actions; its old row is
+            // collapsed rather than left behind as a 50px gap.
+            tblTestCard.Controls.Remove(lblTestTitle);
+            lblTestTitle.Dock = DockStyle.None;
+            lblTestTitle.Anchor = AnchorStyles.Left;
+            lblTestTitle.AutoSize = true;
+            lblTestTitle.Margin = new Padding(0);
+            tblTestCard.RowStyles[0] = new RowStyle(SizeType.Absolute, 0F);
+
+            header.Controls.Add(lblTestTitle, 0, 0);
+            header.Controls.Add(actions, 1, 0);
+
+            cardTestSettings.Controls.Add(header);
+        }
+
+        // AutoSize rather than a fixed width: ScaleExplicitFonts grows the caption at Load and a
+        // hardcoded button would clip it, which is what hid these buttons in the first place.
+        private static Button BuildCardButton(string text, Color back, Color fore)
+        {
+            var button = new Button
+            {
+                Text = text,
+                Font = UIStyleHelper.Font9Bold,
+                ForeColor = fore,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Padding = new Padding(16, 7, 16, 7),
+                Margin = new Padding(8, 0, 0, 0)
+            };
+            UIStyleHelper.SetupButtonRoundedEdges(button, 8, back, ControlPaint.Light(back, 0.3f), ControlPaint.Dark(back, 0.05f), Color.Transparent);
+            return button;
+        }
+
+        private void SetTickListsEditable(bool editable)
+        {
+            foreach (var (_, box) in _typeBoxes.Concat(_learnBoxes).Concat(_resultBoxes))
+            {
+                box.Enabled = editable;
+            }
+
+            if (_btnEditTicks is not null) _btnEditTicks.Visible = !editable;
+            if (_btnSaveTicks is not null) _btnSaveTicks.Visible = editable;
+            if (_btnCancelTicks is not null) _btnCancelTicks.Visible = editable;
+        }
+
+        private void ReloadTickLists()
+        {
+            PopulateTestTypes();
+            PopulateLearnConnections();
+            PopulateTestResultColumns();
+        }
+
+        // Writes all three tick lists, then pushes them into the pages already built from them.
+        private void BtnSaveTicks_Click(object? sender, EventArgs e)
+        {
+            bool allSaved = true;
+
+            foreach (var (id, box) in _typeBoxes) allSaved &= TestSettingService.SetTestTypeChecked(id, box.Checked);
+            foreach (var (id, box) in _learnBoxes) allSaved &= TestSettingService.SetLearnConnectionChecked(id, box.Checked);
+            foreach (var (id, box) in _resultBoxes) allSaved &= TestSettingService.SetTestResultChecked(id, box.Checked);
+
+            if (!allSaved)
+            {
+                MessageBox.Show("Some settings could not be saved. Check the log and try again.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            Application.OpenForms.OfType<MainForm>().FirstOrDefault()?.ApplyTestSettings();
+            SetTickListsEditable(false);
+
+            MessageBox.Show("Default test settings saved.", "Default Test Settings",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void NumericTextBox_KeyPress(object? sender, KeyPressEventArgs e)
@@ -343,29 +523,69 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulateTestTypes()
         {
-            // Placeholder: Loop from TestType Column in database/enum
-            string[] dummyTestTypes = { "Standard Electrical", "Automated", "Quick Diagnostics", "Burn-in", "High Voltage" };
-            
-            // Populate ComboBox
             cmbDefTestType.Items.Clear();
-            cmbDefTestType.Items.AddRange(dummyTestTypes);
+            foreach (var type in TestSettingService.GetTestTypes())
+            {
+                cmbDefTestType.Items.Add(type.DisplayName);
+            }
             if (cmbDefTestType.Items.Count > 0) cmbDefTestType.SelectedIndex = 0;
 
-            // Populate FlowLayoutPanel CheckBoxes
-            flpTestTypeAvail.Controls.Clear();
-            foreach (string tt in dummyTestTypes)
+            UIStyleHelper.ClearAndDispose(flpTestTypeAvail.Controls);
+            _typeBoxes.Clear();
+            foreach (var check in TestSettingService.GetTestTypeChecks())
             {
-                CheckBox cb = new CheckBox
-                {
-                    Text = tt,
-                    AutoSize = true,
-                    Font = new Font("Segoe UI", 9.5F),
-                    ForeColor = Color.FromArgb(30, 41, 59),
-                    Margin = new Padding(0, 5, 0, 5),
-                    UseVisualStyleBackColor = true
-                };
-                flpTestTypeAvail.Controls.Add(cb);
+                var box = BuildCheck(check.DisplayName, check.IsChecked);
+                flpTestTypeAvail.Controls.Add(box);
+                _typeBoxes.Add((check.Id, box));
             }
+        }
+
+        private void PopulateLearnConnections()
+        {
+            UIStyleHelper.ClearAndDispose(flpLearnConn.Controls);
+            _learnBoxes.Clear();
+            foreach (var conn in TestSettingService.GetLearnConnections())
+            {
+                var box = BuildCheck(conn.DisplayName, conn.IsChecked);
+                flpLearnConn.Controls.Add(box);
+                _learnBoxes.Add((conn.Id, box));
+            }
+        }
+
+        // The twelve boxes stay in the designer for their layout; only their state comes from the table.
+        private void PopulateTestResultColumns()
+        {
+            var checks = TestSettingService.GetTestResultChecks();
+            _resultBoxes.Clear();
+
+            foreach (Control control in flpTestResultCol.Controls)
+            {
+                if (control is not CheckBox box) continue;
+
+                var check = checks.FirstOrDefault(c => c.TestResultName == box.Text);
+                if (check == null)
+                {
+                    box.Enabled = false;
+                    continue;
+                }
+
+                box.Checked = check.IsChecked;
+                _resultBoxes.Add((check.Id, box));
+            }
+        }
+
+        private static CheckBox BuildCheck(string text, bool isChecked)
+        {
+            return new CheckBox
+            {
+                Text = text,
+                Checked = isChecked,
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9.5F),
+                ForeColor = Color.FromArgb(30, 41, 59),
+                Margin = new Padding(0, 5, 0, 5),
+                UseVisualStyleBackColor = true
+            };
         }
     }
 }

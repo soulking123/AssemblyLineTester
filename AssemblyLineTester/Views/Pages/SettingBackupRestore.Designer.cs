@@ -30,6 +30,8 @@ namespace AssemblyLineTester.Views
             btnBrowseRecap = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnRecap = new AssemblyLineTester.Views.Controls.RoundedButton();
             lblRollbackTo = new Label();
+            lblDatabaseLocation = new Label();
+            txtDatabasePath = new TextBox();
             txtRollbackPath = new TextBox();
             flpRollbackBtns = new FlowLayoutPanel();
             btnBrowseRollback = new AssemblyLineTester.Views.Controls.RoundedButton();
@@ -92,13 +94,17 @@ namespace AssemblyLineTester.Views
             tblBackupRestore.Controls.Add(lblRollbackTo, 0, 5);
             tblBackupRestore.Controls.Add(txtRollbackPath, 0, 6);
             tblBackupRestore.Controls.Add(flpRollbackBtns, 4, 6);
+            tblBackupRestore.Controls.Add(lblDatabaseLocation, 0, 7);
+            tblBackupRestore.Controls.Add(txtDatabasePath, 0, 8);
             tblBackupRestore.Dock = DockStyle.Top;
             tblBackupRestore.Location = new Point(0, 0);
             tblBackupRestore.Margin = new Padding(6, 7, 6, 7);
             tblBackupRestore.Name = "tblBackupRestore";
             tblBackupRestore.Padding = new Padding(15, 0, 15, 15);
-            tblBackupRestore.RowCount = 7;
+            tblBackupRestore.RowCount = 9;
             tblBackupRestore.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+            tblBackupRestore.RowStyles.Add(new RowStyle());
+            tblBackupRestore.RowStyles.Add(new RowStyle());
             tblBackupRestore.RowStyles.Add(new RowStyle());
             tblBackupRestore.RowStyles.Add(new RowStyle());
             tblBackupRestore.RowStyles.Add(new RowStyle());
@@ -263,6 +269,29 @@ namespace AssemblyLineTester.Views
             txtRollbackPath.ReadOnly = true;
             txtRollbackPath.Size = new Size(1101, 41);
             txtRollbackPath.TabIndex = 8;
+            //
+            // lblDatabaseLocation
+            //
+            lblDatabaseLocation.AutoSize = true;
+            tblBackupRestore.SetColumnSpan(lblDatabaseLocation, 6);
+            lblDatabaseLocation.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblDatabaseLocation.ForeColor = Color.FromArgb(51, 65, 85);
+            lblDatabaseLocation.Margin = new Padding(0, 10, 0, 4);
+            lblDatabaseLocation.Name = "lblDatabaseLocation";
+            lblDatabaseLocation.Size = new Size(200, 32);
+            lblDatabaseLocation.TabIndex = 9;
+            lblDatabaseLocation.Text = "Database Location:";
+            //
+            // txtDatabasePath
+            //
+            txtDatabasePath.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            tblBackupRestore.SetColumnSpan(txtDatabasePath, 6);
+            txtDatabasePath.Font = new Font("Segoe UI", 9.5F);
+            txtDatabasePath.Margin = new Padding(0, 0, 15, 14);
+            txtDatabasePath.Name = "txtDatabasePath";
+            txtDatabasePath.ReadOnly = true;
+            txtDatabasePath.Size = new Size(1101, 41);
+            txtDatabasePath.TabIndex = 10;
             // 
             // flpRollbackBtns
             // 
@@ -351,5 +380,7 @@ namespace AssemblyLineTester.Views
         private TextBox txtManualRecapPath;
         private Label lblRollbackTo;
         private TextBox txtRollbackPath;
+        private Label lblDatabaseLocation;
+        private TextBox txtDatabasePath;
     }
 }

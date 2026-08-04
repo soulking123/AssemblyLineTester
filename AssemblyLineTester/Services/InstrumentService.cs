@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using CtaDotNet.Services;
 using CtaDotNet.Models;
@@ -51,10 +51,9 @@ namespace AssemblyLineTester.Services
                 if (_connectionId != -1)
                 {
                     short idToDisconnect = _connectionId;
-                    _connectionId = -1; // Reset memory state instantly
+                    _connectionId = -1;
 
-                    // Run native DLL disconnect in a fire-and-forget background task
-                    // so it doesn't block the calling monitoring loop thread
+                    // Fire-and-forget so a dead socket never blocks the monitoring loop.
                     System.Threading.Tasks.Task.Run(() =>
                     {
                         lock (_lockObj)
@@ -65,7 +64,6 @@ namespace AssemblyLineTester.Services
                             }
                             catch
                             {
-                                // Ignore exceptions on dead socket disconnects
                             }
                         }
                     });
@@ -110,7 +108,6 @@ namespace AssemblyLineTester.Services
         {
             if (_connectionId == -1)
             {
-                // Return offline immediately without attempting to connect
                 return false;
             }
             try
@@ -121,14 +118,12 @@ namespace AssemblyLineTester.Services
                     {
                         try
                         {
-                            // 1. Verify CTA Server is ready to receive commands
                             var readyRes = _service.ServerReady(_connectionId);
                             if (readyRes == null || readyRes.DllCallResult != CtaCommandResultCode.Success || !readyRes.FunctionResult)
                             {
                                 return false;
                             }
 
-                            // 2. Verify hardware connectivity by querying server information
                             var infoRes = _service.GetServerInformation(_connectionId);
                             return infoRes != null && infoRes.DllCallResult == CtaCommandResultCode.Success && !string.IsNullOrWhiteSpace(infoRes.Result);
                         }
@@ -153,7 +148,7 @@ namespace AssemblyLineTester.Services
                 }
                 else
                 {
-                    // Timeout! USB probably unplugged
+                    // Timed out - USB most likely unplugged.
                     Disconnect();
                     return false;
                 }
@@ -218,7 +213,6 @@ namespace AssemblyLineTester.Services
                 }
                 catch
                 {
-                    // Suppress exceptions
                 }
                 return 0.0;
             }
@@ -288,9 +282,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Retrieves system information from the connected CTA Server.
-        /// </summary>
+        // Reads system information from the connected CTA Server.
         public CtaStringResult GetServerInformation()
         {
             if (!IsConnected) return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
@@ -307,9 +299,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Triggers a learn operation on the connected CTA instrument for the specified test name.
-        /// </summary>
+        // Starts a learn operation on the instrument for the given test name.
         public CtaCommandResultCode LearnConnection(string testName = "")
         {
             if (!IsConnected) return (CtaCommandResultCode)(-1);
@@ -326,6 +316,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
+        // Starts a complex learn for the given test name and component.
         public CtaCommandResultCode LearnComplexConnection(string testName, byte component)
         {
             if (!IsConnected) return (CtaCommandResultCode)(-1);
@@ -342,9 +333,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Retrieves the learned connection or test program text from the connected CTA Server.
-        /// </summary>
+        // Reads back the learned connection or program text.
         public CtaStringResult GetLearnedConnection(string testName = "")
         {
             if (!IsConnected) return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
@@ -377,9 +366,7 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Sends an abort command to the connected CTA instrument to cancel active operations.
-        /// </summary>
+        // Cancels whatever the instrument is currently running.
         public CtaCommandResultCode Abort()
         {
             if (!IsConnected) return (CtaCommandResultCode)(-1);

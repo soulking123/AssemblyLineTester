@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,74 +8,16 @@ using AssemblyLineTester.Models;
 
 namespace AssemblyLineTester.Services
 {
-    /// <summary>
-    /// Provides database operations for role permissions and RBAC configuration.
-    /// </summary>
+    // Reads and writes role permissions.
     public class RolePermissionService
     {
-        /// <summary>
-        /// Retrieves all roles available in the system.
-        /// </summary>
-        public List<Role> GetAllRoles()
-        {
-            using var db = new AppDbContext();
-            return db.Roles.OrderBy(r => r.Id).ToList();
-        }
-
-        /// <summary>
-        /// Retrieves all roles available in the system asynchronously.
-        /// </summary>
         public async Task<List<Role>> GetAllRolesAsync()
         {
             using var db = new AppDbContext();
             return await db.Roles.OrderBy(r => r.Id).ToListAsync();
         }
 
-        /// <summary>
-        /// Retrieves all assigned and available permissions for a given role ID.
-        /// If any new permission definitions are missing in the database for the role, they are auto-created.
-        /// </summary>
-        public List<RolePermission> GetPermissionsByRoleId(int roleId)
-        {
-            using var db = new AppDbContext();
-            var existing = db.RolePermissions
-                .Where(rp => rp.RoleId == roleId)
-                .OrderBy(rp => rp.Id)
-                .ToList();
-
-            // Ensure all standard keys exist for this role
-            var allDefs = GetStandardPermissionDefinitions();
-            bool addedNew = false;
-
-            foreach (var (key, group, desc) in allDefs)
-            {
-                if (!existing.Any(e => e.PermissionKey == key))
-                {
-                    var newRp = new RolePermission
-                    {
-                        RoleId = roleId,
-                        PermissionKey = key,
-                        PermissionGroup = group,
-                        Description = desc,
-                        IsGranted = (roleId == 1) // Administrator gets true by default
-                    };
-                    db.RolePermissions.Add(newRp);
-                    existing.Add(newRp);
-                    addedNew = true;
-                }
-            }
-
-            if (addedNew)
-            {
-                db.SaveChanges();
-            }
-
-            return existing;
-        }
-
-        /// <summary>
-        /// Retrieves all assigned and available permissions for a given role ID asynchronously.
-        /// </summary>
+        // Returns the role's permissions, creating any standard key it is missing.
         public async Task<List<RolePermission>> GetPermissionsByRoleIdAsync(int roleId)
         {
             using var db = new AppDbContext();
@@ -84,7 +26,6 @@ namespace AssemblyLineTester.Services
                 .OrderBy(rp => rp.Id)
                 .ToListAsync();
 
-            // Ensure all standard keys exist for this role
             var allDefs = GetStandardPermissionDefinitions();
             bool addedNew = false;
 
@@ -98,7 +39,8 @@ namespace AssemblyLineTester.Services
                         PermissionKey = key,
                         PermissionGroup = group,
                         Description = desc,
-                        IsGranted = (roleId == 1) // Administrator gets true by default
+                        // Same rule the seed uses, so a key added after release lands correctly.
+                        IsGranted = GetDefaultGrantState(roleId, key)
                     };
                     db.RolePermissions.Add(newRp);
                     existing.Add(newRp);
@@ -114,12 +56,10 @@ namespace AssemblyLineTester.Services
             return existing;
         }
 
-        /// <summary>
-        /// Updates the permission toggle states for a specific role.
-        /// </summary>
+        // Applies the toggle states for one role, refreshing the session if it is the active role.
         public void UpdatePermissions(int roleId, Dictionary<string, bool> updatedToggles)
         {
-            // Safeguard: Administrator role cannot have Settings or User Management access revoked
+            // Administrator can never lose Settings or User Management, or nobody can undo it.
             if (roleId == 1)
             {
                 if (updatedToggles.ContainsKey("Page.Settings")) updatedToggles["Page.Settings"] = true;
@@ -135,8 +75,7 @@ namespace AssemblyLineTester.Services
             {
                 if (updatedToggles.TryGetValue(rp.PermissionKey, out bool granted) && rp.IsGranted != granted)
                 {
-                    // Only the keys that actually moved go in the entry. Listing all forty every
-                    // time would bury the one that mattered.
+                    // Only the keys that moved, or the entry buries the one that mattered.
                     changed.Add($"{rp.PermissionKey}={(granted ? "on" : "off")}");
                     rp.IsGranted = granted;
                 }
@@ -154,7 +93,6 @@ namespace AssemblyLineTester.Services
                     $"Permissions for role '{roleName}' changed: {string.Join(", ", changed)}");
             }
 
-            // If updating the active user's role, refresh the SessionManager cache immediately
             if (SessionManager.CurrentUser != null && SessionManager.CurrentUser.RoleId == roleId)
             {
                 SessionManager.RefreshPermissions();
@@ -162,14 +100,11 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        /// <summary>
-        /// Resets all permissions for a specific role back to initial system defaults.
-        /// </summary>
+        // Puts every permission for one role back to its shipped default.
         public void ResetRoleToDefaults(int roleId)
         {
             using var db = new AppDbContext();
             var existing = db.RolePermissions.Where(rp => rp.RoleId == roleId).ToList();
-            var defs = GetStandardPermissionDefinitions();
 
             foreach (var rp in existing)
             {
@@ -193,16 +128,17 @@ namespace AssemblyLineTester.Services
             }
         }
 
+        // Delete rights stay narrow on purpose: Administrator, Engineer and Supervisor only.
         public static bool GetDefaultGrantState(int roleId, string key)
         {
-            if (roleId == 1) return true; // Administrator gets all
+            if (roleId == 1) return true;
             if (roleId == 2) // Operator
             {
                 return key is "Page.Dashboard" or "Page.TestExecution" or "Page.TestHistory" or "Action.TestExecution.Run";
             }
             if (roleId == 3) // Engineer
             {
-                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.TestConfig.Edit" or "Action.Instruments.Calibrate" or "Action.Reports.Export";
+                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.TestConfig.Edit" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Reports.Edit" or "Action.TestHistory.Delete";
             }
             if (roleId == 4) // Technician
             {
@@ -214,7 +150,7 @@ namespace AssemblyLineTester.Services
             }
             if (roleId == 6) // Supervisor
             {
-                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Action.TestExecution.Run" or "Action.Reports.Export";
+                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Action.TestExecution.Run" or "Action.Reports.Export" or "Action.Reports.Edit" or "Action.TestHistory.Delete";
             }
             return false;
         }
@@ -237,7 +173,11 @@ namespace AssemblyLineTester.Services
                 ("Action.UserManagement.Edit", "System & Logs", "Add, Edit, and Manage System User Accounts"),
                 ("Action.Reports.Export", "System & Logs", "Export and Print Test Reports & Analytics"),
                 ("Action.SystemLog.Clear", "System & Logs", "Clear and Purge System Activity Logs"),
-                ("Action.Database.Backup", "System & Logs", "Create and Restore Database Backups")
+                ("Action.Database.Backup", "System & Logs", "Create and Restore Database Backups"),
+
+                // Appended, never slotted mid-list: seed ids follow position and would renumber.
+                ("Action.Reports.Edit", "System & Logs", "Amend and Delete Saved Test Reports"),
+                ("Action.TestHistory.Delete", "System & Logs", "Delete Test History Records")
             };
         }
     }

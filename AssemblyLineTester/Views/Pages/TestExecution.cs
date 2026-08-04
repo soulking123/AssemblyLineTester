@@ -1,4 +1,4 @@
-using AssemblyLineTester.Data;
+﻿using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
+using AssemblyLineTester.Helpers;
 using static AssemblyLineTester.Models.SystemLog;
 
 using Timer = System.Windows.Forms.Timer;
@@ -27,6 +29,7 @@ namespace AssemblyLineTester.Views.Pages
     {
         private readonly InstrumentService _instrument = new();
         private List<LiveTestDetailRowDto> _loadedRows = new();
+        private List<string> _resultColumns = new();
         private readonly TestConfigService _configService = new TestConfigService();
         private string _customTestText = string.Empty;
         private double _continuityResistance;
@@ -78,40 +81,37 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-
         private void SetupTimer()
         {
-            // Set timer to trigger every 1 second (1000 ms)
             _elapsedTimer.Interval = 1000;
             _elapsedTimer.Tick += ElapsedTimer_Tick;
         }
+
         private void ElapsedTimer_Tick(object? sender, EventArgs e)
         {
-            // Update Elapsed Time display every 1 second (HH:mm:ss format)
             lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
         private void OnTestFinishedSuccessfully()
         {
-            // Update Status
             lblStatusRunning.Text = "Finished";
             lblStatusRunning.ForeColor = Color.Green;
-            // Stop Stopwatch & Timer
             StopTestTiming();
         }
+
+        // Stops the clock and writes the final end time and elapsed total to the labels.
         private void StopTestTiming()
         {
-            // 1. Stop Timer & Stopwatch
             _testStopwatch.Stop();
             _elapsedTimer.Stop();
-            // 2. Record & Display End Time
+
+            // Shown on screen, never stored, so local time is the right choice here.
             _endTime = DateTime.Now;
             lblEndTimeVal.Text = _endTime.ToString("dd MMM yyyy hh:mm:ss tt");
-            // 3. Ensure final exact elapsed time is displayed
             lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
-        // Populates the filter dropdowns at the top of the page (Product Model, Type, Area, etc).
+        // Fills the Product Model, Type, Area, Part Number and ECN dropdowns.
         private void SetupFilterDropdowns()
         {
             cmbProductModel.Items.Clear();
@@ -136,29 +136,58 @@ namespace AssemblyLineTester.Views.Pages
             cmbEcnNo.SelectedIndex = 0;
         }
 
-        // Sets up grid columns and styling only. No rows are added here -
-        // the grid stays empty until a config file is loaded via Load Program.
+        // Rebuilds the live grid header after the result-column ticks were saved in Settings.
+        public void ReloadResultColumns() => SetupGridLiveDetails();
+
+        // Columns and styling only; rows arrive when a program is loaded.
         private void SetupGridLiveDetails()
         {
             gridLiveDetails.Columns.Clear();
+            _resultColumns = TestSettingService.GetEnabledResultColumns();
 
             gridLiveDetails.Columns.Add("StepNo", "#");
-            gridLiveDetails.Columns.Add("TestPoint", "Test Point");
-            gridLiveDetails.Columns.Add("TestType", "Test Type");
-            gridLiveDetails.Columns.Add("Measured", "Measured Value");
+            foreach (string column in _resultColumns)
+            {
+                gridLiveDetails.Columns.Add(column, column);
+                gridLiveDetails.Columns[column]!.MinimumWidth = 110;
+            }
             gridLiveDetails.Columns.Add("Status", "Status");
 
             gridLiveDetails.AllowUserToResizeColumns = true;
             gridLiveDetails.Columns["StepNo"]!.Width = 55;
-            gridLiveDetails.Columns["TestPoint"]!.Width = 240;
-            gridLiveDetails.Columns["TestType"]!.Width = 180;
-            gridLiveDetails.Columns["Measured"]!.Width = 240;
             gridLiveDetails.Columns["Status"]!.MinimumWidth = 140;
             gridLiveDetails.Columns["Status"]!.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
             AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridLiveDetails);
             gridLiveDetails.RowTemplate.Height = 36;
             gridLiveDetails.ColumnHeadersHeight = 40;
+        }
+
+        // The instrument reports measurements but knows nothing about labels, limits or tolerance;
+        // those live on the loaded program, so each row is filled from its net.
+        //
+        // ponytail: matched by position, which assumes the instrument returns measurements in program
+        // order. Swap for a pin-address match if that assumption ever breaks.
+        private void ApplyConfigNets(TestConfiguration config)
+        {
+            var nets = config.Nets?.OrderBy(n => n.SequenceNo).ToList();
+            if (nets == null || nets.Count != _loadedRows.Count) return;
+
+            for (int i = 0; i < _loadedRows.Count; i++)
+            {
+                var row = _loadedRows[i];
+                var net = nets[i];
+
+                row.FromLabel = net.FromLabel;
+                row.ToLabel = net.ToLabel;
+                row.LowerLimit = net.LowerLimit;
+                row.Tolerance = net.Tolerance;
+                row.Unit = net.MeasurementUnit;
+                if (net.UpperLimit.HasValue) row.UpperLimit = net.UpperLimit;
+                if (net.ExpectedValue.HasValue) row.ExpectedValue = net.ExpectedValue.Value.ToString(CultureInfo.InvariantCulture);
+                if (string.IsNullOrWhiteSpace(row.NetId)) row.NetId = net.NetId;
+                if (string.IsNullOrWhiteSpace(row.HarnessGroup)) row.HarnessGroup = net.HarnessGroup;
+            }
         }
 
         private void BtnLoadProgram_Click(object? sender, EventArgs e)
@@ -230,23 +259,32 @@ namespace AssemblyLineTester.Views.Pages
             btnLoadProgram.Enabled = false;
             btnStartTest.Enabled = false;
             btnSaveReport.Enabled = false;
+            txtNotes.Clear();
 
             try
             {
+                // GetActiveConfig returns null when no program is loaded, and ExecuteTest would
+                // have dereferenced it. Refused here, with the reason, rather than crashed.
                 TestConfiguration? activeConfig = _configService.GetActiveConfig();
-                if (activeConfig != null)
+                if (activeConfig is null)
                 {
-                    lblStatusRunning.Text = "Running";
-                    lblStatusRunning.ForeColor = Color.Yellow;
-                    _startTime = DateTime.Now;
-                    lblStartTimeVal.Text = _startTime.ToString("dd MMM yyyy hh:mm:ss tt");
-                    lblEndTimeVal.Text = "-";
-
-                    _testStopwatch.Reset();
-                    _testStopwatch.Start();
-                    _elapsedTimer.Start();
-                    await Task.Run(() => ExecuteTest(activeConfig), token);
+                    MessageBox.Show(this,
+                        "No test program is active. Load a program before starting a test.",
+                        "No Active Program", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
+
+                lblStatusRunning.Text = "Running";
+                lblStatusRunning.ForeColor = Color.Yellow;
+                _startTime = DateTime.Now;
+                lblStartTimeVal.Text = _startTime.ToString("dd MMM yyyy hh:mm:ss tt");
+                lblEndTimeVal.Text = "-";
+
+                _testStopwatch.Reset();
+                _testStopwatch.Start();
+                _elapsedTimer.Start();
+                await Task.Run(() => ExecuteTest(activeConfig), token);
+
                 if (token.IsCancellationRequested) return;
 
 
@@ -259,7 +297,7 @@ namespace AssemblyLineTester.Views.Pages
                     var reportService = new TestReportService();
                     _currentReportId = reportService.SaveDraftLiveTestReport(
                         cmbProductModel.Text, cmbProductType.Text, cmbArea.Text, cmbEcnNo.Text, "1.0",
-                        cmbPartNumber.Text, DateTime.Now, _loadedRows, overallResult);
+                        cmbPartNumber.Text, AppTime.UtcNow, _loadedRows, overallResult);
 
                     //ShowSummary(_loadedRows, overallResult);
 
@@ -283,7 +321,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch (OperationCanceledException)
             {
-                // Task was canceled via btnAbort
+                // Aborted from btnStopTest, nothing left to report.
             }
             finally 
             {
@@ -427,10 +465,13 @@ namespace AssemblyLineTester.Views.Pages
                                     ToPoint = $"{measurement.Point2}",
                                     TestType = rowTestType,
                                     MeasuredValue = Math.Round(measurement.Value1, 3),
+                                    UpperLimit = _continuityResistance,
                                     Status = status
                                 });
                             }
                         }
+
+                        ApplyConfigNets(config);
 
                         logService.Log(LogSeverity.Info, "Instrument", "Get Test Masurement Success.",
                         $"Success getting test measurement with test result", SessionManager.CurrentUser?.Username ?? "Unknown");
@@ -579,7 +620,6 @@ namespace AssemblyLineTester.Views.Pages
         {
             _testCts?.Cancel();
 
-            // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
             string errorText = "";
             try
@@ -639,13 +679,14 @@ namespace AssemblyLineTester.Views.Pages
                 cmbProductType.Text,
                 "1.0",
                 cmbArea.Text,
-                "OP-402",
+                SessionManager.CurrentUser?.FullName ?? "Unknown",
                 cmbPartNumber.Text,
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
-                DateTime.Now,
+                AppTime.UtcNow,
                 _loadedRows ?? new List<LiveTestDetailRowDto>(),
-                _currentReportId
+                _currentReportId,
+                txtNotes.Text
             );
 
             if (modal.ShowDialog(this) == DialogResult.OK)
@@ -653,6 +694,7 @@ namespace AssemblyLineTester.Views.Pages
                 lblStatusRunning.Text = "Idle";
                 lblStatusRunning.ForeColor = Color.Gray;
                 listBoxTestSummary.Items.Clear();
+                txtNotes.Clear();
 
                 MessageBox.Show("Test Report saved successfully to the database!\nIt can now be viewed in Reports and Test History.", "Report Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -667,12 +709,11 @@ namespace AssemblyLineTester.Views.Pages
 
             foreach (var row in rows)
             {
-                int idx = gridLiveDetails.Rows.Add(
-                    row.StepNo.ToString(),
-                    row.TestPoint,
-                    row.TestType,
-                    row.MeasuredValue?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "",
-                    row.Status.ToString().ToUpperInvariant());
+                var values = new List<string> { row.StepNo.ToString() };
+                values.AddRange(_resultColumns.Select(column => ResultCellValue(row, column)));
+                values.Add(row.Status.ToString().ToUpperInvariant());
+
+                int idx = gridLiveDetails.Rows.Add(values.ToArray());
 
                 ApplyStatusStyle(gridLiveDetails.Rows[idx], row.Status);
 
@@ -680,6 +721,27 @@ namespace AssemblyLineTester.Views.Pages
             }
             gridLiveDetails.Refresh();
         }
+
+        // Maps a configurable column name onto the live row it is rendered from.
+        private static string ResultCellValue(LiveTestDetailRowDto row, string column) => column switch
+        {
+            "Net-ID" => row.NetId,
+            "Harness Group" => row.HarnessGroup,
+            "From" => row.FromPoint,
+            "Net From Label" => row.FromLabel,
+            "To" => row.ToPoint,
+            "Net To Label" => row.ToLabel,
+            "Test Type" => row.TestType,
+            "Lower Limit" => FormatNumber(row.LowerLimit),
+            "Upper Limit" => FormatNumber(row.UpperLimit),
+            "Expected Value" => row.ExpectedValue,
+            "Tolerance" => row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
+            "Measurement" => FormatNumber(row.MeasuredValue, "F3"),
+            _ => ""
+        };
+
+        private static string FormatNumber(double? value, string format = "0.##") =>
+            value?.ToString(format, CultureInfo.InvariantCulture) ?? "";
       
         private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)
         {
@@ -694,7 +756,7 @@ namespace AssemblyLineTester.Views.Pages
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(254, 240, 138);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(133, 77, 14);
                     break;
-                default: // Pending, Fail
+                default:
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(241, 245, 249);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(100, 116, 139);
                     break;
@@ -756,8 +818,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (harness != null)
                 {
-                    var connectorService = new AssemblyLineTester.Services.ConnectorService();
-                    var connectors = connectorService.GetConnectorsByHarness(harness.ProductHarnessId);
+                    var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);
                     if (connectors != null && connectors.Count > 0)
                     {
                         var firstConn = System.Linq.Enumerable.FirstOrDefault(connectors, c => !string.IsNullOrEmpty(c.ImagePath));
@@ -857,8 +918,7 @@ namespace AssemblyLineTester.Views.Pages
                 var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModel || h.Name == activeConfig.ConfigName);
                 if (harness != null)
                 {
-                    var connectorService = new AssemblyLineTester.Services.ConnectorService();
-                    var connectors = connectorService.GetConnectorsByHarness(harness.ProductHarnessId);
+                    var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);
                     if (connectors != null)
                     {
                         foreach(var conn in connectors)

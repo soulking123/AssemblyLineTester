@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<RootNamespace>LicenseGenerator</RootNamespace>
+	</PropertyGroup>
+
+	<!--
+	Release-owner-only tool: generates the signing keypair and issues license.lic files.
+	Deliberately not referenced by AssemblyLineTester.csproj and not part of the publish
+	profile or installer — the private key must never ship inside the product.
+	-->
+
+</Project>

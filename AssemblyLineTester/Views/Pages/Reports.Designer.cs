@@ -1,4 +1,4 @@
-namespace AssemblyLineTester.Views.Pages
+﻿namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -84,13 +84,13 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterGrid1 = new TableLayoutPanel();
             lblFilterModel = new Label();
             lblFilterType = new Label();
-            cmbModel = new ComboBox();
-            cmbType = new ComboBox();
+            txtModel = new TextBox();
+            txtType = new TextBox();
             tblFilterGrid2 = new TableLayoutPanel();
             lblFilterArea = new Label();
             lblFilterOperator = new Label();
-            cmbArea = new ComboBox();
-            cmbOperator = new ComboBox();
+            txtArea = new TextBox();
+            txtOperator = new TextBox();
             tblFilterGrid3 = new TableLayoutPanel();
             lblFilterResult = new Label();
             lblFilterPart = new Label();
@@ -120,10 +120,9 @@ namespace AssemblyLineTester.Views.Pages
             gridReports = new DataGridView();
             colNo = new DataGridViewTextBoxColumn();
             colReportName = new DataGridViewTextBoxColumn();
-            colReportType = new DataGridViewTextBoxColumn();
             colDateGenerated = new DataGridViewTextBoxColumn();
             colGeneratedBy = new DataGridViewTextBoxColumn();
-            colSize = new DataGridViewTextBoxColumn();
+            colResult = new DataGridViewTextBoxColumn();
             colAction = new DataGridViewTextBoxColumn();
             tblPagination = new TableLayoutPanel();
             lblPageInfo = new Label();
@@ -547,8 +546,8 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterGrid1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblFilterGrid1.Controls.Add(lblFilterModel, 0, 0);
             tblFilterGrid1.Controls.Add(lblFilterType, 1, 0);
-            tblFilterGrid1.Controls.Add(cmbModel, 0, 1);
-            tblFilterGrid1.Controls.Add(cmbType, 1, 1);
+            tblFilterGrid1.Controls.Add(txtModel, 0, 1);
+            tblFilterGrid1.Controls.Add(txtType, 1, 1);
             tblFilterGrid1.Dock = DockStyle.Fill;
             tblFilterGrid1.Location = new Point(0, 113);
             tblFilterGrid1.Margin = new Padding(0, 0, 0, 5);
@@ -583,31 +582,27 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterType.TabIndex = 1;
             lblFilterType.Text = "Product Type";
             // 
-            // cmbModel
-            // 
-            cmbModel.Dock = DockStyle.Fill;
-            cmbModel.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbModel.Font = new Font("Segoe UI", 9F);
-            cmbModel.FormattingEnabled = true;
-            cmbModel.Items.AddRange(new object[] { "All Models", "Model X-100", "Model Y-200", "Model Z-300" });
-            cmbModel.Location = new Point(0, 14);
-            cmbModel.Margin = new Padding(0, 0, 3, 0);
-            cmbModel.Name = "cmbModel";
-            cmbModel.Size = new Size(248, 23);
-            cmbModel.TabIndex = 2;
-            // 
-            // cmbType
-            // 
-            cmbType.Dock = DockStyle.Fill;
-            cmbType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbType.Font = new Font("Segoe UI", 9F);
-            cmbType.FormattingEnabled = true;
-            cmbType.Items.AddRange(new object[] { "All Types", "Standard", "Premium", "Industrial" });
-            cmbType.Location = new Point(254, 14);
-            cmbType.Margin = new Padding(3, 0, 0, 0);
-            cmbType.Name = "cmbType";
-            cmbType.Size = new Size(249, 23);
-            cmbType.TabIndex = 3;
+            // txtModel
+            //
+            txtModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtModel.Font = new Font("Segoe UI", 9F);
+            txtModel.Location = new Point(0, 14);
+            txtModel.Margin = new Padding(0, 0, 3, 0);
+            txtModel.Name = "txtModel";
+            txtModel.PlaceholderText = "Search by Product Model...";
+            txtModel.Size = new Size(248, 23);
+            txtModel.TabIndex = 2;
+            //
+            // txtType
+            //
+            txtType.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtType.Font = new Font("Segoe UI", 9F);
+            txtType.Location = new Point(254, 14);
+            txtType.Margin = new Padding(3, 0, 0, 0);
+            txtType.Name = "txtType";
+            txtType.PlaceholderText = "Search by Product Type...";
+            txtType.Size = new Size(249, 23);
+            txtType.TabIndex = 3;
             // 
             // tblFilterGrid2
             // 
@@ -618,8 +613,8 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterGrid2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblFilterGrid2.Controls.Add(lblFilterArea, 0, 0);
             tblFilterGrid2.Controls.Add(lblFilterOperator, 1, 0);
-            tblFilterGrid2.Controls.Add(cmbArea, 0, 1);
-            tblFilterGrid2.Controls.Add(cmbOperator, 1, 1);
+            tblFilterGrid2.Controls.Add(txtArea, 0, 1);
+            tblFilterGrid2.Controls.Add(txtOperator, 1, 1);
             tblFilterGrid2.Dock = DockStyle.Fill;
             tblFilterGrid2.Location = new Point(0, 155);
             tblFilterGrid2.Margin = new Padding(0, 0, 0, 7);
@@ -654,31 +649,27 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterOperator.TabIndex = 1;
             lblFilterOperator.Text = "Operator";
             // 
-            // cmbArea
-            // 
-            cmbArea.Dock = DockStyle.Fill;
-            cmbArea.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbArea.Font = new Font("Segoe UI", 9F);
-            cmbArea.FormattingEnabled = true;
-            cmbArea.Items.AddRange(new object[] { "All Areas", "Assembly Bay A", "Inspection Line 1", "Packaging Station" });
-            cmbArea.Location = new Point(0, 14);
-            cmbArea.Margin = new Padding(0, 0, 3, 0);
-            cmbArea.Name = "cmbArea";
-            cmbArea.Size = new Size(248, 23);
-            cmbArea.TabIndex = 2;
-            // 
-            // cmbOperator
-            // 
-            cmbOperator.Dock = DockStyle.Fill;
-            cmbOperator.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbOperator.Font = new Font("Segoe UI", 9F);
-            cmbOperator.FormattingEnabled = true;
-            cmbOperator.Items.AddRange(new object[] { "All Operators", "John Doe (OP-101)", "Jane Smith (OP-102)", "Robert Johnson (OP-103)" });
-            cmbOperator.Location = new Point(254, 14);
-            cmbOperator.Margin = new Padding(3, 0, 0, 0);
-            cmbOperator.Name = "cmbOperator";
-            cmbOperator.Size = new Size(249, 23);
-            cmbOperator.TabIndex = 3;
+            // txtArea
+            //
+            txtArea.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtArea.Font = new Font("Segoe UI", 9F);
+            txtArea.Location = new Point(0, 14);
+            txtArea.Margin = new Padding(0, 0, 3, 0);
+            txtArea.Name = "txtArea";
+            txtArea.PlaceholderText = "Search by Area...";
+            txtArea.Size = new Size(248, 23);
+            txtArea.TabIndex = 2;
+            //
+            // txtOperator
+            //
+            txtOperator.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtOperator.Font = new Font("Segoe UI", 9F);
+            txtOperator.Location = new Point(254, 14);
+            txtOperator.Margin = new Padding(3, 0, 0, 0);
+            txtOperator.Name = "txtOperator";
+            txtOperator.PlaceholderText = "Search by Operator...";
+            txtOperator.Size = new Size(249, 23);
+            txtOperator.TabIndex = 3;
             // 
             // tblFilterGrid3
             // 
@@ -1016,7 +1007,7 @@ namespace AssemblyLineTester.Views.Pages
             tblCenter.RowCount = 3;
             tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
             tblCenter.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 31F));
+            tblCenter.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tblCenter.Size = new Size(940, 457);
             tblCenter.TabIndex = 0;
             // 
@@ -1051,7 +1042,7 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             gridReports.ColumnHeadersHeight = 48;
             gridReports.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridReports.Columns.AddRange(new DataGridViewColumn[] { colNo, colReportName, colReportType, colDateGenerated, colGeneratedBy, colSize, colAction });
+            gridReports.Columns.AddRange(new DataGridViewColumn[] { colNo, colReportName, colDateGenerated, colGeneratedBy, colResult, colAction });
             dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle7.BackColor = Color.White;
             dataGridViewCellStyle7.Font = new Font("Segoe UI", 9F);
@@ -1094,16 +1085,6 @@ namespace AssemblyLineTester.Views.Pages
             colReportName.Name = "colReportName";
             colReportName.ReadOnly = true;
             // 
-            // colReportType
-            // 
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            colReportType.DefaultCellStyle = dataGridViewCellStyle3;
-            colReportType.FillWeight = 70F;
-            colReportType.HeaderText = "Report Type";
-            colReportType.MinimumWidth = 90;
-            colReportType.Name = "colReportType";
-            colReportType.ReadOnly = true;
-            // 
             // colDateGenerated
             // 
             dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -1122,15 +1103,15 @@ namespace AssemblyLineTester.Views.Pages
             colGeneratedBy.Name = "colGeneratedBy";
             colGeneratedBy.ReadOnly = true;
             // 
-            // colSize
+            // colResult
             // 
-            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleRight;
-            colSize.DefaultCellStyle = dataGridViewCellStyle5;
-            colSize.FillWeight = 45F;
-            colSize.HeaderText = "Size";
-            colSize.MinimumWidth = 60;
-            colSize.Name = "colSize";
-            colSize.ReadOnly = true;
+            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            colResult.DefaultCellStyle = dataGridViewCellStyle5;
+            colResult.FillWeight = 60F;
+            colResult.HeaderText = "Result";
+            colResult.MinimumWidth = 80;
+            colResult.Name = "colResult";
+            colResult.ReadOnly = true;
             // 
             // colAction
             // 
@@ -1144,6 +1125,8 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblPagination
             // 
+            tblPagination.AutoSize = true;
+            tblPagination.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tblPagination.ColumnCount = 2;
             tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
@@ -1154,7 +1137,7 @@ namespace AssemblyLineTester.Views.Pages
             tblPagination.Margin = new Padding(0);
             tblPagination.Name = "tblPagination";
             tblPagination.RowCount = 1;
-            tblPagination.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblPagination.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tblPagination.Size = new Size(940, 31);
             tblPagination.TabIndex = 2;
             // 
@@ -1169,6 +1152,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPageInfo.TabIndex = 0;
             lblPageInfo.Text = "Showing 1 to 10 of 18 entries";
             lblPageInfo.TextAlign = ContentAlignment.MiddleLeft;
+            lblPageInfo.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // flpPageButtons
             // 
@@ -1179,12 +1163,15 @@ namespace AssemblyLineTester.Views.Pages
             flpPageButtons.Controls.Add(btnPage1);
             flpPageButtons.Controls.Add(btnPagePrev);
             flpPageButtons.Controls.Add(btnPageFirst);
+            flpPageButtons.AutoSize = true;
+            flpPageButtons.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             flpPageButtons.Dock = DockStyle.Fill;
             flpPageButtons.FlowDirection = FlowDirection.RightToLeft;
             flpPageButtons.Location = new Point(470, 2);
             flpPageButtons.Margin = new Padding(0, 2, 0, 0);
             flpPageButtons.Name = "flpPageButtons";
             flpPageButtons.Size = new Size(470, 29);
+            flpPageButtons.WrapContents = false;
             flpPageButtons.TabIndex = 1;
             // 
             // btnPageLast
@@ -2568,9 +2555,9 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.Label lblFilterType;
 
-        private System.Windows.Forms.ComboBox cmbModel;
+        private System.Windows.Forms.TextBox txtModel;
 
-        private System.Windows.Forms.ComboBox cmbType;
+        private System.Windows.Forms.TextBox txtType;
 
         private System.Windows.Forms.TableLayoutPanel tblFilterGrid2;
 
@@ -2578,9 +2565,9 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.Label lblFilterOperator;
 
-        private System.Windows.Forms.ComboBox cmbArea;
+        private System.Windows.Forms.TextBox txtArea;
 
-        private System.Windows.Forms.ComboBox cmbOperator;
+        private System.Windows.Forms.TextBox txtOperator;
 
         private System.Windows.Forms.TableLayoutPanel tblFilterGrid3;
 
@@ -2644,13 +2631,12 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colReportName;
 
-        private System.Windows.Forms.DataGridViewTextBoxColumn colReportType;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colDateGenerated;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colGeneratedBy;
 
-        private System.Windows.Forms.DataGridViewTextBoxColumn colSize;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colResult;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colAction;
 
