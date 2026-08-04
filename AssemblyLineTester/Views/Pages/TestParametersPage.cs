@@ -1,4 +1,4 @@
-﻿
+
 using AssemblyLineTester.Services;
 using FontAwesome.Sharp;
 using System;
@@ -1566,7 +1566,7 @@ namespace AssemblyLineTester.Views.Pages
                     LowerLimit = lower,
                     UpperLimit = upper,
                     Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
+                    MeasurementUnit = "",
                     Color = row.Cells["colColor"].Value?.ToString() ?? "",
                     Gauge = row.Cells["colGauge"].Value?.ToString() ?? ""
                 });
@@ -1707,6 +1707,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
+            InstrumentService.StopMonitoring();
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
@@ -1717,8 +1718,6 @@ namespace AssemblyLineTester.Views.Pages
             btnStartAll.Enabled = false;
             btnStartSelected.Enabled = false;
             btnAbort.Enabled = true;
-
-
             try
             {
                 //bool isConnected = _instrument.Connect();
@@ -1728,24 +1727,26 @@ namespace AssemblyLineTester.Views.Pages
                 //    return;
                 //}
 
-                var learnResult = await Task.Run(() => _instrument.LearnConnection(), token);
+                //  WIRE = 0
+                //  RESISTORS = 1
+                //  CAPACITORS = 2  
+                //  DIODES = 4
+                //  TWISTED PAIRS = 8
+                //
+                //
+                //
+                //
+                byte testLearnValue = 3;
+
+                var learnResult = testLearnValue == 0
+                    ? await Task.Run(() => _instrument.LearnConnection(), token)
+                    : await Task.Run(() => _instrument.LearnComplexConnection("", testLearnValue), token);
+
                 if (token.IsCancellationRequested) return;
 
                 if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                 {
                     string errorMessage = "No Error";
-
-                    // Fast loop: check 4 times, wait 300ms each, to beat the race condition 
-                    // but not so long that the buffer clears itself!
-                    for (int i = 0; i < 4; i++)
-                    {
-                        await Task.Delay(300, token);
-                        var lastErrorObj = _instrument.GetLastError();
-                        errorMessage = lastErrorObj?.Result;
-
-                        if (!string.IsNullOrWhiteSpace(errorMessage) && errorMessage != "No Error")
-                            break; // Caught it!
-                    }
 
                     // Fallback: If the API completely refuses to give the error, force a generic message
                     if (string.IsNullOrWhiteSpace(errorMessage) || errorMessage == "No Error")
@@ -1761,6 +1762,8 @@ namespace AssemblyLineTester.Views.Pages
                 var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);
                 if (token.IsCancellationRequested) return;
                 Debug.WriteLine(getTestResult);
+                Debug.WriteLine("result :");
+                Debug.WriteLine(getTestResult.Result);
                 if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
                 {
 
@@ -1790,6 +1793,8 @@ namespace AssemblyLineTester.Views.Pages
             }
             finally
             {
+
+                InstrumentService.StartMonitoring();
                 btnLearnConnection.Text = originalText;
                 btnLearnConnection.Enabled = true;
                 btnStartAll.Enabled = true;
@@ -2061,7 +2066,7 @@ namespace AssemblyLineTester.Views.Pages
                     TestType = null,
                     LowerLimit = 10,
                     UpperLimit = 10,
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? ""
+                    MeasurementUnit = ""
                 });
             }
 

@@ -95,7 +95,10 @@ namespace AssemblyLineTester.Views.Modals
         {
             if (_optionsFlow == null) return;
 
-            int wanted = Math.Min(_optionsFlow.PreferredSize.Height, pnlContent.Height);
+            int contentHeight = _optionsFlow.Padding.Vertical +
+                _optionsFlow.Controls.Cast<Control>().Sum(c => c.PreferredSize.Height + c.Margin.Vertical);
+
+            int wanted = Math.Max(contentHeight + 15, 120);
             ClientSize = new Size(ClientSize.Width, pnlCustomHeader.Height + wanted + pnlBottom.Height);
         }
 
