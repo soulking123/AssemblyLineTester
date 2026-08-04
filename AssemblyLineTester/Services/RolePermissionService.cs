@@ -59,6 +59,8 @@ namespace AssemblyLineTester.Services
         // Applies the toggle states for one role, refreshing the session if it is the active role.
         public void UpdatePermissions(int roleId, Dictionary<string, bool> updatedToggles)
         {
+            RequireUserManagementRights();
+
             // Administrator can never lose Settings or User Management, or nobody can undo it.
             if (roleId == 1)
             {
@@ -103,6 +105,8 @@ namespace AssemblyLineTester.Services
         // Puts every permission for one role back to its shipped default.
         public void ResetRoleToDefaults(int roleId)
         {
+            RequireUserManagementRights();
+
             using var db = new AppDbContext();
             var existing = db.RolePermissions.Where(rp => rp.RoleId == roleId).ToList();
 
@@ -128,6 +132,15 @@ namespace AssemblyLineTester.Services
             }
         }
 
+        // Rewriting a role's rights is user management, not a settings tweak: Page.Settings is not enough.
+        private static void RequireUserManagementRights()
+        {
+            if (!SessionManager.HasPermission("Action.UserManagement.Edit"))
+            {
+                throw new UnauthorizedAccessException("Access denied. You are not allowed to change role permissions.");
+            }
+        }
+
         // Delete rights stay narrow on purpose: Administrator, Engineer and Supervisor only.
         public static bool GetDefaultGrantState(int roleId, string key)
         {
@@ -138,11 +151,11 @@ namespace AssemblyLineTester.Services
             }
             if (roleId == 3) // Engineer
             {
-                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.TestConfig.Edit" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Reports.Edit" or "Action.TestHistory.Delete" or "Action.Maintenance.Reset";
+                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.TestConfig.Edit" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Reports.Edit" or "Action.TestHistory.Delete" or "Action.Maintenance.Reset" or "Action.HarnessDatabase.Edit" or "Action.Settings.Edit";
             }
             if (roleId == 4) // Technician
             {
-                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Maintenance.Reset";
+                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Maintenance.Reset" or "Action.HarnessDatabase.Edit";
             }
             if (roleId == 5) // Quality
             {
@@ -152,7 +165,10 @@ namespace AssemblyLineTester.Services
             {
                 return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Action.TestExecution.Run" or "Action.Reports.Export" or "Action.Reports.Edit" or "Action.TestHistory.Delete";
             }
-            return false;
+            // A role beyond the six shipped ones starts at the lowest useful rung rather than at
+            // nothing, so Reset Defaults cannot strip it down to an account that cannot sign in
+            // anywhere. Everything past the Dashboard is granted deliberately.
+            return key == "Page.Dashboard";
         }
 
         public static (string Key, string Group, string Description)[] GetStandardPermissionDefinitions()
@@ -178,7 +194,9 @@ namespace AssemblyLineTester.Services
                 // Appended, never slotted mid-list: seed ids follow position and would renumber.
                 ("Action.Reports.Edit", "System & Logs", "Amend and Delete Saved Test Reports"),
                 ("Action.TestHistory.Delete", "System & Logs", "Delete Test History Records"),
-                ("Action.Maintenance.Reset", "System & Logs", "Reset the Maintenance Countdown")
+                ("Action.Maintenance.Reset", "System & Logs", "Reset the Maintenance Countdown"),
+                ("Action.HarnessDatabase.Edit", "Test Operations", "Add, Edit, and Delete Harnesses and Connectors"),
+                ("Action.Settings.Edit", "System & Logs", "Change Default Test Settings")
             };
         }
     }

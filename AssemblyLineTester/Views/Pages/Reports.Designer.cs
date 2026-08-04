@@ -85,14 +85,12 @@ namespace AssemblyLineTester.Views.Pages
             lblFilters = new Label();
             tblFilterGrid1 = new TableLayoutPanel();
             lblFilterModel = new Label();
-            lblFilterType = new Label();
             cmbModel = new ComboBox();
-            cmbType = new ComboBox();
             tblFilterGrid2 = new TableLayoutPanel();
             lblFilterArea = new Label();
             lblFilterOperator = new Label();
             cmbArea = new ComboBox();
-            cmbOperator = new ComboBox();
+            txtOperator = new TextBox();
             tblFilterGrid3 = new TableLayoutPanel();
             lblFilterResult = new Label();
             lblFilterPart = new Label();
@@ -496,13 +494,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             tblFilterGrid1.AutoSize = true;
             tblFilterGrid1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tblFilterGrid1.ColumnCount = 2;
-            tblFilterGrid1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tblFilterGrid1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblFilterGrid1.ColumnCount = 1;
+            tblFilterGrid1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblFilterGrid1.Controls.Add(lblFilterModel, 0, 0);
-            tblFilterGrid1.Controls.Add(lblFilterType, 1, 0);
             tblFilterGrid1.Controls.Add(cmbModel, 0, 1);
-            tblFilterGrid1.Controls.Add(cmbType, 1, 1);
             tblFilterGrid1.Dock = DockStyle.Fill;
             tblFilterGrid1.Location = new Point(0, 74);
             tblFilterGrid1.Margin = new Padding(0, 0, 0, 5);
@@ -524,45 +519,20 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterModel.Size = new Size(83, 13);
             lblFilterModel.TabIndex = 0;
             lblFilterModel.Text = "Product Model";
-            // 
-            // lblFilterType
-            // 
-            lblFilterType.AutoSize = true;
-            lblFilterType.Font = new Font("Segoe UI", 8F);
-            lblFilterType.ForeColor = Color.FromArgb(100, 116, 139);
-            lblFilterType.Location = new Point(250, 0);
-            lblFilterType.Margin = new Padding(3, 0, 0, 1);
-            lblFilterType.Name = "lblFilterType";
-            lblFilterType.Size = new Size(72, 13);
-            lblFilterType.TabIndex = 1;
-            lblFilterType.Text = "Product Type";
-            // 
+            //
             // cmbModel
-            // 
+            //
             cmbModel.Dock = DockStyle.Fill;
             cmbModel.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbModel.Font = new Font("Segoe UI", 9F);
             cmbModel.FormattingEnabled = true;
-            cmbModel.Items.AddRange(new object[] { "All Models", "Model X-100", "Model Y-200", "Model Z-300" });
+            cmbModel.Items.AddRange(new object[] { "All Models", "6020", "6030", "6040", "6060" });
             cmbModel.Location = new Point(0, 14);
-            cmbModel.Margin = new Padding(0, 0, 3, 0);
+            cmbModel.Margin = new Padding(0, 0, 0, 0);
             cmbModel.Name = "cmbModel";
-            cmbModel.Size = new Size(244, 23);
+            cmbModel.Size = new Size(494, 23);
             cmbModel.TabIndex = 2;
-            // 
-            // cmbType
-            // 
-            cmbType.Dock = DockStyle.Fill;
-            cmbType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbType.Font = new Font("Segoe UI", 9F);
-            cmbType.FormattingEnabled = true;
-            cmbType.Items.AddRange(new object[] { "All Types", "Standard", "Premium", "Industrial" });
-            cmbType.Location = new Point(250, 14);
-            cmbType.Margin = new Padding(3, 0, 0, 0);
-            cmbType.Name = "cmbType";
-            cmbType.Size = new Size(244, 23);
-            cmbType.TabIndex = 3;
-            // 
+            //
             // tblFilterGrid2
             // 
             tblFilterGrid2.AutoSize = true;
@@ -573,7 +543,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterGrid2.Controls.Add(lblFilterArea, 0, 0);
             tblFilterGrid2.Controls.Add(lblFilterOperator, 1, 0);
             tblFilterGrid2.Controls.Add(cmbArea, 0, 1);
-            tblFilterGrid2.Controls.Add(cmbOperator, 1, 1);
+            tblFilterGrid2.Controls.Add(txtOperator, 1, 1);
             tblFilterGrid2.Dock = DockStyle.Fill;
             tblFilterGrid2.Location = new Point(0, 116);
             tblFilterGrid2.Margin = new Padding(0, 0, 0, 7);
@@ -606,34 +576,32 @@ namespace AssemblyLineTester.Views.Pages
             lblFilterOperator.Name = "lblFilterOperator";
             lblFilterOperator.Size = new Size(54, 13);
             lblFilterOperator.TabIndex = 1;
-            lblFilterOperator.Text = "Operator";
-            // 
+            lblFilterOperator.Text = "Operator/User";
+            //
             // cmbArea
-            // 
+            //
             cmbArea.Dock = DockStyle.Fill;
             cmbArea.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbArea.Font = new Font("Segoe UI", 9F);
             cmbArea.FormattingEnabled = true;
-            cmbArea.Items.AddRange(new object[] { "All Areas", "Assembly Bay A", "Inspection Line 1", "Packaging Station" });
+            cmbArea.Items.AddRange(new object[] { "All Areas", "Riser Cabinet" });
             cmbArea.Location = new Point(0, 14);
             cmbArea.Margin = new Padding(0, 0, 3, 0);
             cmbArea.Name = "cmbArea";
             cmbArea.Size = new Size(244, 23);
             cmbArea.TabIndex = 2;
-            // 
-            // cmbOperator
-            // 
-            cmbOperator.Dock = DockStyle.Fill;
-            cmbOperator.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbOperator.Font = new Font("Segoe UI", 9F);
-            cmbOperator.FormattingEnabled = true;
-            cmbOperator.Items.AddRange(new object[] { "All Operators", "John Doe (OP-101)", "Jane Smith (OP-102)", "Robert Johnson (OP-103)" });
-            cmbOperator.Location = new Point(250, 14);
-            cmbOperator.Margin = new Padding(3, 0, 0, 0);
-            cmbOperator.Name = "cmbOperator";
-            cmbOperator.Size = new Size(244, 23);
-            cmbOperator.TabIndex = 3;
-            // 
+            //
+            // txtOperator
+            //
+            txtOperator.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtOperator.Font = new Font("Segoe UI", 9F);
+            txtOperator.Location = new Point(250, 14);
+            txtOperator.Margin = new Padding(3, 0, 0, 0);
+            txtOperator.Name = "txtOperator";
+            txtOperator.PlaceholderText = "Search by Operator/User...";
+            txtOperator.Size = new Size(244, 23);
+            txtOperator.TabIndex = 3;
+            //
             // tblFilterGrid3
             // 
             tblFilterGrid3.AutoSize = true;
@@ -2559,11 +2527,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.Label lblFilterModel;
 
-        private System.Windows.Forms.Label lblFilterType;
-
         private System.Windows.Forms.ComboBox cmbModel;
-
-        private System.Windows.Forms.ComboBox cmbType;
 
         private System.Windows.Forms.TableLayoutPanel tblFilterGrid2;
 
@@ -2573,7 +2537,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.ComboBox cmbArea;
 
-        private System.Windows.Forms.ComboBox cmbOperator;
+        private System.Windows.Forms.TextBox txtOperator;
 
         private System.Windows.Forms.TableLayoutPanel tblFilterGrid3;
 

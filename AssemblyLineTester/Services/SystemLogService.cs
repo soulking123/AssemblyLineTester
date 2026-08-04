@@ -300,6 +300,17 @@ namespace AssemblyLineTester.Services
         }
 
         // Shared by GetLogs and GetSummary so the two can never disagree.
+        // Distinct module names present in the log, for the filter dropdown.
+        public List<string> GetKnownModules()
+        {
+            using var db = new AppDbContext();
+            return db.SystemLogs
+                .Select(l => l.ModuleName)
+                .Distinct()
+                .OrderBy(m => m)
+                .ToList();
+        }
+
         private static IQueryable<SystemLog> ApplyFilter(IQueryable<SystemLog> query, SystemLogFilter filter)
         {
             // Timestamps are UTC and the pickers give local dates, so the range is converted first.
@@ -325,14 +336,18 @@ namespace AssemblyLineTester.Services
                 query = query.Where(l => l.ModuleName == filter.ModuleName);
             }
 
+            // Partial match, because these two are typed by hand now: an exact comparison would
+            // return nothing for "adm" or "delete" and look like the filter is broken.
             if (!string.IsNullOrWhiteSpace(filter.UserName))
             {
-                query = query.Where(l => l.UserName == filter.UserName);
+                var user = filter.UserName.Trim();
+                query = query.Where(l => l.UserName != null && EF.Functions.Like(l.UserName, $"%{user}%"));
             }
 
             if (!string.IsNullOrWhiteSpace(filter.ActionName))
             {
-                query = query.Where(l => l.ActionName == filter.ActionName);
+                var action = filter.ActionName.Trim();
+                query = query.Where(l => EF.Functions.Like(l.ActionName, $"%{action}%"));
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Keyword))

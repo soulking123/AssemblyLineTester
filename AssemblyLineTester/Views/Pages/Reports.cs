@@ -50,7 +50,13 @@ namespace AssemblyLineTester.Views.Pages
 
             // Designer fonts sit out WinForms' AutoScale pass; without this the text keeps its
             // authored size inside containers that were already scaled, and overflows them.
-            UIStyleHelper.ScaleExplicitFonts(this, UIStyleHelper.GetHostScaleFactor(this));
+            float hostScale = UIStyleHelper.GetHostScaleFactor(this);
+            UIStyleHelper.ScaleExplicitFonts(this, hostScale);
+
+            // Same issue for the Absolute-height pagination row: CreatePageButton scales the
+            // buttons themselves, but this row height is a Designer literal, so on high-DPI
+            // machines the scaled buttons grow past it and get clipped by the panel.
+            tblCenter.RowStyles[2].Height = 66F * hostScale;
 
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
             RenderReportData(_appliedFilter);
@@ -79,7 +85,6 @@ namespace AssemblyLineTester.Views.Pages
             cardTrend.Controls.SetChildIndex(chartTrend, 0);
 
             if (cmbModel.Items.Count > 0) cmbModel.SelectedIndex = 0;
-            if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
             // Plain date picker, no checkbox - dd/MM/yy format, user picks whenever they want.
@@ -358,9 +363,8 @@ namespace AssemblyLineTester.Views.Pages
             dtpStart.Value = DateTime.Now.AddDays(-30);
             dtpEnd.Value = DateTime.Now;
             cmbModel.SelectedIndex = 0;
-            cmbType.SelectedIndex = 0;
             cmbArea.SelectedIndex = 0;
-            cmbOperator.SelectedIndex = 0;
+            txtOperator.Text = string.Empty;
             cmbResult.SelectedIndex = 0;
             txtPartNumber.Text = string.Empty;
         }
@@ -377,15 +381,11 @@ namespace AssemblyLineTester.Views.Pages
             if (!string.Equals(cmbModel.Text, "All Models", StringComparison.OrdinalIgnoreCase))
                 filter.ProductModel = cmbModel.Text;
 
-            if (!string.Equals(cmbType.Text, "All Types", StringComparison.OrdinalIgnoreCase))
-                filter.ProductType = cmbType.Text;
-
             if (!string.Equals(cmbArea.Text, "All Areas", StringComparison.OrdinalIgnoreCase))
                 filter.Area = cmbArea.Text;
 
-            if (!string.IsNullOrWhiteSpace(cmbOperator.Text)
-                && !string.Equals(cmbOperator.Text, "All Operators", StringComparison.OrdinalIgnoreCase))
-                filter.Operator = cmbOperator.Text;
+            if (!string.IsNullOrWhiteSpace(txtOperator.Text))
+                filter.Operator = txtOperator.Text.Trim();
 
             if (!string.Equals(cmbResult.Text, "All Results", StringComparison.OrdinalIgnoreCase))
                 filter.Result = cmbResult.Text.ToUpperInvariant();

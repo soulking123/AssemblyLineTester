@@ -244,7 +244,23 @@ namespace AssemblyLineTester.Views
             btnSettings.Visible = SessionManager.HasPermission("Page.Settings");
             btnUserManagement.Visible = SessionManager.HasPermission("Page.UserManagement");
 
+            LeavePageIfNoLongerAllowed();
             RepositionSidebarButtons();
+        }
+
+        // Hiding a sidebar button leaves its page on screen and still usable, so the view is moved
+        // to the first page the role can still reach.
+        // ponytail: a role left with no page at all keeps the one it is on; fix that at sign-in,
+        // where an account that can open nothing should not get a session in the first place.
+        private void LeavePageIfNoLongerAllowed()
+        {
+            var active = SidebarMenuButtons.FirstOrDefault(b => b.IsActive);
+            if (active is null || active.Visible) return;
+
+            var fallback = SidebarMenuButtons.FirstOrDefault(b => b.Visible);
+            if (fallback is null) return;
+
+            SetActiveMenu(fallback, GetOrInitPage(fallback.Name));
         }
 
         // Pushes saved Default Test Settings into the pages that were built from them. Both are

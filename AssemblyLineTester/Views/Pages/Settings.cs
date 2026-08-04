@@ -187,6 +187,7 @@ namespace AssemblyLineTester.Views.Pages
             Label[] tabLabels = [lblTabGen, lblTabTest, lblTabHw, lblTabUsers, lblTabNotif, lblTabBackup, lblTabSysInfo];
 
             activeTabLabel = lblTabGen;
+            lblTabUsers.Visible = SessionManager.HasPermission("Page.UserManagement");
 
             flpTabs.SuspendLayout();
             try
@@ -301,6 +302,7 @@ namespace AssemblyLineTester.Views.Pages
         private void Tab_Click(Label clickedLabel, EventArgs e)
         {
             if (pnlPageContainer == null) return;
+            if (clickedLabel == lblTabUsers && !SessionManager.HasPermission("Page.UserManagement")) return;
             pnlPageContainer.SuspendLayout();
             flpTabs.SuspendLayout();
             try
@@ -427,7 +429,6 @@ namespace AssemblyLineTester.Views.Pages
             PopulateTestTypes();
             PopulateTestResultColumns();
             LoadDefaultTestSettings();
-
             SetupMaintenanceEvents();
         }
 
@@ -449,6 +450,10 @@ namespace AssemblyLineTester.Views.Pages
             btnCancelMaintenance.Visible = editable;
             btnUpdateMaintenance.Visible = editable;
             lblEditHint.Visible = editable;
+
+            // Reset would overwrite the figures being typed with the stored interval, so the two
+            // actions cannot be offered at the same time.
+            btnResetMaintenance.Enabled = !editable;
         }
 
         // Single path to the countdown, so every change is permission-checked and logged once.
@@ -544,7 +549,10 @@ namespace AssemblyLineTester.Views.Pages
             _btnSaveTicks = BuildCardButton("💾  Save", Color.FromArgb(250, 204, 21), Color.FromArgb(30, 41, 59));
             _btnCancelTicks = BuildCardButton("Cancel", Color.FromArgb(241, 245, 249), Color.FromArgb(71, 85, 105));
 
-            _btnEditTicks.Click += (s, e) => SetTickListsEditable(true);
+            _btnEditTicks.Click += (s, e) =>
+            {
+                if (HasSettingsEditPermission()) SetTickListsEditable(true);
+            };
             _btnCancelTicks.Click += (s, e) => { ReloadTickLists(); SetTickListsEditable(false); };
             _btnSaveTicks.Click += BtnSaveTicks_Click;
 
@@ -648,14 +656,41 @@ namespace AssemblyLineTester.Views.Pages
         }
 
         // Writes all three tick lists, then pushes them into the pages already built from them.
+        private static bool HasSettingsEditPermission()
+        {
+            if (SessionManager.HasPermission("Action.Settings.Edit")) return true;
+            MessageBox.Show("You do not have permission to change the default test settings.",
+                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
         private void BtnSaveTicks_Click(object? sender, EventArgs e)
         {
+            if (!HasSettingsEditPermission()) return;
+
+            var defaults = ReadDefaultsFromCard();
+
+            // Checked before anything is written: the tick lists save first, so rejecting the
+            // defaults afterwards would leave the card half-saved.
+            if (defaults.TotalTestPointsAvailable % 2 != 0)
+            {
+                MessageBox.Show(
+                    $"Total Test Point Available must be an even number.\r\n\r\n" +
+                    $"{defaults.TotalTestPointsAvailable} is odd. Test points are wired in pairs, " +
+                    $"so one point would be left with nothing to test against.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                txtTotalTestPoint.Focus();
+                txtTotalTestPoint.SelectAll();
+                return;
+            }
+
             bool allSaved = true;
 
             allSaved &= TestSettingService.SaveTestTypeChecks(_typeBoxes.Select(t => (t.Id, t.Box.Checked)));
             allSaved &= TestSettingService.SaveLearnConnectionChecks(_learnBoxes.Select(t => (t.Id, t.Box.Checked)));
             allSaved &= TestSettingService.SaveTestResultChecks(_resultBoxes.Select(t => (t.Id, t.Box.Checked)));
-            allSaved &= TestSettingService.SaveDefaults(ReadDefaultsFromCard());
+            allSaved &= TestSettingService.SaveDefaults(defaults);
 
             if (!allSaved)
             {

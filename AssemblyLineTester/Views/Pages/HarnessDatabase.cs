@@ -270,7 +270,10 @@ namespace AssemblyLineTester.Views.Pages
 
         private bool HasHarnessEditPermission()
         {
-            if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator")
+            // Was gated on Action.Database.Backup, which is a different job entirely: anyone trusted
+            // to take a backup could delete harnesses. The role-name fallback is gone too, since
+            // HasPermission already answers true for Administrator.
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
             {
                 MessageBox.Show("You do not have permission to modify harness records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
