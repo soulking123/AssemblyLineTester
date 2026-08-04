@@ -18,13 +18,30 @@ return args[0] switch
 
 static int GenKeys(string[] args)
 {
-    string outDir = args.Length > 0 ? args[0] : Directory.GetCurrentDirectory();
+    bool force = args.Contains("--force");
+    string outDir = args.FirstOrDefault(a => a != "--force") ?? Directory.GetCurrentDirectory();
     Directory.CreateDirectory(outDir);
-
-    using var rsa = RSA.Create(3072);
 
     string privatePath = Path.Combine(outDir, "private.pem");
     string publicPath = Path.Combine(outDir, "public.pem");
+
+    // Overwriting the signing key silently strands every license already in the field: they can
+    // never be reissued, and each customer needs a rebuilt installer. Refuse unless asked twice.
+    if (File.Exists(privatePath) && !force)
+    {
+        return Fail($"""
+            {privatePath} already exists. Generating new keys would destroy it, and every license
+            signed with it could never be reissued - each customer would need a new installer.
+
+            To sign a license with the existing key:
+                issue --customer <name> --key "{privatePath}" ...
+
+            If you really mean to rotate the key for every customer, back the file up first, then
+            re-run with --force.
+            """);
+    }
+
+    using var rsa = RSA.Create(3072);
 
     File.WriteAllText(privatePath, rsa.ExportRSAPrivateKeyPem());
     File.WriteAllText(publicPath, rsa.ExportSubjectPublicKeyInfoPem());

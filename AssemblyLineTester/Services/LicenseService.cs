@@ -25,7 +25,7 @@ namespace AssemblyLineTester.Services
     public static class LicenseService
     {
         // Public half of the keypair from Tools/LicenseGenerator's genkeys.
-        private const string PublicKeyBase64 = "MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAxm7wDjjA2D27ly74KDb8TY1j/aiuGfimtK7ymHvMFzFMeVd1RVdulg24nWs2yCz66WU2PNlFAckIzw7SSfhoSVvhi1o/D4Y5ynPUuhPyvLGPk3JY0UTsv5YAWly12ge/bGDs/j59X78sQYVQlZSfrnIyVTR5H+mpwS5oB8bPfL+HkpiaSmiliF2EB1DQ6v5zdbOoPQsT0TI6JNiZC5SOpCluGgR4i+jQzYRlBuZ/oIn+C1O0iAR8NXbIhnoKzVGIHytxn5imn63YStOkFJDTI2Tzna+uRFE5/ijrbqxd5/yseZUXFST9iHQ6l3+lksdcqBHewlS0IAEHOzpzIFc8xJx4PDGbcbswgPu/rDKiqjJE35iolhyKf7nPFIMezeHsy4cekCpwPfkSTEr/kmQ+ScHgOzFbEJIYtxQwEYlf9iQCOTi2Il1unVjOl+g19IySKNT2zjVJvjm8f/Unz+mAVyDPSPwpkiBEmITqwGlVTCvygo/t4Aop3R26v2z006d1AgMBAAE=";
+        private const string PublicKeyBase64 = "MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA13UtXXHWmT/CZJV0yw+CM4/IkgTrUeoFEb0PAbX9LNH3722Q5DFXYAQ89l00pYHFsE6a/jUOSY9vhcAD5QDWbm5FRblEKw6P00H+IuzsrnYvOTrKPmIwAWiT1MFilT+2EvdoY4I/H/b5MEnkc9BhBLaLKO69/CtcNBmuUIA1lpq7G4YB8iamYwf2Foea2L6/UAEmAIig7NOBU1aMkEhP8yd9j7dmYBZd25hPE6F7OqGvQ7neb4w0c/lRnwJ/GfbHScfddOqY7QK2tIOvTCSSPpuLqljdOEw01tGMPePrOmC10h1mQaFXtEnowrwM+xl8W7eLQ3E8TTw2VMOEjAqTc/RNW5cKzrhmtBc3wSBV3B5oYf+AhZiJy1iOAIIucQxrwtJy0RC410uuV6qIL2o+VthpqllzdZdqsyjCgteZfmvzdI6N7Bm4FWijdfVRy9h/0B6aD2Dr/J+JGPfVGByV18sv+A3Hx5X65iqStMK9o4HpQWVK6oWuHHRzqBYtm1GBAgMBAAE=";
 
         // Signs license.state so a hand edit is caught.
         private static readonly byte[] RatchetHmacKey = Encoding.UTF8.GetBytes("AssemblyLineTester.LicenseRatchet.v1");
