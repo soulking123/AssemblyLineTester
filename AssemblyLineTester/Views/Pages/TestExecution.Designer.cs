@@ -771,18 +771,19 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblRow2
             // 
-            tblRow2.ColumnCount = 3;
-            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tblRow2.ColumnCount = 2;
+            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75F));
             tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tblRow2.Controls.Add(cardLiveDetails, 0, 0);
             tblRow2.Controls.Add(cardTestSummary, 1, 0);
-            tblRow2.Controls.Add(cardNotes, 2, 0);
+            tblRow2.Controls.Add(cardNotes, 1, 1);
             tblRow2.Dock = DockStyle.Fill;
             tblRow2.Location = new Point(3, 699);
             tblRow2.Name = "tblRow2";
-            tblRow2.RowCount = 1;
-            tblRow2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblRow2.RowCount = 2;
+            tblRow2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tblRow2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tblRow2.SetRowSpan(cardLiveDetails, 2);
             tblRow2.Size = new Size(2670, 951);
             tblRow2.TabIndex = 2;
             // 
@@ -793,10 +794,9 @@ namespace AssemblyLineTester.Views.Pages
             cardLiveDetails.Controls.Add(pnlLiveDetailsHeader);
             cardLiveDetails.Dock = DockStyle.Fill;
             cardLiveDetails.Location = new Point(5, 5);
-            cardLiveDetails.Margin = new Padding(5);
             cardLiveDetails.Name = "cardLiveDetails";
             cardLiveDetails.Padding = new Padding(10);
-            cardLiveDetails.Size = new Size(1325, 941);
+            cardLiveDetails.Size = new Size(1992, 941);
             cardLiveDetails.TabIndex = 0;
             // 
             // gridLiveDetails
@@ -862,11 +862,10 @@ namespace AssemblyLineTester.Views.Pages
             cardTestSummary.Controls.Add(listBoxTestSummary);
             cardTestSummary.Controls.Add(lblTestSummaryTitle);
             cardTestSummary.Dock = DockStyle.Fill;
-            cardTestSummary.Location = new Point(1340, 5);
-            cardTestSummary.Margin = new Padding(5, 5, 5, 2);
+            cardTestSummary.Location = new Point(2007, 5);
             cardTestSummary.Name = "cardTestSummary";
             cardTestSummary.Padding = new Padding(10);
-            cardTestSummary.Size = new Size(657, 944);
+            cardTestSummary.Size = new Size(658, 467);
             cardTestSummary.TabIndex = 0;
             // 
             // listBoxTestSummary
@@ -899,11 +898,10 @@ namespace AssemblyLineTester.Views.Pages
             cardNotes.Controls.Add(txtNotes);
             cardNotes.Controls.Add(lblNotesTitle);
             cardNotes.Dock = DockStyle.Fill;
-            cardNotes.Location = new Point(2007, 2);
-            cardNotes.Margin = new Padding(5, 2, 5, 5);
+            cardNotes.Location = new Point(2007, 482);
             cardNotes.Name = "cardNotes";
             cardNotes.Padding = new Padding(10);
-            cardNotes.Size = new Size(658, 944);
+            cardNotes.Size = new Size(658, 467);
             cardNotes.TabIndex = 1;
             // 
             // txtNotes

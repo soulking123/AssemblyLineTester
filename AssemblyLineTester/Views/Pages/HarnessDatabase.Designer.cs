@@ -352,12 +352,12 @@ namespace AssemblyLineTester.Views.Pages
             panelDetailCard.RowCount = 2;
             panelDetailCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 86F));
             panelDetailCard.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            panelDetailCard.Size = new Size(3311, 1941);
+            panelDetailCard.Size = new Size(3311, 1944);
             panelDetailCard.TabIndex = 0;
             // 
             // panelDetailTop
             // 
-            panelDetailTop.BackColor = Color.Transparent;
+            panelDetailTop.BackColor = Color.White;
             panelDetailTop.Controls.Add(lblDetailTitle);
             panelDetailTop.Controls.Add(flpNavigation);
             panelDetailTop.Dock = DockStyle.Fill;
@@ -435,7 +435,7 @@ namespace AssemblyLineTester.Views.Pages
             panelTabContent.Location = new Point(20, 86);
             panelTabContent.Margin = new Padding(20, 0, 20, 19);
             panelTabContent.Name = "panelTabContent";
-            panelTabContent.Size = new Size(3271, 1891);
+            panelTabContent.Size = new Size(3271, 1839);
             panelTabContent.TabIndex = 1;
             // 
             // tableLayoutPanelBottomRight
@@ -446,12 +446,12 @@ namespace AssemblyLineTester.Views.Pages
             tableLayoutPanelBottomRight.Controls.Add(panelCardSpecs, 0, 0);
             tableLayoutPanelBottomRight.Controls.Add(panelCardTestSummary, 1, 0);
             tableLayoutPanelBottomRight.Dock = DockStyle.Fill;
-            tableLayoutPanelBottomRight.Location = new Point(0, 1996);
+            tableLayoutPanelBottomRight.Location = new Point(0, 1970);
             tableLayoutPanelBottomRight.Margin = new Padding(0);
             tableLayoutPanelBottomRight.Name = "tableLayoutPanelBottomRight";
             tableLayoutPanelBottomRight.RowCount = 1;
             tableLayoutPanelBottomRight.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelBottomRight.Size = new Size(3311, 819);
+            tableLayoutPanelBottomRight.Size = new Size(3311, 845);
             tableLayoutPanelBottomRight.TabIndex = 2;
             // 
             // panelCardSpecs
@@ -464,7 +464,7 @@ namespace AssemblyLineTester.Views.Pages
             panelCardSpecs.Margin = new Padding(0, 0, 16, 0);
             panelCardSpecs.Name = "panelCardSpecs";
             panelCardSpecs.Padding = new Padding(24, 70, 24, 24);
-            panelCardSpecs.Size = new Size(1805, 819);
+            panelCardSpecs.Size = new Size(1805, 845);
             panelCardSpecs.TabIndex = 0;
             // 
             // tblSpecsContent
@@ -483,7 +483,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblSpecsContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblSpecsContent.Size = new Size(1757, 725);
+            tblSpecsContent.Size = new Size(1757, 751);
             tblSpecsContent.TabIndex = 1;
             // 
             // lblSpecsTitle
@@ -507,7 +507,7 @@ namespace AssemblyLineTester.Views.Pages
             panelCardTestSummary.Margin = new Padding(0);
             panelCardTestSummary.Name = "panelCardTestSummary";
             panelCardTestSummary.Padding = new Padding(24, 70, 24, 24);
-            panelCardTestSummary.Size = new Size(1490, 819);
+            panelCardTestSummary.Size = new Size(1490, 845);
             panelCardTestSummary.TabIndex = 1;
             // 
             // tblTestSummaryContent
@@ -524,7 +524,7 @@ namespace AssemblyLineTester.Views.Pages
             tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblTestSummaryContent.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblTestSummaryContent.Size = new Size(1442, 725);
+            tblTestSummaryContent.Size = new Size(1442, 751);
             tblTestSummaryContent.TabIndex = 1;
             // 
             // lblTestSummaryTitle
