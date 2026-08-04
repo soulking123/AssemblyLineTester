@@ -77,6 +77,14 @@
             lblTestResultCol = new Label();
             flpTestTypeAvail = new FlowLayoutPanel();
             flpLearnConn = new FlowLayoutPanel();
+            lblDataStorage = new Label();
+            lblReportStorage = new Label();
+            tblDataBrowse = new TableLayoutPanel();
+            txtDataPath = new TextBox();
+            btnBrowseData = new AssemblyLineTester.Views.Controls.RoundedButton();
+            tblReportBrowse = new TableLayoutPanel();
+            txtReportPath = new TextBox();
+            btnBrowseReport = new AssemblyLineTester.Views.Controls.RoundedButton();
             flpTestResultCol = new FlowLayoutPanel();
             chkResNetId = new CheckBox();
             chkResHarnessGrp = new CheckBox();
@@ -90,14 +98,6 @@
             chkResExpectedVal = new CheckBox();
             chkResTolerance = new CheckBox();
             chkResMeasurement = new CheckBox();
-            lblDataStorage = new Label();
-            lblReportStorage = new Label();
-            tblDataBrowse = new TableLayoutPanel();
-            txtDataPath = new TextBox();
-            btnBrowseData = new Button();
-            tblReportBrowse = new TableLayoutPanel();
-            txtReportPath = new TextBox();
-            btnBrowseReport = new Button();
             cardAppSettings = new Panel();
             tblAppCard = new TableLayoutPanel();
             lblAppTitle = new Label();
@@ -117,9 +117,9 @@
             cardTestSettings.SuspendLayout();
             tblTestCard.SuspendLayout();
             flpLearnConn.SuspendLayout();
-            flpTestResultCol.SuspendLayout();
             tblDataBrowse.SuspendLayout();
             tblReportBrowse.SuspendLayout();
+            flpTestResultCol.SuspendLayout();
             cardAppSettings.SuspendLayout();
             tblAppCard.SuspendLayout();
             SuspendLayout();
@@ -168,10 +168,7 @@
             // flpTabs
             // 
             flpTabs.Controls.Add(lblTabGen);
-            flpTabs.Controls.Add(lblTabTest);
-            flpTabs.Controls.Add(lblTabHw);
             flpTabs.Controls.Add(lblTabUsers);
-            flpTabs.Controls.Add(lblTabNotif);
             flpTabs.Controls.Add(lblTabBackup);
             flpTabs.Controls.Add(lblTabSysInfo);
             flpTabs.Dock = DockStyle.Fill;
@@ -879,6 +876,130 @@
             flpLearnConn.Size = new Size(183, 250);
             flpLearnConn.TabIndex = 21;
             // 
+            // lblDataStorage
+            // 
+            lblDataStorage.AutoSize = true;
+            tblTestCard.SetColumnSpan(lblDataStorage, 2);
+            lblDataStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblDataStorage.ForeColor = Color.FromArgb(51, 65, 85);
+            lblDataStorage.Location = new Point(15, 624);
+            lblDataStorage.Margin = new Padding(0, 10, 0, 4);
+            lblDataStorage.Name = "lblDataStorage";
+            lblDataStorage.Size = new Size(218, 32);
+            lblDataStorage.TabIndex = 1;
+            lblDataStorage.Text = "Data Storage Path";
+            // 
+            // lblReportStorage
+            // 
+            lblReportStorage.AutoSize = true;
+            tblTestCard.SetColumnSpan(lblReportStorage, 2);
+            lblReportStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblReportStorage.ForeColor = Color.FromArgb(51, 65, 85);
+            lblReportStorage.Location = new Point(998, 624);
+            lblReportStorage.Margin = new Padding(15, 10, 0, 4);
+            lblReportStorage.Name = "lblReportStorage";
+            lblReportStorage.Size = new Size(243, 32);
+            lblReportStorage.TabIndex = 2;
+            lblReportStorage.Text = "Report Storage Path";
+            // 
+            // tblDataBrowse
+            // 
+            tblDataBrowse.AutoSize = true;
+            tblDataBrowse.ColumnCount = 2;
+            tblTestCard.SetColumnSpan(tblDataBrowse, 2);
+            tblDataBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblDataBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
+            tblDataBrowse.Controls.Add(txtDataPath, 0, 0);
+            tblDataBrowse.Controls.Add(btnBrowseData, 1, 0);
+            tblDataBrowse.Dock = DockStyle.Fill;
+            tblDataBrowse.Location = new Point(15, 660);
+            tblDataBrowse.Margin = new Padding(0, 0, 15, 14);
+            tblDataBrowse.Name = "tblDataBrowse";
+            tblDataBrowse.RowCount = 1;
+            tblDataBrowse.RowStyles.Add(new RowStyle());
+            tblDataBrowse.Size = new Size(953, 41);
+            tblDataBrowse.TabIndex = 3;
+            // 
+            // txtDataPath
+            // 
+            txtDataPath.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtDataPath.Font = new Font("Segoe UI", 9.5F);
+            txtDataPath.Location = new Point(0, 0);
+            txtDataPath.Margin = new Padding(0, 0, 10, 0);
+            txtDataPath.Name = "txtDataPath";
+            txtDataPath.ReadOnly = true;
+            txtDataPath.Size = new Size(833, 41);
+            txtDataPath.TabIndex = 0;
+            txtDataPath.Text = "C:\\Data\\TestResults";
+            // 
+            // btnBrowseData
+            // 
+            btnBrowseData.Anchor = AnchorStyles.None;
+            btnBrowseData.BackColor = Color.FromArgb(241, 245, 249);
+            btnBrowseData.Cursor = Cursors.Hand;
+            btnBrowseData.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnBrowseData.FlatStyle = FlatStyle.Flat;
+            btnBrowseData.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnBrowseData.ForeColor = Color.FromArgb(51, 65, 85);
+            btnBrowseData.HoverForeColor = Color.Empty;
+            btnBrowseData.Location = new Point(843, 0);
+            btnBrowseData.Margin = new Padding(0);
+            btnBrowseData.Name = "btnBrowseData";
+            btnBrowseData.PressedForeColor = Color.Empty;
+            btnBrowseData.Size = new Size(110, 41);
+            btnBrowseData.TabIndex = 1;
+            btnBrowseData.Text = "Browse";
+            btnBrowseData.UseVisualStyleBackColor = false;
+            // 
+            // tblReportBrowse
+            // 
+            tblReportBrowse.AutoSize = true;
+            tblReportBrowse.ColumnCount = 2;
+            tblTestCard.SetColumnSpan(tblReportBrowse, 2);
+            tblReportBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblReportBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
+            tblReportBrowse.Controls.Add(txtReportPath, 0, 0);
+            tblReportBrowse.Controls.Add(btnBrowseReport, 1, 0);
+            tblReportBrowse.Dock = DockStyle.Fill;
+            tblReportBrowse.Location = new Point(998, 660);
+            tblReportBrowse.Margin = new Padding(15, 0, 0, 14);
+            tblReportBrowse.Name = "tblReportBrowse";
+            tblReportBrowse.RowCount = 1;
+            tblReportBrowse.RowStyles.Add(new RowStyle());
+            tblReportBrowse.Size = new Size(955, 41);
+            tblReportBrowse.TabIndex = 4;
+            // 
+            // txtReportPath
+            // 
+            txtReportPath.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtReportPath.Font = new Font("Segoe UI", 9.5F);
+            txtReportPath.Location = new Point(0, 0);
+            txtReportPath.Margin = new Padding(0, 0, 10, 0);
+            txtReportPath.Name = "txtReportPath";
+            txtReportPath.ReadOnly = true;
+            txtReportPath.Size = new Size(835, 41);
+            txtReportPath.TabIndex = 0;
+            txtReportPath.Text = "C:\\Reports\\Production";
+            // 
+            // btnBrowseReport
+            // 
+            btnBrowseReport.Anchor = AnchorStyles.None;
+            btnBrowseReport.BackColor = Color.FromArgb(241, 245, 249);
+            btnBrowseReport.Cursor = Cursors.Hand;
+            btnBrowseReport.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnBrowseReport.FlatStyle = FlatStyle.Flat;
+            btnBrowseReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnBrowseReport.ForeColor = Color.FromArgb(51, 65, 85);
+            btnBrowseReport.HoverForeColor = Color.Empty;
+            btnBrowseReport.Location = new Point(845, 0);
+            btnBrowseReport.Margin = new Padding(0);
+            btnBrowseReport.Name = "btnBrowseReport";
+            btnBrowseReport.PressedForeColor = Color.Empty;
+            btnBrowseReport.Size = new Size(110, 41);
+            btnBrowseReport.TabIndex = 1;
+            btnBrowseReport.Text = "Browse";
+            btnBrowseReport.UseVisualStyleBackColor = false;
+            //
             // flpTestResultCol
             // 
             flpTestResultCol.AutoSize = true;
@@ -900,7 +1021,7 @@
             flpTestResultCol.Margin = new Padding(0, 0, 15, 14);
             flpTestResultCol.MaximumSize = new Size(800, 300);
             flpTestResultCol.Name = "flpTestResultCol";
-            flpTestResultCol.Size = new Size(800, 300);
+            flpTestResultCol.Size = new Size(442, 300);
             flpTestResultCol.TabIndex = 22;
             // 
             // chkResNetId
@@ -1058,126 +1179,6 @@
             chkResMeasurement.TabIndex = 11;
             chkResMeasurement.Text = "Measurement";
             chkResMeasurement.UseVisualStyleBackColor = true;
-            // 
-            // lblDataStorage
-            // 
-            lblDataStorage.AutoSize = true;
-            tblTestCard.SetColumnSpan(lblDataStorage, 2);
-            lblDataStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblDataStorage.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDataStorage.Location = new Point(15, 624);
-            lblDataStorage.Margin = new Padding(0, 10, 0, 4);
-            lblDataStorage.Name = "lblDataStorage";
-            lblDataStorage.Size = new Size(218, 32);
-            lblDataStorage.TabIndex = 1;
-            lblDataStorage.Text = "Data Storage Path";
-            // 
-            // lblReportStorage
-            // 
-            lblReportStorage.AutoSize = true;
-            tblTestCard.SetColumnSpan(lblReportStorage, 2);
-            lblReportStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblReportStorage.ForeColor = Color.FromArgb(51, 65, 85);
-            lblReportStorage.Location = new Point(998, 624);
-            lblReportStorage.Margin = new Padding(15, 10, 0, 4);
-            lblReportStorage.Name = "lblReportStorage";
-            lblReportStorage.Size = new Size(243, 32);
-            lblReportStorage.TabIndex = 2;
-            lblReportStorage.Text = "Report Storage Path";
-            // 
-            // tblDataBrowse
-            // 
-            tblDataBrowse.AutoSize = true;
-            tblDataBrowse.ColumnCount = 2;
-            tblTestCard.SetColumnSpan(tblDataBrowse, 2);
-            tblDataBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblDataBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
-            tblDataBrowse.Controls.Add(txtDataPath, 0, 0);
-            tblDataBrowse.Controls.Add(btnBrowseData, 1, 0);
-            tblDataBrowse.Dock = DockStyle.Fill;
-            tblDataBrowse.Location = new Point(15, 660);
-            tblDataBrowse.Margin = new Padding(0, 0, 15, 14);
-            tblDataBrowse.Name = "tblDataBrowse";
-            tblDataBrowse.RowCount = 1;
-            tblDataBrowse.RowStyles.Add(new RowStyle());
-            tblDataBrowse.Size = new Size(953, 41);
-            tblDataBrowse.TabIndex = 3;
-            // 
-            // txtDataPath
-            // 
-            txtDataPath.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtDataPath.Font = new Font("Segoe UI", 9.5F);
-            txtDataPath.Location = new Point(0, 0);
-            txtDataPath.Margin = new Padding(0, 0, 10, 0);
-            txtDataPath.Name = "txtDataPath";
-            txtDataPath.ReadOnly = true;
-            txtDataPath.Size = new Size(833, 41);
-            txtDataPath.TabIndex = 0;
-            txtDataPath.Text = "C:\\Data\\TestResults";
-            // 
-            // btnBrowseData
-            // 
-            btnBrowseData.Anchor = AnchorStyles.None;
-            btnBrowseData.BackColor = Color.FromArgb(241, 245, 249);
-            btnBrowseData.Cursor = Cursors.Hand;
-            btnBrowseData.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnBrowseData.FlatStyle = FlatStyle.Flat;
-            btnBrowseData.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnBrowseData.ForeColor = Color.FromArgb(51, 65, 85);
-            btnBrowseData.Location = new Point(843, 0);
-            btnBrowseData.Margin = new Padding(0);
-            btnBrowseData.Name = "btnBrowseData";
-            btnBrowseData.Size = new Size(110, 41);
-            btnBrowseData.TabIndex = 1;
-            btnBrowseData.Text = "Browse...";
-            btnBrowseData.UseVisualStyleBackColor = false;
-            // 
-            // tblReportBrowse
-            // 
-            tblReportBrowse.AutoSize = true;
-            tblReportBrowse.ColumnCount = 2;
-            tblTestCard.SetColumnSpan(tblReportBrowse, 2);
-            tblReportBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblReportBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
-            tblReportBrowse.Controls.Add(txtReportPath, 0, 0);
-            tblReportBrowse.Controls.Add(btnBrowseReport, 1, 0);
-            tblReportBrowse.Dock = DockStyle.Fill;
-            tblReportBrowse.Location = new Point(998, 660);
-            tblReportBrowse.Margin = new Padding(15, 0, 0, 14);
-            tblReportBrowse.Name = "tblReportBrowse";
-            tblReportBrowse.RowCount = 1;
-            tblReportBrowse.RowStyles.Add(new RowStyle());
-            tblReportBrowse.Size = new Size(955, 41);
-            tblReportBrowse.TabIndex = 4;
-            // 
-            // txtReportPath
-            // 
-            txtReportPath.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtReportPath.Font = new Font("Segoe UI", 9.5F);
-            txtReportPath.Location = new Point(0, 0);
-            txtReportPath.Margin = new Padding(0, 0, 10, 0);
-            txtReportPath.Name = "txtReportPath";
-            txtReportPath.ReadOnly = true;
-            txtReportPath.Size = new Size(835, 41);
-            txtReportPath.TabIndex = 0;
-            txtReportPath.Text = "C:\\Reports\\Production";
-            // 
-            // btnBrowseReport
-            // 
-            btnBrowseReport.Anchor = AnchorStyles.None;
-            btnBrowseReport.BackColor = Color.FromArgb(241, 245, 249);
-            btnBrowseReport.Cursor = Cursors.Hand;
-            btnBrowseReport.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-            btnBrowseReport.FlatStyle = FlatStyle.Flat;
-            btnBrowseReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnBrowseReport.ForeColor = Color.FromArgb(51, 65, 85);
-            btnBrowseReport.Location = new Point(845, 0);
-            btnBrowseReport.Margin = new Padding(0);
-            btnBrowseReport.Name = "btnBrowseReport";
-            btnBrowseReport.Size = new Size(110, 41);
-            btnBrowseReport.TabIndex = 1;
-            btnBrowseReport.Text = "Browse...";
-            btnBrowseReport.UseVisualStyleBackColor = false;
             // 
             // cardAppSettings
             // 
@@ -1353,12 +1354,12 @@
             tblTestCard.PerformLayout();
             flpLearnConn.ResumeLayout(false);
             flpLearnConn.PerformLayout();
-            flpTestResultCol.ResumeLayout(false);
-            flpTestResultCol.PerformLayout();
             tblDataBrowse.ResumeLayout(false);
             tblDataBrowse.PerformLayout();
             tblReportBrowse.ResumeLayout(false);
             tblReportBrowse.PerformLayout();
+            flpTestResultCol.ResumeLayout(false);
+            flpTestResultCol.PerformLayout();
             cardAppSettings.ResumeLayout(false);
             cardAppSettings.PerformLayout();
             tblAppCard.ResumeLayout(false);
@@ -1428,11 +1429,11 @@
         private System.Windows.Forms.Label lblDataStorage;
         private System.Windows.Forms.TableLayoutPanel tblDataBrowse;
         private System.Windows.Forms.TextBox txtDataPath;
-        private System.Windows.Forms.Button btnBrowseData;
+        private Controls.RoundedButton btnBrowseData;
         private System.Windows.Forms.Label lblReportStorage;
         private System.Windows.Forms.TableLayoutPanel tblReportBrowse;
         private System.Windows.Forms.TextBox txtReportPath;
-        private System.Windows.Forms.Button btnBrowseReport;
+        private Controls.RoundedButton btnBrowseReport;
 
 
         private System.Windows.Forms.Panel cardAppSettings;

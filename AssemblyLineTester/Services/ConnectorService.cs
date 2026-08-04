@@ -16,6 +16,18 @@ namespace AssemblyLineTester.Services
         private static readonly string ConnectorImageRoot = Path.Combine("Assets", "img", "connector");
 
         // The whole shared catalog, for the add-connector picker.
+        // Connectors linked to a harness, in the order they were attached ("J1", "J2", ...).
+        public static List<Connector> GetConnectorsByHarness(int harnessId)
+        {
+            using var db = new AppDbContext();
+            return db.HarnessConnectors
+                .Where(hc => hc.ProductHarnessId == harnessId)
+                .OrderBy(hc => hc.Position)
+                .Include(hc => hc.Connector)
+                .Select(hc => hc.Connector!)
+                .ToList();
+        }
+
         public static List<Connector> GetAllConnectors()
         {
             using var db = new AppDbContext();

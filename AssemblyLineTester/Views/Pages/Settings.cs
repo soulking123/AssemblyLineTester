@@ -18,7 +18,7 @@ namespace AssemblyLineTester.Views.Pages
         private TableLayoutPanel? tblUcContainer;
         private Label? lblUnderConstructionTitle;
         private SettingsUsersAndRolesPage? _usersAndRolesPage;
-        private TableLayoutPanel? _backupPage;
+        private SettingBackupRestore? _backupRestorePage;
 
         private readonly List<(int Id, CheckBox Box)> _typeBoxes = new();
         private readonly List<(int Id, CheckBox Box)> _learnBoxes = new();
@@ -286,7 +286,7 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = true;
                     tblContent.BringToFront();
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
-                    if (_backupPage != null) _backupPage.Visible = false;
+                    if (_backupRestorePage != null) _backupRestorePage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
                     settingSystemInfo.Visible = false;
                 }
@@ -294,7 +294,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
-                    if (_backupPage != null) _backupPage.Visible = false;
+                    if (_backupRestorePage != null) _backupRestorePage.Visible = false;
                     if (_usersAndRolesPage == null)
                     {
                         _usersAndRolesPage = new SettingsUsersAndRolesPage
@@ -314,6 +314,7 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
+                    if (_backupRestorePage != null) _backupRestorePage.Visible = false;
 
                     if (!pnlPageContainer.Controls.Contains(settingSystemInfo))
                     {
@@ -329,19 +330,26 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
-                    if (_backupPage == null)
+                    settingSystemInfo.Visible = false;
+
+                    if (_backupRestorePage == null)
                     {
-                        _backupPage = BuildBackupPage();
-                        pnlPageContainer.Controls.Add(_backupPage);
+                        _backupRestorePage = new SettingBackupRestore
+                        {
+                            Dock = DockStyle.Fill,
+                            Visible = true,
+                            Margin = new Padding(0)
+                        };
+                        pnlPageContainer.Controls.Add(_backupRestorePage);
                     }
-                    _backupPage.Visible = true;
-                    _backupPage.BringToFront();
+                    _backupRestorePage.Visible = true;
+                    _backupRestorePage.BringToFront();
                 }
                 else
                 {
                     tblContent.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
-                    if (_backupPage != null) _backupPage.Visible = false;
+                    if (_backupRestorePage != null) _backupRestorePage.Visible = false;
                     settingSystemInfo.Visible = false;
                     if (tblUcContainer != null && lblUnderConstructionTitle != null)
                     {
@@ -356,171 +364,6 @@ namespace AssemblyLineTester.Views.Pages
                 flpTabs.ResumeLayout(true);
                 pnlPageContainer.ResumeLayout(true);
             }
-        }
-
-        // Backup & Restore tab, built in code because it is only two buttons.
-        private TableLayoutPanel BuildBackupPage()
-        {
-            var container = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 3,
-                RowCount = 3,
-                BackColor = Color.FromArgb(244, 245, 247)
-            };
-            container.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            container.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 760F));
-            container.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            container.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            container.RowStyles.Add(new RowStyle(SizeType.Absolute, 330F));
-            container.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-
-            var card = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(30) };
-            Helpers.UIStyleHelper.SetupCardRoundedEdges(card, 12, Color.FromArgb(34, 40, 49), 2.5f);
-
-            var lblTitle = new Label
-            {
-                Text = "Backup & Restore",
-                Font = Helpers.UIStyleHelper.Font18Bold,
-                ForeColor = Color.FromArgb(30, 41, 59),
-                AutoSize = true,
-                Location = new Point(30, 26)
-            };
-
-            var lblBackupHint = new Label
-            {
-                Text = "Saves a complete copy of the database to a file you choose. Safe to run while the\n" +
-                       "application is in use.",
-                Font = Helpers.UIStyleHelper.Font11Regular,
-                ForeColor = Color.FromArgb(100, 116, 139),
-                AutoSize = true,
-                Location = new Point(30, 84)
-            };
-
-            var btnBackup = new Button
-            {
-                Text = "Create Backup...",
-                Font = Helpers.UIStyleHelper.Font11Bold,
-                ForeColor = Color.FromArgb(30, 41, 59),
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand,
-                Size = new Size(240, 48),
-                Location = new Point(30, 140)
-            };
-            Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnBackup, 10,
-                Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
-            btnBackup.Click += BtnBackup_Click;
-
-            var lblRestoreHint = new Label
-            {
-                Text = "Replaces everything currently in the database with the contents of a backup file.\n" +
-                       "The current database is copied aside first, and the application restarts afterwards.",
-                Font = Helpers.UIStyleHelper.Font11Regular,
-                ForeColor = Color.FromArgb(100, 116, 139),
-                AutoSize = true,
-                Location = new Point(30, 210)
-            };
-
-            var btnRestore = new Button
-            {
-                Text = "Restore From Backup...",
-                Font = Helpers.UIStyleHelper.Font11Bold,
-                ForeColor = Color.FromArgb(30, 41, 59),
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand,
-                Size = new Size(240, 48),
-                Location = new Point(30, 266)
-            };
-            Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnRestore, 10,
-                Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
-            btnRestore.Click += BtnRestore_Click;
-
-            card.Controls.AddRange([lblTitle, lblBackupHint, btnBackup, lblRestoreHint, btnRestore]);
-            container.Controls.Add(card, 1, 1);
-            return container;
-        }
-
-        private static bool HasBackupPermission()
-        {
-            if (Services.SessionManager.HasPermission("Action.Database.Backup")) return true;
-            MessageBox.Show("You do not have permission to back up or restore the database.",
-                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return false;
-        }
-
-        private void BtnBackup_Click(object? sender, EventArgs e)
-        {
-            if (!HasBackupPermission()) return;
-
-            using var dialog = new SaveFileDialog
-            {
-                Filter = "Database backup (*.db)|*.db",
-                FileName = $"assemblylinetester-backup-{DateTime.Now:yyyyMMdd-HHmmss}.db"
-            };
-            if (dialog.ShowDialog() != DialogResult.OK) return;
-
-            Cursor previous = Cursor;
-            Cursor = Cursors.WaitCursor;
-            try
-            {
-                Services.DatabaseBackupService.Backup(dialog.FileName);
-                MessageBox.Show($"Backup saved to:\r\n{dialog.FileName}", "Backup complete",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                Services.FileLogService.Error("Settings.BtnBackup_Click", "Database backup failed.", ex);
-                MessageBox.Show($"Backup failed: {ex.Message}", "Backup", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                Cursor = previous;
-            }
-        }
-
-        private void BtnRestore_Click(object? sender, EventArgs e)
-        {
-            if (!HasBackupPermission()) return;
-
-            using var dialog = new OpenFileDialog
-            {
-                Filter = "Database backup (*.db)|*.db",
-                CheckFileExists = true
-            };
-            if (dialog.ShowDialog() != DialogResult.OK) return;
-
-            // Asked after the pick, so the operator sees which file is about to overwrite theirs.
-            if (MessageBox.Show(
-                    $"This replaces all current data - users, harnesses and test reports - with the contents of:\r\n\r\n" +
-                    $"{dialog.FileName}\r\n\r\nThe current database is saved aside as a pre-restore file first, and the " +
-                    $"application will restart. Continue?",
-                    "Restore database",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-            {
-                return;
-            }
-
-            Cursor previous = Cursor;
-            Cursor = Cursors.WaitCursor;
-            try
-            {
-                Services.DatabaseBackupService.Restore(dialog.FileName);
-            }
-            catch (Exception ex)
-            {
-                Services.FileLogService.Error("Settings.BtnRestore_Click", "Database restore failed.", ex);
-                MessageBox.Show($"Restore failed: {ex.Message}", "Restore", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            finally
-            {
-                Cursor = previous;
-            }
-
-            // Everything on screen now describes a database that is gone; only a restart is honest.
-            MessageBox.Show("Restore complete. The application will now restart so you can sign in again.",
-                "Restore", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            Application.Restart();
         }
 
         private void SetupEvents()

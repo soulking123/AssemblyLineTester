@@ -12,15 +12,59 @@ namespace AssemblyLineTester.Services
     // SQLite backup and restore via the native backup API, safe while the app holds the file.
     public static class DatabaseBackupService
     {
-        private static string DbPath => AppDbContext.DbPath;
+        public static string DbPath => AppDbContext.DbPath;
 
-        private static readonly string AutoBackupFolder = Path.Combine(AppDbContext.DataFolder, "Backups");
+        public static string AutoBackupFolder { get; } = Path.Combine(AppDbContext.DataFolder, "Backups");
 
         private const int MaxAutoBackups = 10;
         private const int MaxPreRestoreCopies = 5;
 
-        // Three backups a day; a restart sooner than that reuses the fresh one.
-        private const int MinHoursBetweenAutoBackups = 8;
+        public const int DefaultIntervalHours = 24;
+
+        private static readonly string IntervalFilePath = Path.Combine(AppDbContext.DataFolder, "backup-interval.txt");
+
+        /// <summary>
+        /// Hours that must pass before startup takes another automatic backup.
+        /// </summary>
+        /// <remarks>
+        /// Kept in a file beside the database rather than a table, because it describes this
+        /// installation rather than the data: a restored backup must not drag another machine's
+        /// schedule along with it. An unreadable value falls back to the default instead of
+        /// throwing - a bad setting must not stop the application from starting.
+        /// </remarks>
+        public static int AutoBackupIntervalHours
+        {
+            get
+            {
+                try
+                {
+                    if (File.Exists(IntervalFilePath) &&
+                        int.TryParse(File.ReadAllText(IntervalFilePath), out int hours) &&
+                        hours > 0)
+                    {
+                        return hours;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    FileLogService.Warn("DatabaseBackupService.AutoBackupIntervalHours",
+                        $"Could not read the backup interval, using {DefaultIntervalHours}h. {ex.Message}");
+                }
+
+                return DefaultIntervalHours;
+            }
+            set
+            {
+                if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value), "Interval must be at least one hour.");
+
+                Directory.CreateDirectory(AppDbContext.DataFolder);
+                File.WriteAllText(IntervalFilePath, value.ToString(CultureInfo.InvariantCulture));
+
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Database", "Set Backup Interval",
+                    $"Automatic backup interval set to {value} hours.");
+            }
+        }
 
         // Copies the live database to the given path.
         public static void Backup(string destinationPath)
@@ -119,11 +163,11 @@ namespace AssemblyLineTester.Services
                 .OrderByDescending(f => f, StringComparer.Ordinal)
                 .FirstOrDefault();
 
-            return IsRecent(newest, DateTime.Now);
+            return IsRecent(newest, DateTime.Now, AutoBackupIntervalHours);
         }
 
         // Age comes from the filename, not the file timestamp, which copying would have reset.
-        internal static bool IsRecent(string? newestBackupPath, DateTime now)
+        internal static bool IsRecent(string? newestBackupPath, DateTime now, int intervalHours)
         {
             if (newestBackupPath is null) return false;
 
@@ -133,7 +177,7 @@ namespace AssemblyLineTester.Services
 
             return DateTime.TryParseExact(name[prefix.Length..], "yyyyMMdd-HHmmss",
                        CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime taken)
-                   && taken > now.AddHours(-MinHoursBetweenAutoBackups);
+                   && taken > now.AddHours(-intervalHours);
         }
 
         // Debug-only guard on the backup interval rule.
@@ -142,11 +186,12 @@ namespace AssemblyLineTester.Services
         {
             var now = new DateTime(2026, 1, 1, 12, 0, 0);
 
-            Debug.Assert(!IsRecent(null, now), "no backup at all must not count as recent");
-            Debug.Assert(IsRecent(@"C:\b\auto-backup-20260101-110000.db", now), "an hour old must count as recent");
-            Debug.Assert(!IsRecent(@"C:\b\auto-backup-20260101-030000.db", now), "exactly eight hours old must expire");
-            Debug.Assert(!IsRecent(@"C:\b\auto-backup-notadate.db", now), "an unreadable name must not block a backup");
-            Debug.Assert(!IsRecent(@"C:\b\pre-restore-20260101-110000.db", now), "a pre-restore copy is not an auto backup");
+            Debug.Assert(!IsRecent(null, now, 24), "no backup at all must not count as recent");
+            Debug.Assert(IsRecent(@"C:\b\auto-backup-20260101-110000.db", now, 24), "an hour old must count as recent");
+            Debug.Assert(!IsRecent(@"C:\b\auto-backup-20251231-120000.db", now, 24), "exactly a day old must expire");
+            Debug.Assert(IsRecent(@"C:\b\auto-backup-20251231-120000.db", now, 168), "a longer interval must keep it recent");
+            Debug.Assert(!IsRecent(@"C:\b\auto-backup-notadate.db", now, 24), "an unreadable name must not block a backup");
+            Debug.Assert(!IsRecent(@"C:\b\pre-restore-20260101-110000.db", now, 24), "a pre-restore copy is not an auto backup");
         }
 
         // Names sort chronologically, so newest-first needs no file metadata.
