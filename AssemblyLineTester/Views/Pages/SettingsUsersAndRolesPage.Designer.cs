@@ -739,7 +739,7 @@ namespace AssemblyLineTester.Views.Pages
             chkActUserEdit.Name = "chkActUserEdit";
             chkActUserEdit.Size = new Size(540, 40);
             chkActUserEdit.TabIndex = 1;
-            chkActUserEdit.Tag = "Action.Users.Edit";
+            chkActUserEdit.Tag = "Action.UserManagement.Edit";
             chkActUserEdit.Text = "Manage User Accounts & Role Assignments";
             chkActUserEdit.UseVisualStyleBackColor = true;
             // 

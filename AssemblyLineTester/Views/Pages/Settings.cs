@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -51,14 +51,25 @@ namespace AssemblyLineTester.Views.Pages
         private Label? activeTabLabel;
         private bool isLoaded = false;
 
-        public Settings()
+        private AssemblyLineTester.Models.SettingsPreloadData? _preloadData;
+
+        public Settings() : this(null)
         {
+        }
+
+        public Settings(AssemblyLineTester.Models.SettingsPreloadData? preloadData)
+        {
+            _preloadData = preloadData;
             InitializeComponent();
+            this.SuspendLayout();
+            if (tblMain != null) tblMain.SuspendLayout();
             SetupInteractiveTabs();
             EnableDoubleBuffering();
             if (cmbRefresh.Items.Count > 0) cmbRefresh.SelectedIndex = 0;
             SetupEvents();
             LoadFileSettings();
+            if (tblMain != null) tblMain.ResumeLayout(false);
+            this.ResumeLayout(false);
         }
 
         // These came from the mockup. Only the folders exist in code, so they are shown read-only
@@ -110,7 +121,16 @@ namespace AssemblyLineTester.Views.Pages
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
                 AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
+                
+                tblTestCard.SuspendLayout();
+                cardTestSettings.SuspendLayout();
+                PopulateLearnConnections();
+                BuildTickListEditButtons();
+                SetTickListsEditable(false);
                 LayoutTickLists();
+                cardTestSettings.ResumeLayout(true);
+                tblTestCard.ResumeLayout(true);
+                
                 isLoaded = true;
             }
         }
@@ -167,6 +187,7 @@ namespace AssemblyLineTester.Views.Pages
             Label[] tabLabels = [lblTabGen, lblTabTest, lblTabHw, lblTabUsers, lblTabNotif, lblTabBackup, lblTabSysInfo];
 
             activeTabLabel = lblTabGen;
+            lblTabUsers.Visible = SessionManager.HasPermission("Page.UserManagement");
 
             flpTabs.SuspendLayout();
             try
@@ -281,6 +302,7 @@ namespace AssemblyLineTester.Views.Pages
         private void Tab_Click(Label clickedLabel, EventArgs e)
         {
             if (pnlPageContainer == null) return;
+            if (clickedLabel == lblTabUsers && !SessionManager.HasPermission("Page.UserManagement")) return;
             pnlPageContainer.SuspendLayout();
             flpTabs.SuspendLayout();
             try
@@ -334,11 +356,13 @@ namespace AssemblyLineTester.Views.Pages
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupRestorePage != null) _backupRestorePage.Visible = false;
 
-                    settingSystemInfo ??= new SettingSystemInfo();
+                    settingSystemInfo ??= new SettingSystemInfo
+                    {
+                        Dock = DockStyle.Fill,
+                        Margin = new Padding(0)
+                    };
                     if (!pnlPageContainer.Controls.Contains(settingSystemInfo))
                     {
-                        settingSystemInfo.Dock = DockStyle.Fill;
-                        settingSystemInfo.Margin = new Padding(0);
                         pnlPageContainer.Controls.Add(settingSystemInfo);
                     }
                     settingSystemInfo.Visible = true;
@@ -403,11 +427,8 @@ namespace AssemblyLineTester.Views.Pages
             txtDefCapacitorTol.KeyPress += NumericTextBox_KeyPress;
 
             PopulateTestTypes();
-            PopulateLearnConnections();
             PopulateTestResultColumns();
             LoadDefaultTestSettings();
-            BuildTickListEditButtons();
-            SetTickListsEditable(false);
             SetupMaintenanceEvents();
         }
 
@@ -429,6 +450,10 @@ namespace AssemblyLineTester.Views.Pages
             btnCancelMaintenance.Visible = editable;
             btnUpdateMaintenance.Visible = editable;
             lblEditHint.Visible = editable;
+
+            // Reset would overwrite the figures being typed with the stored interval, so the two
+            // actions cannot be offered at the same time.
+            btnResetMaintenance.Enabled = !editable;
         }
 
         // Single path to the countdown, so every change is permission-checked and logged once.
@@ -524,7 +549,10 @@ namespace AssemblyLineTester.Views.Pages
             _btnSaveTicks = BuildCardButton("💾  Save", Color.FromArgb(250, 204, 21), Color.FromArgb(30, 41, 59));
             _btnCancelTicks = BuildCardButton("Cancel", Color.FromArgb(241, 245, 249), Color.FromArgb(71, 85, 105));
 
-            _btnEditTicks.Click += (s, e) => SetTickListsEditable(true);
+            _btnEditTicks.Click += (s, e) =>
+            {
+                if (HasSettingsEditPermission()) SetTickListsEditable(true);
+            };
             _btnCancelTicks.Click += (s, e) => { ReloadTickLists(); SetTickListsEditable(false); };
             _btnSaveTicks.Click += BtnSaveTicks_Click;
 
@@ -628,14 +656,41 @@ namespace AssemblyLineTester.Views.Pages
         }
 
         // Writes all three tick lists, then pushes them into the pages already built from them.
+        private static bool HasSettingsEditPermission()
+        {
+            if (SessionManager.HasPermission("Action.Settings.Edit")) return true;
+            MessageBox.Show("You do not have permission to change the default test settings.",
+                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
         private void BtnSaveTicks_Click(object? sender, EventArgs e)
         {
+            if (!HasSettingsEditPermission()) return;
+
+            var defaults = ReadDefaultsFromCard();
+
+            // Checked before anything is written: the tick lists save first, so rejecting the
+            // defaults afterwards would leave the card half-saved.
+            if (defaults.TotalTestPointsAvailable % 2 != 0)
+            {
+                MessageBox.Show(
+                    $"Total Test Point Available must be an even number.\r\n\r\n" +
+                    $"{defaults.TotalTestPointsAvailable} is odd. Test points are wired in pairs, " +
+                    $"so one point would be left with nothing to test against.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                txtTotalTestPoint.Focus();
+                txtTotalTestPoint.SelectAll();
+                return;
+            }
+
             bool allSaved = true;
 
             allSaved &= TestSettingService.SaveTestTypeChecks(_typeBoxes.Select(t => (t.Id, t.Box.Checked)));
             allSaved &= TestSettingService.SaveLearnConnectionChecks(_learnBoxes.Select(t => (t.Id, t.Box.Checked)));
             allSaved &= TestSettingService.SaveTestResultChecks(_resultBoxes.Select(t => (t.Id, t.Box.Checked)));
-            allSaved &= TestSettingService.SaveDefaults(ReadDefaultsFromCard());
+            allSaved &= TestSettingService.SaveDefaults(defaults);
 
             if (!allSaved)
             {
@@ -700,7 +755,8 @@ namespace AssemblyLineTester.Views.Pages
             {
                 UIStyleHelper.ClearAndDispose(flpTestTypeAvail.Controls);
                 _typeBoxes.Clear();
-                foreach (var check in TestSettingService.GetTestTypeChecks())
+                var testTypeChecks = _preloadData?.TestTypeChecks ?? TestSettingService.GetTestTypeChecks();
+                foreach (var check in testTypeChecks)
                 {
                     var box = BuildCheck(check.DisplayName, check.IsChecked);
                     flpTestTypeAvail.Controls.Add(box);
@@ -720,7 +776,11 @@ namespace AssemblyLineTester.Views.Pages
         private void PopulateDefaultTestType()
         {
             var enabled = TestSettingService.GetEnabledTestTypeNames();
-            if (enabled.Count == 0) enabled = TestSettingService.GetTestTypes().Select(t => t.TestTypeName).ToList();
+            if (enabled.Count == 0) 
+            {
+                var testTypes = _preloadData?.TestTypes ?? TestSettingService.GetTestTypes();
+                enabled = testTypes.Select(t => t.TestTypeName).ToList();
+            }
 
             cmbDefTestType.Items.Clear();
             cmbDefTestType.Items.AddRange(enabled.Cast<object>().ToArray());
@@ -750,7 +810,8 @@ namespace AssemblyLineTester.Views.Pages
             {
                 UIStyleHelper.ClearAndDispose(flpLearnConn.Controls);
                 _learnBoxes.Clear();
-                foreach (var conn in TestSettingService.GetLearnConnections())
+                var connections = _preloadData?.LearnConnections ?? TestSettingService.GetLearnConnections();
+                foreach (var conn in connections)
                 {
                     var box = BuildCheck(conn.DisplayName, conn.IsChecked);
                     flpLearnConn.Controls.Add(box);
@@ -766,8 +827,9 @@ namespace AssemblyLineTester.Views.Pages
         // The twelve boxes stay in the designer for their layout; only their state comes from the table.
         private void PopulateTestResultColumns()
         {
-            var checks = TestSettingService.GetTestResultChecks();
+            var checks = _preloadData?.TestResultChecks ?? TestSettingService.GetTestResultChecks();
             _resultBoxes.Clear();
+            flpTestResultCol.SuspendLayout();
 
             foreach (Control control in flpTestResultCol.Controls)
             {
@@ -783,6 +845,7 @@ namespace AssemblyLineTester.Views.Pages
                 box.Checked = check.IsChecked;
                 _resultBoxes.Add((check.Id, box));
             }
+            flpTestResultCol.ResumeLayout(false);
         }
 
         private static CheckBox BuildCheck(string text, bool isChecked)

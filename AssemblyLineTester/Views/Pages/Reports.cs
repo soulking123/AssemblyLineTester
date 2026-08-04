@@ -50,7 +50,13 @@ namespace AssemblyLineTester.Views.Pages
 
             // Designer fonts sit out WinForms' AutoScale pass; without this the text keeps its
             // authored size inside containers that were already scaled, and overflows them.
-            UIStyleHelper.ScaleExplicitFonts(this, UIStyleHelper.GetHostScaleFactor(this));
+            float hostScale = UIStyleHelper.GetHostScaleFactor(this);
+            UIStyleHelper.ScaleExplicitFonts(this, hostScale);
+
+            // Same issue for the Absolute-height pagination row: CreatePageButton scales the
+            // buttons themselves, but this row height is a Designer literal, so on high-DPI
+            // machines the scaled buttons grow past it and get clipped by the panel.
+            tblCenter.RowStyles[2].Height = 66F * hostScale;
 
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
             RenderReportData(_appliedFilter);
@@ -79,7 +85,6 @@ namespace AssemblyLineTester.Views.Pages
             cardTrend.Controls.SetChildIndex(chartTrend, 0);
 
             if (cmbModel.Items.Count > 0) cmbModel.SelectedIndex = 0;
-            if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
             // Plain date picker, no checkbox - dd/MM/yy format, user picks whenever they want.
@@ -358,9 +363,8 @@ namespace AssemblyLineTester.Views.Pages
             dtpStart.Value = DateTime.Now.AddDays(-30);
             dtpEnd.Value = DateTime.Now;
             cmbModel.SelectedIndex = 0;
-            cmbType.SelectedIndex = 0;
             cmbArea.SelectedIndex = 0;
-            cmbOperator.SelectedIndex = 0;
+            txtOperator.Text = string.Empty;
             cmbResult.SelectedIndex = 0;
             txtPartNumber.Text = string.Empty;
         }
@@ -377,15 +381,11 @@ namespace AssemblyLineTester.Views.Pages
             if (!string.Equals(cmbModel.Text, "All Models", StringComparison.OrdinalIgnoreCase))
                 filter.ProductModel = cmbModel.Text;
 
-            if (!string.Equals(cmbType.Text, "All Types", StringComparison.OrdinalIgnoreCase))
-                filter.ProductType = cmbType.Text;
-
             if (!string.Equals(cmbArea.Text, "All Areas", StringComparison.OrdinalIgnoreCase))
                 filter.Area = cmbArea.Text;
 
-            if (!string.IsNullOrWhiteSpace(cmbOperator.Text)
-                && !string.Equals(cmbOperator.Text, "All Operators", StringComparison.OrdinalIgnoreCase))
-                filter.Operator = cmbOperator.Text;
+            if (!string.IsNullOrWhiteSpace(txtOperator.Text))
+                filter.Operator = txtOperator.Text.Trim();
 
             if (!string.Equals(cmbResult.Text, "All Results", StringComparison.OrdinalIgnoreCase))
                 filter.Result = cmbResult.Text.ToUpperInvariant();
@@ -569,12 +569,13 @@ namespace AssemblyLineTester.Views.Pages
 
             // These buttons are built after the page was laid out, so they carry designer-era
             // sizes that nothing has scaled yet.
-            float scale = UIStyleHelper.GetHostScaleFactor(this);
+            float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
+            float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
 
-            var btnLast = CreatePageButton("»", false, _currentPage < _totalPages, (s, e) => GoToPage(_totalPages), scale);
+            var btnLast = CreatePageButton("»", false, _currentPage < _totalPages, (s, e) => GoToPage(_totalPages), scaleX, scaleY);
             flpPageButtons.Controls.Add(btnLast);
 
-            var btnNext = CreatePageButton("›", false, _currentPage < _totalPages, (s, e) => { if (_currentPage < _totalPages) GoToPage(_currentPage + 1); }, scale);
+            var btnNext = CreatePageButton("›", false, _currentPage < _totalPages, (s, e) => { if (_currentPage < _totalPages) GoToPage(_currentPage + 1); }, scaleX, scaleY);
             flpPageButtons.Controls.Add(btnNext);
 
             for (int p = _totalPages; p >= 1; p--)
@@ -582,35 +583,35 @@ namespace AssemblyLineTester.Views.Pages
                 if (p == 1 || p == _totalPages || (p >= _currentPage - 1 && p <= _currentPage + 1))
                 {
                     int pageNum = p;
-                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => GoToPage(pageNum), scale);
+                    var btnPage = CreatePageButton(pageNum.ToString(), pageNum == _currentPage, true, (s, e) => GoToPage(pageNum), scaleX, scaleY);
                     flpPageButtons.Controls.Add(btnPage);
                 }
                 else if (p == _currentPage - 2 || p == _currentPage + 2)
                 {
-                    var btnDots = CreatePageButton("...", false, false, null, scale);
+                    var btnDots = CreatePageButton("...", false, false, null, scaleX, scaleY);
                     flpPageButtons.Controls.Add(btnDots);
                 }
             }
 
-            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) GoToPage(_currentPage - 1); }, scale);
+            var btnPrev = CreatePageButton("‹", false, _currentPage > 1, (s, e) => { if (_currentPage > 1) GoToPage(_currentPage - 1); }, scaleX, scaleY);
             flpPageButtons.Controls.Add(btnPrev);
 
-            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => GoToPage(1), scale);
+            var btnFirst = CreatePageButton("«", false, _currentPage > 1, (s, e) => GoToPage(1), scaleX, scaleY);
             flpPageButtons.Controls.Add(btnFirst);
         }
 
-        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick, float scale)
+        private static Button CreatePageButton(string text, bool isActive, bool isEnabled, EventHandler? onClick, float scaleX, float scaleY)
         {
             Button btn = new()
             {
                 Text = text,
-                Size = new Size((int)(38 * scale), (int)(40 * scale)),
-                Margin = new Padding((int)(2 * scale), (int)(6 * scale), (int)(2 * scale), (int)(6 * scale)),
+                Size = new Size((int)(38 * scaleX), (int)(40 * scaleY)),
+                Margin = new Padding((int)(2 * scaleX), (int)(6 * scaleY), (int)(2 * scaleX), (int)(6 * scaleY)),
                 FlatStyle = FlatStyle.Flat,
                 Enabled = isEnabled,
                 Cursor = isEnabled ? Cursors.Hand : Cursors.Default,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Padding = new Padding(0, 0, 0, (int)(2 * scale)),
+                Padding = new Padding(0, 0, 0, (int)(2 * scaleY)),
                 UseCompatibleTextRendering = true
             };
             btn.FlatAppearance.BorderSize = 1;
@@ -647,7 +648,6 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             // Set from the shared statics above, so it is explicit and will not scale on its own.
-            btn.Font = UIStyleHelper.ScaleFont(btn.Font, scale);
 
             return btn;
         }

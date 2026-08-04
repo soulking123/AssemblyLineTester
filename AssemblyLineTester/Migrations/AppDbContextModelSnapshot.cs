@@ -70,6 +70,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("TestTypeId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("TestTypeValue")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TestTypeId");
@@ -82,35 +85,40 @@ namespace AssemblyLineTester.Migrations
                             Id = 1,
                             DisplayName = "Wire",
                             IsChecked = true,
-                            TestTypeId = 15
+                            TestTypeId = 15,
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 2,
                             DisplayName = "Resistance",
                             IsChecked = true,
-                            TestTypeId = 11
+                            TestTypeId = 11,
+                            TestTypeValue = 1
                         },
                         new
                         {
                             Id = 3,
                             DisplayName = "Capacitor",
                             IsChecked = true,
-                            TestTypeId = 3
+                            TestTypeId = 3,
+                            TestTypeValue = 2
                         },
                         new
                         {
                             Id = 4,
                             DisplayName = "Diode",
                             IsChecked = true,
-                            TestTypeId = 6
+                            TestTypeId = 6,
+                            TestTypeValue = 4
                         },
                         new
                         {
                             Id = 5,
                             DisplayName = "Twisted Pair",
                             IsChecked = true,
-                            TestTypeId = 14
+                            TestTypeId = 14,
+                            TestTypeValue = 8
                         });
                 });
 
@@ -443,159 +451,177 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 19,
-                            Description = "Access Dashboard Page",
+                            Description = "Add, Edit, and Delete Harnesses and Connectors",
                             IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Dashboard",
-                            RoleId = 2
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.HarnessDatabase.Edit",
+                            RoleId = 1
                         },
                         new
                         {
                             Id = 20,
-                            Description = "Access Test Execution Page",
+                            Description = "Change Default Test Settings",
                             IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestExecution",
-                            RoleId = 2
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Settings.Edit",
+                            RoleId = 1
                         },
                         new
                         {
                             Id = 21,
-                            Description = "Access Harness Database Page",
-                            IsGranted = false,
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.HarnessDatabase",
+                            PermissionKey = "Page.Dashboard",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 22,
-                            Description = "Access Test History Page",
+                            Description = "Access Test Execution Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestHistory",
+                            PermissionKey = "Page.TestExecution",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 23,
-                            Description = "Access Reports Page",
+                            Description = "Access Harness Database Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Reports",
+                            PermissionKey = "Page.HarnessDatabase",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 24,
-                            Description = "Access System Log Page",
-                            IsGranted = false,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.SystemLog",
+                            PermissionKey = "Page.TestHistory",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 25,
-                            Description = "Access Settings Page",
+                            Description = "Access Reports Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Settings",
+                            PermissionKey = "Page.Reports",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 26,
-                            Description = "Access User Management Page",
+                            Description = "Access System Log Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.UserManagement",
+                            PermissionKey = "Page.SystemLog",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 27,
-                            Description = "Start and Run Testing Operations",
-                            IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestExecution.Run",
+                            Description = "Access Settings Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 28,
-                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            Description = "Access User Management Page",
                             IsGranted = false,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestConfig.Edit",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 29,
-                            Description = "Calibrate and Configure Hardware Instruments",
-                            IsGranted = false,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
                             PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.Instruments.Calibrate",
+                            PermissionKey = "Action.TestExecution.Run",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 30,
-                            Description = "Add, Edit, and Manage System User Accounts",
+                            Description = "Add and Edit Test Parameters & Harness Specs",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.UserManagement.Edit",
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 31,
-                            Description = "Export and Print Test Reports & Analytics",
+                            Description = "Calibrate and Configure Hardware Instruments",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Export",
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 32,
-                            Description = "Clear and Purge System Activity Logs",
+                            Description = "Add, Edit, and Manage System User Accounts",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.SystemLog.Clear",
+                            PermissionKey = "Action.UserManagement.Edit",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 33,
-                            Description = "Create and Restore Database Backups",
+                            Description = "Export and Print Test Reports & Analytics",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Database.Backup",
+                            PermissionKey = "Action.Reports.Export",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 34,
-                            Description = "Amend and Delete Saved Test Reports",
+                            Description = "Clear and Purge System Activity Logs",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Edit",
+                            PermissionKey = "Action.SystemLog.Clear",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 35,
-                            Description = "Delete Test History Records",
+                            Description = "Create and Restore Database Backups",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.TestHistory.Delete",
+                            PermissionKey = "Action.Database.Backup",
                             RoleId = 2
                         },
                         new
                         {
                             Id = 36,
+                            Description = "Amend and Delete Saved Test Reports",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 37,
+                            Description = "Delete Test History Records",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 38,
                             Description = "Reset the Maintenance Countdown",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -604,160 +630,178 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 37,
-                            Description = "Access Dashboard Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Dashboard",
-                            RoleId = 3
-                        },
-                        new
-                        {
-                            Id = 38,
-                            Description = "Access Test Execution Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestExecution",
-                            RoleId = 3
-                        },
-                        new
-                        {
                             Id = 39,
-                            Description = "Access Harness Database Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.HarnessDatabase",
-                            RoleId = 3
+                            Description = "Add, Edit, and Delete Harnesses and Connectors",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.HarnessDatabase.Edit",
+                            RoleId = 2
                         },
                         new
                         {
                             Id = 40,
-                            Description = "Access Test History Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestHistory",
-                            RoleId = 3
+                            Description = "Change Default Test Settings",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Settings.Edit",
+                            RoleId = 2
                         },
                         new
                         {
                             Id = 41,
-                            Description = "Access Reports Page",
+                            Description = "Access Dashboard Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Reports",
+                            PermissionKey = "Page.Dashboard",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 42,
-                            Description = "Access System Log Page",
+                            Description = "Access Test Execution Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.SystemLog",
+                            PermissionKey = "Page.TestExecution",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 43,
-                            Description = "Access Settings Page",
+                            Description = "Access Harness Database Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Settings",
+                            PermissionKey = "Page.HarnessDatabase",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 44,
-                            Description = "Access User Management Page",
-                            IsGranted = false,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.UserManagement",
+                            PermissionKey = "Page.TestHistory",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 45,
-                            Description = "Start and Run Testing Operations",
+                            Description = "Access Reports Page",
                             IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestExecution.Run",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 46,
-                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            Description = "Access System Log Page",
                             IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestConfig.Edit",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 47,
-                            Description = "Calibrate and Configure Hardware Instruments",
+                            Description = "Access Settings Page",
                             IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.Instruments.Calibrate",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 48,
-                            Description = "Add, Edit, and Manage System User Accounts",
+                            Description = "Access User Management Page",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.UserManagement.Edit",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 49,
-                            Description = "Export and Print Test Reports & Analytics",
+                            Description = "Start and Run Testing Operations",
                             IsGranted = true,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Export",
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 50,
-                            Description = "Clear and Purge System Activity Logs",
-                            IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.SystemLog.Clear",
+                            Description = "Add and Edit Test Parameters & Harness Specs",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 51,
-                            Description = "Create and Restore Database Backups",
-                            IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Database.Backup",
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 52,
-                            Description = "Amend and Delete Saved Test Reports",
-                            IsGranted = true,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
                             PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Edit",
+                            PermissionKey = "Action.UserManagement.Edit",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 53,
-                            Description = "Delete Test History Records",
+                            Description = "Export and Print Test Reports & Analytics",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.TestHistory.Delete",
+                            PermissionKey = "Action.Reports.Export",
                             RoleId = 3
                         },
                         new
                         {
                             Id = 54,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 55,
+                            Description = "Create and Restore Database Backups",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Database.Backup",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 56,
+                            Description = "Amend and Delete Saved Test Reports",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 57,
+                            Description = "Delete Test History Records",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
+                            RoleId = 3
+                        },
+                        new
+                        {
+                            Id = 58,
                             Description = "Reset the Maintenance Countdown",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
@@ -766,160 +810,178 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 55,
-                            Description = "Access Dashboard Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Dashboard",
-                            RoleId = 4
-                        },
-                        new
-                        {
-                            Id = 56,
-                            Description = "Access Test Execution Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestExecution",
-                            RoleId = 4
-                        },
-                        new
-                        {
-                            Id = 57,
-                            Description = "Access Harness Database Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.HarnessDatabase",
-                            RoleId = 4
-                        },
-                        new
-                        {
-                            Id = 58,
-                            Description = "Access Test History Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestHistory",
-                            RoleId = 4
-                        },
-                        new
-                        {
                             Id = 59,
-                            Description = "Access Reports Page",
-                            IsGranted = false,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Reports",
-                            RoleId = 4
+                            Description = "Add, Edit, and Delete Harnesses and Connectors",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.HarnessDatabase.Edit",
+                            RoleId = 3
                         },
                         new
                         {
                             Id = 60,
-                            Description = "Access System Log Page",
+                            Description = "Change Default Test Settings",
                             IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.SystemLog",
-                            RoleId = 4
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Settings.Edit",
+                            RoleId = 3
                         },
                         new
                         {
                             Id = 61,
-                            Description = "Access Settings Page",
+                            Description = "Access Dashboard Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Settings",
+                            PermissionKey = "Page.Dashboard",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 62,
-                            Description = "Access User Management Page",
-                            IsGranted = false,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
                             PermissionGroup = "Page Access",
-                            PermissionKey = "Page.UserManagement",
+                            PermissionKey = "Page.TestExecution",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 63,
-                            Description = "Start and Run Testing Operations",
+                            Description = "Access Harness Database Page",
                             IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestExecution.Run",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 64,
-                            Description = "Add and Edit Test Parameters & Harness Specs",
-                            IsGranted = false,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestConfig.Edit",
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 65,
-                            Description = "Calibrate and Configure Hardware Instruments",
-                            IsGranted = true,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.Instruments.Calibrate",
+                            Description = "Access Reports Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 66,
-                            Description = "Add, Edit, and Manage System User Accounts",
-                            IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.UserManagement.Edit",
+                            Description = "Access System Log Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 67,
-                            Description = "Export and Print Test Reports & Analytics",
+                            Description = "Access Settings Page",
                             IsGranted = true,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Export",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 68,
-                            Description = "Clear and Purge System Activity Logs",
+                            Description = "Access User Management Page",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.SystemLog.Clear",
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 69,
-                            Description = "Create and Restore Database Backups",
-                            IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Database.Backup",
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 70,
-                            Description = "Amend and Delete Saved Test Reports",
+                            Description = "Add and Edit Test Parameters & Harness Specs",
                             IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.Reports.Edit",
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestConfig.Edit",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 71,
-                            Description = "Delete Test History Records",
-                            IsGranted = false,
-                            PermissionGroup = "System & Logs",
-                            PermissionKey = "Action.TestHistory.Delete",
+                            Description = "Calibrate and Configure Hardware Instruments",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.Instruments.Calibrate",
                             RoleId = 4
                         },
                         new
                         {
                             Id = 72,
+                            Description = "Add, Edit, and Manage System User Accounts",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.UserManagement.Edit",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 73,
+                            Description = "Export and Print Test Reports & Analytics",
+                            IsGranted = true,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Export",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 74,
+                            Description = "Clear and Purge System Activity Logs",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.SystemLog.Clear",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 75,
+                            Description = "Create and Restore Database Backups",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Database.Backup",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 76,
+                            Description = "Amend and Delete Saved Test Reports",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Reports.Edit",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 77,
+                            Description = "Delete Test History Records",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.TestHistory.Delete",
+                            RoleId = 4
+                        },
+                        new
+                        {
+                            Id = 78,
                             Description = "Reset the Maintenance Countdown",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
@@ -928,88 +990,106 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 73,
-                            Description = "Access Dashboard Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Dashboard",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 74,
-                            Description = "Access Test Execution Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestExecution",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 75,
-                            Description = "Access Harness Database Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.HarnessDatabase",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 76,
-                            Description = "Access Test History Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.TestHistory",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 77,
-                            Description = "Access Reports Page",
-                            IsGranted = true,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Reports",
-                            RoleId = 5
-                        },
-                        new
-                        {
-                            Id = 78,
-                            Description = "Access System Log Page",
-                            IsGranted = false,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.SystemLog",
-                            RoleId = 5
-                        },
-                        new
-                        {
                             Id = 79,
-                            Description = "Access Settings Page",
-                            IsGranted = false,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.Settings",
-                            RoleId = 5
+                            Description = "Add, Edit, and Delete Harnesses and Connectors",
+                            IsGranted = true,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.HarnessDatabase.Edit",
+                            RoleId = 4
                         },
                         new
                         {
                             Id = 80,
-                            Description = "Access User Management Page",
+                            Description = "Change Default Test Settings",
                             IsGranted = false,
-                            PermissionGroup = "Page Access",
-                            PermissionKey = "Page.UserManagement",
-                            RoleId = 5
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Settings.Edit",
+                            RoleId = 4
                         },
                         new
                         {
                             Id = 81,
-                            Description = "Start and Run Testing Operations",
-                            IsGranted = false,
-                            PermissionGroup = "Test Operations",
-                            PermissionKey = "Action.TestExecution.Run",
+                            Description = "Access Dashboard Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Dashboard",
                             RoleId = 5
                         },
                         new
                         {
                             Id = 82,
+                            Description = "Access Test Execution Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestExecution",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 83,
+                            Description = "Access Harness Database Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.HarnessDatabase",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 84,
+                            Description = "Access Test History Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.TestHistory",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 85,
+                            Description = "Access Reports Page",
+                            IsGranted = true,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Reports",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 86,
+                            Description = "Access System Log Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.SystemLog",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 87,
+                            Description = "Access Settings Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.Settings",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 88,
+                            Description = "Access User Management Page",
+                            IsGranted = false,
+                            PermissionGroup = "Page Access",
+                            PermissionKey = "Page.UserManagement",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 89,
+                            Description = "Start and Run Testing Operations",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.TestExecution.Run",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 90,
                             Description = "Add and Edit Test Parameters & Harness Specs",
                             IsGranted = false,
                             PermissionGroup = "Test Operations",
@@ -1018,7 +1098,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 83,
+                            Id = 91,
                             Description = "Calibrate and Configure Hardware Instruments",
                             IsGranted = false,
                             PermissionGroup = "Test Operations",
@@ -1027,7 +1107,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 84,
+                            Id = 92,
                             Description = "Add, Edit, and Manage System User Accounts",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1036,7 +1116,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 85,
+                            Id = 93,
                             Description = "Export and Print Test Reports & Analytics",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
@@ -1045,7 +1125,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 86,
+                            Id = 94,
                             Description = "Clear and Purge System Activity Logs",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1054,7 +1134,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 87,
+                            Id = 95,
                             Description = "Create and Restore Database Backups",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1063,7 +1143,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 88,
+                            Id = 96,
                             Description = "Amend and Delete Saved Test Reports",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1072,7 +1152,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 89,
+                            Id = 97,
                             Description = "Delete Test History Records",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1081,7 +1161,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 90,
+                            Id = 98,
                             Description = "Reset the Maintenance Countdown",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1090,7 +1170,25 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 91,
+                            Id = 99,
+                            Description = "Add, Edit, and Delete Harnesses and Connectors",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.HarnessDatabase.Edit",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 100,
+                            Description = "Change Default Test Settings",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Settings.Edit",
+                            RoleId = 5
+                        },
+                        new
+                        {
+                            Id = 101,
                             Description = "Access Dashboard Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -1099,7 +1197,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 92,
+                            Id = 102,
                             Description = "Access Test Execution Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -1108,7 +1206,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 93,
+                            Id = 103,
                             Description = "Access Harness Database Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -1117,7 +1215,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 94,
+                            Id = 104,
                             Description = "Access Test History Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -1126,7 +1224,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 95,
+                            Id = 105,
                             Description = "Access Reports Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -1135,7 +1233,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 96,
+                            Id = 106,
                             Description = "Access System Log Page",
                             IsGranted = true,
                             PermissionGroup = "Page Access",
@@ -1144,7 +1242,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 97,
+                            Id = 107,
                             Description = "Access Settings Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
@@ -1153,7 +1251,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 98,
+                            Id = 108,
                             Description = "Access User Management Page",
                             IsGranted = false,
                             PermissionGroup = "Page Access",
@@ -1162,7 +1260,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 99,
+                            Id = 109,
                             Description = "Start and Run Testing Operations",
                             IsGranted = true,
                             PermissionGroup = "Test Operations",
@@ -1171,7 +1269,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 100,
+                            Id = 110,
                             Description = "Add and Edit Test Parameters & Harness Specs",
                             IsGranted = false,
                             PermissionGroup = "Test Operations",
@@ -1180,7 +1278,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 101,
+                            Id = 111,
                             Description = "Calibrate and Configure Hardware Instruments",
                             IsGranted = false,
                             PermissionGroup = "Test Operations",
@@ -1189,7 +1287,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 102,
+                            Id = 112,
                             Description = "Add, Edit, and Manage System User Accounts",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1198,7 +1296,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 103,
+                            Id = 113,
                             Description = "Export and Print Test Reports & Analytics",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
@@ -1207,7 +1305,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 104,
+                            Id = 114,
                             Description = "Clear and Purge System Activity Logs",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1216,7 +1314,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 105,
+                            Id = 115,
                             Description = "Create and Restore Database Backups",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
@@ -1225,7 +1323,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 106,
+                            Id = 116,
                             Description = "Amend and Delete Saved Test Reports",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
@@ -1234,7 +1332,7 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 107,
+                            Id = 117,
                             Description = "Delete Test History Records",
                             IsGranted = true,
                             PermissionGroup = "System & Logs",
@@ -1243,11 +1341,29 @@ namespace AssemblyLineTester.Migrations
                         },
                         new
                         {
-                            Id = 108,
+                            Id = 118,
                             Description = "Reset the Maintenance Countdown",
                             IsGranted = false,
                             PermissionGroup = "System & Logs",
                             PermissionKey = "Action.Maintenance.Reset",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 119,
+                            Description = "Add, Edit, and Delete Harnesses and Connectors",
+                            IsGranted = false,
+                            PermissionGroup = "Test Operations",
+                            PermissionKey = "Action.HarnessDatabase.Edit",
+                            RoleId = 6
+                        },
+                        new
+                        {
+                            Id = 120,
+                            Description = "Change Default Test Settings",
+                            IsGranted = false,
+                            PermissionGroup = "System & Logs",
+                            PermissionKey = "Action.Settings.Edit",
                             RoleId = 6
                         });
                 });

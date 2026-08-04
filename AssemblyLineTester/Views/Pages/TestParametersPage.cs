@@ -142,6 +142,28 @@ namespace AssemblyLineTester.Views.Pages
                 LoadTestTypeColumnItems();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
+                LoadProductModels();
+            }
+        }
+
+        private void LoadProductModels()
+        {
+            try
+            {
+                using var db = new Data.AppDbContext();
+                var models = db.ProductHarnesses
+                    .Select(p => p.ProductModel)
+                    .Where(m => !string.IsNullOrEmpty(m))
+                    .Distinct()
+                    .OrderBy(m => m)
+                    .ToArray();
+                
+                txtProductModel.Items.Clear();
+                txtProductModel.Items.AddRange(models);
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("TestParametersPage.LoadProductModels", "Failed to load product models", ex);
             }
         }
         private void TestParameterPage_VisibleChanged(object? sender, EventArgs e)
@@ -301,7 +323,7 @@ namespace AssemblyLineTester.Views.Pages
                 found[label] = sheet.Cell(r, 2).GetString().Trim();
             }
 
-            void Apply(TextBox box, string label)
+            void Apply(Control box, string label)
             {
                 if (found.TryGetValue(label, out string? value) && !string.IsNullOrWhiteSpace(value)) box.Text = value;
             }
@@ -629,6 +651,17 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        // Action.TestExecution.Run was in the permission matrix from the start but nothing read it,
+        // so switching it off changed nothing. Both start paths route through here.
+        private bool CheckRunPermission()
+        {
+            if (SessionManager.HasPermission("Action.TestExecution.Run")) return true;
+
+            MessageBox.Show("You do not have permission to run tests.", "Access Denied",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
         private bool CheckEditPermission()
         {
             if (!SessionManager.HasPermission("Action.TestConfig.Edit"))
@@ -839,22 +872,18 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
-            // The Excel file is an extra copy, never a substitute: only the database version can be
-            // loaded back and run on the line, so that write happens either way.
-            var destination = MessageBox.Show(
-                "Where should this configuration go?\r\n\r\n" +
-                "Yes\t-  Save to the database\r\n" +
-                "No\t-  Save to the database and export an Excel file\r\n" +
-                "Cancel\t-  Do nothing",
-                "Save", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            using var dlg = new Views.Modals.ExportOptionsModalForm();
+            if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
-            if (destination == DialogResult.Cancel) return;
+            if (dlg.ExportToDatabase)
+            {
+                if (!TrySaveConfigToDatabase()) return;
+            }
 
-            // The export is skipped when the database write did not happen, so a spreadsheet can
-            // never claim a configuration that was rejected or that the operator declined to overwrite.
-            if (!TrySaveConfigToDatabase()) return;
-
-            if (destination == DialogResult.No) ExportGridToExcel();
+            if (dlg.ExportToExcel)
+            {
+                ExportGridToExcel();
+            }
         }
 
         // Returns false when the configuration was rejected or the operator backed out.
@@ -1440,14 +1469,12 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            using Pen normalPen = new(Color.FromArgb(14, 165, 233), 3f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
-            using Pen darkPen = new(Color.FromArgb(15, 23, 42), 3f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
+            using Pen blackPen = new(Color.Black, 3f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
             foreach (var conn in connections)
             {
                 if (!highlightedRows.Contains(conn.RowIndex))
                 {
-                    Pen p = (conn.RowIndex % 2 == 0) ? normalPen : darkPen;
-                    g.DrawBezier(p, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
+                    g.DrawBezier(blackPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
                 }
             }
 
@@ -1805,6 +1832,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void btnStartAll_Click(object? sender, EventArgs e)
         {
+            if (!CheckRunPermission()) return;
+
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
@@ -1848,6 +1877,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void btnStartSelected_Click(object? sender, EventArgs e)
         {
+            if (!CheckRunPermission()) return;
+
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;

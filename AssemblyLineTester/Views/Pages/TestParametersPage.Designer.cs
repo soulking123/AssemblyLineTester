@@ -1,4 +1,4 @@
-﻿namespace AssemblyLineTester.Views.Pages
+namespace AssemblyLineTester.Views.Pages
 {
     partial class TestParametersPage
     {
@@ -57,10 +57,13 @@
             txtConfigName = new TextBox();
             tblCellProductModel = new TableLayoutPanel();
             lblProductModel = new Label();
-            txtProductModel = new TextBox();
+            txtProductModel = new ComboBox();
             tblCellConnRes = new TableLayoutPanel();
             lblConnectionResistance = new Label();
             txtConnectionResistance = new TextBox();
+            tblCellCompRes = new TableLayoutPanel();
+            lblComponentResistance = new Label();
+            txtComponentResistance = new TextBox();
             tblCellInsRes = new TableLayoutPanel();
             lblInsulationResistance = new Label();
             txtInsulationResistance = new TextBox();
@@ -97,6 +100,7 @@
             tblCellConfigName.SuspendLayout();
             tblCellProductModel.SuspendLayout();
             tblCellConnRes.SuspendLayout();
+            tblCellCompRes.SuspendLayout();
             tblCellInsRes.SuspendLayout();
             pnlConfigInfoHeader.SuspendLayout();
             pnlButtons.SuspendLayout();
@@ -402,15 +406,17 @@
             tblConfigInfo.Controls.Add(tblCellProductModel, 2, 0);
             tblConfigInfo.Controls.Add(tblCellConnRes, 0, 1);
             tblConfigInfo.Controls.Add(tblCellInsRes, 2, 1);
-            tblConfigInfo.Controls.Add(btnLearnConnection, 0, 2);
-            tblConfigInfo.Controls.Add(btnStartAll, 1, 2);
-            tblConfigInfo.Controls.Add(btnStartSelected, 2, 2);
-            tblConfigInfo.Controls.Add(btnAbort, 3, 2);
+            tblConfigInfo.Controls.Add(tblCellCompRes, 0, 2);
+            tblConfigInfo.Controls.Add(btnLearnConnection, 0, 3);
+            tblConfigInfo.Controls.Add(btnStartAll, 1, 3);
+            tblConfigInfo.Controls.Add(btnStartSelected, 2, 3);
+            tblConfigInfo.Controls.Add(btnAbort, 3, 3);
             tblConfigInfo.Dock = DockStyle.Fill;
             tblConfigInfo.Location = new Point(9, 6);
             tblConfigInfo.Margin = new Padding(0);
             tblConfigInfo.Name = "tblConfigInfo";
-            tblConfigInfo.RowCount = 3;
+            tblConfigInfo.RowCount = 4;
+            tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
@@ -489,6 +495,7 @@
             lblProductModel.TabIndex = 0;
             lblProductModel.Text = "Product Model";
             // 
+            // 
             // txtProductModel
             // 
             txtProductModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
@@ -541,6 +548,46 @@
             txtConnectionResistance.Size = new Size(315, 30);
             txtConnectionResistance.TabIndex = 1;
             txtConnectionResistance.Text = "100";
+            // 
+            // tblCellCompRes
+            // 
+            tblConfigInfo.SetColumnSpan(tblCellCompRes, 2);
+            tblCellCompRes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblCellCompRes.Controls.Add(lblComponentResistance, 0, 0);
+            tblCellCompRes.Controls.Add(txtComponentResistance, 0, 1);
+            tblCellCompRes.Dock = DockStyle.Fill;
+            tblCellCompRes.Location = new Point(4, 136);
+            tblCellCompRes.Margin = new Padding(4, 2, 9, 5);
+            tblCellCompRes.Name = "tblCellCompRes";
+            tblCellCompRes.RowCount = 2;
+            tblCellCompRes.RowStyles.Add(new RowStyle());
+            tblCellCompRes.RowStyles.Add(new RowStyle());
+            tblCellCompRes.Size = new Size(315, 56);
+            tblCellCompRes.TabIndex = 4;
+            // 
+            // lblComponentResistance
+            // 
+            lblComponentResistance.AutoSize = true;
+            lblComponentResistance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblComponentResistance.ForeColor = Color.FromArgb(100, 116, 139);
+            lblComponentResistance.Location = new Point(0, 0);
+            lblComponentResistance.Margin = new Padding(0, 0, 0, 6);
+            lblComponentResistance.Name = "lblComponentResistance";
+            lblComponentResistance.Size = new Size(207, 20);
+            lblComponentResistance.TabIndex = 0;
+            lblComponentResistance.Text = "Component Resistance (mΩ)";
+            // 
+            // txtComponentResistance
+            // 
+            txtComponentResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtComponentResistance.Font = new Font("Segoe UI", 10F);
+            txtComponentResistance.Location = new Point(0, 26);
+            txtComponentResistance.Margin = new Padding(0);
+            txtComponentResistance.Name = "txtComponentResistance";
+            txtComponentResistance.Size = new Size(315, 30);
+            txtComponentResistance.TabIndex = 1;
+            txtComponentResistance.Text = "N/A";
+            txtComponentResistance.ReadOnly = true;
             // 
             // tblCellInsRes
             // 
@@ -953,6 +1000,8 @@
             tblCellProductModel.PerformLayout();
             tblCellConnRes.ResumeLayout(false);
             tblCellConnRes.PerformLayout();
+            tblCellCompRes.ResumeLayout(false);
+            tblCellCompRes.PerformLayout();
             tblCellInsRes.ResumeLayout(false);
             tblCellInsRes.PerformLayout();
             pnlConfigInfoHeader.ResumeLayout(false);
@@ -993,14 +1042,17 @@
         private TableLayoutPanel tblCellConfigName;
         private TableLayoutPanel tblCellProductModel;
         private TableLayoutPanel tblCellConnRes;
+        private TableLayoutPanel tblCellCompRes;
         private TableLayoutPanel tblCellInsRes;
         private Label lblConfigName;
         private Label lblProductModel;
         private Label lblConnectionResistance;
+        private Label lblComponentResistance;
         private Label lblInsulationResistance;
         internal TextBox txtConfigName;
-        internal TextBox txtProductModel;
+        internal ComboBox txtProductModel;
         internal TextBox txtConnectionResistance;
+        internal TextBox txtComponentResistance;
         internal TextBox txtInsulationResistance;
         private Panel pnlConfigInfoHeader;
         private Label lblConfigInfoHeader;

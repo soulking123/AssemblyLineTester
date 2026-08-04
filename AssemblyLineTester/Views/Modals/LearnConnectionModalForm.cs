@@ -52,7 +52,7 @@ namespace AssemblyLineTester.Views.Modals
                 WrapContents = false,
                 AutoScroll = true,
                 BackColor = Color.Transparent,
-                Padding = new Padding(56, 43, 12, 12)
+                Padding = new Padding(56, 12, 12, 12)
             };
 
             foreach (var connection in TestSettingService.GetLearnConnections().Where(c => c.IsChecked))

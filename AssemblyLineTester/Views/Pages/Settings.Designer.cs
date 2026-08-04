@@ -1,4 +1,4 @@
-﻿namespace AssemblyLineTester.Views.Pages
+namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -30,7 +30,7 @@
             lblTabUsers = new Label();
             lblTabBackup = new Label();
             lblTabSysInfo = new Label();
-            tblContent = new TableLayoutPanel();
+            tblContent = new Panel();
             tblLeftColumn = new TableLayoutPanel();
             tblTopRowContainer = new TableLayoutPanel();
             cardGeneral = new Panel();
@@ -43,8 +43,9 @@
             cardMaintenanceState = new Panel();
             tblMaintCard = new TableLayoutPanel();
             lblMaintTitle = new Label();
-            btnResetMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
+            flpMaintHeaderActions = new FlowLayoutPanel();
             btnEditMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnResetMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
             lblRemainingDays = new Label();
             lblRemainingHours = new Label();
             txtRemainingDays = new TextBox();
@@ -56,7 +57,6 @@
             lblLastUsageTitle = new Label();
             lblLastUsageVal = new Label();
             flpMaintActions = new FlowLayoutPanel();
-            flpMaintHeaderActions = new FlowLayoutPanel();
             btnUpdateMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnCancelMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
             lblEditHint = new Label();
@@ -127,10 +127,10 @@
             tblGenCard.SuspendLayout();
             cardMaintenanceState.SuspendLayout();
             tblMaintCard.SuspendLayout();
+            flpMaintHeaderActions.SuspendLayout();
             pnlMaintInfo.SuspendLayout();
             tblMaintInfo.SuspendLayout();
             flpMaintActions.SuspendLayout();
-            flpMaintHeaderActions.SuspendLayout();
             cardTestSettings.SuspendLayout();
             tblTestCard.SuspendLayout();
             tblDataBrowse.SuspendLayout();
@@ -241,16 +241,11 @@
             // tblContent
             // 
             tblContent.AutoScroll = true;
-            tblContent.ColumnCount = 1;
-            tblContent.ColumnStyles.Add(new ColumnStyle());
-            tblContent.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
-            tblContent.Controls.Add(tblLeftColumn, 0, 0);
+            tblContent.Controls.Add(tblLeftColumn);
             tblContent.Dock = DockStyle.Fill;
             tblContent.Location = new Point(26, 180);
             tblContent.Margin = new Padding(26, 0, 26, 0);
             tblContent.Name = "tblContent";
-            tblContent.RowCount = 1;
-            tblContent.RowStyles.Add(new RowStyle());
             tblContent.Size = new Size(1994, 1281);
             tblContent.TabIndex = 2;
             // 
@@ -262,16 +257,16 @@
             tblLeftColumn.Controls.Add(tblTopRowContainer, 0, 0);
             tblLeftColumn.Controls.Add(cardTestSettings, 0, 1);
             tblLeftColumn.Controls.Add(cardAppSettings, 0, 3);
-            tblLeftColumn.Dock = DockStyle.Fill;
-            tblLeftColumn.Location = new Point(13, 13);
+            tblLeftColumn.Dock = DockStyle.Top;
+            tblLeftColumn.Location = new Point(0, 0);
             tblLeftColumn.Margin = new Padding(13);
             tblLeftColumn.Name = "tblLeftColumn";
             tblLeftColumn.RowCount = 4;
             tblLeftColumn.RowStyles.Add(new RowStyle());
             tblLeftColumn.RowStyles.Add(new RowStyle());
             tblLeftColumn.RowStyles.Add(new RowStyle());
-            tblLeftColumn.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tblLeftColumn.Size = new Size(1968, 1255);
+            tblLeftColumn.RowStyles.Add(new RowStyle());
+            tblLeftColumn.Size = new Size(1994, 1145);
             tblLeftColumn.TabIndex = 0;
             // 
             // tblTopRowContainer
@@ -288,7 +283,7 @@
             tblTopRowContainer.Name = "tblTopRowContainer";
             tblTopRowContainer.RowCount = 1;
             tblTopRowContainer.RowStyles.Add(new RowStyle());
-            tblTopRowContainer.Size = new Size(1968, 356);
+            tblTopRowContainer.Size = new Size(1994, 356);
             tblTopRowContainer.TabIndex = 0;
             // 
             // cardGeneral
@@ -301,7 +296,7 @@
             cardGeneral.Location = new Point(0, 0);
             cardGeneral.Margin = new Padding(0, 0, 10, 0);
             cardGeneral.Name = "cardGeneral";
-            cardGeneral.Size = new Size(974, 356);
+            cardGeneral.Size = new Size(987, 356);
             cardGeneral.TabIndex = 0;
             // 
             // tblGenCard
@@ -319,16 +314,22 @@
             tblGenCard.Controls.Add(lblSysName, 3, 1);
             tblGenCard.Controls.Add(txtCompanyName, 0, 2);
             tblGenCard.Controls.Add(txtSysName, 3, 2);
+            tblGenCard.Controls.Add(lblDataStorage, 0, 3);
+            tblGenCard.Controls.Add(lblReportStorage, 3, 3);
+            tblGenCard.Controls.Add(tblDataBrowse, 0, 4);
+            tblGenCard.Controls.Add(tblReportBrowse, 3, 4);
             tblGenCard.Dock = DockStyle.Top;
             tblGenCard.Location = new Point(0, 0);
             tblGenCard.Margin = new Padding(8);
             tblGenCard.Name = "tblGenCard";
             tblGenCard.Padding = new Padding(15, 0, 15, 15);
-            tblGenCard.RowCount = 3;
+            tblGenCard.RowCount = 5;
             tblGenCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             tblGenCard.RowStyles.Add(new RowStyle());
             tblGenCard.RowStyles.Add(new RowStyle());
-            tblGenCard.Size = new Size(974, 166);
+            tblGenCard.RowStyles.Add(new RowStyle());
+            tblGenCard.RowStyles.Add(new RowStyle());
+            tblGenCard.Size = new Size(987, 166);
             tblGenCard.TabIndex = 0;
             // 
             // lblGenTitle
@@ -340,7 +341,7 @@
             lblGenTitle.Location = new Point(15, 0);
             lblGenTitle.Margin = new Padding(0, 0, 0, 14);
             lblGenTitle.Name = "lblGenTitle";
-            lblGenTitle.Size = new Size(944, 36);
+            lblGenTitle.Size = new Size(957, 36);
             lblGenTitle.TabIndex = 0;
             lblGenTitle.Text = "GENERAL SETTINGS";
             lblGenTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -364,7 +365,7 @@
             tblGenCard.SetColumnSpan(lblSysName, 3);
             lblSysName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblSysName.ForeColor = Color.FromArgb(51, 65, 85);
-            lblSysName.Location = new Point(501, 60);
+            lblSysName.Location = new Point(507, 60);
             lblSysName.Margin = new Padding(15, 10, 0, 4);
             lblSysName.Name = "lblSysName";
             lblSysName.Size = new Size(168, 32);
@@ -379,7 +380,7 @@
             txtCompanyName.Location = new Point(15, 96);
             txtCompanyName.Margin = new Padding(0, 0, 15, 14);
             txtCompanyName.Name = "txtCompanyName";
-            txtCompanyName.Size = new Size(456, 41);
+            txtCompanyName.Size = new Size(462, 41);
             txtCompanyName.TabIndex = 3;
             txtCompanyName.Text = "Caterpillar Inc.";
             // 
@@ -387,11 +388,15 @@
             // 
             txtSysName.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             tblGenCard.SetColumnSpan(txtSysName, 3);
+            tblGenCard.SetColumnSpan(lblDataStorage, 3);
+            tblGenCard.SetColumnSpan(lblReportStorage, 3);
+            tblGenCard.SetColumnSpan(tblDataBrowse, 3);
+            tblGenCard.SetColumnSpan(tblReportBrowse, 3);
             txtSysName.Font = new Font("Segoe UI", 9.5F);
-            txtSysName.Location = new Point(501, 96);
+            txtSysName.Location = new Point(507, 96);
             txtSysName.Margin = new Padding(15, 0, 0, 14);
             txtSysName.Name = "txtSysName";
-            txtSysName.Size = new Size(458, 41);
+            txtSysName.Size = new Size(465, 41);
             txtSysName.TabIndex = 4;
             txtSysName.Text = "Assembly Line Test Rig #4";
             // 
@@ -402,10 +407,10 @@
             cardMaintenanceState.BackColor = Color.White;
             cardMaintenanceState.Controls.Add(tblMaintCard);
             cardMaintenanceState.Dock = DockStyle.Fill;
-            cardMaintenanceState.Location = new Point(994, 0);
+            cardMaintenanceState.Location = new Point(1007, 0);
             cardMaintenanceState.Margin = new Padding(10, 0, 0, 0);
             cardMaintenanceState.Name = "cardMaintenanceState";
-            cardMaintenanceState.Size = new Size(974, 356);
+            cardMaintenanceState.Size = new Size(987, 356);
             cardMaintenanceState.TabIndex = 1;
             // 
             // tblMaintCard
@@ -418,7 +423,7 @@
             tblMaintCard.ColumnStyles.Add(new ColumnStyle());
             tblMaintCard.Controls.Add(lblMaintTitle, 0, 0);
             tblMaintCard.Controls.Add(flpMaintHeaderActions, 2, 0);
-                        tblMaintCard.Controls.Add(lblRemainingDays, 0, 1);
+            tblMaintCard.Controls.Add(lblRemainingDays, 0, 1);
             tblMaintCard.Controls.Add(lblRemainingHours, 2, 1);
             tblMaintCard.Controls.Add(txtRemainingDays, 0, 2);
             tblMaintCard.Controls.Add(txtRemainingHours, 2, 2);
@@ -435,7 +440,7 @@
             tblMaintCard.RowStyles.Add(new RowStyle());
             tblMaintCard.RowStyles.Add(new RowStyle());
             tblMaintCard.RowStyles.Add(new RowStyle());
-            tblMaintCard.Size = new Size(974, 356);
+            tblMaintCard.Size = new Size(987, 356);
             tblMaintCard.TabIndex = 0;
             // 
             // lblMaintTitle
@@ -447,37 +452,34 @@
             lblMaintTitle.ForeColor = Color.FromArgb(51, 65, 85);
             lblMaintTitle.Location = new Point(18, 0);
             lblMaintTitle.Name = "lblMaintTitle";
-            lblMaintTitle.Size = new Size(451, 50);
+            lblMaintTitle.Size = new Size(464, 50);
             lblMaintTitle.TabIndex = 0;
             lblMaintTitle.Text = "MAINTENANCE STATE";
             lblMaintTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // btnResetMaintenance
+            // flpMaintHeaderActions
             // 
-                        btnResetMaintenance.BackColor = Color.FromArgb(239, 246, 255);
-            btnResetMaintenance.BorderRadius = 8;
-            btnResetMaintenance.FlatStyle = FlatStyle.Flat;
-            btnResetMaintenance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnResetMaintenance.ForeColor = Color.FromArgb(30, 58, 138);
-            btnResetMaintenance.HoverForeColor = Color.Empty;
-            btnResetMaintenance.Location = new Point(475, 5);
-            btnResetMaintenance.Margin = new Padding(10, 5, 0, 5);
-            btnResetMaintenance.Name = "btnResetMaintenance";
-            btnResetMaintenance.PressedForeColor = Color.Empty;
-            btnResetMaintenance.Size = new Size(120, 40);
-            btnResetMaintenance.TabIndex = 1;
-            btnResetMaintenance.Text = "Reset";
-            btnResetMaintenance.UseVisualStyleBackColor = false;
+            flpMaintHeaderActions.AutoSize = true;
+            tblMaintCard.SetColumnSpan(flpMaintHeaderActions, 2);
+            flpMaintHeaderActions.Controls.Add(btnEditMaintenance);
+            flpMaintHeaderActions.Controls.Add(btnResetMaintenance);
+            flpMaintHeaderActions.Dock = DockStyle.Right;
+            flpMaintHeaderActions.FlowDirection = FlowDirection.RightToLeft;
+            flpMaintHeaderActions.Location = new Point(712, 0);
+            flpMaintHeaderActions.Margin = new Padding(0);
+            flpMaintHeaderActions.Name = "flpMaintHeaderActions";
+            flpMaintHeaderActions.Size = new Size(260, 50);
+            flpMaintHeaderActions.TabIndex = 9;
             // 
             // btnEditMaintenance
             // 
-                        btnEditMaintenance.BackColor = Color.FromArgb(253, 230, 138);
+            btnEditMaintenance.BackColor = Color.FromArgb(253, 230, 138);
             btnEditMaintenance.BorderRadius = 8;
             btnEditMaintenance.FlatStyle = FlatStyle.Flat;
             btnEditMaintenance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnEditMaintenance.ForeColor = Color.FromArgb(69, 26, 3);
             btnEditMaintenance.HoverForeColor = Color.Empty;
-            btnEditMaintenance.Location = new Point(836, 5);
+            btnEditMaintenance.Location = new Point(140, 5);
             btnEditMaintenance.Margin = new Padding(10, 5, 0, 5);
             btnEditMaintenance.Name = "btnEditMaintenance";
             btnEditMaintenance.PressedForeColor = Color.Empty;
@@ -485,6 +487,23 @@
             btnEditMaintenance.TabIndex = 2;
             btnEditMaintenance.Text = "✏️ Edit";
             btnEditMaintenance.UseVisualStyleBackColor = false;
+            // 
+            // btnResetMaintenance
+            // 
+            btnResetMaintenance.BackColor = Color.FromArgb(239, 246, 255);
+            btnResetMaintenance.BorderRadius = 8;
+            btnResetMaintenance.FlatStyle = FlatStyle.Flat;
+            btnResetMaintenance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnResetMaintenance.ForeColor = Color.FromArgb(30, 58, 138);
+            btnResetMaintenance.HoverForeColor = Color.Empty;
+            btnResetMaintenance.Location = new Point(10, 5);
+            btnResetMaintenance.Margin = new Padding(10, 5, 0, 5);
+            btnResetMaintenance.Name = "btnResetMaintenance";
+            btnResetMaintenance.PressedForeColor = Color.Empty;
+            btnResetMaintenance.Size = new Size(120, 40);
+            btnResetMaintenance.TabIndex = 1;
+            btnResetMaintenance.Text = "Reset";
+            btnResetMaintenance.UseVisualStyleBackColor = false;
             // 
             // lblRemainingDays
             // 
@@ -505,7 +524,7 @@
             tblMaintCard.SetColumnSpan(lblRemainingHours, 2);
             lblRemainingHours.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblRemainingHours.ForeColor = Color.FromArgb(100, 116, 139);
-            lblRemainingHours.Location = new Point(487, 60);
+            lblRemainingHours.Location = new Point(500, 60);
             lblRemainingHours.Margin = new Padding(15, 10, 0, 4);
             lblRemainingHours.Name = "lblRemainingHours";
             lblRemainingHours.Size = new Size(208, 32);
@@ -521,7 +540,7 @@
             txtRemainingDays.Margin = new Padding(0, 0, 15, 14);
             txtRemainingDays.Name = "txtRemainingDays";
             txtRemainingDays.ReadOnly = true;
-            txtRemainingDays.Size = new Size(442, 41);
+            txtRemainingDays.Size = new Size(455, 41);
             txtRemainingDays.TabIndex = 5;
             txtRemainingDays.Text = "180";
             // 
@@ -530,7 +549,7 @@
             txtRemainingHours.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             tblMaintCard.SetColumnSpan(txtRemainingHours, 2);
             txtRemainingHours.Font = new Font("Segoe UI", 9.5F);
-            txtRemainingHours.Location = new Point(487, 96);
+            txtRemainingHours.Location = new Point(500, 96);
             txtRemainingHours.Margin = new Padding(15, 0, 0, 14);
             txtRemainingHours.Name = "txtRemainingHours";
             txtRemainingHours.ReadOnly = true;
@@ -553,7 +572,7 @@
             pnlMaintInfo.Margin = new Padding(0, 15, 0, 15);
             pnlMaintInfo.Name = "pnlMaintInfo";
             pnlMaintInfo.Padding = new Padding(15);
-            pnlMaintInfo.Size = new Size(944, 102);
+            pnlMaintInfo.Size = new Size(957, 102);
             pnlMaintInfo.TabIndex = 7;
             // 
             // tblMaintInfo
@@ -572,7 +591,7 @@
             tblMaintInfo.RowCount = 2;
             tblMaintInfo.RowStyles.Add(new RowStyle());
             tblMaintInfo.RowStyles.Add(new RowStyle());
-            tblMaintInfo.Size = new Size(914, 72);
+            tblMaintInfo.Size = new Size(927, 72);
             tblMaintInfo.TabIndex = 0;
             // 
             // lblOperatingTimeTodayTitle
@@ -593,7 +612,7 @@
             lblOperatingTimeTodayVal.Dock = DockStyle.Right;
             lblOperatingTimeTodayVal.Font = new Font("Segoe UI", 9F);
             lblOperatingTimeTodayVal.ForeColor = Color.FromArgb(51, 65, 85);
-            lblOperatingTimeTodayVal.Location = new Point(812, 0);
+            lblOperatingTimeTodayVal.Location = new Point(825, 0);
             lblOperatingTimeTodayVal.Margin = new Padding(0, 0, 0, 8);
             lblOperatingTimeTodayVal.Name = "lblOperatingTimeTodayVal";
             lblOperatingTimeTodayVal.Size = new Size(102, 32);
@@ -618,27 +637,12 @@
             lblLastUsageVal.Dock = DockStyle.Right;
             lblLastUsageVal.Font = new Font("Segoe UI", 9F);
             lblLastUsageVal.ForeColor = Color.FromArgb(51, 65, 85);
-            lblLastUsageVal.Location = new Point(773, 40);
+            lblLastUsageVal.Location = new Point(786, 40);
             lblLastUsageVal.Margin = new Padding(0);
             lblLastUsageVal.Name = "lblLastUsageVal";
             lblLastUsageVal.Size = new Size(141, 32);
             lblLastUsageVal.TabIndex = 3;
             lblLastUsageVal.Text = "01 Jan 2026";
-
-            // 
-            // flpMaintHeaderActions
-            // 
-            flpMaintHeaderActions.AutoSize = true;
-            tblMaintCard.SetColumnSpan(flpMaintHeaderActions, 2);
-            flpMaintHeaderActions.Controls.Add(btnEditMaintenance);
-            flpMaintHeaderActions.Controls.Add(btnResetMaintenance);
-            flpMaintHeaderActions.Dock = DockStyle.Right;
-            flpMaintHeaderActions.FlowDirection = FlowDirection.RightToLeft;
-            flpMaintHeaderActions.Location = new Point(716, 0);
-            flpMaintHeaderActions.Margin = new Padding(0);
-            flpMaintHeaderActions.Name = "flpMaintHeaderActions";
-            flpMaintHeaderActions.Size = new Size(240, 50);
-            flpMaintHeaderActions.TabIndex = 9;
             // 
             // flpMaintActions
             // 
@@ -649,7 +653,7 @@
             flpMaintActions.Controls.Add(lblEditHint);
             flpMaintActions.Dock = DockStyle.Right;
             flpMaintActions.FlowDirection = FlowDirection.RightToLeft;
-            flpMaintActions.Location = new Point(195, 286);
+            flpMaintActions.Location = new Point(208, 286);
             flpMaintActions.Name = "flpMaintActions";
             flpMaintActions.Size = new Size(761, 52);
             flpMaintActions.TabIndex = 8;
@@ -713,7 +717,7 @@
             cardTestSettings.Location = new Point(0, 375);
             cardTestSettings.Margin = new Padding(0, 0, 0, 19);
             cardTestSettings.Name = "cardTestSettings";
-            cardTestSettings.Size = new Size(1968, 730);
+            cardTestSettings.Size = new Size(1994, 731);
             cardTestSettings.TabIndex = 1;
             // 
             // tblTestCard
@@ -726,37 +730,33 @@
             tblTestCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tblTestCard.Controls.Add(lblTestTitle, 0, 0);
             tblTestCard.Controls.Add(lblTotalTestPoint, 0, 1);
-            tblTestCard.Controls.Add(lblDefTestType, 1, 1);
-            tblTestCard.Controls.Add(lblDefResistorVal, 2, 1);
-            tblTestCard.Controls.Add(lblDefMaxWireRes, 3, 1);
             tblTestCard.Controls.Add(txtTotalTestPoint, 0, 2);
+            tblTestCard.Controls.Add(lblDefTestType, 1, 1);
             tblTestCard.Controls.Add(cmbDefTestType, 1, 2);
+            tblTestCard.Controls.Add(lblDefResistorVal, 2, 1);
             tblTestCard.Controls.Add(txtDefResistorVal, 2, 2);
-            tblTestCard.Controls.Add(txtDefMaxWireRes, 3, 2);
-            tblTestCard.Controls.Add(lblDefCapacitorTol, 0, 3);
-            tblTestCard.Controls.Add(lblDefResistorTol, 1, 3);
+            tblTestCard.Controls.Add(lblDefResistorTol, 3, 1);
+            tblTestCard.Controls.Add(txtDefResistorTol, 3, 2);
+            tblTestCard.Controls.Add(lblDefCapacitorVal, 0, 3);
+            tblTestCard.Controls.Add(txtDefCapacitorVal, 0, 4);
+            tblTestCard.Controls.Add(lblDefCapacitorTol, 1, 3);
+            tblTestCard.Controls.Add(txtDefCapacitorTol, 1, 4);
             tblTestCard.Controls.Add(lblDefWireInsRes, 2, 3);
-            tblTestCard.Controls.Add(lblDefCapacitorVal, 3, 3);
-            tblTestCard.Controls.Add(txtDefCapacitorTol, 0, 4);
-            tblTestCard.Controls.Add(txtDefResistorTol, 1, 4);
             tblTestCard.Controls.Add(txtDefWireInsRes, 2, 4);
-            tblTestCard.Controls.Add(txtDefCapacitorVal, 3, 4);
+            tblTestCard.Controls.Add(lblDefMaxWireRes, 3, 3);
+            tblTestCard.Controls.Add(txtDefMaxWireRes, 3, 4);
             tblTestCard.Controls.Add(lblTestTypeAvail, 0, 5);
             tblTestCard.Controls.Add(lblLearnConn, 1, 5);
             tblTestCard.Controls.Add(lblTestResultCol, 2, 5);
             tblTestCard.Controls.Add(flpTestTypeAvail, 0, 6);
             tblTestCard.Controls.Add(flpLearnConn, 1, 6);
-            tblTestCard.Controls.Add(lblDataStorage, 0, 7);
-            tblTestCard.Controls.Add(lblReportStorage, 2, 7);
-            tblTestCard.Controls.Add(tblDataBrowse, 0, 8);
-            tblTestCard.Controls.Add(tblReportBrowse, 2, 8);
             tblTestCard.Controls.Add(flpTestResultCol, 2, 6);
             tblTestCard.Dock = DockStyle.Top;
             tblTestCard.Location = new Point(0, 0);
             tblTestCard.Margin = new Padding(8);
             tblTestCard.Name = "tblTestCard";
             tblTestCard.Padding = new Padding(15, 0, 15, 15);
-            tblTestCard.RowCount = 9;
+            tblTestCard.RowCount = 7;
             tblTestCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             tblTestCard.RowStyles.Add(new RowStyle());
             tblTestCard.RowStyles.Add(new RowStyle());
@@ -764,9 +764,7 @@
             tblTestCard.RowStyles.Add(new RowStyle());
             tblTestCard.RowStyles.Add(new RowStyle());
             tblTestCard.RowStyles.Add(new RowStyle());
-            tblTestCard.RowStyles.Add(new RowStyle());
-            tblTestCard.RowStyles.Add(new RowStyle());
-            tblTestCard.Size = new Size(1968, 730);
+            tblTestCard.Size = new Size(1994, 731);
             tblTestCard.TabIndex = 0;
             // 
             // lblTestTitle
@@ -777,7 +775,7 @@
             lblTestTitle.Location = new Point(15, 0);
             lblTestTitle.Margin = new Padding(0, 0, 0, 14);
             lblTestTitle.Name = "lblTestTitle";
-            lblTestTitle.Size = new Size(484, 36);
+            lblTestTitle.Size = new Size(491, 36);
             lblTestTitle.TabIndex = 0;
             lblTestTitle.Text = "DEFAULT TEST SETTINGS";
             lblTestTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -799,36 +797,36 @@
             lblDefTestType.AutoSize = true;
             lblDefTestType.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDefTestType.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDefTestType.Location = new Point(499, 60);
+            lblDefTestType.Location = new Point(506, 60);
             lblDefTestType.Margin = new Padding(0, 10, 0, 4);
             lblDefTestType.Name = "lblDefTestType";
             lblDefTestType.Size = new Size(211, 32);
             lblDefTestType.TabIndex = 2;
-            lblDefTestType.Text = "Default Test Type";
+            lblDefTestType.Text = "Test Type";
             // 
             // lblDefResistorVal
             // 
             lblDefResistorVal.AutoSize = true;
             lblDefResistorVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDefResistorVal.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDefResistorVal.Location = new Point(983, 60);
+            lblDefResistorVal.Location = new Point(997, 60);
             lblDefResistorVal.Margin = new Padding(0, 10, 0, 4);
             lblDefResistorVal.Name = "lblDefResistorVal";
             lblDefResistorVal.Size = new Size(308, 32);
             lblDefResistorVal.TabIndex = 3;
-            lblDefResistorVal.Text = "Default Resistor Value (Ω)";
+            lblDefResistorVal.Text = "Resistor Value (Ω)";
             // 
             // lblDefMaxWireRes
             // 
             lblDefMaxWireRes.AutoSize = true;
             lblDefMaxWireRes.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDefMaxWireRes.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDefMaxWireRes.Location = new Point(1467, 60);
+            lblDefMaxWireRes.Location = new Point(1488, 60);
             lblDefMaxWireRes.Margin = new Padding(0, 10, 0, 4);
             lblDefMaxWireRes.Name = "lblDefMaxWireRes";
             lblDefMaxWireRes.Size = new Size(384, 32);
             lblDefMaxWireRes.TabIndex = 4;
-            lblDefMaxWireRes.Text = "Default Max Wire Resistance (Ω)";
+            lblDefMaxWireRes.Text = "Max Wire Resistance (Ω)";
             // 
             // txtTotalTestPoint
             // 
@@ -837,7 +835,7 @@
             txtTotalTestPoint.Location = new Point(15, 97);
             txtTotalTestPoint.Margin = new Padding(0, 0, 15, 14);
             txtTotalTestPoint.Name = "txtTotalTestPoint";
-            txtTotalTestPoint.Size = new Size(469, 41);
+            txtTotalTestPoint.Size = new Size(476, 41);
             txtTotalTestPoint.TabIndex = 5;
             // 
             // cmbDefTestType
@@ -846,30 +844,30 @@
             cmbDefTestType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbDefTestType.FlatStyle = FlatStyle.Flat;
             cmbDefTestType.Font = new Font("Segoe UI", 9.5F);
-            cmbDefTestType.Location = new Point(499, 96);
+            cmbDefTestType.Location = new Point(506, 96);
             cmbDefTestType.Margin = new Padding(0, 0, 15, 14);
             cmbDefTestType.Name = "cmbDefTestType";
-            cmbDefTestType.Size = new Size(469, 43);
+            cmbDefTestType.Size = new Size(476, 43);
             cmbDefTestType.TabIndex = 6;
             // 
             // txtDefResistorVal
             // 
             txtDefResistorVal.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtDefResistorVal.Font = new Font("Segoe UI", 9.5F);
-            txtDefResistorVal.Location = new Point(983, 97);
+            txtDefResistorVal.Location = new Point(997, 97);
             txtDefResistorVal.Margin = new Padding(0, 0, 15, 14);
             txtDefResistorVal.Name = "txtDefResistorVal";
-            txtDefResistorVal.Size = new Size(469, 41);
+            txtDefResistorVal.Size = new Size(476, 41);
             txtDefResistorVal.TabIndex = 7;
             // 
             // txtDefMaxWireRes
             // 
             txtDefMaxWireRes.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtDefMaxWireRes.Font = new Font("Segoe UI", 9.5F);
-            txtDefMaxWireRes.Location = new Point(1467, 97);
+            txtDefMaxWireRes.Location = new Point(1488, 97);
             txtDefMaxWireRes.Margin = new Padding(0, 0, 15, 14);
             txtDefMaxWireRes.Name = "txtDefMaxWireRes";
-            txtDefMaxWireRes.Size = new Size(471, 41);
+            txtDefMaxWireRes.Size = new Size(476, 41);
             txtDefMaxWireRes.TabIndex = 8;
             // 
             // lblDefCapacitorTol
@@ -877,87 +875,87 @@
             lblDefCapacitorTol.AutoSize = true;
             lblDefCapacitorTol.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDefCapacitorTol.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDefCapacitorTol.Location = new Point(15, 163);
+            lblDefCapacitorTol.Location = new Point(15, 164);
             lblDefCapacitorTol.Margin = new Padding(0, 10, 0, 4);
             lblDefCapacitorTol.Name = "lblDefCapacitorTol";
             lblDefCapacitorTol.Size = new Size(377, 32);
             lblDefCapacitorTol.TabIndex = 17;
-            lblDefCapacitorTol.Text = "Default Capacitor Tolerance (%)";
+            lblDefCapacitorTol.Text = "Capacitor Tolerance (%)";
             // 
             // lblDefResistorTol
             // 
             lblDefResistorTol.AutoSize = true;
             lblDefResistorTol.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDefResistorTol.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDefResistorTol.Location = new Point(499, 163);
+            lblDefResistorTol.Location = new Point(506, 164);
             lblDefResistorTol.Margin = new Padding(0, 10, 0, 4);
             lblDefResistorTol.Name = "lblDefResistorTol";
             lblDefResistorTol.Size = new Size(359, 32);
             lblDefResistorTol.TabIndex = 10;
-            lblDefResistorTol.Text = "Default Resistor Tolerance (%)";
+            lblDefResistorTol.Text = "Resistor Tolerance (%)";
             // 
             // lblDefWireInsRes
             // 
             lblDefWireInsRes.AutoSize = true;
             lblDefWireInsRes.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDefWireInsRes.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDefWireInsRes.Location = new Point(983, 163);
+            lblDefWireInsRes.Location = new Point(997, 164);
             lblDefWireInsRes.Margin = new Padding(0, 10, 0, 4);
             lblDefWireInsRes.Name = "lblDefWireInsRes";
             lblDefWireInsRes.Size = new Size(400, 32);
             lblDefWireInsRes.TabIndex = 11;
-            lblDefWireInsRes.Text = "Default Wire Insulation Res. (MΩ)";
+            lblDefWireInsRes.Text = "Min Wire Insulation Res. (MΩ)";
             // 
             // lblDefCapacitorVal
             // 
             lblDefCapacitorVal.AutoSize = true;
             lblDefCapacitorVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDefCapacitorVal.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDefCapacitorVal.Location = new Point(1467, 163);
+            lblDefCapacitorVal.Location = new Point(1488, 164);
             lblDefCapacitorVal.Margin = new Padding(0, 10, 0, 4);
             lblDefCapacitorVal.Name = "lblDefCapacitorVal";
             lblDefCapacitorVal.Size = new Size(335, 32);
             lblDefCapacitorVal.TabIndex = 12;
-            lblDefCapacitorVal.Text = "Default Capacitor Value (µF)";
+            lblDefCapacitorVal.Text = "Capacitor Value (μF)";
             // 
             // txtDefCapacitorTol
             // 
             txtDefCapacitorTol.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtDefCapacitorTol.Font = new Font("Segoe UI", 9.5F);
-            txtDefCapacitorTol.Location = new Point(15, 199);
+            txtDefCapacitorTol.Location = new Point(15, 200);
             txtDefCapacitorTol.Margin = new Padding(0, 0, 15, 14);
             txtDefCapacitorTol.Name = "txtDefCapacitorTol";
-            txtDefCapacitorTol.Size = new Size(469, 41);
+            txtDefCapacitorTol.Size = new Size(476, 41);
             txtDefCapacitorTol.TabIndex = 20;
             // 
             // txtDefResistorTol
             // 
             txtDefResistorTol.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtDefResistorTol.Font = new Font("Segoe UI", 9.5F);
-            txtDefResistorTol.Location = new Point(499, 199);
+            txtDefResistorTol.Location = new Point(506, 200);
             txtDefResistorTol.Margin = new Padding(0, 0, 15, 14);
             txtDefResistorTol.Name = "txtDefResistorTol";
-            txtDefResistorTol.Size = new Size(469, 41);
+            txtDefResistorTol.Size = new Size(476, 41);
             txtDefResistorTol.TabIndex = 14;
             // 
             // txtDefWireInsRes
             // 
             txtDefWireInsRes.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtDefWireInsRes.Font = new Font("Segoe UI", 9.5F);
-            txtDefWireInsRes.Location = new Point(983, 199);
+            txtDefWireInsRes.Location = new Point(997, 200);
             txtDefWireInsRes.Margin = new Padding(0, 0, 15, 14);
             txtDefWireInsRes.Name = "txtDefWireInsRes";
-            txtDefWireInsRes.Size = new Size(469, 41);
+            txtDefWireInsRes.Size = new Size(476, 41);
             txtDefWireInsRes.TabIndex = 15;
             // 
             // txtDefCapacitorVal
             // 
             txtDefCapacitorVal.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtDefCapacitorVal.Font = new Font("Segoe UI", 9.5F);
-            txtDefCapacitorVal.Location = new Point(1467, 199);
+            txtDefCapacitorVal.Location = new Point(1488, 200);
             txtDefCapacitorVal.Margin = new Padding(0, 0, 15, 14);
             txtDefCapacitorVal.Name = "txtDefCapacitorVal";
-            txtDefCapacitorVal.Size = new Size(471, 41);
+            txtDefCapacitorVal.Size = new Size(476, 41);
             txtDefCapacitorVal.TabIndex = 16;
             // 
             // lblTestTypeAvail
@@ -965,7 +963,7 @@
             lblTestTypeAvail.AutoSize = true;
             lblTestTypeAvail.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblTestTypeAvail.ForeColor = Color.FromArgb(51, 65, 85);
-            lblTestTypeAvail.Location = new Point(15, 264);
+            lblTestTypeAvail.Location = new Point(15, 265);
             lblTestTypeAvail.Margin = new Padding(0, 10, 0, 4);
             lblTestTypeAvail.Name = "lblTestTypeAvail";
             lblTestTypeAvail.Size = new Size(231, 32);
@@ -977,7 +975,7 @@
             lblLearnConn.AutoSize = true;
             lblLearnConn.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblLearnConn.ForeColor = Color.FromArgb(51, 65, 85);
-            lblLearnConn.Location = new Point(499, 264);
+            lblLearnConn.Location = new Point(506, 265);
             lblLearnConn.Margin = new Padding(0, 10, 0, 4);
             lblLearnConn.Name = "lblLearnConn";
             lblLearnConn.Size = new Size(215, 32);
@@ -990,7 +988,7 @@
             tblTestCard.SetColumnSpan(lblTestResultCol, 2);
             lblTestResultCol.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblTestResultCol.ForeColor = Color.FromArgb(51, 65, 85);
-            lblTestResultCol.Location = new Point(983, 264);
+            lblTestResultCol.Location = new Point(997, 265);
             lblTestResultCol.Margin = new Padding(0, 10, 0, 4);
             lblTestResultCol.Name = "lblTestResultCol";
             lblTestResultCol.Size = new Size(232, 32);
@@ -1001,7 +999,7 @@
             // 
             flpTestTypeAvail.AutoSize = true;
             flpTestTypeAvail.FlowDirection = FlowDirection.TopDown;
-            flpTestTypeAvail.Location = new Point(15, 300);
+            flpTestTypeAvail.Location = new Point(15, 301);
             flpTestTypeAvail.Margin = new Padding(0, 0, 15, 14);
             flpTestTypeAvail.MaximumSize = new Size(460, 400);
             flpTestTypeAvail.Name = "flpTestTypeAvail";
@@ -1012,7 +1010,7 @@
             // 
             flpLearnConn.AutoSize = true;
             flpLearnConn.FlowDirection = FlowDirection.TopDown;
-            flpLearnConn.Location = new Point(499, 300);
+            flpLearnConn.Location = new Point(506, 301);
             flpLearnConn.Margin = new Padding(0, 0, 15, 14);
             flpLearnConn.Name = "flpLearnConn";
             flpLearnConn.Size = new Size(0, 0);
@@ -1021,10 +1019,9 @@
             // lblDataStorage
             // 
             lblDataStorage.AutoSize = true;
-            tblTestCard.SetColumnSpan(lblDataStorage, 2);
             lblDataStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDataStorage.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDataStorage.Location = new Point(15, 624);
+            lblDataStorage.Location = new Point(15, 625);
             lblDataStorage.Margin = new Padding(0, 10, 0, 4);
             lblDataStorage.Name = "lblDataStorage";
             lblDataStorage.Size = new Size(218, 32);
@@ -1034,10 +1031,9 @@
             // lblReportStorage
             // 
             lblReportStorage.AutoSize = true;
-            tblTestCard.SetColumnSpan(lblReportStorage, 2);
             lblReportStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblReportStorage.ForeColor = Color.FromArgb(51, 65, 85);
-            lblReportStorage.Location = new Point(998, 624);
+            lblReportStorage.Location = new Point(1012, 625);
             lblReportStorage.Margin = new Padding(15, 10, 0, 4);
             lblReportStorage.Name = "lblReportStorage";
             lblReportStorage.Size = new Size(243, 32);
@@ -1048,18 +1044,17 @@
             // 
             tblDataBrowse.AutoSize = true;
             tblDataBrowse.ColumnCount = 2;
-            tblTestCard.SetColumnSpan(tblDataBrowse, 2);
             tblDataBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblDataBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
             tblDataBrowse.Controls.Add(txtDataPath, 0, 0);
             tblDataBrowse.Controls.Add(btnBrowseData, 1, 0);
             tblDataBrowse.Dock = DockStyle.Fill;
-            tblDataBrowse.Location = new Point(15, 660);
+            tblDataBrowse.Location = new Point(15, 661);
             tblDataBrowse.Margin = new Padding(0, 0, 15, 14);
             tblDataBrowse.Name = "tblDataBrowse";
             tblDataBrowse.RowCount = 1;
             tblDataBrowse.RowStyles.Add(new RowStyle());
-            tblDataBrowse.Size = new Size(953, 41);
+            tblDataBrowse.Size = new Size(967, 41);
             tblDataBrowse.TabIndex = 3;
             // 
             // txtDataPath
@@ -1070,7 +1065,7 @@
             txtDataPath.Margin = new Padding(0, 0, 10, 0);
             txtDataPath.Name = "txtDataPath";
             txtDataPath.ReadOnly = true;
-            txtDataPath.Size = new Size(833, 41);
+            txtDataPath.Size = new Size(847, 41);
             txtDataPath.TabIndex = 0;
             txtDataPath.Text = "C:\\Data\\TestResults";
             // 
@@ -1083,7 +1078,7 @@
             btnBrowseData.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnBrowseData.ForeColor = Color.FromArgb(51, 65, 85);
             btnBrowseData.HoverForeColor = Color.Empty;
-            btnBrowseData.Location = new Point(843, 0);
+            btnBrowseData.Location = new Point(857, 0);
             btnBrowseData.Margin = new Padding(0);
             btnBrowseData.Name = "btnBrowseData";
             btnBrowseData.PressedForeColor = Color.Empty;
@@ -1096,18 +1091,17 @@
             // 
             tblReportBrowse.AutoSize = true;
             tblReportBrowse.ColumnCount = 2;
-            tblTestCard.SetColumnSpan(tblReportBrowse, 2);
             tblReportBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblReportBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
             tblReportBrowse.Controls.Add(txtReportPath, 0, 0);
             tblReportBrowse.Controls.Add(btnBrowseReport, 1, 0);
             tblReportBrowse.Dock = DockStyle.Fill;
-            tblReportBrowse.Location = new Point(998, 660);
+            tblReportBrowse.Location = new Point(1012, 661);
             tblReportBrowse.Margin = new Padding(15, 0, 0, 14);
             tblReportBrowse.Name = "tblReportBrowse";
             tblReportBrowse.RowCount = 1;
             tblReportBrowse.RowStyles.Add(new RowStyle());
-            tblReportBrowse.Size = new Size(955, 41);
+            tblReportBrowse.Size = new Size(967, 41);
             tblReportBrowse.TabIndex = 4;
             // 
             // txtReportPath
@@ -1118,7 +1112,7 @@
             txtReportPath.Margin = new Padding(0, 0, 10, 0);
             txtReportPath.Name = "txtReportPath";
             txtReportPath.ReadOnly = true;
-            txtReportPath.Size = new Size(835, 41);
+            txtReportPath.Size = new Size(847, 41);
             txtReportPath.TabIndex = 0;
             txtReportPath.Text = "C:\\Reports\\Production";
             // 
@@ -1131,7 +1125,7 @@
             btnBrowseReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnBrowseReport.ForeColor = Color.FromArgb(51, 65, 85);
             btnBrowseReport.HoverForeColor = Color.Empty;
-            btnBrowseReport.Location = new Point(845, 0);
+            btnBrowseReport.Location = new Point(857, 0);
             btnBrowseReport.Margin = new Padding(0);
             btnBrowseReport.Name = "btnBrowseReport";
             btnBrowseReport.PressedForeColor = Color.Empty;
@@ -1157,7 +1151,7 @@
             flpTestResultCol.Controls.Add(chkResTolerance);
             flpTestResultCol.Controls.Add(chkResMeasurement);
             flpTestResultCol.FlowDirection = FlowDirection.TopDown;
-            flpTestResultCol.Location = new Point(983, 300);
+            flpTestResultCol.Location = new Point(997, 301);
             flpTestResultCol.Margin = new Padding(0, 0, 15, 14);
             flpTestResultCol.MaximumSize = new Size(800, 300);
             flpTestResultCol.Name = "flpTestResultCol";
@@ -1327,10 +1321,10 @@
             cardAppSettings.BackColor = Color.White;
             cardAppSettings.Controls.Add(tblAppCard);
             cardAppSettings.Dock = DockStyle.Fill;
-            cardAppSettings.Location = new Point(0, 1124);
+            cardAppSettings.Location = new Point(0, 1125);
             cardAppSettings.Margin = new Padding(0);
             cardAppSettings.Name = "cardAppSettings";
-            cardAppSettings.Size = new Size(1968, 131);
+            cardAppSettings.Size = new Size(1994, 20);
             cardAppSettings.TabIndex = 3;
             // 
             // tblAppCard
@@ -1358,7 +1352,7 @@
             tblAppCard.RowStyles.Add(new RowStyle());
             tblAppCard.RowStyles.Add(new RowStyle());
             tblAppCard.RowStyles.Add(new RowStyle());
-            tblAppCard.Size = new Size(1968, 305);
+            tblAppCard.Size = new Size(1994, 305);
             tblAppCard.TabIndex = 0;
             // 
             // lblAppTitle
@@ -1370,7 +1364,7 @@
             lblAppTitle.Location = new Point(15, 0);
             lblAppTitle.Margin = new Padding(0, 0, 0, 14);
             lblAppTitle.Name = "lblAppTitle";
-            lblAppTitle.Size = new Size(1938, 36);
+            lblAppTitle.Size = new Size(1964, 36);
             lblAppTitle.TabIndex = 0;
             lblAppTitle.Text = "APPLICATION SETTINGS";
             lblAppTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -1394,7 +1388,7 @@
             lblRefresh.AutoSize = true;
             lblRefresh.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblRefresh.ForeColor = Color.FromArgb(30, 41, 59);
-            lblRefresh.Location = new Point(999, 60);
+            lblRefresh.Location = new Point(1012, 60);
             lblRefresh.Margin = new Padding(15, 10, 0, 4);
             lblRefresh.Name = "lblRefresh";
             lblRefresh.Size = new Size(297, 32);
@@ -1419,10 +1413,10 @@
             cmbRefresh.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbRefresh.Font = new Font("Segoe UI", 9.5F);
             cmbRefresh.Items.AddRange(new object[] { "10 Seconds", "30 Seconds", "1 Minute", "5 Minutes" });
-            cmbRefresh.Location = new Point(999, 111);
+            cmbRefresh.Location = new Point(1012, 111);
             cmbRefresh.Margin = new Padding(15, 0, 0, 14);
             cmbRefresh.Name = "cmbRefresh";
-            cmbRefresh.Size = new Size(954, 43);
+            cmbRefresh.Size = new Size(967, 43);
             cmbRefresh.TabIndex = 4;
             // 
             // chkSoundNotif
@@ -1446,7 +1440,7 @@
             chkConfirmDelete.CheckState = CheckState.Checked;
             chkConfirmDelete.Font = new Font("Segoe UI", 9.5F);
             chkConfirmDelete.ForeColor = Color.FromArgb(30, 41, 59);
-            chkConfirmDelete.Location = new Point(999, 180);
+            chkConfirmDelete.Location = new Point(1012, 180);
             chkConfirmDelete.Margin = new Padding(15, 10, 10, 10);
             chkConfirmDelete.Name = "chkConfirmDelete";
             chkConfirmDelete.Size = new Size(378, 40);
@@ -1460,7 +1454,7 @@
             chkAuditTrail.CheckState = CheckState.Checked;
             chkAuditTrail.Font = new Font("Segoe UI", 9.5F);
             chkAuditTrail.ForeColor = Color.FromArgb(30, 41, 59);
-            chkAuditTrail.Location = new Point(999, 240);
+            chkAuditTrail.Location = new Point(1012, 240);
             chkAuditTrail.Margin = new Padding(15, 10, 10, 10);
             chkAuditTrail.Name = "chkAuditTrail";
             chkAuditTrail.Size = new Size(238, 40);
@@ -1533,14 +1527,13 @@
             cardMaintenanceState.PerformLayout();
             tblMaintCard.ResumeLayout(false);
             tblMaintCard.PerformLayout();
+            flpMaintHeaderActions.ResumeLayout(false);
             pnlMaintInfo.ResumeLayout(false);
             pnlMaintInfo.PerformLayout();
             tblMaintInfo.ResumeLayout(false);
             tblMaintInfo.PerformLayout();
             flpMaintActions.ResumeLayout(false);
             flpMaintActions.PerformLayout();
-            flpMaintHeaderActions.ResumeLayout(false);
-            flpMaintHeaderActions.PerformLayout();
             cardTestSettings.ResumeLayout(false);
             cardTestSettings.PerformLayout();
             tblTestCard.ResumeLayout(false);
@@ -1582,7 +1575,7 @@
 
         private System.Windows.Forms.Label lblTabSysInfo;
 
-        private System.Windows.Forms.TableLayoutPanel tblContent;
+        private System.Windows.Forms.Panel tblContent;
 
         private System.Windows.Forms.TableLayoutPanel tblLeftColumn;
 

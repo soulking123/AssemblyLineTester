@@ -166,12 +166,19 @@ namespace AssemblyLineTester.Helpers
                 );
             }
 
+            int? cachedRadius = null;
+
             card.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                int r = ScaleRadius(card, radius);
+                if (cachedRadius == null)
+                {
+                    if (card.FindForm() != null) cachedRadius = ScaleRadius(card, radius);
+                    else cachedRadius = radius; // Fallback if not yet parented to a form
+                }
+                int r = cachedRadius.Value;
 
                 Color parentBg = card.Parent?.BackColor != null && card.Parent.BackColor != Color.Transparent
                     ? card.Parent.BackColor
@@ -217,12 +224,19 @@ namespace AssemblyLineTester.Helpers
             btn.MouseDown += (s, e) => { btn.BackColor = pressColor; btn.Invalidate(); };
             btn.MouseUp += (s, e) => { btn.BackColor = hoverColor; btn.Invalidate(); };
 
+            int? cachedRadius = null;
+
             btn.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                int r = ScaleRadius(btn, radius);
+                if (cachedRadius == null)
+                {
+                    if (btn.FindForm() != null) cachedRadius = ScaleRadius(btn, radius);
+                    else cachedRadius = radius;
+                }
+                int r = cachedRadius.Value;
 
                 Color parentBg = btn.Parent?.BackColor != null && btn.Parent.BackColor != Color.Transparent
                     ? btn.Parent.BackColor
@@ -267,13 +281,20 @@ namespace AssemblyLineTester.Helpers
 
             DoubleBufferedProperty?.SetValue(badge, true);
 
+            int? cachedRadius = null;
+
             badge.Paint += (s, e) =>
             {
                 if (s is not Control ctrl) return;
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                int r = ScaleRadius(badge, radius);
+                if (cachedRadius == null)
+                {
+                    if (badge.FindForm() != null) cachedRadius = ScaleRadius(badge, radius);
+                    else cachedRadius = radius;
+                }
+                int r = cachedRadius.Value;
 
                 Color parentBg = badge.Parent?.BackColor != null && badge.Parent.BackColor != Color.Transparent
                     ? badge.Parent.BackColor
@@ -365,21 +386,30 @@ namespace AssemblyLineTester.Helpers
             if (root is null || factor <= 0f) return;
             if (Math.Abs(factor - 1f) < 0.01f) return;
 
-            foreach (Control control in Descendants(root))
+            root.SuspendLayout();
+            try
             {
-                // Control.Font returns the parent's instance when unset, so identity means inherited.
-                bool inherited = control.Parent is not null && ReferenceEquals(control.Font, control.Parent.Font);
-                if (!inherited)
-                {
-                    control.Font = ScaleFont(control.Font, factor);
-                }
 
-                if (control is DataGridView grid)
+                foreach (Control control in Descendants(root))
                 {
-                    grid.DefaultCellStyle.Font = ScaleFont(grid.DefaultCellStyle.Font ?? grid.Font, factor);
-                    grid.ColumnHeadersDefaultCellStyle.Font = ScaleFont(grid.ColumnHeadersDefaultCellStyle.Font ?? grid.Font, factor);
-                    grid.RowsDefaultCellStyle.Font = ScaleFont(grid.RowsDefaultCellStyle.Font ?? grid.Font, factor);
+                // Control.Font returns the parent's instance when unset, so identity means inherited.
+                    bool inherited = control.Parent is not null && ReferenceEquals(control.Font, control.Parent.Font);
+                    if (!inherited)
+                    {
+                        control.Font = ScaleFont(control.Font, factor);
+                    }
+
+                    if (control is DataGridView grid)
+                    {
+                        grid.DefaultCellStyle.Font = ScaleFont(grid.DefaultCellStyle.Font ?? grid.Font, factor);
+                        grid.ColumnHeadersDefaultCellStyle.Font = ScaleFont(grid.ColumnHeadersDefaultCellStyle.Font ?? grid.Font, factor);
+                        grid.RowsDefaultCellStyle.Font = ScaleFont(grid.RowsDefaultCellStyle.Font ?? grid.Font, factor);
+                    }
                 }
+            }
+            finally
+            {
+                root.ResumeLayout(false);
             }
         }
 

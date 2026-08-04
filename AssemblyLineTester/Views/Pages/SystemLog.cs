@@ -49,6 +49,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlLevelStats.Resize += (s, ev) => pnlLevelStats.Invalidate();
             _moduleScroll.Resize += (s, ev) => _moduleScroll.Invalidate();
 
+            PopulateModuleFilter();
             gridData.CellPainting += gridData_CellPainting;
             InitializeGridColumns();
 
@@ -156,6 +157,22 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        // Built from what the log actually holds. The designer list was written from the mockup
+        // and never grew, so entries from newer modules could not be filtered at all.
+        private void PopulateModuleFilter()
+        {
+            string previous = cmbModule.Text;
+
+            cmbModule.Items.Clear();
+            cmbModule.Items.Add("All");
+            foreach (string module in _logService.GetKnownModules())
+            {
+                cmbModule.Items.Add(module);
+            }
+
+            cmbModule.Text = cmbModule.Items.Contains(previous) ? previous : "All";
+        }
+
         // Puts the filter controls back to the last 30 days with nothing else set.
         private void ResetFilters()
         {
@@ -163,8 +180,8 @@ namespace AssemblyLineTester.Views.Pages
             dtpStart.Value = DateTime.Now.AddDays(-30);
             cmbLogLevel.Text = "All";
             cmbModule.Text = "All";
-            cmbUser.Text = "All";
-            cmbAction.Text = "All";
+            txtUser.Text = string.Empty;
+            txtAction.Text = string.Empty;
             txtKeyword.Text = string.Empty;
         }
 
@@ -188,11 +205,11 @@ namespace AssemblyLineTester.Views.Pages
             if (!string.Equals(cmbModule.Text, "All", StringComparison.OrdinalIgnoreCase))
                 filter.ModuleName = cmbModule.Text;
 
-            if (!string.Equals(cmbUser.Text, "All", StringComparison.OrdinalIgnoreCase))
-                filter.UserName = cmbUser.Text;
+            if (!string.IsNullOrWhiteSpace(txtUser.Text))
+                filter.UserName = txtUser.Text.Trim();
 
-            if (!string.Equals(cmbAction.Text, "All", StringComparison.OrdinalIgnoreCase))
-                filter.ActionName = cmbAction.Text;
+            if (!string.IsNullOrWhiteSpace(txtAction.Text))
+                filter.ActionName = txtAction.Text.Trim();
 
             if (!string.IsNullOrWhiteSpace(txtKeyword.Text))
                 filter.Keyword = txtKeyword.Text.Trim();
