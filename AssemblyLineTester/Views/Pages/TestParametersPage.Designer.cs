@@ -36,12 +36,26 @@ namespace AssemblyLineTester.Views.Pages
             pnlLeftBox = new Panel();
             gridConfig = new DataGridView();
             colNo = new DataGridViewTextBoxColumn();
+            colNetId = new DataGridViewTextBoxColumn();
+            colHarnessGroup = new DataGridViewTextBoxColumn();
             colFromAddr = new DataGridViewTextBoxColumn();
+            colFromLabel = new DataGridViewTextBoxColumn();
             colToAddr = new DataGridViewTextBoxColumn();
+            colToLabel = new DataGridViewTextBoxColumn();
             colTestType = new DataGridViewComboBoxColumn();
+            colLowerLimit = new DataGridViewTextBoxColumn();
+            colUpperLimit = new DataGridViewTextBoxColumn();
+            colExpectedValue = new DataGridViewTextBoxColumn();
+            colTolerance = new DataGridViewTextBoxColumn();
             colUnit = new DataGridViewTextBoxColumn();
             pnlConfigInfo = new Panel();
             tblConfigInfo = new TableLayoutPanel();
+            tblCellConfigName = new TableLayoutPanel();
+            lblConfigName = new Label();
+            txtConfigName = new TextBox();
+            tblCellProductModel = new TableLayoutPanel();
+            lblProductModel = new Label();
+            txtProductModel = new TextBox();
             tblCellConnRes = new TableLayoutPanel();
             lblConnectionResistance = new Label();
             txtConnectionResistance = new TextBox();
@@ -67,20 +81,7 @@ namespace AssemblyLineTester.Views.Pages
             picPreview = new PictureBox();
             pnlHeaderBottom = new Panel();
             lblHeaderBottom = new Label();
-            colNetId = new DataGridViewTextBoxColumn();
-            colHarnessGroup = new DataGridViewTextBoxColumn();
-            colFromLabel = new DataGridViewTextBoxColumn();
-            colToLabel = new DataGridViewTextBoxColumn();
-            colLowerLimit = new DataGridViewTextBoxColumn();
-            colUpperLimit = new DataGridViewTextBoxColumn();
-            colExpectedValue = new DataGridViewTextBoxColumn();
-            colTolerance = new DataGridViewTextBoxColumn();
-            tblCellConfigName = new TableLayoutPanel();
-            lblConfigName = new Label();
-            txtConfigName = new TextBox();
-            tblCellProductModel = new TableLayoutPanel();
-            lblProductModel = new Label();
-            txtProductModel = new TextBox();
+            btnComplex = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainerMain).BeginInit();
             splitContainerMain.Panel1.SuspendLayout();
             splitContainerMain.Panel2.SuspendLayout();
@@ -89,6 +90,8 @@ namespace AssemblyLineTester.Views.Pages
             ((System.ComponentModel.ISupportInitialize)gridConfig).BeginInit();
             pnlConfigInfo.SuspendLayout();
             tblConfigInfo.SuspendLayout();
+            tblCellConfigName.SuspendLayout();
+            tblCellProductModel.SuspendLayout();
             tblCellConnRes.SuspendLayout();
             tblCellInsRes.SuspendLayout();
             pnlConfigInfoHeader.SuspendLayout();
@@ -101,8 +104,6 @@ namespace AssemblyLineTester.Views.Pages
             pnlPreviewScroll.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picPreview).BeginInit();
             pnlHeaderBottom.SuspendLayout();
-            tblCellConfigName.SuspendLayout();
-            tblCellProductModel.SuspendLayout();
             SuspendLayout();
             // 
             // btnLearnConnection
@@ -116,7 +117,7 @@ namespace AssemblyLineTester.Views.Pages
             btnLearnConnection.ForeColor = Color.Black;
             btnLearnConnection.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnLearnConnection.HoverForeColor = Color.Empty;
-            btnLearnConnection.Location = new Point(12, 6);
+            btnLearnConnection.Location = new Point(12, 137);
             btnLearnConnection.Margin = new Padding(12, 6, 12, 6);
             btnLearnConnection.Name = "btnLearnConnection";
             btnLearnConnection.NormalBackColor = Color.FromArgb(203, 213, 225);
@@ -139,7 +140,7 @@ namespace AssemblyLineTester.Views.Pages
             btnStartAll.ForeColor = Color.Black;
             btnStartAll.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnStartAll.HoverForeColor = Color.Empty;
-            btnStartAll.Location = new Point(176, 6);
+            btnStartAll.Location = new Point(176, 137);
             btnStartAll.Margin = new Padding(12, 6, 12, 6);
             btnStartAll.Name = "btnStartAll";
             btnStartAll.NormalBackColor = Color.FromArgb(203, 213, 225);
@@ -162,7 +163,7 @@ namespace AssemblyLineTester.Views.Pages
             btnStartSelected.ForeColor = Color.Black;
             btnStartSelected.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnStartSelected.HoverForeColor = Color.Empty;
-            btnStartSelected.Location = new Point(340, 6);
+            btnStartSelected.Location = new Point(340, 137);
             btnStartSelected.Margin = new Padding(12, 6, 12, 6);
             btnStartSelected.Name = "btnStartSelected";
             btnStartSelected.NormalBackColor = Color.FromArgb(203, 213, 225);
@@ -185,7 +186,7 @@ namespace AssemblyLineTester.Views.Pages
             btnAbort.ForeColor = Color.Black;
             btnAbort.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnAbort.HoverForeColor = Color.Empty;
-            btnAbort.Location = new Point(504, 6);
+            btnAbort.Location = new Point(504, 137);
             btnAbort.Margin = new Padding(12, 6, 12, 6);
             btnAbort.Name = "btnAbort";
             btnAbort.NormalBackColor = Color.FromArgb(203, 213, 225);
@@ -250,12 +251,12 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colNetId, colHarnessGroup, colFromAddr, colFromLabel, colToAddr, colToLabel, colTestType, colLowerLimit, colUpperLimit, colExpectedValue, colTolerance, colUnit });
             gridConfig.Dock = DockStyle.Fill;
             gridConfig.EnableHeadersVisualStyles = false;
-            gridConfig.Location = new Point(0, 213);
+            gridConfig.Location = new Point(0, 283);
             gridConfig.Name = "gridConfig";
             gridConfig.RowHeadersVisible = false;
             gridConfig.RowHeadersWidth = 82;
             gridConfig.RowTemplate.Height = 38;
-            gridConfig.Size = new Size(675, 617);
+            gridConfig.Size = new Size(675, 547);
             gridConfig.TabIndex = 4;
             // 
             // colNo
@@ -265,17 +266,41 @@ namespace AssemblyLineTester.Views.Pages
             colNo.Name = "colNo";
             colNo.ReadOnly = true;
             // 
+            // colNetId
+            // 
+            colNetId.HeaderText = "Net-ID";
+            colNetId.MinimumWidth = 110;
+            colNetId.Name = "colNetId";
+            // 
+            // colHarnessGroup
+            // 
+            colHarnessGroup.HeaderText = "Harness-Group";
+            colHarnessGroup.MinimumWidth = 130;
+            colHarnessGroup.Name = "colHarnessGroup";
+            // 
             // colFromAddr
             // 
             colFromAddr.HeaderText = "From";
             colFromAddr.MinimumWidth = 90;
             colFromAddr.Name = "colFromAddr";
             // 
+            // colFromLabel
+            // 
+            colFromLabel.HeaderText = "Net-From\nLabel";
+            colFromLabel.MinimumWidth = 100;
+            colFromLabel.Name = "colFromLabel";
+            // 
             // colToAddr
             // 
             colToAddr.HeaderText = "To";
             colToAddr.MinimumWidth = 90;
             colToAddr.Name = "colToAddr";
+            // 
+            // colToLabel
+            // 
+            colToLabel.HeaderText = "Net-To\nLabel";
+            colToLabel.MinimumWidth = 100;
+            colToLabel.Name = "colToLabel";
             // 
             // colTestType
             // 
@@ -284,6 +309,32 @@ namespace AssemblyLineTester.Views.Pages
             colTestType.Items.AddRange(new object[] { "WIRE", "4WIRE", "TWISTED PAIR", "SIGNATURE WIRE", "RESISTOR", "4RESISTOR", "CAPACITOR", "DIODE", "SIGNATURE DIODE", "OPEN", "CLOSE", "LINK", "PROBE", "COMMENT", "LUA COMPONENT" });
             colTestType.MinimumWidth = 120;
             colTestType.Name = "colTestType";
+            // 
+            // colLowerLimit
+            // 
+            colLowerLimit.HeaderText = "Lower\nLimit";
+            colLowerLimit.MinimumWidth = 80;
+            colLowerLimit.Name = "colLowerLimit";
+            colLowerLimit.ReadOnly = true;
+            // 
+            // colUpperLimit
+            // 
+            colUpperLimit.HeaderText = "Upper\nLimit";
+            colUpperLimit.MinimumWidth = 80;
+            colUpperLimit.Name = "colUpperLimit";
+            colUpperLimit.ReadOnly = true;
+            // 
+            // colExpectedValue
+            // 
+            colExpectedValue.HeaderText = "Expected\nValue";
+            colExpectedValue.MinimumWidth = 110;
+            colExpectedValue.Name = "colExpectedValue";
+            // 
+            // colTolerance
+            // 
+            colTolerance.HeaderText = "Tolerance";
+            colTolerance.MinimumWidth = 90;
+            colTolerance.Name = "colTolerance";
             // 
             // colUnit
             // 
@@ -303,7 +354,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlConfigInfo.Location = new Point(0, 98);
             pnlConfigInfo.Name = "pnlConfigInfo";
             pnlConfigInfo.Padding = new Padding(9, 6, 9, 6);
-            pnlConfigInfo.Size = new Size(675, 115);
+            pnlConfigInfo.Size = new Size(675, 185);
             pnlConfigInfo.TabIndex = 3;
             // 
             // tblConfigInfo
@@ -332,24 +383,109 @@ namespace AssemblyLineTester.Views.Pages
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
-            tblConfigInfo.Size = new Size(657, 103);
+            tblConfigInfo.Size = new Size(657, 173);
             tblConfigInfo.TabIndex = 0;
+            // 
+            // tblCellConfigName
+            // 
+            tblCellConfigName.AutoSize = true;
+            tblCellConfigName.ColumnCount = 1;
+            tblConfigInfo.SetColumnSpan(tblCellConfigName, 2);
+            tblCellConfigName.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblCellConfigName.Controls.Add(lblConfigName, 0, 0);
+            tblCellConfigName.Controls.Add(txtConfigName, 0, 1);
+            tblCellConfigName.Dock = DockStyle.Fill;
+            tblCellConfigName.Location = new Point(6, 4);
+            tblCellConfigName.Margin = new Padding(6, 4, 15, 8);
+            tblCellConfigName.Name = "tblCellConfigName";
+            tblCellConfigName.RowCount = 2;
+            tblCellConfigName.RowStyles.Add(new RowStyle());
+            tblCellConfigName.RowStyles.Add(new RowStyle());
+            tblCellConfigName.Size = new Size(307, 56);
+            tblCellConfigName.TabIndex = 0;
+            // 
+            // lblConfigName
+            // 
+            lblConfigName.AutoSize = true;
+            lblConfigName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblConfigName.ForeColor = Color.FromArgb(100, 116, 139);
+            lblConfigName.Location = new Point(0, 0);
+            lblConfigName.Margin = new Padding(0, 0, 0, 6);
+            lblConfigName.Name = "lblConfigName";
+            lblConfigName.Size = new Size(101, 20);
+            lblConfigName.TabIndex = 0;
+            lblConfigName.Text = "Config Name";
+            // 
+            // txtConfigName
+            // 
+            txtConfigName.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtConfigName.CausesValidation = false;
+            txtConfigName.Font = new Font("Segoe UI", 10F);
+            txtConfigName.Location = new Point(0, 26);
+            txtConfigName.Margin = new Padding(0);
+            txtConfigName.Name = "txtConfigName";
+            txtConfigName.Size = new Size(307, 30);
+            txtConfigName.TabIndex = 1;
+            txtConfigName.Text = "Main Harness Test";
+            // 
+            // tblCellProductModel
+            // 
+            tblCellProductModel.AutoSize = true;
+            tblCellProductModel.ColumnCount = 1;
+            tblConfigInfo.SetColumnSpan(tblCellProductModel, 2);
+            tblCellProductModel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblCellProductModel.Controls.Add(lblProductModel, 0, 0);
+            tblCellProductModel.Controls.Add(txtProductModel, 0, 1);
+            tblCellProductModel.Dock = DockStyle.Fill;
+            tblCellProductModel.Location = new Point(343, 4);
+            tblCellProductModel.Margin = new Padding(15, 4, 6, 8);
+            tblCellProductModel.Name = "tblCellProductModel";
+            tblCellProductModel.RowCount = 2;
+            tblCellProductModel.RowStyles.Add(new RowStyle());
+            tblCellProductModel.RowStyles.Add(new RowStyle());
+            tblCellProductModel.Size = new Size(308, 56);
+            tblCellProductModel.TabIndex = 1;
+            // 
+            // lblProductModel
+            // 
+            lblProductModel.AutoSize = true;
+            lblProductModel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblProductModel.ForeColor = Color.FromArgb(100, 116, 139);
+            lblProductModel.Location = new Point(0, 0);
+            lblProductModel.Margin = new Padding(0, 0, 0, 6);
+            lblProductModel.Name = "lblProductModel";
+            lblProductModel.Size = new Size(112, 20);
+            lblProductModel.TabIndex = 0;
+            lblProductModel.Text = "Product Model";
+            // 
+            // txtProductModel
+            // 
+            txtProductModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtProductModel.CausesValidation = false;
+            txtProductModel.Font = new Font("Segoe UI", 10F);
+            txtProductModel.Location = new Point(0, 26);
+            txtProductModel.Margin = new Padding(0);
+            txtProductModel.Name = "txtProductModel";
+            txtProductModel.Size = new Size(308, 30);
+            txtProductModel.TabIndex = 1;
+            txtProductModel.Text = "6060";
             // 
             // tblCellConnRes
             // 
             tblCellConnRes.AutoSize = true;
             tblCellConnRes.ColumnCount = 1;
+            tblConfigInfo.SetColumnSpan(tblCellConnRes, 2);
             tblCellConnRes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblCellConnRes.Controls.Add(lblConnectionResistance, 0, 0);
             tblCellConnRes.Controls.Add(txtConnectionResistance, 0, 1);
             tblCellConnRes.Dock = DockStyle.Fill;
-            tblCellConnRes.Location = new Point(4, 44);
+            tblCellConnRes.Location = new Point(4, 70);
             tblCellConnRes.Margin = new Padding(4, 2, 9, 5);
             tblCellConnRes.Name = "tblCellConnRes";
             tblCellConnRes.RowCount = 2;
             tblCellConnRes.RowStyles.Add(new RowStyle());
             tblCellConnRes.RowStyles.Add(new RowStyle());
-            tblCellConnRes.Size = new Size(315, 54);
+            tblCellConnRes.Size = new Size(315, 56);
             tblCellConnRes.TabIndex = 2;
             // 
             // lblConnectionResistance
@@ -368,27 +504,27 @@ namespace AssemblyLineTester.Views.Pages
             // 
             txtConnectionResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtConnectionResistance.Font = new Font("Segoe UI", 10F);
-            txtConnectionResistance.Location = new Point(0, 32);
+            txtConnectionResistance.Location = new Point(0, 26);
             txtConnectionResistance.Margin = new Padding(0);
             txtConnectionResistance.Name = "txtConnectionResistance";
-            txtConnectionResistance.Size = new Size(513, 30);
+            txtConnectionResistance.Size = new Size(315, 30);
             txtConnectionResistance.TabIndex = 1;
             txtConnectionResistance.Text = "100";
-            tblConfigInfo.SetColumnSpan(tblCellConfigName, 2);
-            tblConfigInfo.SetColumnSpan(tblCellProductModel, 2);
-            tblConfigInfo.SetColumnSpan(tblCellConnRes, 2);
+            // 
+            // tblCellInsRes
+            // 
             tblConfigInfo.SetColumnSpan(tblCellInsRes, 2);
             tblCellInsRes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblCellInsRes.Controls.Add(lblInsulationResistance, 0, 0);
             tblCellInsRes.Controls.Add(txtInsulationResistance, 0, 1);
             tblCellInsRes.Dock = DockStyle.Fill;
-            tblCellInsRes.Location = new Point(337, 44);
+            tblCellInsRes.Location = new Point(337, 70);
             tblCellInsRes.Margin = new Padding(9, 2, 4, 5);
             tblCellInsRes.Name = "tblCellInsRes";
             tblCellInsRes.RowCount = 2;
             tblCellInsRes.RowStyles.Add(new RowStyle());
             tblCellInsRes.RowStyles.Add(new RowStyle());
-            tblCellInsRes.Size = new Size(316, 54);
+            tblCellInsRes.Size = new Size(316, 56);
             tblCellInsRes.TabIndex = 3;
             // 
             // lblInsulationResistance
@@ -408,7 +544,7 @@ namespace AssemblyLineTester.Views.Pages
             txtInsulationResistance.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtInsulationResistance.CausesValidation = false;
             txtInsulationResistance.Font = new Font("Segoe UI", 10F);
-            txtInsulationResistance.Location = new Point(0, 24);
+            txtInsulationResistance.Location = new Point(0, 25);
             txtInsulationResistance.Margin = new Padding(0);
             txtInsulationResistance.Name = "txtInsulationResistance";
             txtInsulationResistance.Size = new Size(316, 30);
@@ -471,6 +607,7 @@ namespace AssemblyLineTester.Views.Pages
             flpButtonsLeft.Controls.Add(btnTotalNet);
             flpButtonsLeft.Controls.Add(btnAdd);
             flpButtonsLeft.Controls.Add(btnRemove);
+            flpButtonsLeft.Controls.Add(btnComplex);
             flpButtonsLeft.Dock = DockStyle.Fill;
             flpButtonsLeft.Location = new Point(0, 0);
             flpButtonsLeft.Margin = new Padding(0);
@@ -700,145 +837,15 @@ namespace AssemblyLineTester.Views.Pages
             lblHeaderBottom.Text = "Live Schematic Diagram Preview";
             lblHeaderBottom.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // colNetId
+            // btnComplex
             // 
-            colNetId.HeaderText = "Net-ID";
-            colNetId.MinimumWidth = 110;
-            colNetId.Name = "colNetId";
-            colNetId.Width = 130;
-            // 
-            // colHarnessGroup
-            // 
-            colHarnessGroup.HeaderText = "Harness-Group";
-            colHarnessGroup.MinimumWidth = 130;
-            colHarnessGroup.Name = "colHarnessGroup";
-            colHarnessGroup.Width = 160;
-            // 
-            // colFromLabel
-            // 
-            colFromLabel.HeaderText = "Net-From\nLabel";
-            colFromLabel.MinimumWidth = 100;
-            colFromLabel.Name = "colFromLabel";
-            colFromLabel.Width = 120;
-            // 
-            // colToLabel
-            // 
-            colToLabel.HeaderText = "Net-To\nLabel";
-            colToLabel.MinimumWidth = 100;
-            colToLabel.Name = "colToLabel";
-            colToLabel.Width = 120;
-            // 
-            // colLowerLimit
-            // 
-            colLowerLimit.HeaderText = "Lower\nLimit";
-            colLowerLimit.MinimumWidth = 80;
-            colLowerLimit.Name = "colLowerLimit";
-            colLowerLimit.ReadOnly = true;
-            colLowerLimit.Width = 95;
-            // 
-            // colUpperLimit
-            // 
-            colUpperLimit.HeaderText = "Upper\nLimit";
-            colUpperLimit.MinimumWidth = 80;
-            colUpperLimit.Name = "colUpperLimit";
-            colUpperLimit.ReadOnly = true;
-            colUpperLimit.Width = 95;
-            // 
-            // colExpectedValue
-            // 
-            colExpectedValue.HeaderText = "Expected\nValue";
-            colExpectedValue.MinimumWidth = 110;
-            colExpectedValue.Name = "colExpectedValue";
-            colExpectedValue.Width = 140;
-            // 
-            // colTolerance
-            // 
-            colTolerance.HeaderText = "Tolerance";
-            colTolerance.MinimumWidth = 90;
-            colTolerance.Name = "colTolerance";
-            colTolerance.Width = 110;
-            // 
-            // tblCellConfigName
-            // 
-            tblCellConfigName.AutoSize = true;
-            tblCellConfigName.ColumnCount = 1;
-            tblCellConfigName.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblCellConfigName.Controls.Add(lblConfigName, 0, 0);
-            tblCellConfigName.Controls.Add(txtConfigName, 0, 1);
-            tblCellConfigName.Dock = DockStyle.Fill;
-            tblCellConfigName.Location = new Point(6, 4);
-            tblCellConfigName.Margin = new Padding(6, 4, 15, 8);
-            tblCellConfigName.Name = "tblCellConfigName";
-            tblCellConfigName.RowCount = 2;
-            tblCellConfigName.RowStyles.Add(new RowStyle());
-            tblCellConfigName.RowStyles.Add(new RowStyle());
-            tblCellConfigName.Size = new Size(513, 81);
-            tblCellConfigName.TabIndex = 0;
-            // 
-            // lblConfigName
-            // 
-            lblConfigName.AutoSize = true;
-            lblConfigName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblConfigName.ForeColor = Color.FromArgb(100, 116, 139);
-            lblConfigName.Location = new Point(0, 0);
-            lblConfigName.Margin = new Padding(0, 0, 0, 6);
-            lblConfigName.Name = "lblConfigName";
-            lblConfigName.Size = new Size(101, 20);
-            lblConfigName.TabIndex = 0;
-            lblConfigName.Text = "Config Name";
-            // 
-            // txtConfigName
-            // 
-            txtConfigName.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtConfigName.CausesValidation = false;
-            txtConfigName.Font = new Font("Segoe UI", 10F);
-            txtConfigName.Location = new Point(0, 38);
-            txtConfigName.Margin = new Padding(0);
-            txtConfigName.Name = "txtConfigName";
-            txtConfigName.Size = new Size(513, 30);
-            txtConfigName.TabIndex = 1;
-            txtConfigName.Text = "Main Harness Test";
-            // 
-            // tblCellProductModel
-            // 
-            tblCellProductModel.AutoSize = true;
-            tblCellProductModel.ColumnCount = 1;
-            tblCellProductModel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblCellProductModel.Controls.Add(lblProductModel, 0, 0);
-            tblCellProductModel.Controls.Add(txtProductModel, 0, 1);
-            tblCellProductModel.Dock = DockStyle.Fill;
-            tblCellProductModel.Location = new Point(549, 4);
-            tblCellProductModel.Margin = new Padding(15, 4, 6, 8);
-            tblCellProductModel.Name = "tblCellProductModel";
-            tblCellProductModel.RowCount = 2;
-            tblCellProductModel.RowStyles.Add(new RowStyle());
-            tblCellProductModel.RowStyles.Add(new RowStyle());
-            tblCellProductModel.Size = new Size(513, 81);
-            tblCellProductModel.TabIndex = 1;
-            // 
-            // lblProductModel
-            // 
-            lblProductModel.AutoSize = true;
-            lblProductModel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblProductModel.ForeColor = Color.FromArgb(100, 116, 139);
-            lblProductModel.Location = new Point(0, 0);
-            lblProductModel.Margin = new Padding(0, 0, 0, 6);
-            lblProductModel.Name = "lblProductModel";
-            lblProductModel.Size = new Size(112, 20);
-            lblProductModel.TabIndex = 0;
-            lblProductModel.Text = "Product Model";
-            // 
-            // txtProductModel
-            // 
-            txtProductModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtProductModel.CausesValidation = false;
-            txtProductModel.Font = new Font("Segoe UI", 10F);
-            txtProductModel.Location = new Point(0, 38);
-            txtProductModel.Margin = new Padding(0);
-            txtProductModel.Name = "txtProductModel";
-            txtProductModel.Size = new Size(513, 30);
-            txtProductModel.TabIndex = 1;
-            txtProductModel.Text = "6060";
+            btnComplex.Location = new Point(233, 8);
+            btnComplex.Name = "btnComplex";
+            btnComplex.Size = new Size(94, 29);
+            btnComplex.TabIndex = 3;
+            btnComplex.Text = "Temporary";
+            btnComplex.UseVisualStyleBackColor = true;
+            btnComplex.Click += btnComplex_Click;
             // 
             // TestParametersPage
             // 
@@ -848,7 +855,7 @@ namespace AssemblyLineTester.Views.Pages
             Controls.Add(splitContainerMain);
             Margin = new Padding(0);
             Name = "TestParametersPage";
-            Padding = new Padding(9, 9, 9, 9);
+            Padding = new Padding(9);
             Size = new Size(1259, 850);
             splitContainerMain.Panel1.ResumeLayout(false);
             splitContainerMain.Panel2.ResumeLayout(false);
@@ -861,6 +868,10 @@ namespace AssemblyLineTester.Views.Pages
             pnlConfigInfo.PerformLayout();
             tblConfigInfo.ResumeLayout(false);
             tblConfigInfo.PerformLayout();
+            tblCellConfigName.ResumeLayout(false);
+            tblCellConfigName.PerformLayout();
+            tblCellProductModel.ResumeLayout(false);
+            tblCellProductModel.PerformLayout();
             tblCellConnRes.ResumeLayout(false);
             tblCellConnRes.PerformLayout();
             tblCellInsRes.ResumeLayout(false);
@@ -875,10 +886,6 @@ namespace AssemblyLineTester.Views.Pages
             pnlPreviewScroll.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picPreview).EndInit();
             pnlHeaderBottom.ResumeLayout(false);
-            tblCellConfigName.ResumeLayout(false);
-            tblCellConfigName.PerformLayout();
-            tblCellProductModel.ResumeLayout(false);
-            tblCellProductModel.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -937,5 +944,6 @@ namespace AssemblyLineTester.Views.Pages
         private DataGridViewTextBoxColumn colFromAddr;
         private DataGridViewTextBoxColumn colToAddr;
         private DataGridViewTextBoxColumn colUnit;
+        private Button btnComplex;
     }
 }

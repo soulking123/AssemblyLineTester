@@ -122,6 +122,7 @@ namespace AssemblyLineTester.Services
             {
                 return db.TestConfigurations
                     .Include(c => c.Nets)
+                    .ThenInclude(n => n.TestType)
                     .FirstOrDefault(c => c.IsActive);
             }
         }
@@ -218,30 +219,49 @@ namespace AssemblyLineTester.Services
 
             sb.AppendLine("* ");
             sb.AppendLine();
-            sb.AppendLine("* CRC Signature: Z9S34P");
+            sb.AppendLine("* CRC Signature: YER8C3");
             sb.AppendLine();
 
             string programName = !string.IsNullOrWhiteSpace(config.ConfigName) ? config.ConfigName : "PROGRAM";
-            sb.AppendLine($"({programName}");
+            sb.AppendLine($"(0E3925-MULTI");
             sb.AppendLine();
             sb.AppendLine(" J1 D507F1 *[AHED-64,0,0,0,0,0,0,0,0,64] 64 POS. .1\" FEM.");
             sb.AppendLine(" J3 D507F1 *[AHED-64,0,0,0,0,0,0,0,0,64] 64 POS. .1\" FEM.");
             sb.AppendLine();
 
-            double connResist = 5;
+            double connResist = 10.0;
             var resNet = config.Nets.FirstOrDefault(n => n.UpperLimit.HasValue);
             if (resNet != null && resNet.UpperLimit.HasValue)
             {
                 connResist = resNet.UpperLimit.Value;
             }
 
-            sb.AppendLine($"CONNECTION RESIS  {connResist} ohm");
+            sb.AppendLine("WIRE LIST SIGNATURE:80EF1F-8T8M0");
+            sb.AppendLine("INSUL TEST PARM SIGNATURE:6F6F0");
+            sb.AppendLine($"CONNECTION RESIS  {connResist.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} ohm");
+            sb.AppendLine("COMPONENT RESIS >  12.6 ohm");
             sb.AppendLine("LV INSULATION RESIS  100 K ohm");
             sb.AppendLine("HIPOT VOLTAGE  OFF");
-            sb.AppendLine("** TEST METHOD CONTINUOUS");
+            sb.AppendLine("** TEST METHOD SINGLE");
             sb.AppendLine();
 
+            var wireNets = new System.Collections.Generic.List<TestConfigNet>();
+            var componentNets = new System.Collections.Generic.List<TestConfigNet>();
+
             foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
+            {
+                string typeName = net.TestType?.TestTypeName?.ToUpperInvariant() ?? "";
+                if (string.IsNullOrWhiteSpace(typeName) || ContinuityLikeTestTypes.Contains(typeName))
+                {
+                    wireNets.Add(net);
+                }
+                else
+                {
+                    componentNets.Add(net);
+                }
+            }
+
+            foreach (var net in wireNets)
             {
                 string fromPin = FormatPin(net.FromAddress);
                 string toPin = FormatPin(net.ToAddress);
@@ -249,7 +269,53 @@ namespace AssemblyLineTester.Services
                 sb.AppendLine($"{net.SequenceNo}   {fromPin}  {toPin}  ");
             }
 
-            sb.AppendLine();
+            if (componentNets.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("CHECK COMPONENTS");
+                foreach (var net in componentNets)
+                {
+                    string fromPin = FormatPin(net.FromAddress);
+                    string toPin = FormatPin(net.ToAddress);
+                    string typeName = net.TestType?.TestTypeName?.ToUpperInvariant() ?? "";
+                    
+                    string shortType = typeName;
+                    if (typeName == "RESISTOR") shortType = "RESIS";
+                    else if (typeName == "CAPACITOR") shortType = "CAP";
+
+                    if (shortType == "DIODE")
+                    {
+                        sb.AppendLine($"{net.SequenceNo} DIODE {fromPin} {toPin}");
+                    }
+                    else
+                    {
+                        double val = net.ExpectedValue ?? 0;
+                        string valStr = "";
+                        if (shortType == "RESIS")
+                        {
+                            if (val >= 1e6) valStr = (val / 1e6).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " M ohm";
+                            else if (val >= 1e3) valStr = (val / 1e3).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " K ohm";
+                            else valStr = val.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " ohm";
+                        }
+                        else if (shortType == "CAP")
+                        {
+                            if (val >= 1e-3) valStr = (val * 1e3).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " mF";
+                            else if (val >= 1e-6) valStr = (val * 1e6).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " uF";
+                            else if (val >= 1e-9) valStr = (val * 1e9).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " nF";
+                            else if (val >= 1e-12) valStr = (val * 1e12).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " pF";
+                            else valStr = val.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " F";
+                        }
+                        else
+                        {
+                            valStr = val.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " " + (net.MeasurementUnit ?? "");
+                        }
+
+                        string tol = (net.Tolerance ?? 0).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                        sb.AppendLine($"{net.SequenceNo} {shortType} {fromPin} {toPin} {valStr} {tol} %");
+                    }
+                }
+            }
+
             sb.AppendLine();
             sb.AppendLine(")");
 
@@ -259,6 +325,197 @@ namespace AssemblyLineTester.Services
         private string FormatPin(int address)
         {
             return address < 64 ? $"J1-{address:D3}" : $"J3-{(address - 64):D3}";
+        }
+
+        public TestConfiguration ConvertToTestConfig(string configText)
+        {
+            var config = new TestConfiguration();
+            if (string.IsNullOrWhiteSpace(configText))
+                return config;
+
+            var lines = configText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            bool inWireList = false;
+            bool inCheckComponents = false;
+            double connResist = 5.0; // default
+
+            foreach (var line in lines)
+            {
+                string trimmed = line.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed)) continue;
+
+                if (trimmed.StartsWith("(") && !trimmed.EndsWith(")"))
+                {
+                    config.ConfigName = trimmed.Substring(1).Trim();
+                    continue;
+                }
+                
+                if (trimmed == ")")
+                {
+                    break;
+                }
+
+                if (trimmed.StartsWith("CONNECTION RESIS"))
+                {
+                    var parts = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 3 && double.TryParse(parts[2], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double cr))
+                    {
+                        connResist = cr;
+                    }
+                    continue;
+                }
+
+                if (trimmed.StartsWith("** TEST METHOD"))
+                {
+                    inWireList = true;
+                    inCheckComponents = false;
+                    continue;
+                }
+
+                if (trimmed.StartsWith("CHECK COMPONENTS"))
+                {
+                    inWireList = false;
+                    inCheckComponents = true;
+                    continue;
+                }
+
+                if (inWireList)
+                {
+                    var parts = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 3 && int.TryParse(parts[0], out int seq))
+                    {
+                        string fromPinStr = parts[1];
+                        string toPinStr = parts[2];
+
+                        if (fromPinStr.StartsWith("J3") && toPinStr.StartsWith("J1"))
+                        {
+                            string temp = fromPinStr;
+                            fromPinStr = toPinStr;
+                            toPinStr = temp;
+                        }
+
+                        var net = new TestConfigNet
+                        {
+                            SequenceNo = seq,
+                            FromAddress = ParsePin(fromPinStr),
+                            FromLabel = fromPinStr,
+                            ToAddress = ParsePin(toPinStr),
+                            ToLabel = toPinStr,
+                            UpperLimit = connResist
+                        };
+                        
+                        var tt = GetTestTypeByName("WIRE");
+                        if (tt != null)
+                        {
+                            net.TestTypeId = tt.Id;
+                            net.TestType = tt;
+                        }
+                        
+                        config.Nets.Add(net);
+                    }
+                }
+                else if (inCheckComponents)
+                {
+                    var parts = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 4 && int.TryParse(parts[0], out int seq))
+                    {
+                        string testTypeName = parts[1];
+                        string mappedTestTypeName = testTypeName;
+                        if (testTypeName == "RESIS") mappedTestTypeName = "RESISTOR";
+                        else if (testTypeName == "CAP") mappedTestTypeName = "CAPACITOR";
+
+                        string fromPinStr = parts[2];
+                        string toPinStr = parts[3];
+
+                        if (fromPinStr.StartsWith("J3") && toPinStr.StartsWith("J1"))
+                        {
+                            string temp = fromPinStr;
+                            fromPinStr = toPinStr;
+                            toPinStr = temp;
+                        }
+
+                        var net = new TestConfigNet
+                        {
+                            SequenceNo = seq,
+                            FromAddress = ParsePin(fromPinStr),
+                            FromLabel = fromPinStr,
+                            ToAddress = ParsePin(toPinStr),
+                            ToLabel = toPinStr
+                        };
+
+                        if (parts.Length >= 5)
+                        {
+                            if (double.TryParse(parts[4], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double exp))
+                                net.ExpectedValue = exp;
+                            
+                            int i = 5;
+                            var unitParts = new List<string>();
+                            while (i < parts.Length && !double.TryParse(parts[i], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _))
+                            {
+                                unitParts.Add(parts[i]);
+                                i++;
+                            }
+                            
+                            double multiplier = 1.0;
+                            if (unitParts.Count > 0)
+                            {
+                                string fullUnit = string.Join("", unitParts);
+                                if (fullUnit.StartsWith("K") || fullUnit.StartsWith("k")) multiplier = 1e3;
+                                else if (fullUnit.StartsWith("M")) multiplier = 1e6;
+                                else if (fullUnit.StartsWith("m")) multiplier = 1e-3;
+                                else if (fullUnit.StartsWith("u")) multiplier = 1e-6;
+                                else if (fullUnit.StartsWith("n")) multiplier = 1e-9;
+                                else if (fullUnit.StartsWith("p")) multiplier = 1e-12;
+                            }
+                            
+                            if (net.ExpectedValue.HasValue)
+                            {
+                                net.ExpectedValue = net.ExpectedValue.Value * multiplier;
+                            }
+                            
+                            net.MeasurementUnit = "";
+                            
+                            if (i < parts.Length && double.TryParse(parts[i], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double tol))
+                            {
+                                net.Tolerance = tol;
+                            }
+                        }
+
+                        var tt = GetTestTypeByName(mappedTestTypeName);
+                        if (tt != null)
+                        {
+                            net.TestTypeId = tt.Id;
+                            net.TestType = tt;
+                        }
+
+                        config.Nets.Add(net);
+                    }
+                }
+            }
+
+            int sequenceIndex = 1;
+            foreach (var n in config.Nets)
+            {
+                n.SequenceNo = sequenceIndex++;
+            }
+
+            return config;
+        }
+
+        private int ParsePin(string pin)
+        {
+            if (string.IsNullOrWhiteSpace(pin)) return 0;
+            pin = pin.Trim();
+            if (pin.StartsWith("J1-") && pin.Length > 3)
+            {
+                if (int.TryParse(pin.Substring(3), out int num))
+                    return num;
+            }
+            else if (pin.StartsWith("J3-") && pin.Length > 3)
+            {
+                if (int.TryParse(pin.Substring(3), out int num))
+                    return num + 64;
+            }
+            return 0;
         }
     }
 }
