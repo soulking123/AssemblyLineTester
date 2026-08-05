@@ -28,6 +28,7 @@ namespace AssemblyLineTester.Services
             using PdfDocument doc = new();
 
             DrawSummaryPage(doc, detail, logoPath);
+            DrawTestSummaryPage(doc, detail, logoPath);
             DrawDetailPages(doc, detail, logoPath);
 
             int totalPages = StampHeadersAndFooters(doc, detail, logoPath);
@@ -58,6 +59,71 @@ namespace AssemblyLineTester.Services
             y = DrawTypeSummaryTable(gfx, detail, font, fontBold, y);
             y = DrawOverallResultBox(gfx, page, detail, y);
             DrawNotes(gfx, page, detail, font, fontBold, y);
+        }
+
+        // Page 2: the Test Summary panel from the Test Execution screen, line for line.
+        private static void DrawTestSummaryPage(PdfDocument doc, ReportDetailDto detail, string logoPath)
+        {
+            var page = doc.AddPage();
+            page.Size = PdfSharp.PageSize.A4;
+            page.Orientation = PdfSharp.PageOrientation.Portrait;
+            using XGraphics gfx = XGraphics.FromPdfPage(page);
+
+            var font = new XFont("Arial", 10, XFontStyle.Regular);
+            var fontBold = new XFont("Arial", 10, XFontStyle.Bold);
+
+            double y = DrawPageHeader(gfx, page, detail, 0, 0, logoPath);
+
+            var titleBg = new XSolidBrush(XColor.FromArgb(40, 230, 230, 230));
+            gfx.DrawRectangle(titleBg, Margin, y - 2, 200, 18);
+            gfx.DrawString("TEST SUMMARY", fontBold, XBrushes.Black, new XRect(Margin, y, 400, 16), XStringFormats.TopLeft);
+            y += 26;
+
+            double lineH = 18;
+            double width = page.Width - Margin * 2;
+
+            gfx.DrawString($"TEST RESULT = {detail.OverallResult}", fontBold,
+                detail.OverallResult?.ToUpperInvariant() == "PASS" ? XBrushes.DarkGreen : XBrushes.DarkRed,
+                new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+            y += lineH * 2;
+
+            // "OK"/"X" rather than the screen's tick and cross: PdfSharp maps those glyphs through
+            // the base Arial encoding and drops them, which would leave the counts unlabelled.
+            foreach (var s in detail.TypeSummaries)
+            {
+                bool allPassed = s.Fail == 0;
+                gfx.DrawString($"[{(allPassed ? "OK" : "X")}]  {s.TestType} ({s.Pass}/{s.Total})", font,
+                    allPassed ? XBrushes.Black : XBrushes.DarkRed,
+                    new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                y += lineH;
+            }
+
+            y += lineH;
+            gfx.DrawString("TEST ERRORS", fontBold, XBrushes.Black, new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+            y += lineH * 1.5;
+
+            var failed = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
+            if (failed.Count == 0)
+            {
+                gfx.DrawString("No errors were recorded for this test run.", font, XBrushes.Black,
+                    new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                return;
+            }
+
+            double bottom = page.Height - Margin - FooterReserve;
+            foreach (var d in failed)
+            {
+                if (y + lineH > bottom)
+                {
+                    gfx.DrawString($"... and {failed.Count - failed.IndexOf(d)} more, see the detail pages.",
+                        font, XBrushes.Black, new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                    break;
+                }
+
+                gfx.DrawString($"{d.NetId} ({d.TestType}) - {d.ErrorDetail}", font, XBrushes.DarkRed,
+                    new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                y += lineH;
+            }
         }
 
         // Operator notes as a wrapped paragraph under the result box.
@@ -381,7 +447,7 @@ namespace AssemblyLineTester.Services
             }
 
             g.DrawRectangle(new XSolidBrush(resultFill), resultRect);
-            g.DrawRectangle(XPens.LightGray, x, y, cols[9], rowH);
+            g.DrawRectangle(XPens.LightGray, x, y, cols[columns.Count], rowH);
             g.DrawString(d.Result, fontBold, resultText, resultRect, XStringFormats.Center);
 
             return y + rowH;

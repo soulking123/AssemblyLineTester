@@ -155,6 +155,19 @@ namespace AssemblyLineTester.Views.Pages
                 EnableDoubleBufferingRecursive(child);
             }
         }
+        // The Settings default, but only if the type column can actually hold it - a default that
+        // Test Type Available has since switched off would make the new row's cell reject its value.
+        private string ResolveDefaultTestType()
+        {
+            var column = gridConfig.Columns["colTestType"] as DataGridViewComboBoxColumn;
+            var offered = column?.Items.Cast<object>().Select(i => i.ToString() ?? "").ToList() ?? new List<string>();
+
+            string preferred = TestSettingService.GetDefaultTestTypeName();
+            if (offered.Contains(preferred)) return preferred;
+
+            return offered.FirstOrDefault() ?? "WIRE";
+        }
+
         // Offers only the test types ticked under Settings, falling back to every type if none are.
         public void LoadTestTypeColumnItems()
         {
@@ -210,7 +223,8 @@ namespace AssemblyLineTester.Views.Pages
             if (!CheckEditPermission()) return;
 
             int newIdx = gridConfig.Rows.Count + 1;
-            string defaultUnit = UnitConversionHelper.GetBaseUnit("WIRE");
+            string defaultType = ResolveDefaultTestType();
+            string defaultUnit = UnitConversionHelper.GetBaseUnit(defaultType);
 
             int nextFromAddr = GetNextAvailableAddress();
             int nextToAddr = nextFromAddr + 1;
@@ -218,7 +232,7 @@ namespace AssemblyLineTester.Views.Pages
             int idx = gridConfig.Rows.Add(
                 newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply",
                 nextFromAddr.ToString(), $"X1-0{newIdx}", nextToAddr.ToString(), $"Y1-0{newIdx}",
-                "WIRE", "0", "0", "0", "-", defaultUnit);
+                defaultType, "0", "0", "0", "-", defaultUnit);
 
             UpdateRowUnitDropdown(idx);
             gridConfig.Rows[idx].Cells["colUnit"].Value = defaultUnit;

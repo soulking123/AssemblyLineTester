@@ -16,7 +16,7 @@ namespace AssemblyLineTester.Services
 
             using var wb = new XLWorkbook();
 
-            var ws = wb.Worksheets.Add("Summary");
+            var ws = wb.Worksheets.Add("General Information");
             int r = 1;
 
             ws.Cell(r, 1).Value = "GENERAL INFORMATION";
@@ -105,6 +105,46 @@ namespace AssemblyLineTester.Services
             ws.Column(1).Width = Math.Max(ws.Column(1).Width, 20);
             ws.Column(2).Width = Math.Max(ws.Column(2).Width, 3);
             ws.Column(3).Width = Math.Max(ws.Column(3).Width, 12);
+
+            // Sheet 2: the Test Summary panel from the Test Execution screen, line for line.
+            var wsSummary = wb.Worksheets.Add("Test Summary");
+            int sr = 1;
+
+            wsSummary.Cell(sr, 1).Value = $"TEST RESULT = {detail.OverallResult}";
+            wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+            wsSummary.Cell(sr, 1).Style.Font.FontColor =
+                detail.OverallResult?.ToUpperInvariant() == "PASS" ? XLColor.DarkGreen : XLColor.DarkRed;
+            sr += 2;
+
+            foreach (var s in detail.TypeSummaries)
+            {
+                bool allPassed = s.Fail == 0;
+                wsSummary.Cell(sr, 1).Value = $"[{(allPassed ? "OK" : "X")}]  {s.TestType} ({s.Pass}/{s.Total})";
+                if (!allPassed) wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                sr++;
+            }
+
+            sr += 1;
+            wsSummary.Cell(sr, 1).Value = "TEST ERRORS";
+            wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+            sr += 2;
+
+            var failedRows = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
+            if (failedRows.Count == 0)
+            {
+                wsSummary.Cell(sr, 1).Value = "No errors were recorded for this test run.";
+            }
+            else
+            {
+                foreach (var d in failedRows)
+                {
+                    wsSummary.Cell(sr, 1).Value = $"{d.NetId} ({d.TestType}) - {d.ErrorDetail}";
+                    wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                    sr++;
+                }
+            }
+
+            wsSummary.Column(1).AdjustToContents();
 
             // Sheet 2: one row per net.
             var ws2 = wb.Worksheets.Add("Details");

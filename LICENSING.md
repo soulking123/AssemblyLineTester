@@ -178,6 +178,44 @@ Kalau Python tidak ada di PC client, baca pesan dialognya — tiap pesan menunju
 
 ---
 
+## Kerja bertiga dalam satu tim
+
+`private.pem` dan `*.lic` ada di `.gitignore` — jadi **`git pull` tidak membawa kunci**. Anggota tim yang baru clone mendapat kodenya saja.
+
+Anggap `private.pem` sebagai stempel perusahaan: **satu untuk seluruh tim**. `PublicKeyBase64` di `LicenseService.cs` adalah cetakan cap-nya di dalam aplikasi. Stempel lain = cap tidak cocok = lisensi ditolak.
+
+### Anggota tim ingin menjalankan aplikasi di laptopnya
+
+Dia berperan sebagai **client**, bukan vendor. Tidak perlu `private.pem`.
+
+1. **Dia**: jalankan aplikasi, catat Machine ID dari dialog error, kirim ke pemegang kunci
+2. **Pemegang kunci**: `issue --customer "<Nama> - Dev" --machine <ID> --key private.pem --out <nama>.lic`
+3. **Dia**: simpan sebagai `C:\ProgramData\AssemblyLineTester\license.lic`, buka aplikasi
+
+### Anggota tim ingin memasang ke PC client sendiri
+
+Dia butuh `private.pem` — **yang sama persis**, bukan bikin baru.
+
+1. **Pemegang kunci**: kirim `private.pem` lewat USB, password manager, atau repo privat. Jangan chat, email, atau git.
+2. **Dia**: taruh di root proyek, lalu buktikan sepasang:
+   ```bash
+   python Tools/license-doctor.py --license <apa-saja>.lic --key private.pem
+   ```
+   Langkah 2 wajib `[OK]`. Kalau `GAGAL`, kuncinya salah — berhenti, jangan terbitkan apa pun.
+3. **Dia**: lanjutkan BAGIAN 1 sampai 4 di atas seperti biasa
+
+### Yang akan merusak kerja semua orang
+
+Menjalankan `genkeys`, lalu menempel public key baru ke `LicenseService.cs` dan commit. Akibatnya:
+
+- semua lisensi yang sudah terbit mati seketika
+- setiap PC client harus di-install ulang
+- lisensi dev anggota tim lain ikut mati
+
+`genkeys` sekarang menolak menimpa `private.pem` yang ada, tapi `--force` masih menembusnya. Sepakati: **hanya satu orang** yang memegang dan menyimpan kunci.
+
+---
+
 ## Aturan yang tidak boleh dilanggar
 
 1. **Jangan jalankan `genkeys` dua kali.** Ia menimpa `private.pem` tanpa peringatan. Semua lisensi yang beredar langsung tidak bisa diterbitkan ulang.

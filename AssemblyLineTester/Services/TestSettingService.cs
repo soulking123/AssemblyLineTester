@@ -47,33 +47,165 @@ namespace AssemblyLineTester.Services
             return db.TestTypes.AsNoTracking().OrderBy(t => t.TestTypeName).ToList();
         }
 
-        public static bool SetTestTypeChecked(int id, bool isChecked) =>
-            Update(db => db.TestTypeChecks.FirstOrDefault(c => c.Id == id), e => e.IsChecked = isChecked);
+        /// <summary>
+        /// The single row behind the Default Test Settings card, created empty on first use.
+        /// </summary>
+        /// <remarks>
+        /// One row, not one per product model: the entity carries no product model column, so a
+        /// second row could never be told apart from the first.
+        /// </remarks>
+        public static DefaultTestSetting GetDefaults()
+        {
+            using var db = new AppDbContext();
+            var existing = db.DefaultTestSettings.AsNoTracking().OrderBy(d => d.Id).FirstOrDefault();
+            if (existing != null) return existing;
 
-        public static bool SetLearnConnectionChecked(int id, bool isChecked) =>
-            Update(db => db.LearnConnections.FirstOrDefault(c => c.Id == id), e => e.IsChecked = isChecked);
+            var seeded = new DefaultTestSetting();
+            db.DefaultTestSettings.Add(seeded);
+            db.SaveChanges();
+            return seeded;
+        }
 
-        public static bool SetTestResultChecked(int id, bool isChecked) =>
-            Update(db => db.TestResultChecks.FirstOrDefault(c => c.Id == id), e => e.IsChecked = isChecked);
+        // Name of the test type a new Test Parameter row should start on.
+        public static string GetDefaultTestTypeName()
+        {
+            int id = GetDefaults().DefaultTestTypeId;
+            if (id <= 0) return string.Empty;
 
-        // A failed tick must not take the Settings page down with it, so the write is reported, not thrown.
-        private static bool Update<T>(Func<AppDbContext, T?> find, Action<T> apply) where T : class
+            using var db = new AppDbContext();
+            return db.TestTypes.AsNoTracking().FirstOrDefault(t => t.Id == id)?.TestTypeName ?? string.Empty;
+        }
+
+        // Writes the whole card in one go, so a half-saved set of defaults cannot be left behind.
+        public static bool SaveDefaults(DefaultTestSetting values)
         {
             try
             {
                 using var db = new AppDbContext();
-                var entity = find(db);
-                if (entity == null) return false;
+                var row = db.DefaultTestSettings.OrderBy(d => d.Id).FirstOrDefault();
+                if (row == null)
+                {
+                    row = new DefaultTestSetting();
+                    db.DefaultTestSettings.Add(row);
+                }
 
-                apply(entity);
+                row.TotalTestPointsAvailable = values.TotalTestPointsAvailable;
+                row.DefaultTestTypeId = values.DefaultTestTypeId;
+                row.DefaultMaxWireResistance = values.DefaultMaxWireResistance;
+                row.DefaultWireInstallationResistance = values.DefaultWireInstallationResistance;
+                row.DefaultResistorValue = values.DefaultResistorValue;
+                row.DefaultResistorTolerance = values.DefaultResistorTolerance;
+                row.DefaultCapacitorValue = values.DefaultCapacitorValue;
+                row.DefaultCapacitorTolerance = values.DefaultCapacitorTolerance;
+
+                // Asked before SaveChanges, while the tracker still knows the old values, so
+                // pressing Save without editing anything leaves no entry.
+                bool changed = db.ChangeTracker.HasChanges();
                 db.SaveChanges();
+                if (!changed) return true;
+
+                string typeName = db.TestTypes.AsNoTracking()
+                    .FirstOrDefault(t => t.Id == row.DefaultTestTypeId)?.TestTypeName ?? "none";
+
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Settings", "Update Default Test Settings",
+                    $"Default test type set to {typeName}, {row.TotalTestPointsAvailable} test points available.");
+
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"TestSettingService.Update failed: {ex}");
+                Debug.WriteLine($"TestSettingService.SaveDefaults failed: {ex}");
                 return false;
             }
+        }
+
+        public static bool SaveTestTypeChecks(IEnumerable<(int Id, bool Checked)> states) =>
+            SaveTicks(states, "Update Test Type Availability", "test types",
+                db => db.TestTypeChecks, c => c.Id, c => c.IsChecked, (c, v) => c.IsChecked = v, c => c.TestTypeName);
+
+        public static bool SaveLearnConnectionChecks(IEnumerable<(int Id, bool Checked)> states) =>
+            SaveTicks(states, "Update Learn Connections", "learn connections",
+                db => db.LearnConnections, c => c.Id, c => c.IsChecked, (c, v) => c.IsChecked = v, c => c.DisplayName);
+
+        public static bool SaveTestResultChecks(IEnumerable<(int Id, bool Checked)> states) =>
+            SaveTicks(states, "Update Result Columns", "result columns",
+                db => db.TestResultChecks, c => c.Id, c => c.IsChecked, (c, v) => c.IsChecked = v, c => c.TestResultName);
+
+        /// <summary>
+        /// Applies a whole tick list in one transaction and records what actually changed.
+        /// </summary>
+        /// <remarks>
+        /// One entry per list, not per tick: a single Save touches every box on the card, and
+        /// logging each one would bury the day's real events under thirty rows. Nothing is written
+        /// to the log when nothing moved, so an operator who opens Edit and changes their mind
+        /// leaves no entry behind.
+        /// </remarks>
+        private static bool SaveTicks<T>(
+            IEnumerable<(int Id, bool Checked)> states,
+            string actionName,
+            string listLabel,
+            Func<AppDbContext, DbSet<T>> set,
+            Func<T, int> id,
+            Func<T, bool> isChecked,
+            Action<T, bool> apply,
+            Func<T, string> name) where T : class
+        {
+            try
+            {
+                using var db = new AppDbContext();
+                var rows = set(db).ToList();
+
+                var turnedOn = new List<string>();
+                var turnedOff = new List<string>();
+
+                foreach (var (rowId, wanted) in states)
+                {
+                    var row = rows.FirstOrDefault(r => id(r) == rowId);
+                    if (row == null || isChecked(row) == wanted) continue;
+
+                    (wanted ? turnedOn : turnedOff).Add(name(row));
+                    apply(row, wanted);
+                }
+
+                if (turnedOn.Count == 0 && turnedOff.Count == 0) return true;
+
+                db.SaveChanges();
+
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Settings", actionName,
+                    BuildTickMessage(listLabel, turnedOn, turnedOff, rows.Count(isChecked), rows.Count));
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"TestSettingService.SaveTicks({actionName}) failed: {ex}");
+                return false;
+            }
+        }
+
+        // Names what moved and where the list stands afterwards, in one sentence.
+        internal static string BuildTickMessage(string listLabel, List<string> turnedOn, List<string> turnedOff, int nowEnabled, int total)
+        {
+            var parts = new List<string>();
+            if (turnedOn.Count > 0) parts.Add($"enabled {string.Join(", ", turnedOn)}");
+            if (turnedOff.Count > 0) parts.Add($"disabled {string.Join(", ", turnedOff)}");
+
+            string subject = $"{char.ToUpperInvariant(listLabel[0])}{listLabel[1..]}";
+            return $"{subject}: {string.Join("; ", parts)}. {nowEnabled} of {total} now enabled.";
+        }
+
+        /// <summary>Debug-only guard on the tick-list log message.</summary>
+        [Conditional("DEBUG")]
+        public static void SelfCheck()
+        {
+            string both = BuildTickMessage("result columns", new List<string> { "Tolerance" }, new List<string> { "Net-ID" }, 6, 12);
+            Debug.Assert(both == "Result columns: enabled Tolerance; disabled Net-ID. 6 of 12 now enabled.", both);
+
+            string onlyOff = BuildTickMessage("test types", new List<string>(), new List<string> { "DIODE", "OPEN" }, 4, 15);
+            Debug.Assert(onlyOff == "Test types: disabled DIODE, OPEN. 4 of 15 now enabled.", onlyOff);
+            Debug.Assert(!onlyOff.Contains("enabled DIODE"), "an empty side must not be announced");
         }
     }
 }

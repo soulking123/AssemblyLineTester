@@ -5,10 +5,12 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using AssemblyLineTester.Helpers;
+using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views.Pages
@@ -385,6 +387,7 @@ namespace AssemblyLineTester.Views.Pages
             PopulateTestTypes();
             PopulateLearnConnections();
             PopulateTestResultColumns();
+            LoadDefaultTestSettings();
             BuildTickListEditButtons();
             SetTickListsEditable(false);
         }
@@ -465,12 +468,27 @@ namespace AssemblyLineTester.Views.Pages
             return button;
         }
 
+        private TextBox[] DefaultValueBoxes => new[]
+        {
+            txtTotalTestPoint, txtDefMaxWireRes, txtDefWireInsRes, txtDefResistorVal,
+            txtDefResistorTol, txtDefCapacitorVal, txtDefCapacitorTol
+        };
+
         private void SetTickListsEditable(bool editable)
         {
             foreach (var (_, box) in _typeBoxes.Concat(_learnBoxes).Concat(_resultBoxes))
             {
                 box.Enabled = editable;
             }
+
+            // ReadOnly rather than Enabled=false, so the values stay legible while locked.
+            foreach (var box in DefaultValueBoxes)
+            {
+                box.ReadOnly = !editable;
+                box.BackColor = editable ? Color.White : Color.FromArgb(241, 245, 249);
+            }
+
+            cmbDefTestType.Enabled = editable;
 
             if (_btnEditTicks is not null) _btnEditTicks.Visible = !editable;
             if (_btnSaveTicks is not null) _btnSaveTicks.Visible = editable;
@@ -482,6 +500,7 @@ namespace AssemblyLineTester.Views.Pages
             PopulateTestTypes();
             PopulateLearnConnections();
             PopulateTestResultColumns();
+            LoadDefaultTestSettings();
         }
 
         // Writes all three tick lists, then pushes them into the pages already built from them.
@@ -489,9 +508,10 @@ namespace AssemblyLineTester.Views.Pages
         {
             bool allSaved = true;
 
-            foreach (var (id, box) in _typeBoxes) allSaved &= TestSettingService.SetTestTypeChecked(id, box.Checked);
-            foreach (var (id, box) in _learnBoxes) allSaved &= TestSettingService.SetLearnConnectionChecked(id, box.Checked);
-            foreach (var (id, box) in _resultBoxes) allSaved &= TestSettingService.SetTestResultChecked(id, box.Checked);
+            allSaved &= TestSettingService.SaveTestTypeChecks(_typeBoxes.Select(t => (t.Id, t.Box.Checked)));
+            allSaved &= TestSettingService.SaveLearnConnectionChecks(_learnBoxes.Select(t => (t.Id, t.Box.Checked)));
+            allSaved &= TestSettingService.SaveTestResultChecks(_resultBoxes.Select(t => (t.Id, t.Box.Checked)));
+            allSaved &= TestSettingService.SaveDefaults(ReadDefaultsFromCard());
 
             if (!allSaved)
             {
@@ -500,11 +520,39 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
+            // Reloaded before the dropdown is read back: unticking a type must drop it from the
+            // default list too, and that can change which type is selected.
+            PopulateDefaultTestType();
+
             Application.OpenForms.OfType<MainForm>().FirstOrDefault()?.ApplyTestSettings();
             SetTickListsEditable(false);
 
             MessageBox.Show("Default test settings saved.", "Default Test Settings",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        // Reads the card back into an entity; blank or half-typed numbers count as zero rather
+        // than blocking the save on a field the operator never filled in.
+        private DefaultTestSetting ReadDefaultsFromCard()
+        {
+            static double Number(TextBox box) =>
+                double.TryParse(box.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double value) ? value : 0;
+
+            string selectedType = cmbDefTestType.SelectedItem?.ToString() ?? "";
+            int typeId = TestSettingService.GetTestTypes()
+                .FirstOrDefault(t => t.TestTypeName == selectedType)?.Id ?? 0;
+
+            return new DefaultTestSetting
+            {
+                TotalTestPointsAvailable = (int)Number(txtTotalTestPoint),
+                DefaultTestTypeId = typeId,
+                DefaultMaxWireResistance = Number(txtDefMaxWireRes),
+                DefaultWireInstallationResistance = Number(txtDefWireInsRes),
+                DefaultResistorValue = Number(txtDefResistorVal),
+                DefaultResistorTolerance = (int)Number(txtDefResistorTol),
+                DefaultCapacitorValue = Number(txtDefCapacitorVal),
+                DefaultCapacitorTolerance = (int)Number(txtDefCapacitorTol)
+            };
         }
 
         private void NumericTextBox_KeyPress(object? sender, KeyPressEventArgs e)
@@ -523,13 +571,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulateTestTypes()
         {
-            cmbDefTestType.Items.Clear();
-            foreach (var type in TestSettingService.GetTestTypes())
-            {
-                cmbDefTestType.Items.Add(type.DisplayName);
-            }
-            if (cmbDefTestType.Items.Count > 0) cmbDefTestType.SelectedIndex = 0;
-
             UIStyleHelper.ClearAndDispose(flpTestTypeAvail.Controls);
             _typeBoxes.Clear();
             foreach (var check in TestSettingService.GetTestTypeChecks())
@@ -538,6 +579,36 @@ namespace AssemblyLineTester.Views.Pages
                 flpTestTypeAvail.Controls.Add(box);
                 _typeBoxes.Add((check.Id, box));
             }
+
+            PopulateDefaultTestType();
+        }
+
+        // Only ticked types are offered: defaulting to a type that Test Type Available has switched
+        // off would put a value in the Test Parameter grid that its own dropdown cannot hold.
+        private void PopulateDefaultTestType()
+        {
+            var enabled = TestSettingService.GetEnabledTestTypeNames();
+            if (enabled.Count == 0) enabled = TestSettingService.GetTestTypes().Select(t => t.TestTypeName).ToList();
+
+            cmbDefTestType.Items.Clear();
+            cmbDefTestType.Items.AddRange(enabled.Cast<object>().ToArray());
+
+            string stored = TestSettingService.GetDefaultTestTypeName();
+            int index = cmbDefTestType.Items.IndexOf(stored);
+            if (cmbDefTestType.Items.Count > 0) cmbDefTestType.SelectedIndex = index >= 0 ? index : 0;
+        }
+
+        private void LoadDefaultTestSettings()
+        {
+            var defaults = TestSettingService.GetDefaults();
+
+            txtTotalTestPoint.Text = defaults.TotalTestPointsAvailable.ToString(CultureInfo.InvariantCulture);
+            txtDefMaxWireRes.Text = defaults.DefaultMaxWireResistance.ToString(CultureInfo.InvariantCulture);
+            txtDefWireInsRes.Text = defaults.DefaultWireInstallationResistance.ToString(CultureInfo.InvariantCulture);
+            txtDefResistorVal.Text = defaults.DefaultResistorValue.ToString(CultureInfo.InvariantCulture);
+            txtDefResistorTol.Text = defaults.DefaultResistorTolerance.ToString(CultureInfo.InvariantCulture);
+            txtDefCapacitorVal.Text = defaults.DefaultCapacitorValue.ToString(CultureInfo.InvariantCulture);
+            txtDefCapacitorTol.Text = defaults.DefaultCapacitorTolerance.ToString(CultureInfo.InvariantCulture);
         }
 
         private void PopulateLearnConnections()
