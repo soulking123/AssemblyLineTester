@@ -1,4 +1,7 @@
-﻿namespace AssemblyLineTester.Views.Pages
+﻿using ClosedXML.Excel;
+using static System.Windows.Forms.MonthCalendar;
+
+namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -39,6 +42,7 @@
             base.Dispose(disposing);
 
         }
+
 
 
 
@@ -84,13 +88,13 @@
             tblFilterGrid1 = new TableLayoutPanel();
             lblFilterModel = new Label();
             lblFilterType = new Label();
-            txtModel = new TextBox();
-            txtType = new TextBox();
+            cmbModel = new ComboBox();
+            cmbType = new ComboBox();
             tblFilterGrid2 = new TableLayoutPanel();
             lblFilterArea = new Label();
             lblFilterOperator = new Label();
-            txtArea = new TextBox();
-            txtOperator = new TextBox();
+            cmbArea = new ComboBox();
+            cmbOperator = new ComboBox();
             tblFilterGrid3 = new TableLayoutPanel();
             lblFilterResult = new Label();
             lblFilterPart = new Label();
@@ -120,9 +124,10 @@
             gridReports = new DataGridView();
             colNo = new DataGridViewTextBoxColumn();
             colReportName = new DataGridViewTextBoxColumn();
+            colReportType = new DataGridViewTextBoxColumn();
             colDateGenerated = new DataGridViewTextBoxColumn();
             colGeneratedBy = new DataGridViewTextBoxColumn();
-            colResult = new DataGridViewTextBoxColumn();
+            colSize = new DataGridViewTextBoxColumn();
             colAction = new DataGridViewTextBoxColumn();
             tblPagination = new TableLayoutPanel();
             lblPageInfo = new Label();
@@ -137,6 +142,7 @@
             cardTrend = new Panel();
             lblTrendTitle = new Label();
             tblColRight = new TableLayoutPanel();
+            cardPreviewTop = new Panel();
             lblPreviewTitle = new Label();
             flpPreviewButtons = new TableLayoutPanel();
             btnExportPDF = new Button();
@@ -251,6 +257,7 @@
             flpPageButtons.SuspendLayout();
             cardTrend.SuspendLayout();
             tblColRight.SuspendLayout();
+            cardPreviewTop.SuspendLayout();
             flpPreviewButtons.SuspendLayout();
             pnlPreviewContainer.SuspendLayout();
             cardPaper.SuspendLayout();
@@ -275,22 +282,22 @@
             tblMain.Controls.Add(splitLeftCenterRight, 0, 1);
             tblMain.Dock = DockStyle.Fill;
             tblMain.Location = new Point(0, 0);
-            tblMain.Margin = new Padding(3, 2, 3, 2);
+            tblMain.Margin = new Padding(6, 4, 6, 4);
             tblMain.Name = "tblMain";
             tblMain.RowCount = 2;
-            tblMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 94F));
             tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblMain.Size = new Size(2154, 1149);
+            tblMain.Size = new Size(4000, 2451);
             tblMain.TabIndex = 0;
             // 
             // pnlTopHeader
             // 
             pnlTopHeader.Controls.Add(lblPageHeader);
             pnlTopHeader.Dock = DockStyle.Fill;
-            pnlTopHeader.Location = new Point(9, 4);
-            pnlTopHeader.Margin = new Padding(9, 4, 9, 0);
+            pnlTopHeader.Location = new Point(17, 9);
+            pnlTopHeader.Margin = new Padding(17, 9, 17, 0);
             pnlTopHeader.Name = "pnlTopHeader";
-            pnlTopHeader.Size = new Size(2136, 40);
+            pnlTopHeader.Size = new Size(3966, 85);
             pnlTopHeader.TabIndex = 0;
             // 
             // lblPageHeader
@@ -299,8 +306,9 @@
             lblPageHeader.Font = new Font("Segoe UI", 13.5F, FontStyle.Bold);
             lblPageHeader.ForeColor = Color.FromArgb(30, 41, 59);
             lblPageHeader.Location = new Point(0, 0);
+            lblPageHeader.Margin = new Padding(6, 0, 6, 0);
             lblPageHeader.Name = "lblPageHeader";
-            lblPageHeader.Size = new Size(263, 40);
+            lblPageHeader.Size = new Size(488, 85);
             lblPageHeader.TabIndex = 0;
             lblPageHeader.Text = "📑  REPORTS";
             lblPageHeader.TextAlign = ContentAlignment.MiddleLeft;
@@ -308,8 +316,8 @@
             // splitLeftCenterRight
             // 
             splitLeftCenterRight.Dock = DockStyle.Fill;
-            splitLeftCenterRight.Location = new Point(9, 48);
-            splitLeftCenterRight.Margin = new Padding(9, 4, 9, 8);
+            splitLeftCenterRight.Location = new Point(17, 103);
+            splitLeftCenterRight.Margin = new Padding(17, 9, 17, 17);
             splitLeftCenterRight.Name = "splitLeftCenterRight";
             // 
             // splitLeftCenterRight.Panel1
@@ -321,9 +329,9 @@
             // 
             splitLeftCenterRight.Panel2.AutoScroll = true;
             splitLeftCenterRight.Panel2.Controls.Add(tblColRight);
-            splitLeftCenterRight.Size = new Size(2136, 1093);
-            splitLeftCenterRight.SplitterDistance = 1493;
-            splitLeftCenterRight.SplitterWidth = 6;
+            splitLeftCenterRight.Size = new Size(3966, 2331);
+            splitLeftCenterRight.SplitterDistance = 2772;
+            splitLeftCenterRight.SplitterWidth = 11;
             splitLeftCenterRight.TabIndex = 1;
             // 
             // splitMainTopBottom
@@ -343,16 +351,14 @@
             // splitMainTopBottom.Panel2
             // 
             splitMainTopBottom.Panel2.Controls.Add(cardTrend);
-            splitMainTopBottom.Size = new Size(1493, 1093);
-            splitMainTopBottom.SplitterDistance = 475;
-            splitMainTopBottom.SplitterWidth = 5;
+            splitMainTopBottom.Size = new Size(2772, 2331);
+            splitMainTopBottom.SplitterDistance = 1013;
+            splitMainTopBottom.SplitterWidth = 11;
             splitMainTopBottom.TabIndex = 0;
             // 
             // splitLeftRight
             // 
             splitLeftRight.Dock = DockStyle.Fill;
-            splitLeftRight.FixedPanel = FixedPanel.Panel1;
-            splitLeftRight.IsSplitterFixed = true;
             splitLeftRight.Location = new Point(0, 0);
             splitLeftRight.Margin = new Padding(0);
             splitLeftRight.Name = "splitLeftRight";
@@ -364,9 +370,9 @@
             // splitLeftRight.Panel2
             // 
             splitLeftRight.Panel2.Controls.Add(cardReportList);
-            splitLeftRight.Size = new Size(1493, 475);
-            splitLeftRight.SplitterDistance = 525;
-            splitLeftRight.SplitterWidth = 6;
+            splitLeftRight.Size = new Size(2772, 1013);
+            splitLeftRight.SplitterDistance = 974;
+            splitLeftRight.SplitterWidth = 11;
             splitLeftRight.TabIndex = 0;
             // 
             // tblColLeft
@@ -376,11 +382,11 @@
             tblColLeft.Controls.Add(cardFilters, 0, 0);
             tblColLeft.Dock = DockStyle.Fill;
             tblColLeft.Location = new Point(0, 0);
-            tblColLeft.Margin = new Padding(0, 0, 7, 0);
+            tblColLeft.Margin = new Padding(0, 0, 13, 0);
             tblColLeft.Name = "tblColLeft";
             tblColLeft.RowCount = 1;
             tblColLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblColLeft.Size = new Size(525, 475);
+            tblColLeft.Size = new Size(974, 1013);
             tblColLeft.TabIndex = 0;
             // 
             // cardFilters
@@ -392,8 +398,8 @@
             cardFilters.Location = new Point(0, 0);
             cardFilters.Margin = new Padding(0);
             cardFilters.Name = "cardFilters";
-            cardFilters.Padding = new Padding(11, 9, 11, 9);
-            cardFilters.Size = new Size(525, 475);
+            cardFilters.Padding = new Padding(20, 19, 20, 19);
+            cardFilters.Size = new Size(974, 1013);
             cardFilters.TabIndex = 0;
             // 
             // tblFilterControls
@@ -413,8 +419,8 @@
             tblFilterControls.Controls.Add(lblSummaryTitle, 0, 10);
             tblFilterControls.Controls.Add(tblSummaryCards, 0, 11);
             tblFilterControls.Dock = DockStyle.Fill;
-            tblFilterControls.Location = new Point(11, 9);
-            tblFilterControls.Margin = new Padding(3, 2, 3, 2);
+            tblFilterControls.Location = new Point(20, 19);
+            tblFilterControls.Margin = new Padding(6, 4, 6, 4);
             tblFilterControls.Name = "tblFilterControls";
             tblFilterControls.RowCount = 12;
             tblFilterControls.RowStyles.Add(new RowStyle());
@@ -426,10 +432,10 @@
             tblFilterControls.RowStyles.Add(new RowStyle());
             tblFilterControls.RowStyles.Add(new RowStyle());
             tblFilterControls.RowStyles.Add(new RowStyle());
-            tblFilterControls.RowStyles.Add(new RowStyle(SizeType.Absolute, 15F));
+            tblFilterControls.RowStyles.Add(new RowStyle(SizeType.Absolute, 32F));
             tblFilterControls.RowStyles.Add(new RowStyle());
             tblFilterControls.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblFilterControls.Size = new Size(503, 457);
+            tblFilterControls.Size = new Size(934, 975);
             tblFilterControls.TabIndex = 0;
             // 
             // lblReportType
@@ -438,9 +444,9 @@
             lblReportType.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblReportType.ForeColor = Color.FromArgb(71, 85, 105);
             lblReportType.Location = new Point(0, 0);
-            lblReportType.Margin = new Padding(0, 0, 0, 3);
+            lblReportType.Margin = new Padding(0, 0, 0, 6);
             lblReportType.Name = "lblReportType";
-            lblReportType.Size = new Size(82, 15);
+            lblReportType.Size = new Size(159, 31);
             lblReportType.TabIndex = 0;
             lblReportType.Text = "REPORT TYPE";
             // 
@@ -451,10 +457,10 @@
             cmbReportType.Font = new Font("Segoe UI", 9.5F);
             cmbReportType.FormattingEnabled = true;
             cmbReportType.Items.AddRange(new object[] { "Test Report", "Summary Report" });
-            cmbReportType.Location = new Point(0, 18);
-            cmbReportType.Margin = new Padding(0, 0, 0, 6);
+            cmbReportType.Location = new Point(0, 37);
+            cmbReportType.Margin = new Padding(0, 0, 0, 13);
             cmbReportType.Name = "cmbReportType";
-            cmbReportType.Size = new Size(503, 25);
+            cmbReportType.Size = new Size(934, 43);
             cmbReportType.TabIndex = 1;
             // 
             // lblDateRange
@@ -462,10 +468,10 @@
             lblDateRange.AutoSize = true;
             lblDateRange.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblDateRange.ForeColor = Color.FromArgb(71, 85, 105);
-            lblDateRange.Location = new Point(0, 49);
-            lblDateRange.Margin = new Padding(0, 0, 0, 3);
+            lblDateRange.Location = new Point(0, 93);
+            lblDateRange.Margin = new Padding(0, 0, 0, 6);
             lblDateRange.Name = "lblDateRange";
-            lblDateRange.Size = new Size(79, 15);
+            lblDateRange.Size = new Size(153, 31);
             lblDateRange.TabIndex = 2;
             lblDateRange.Text = "DATE RANGE";
             // 
@@ -473,18 +479,18 @@
             // 
             tblDateRange.ColumnCount = 3;
             tblDateRange.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tblDateRange.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 13F));
+            tblDateRange.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 24F));
             tblDateRange.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblDateRange.Controls.Add(dtpStart, 0, 0);
             tblDateRange.Controls.Add(lblDash, 1, 0);
             tblDateRange.Controls.Add(dtpEnd, 2, 0);
             tblDateRange.Dock = DockStyle.Fill;
-            tblDateRange.Location = new Point(0, 67);
-            tblDateRange.Margin = new Padding(0, 0, 0, 6);
+            tblDateRange.Location = new Point(0, 130);
+            tblDateRange.Margin = new Padding(0, 0, 0, 13);
             tblDateRange.Name = "tblDateRange";
             tblDateRange.RowCount = 1;
             tblDateRange.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblDateRange.Size = new Size(503, 22);
+            tblDateRange.Size = new Size(934, 68);
             tblDateRange.TabIndex = 3;
             // 
             // dtpStart
@@ -493,10 +499,10 @@
             dtpStart.CustomFormat = "dd Mar yyyy";
             dtpStart.Font = new Font("Segoe UI", 9F);
             dtpStart.Format = DateTimePickerFormat.Custom;
-            dtpStart.Location = new Point(4, 4);
-            dtpStart.Margin = new Padding(4);
+            dtpStart.Location = new Point(7, 14);
+            dtpStart.Margin = new Padding(7, 9, 7, 9);
             dtpStart.Name = "dtpStart";
-            dtpStart.Size = new Size(237, 23);
+            dtpStart.Size = new Size(441, 39);
             dtpStart.TabIndex = 0;
             // 
             // lblDash
@@ -505,10 +511,10 @@
             lblDash.Dock = DockStyle.Fill;
             lblDash.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDash.ForeColor = Color.FromArgb(100, 116, 139);
-            lblDash.Location = new Point(245, 0);
+            lblDash.Location = new Point(455, 0);
             lblDash.Margin = new Padding(0);
             lblDash.Name = "lblDash";
-            lblDash.Size = new Size(13, 22);
+            lblDash.Size = new Size(24, 68);
             lblDash.TabIndex = 1;
             lblDash.Text = "-";
             lblDash.TextAlign = ContentAlignment.MiddleCenter;
@@ -519,10 +525,10 @@
             dtpEnd.CustomFormat = "dd Mar yyyy";
             dtpEnd.Font = new Font("Segoe UI", 9F);
             dtpEnd.Format = DateTimePickerFormat.Custom;
-            dtpEnd.Location = new Point(262, 4);
-            dtpEnd.Margin = new Padding(4);
+            dtpEnd.Location = new Point(486, 14);
+            dtpEnd.Margin = new Padding(7, 9, 7, 9);
             dtpEnd.Name = "dtpEnd";
-            dtpEnd.Size = new Size(237, 23);
+            dtpEnd.Size = new Size(441, 39);
             dtpEnd.TabIndex = 2;
             // 
             // lblFilters
@@ -530,10 +536,10 @@
             lblFilters.AutoSize = true;
             lblFilters.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblFilters.ForeColor = Color.FromArgb(71, 85, 105);
-            lblFilters.Location = new Point(0, 95);
-            lblFilters.Margin = new Padding(0, 0, 0, 3);
+            lblFilters.Location = new Point(0, 211);
+            lblFilters.Margin = new Padding(0, 0, 0, 6);
             lblFilters.Name = "lblFilters";
-            lblFilters.Size = new Size(50, 15);
+            lblFilters.Size = new Size(96, 31);
             lblFilters.TabIndex = 4;
             lblFilters.Text = "FILTERS";
             // 
@@ -546,16 +552,16 @@
             tblFilterGrid1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblFilterGrid1.Controls.Add(lblFilterModel, 0, 0);
             tblFilterGrid1.Controls.Add(lblFilterType, 1, 0);
-            tblFilterGrid1.Controls.Add(txtModel, 0, 1);
-            tblFilterGrid1.Controls.Add(txtType, 1, 1);
+            tblFilterGrid1.Controls.Add(cmbModel, 0, 1);
+            tblFilterGrid1.Controls.Add(cmbType, 1, 1);
             tblFilterGrid1.Dock = DockStyle.Fill;
-            tblFilterGrid1.Location = new Point(0, 113);
-            tblFilterGrid1.Margin = new Padding(0, 0, 0, 5);
+            tblFilterGrid1.Location = new Point(0, 248);
+            tblFilterGrid1.Margin = new Padding(0, 0, 0, 11);
             tblFilterGrid1.Name = "tblFilterGrid1";
             tblFilterGrid1.RowCount = 2;
             tblFilterGrid1.RowStyles.Add(new RowStyle());
             tblFilterGrid1.RowStyles.Add(new RowStyle());
-            tblFilterGrid1.Size = new Size(503, 37);
+            tblFilterGrid1.Size = new Size(934, 72);
             tblFilterGrid1.TabIndex = 5;
             // 
             // lblFilterModel
@@ -564,9 +570,9 @@
             lblFilterModel.Font = new Font("Segoe UI", 8F);
             lblFilterModel.ForeColor = Color.FromArgb(100, 116, 139);
             lblFilterModel.Location = new Point(0, 0);
-            lblFilterModel.Margin = new Padding(0, 0, 0, 1);
+            lblFilterModel.Margin = new Padding(0, 0, 0, 2);
             lblFilterModel.Name = "lblFilterModel";
-            lblFilterModel.Size = new Size(83, 13);
+            lblFilterModel.Size = new Size(157, 30);
             lblFilterModel.TabIndex = 0;
             lblFilterModel.Text = "Product Model";
             // 
@@ -575,34 +581,38 @@
             lblFilterType.AutoSize = true;
             lblFilterType.Font = new Font("Segoe UI", 8F);
             lblFilterType.ForeColor = Color.FromArgb(100, 116, 139);
-            lblFilterType.Location = new Point(254, 0);
-            lblFilterType.Margin = new Padding(3, 0, 0, 1);
+            lblFilterType.Location = new Point(473, 0);
+            lblFilterType.Margin = new Padding(6, 0, 0, 2);
             lblFilterType.Name = "lblFilterType";
-            lblFilterType.Size = new Size(72, 13);
+            lblFilterType.Size = new Size(141, 30);
             lblFilterType.TabIndex = 1;
             lblFilterType.Text = "Product Type";
             // 
-            // txtModel
-            //
-            txtModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtModel.Font = new Font("Segoe UI", 9F);
-            txtModel.Location = new Point(0, 14);
-            txtModel.Margin = new Padding(0, 0, 3, 0);
-            txtModel.Name = "txtModel";
-            txtModel.PlaceholderText = "Search by Product Model...";
-            txtModel.Size = new Size(248, 23);
-            txtModel.TabIndex = 2;
-            //
-            // txtType
-            //
-            txtType.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtType.Font = new Font("Segoe UI", 9F);
-            txtType.Location = new Point(254, 14);
-            txtType.Margin = new Padding(3, 0, 0, 0);
-            txtType.Name = "txtType";
-            txtType.PlaceholderText = "Search by Product Type...";
-            txtType.Size = new Size(249, 23);
-            txtType.TabIndex = 3;
+            // cmbModel
+            // 
+            cmbModel.Dock = DockStyle.Fill;
+            cmbModel.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbModel.Font = new Font("Segoe UI", 9F);
+            cmbModel.FormattingEnabled = true;
+            cmbModel.Items.AddRange(new object[] { "All Models", "Model X-100", "Model Y-200", "Model Z-300" });
+            cmbModel.Location = new Point(0, 32);
+            cmbModel.Margin = new Padding(0, 0, 6, 0);
+            cmbModel.Name = "cmbModel";
+            cmbModel.Size = new Size(461, 40);
+            cmbModel.TabIndex = 2;
+            // 
+            // cmbType
+            // 
+            cmbType.Dock = DockStyle.Fill;
+            cmbType.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbType.Font = new Font("Segoe UI", 9F);
+            cmbType.FormattingEnabled = true;
+            cmbType.Items.AddRange(new object[] { "All Types", "Standard", "Premium", "Industrial" });
+            cmbType.Location = new Point(473, 32);
+            cmbType.Margin = new Padding(6, 0, 0, 0);
+            cmbType.Name = "cmbType";
+            cmbType.Size = new Size(461, 40);
+            cmbType.TabIndex = 3;
             // 
             // tblFilterGrid2
             // 
@@ -613,16 +623,16 @@
             tblFilterGrid2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblFilterGrid2.Controls.Add(lblFilterArea, 0, 0);
             tblFilterGrid2.Controls.Add(lblFilterOperator, 1, 0);
-            tblFilterGrid2.Controls.Add(txtArea, 0, 1);
-            tblFilterGrid2.Controls.Add(txtOperator, 1, 1);
+            tblFilterGrid2.Controls.Add(cmbArea, 0, 1);
+            tblFilterGrid2.Controls.Add(cmbOperator, 1, 1);
             tblFilterGrid2.Dock = DockStyle.Fill;
-            tblFilterGrid2.Location = new Point(0, 155);
-            tblFilterGrid2.Margin = new Padding(0, 0, 0, 7);
+            tblFilterGrid2.Location = new Point(0, 331);
+            tblFilterGrid2.Margin = new Padding(0, 0, 0, 15);
             tblFilterGrid2.Name = "tblFilterGrid2";
             tblFilterGrid2.RowCount = 2;
             tblFilterGrid2.RowStyles.Add(new RowStyle());
             tblFilterGrid2.RowStyles.Add(new RowStyle());
-            tblFilterGrid2.Size = new Size(503, 37);
+            tblFilterGrid2.Size = new Size(934, 72);
             tblFilterGrid2.TabIndex = 7;
             // 
             // lblFilterArea
@@ -631,9 +641,9 @@
             lblFilterArea.Font = new Font("Segoe UI", 8F);
             lblFilterArea.ForeColor = Color.FromArgb(100, 116, 139);
             lblFilterArea.Location = new Point(0, 0);
-            lblFilterArea.Margin = new Padding(0, 0, 0, 1);
+            lblFilterArea.Margin = new Padding(0, 0, 0, 2);
             lblFilterArea.Name = "lblFilterArea";
-            lblFilterArea.Size = new Size(30, 13);
+            lblFilterArea.Size = new Size(58, 30);
             lblFilterArea.TabIndex = 0;
             lblFilterArea.Text = "Area";
             // 
@@ -642,34 +652,38 @@
             lblFilterOperator.AutoSize = true;
             lblFilterOperator.Font = new Font("Segoe UI", 8F);
             lblFilterOperator.ForeColor = Color.FromArgb(100, 116, 139);
-            lblFilterOperator.Location = new Point(254, 0);
-            lblFilterOperator.Margin = new Padding(3, 0, 0, 1);
+            lblFilterOperator.Location = new Point(473, 0);
+            lblFilterOperator.Margin = new Padding(6, 0, 0, 2);
             lblFilterOperator.Name = "lblFilterOperator";
-            lblFilterOperator.Size = new Size(54, 13);
+            lblFilterOperator.Size = new Size(102, 30);
             lblFilterOperator.TabIndex = 1;
             lblFilterOperator.Text = "Operator";
             // 
-            // txtArea
-            //
-            txtArea.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtArea.Font = new Font("Segoe UI", 9F);
-            txtArea.Location = new Point(0, 14);
-            txtArea.Margin = new Padding(0, 0, 3, 0);
-            txtArea.Name = "txtArea";
-            txtArea.PlaceholderText = "Search by Area...";
-            txtArea.Size = new Size(248, 23);
-            txtArea.TabIndex = 2;
-            //
-            // txtOperator
-            //
-            txtOperator.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtOperator.Font = new Font("Segoe UI", 9F);
-            txtOperator.Location = new Point(254, 14);
-            txtOperator.Margin = new Padding(3, 0, 0, 0);
-            txtOperator.Name = "txtOperator";
-            txtOperator.PlaceholderText = "Search by Operator...";
-            txtOperator.Size = new Size(249, 23);
-            txtOperator.TabIndex = 3;
+            // cmbArea
+            // 
+            cmbArea.Dock = DockStyle.Fill;
+            cmbArea.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbArea.Font = new Font("Segoe UI", 9F);
+            cmbArea.FormattingEnabled = true;
+            cmbArea.Items.AddRange(new object[] { "All Areas", "Assembly Bay A", "Inspection Line 1", "Packaging Station" });
+            cmbArea.Location = new Point(0, 32);
+            cmbArea.Margin = new Padding(0, 0, 6, 0);
+            cmbArea.Name = "cmbArea";
+            cmbArea.Size = new Size(461, 40);
+            cmbArea.TabIndex = 2;
+            // 
+            // cmbOperator
+            // 
+            cmbOperator.Dock = DockStyle.Fill;
+            cmbOperator.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbOperator.Font = new Font("Segoe UI", 9F);
+            cmbOperator.FormattingEnabled = true;
+            cmbOperator.Items.AddRange(new object[] { "All Operators", "John Doe (OP-101)", "Jane Smith (OP-102)", "Robert Johnson (OP-103)" });
+            cmbOperator.Location = new Point(473, 32);
+            cmbOperator.Margin = new Padding(6, 0, 0, 0);
+            cmbOperator.Name = "cmbOperator";
+            cmbOperator.Size = new Size(461, 40);
+            cmbOperator.TabIndex = 3;
             // 
             // tblFilterGrid3
             // 
@@ -683,13 +697,13 @@
             tblFilterGrid3.Controls.Add(cmbResult, 0, 1);
             tblFilterGrid3.Controls.Add(txtPartNumber, 1, 1);
             tblFilterGrid3.Dock = DockStyle.Fill;
-            tblFilterGrid3.Location = new Point(0, 199);
-            tblFilterGrid3.Margin = new Padding(0, 0, 0, 5);
+            tblFilterGrid3.Location = new Point(0, 418);
+            tblFilterGrid3.Margin = new Padding(0, 0, 0, 11);
             tblFilterGrid3.Name = "tblFilterGrid3";
             tblFilterGrid3.RowCount = 2;
             tblFilterGrid3.RowStyles.Add(new RowStyle());
             tblFilterGrid3.RowStyles.Add(new RowStyle());
-            tblFilterGrid3.Size = new Size(503, 37);
+            tblFilterGrid3.Size = new Size(934, 72);
             tblFilterGrid3.TabIndex = 5;
             // 
             // lblFilterResult
@@ -698,9 +712,9 @@
             lblFilterResult.Font = new Font("Segoe UI", 8F);
             lblFilterResult.ForeColor = Color.FromArgb(100, 116, 139);
             lblFilterResult.Location = new Point(0, 0);
-            lblFilterResult.Margin = new Padding(0, 0, 0, 1);
+            lblFilterResult.Margin = new Padding(0, 0, 0, 2);
             lblFilterResult.Name = "lblFilterResult";
-            lblFilterResult.Size = new Size(39, 13);
+            lblFilterResult.Size = new Size(70, 30);
             lblFilterResult.TabIndex = 0;
             lblFilterResult.Text = "Result";
             // 
@@ -709,10 +723,10 @@
             lblFilterPart.AutoSize = true;
             lblFilterPart.Font = new Font("Segoe UI", 8F);
             lblFilterPart.ForeColor = Color.FromArgb(100, 116, 139);
-            lblFilterPart.Location = new Point(254, 0);
-            lblFilterPart.Margin = new Padding(3, 0, 0, 1);
+            lblFilterPart.Location = new Point(473, 0);
+            lblFilterPart.Margin = new Padding(6, 0, 0, 2);
             lblFilterPart.Name = "lblFilterPart";
-            lblFilterPart.Size = new Size(71, 13);
+            lblFilterPart.Size = new Size(136, 30);
             lblFilterPart.TabIndex = 1;
             lblFilterPart.Text = "Part Number";
             // 
@@ -723,21 +737,21 @@
             cmbResult.Font = new Font("Segoe UI", 9F);
             cmbResult.FormattingEnabled = true;
             cmbResult.Items.AddRange(new object[] { "All Results", "PASS Only", "FAIL Only" });
-            cmbResult.Location = new Point(0, 14);
-            cmbResult.Margin = new Padding(0, 0, 3, 0);
+            cmbResult.Location = new Point(0, 32);
+            cmbResult.Margin = new Padding(0, 0, 6, 0);
             cmbResult.Name = "cmbResult";
-            cmbResult.Size = new Size(248, 23);
+            cmbResult.Size = new Size(461, 40);
             cmbResult.TabIndex = 2;
             // 
             // txtPartNumber
             // 
             txtPartNumber.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtPartNumber.Font = new Font("Segoe UI", 9F);
-            txtPartNumber.Location = new Point(254, 14);
-            txtPartNumber.Margin = new Padding(3, 0, 0, 0);
+            txtPartNumber.Location = new Point(473, 32);
+            txtPartNumber.Margin = new Padding(6, 0, 0, 0);
             txtPartNumber.Name = "txtPartNumber";
             txtPartNumber.PlaceholderText = "Search by Part Number...";
-            txtPartNumber.Size = new Size(249, 23);
+            txtPartNumber.Size = new Size(461, 39);
             txtPartNumber.TabIndex = 3;
             // 
             // tblFilterButtons
@@ -748,12 +762,12 @@
             tblFilterButtons.Controls.Add(btnGenerate, 0, 0);
             tblFilterButtons.Controls.Add(btnReset, 1, 0);
             tblFilterButtons.Dock = DockStyle.Fill;
-            tblFilterButtons.Location = new Point(0, 241);
+            tblFilterButtons.Location = new Point(0, 501);
             tblFilterButtons.Margin = new Padding(0);
             tblFilterButtons.Name = "tblFilterButtons";
             tblFilterButtons.RowCount = 1;
             tblFilterButtons.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblFilterButtons.Size = new Size(503, 31);
+            tblFilterButtons.Size = new Size(934, 66);
             tblFilterButtons.TabIndex = 8;
             // 
             // btnGenerate
@@ -765,9 +779,9 @@
             btnGenerate.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnGenerate.ForeColor = Color.Black;
             btnGenerate.Location = new Point(0, 0);
-            btnGenerate.Margin = new Padding(0, 0, 3, 0);
+            btnGenerate.Margin = new Padding(0, 0, 6, 0);
             btnGenerate.Name = "btnGenerate";
-            btnGenerate.Size = new Size(323, 31);
+            btnGenerate.Size = new Size(601, 66);
             btnGenerate.TabIndex = 0;
             btnGenerate.Text = "Generate Report";
             btnGenerate.UseVisualStyleBackColor = false;
@@ -780,10 +794,10 @@
             btnReset.FlatStyle = FlatStyle.Flat;
             btnReset.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnReset.ForeColor = Color.FromArgb(51, 65, 85);
-            btnReset.Location = new Point(329, 0);
-            btnReset.Margin = new Padding(3, 0, 0, 0);
+            btnReset.Location = new Point(613, 0);
+            btnReset.Margin = new Padding(6, 0, 0, 0);
             btnReset.Name = "btnReset";
-            btnReset.Size = new Size(174, 31);
+            btnReset.Size = new Size(321, 66);
             btnReset.TabIndex = 1;
             btnReset.Text = "Reset";
             btnReset.UseVisualStyleBackColor = false;
@@ -792,10 +806,10 @@
             // 
             pnlSeparator.BackColor = Color.FromArgb(226, 232, 240);
             pnlSeparator.Dock = DockStyle.Fill;
-            pnlSeparator.Location = new Point(0, 280);
-            pnlSeparator.Margin = new Padding(0, 8, 0, 8);
+            pnlSeparator.Location = new Point(0, 584);
+            pnlSeparator.Margin = new Padding(0, 17, 0, 17);
             pnlSeparator.Name = "pnlSeparator";
-            pnlSeparator.Size = new Size(503, 1);
+            pnlSeparator.Size = new Size(934, 1);
             pnlSeparator.TabIndex = 9;
             // 
             // lblSummaryTitle
@@ -803,10 +817,10 @@
             lblSummaryTitle.Dock = DockStyle.Top;
             lblSummaryTitle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblSummaryTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblSummaryTitle.Location = new Point(0, 287);
-            lblSummaryTitle.Margin = new Padding(0, 0, 0, 5);
+            lblSummaryTitle.Location = new Point(0, 599);
+            lblSummaryTitle.Margin = new Padding(0, 0, 0, 11);
             lblSummaryTitle.Name = "lblSummaryTitle";
-            lblSummaryTitle.Size = new Size(503, 19);
+            lblSummaryTitle.Size = new Size(934, 41);
             lblSummaryTitle.TabIndex = 10;
             lblSummaryTitle.Text = "SUMMARY (08 Mar 2026 - 15 Mar 2026)";
             // 
@@ -820,13 +834,13 @@
             tblSummaryCards.Controls.Add(pnlSumFail, 0, 1);
             tblSummaryCards.Controls.Add(pnlSumProg, 1, 1);
             tblSummaryCards.Dock = DockStyle.Fill;
-            tblSummaryCards.Location = new Point(3, 313);
-            tblSummaryCards.Margin = new Padding(3, 2, 3, 2);
+            tblSummaryCards.Location = new Point(6, 655);
+            tblSummaryCards.Margin = new Padding(6, 4, 6, 4);
             tblSummaryCards.Name = "tblSummaryCards";
             tblSummaryCards.RowCount = 2;
             tblSummaryCards.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tblSummaryCards.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblSummaryCards.Size = new Size(497, 142);
+            tblSummaryCards.Size = new Size(922, 316);
             tblSummaryCards.TabIndex = 1;
             // 
             // pnlSumTotal
@@ -836,10 +850,10 @@
             pnlSumTotal.Controls.Add(lblSumTotalVal);
             pnlSumTotal.Dock = DockStyle.Fill;
             pnlSumTotal.Location = new Point(0, 0);
-            pnlSumTotal.Margin = new Padding(0, 0, 3, 3);
+            pnlSumTotal.Margin = new Padding(0, 0, 6, 6);
             pnlSumTotal.Name = "pnlSumTotal";
-            pnlSumTotal.Padding = new Padding(9, 11, 9, 11);
-            pnlSumTotal.Size = new Size(245, 68);
+            pnlSumTotal.Padding = new Padding(17, 23, 17, 23);
+            pnlSumTotal.Size = new Size(455, 152);
             pnlSumTotal.TabIndex = 0;
             // 
             // lblSumTotalKey
@@ -847,9 +861,10 @@
             lblSumTotalKey.Dock = DockStyle.Top;
             lblSumTotalKey.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
             lblSumTotalKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblSumTotalKey.Location = new Point(9, 11);
+            lblSumTotalKey.Location = new Point(17, 23);
+            lblSumTotalKey.Margin = new Padding(6, 0, 6, 0);
             lblSumTotalKey.Name = "lblSumTotalKey";
-            lblSumTotalKey.Size = new Size(227, 12);
+            lblSumTotalKey.Size = new Size(421, 26);
             lblSumTotalKey.TabIndex = 0;
             lblSumTotalKey.Text = "TOTAL TESTED";
             lblSumTotalKey.TextAlign = ContentAlignment.MiddleCenter;
@@ -859,10 +874,10 @@
             lblSumTotalVal.Dock = DockStyle.Fill;
             lblSumTotalVal.Font = new Font("Segoe UI", 13.5F, FontStyle.Bold);
             lblSumTotalVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblSumTotalVal.Location = new Point(9, 11);
-            lblSumTotalVal.Margin = new Padding(6, 0, 6, 0);
+            lblSumTotalVal.Location = new Point(17, 23);
+            lblSumTotalVal.Margin = new Padding(11, 0, 11, 0);
             lblSumTotalVal.Name = "lblSumTotalVal";
-            lblSumTotalVal.Size = new Size(227, 46);
+            lblSumTotalVal.Size = new Size(421, 106);
             lblSumTotalVal.TabIndex = 1;
             lblSumTotalVal.Text = "215";
             lblSumTotalVal.TextAlign = ContentAlignment.MiddleCenter;
@@ -873,11 +888,11 @@
             pnlSumPass.Controls.Add(lblSumPassKey);
             pnlSumPass.Controls.Add(lblSumPassVal);
             pnlSumPass.Dock = DockStyle.Fill;
-            pnlSumPass.Location = new Point(251, 0);
-            pnlSumPass.Margin = new Padding(3, 0, 0, 3);
+            pnlSumPass.Location = new Point(467, 0);
+            pnlSumPass.Margin = new Padding(6, 0, 0, 6);
             pnlSumPass.Name = "pnlSumPass";
-            pnlSumPass.Padding = new Padding(9, 11, 9, 11);
-            pnlSumPass.Size = new Size(246, 68);
+            pnlSumPass.Padding = new Padding(17, 23, 17, 23);
+            pnlSumPass.Size = new Size(455, 152);
             pnlSumPass.TabIndex = 1;
             // 
             // lblSumPassKey
@@ -885,9 +900,10 @@
             lblSumPassKey.Dock = DockStyle.Top;
             lblSumPassKey.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
             lblSumPassKey.ForeColor = Color.FromArgb(6, 95, 70);
-            lblSumPassKey.Location = new Point(9, 11);
+            lblSumPassKey.Location = new Point(17, 23);
+            lblSumPassKey.Margin = new Padding(6, 0, 6, 0);
             lblSumPassKey.Name = "lblSumPassKey";
-            lblSumPassKey.Size = new Size(228, 12);
+            lblSumPassKey.Size = new Size(421, 26);
             lblSumPassKey.TabIndex = 0;
             lblSumPassKey.Text = "PASS";
             lblSumPassKey.TextAlign = ContentAlignment.MiddleCenter;
@@ -897,10 +913,10 @@
             lblSumPassVal.Dock = DockStyle.Fill;
             lblSumPassVal.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblSumPassVal.ForeColor = Color.FromArgb(4, 120, 87);
-            lblSumPassVal.Location = new Point(9, 11);
-            lblSumPassVal.Margin = new Padding(6, 0, 6, 0);
+            lblSumPassVal.Location = new Point(17, 23);
+            lblSumPassVal.Margin = new Padding(11, 0, 11, 0);
             lblSumPassVal.Name = "lblSumPassVal";
-            lblSumPassVal.Size = new Size(228, 46);
+            lblSumPassVal.Size = new Size(421, 106);
             lblSumPassVal.TabIndex = 1;
             lblSumPassVal.Text = "212 (98.60%)";
             lblSumPassVal.TextAlign = ContentAlignment.MiddleCenter;
@@ -911,11 +927,11 @@
             pnlSumFail.Controls.Add(lblSumFailKey);
             pnlSumFail.Controls.Add(lblSumFailVal);
             pnlSumFail.Dock = DockStyle.Fill;
-            pnlSumFail.Location = new Point(0, 77);
-            pnlSumFail.Margin = new Padding(0, 6, 6, 0);
+            pnlSumFail.Location = new Point(0, 171);
+            pnlSumFail.Margin = new Padding(0, 13, 11, 0);
             pnlSumFail.Name = "pnlSumFail";
-            pnlSumFail.Padding = new Padding(9, 11, 9, 11);
-            pnlSumFail.Size = new Size(242, 65);
+            pnlSumFail.Padding = new Padding(17, 23, 17, 23);
+            pnlSumFail.Size = new Size(450, 145);
             pnlSumFail.TabIndex = 2;
             // 
             // lblSumFailKey
@@ -923,9 +939,10 @@
             lblSumFailKey.Dock = DockStyle.Top;
             lblSumFailKey.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
             lblSumFailKey.ForeColor = Color.FromArgb(153, 27, 27);
-            lblSumFailKey.Location = new Point(9, 11);
+            lblSumFailKey.Location = new Point(17, 23);
+            lblSumFailKey.Margin = new Padding(6, 0, 6, 0);
             lblSumFailKey.Name = "lblSumFailKey";
-            lblSumFailKey.Size = new Size(224, 12);
+            lblSumFailKey.Size = new Size(416, 26);
             lblSumFailKey.TabIndex = 0;
             lblSumFailKey.Text = "FAIL";
             lblSumFailKey.TextAlign = ContentAlignment.MiddleCenter;
@@ -935,10 +952,10 @@
             lblSumFailVal.Dock = DockStyle.Fill;
             lblSumFailVal.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblSumFailVal.ForeColor = Color.FromArgb(220, 38, 38);
-            lblSumFailVal.Location = new Point(9, 11);
-            lblSumFailVal.Margin = new Padding(6, 0, 6, 0);
+            lblSumFailVal.Location = new Point(17, 23);
+            lblSumFailVal.Margin = new Padding(11, 0, 11, 0);
             lblSumFailVal.Name = "lblSumFailVal";
-            lblSumFailVal.Size = new Size(224, 43);
+            lblSumFailVal.Size = new Size(416, 99);
             lblSumFailVal.TabIndex = 1;
             lblSumFailVal.Text = "3 (1.40%)";
             lblSumFailVal.TextAlign = ContentAlignment.MiddleCenter;
@@ -949,11 +966,11 @@
             pnlSumProg.Controls.Add(lblSumProgKey);
             pnlSumProg.Controls.Add(lblSumProgVal);
             pnlSumProg.Dock = DockStyle.Fill;
-            pnlSumProg.Location = new Point(254, 77);
-            pnlSumProg.Margin = new Padding(6, 6, 0, 0);
+            pnlSumProg.Location = new Point(472, 171);
+            pnlSumProg.Margin = new Padding(11, 13, 0, 0);
             pnlSumProg.Name = "pnlSumProg";
-            pnlSumProg.Padding = new Padding(9, 11, 9, 11);
-            pnlSumProg.Size = new Size(243, 65);
+            pnlSumProg.Padding = new Padding(17, 23, 17, 23);
+            pnlSumProg.Size = new Size(450, 145);
             pnlSumProg.TabIndex = 3;
             // 
             // lblSumProgKey
@@ -961,9 +978,10 @@
             lblSumProgKey.Dock = DockStyle.Top;
             lblSumProgKey.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
             lblSumProgKey.ForeColor = Color.FromArgb(146, 64, 14);
-            lblSumProgKey.Location = new Point(9, 11);
+            lblSumProgKey.Location = new Point(17, 23);
+            lblSumProgKey.Margin = new Padding(6, 0, 6, 0);
             lblSumProgKey.Name = "lblSumProgKey";
-            lblSumProgKey.Size = new Size(225, 12);
+            lblSumProgKey.Size = new Size(416, 26);
             lblSumProgKey.TabIndex = 0;
             lblSumProgKey.Text = "IN PROGRESS";
             lblSumProgKey.TextAlign = ContentAlignment.MiddleCenter;
@@ -973,10 +991,10 @@
             lblSumProgVal.Dock = DockStyle.Fill;
             lblSumProgVal.Font = new Font("Segoe UI", 13.5F, FontStyle.Bold);
             lblSumProgVal.ForeColor = Color.FromArgb(217, 119, 6);
-            lblSumProgVal.Location = new Point(9, 11);
-            lblSumProgVal.Margin = new Padding(6, 0, 6, 0);
+            lblSumProgVal.Location = new Point(17, 23);
+            lblSumProgVal.Margin = new Padding(11, 0, 11, 0);
             lblSumProgVal.Name = "lblSumProgVal";
-            lblSumProgVal.Size = new Size(225, 43);
+            lblSumProgVal.Size = new Size(416, 99);
             lblSumProgVal.TabIndex = 1;
             lblSumProgVal.Text = "0";
             lblSumProgVal.TextAlign = ContentAlignment.MiddleCenter;
@@ -987,10 +1005,10 @@
             cardReportList.Controls.Add(tblCenter);
             cardReportList.Dock = DockStyle.Fill;
             cardReportList.Location = new Point(0, 0);
-            cardReportList.Margin = new Padding(0, 0, 7, 0);
+            cardReportList.Margin = new Padding(0, 0, 13, 0);
             cardReportList.Name = "cardReportList";
-            cardReportList.Padding = new Padding(11, 9, 11, 9);
-            cardReportList.Size = new Size(962, 475);
+            cardReportList.Padding = new Padding(20, 19, 20, 19);
+            cardReportList.Size = new Size(1787, 1013);
             cardReportList.TabIndex = 1;
             // 
             // tblCenter
@@ -1001,14 +1019,14 @@
             tblCenter.Controls.Add(gridReports, 0, 1);
             tblCenter.Controls.Add(tblPagination, 0, 2);
             tblCenter.Dock = DockStyle.Fill;
-            tblCenter.Location = new Point(11, 9);
-            tblCenter.Margin = new Padding(3, 2, 3, 2);
+            tblCenter.Location = new Point(20, 19);
+            tblCenter.Margin = new Padding(6, 4, 6, 4);
             tblCenter.Name = "tblCenter";
             tblCenter.RowCount = 3;
-            tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 55F));
             tblCenter.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblCenter.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            tblCenter.Size = new Size(940, 457);
+            tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 66F));
+            tblCenter.Size = new Size(1747, 975);
             tblCenter.TabIndex = 0;
             // 
             // lblReportListTitle
@@ -1016,9 +1034,10 @@
             lblReportListTitle.Dock = DockStyle.Top;
             lblReportListTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblReportListTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblReportListTitle.Location = new Point(3, 0);
+            lblReportListTitle.Location = new Point(6, 0);
+            lblReportListTitle.Margin = new Padding(6, 0, 6, 0);
             lblReportListTitle.Name = "lblReportListTitle";
-            lblReportListTitle.Size = new Size(934, 26);
+            lblReportListTitle.Size = new Size(1735, 55);
             lblReportListTitle.TabIndex = 0;
             lblReportListTitle.Text = "REPORT LIST (Total: 18)";
             lblReportListTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -1042,7 +1061,7 @@
             gridReports.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             gridReports.ColumnHeadersHeight = 48;
             gridReports.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridReports.Columns.AddRange(new DataGridViewColumn[] { colNo, colReportName, colDateGenerated, colGeneratedBy, colResult, colAction });
+            gridReports.Columns.AddRange(new DataGridViewColumn[] { colNo, colReportName, colReportType, colDateGenerated, colGeneratedBy, colSize, colAction });
             dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle7.BackColor = Color.White;
             dataGridViewCellStyle7.Font = new Font("Segoe UI", 9F);
@@ -1055,16 +1074,16 @@
             gridReports.Dock = DockStyle.Fill;
             gridReports.EnableHeadersVisualStyles = false;
             gridReports.GridColor = Color.FromArgb(203, 213, 225);
-            gridReports.Location = new Point(0, 39);
-            gridReports.Margin = new Padding(0, 13, 0, 13);
-            gridReports.MinimumSize = new Size(500, 350);
+            gridReports.Location = new Point(0, 83);
+            gridReports.Margin = new Padding(0, 28, 0, 28);
+            gridReports.MinimumSize = new Size(929, 747);
             gridReports.Name = "gridReports";
             gridReports.ReadOnly = true;
             gridReports.RowHeadersVisible = false;
             gridReports.RowHeadersWidth = 82;
             gridReports.RowTemplate.Height = 44;
             gridReports.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridReports.Size = new Size(940, 374);
+            gridReports.Size = new Size(1747, 798);
             gridReports.TabIndex = 1;
             // 
             // colNo
@@ -1085,6 +1104,16 @@
             colReportName.Name = "colReportName";
             colReportName.ReadOnly = true;
             // 
+            // colReportType
+            // 
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            colReportType.DefaultCellStyle = dataGridViewCellStyle3;
+            colReportType.FillWeight = 70F;
+            colReportType.HeaderText = "Report Type";
+            colReportType.MinimumWidth = 90;
+            colReportType.Name = "colReportType";
+            colReportType.ReadOnly = true;
+            // 
             // colDateGenerated
             // 
             dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -1103,15 +1132,15 @@
             colGeneratedBy.Name = "colGeneratedBy";
             colGeneratedBy.ReadOnly = true;
             // 
-            // colResult
+            // colSize
             // 
-            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            colResult.DefaultCellStyle = dataGridViewCellStyle5;
-            colResult.FillWeight = 60F;
-            colResult.HeaderText = "Result";
-            colResult.MinimumWidth = 80;
-            colResult.Name = "colResult";
-            colResult.ReadOnly = true;
+            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleRight;
+            colSize.DefaultCellStyle = dataGridViewCellStyle5;
+            colSize.FillWeight = 45F;
+            colSize.HeaderText = "Size";
+            colSize.MinimumWidth = 60;
+            colSize.Name = "colSize";
+            colSize.ReadOnly = true;
             // 
             // colAction
             // 
@@ -1125,20 +1154,18 @@
             // 
             // tblPagination
             // 
-            tblPagination.AutoSize = true;
-            tblPagination.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tblPagination.ColumnCount = 2;
             tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblPagination.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblPagination.Controls.Add(lblPageInfo, 0, 0);
             tblPagination.Controls.Add(flpPageButtons, 1, 0);
             tblPagination.Dock = DockStyle.Fill;
-            tblPagination.Location = new Point(0, 426);
+            tblPagination.Location = new Point(0, 909);
             tblPagination.Margin = new Padding(0);
             tblPagination.Name = "tblPagination";
             tblPagination.RowCount = 1;
-            tblPagination.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            tblPagination.Size = new Size(940, 31);
+            tblPagination.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblPagination.Size = new Size(1747, 66);
             tblPagination.TabIndex = 2;
             // 
             // lblPageInfo
@@ -1146,12 +1173,12 @@
             lblPageInfo.Dock = DockStyle.Fill;
             lblPageInfo.Font = new Font("Segoe UI", 8.5F);
             lblPageInfo.ForeColor = Color.FromArgb(100, 116, 139);
-            lblPageInfo.Location = new Point(3, 0);
+            lblPageInfo.Location = new Point(6, 0);
+            lblPageInfo.Margin = new Padding(6, 0, 6, 0);
             lblPageInfo.Name = "lblPageInfo";
-            lblPageInfo.Size = new Size(464, 31);
+            lblPageInfo.Size = new Size(861, 66);
             lblPageInfo.TabIndex = 0;
             lblPageInfo.Text = "Showing 1 to 10 of 18 entries";
-            lblPageInfo.TextAlign = ContentAlignment.MiddleLeft;
             lblPageInfo.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // flpPageButtons
@@ -1163,15 +1190,12 @@
             flpPageButtons.Controls.Add(btnPage1);
             flpPageButtons.Controls.Add(btnPagePrev);
             flpPageButtons.Controls.Add(btnPageFirst);
-            flpPageButtons.AutoSize = true;
-            flpPageButtons.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             flpPageButtons.Dock = DockStyle.Fill;
             flpPageButtons.FlowDirection = FlowDirection.RightToLeft;
-            flpPageButtons.Location = new Point(470, 2);
-            flpPageButtons.Margin = new Padding(0, 2, 0, 0);
+            flpPageButtons.Location = new Point(873, 4);
+            flpPageButtons.Margin = new Padding(0, 4, 0, 0);
             flpPageButtons.Name = "flpPageButtons";
-            flpPageButtons.Size = new Size(470, 29);
-            flpPageButtons.WrapContents = false;
+            flpPageButtons.Size = new Size(874, 62);
             flpPageButtons.TabIndex = 1;
             // 
             // btnPageLast
@@ -1180,10 +1204,10 @@
             btnPageLast.FlatAppearance.BorderSize = 0;
             btnPageLast.FlatStyle = FlatStyle.Flat;
             btnPageLast.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPageLast.Location = new Point(435, 0);
-            btnPageLast.Margin = new Padding(2, 0, 0, 0);
+            btnPageLast.Location = new Point(809, 0);
+            btnPageLast.Margin = new Padding(4, 0, 0, 0);
             btnPageLast.Name = "btnPageLast";
-            btnPageLast.Size = new Size(35, 29);
+            btnPageLast.Size = new Size(65, 62);
             btnPageLast.TabIndex = 0;
             btnPageLast.Text = ">>";
             btnPageLast.UseVisualStyleBackColor = false;
@@ -1194,10 +1218,10 @@
             btnPageNext.FlatAppearance.BorderSize = 0;
             btnPageNext.FlatStyle = FlatStyle.Flat;
             btnPageNext.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPageNext.Location = new Point(400, 0);
-            btnPageNext.Margin = new Padding(2, 0, 0, 0);
+            btnPageNext.Location = new Point(744, 0);
+            btnPageNext.Margin = new Padding(4, 0, 0, 0);
             btnPageNext.Name = "btnPageNext";
-            btnPageNext.Size = new Size(33, 33);
+            btnPageNext.Size = new Size(61, 70);
             btnPageNext.TabIndex = 1;
             btnPageNext.Text = ">";
             btnPageNext.UseVisualStyleBackColor = false;
@@ -1208,10 +1232,10 @@
             btnPageDots.FlatAppearance.BorderSize = 0;
             btnPageDots.FlatStyle = FlatStyle.Flat;
             btnPageDots.Font = new Font("Segoe UI", 8.5F);
-            btnPageDots.Location = new Point(369, 0);
-            btnPageDots.Margin = new Padding(2, 0, 0, 0);
+            btnPageDots.Location = new Point(686, 0);
+            btnPageDots.Margin = new Padding(4, 0, 0, 0);
             btnPageDots.Name = "btnPageDots";
-            btnPageDots.Size = new Size(29, 22);
+            btnPageDots.Size = new Size(54, 47);
             btnPageDots.TabIndex = 2;
             btnPageDots.Text = "...";
             btnPageDots.UseVisualStyleBackColor = false;
@@ -1222,10 +1246,10 @@
             btnPage2.FlatAppearance.BorderSize = 0;
             btnPage2.FlatStyle = FlatStyle.Flat;
             btnPage2.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPage2.Location = new Point(336, 0);
-            btnPage2.Margin = new Padding(2, 0, 0, 0);
+            btnPage2.Location = new Point(624, 0);
+            btnPage2.Margin = new Padding(4, 0, 0, 0);
             btnPage2.Name = "btnPage2";
-            btnPage2.Size = new Size(31, 29);
+            btnPage2.Size = new Size(58, 62);
             btnPage2.TabIndex = 3;
             btnPage2.Text = "2";
             btnPage2.UseVisualStyleBackColor = false;
@@ -1237,10 +1261,10 @@
             btnPage1.FlatStyle = FlatStyle.Flat;
             btnPage1.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             btnPage1.ForeColor = Color.White;
-            btnPage1.Location = new Point(303, 0);
-            btnPage1.Margin = new Padding(2, 0, 0, 0);
+            btnPage1.Location = new Point(562, 0);
+            btnPage1.Margin = new Padding(4, 0, 0, 0);
             btnPage1.Name = "btnPage1";
-            btnPage1.Size = new Size(31, 29);
+            btnPage1.Size = new Size(58, 62);
             btnPage1.TabIndex = 4;
             btnPage1.Text = "1";
             btnPage1.UseVisualStyleBackColor = false;
@@ -1251,10 +1275,10 @@
             btnPagePrev.FlatAppearance.BorderSize = 0;
             btnPagePrev.FlatStyle = FlatStyle.Flat;
             btnPagePrev.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPagePrev.Location = new Point(268, 0);
-            btnPagePrev.Margin = new Padding(2, 0, 0, 0);
+            btnPagePrev.Location = new Point(497, 0);
+            btnPagePrev.Margin = new Padding(4, 0, 0, 0);
             btnPagePrev.Name = "btnPagePrev";
-            btnPagePrev.Size = new Size(33, 29);
+            btnPagePrev.Size = new Size(61, 62);
             btnPagePrev.TabIndex = 5;
             btnPagePrev.Text = "<";
             btnPagePrev.UseVisualStyleBackColor = false;
@@ -1265,10 +1289,10 @@
             btnPageFirst.FlatAppearance.BorderSize = 0;
             btnPageFirst.FlatStyle = FlatStyle.Flat;
             btnPageFirst.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPageFirst.Location = new Point(231, 0);
-            btnPageFirst.Margin = new Padding(2, 0, 0, 0);
+            btnPageFirst.Location = new Point(428, 0);
+            btnPageFirst.Margin = new Padding(4, 0, 0, 0);
             btnPageFirst.Name = "btnPageFirst";
-            btnPageFirst.Size = new Size(35, 29);
+            btnPageFirst.Size = new Size(65, 62);
             btnPageFirst.TabIndex = 6;
             btnPageFirst.Text = "<<";
             btnPageFirst.UseVisualStyleBackColor = false;
@@ -1281,8 +1305,8 @@
             cardTrend.Location = new Point(0, 0);
             cardTrend.Margin = new Padding(0);
             cardTrend.Name = "cardTrend";
-            cardTrend.Padding = new Padding(11, 9, 11, 9);
-            cardTrend.Size = new Size(1493, 613);
+            cardTrend.Padding = new Padding(20, 19, 20, 19);
+            cardTrend.Size = new Size(2772, 1307);
             cardTrend.TabIndex = 2;
             // 
             // lblTrendTitle
@@ -1290,9 +1314,10 @@
             lblTrendTitle.Dock = DockStyle.Top;
             lblTrendTitle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblTrendTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblTrendTitle.Location = new Point(11, 9);
+            lblTrendTitle.Location = new Point(20, 19);
+            lblTrendTitle.Margin = new Padding(6, 0, 6, 0);
             lblTrendTitle.Name = "lblTrendTitle";
-            lblTrendTitle.Size = new Size(1471, 20);
+            lblTrendTitle.Size = new Size(2732, 43);
             lblTrendTitle.TabIndex = 0;
             lblTrendTitle.Text = "RESULT TREND";
             // 
@@ -1300,28 +1325,42 @@
             // 
             tblColRight.ColumnCount = 1;
             tblColRight.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblColRight.Controls.Add(lblPreviewTitle, 0, 0);
-            tblColRight.Controls.Add(flpPreviewButtons, 0, 1);
-            tblColRight.Controls.Add(pnlPreviewContainer, 0, 2);
+            tblColRight.Controls.Add(cardPreviewTop, 0, 0);
+            tblColRight.Controls.Add(pnlPreviewContainer, 0, 1);
             tblColRight.Dock = DockStyle.Fill;
             tblColRight.Location = new Point(0, 0);
             tblColRight.Margin = new Padding(0);
             tblColRight.Name = "tblColRight";
-            tblColRight.RowCount = 3;
-            tblColRight.RowStyles.Add(new RowStyle(SizeType.Absolute, 21F));
+            tblColRight.RowCount = 2;
             tblColRight.RowStyles.Add(new RowStyle());
             tblColRight.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblColRight.Size = new Size(637, 1093);
+            tblColRight.Size = new Size(1183, 2331);
             tblColRight.TabIndex = 2;
+            // 
+            // cardPreviewTop
+            // 
+            cardPreviewTop.AutoSize = true;
+            cardPreviewTop.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            cardPreviewTop.BackColor = Color.White;
+            cardPreviewTop.Controls.Add(flpPreviewButtons);
+            cardPreviewTop.Controls.Add(lblPreviewTitle);
+            cardPreviewTop.Dock = DockStyle.Fill;
+            cardPreviewTop.Location = new Point(0, 0);
+            cardPreviewTop.Margin = new Padding(0, 0, 0, 11);
+            cardPreviewTop.Name = "cardPreviewTop";
+            cardPreviewTop.Padding = new Padding(20, 19, 20, 19);
+            cardPreviewTop.Size = new Size(1183, 329);
+            cardPreviewTop.TabIndex = 0;
             // 
             // lblPreviewTitle
             // 
-            lblPreviewTitle.Dock = DockStyle.Fill;
+            lblPreviewTitle.Dock = DockStyle.Top;
             lblPreviewTitle.Font = new Font("Segoe UI", 11.5F, FontStyle.Bold);
             lblPreviewTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblPreviewTitle.Location = new Point(3, 0);
+            lblPreviewTitle.Location = new Point(26, 19);
+            lblPreviewTitle.Margin = new Padding(6, 0, 6, 0);
             lblPreviewTitle.Name = "lblPreviewTitle";
-            lblPreviewTitle.Size = new Size(631, 21);
+            lblPreviewTitle.Size = new Size(1131, 45);
             lblPreviewTitle.TabIndex = 0;
             lblPreviewTitle.Text = "REPORT PREVIEW";
             lblPreviewTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -1330,6 +1369,7 @@
             // 
             flpPreviewButtons.AutoSize = true;
             flpPreviewButtons.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flpPreviewButtons.BackColor = Color.White;
             flpPreviewButtons.ColumnCount = 6;
             flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
             flpPreviewButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
@@ -1344,15 +1384,15 @@
             flpPreviewButtons.Controls.Add(btnDeleteReport, 3, 1);
             flpPreviewButtons.Controls.Add(btnCancelReportEdit, 0, 2);
             flpPreviewButtons.Controls.Add(btnSaveReportEdit, 3, 2);
-            flpPreviewButtons.Dock = DockStyle.Fill;
-            flpPreviewButtons.Location = new Point(0, 21);
-            flpPreviewButtons.Margin = new Padding(0, 0, 0, 5);
+            flpPreviewButtons.Dock = DockStyle.Top;
+            flpPreviewButtons.Location = new Point(20, 64);
+            flpPreviewButtons.Margin = new Padding(0);
             flpPreviewButtons.Name = "flpPreviewButtons";
             flpPreviewButtons.RowCount = 3;
             flpPreviewButtons.RowStyles.Add(new RowStyle());
             flpPreviewButtons.RowStyles.Add(new RowStyle());
             flpPreviewButtons.RowStyles.Add(new RowStyle());
-            flpPreviewButtons.Size = new Size(637, 114);
+            flpPreviewButtons.Size = new Size(1143, 246);
             flpPreviewButtons.TabIndex = 1;
             // 
             // btnExportPDF
@@ -1364,10 +1404,10 @@
             btnExportPDF.FlatStyle = FlatStyle.Flat;
             btnExportPDF.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnExportPDF.ForeColor = Color.FromArgb(220, 53, 69);
-            btnExportPDF.Location = new Point(4, 4);
-            btnExportPDF.Margin = new Padding(4);
+            btnExportPDF.Location = new Point(7, 9);
+            btnExportPDF.Margin = new Padding(7, 9, 7, 9);
             btnExportPDF.Name = "btnExportPDF";
-            btnExportPDF.Size = new Size(204, 29);
+            btnExportPDF.Size = new Size(366, 62);
             btnExportPDF.TabIndex = 0;
             btnExportPDF.Text = "Export PDF";
             btnExportPDF.UseVisualStyleBackColor = false;
@@ -1381,10 +1421,10 @@
             btnExportExcel.FlatStyle = FlatStyle.Flat;
             btnExportExcel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnExportExcel.ForeColor = Color.FromArgb(40, 167, 69);
-            btnExportExcel.Location = new Point(216, 4);
-            btnExportExcel.Margin = new Padding(4);
+            btnExportExcel.Location = new Point(387, 9);
+            btnExportExcel.Margin = new Padding(7, 9, 7, 9);
             btnExportExcel.Name = "btnExportExcel";
-            btnExportExcel.Size = new Size(204, 29);
+            btnExportExcel.Size = new Size(366, 62);
             btnExportExcel.TabIndex = 1;
             btnExportExcel.Text = "Export Excel";
             btnExportExcel.UseVisualStyleBackColor = false;
@@ -1398,10 +1438,10 @@
             btnPrint.FlatStyle = FlatStyle.Flat;
             btnPrint.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnPrint.ForeColor = Color.Black;
-            btnPrint.Location = new Point(428, 4);
-            btnPrint.Margin = new Padding(4);
+            btnPrint.Location = new Point(767, 9);
+            btnPrint.Margin = new Padding(7, 9, 7, 9);
             btnPrint.Name = "btnPrint";
-            btnPrint.Size = new Size(205, 29);
+            btnPrint.Size = new Size(369, 62);
             btnPrint.TabIndex = 2;
             btnPrint.Text = "Print";
             btnPrint.UseVisualStyleBackColor = false;
@@ -1415,10 +1455,10 @@
             btnEditReport.FlatStyle = FlatStyle.Flat;
             btnEditReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnEditReport.ForeColor = Color.White;
-            btnEditReport.Location = new Point(4, 41);
-            btnEditReport.Margin = new Padding(4);
+            btnEditReport.Location = new Point(7, 89);
+            btnEditReport.Margin = new Padding(7, 9, 7, 9);
             btnEditReport.Name = "btnEditReport";
-            btnEditReport.Size = new Size(310, 29);
+            btnEditReport.Size = new Size(556, 62);
             btnEditReport.TabIndex = 3;
             btnEditReport.Text = "Edit";
             btnEditReport.UseVisualStyleBackColor = false;
@@ -1432,10 +1472,10 @@
             btnDeleteReport.FlatStyle = FlatStyle.Flat;
             btnDeleteReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnDeleteReport.ForeColor = Color.White;
-            btnDeleteReport.Location = new Point(322, 41);
-            btnDeleteReport.Margin = new Padding(4);
+            btnDeleteReport.Location = new Point(577, 89);
+            btnDeleteReport.Margin = new Padding(7, 9, 7, 9);
             btnDeleteReport.Name = "btnDeleteReport";
-            btnDeleteReport.Size = new Size(311, 29);
+            btnDeleteReport.Size = new Size(559, 62);
             btnDeleteReport.TabIndex = 4;
             btnDeleteReport.Text = "Delete";
             btnDeleteReport.UseVisualStyleBackColor = false;
@@ -1449,10 +1489,10 @@
             btnCancelReportEdit.FlatStyle = FlatStyle.Flat;
             btnCancelReportEdit.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnCancelReportEdit.ForeColor = Color.White;
-            btnCancelReportEdit.Location = new Point(4, 78);
-            btnCancelReportEdit.Margin = new Padding(4);
+            btnCancelReportEdit.Location = new Point(7, 169);
+            btnCancelReportEdit.Margin = new Padding(7, 9, 7, 9);
             btnCancelReportEdit.Name = "btnCancelReportEdit";
-            btnCancelReportEdit.Size = new Size(310, 32);
+            btnCancelReportEdit.Size = new Size(556, 68);
             btnCancelReportEdit.TabIndex = 6;
             btnCancelReportEdit.Text = "Cancel";
             btnCancelReportEdit.UseVisualStyleBackColor = false;
@@ -1467,10 +1507,10 @@
             btnSaveReportEdit.FlatStyle = FlatStyle.Flat;
             btnSaveReportEdit.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSaveReportEdit.ForeColor = Color.White;
-            btnSaveReportEdit.Location = new Point(322, 78);
-            btnSaveReportEdit.Margin = new Padding(4);
+            btnSaveReportEdit.Location = new Point(577, 169);
+            btnSaveReportEdit.Margin = new Padding(7, 9, 7, 9);
             btnSaveReportEdit.Name = "btnSaveReportEdit";
-            btnSaveReportEdit.Size = new Size(311, 32);
+            btnSaveReportEdit.Size = new Size(559, 68);
             btnSaveReportEdit.TabIndex = 5;
             btnSaveReportEdit.Text = "Save";
             btnSaveReportEdit.UseVisualStyleBackColor = false;
@@ -1479,27 +1519,28 @@
             // pnlPreviewContainer
             // 
             pnlPreviewContainer.AutoScroll = true;
-            pnlPreviewContainer.BackColor = Color.FromArgb(226, 232, 240);
+            pnlPreviewContainer.BackColor = Color.White;
             pnlPreviewContainer.Controls.Add(cardPaper);
             pnlPreviewContainer.Dock = DockStyle.Fill;
-            pnlPreviewContainer.Location = new Point(0, 140);
+            pnlPreviewContainer.Location = new Point(0, 340);
             pnlPreviewContainer.Margin = new Padding(0);
             pnlPreviewContainer.Name = "pnlPreviewContainer";
-            pnlPreviewContainer.Padding = new Padding(26);
-            pnlPreviewContainer.Size = new Size(637, 953);
+            pnlPreviewContainer.Padding = new Padding(28, 35, 28, 35);
+            pnlPreviewContainer.Size = new Size(1183, 1991);
             pnlPreviewContainer.TabIndex = 1;
             // 
             // cardPaper
             // 
             cardPaper.AutoScroll = true;
             cardPaper.BackColor = Color.White;
+            cardPaper.BorderStyle = BorderStyle.FixedSingle;
             cardPaper.Controls.Add(tblPaperContent);
             cardPaper.Dock = DockStyle.Fill;
-            cardPaper.Location = new Point(26, 26);
-            cardPaper.Margin = new Padding(3, 2, 3, 2);
+            cardPaper.Location = new Point(28, 35);
+            cardPaper.Margin = new Padding(6, 4, 6, 4);
             cardPaper.Name = "cardPaper";
-            cardPaper.Padding = new Padding(30);
-            cardPaper.Size = new Size(585, 901);
+            cardPaper.Padding = new Padding(26, 34, 26, 34);
+            cardPaper.Size = new Size(1127, 1921);
             cardPaper.TabIndex = 0;
             // 
             // tblPaperContent
@@ -1512,16 +1553,16 @@
             tblPaperContent.Controls.Add(pnlResultBox, 0, 3);
             tblPaperContent.Controls.Add(pnlNotesBox, 0, 4);
             tblPaperContent.Dock = DockStyle.Fill;
-            tblPaperContent.Location = new Point(30, 30);
-            tblPaperContent.Margin = new Padding(3, 2, 3, 2);
+            tblPaperContent.Location = new Point(26, 34);
+            tblPaperContent.Margin = new Padding(6, 4, 6, 4);
             tblPaperContent.Name = "tblPaperContent";
             tblPaperContent.RowCount = 5;
-            tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 49F));
-            tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 179F));
+            tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 105F));
+            tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 382F));
             tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 47F));
-            tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 108F));
-            tblPaperContent.Size = new Size(525, 841);
+            tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
+            tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 230F));
+            tblPaperContent.Size = new Size(1075, 1853);
             tblPaperContent.TabIndex = 0;
             // 
             // tblPaperHeader
@@ -1533,11 +1574,11 @@
             tblPaperHeader.Controls.Add(lblPaperMeta, 1, 0);
             tblPaperHeader.Dock = DockStyle.Fill;
             tblPaperHeader.Location = new Point(0, 0);
-            tblPaperHeader.Margin = new Padding(0, 0, 0, 8);
+            tblPaperHeader.Margin = new Padding(0, 0, 0, 17);
             tblPaperHeader.Name = "tblPaperHeader";
             tblPaperHeader.RowCount = 1;
             tblPaperHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblPaperHeader.Size = new Size(525, 41);
+            tblPaperHeader.Size = new Size(1075, 88);
             tblPaperHeader.TabIndex = 0;
             // 
             // flpPaperLogo
@@ -1548,7 +1589,7 @@
             flpPaperLogo.Location = new Point(0, 0);
             flpPaperLogo.Margin = new Padding(0);
             flpPaperLogo.Name = "flpPaperLogo";
-            flpPaperLogo.Size = new Size(262, 41);
+            flpPaperLogo.Size = new Size(537, 88);
             flpPaperLogo.TabIndex = 0;
             flpPaperLogo.WrapContents = false;
             // 
@@ -1557,10 +1598,10 @@
             lblLogoBadge.BackColor = Color.FromArgb(30, 41, 59);
             lblLogoBadge.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblLogoBadge.ForeColor = Color.White;
-            lblLogoBadge.Location = new Point(0, 3);
-            lblLogoBadge.Margin = new Padding(0, 3, 9, 0);
+            lblLogoBadge.Location = new Point(0, 6);
+            lblLogoBadge.Margin = new Padding(0, 6, 17, 0);
             lblLogoBadge.Name = "lblLogoBadge";
-            lblLogoBadge.Size = new Size(48, 30);
+            lblLogoBadge.Size = new Size(89, 64);
             lblLogoBadge.TabIndex = 0;
             lblLogoBadge.Text = "CAT";
             lblLogoBadge.TextAlign = ContentAlignment.MiddleCenter;
@@ -1570,10 +1611,10 @@
             lblPaperTitle.AutoSize = true;
             lblPaperTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblPaperTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblPaperTitle.Location = new Point(57, 6);
-            lblPaperTitle.Margin = new Padding(0, 6, 0, 0);
+            lblPaperTitle.Location = new Point(106, 13);
+            lblPaperTitle.Margin = new Padding(0, 13, 0, 0);
             lblPaperTitle.Name = "lblPaperTitle";
-            lblPaperTitle.Size = new Size(110, 21);
+            lblPaperTitle.Size = new Size(223, 45);
             lblPaperTitle.TabIndex = 1;
             lblPaperTitle.Text = "TEST REPORT";
             // 
@@ -1582,9 +1623,10 @@
             lblPaperMeta.Dock = DockStyle.Fill;
             lblPaperMeta.Font = new Font("Segoe UI", 8F);
             lblPaperMeta.ForeColor = Color.FromArgb(71, 85, 105);
-            lblPaperMeta.Location = new Point(265, 0);
+            lblPaperMeta.Location = new Point(543, 0);
+            lblPaperMeta.Margin = new Padding(6, 0, 6, 0);
             lblPaperMeta.Name = "lblPaperMeta";
-            lblPaperMeta.Size = new Size(257, 41);
+            lblPaperMeta.Size = new Size(526, 88);
             lblPaperMeta.TabIndex = 1;
             lblPaperMeta.Text = "Report No.: TR-20260315-103020\r\nDate: 15 Mar 2026\r\nPage: 1 of 2";
             lblPaperMeta.TextAlign = ContentAlignment.TopRight;
@@ -1595,11 +1637,11 @@
             pnlGenInfoBox.Controls.Add(tblGenGrid);
             pnlGenInfoBox.Controls.Add(lblGenTitle);
             pnlGenInfoBox.Dock = DockStyle.Fill;
-            pnlGenInfoBox.Location = new Point(0, 49);
-            pnlGenInfoBox.Margin = new Padding(0, 0, 0, 8);
+            pnlGenInfoBox.Location = new Point(0, 105);
+            pnlGenInfoBox.Margin = new Padding(0, 0, 0, 17);
             pnlGenInfoBox.Name = "pnlGenInfoBox";
-            pnlGenInfoBox.Padding = new Padding(17);
-            pnlGenInfoBox.Size = new Size(525, 171);
+            pnlGenInfoBox.Padding = new Padding(32, 36, 32, 36);
+            pnlGenInfoBox.Size = new Size(1075, 365);
             pnlGenInfoBox.TabIndex = 1;
             // 
             // tblGenGrid
@@ -1630,8 +1672,8 @@
             tblGenGrid.Controls.Add(lblGenResKey, 2, 4);
             tblGenGrid.Controls.Add(lblGenResVal, 3, 4);
             tblGenGrid.Dock = DockStyle.Fill;
-            tblGenGrid.Location = new Point(17, 47);
-            tblGenGrid.Margin = new Padding(3, 2, 3, 2);
+            tblGenGrid.Location = new Point(32, 100);
+            tblGenGrid.Margin = new Padding(6, 4, 6, 4);
             tblGenGrid.Name = "tblGenGrid";
             tblGenGrid.RowCount = 5;
             tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
@@ -1639,7 +1681,7 @@
             tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
             tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
             tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tblGenGrid.Size = new Size(491, 107);
+            tblGenGrid.Size = new Size(1011, 229);
             tblGenGrid.TabIndex = 1;
             // 
             // lblGenModelKey
@@ -1647,9 +1689,10 @@
             lblGenModelKey.Dock = DockStyle.Fill;
             lblGenModelKey.Font = new Font("Segoe UI", 8F);
             lblGenModelKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenModelKey.Location = new Point(3, 0);
+            lblGenModelKey.Location = new Point(6, 0);
+            lblGenModelKey.Margin = new Padding(6, 0, 6, 0);
             lblGenModelKey.Name = "lblGenModelKey";
-            lblGenModelKey.Size = new Size(116, 21);
+            lblGenModelKey.Size = new Size(240, 45);
             lblGenModelKey.TabIndex = 0;
             lblGenModelKey.Text = "Product Model:";
             lblGenModelKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1659,9 +1702,10 @@
             lblGenModelVal.Dock = DockStyle.Fill;
             lblGenModelVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenModelVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenModelVal.Location = new Point(125, 0);
+            lblGenModelVal.Location = new Point(258, 0);
+            lblGenModelVal.Margin = new Padding(6, 0, 6, 0);
             lblGenModelVal.Name = "lblGenModelVal";
-            lblGenModelVal.Size = new Size(116, 21);
+            lblGenModelVal.Size = new Size(240, 45);
             lblGenModelVal.TabIndex = 1;
             lblGenModelVal.Text = "6060";
             lblGenModelVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1671,9 +1715,10 @@
             lblGenEcnKey.Dock = DockStyle.Fill;
             lblGenEcnKey.Font = new Font("Segoe UI", 8F);
             lblGenEcnKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenEcnKey.Location = new Point(247, 0);
+            lblGenEcnKey.Location = new Point(510, 0);
+            lblGenEcnKey.Margin = new Padding(6, 0, 6, 0);
             lblGenEcnKey.Name = "lblGenEcnKey";
-            lblGenEcnKey.Size = new Size(116, 21);
+            lblGenEcnKey.Size = new Size(240, 45);
             lblGenEcnKey.TabIndex = 2;
             lblGenEcnKey.Text = "ECN No:";
             lblGenEcnKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1683,9 +1728,10 @@
             lblGenEcnVal.Dock = DockStyle.Fill;
             lblGenEcnVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenEcnVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenEcnVal.Location = new Point(369, 0);
+            lblGenEcnVal.Location = new Point(762, 0);
+            lblGenEcnVal.Margin = new Padding(6, 0, 6, 0);
             lblGenEcnVal.Name = "lblGenEcnVal";
-            lblGenEcnVal.Size = new Size(119, 21);
+            lblGenEcnVal.Size = new Size(243, 45);
             lblGenEcnVal.TabIndex = 3;
             lblGenEcnVal.Text = "123.R001";
             lblGenEcnVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1695,9 +1741,10 @@
             lblGenTypeKey.Dock = DockStyle.Fill;
             lblGenTypeKey.Font = new Font("Segoe UI", 8F);
             lblGenTypeKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenTypeKey.Location = new Point(3, 21);
+            lblGenTypeKey.Location = new Point(6, 45);
+            lblGenTypeKey.Margin = new Padding(6, 0, 6, 0);
             lblGenTypeKey.Name = "lblGenTypeKey";
-            lblGenTypeKey.Size = new Size(116, 21);
+            lblGenTypeKey.Size = new Size(240, 45);
             lblGenTypeKey.TabIndex = 4;
             lblGenTypeKey.Text = "Product Type:";
             lblGenTypeKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1707,9 +1754,10 @@
             lblGenTypeVal.Dock = DockStyle.Fill;
             lblGenTypeVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenTypeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenTypeVal.Location = new Point(125, 21);
+            lblGenTypeVal.Location = new Point(258, 45);
+            lblGenTypeVal.Margin = new Padding(6, 0, 6, 0);
             lblGenTypeVal.Name = "lblGenTypeVal";
-            lblGenTypeVal.Size = new Size(116, 21);
+            lblGenTypeVal.Size = new Size(240, 45);
             lblGenTypeVal.TabIndex = 5;
             lblGenTypeVal.Text = "AC";
             lblGenTypeVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1719,9 +1767,10 @@
             lblGenRevKey.Dock = DockStyle.Fill;
             lblGenRevKey.Font = new Font("Segoe UI", 8F);
             lblGenRevKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenRevKey.Location = new Point(247, 21);
+            lblGenRevKey.Location = new Point(510, 45);
+            lblGenRevKey.Margin = new Padding(6, 0, 6, 0);
             lblGenRevKey.Name = "lblGenRevKey";
-            lblGenRevKey.Size = new Size(116, 21);
+            lblGenRevKey.Size = new Size(240, 45);
             lblGenRevKey.TabIndex = 6;
             lblGenRevKey.Text = "Revision:";
             lblGenRevKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1731,9 +1780,10 @@
             lblGenRevVal.Dock = DockStyle.Fill;
             lblGenRevVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenRevVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenRevVal.Location = new Point(369, 21);
+            lblGenRevVal.Location = new Point(762, 45);
+            lblGenRevVal.Margin = new Padding(6, 0, 6, 0);
             lblGenRevVal.Name = "lblGenRevVal";
-            lblGenRevVal.Size = new Size(119, 21);
+            lblGenRevVal.Size = new Size(243, 45);
             lblGenRevVal.TabIndex = 7;
             lblGenRevVal.Text = "A";
             lblGenRevVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1743,9 +1793,10 @@
             lblGenAreaKey.Dock = DockStyle.Fill;
             lblGenAreaKey.Font = new Font("Segoe UI", 8F);
             lblGenAreaKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenAreaKey.Location = new Point(3, 42);
+            lblGenAreaKey.Location = new Point(6, 90);
+            lblGenAreaKey.Margin = new Padding(6, 0, 6, 0);
             lblGenAreaKey.Name = "lblGenAreaKey";
-            lblGenAreaKey.Size = new Size(116, 21);
+            lblGenAreaKey.Size = new Size(240, 45);
             lblGenAreaKey.TabIndex = 8;
             lblGenAreaKey.Text = "Area:";
             lblGenAreaKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1755,9 +1806,10 @@
             lblGenAreaVal.Dock = DockStyle.Fill;
             lblGenAreaVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenAreaVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenAreaVal.Location = new Point(125, 42);
+            lblGenAreaVal.Location = new Point(258, 90);
+            lblGenAreaVal.Margin = new Padding(6, 0, 6, 0);
             lblGenAreaVal.Name = "lblGenAreaVal";
-            lblGenAreaVal.Size = new Size(116, 21);
+            lblGenAreaVal.Size = new Size(240, 45);
             lblGenAreaVal.TabIndex = 9;
             lblGenAreaVal.Text = "Engine Control";
             lblGenAreaVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1767,9 +1819,10 @@
             lblGenOpKey.Dock = DockStyle.Fill;
             lblGenOpKey.Font = new Font("Segoe UI", 8F);
             lblGenOpKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenOpKey.Location = new Point(247, 42);
+            lblGenOpKey.Location = new Point(510, 90);
+            lblGenOpKey.Margin = new Padding(6, 0, 6, 0);
             lblGenOpKey.Name = "lblGenOpKey";
-            lblGenOpKey.Size = new Size(116, 21);
+            lblGenOpKey.Size = new Size(240, 45);
             lblGenOpKey.TabIndex = 10;
             lblGenOpKey.Text = "Operator:";
             lblGenOpKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1779,9 +1832,10 @@
             lblGenOpVal.Dock = DockStyle.Fill;
             lblGenOpVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenOpVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenOpVal.Location = new Point(369, 42);
+            lblGenOpVal.Location = new Point(762, 90);
+            lblGenOpVal.Margin = new Padding(6, 0, 6, 0);
             lblGenOpVal.Name = "lblGenOpVal";
-            lblGenOpVal.Size = new Size(119, 21);
+            lblGenOpVal.Size = new Size(243, 45);
             lblGenOpVal.TabIndex = 11;
             lblGenOpVal.Text = "Fally";
             lblGenOpVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1791,9 +1845,10 @@
             lblGenPartKey.Dock = DockStyle.Fill;
             lblGenPartKey.Font = new Font("Segoe UI", 8F);
             lblGenPartKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenPartKey.Location = new Point(3, 63);
+            lblGenPartKey.Location = new Point(6, 135);
+            lblGenPartKey.Margin = new Padding(6, 0, 6, 0);
             lblGenPartKey.Name = "lblGenPartKey";
-            lblGenPartKey.Size = new Size(116, 21);
+            lblGenPartKey.Size = new Size(240, 45);
             lblGenPartKey.TabIndex = 12;
             lblGenPartKey.Text = "Part Number:";
             lblGenPartKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1803,9 +1858,10 @@
             lblGenPartVal.Dock = DockStyle.Fill;
             lblGenPartVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenPartVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenPartVal.Location = new Point(125, 63);
+            lblGenPartVal.Location = new Point(258, 135);
+            lblGenPartVal.Margin = new Padding(6, 0, 6, 0);
             lblGenPartVal.Name = "lblGenPartVal";
-            lblGenPartVal.Size = new Size(116, 21);
+            lblGenPartVal.Size = new Size(240, 45);
             lblGenPartVal.TabIndex = 13;
             lblGenPartVal.Text = "WH-ENG-001";
             lblGenPartVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1815,9 +1871,10 @@
             lblGenTimeKey.Dock = DockStyle.Fill;
             lblGenTimeKey.Font = new Font("Segoe UI", 8F);
             lblGenTimeKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenTimeKey.Location = new Point(247, 63);
+            lblGenTimeKey.Location = new Point(510, 135);
+            lblGenTimeKey.Margin = new Padding(6, 0, 6, 0);
             lblGenTimeKey.Name = "lblGenTimeKey";
-            lblGenTimeKey.Size = new Size(116, 21);
+            lblGenTimeKey.Size = new Size(240, 45);
             lblGenTimeKey.TabIndex = 14;
             lblGenTimeKey.Text = "Test Time:";
             lblGenTimeKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1827,9 +1884,10 @@
             lblGenTimeVal.Dock = DockStyle.Fill;
             lblGenTimeVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenTimeVal.Location = new Point(369, 63);
+            lblGenTimeVal.Location = new Point(762, 135);
+            lblGenTimeVal.Margin = new Padding(6, 0, 6, 0);
             lblGenTimeVal.Name = "lblGenTimeVal";
-            lblGenTimeVal.Size = new Size(119, 21);
+            lblGenTimeVal.Size = new Size(243, 45);
             lblGenTimeVal.TabIndex = 15;
             lblGenTimeVal.Text = "00:09:01";
             lblGenTimeVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1839,9 +1897,10 @@
             lblGenSnKey.Dock = DockStyle.Fill;
             lblGenSnKey.Font = new Font("Segoe UI", 8F);
             lblGenSnKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenSnKey.Location = new Point(3, 84);
+            lblGenSnKey.Location = new Point(6, 180);
+            lblGenSnKey.Margin = new Padding(6, 0, 6, 0);
             lblGenSnKey.Name = "lblGenSnKey";
-            lblGenSnKey.Size = new Size(116, 23);
+            lblGenSnKey.Size = new Size(240, 49);
             lblGenSnKey.TabIndex = 16;
             lblGenSnKey.Text = "Serial Number:";
             lblGenSnKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1851,9 +1910,10 @@
             lblGenSnVal.Dock = DockStyle.Fill;
             lblGenSnVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenSnVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenSnVal.Location = new Point(125, 84);
+            lblGenSnVal.Location = new Point(258, 180);
+            lblGenSnVal.Margin = new Padding(6, 0, 6, 0);
             lblGenSnVal.Name = "lblGenSnVal";
-            lblGenSnVal.Size = new Size(116, 23);
+            lblGenSnVal.Size = new Size(240, 49);
             lblGenSnVal.TabIndex = 17;
             lblGenSnVal.Text = "SN12350";
             lblGenSnVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1863,9 +1923,10 @@
             lblGenResKey.Dock = DockStyle.Fill;
             lblGenResKey.Font = new Font("Segoe UI", 8F);
             lblGenResKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenResKey.Location = new Point(247, 84);
+            lblGenResKey.Location = new Point(510, 180);
+            lblGenResKey.Margin = new Padding(6, 0, 6, 0);
             lblGenResKey.Name = "lblGenResKey";
-            lblGenResKey.Size = new Size(116, 23);
+            lblGenResKey.Size = new Size(240, 49);
             lblGenResKey.TabIndex = 18;
             lblGenResKey.Text = "Result:";
             lblGenResKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1875,9 +1936,10 @@
             lblGenResVal.Dock = DockStyle.Fill;
             lblGenResVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenResVal.ForeColor = Color.FromArgb(4, 120, 87);
-            lblGenResVal.Location = new Point(369, 84);
+            lblGenResVal.Location = new Point(762, 180);
+            lblGenResVal.Margin = new Padding(6, 0, 6, 0);
             lblGenResVal.Name = "lblGenResVal";
-            lblGenResVal.Size = new Size(119, 23);
+            lblGenResVal.Size = new Size(243, 49);
             lblGenResVal.TabIndex = 19;
             lblGenResVal.Text = "PASS";
             lblGenResVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1887,21 +1949,23 @@
             lblGenTitle.Dock = DockStyle.Top;
             lblGenTitle.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblGenTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenTitle.Location = new Point(17, 17);
+            lblGenTitle.Location = new Point(32, 36);
+            lblGenTitle.Margin = new Padding(6, 0, 6, 0);
             lblGenTitle.Name = "lblGenTitle";
-            lblGenTitle.Size = new Size(491, 30);
+            lblGenTitle.Size = new Size(1011, 64);
             lblGenTitle.TabIndex = 0;
             lblGenTitle.Text = "GENERAL INFORMATION";
             // 
             // pnlSummaryTableContainer
             // 
+            pnlSummaryTableContainer.AutoScroll = true;
             pnlSummaryTableContainer.Controls.Add(tblTestSummary);
             pnlSummaryTableContainer.Controls.Add(lblSumTableTitle);
             pnlSummaryTableContainer.Dock = DockStyle.Fill;
-            pnlSummaryTableContainer.Location = new Point(0, 236);
-            pnlSummaryTableContainer.Margin = new Padding(0, 8, 0, 8);
+            pnlSummaryTableContainer.Location = new Point(0, 504);
+            pnlSummaryTableContainer.Margin = new Padding(0, 17, 0, 17);
             pnlSummaryTableContainer.Name = "pnlSummaryTableContainer";
-            pnlSummaryTableContainer.Size = new Size(525, 442);
+            pnlSummaryTableContainer.Size = new Size(1075, 1002);
             pnlSummaryTableContainer.TabIndex = 2;
             // 
             // tblTestSummary
@@ -1944,17 +2008,18 @@
             tblTestSummary.Controls.Add(lblR5C4, 3, 5);
             tblTestSummary.Controls.Add(lblR5C5, 4, 5);
             tblTestSummary.Dock = DockStyle.Top;
-            tblTestSummary.Location = new Point(0, 29);
-            tblTestSummary.Margin = new Padding(3, 2, 3, 2);
+            tblTestSummary.Location = new Point(0, 62);
+            tblTestSummary.Margin = new Padding(6, 4, 6, 4);
+            tblTestSummary.MinimumSize = new Size(600, 0);
             tblTestSummary.Name = "tblTestSummary";
             tblTestSummary.RowCount = 6;
-            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 21F));
-            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 21F));
-            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 21F));
-            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 21F));
-            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            tblTestSummary.Size = new Size(525, 136);
+            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 51F));
+            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
+            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
+            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
+            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
+            tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 51F));
+            tblTestSummary.Size = new Size(1075, 290);
             tblTestSummary.TabIndex = 1;
             // 
             // lblSumH1
@@ -1965,7 +2030,7 @@
             lblSumH1.Location = new Point(1, 1);
             lblSumH1.Margin = new Padding(0);
             lblSumH1.Name = "lblSumH1";
-            lblSumH1.Size = new Size(186, 24);
+            lblSumH1.Size = new Size(384, 51);
             lblSumH1.TabIndex = 0;
             lblSumH1.Text = "Test Type";
             lblSumH1.TextAlign = ContentAlignment.MiddleLeft;
@@ -1975,10 +2040,10 @@
             lblSumH2.BackColor = Color.FromArgb(241, 245, 249);
             lblSumH2.Dock = DockStyle.Fill;
             lblSumH2.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            lblSumH2.Location = new Point(188, 1);
+            lblSumH2.Location = new Point(386, 1);
             lblSumH2.Margin = new Padding(0);
             lblSumH2.Name = "lblSumH2";
-            lblSumH2.Size = new Size(83, 24);
+            lblSumH2.Size = new Size(171, 51);
             lblSumH2.TabIndex = 1;
             lblSumH2.Text = "Total";
             lblSumH2.TextAlign = ContentAlignment.MiddleCenter;
@@ -1988,10 +2053,10 @@
             lblSumH3.BackColor = Color.FromArgb(241, 245, 249);
             lblSumH3.Dock = DockStyle.Fill;
             lblSumH3.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            lblSumH3.Location = new Point(272, 1);
+            lblSumH3.Location = new Point(558, 1);
             lblSumH3.Margin = new Padding(0);
             lblSumH3.Name = "lblSumH3";
-            lblSumH3.Size = new Size(83, 24);
+            lblSumH3.Size = new Size(171, 51);
             lblSumH3.TabIndex = 2;
             lblSumH3.Text = "Pass";
             lblSumH3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2001,10 +2066,10 @@
             lblSumH4.BackColor = Color.FromArgb(241, 245, 249);
             lblSumH4.Dock = DockStyle.Fill;
             lblSumH4.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            lblSumH4.Location = new Point(356, 1);
+            lblSumH4.Location = new Point(730, 1);
             lblSumH4.Margin = new Padding(0);
             lblSumH4.Name = "lblSumH4";
-            lblSumH4.Size = new Size(83, 24);
+            lblSumH4.Size = new Size(171, 51);
             lblSumH4.TabIndex = 3;
             lblSumH4.Text = "Fail";
             lblSumH4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2014,10 +2079,10 @@
             lblSumH5.BackColor = Color.FromArgb(241, 245, 249);
             lblSumH5.Dock = DockStyle.Fill;
             lblSumH5.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            lblSumH5.Location = new Point(440, 1);
+            lblSumH5.Location = new Point(902, 1);
             lblSumH5.Margin = new Padding(0);
             lblSumH5.Name = "lblSumH5";
-            lblSumH5.Size = new Size(84, 24);
+            lblSumH5.Size = new Size(172, 51);
             lblSumH5.TabIndex = 4;
             lblSumH5.Text = "Pass Rate";
             lblSumH5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2026,10 +2091,10 @@
             // 
             lblR1C1.Dock = DockStyle.Fill;
             lblR1C1.Font = new Font("Segoe UI", 8F);
-            lblR1C1.Location = new Point(1, 26);
+            lblR1C1.Location = new Point(1, 53);
             lblR1C1.Margin = new Padding(0);
             lblR1C1.Name = "lblR1C1";
-            lblR1C1.Size = new Size(186, 21);
+            lblR1C1.Size = new Size(384, 45);
             lblR1C1.TabIndex = 5;
             lblR1C1.Text = "Continuity Test";
             lblR1C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2038,10 +2103,10 @@
             // 
             lblR1C2.Dock = DockStyle.Fill;
             lblR1C2.Font = new Font("Segoe UI", 8F);
-            lblR1C2.Location = new Point(188, 26);
+            lblR1C2.Location = new Point(386, 53);
             lblR1C2.Margin = new Padding(0);
             lblR1C2.Name = "lblR1C2";
-            lblR1C2.Size = new Size(83, 21);
+            lblR1C2.Size = new Size(171, 45);
             lblR1C2.TabIndex = 6;
             lblR1C2.Text = "62";
             lblR1C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2050,10 +2115,10 @@
             // 
             lblR1C3.Dock = DockStyle.Fill;
             lblR1C3.Font = new Font("Segoe UI", 8F);
-            lblR1C3.Location = new Point(272, 26);
+            lblR1C3.Location = new Point(558, 53);
             lblR1C3.Margin = new Padding(0);
             lblR1C3.Name = "lblR1C3";
-            lblR1C3.Size = new Size(83, 21);
+            lblR1C3.Size = new Size(171, 45);
             lblR1C3.TabIndex = 7;
             lblR1C3.Text = "62";
             lblR1C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2062,10 +2127,10 @@
             // 
             lblR1C4.Dock = DockStyle.Fill;
             lblR1C4.Font = new Font("Segoe UI", 8F);
-            lblR1C4.Location = new Point(356, 26);
+            lblR1C4.Location = new Point(730, 53);
             lblR1C4.Margin = new Padding(0);
             lblR1C4.Name = "lblR1C4";
-            lblR1C4.Size = new Size(83, 21);
+            lblR1C4.Size = new Size(171, 45);
             lblR1C4.TabIndex = 8;
             lblR1C4.Text = "0";
             lblR1C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2074,10 +2139,10 @@
             // 
             lblR1C5.Dock = DockStyle.Fill;
             lblR1C5.Font = new Font("Segoe UI", 8F);
-            lblR1C5.Location = new Point(440, 26);
+            lblR1C5.Location = new Point(902, 53);
             lblR1C5.Margin = new Padding(0);
             lblR1C5.Name = "lblR1C5";
-            lblR1C5.Size = new Size(84, 21);
+            lblR1C5.Size = new Size(172, 45);
             lblR1C5.TabIndex = 9;
             lblR1C5.Text = "100.00%";
             lblR1C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2086,10 +2151,10 @@
             // 
             lblR2C1.Dock = DockStyle.Fill;
             lblR2C1.Font = new Font("Segoe UI", 8F);
-            lblR2C1.Location = new Point(1, 48);
+            lblR2C1.Location = new Point(1, 99);
             lblR2C1.Margin = new Padding(0);
             lblR2C1.Name = "lblR2C1";
-            lblR2C1.Size = new Size(186, 21);
+            lblR2C1.Size = new Size(384, 45);
             lblR2C1.TabIndex = 10;
             lblR2C1.Text = "Short Circuit Test";
             lblR2C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2098,10 +2163,10 @@
             // 
             lblR2C2.Dock = DockStyle.Fill;
             lblR2C2.Font = new Font("Segoe UI", 8F);
-            lblR2C2.Location = new Point(188, 48);
+            lblR2C2.Location = new Point(386, 99);
             lblR2C2.Margin = new Padding(0);
             lblR2C2.Name = "lblR2C2";
-            lblR2C2.Size = new Size(83, 21);
+            lblR2C2.Size = new Size(171, 45);
             lblR2C2.TabIndex = 11;
             lblR2C2.Text = "62";
             lblR2C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2110,10 +2175,10 @@
             // 
             lblR2C3.Dock = DockStyle.Fill;
             lblR2C3.Font = new Font("Segoe UI", 8F);
-            lblR2C3.Location = new Point(272, 48);
+            lblR2C3.Location = new Point(558, 99);
             lblR2C3.Margin = new Padding(0);
             lblR2C3.Name = "lblR2C3";
-            lblR2C3.Size = new Size(83, 21);
+            lblR2C3.Size = new Size(171, 45);
             lblR2C3.TabIndex = 12;
             lblR2C3.Text = "62";
             lblR2C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2122,10 +2187,10 @@
             // 
             lblR2C4.Dock = DockStyle.Fill;
             lblR2C4.Font = new Font("Segoe UI", 8F);
-            lblR2C4.Location = new Point(356, 48);
+            lblR2C4.Location = new Point(730, 99);
             lblR2C4.Margin = new Padding(0);
             lblR2C4.Name = "lblR2C4";
-            lblR2C4.Size = new Size(83, 21);
+            lblR2C4.Size = new Size(171, 45);
             lblR2C4.TabIndex = 13;
             lblR2C4.Text = "0";
             lblR2C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2134,10 +2199,10 @@
             // 
             lblR2C5.Dock = DockStyle.Fill;
             lblR2C5.Font = new Font("Segoe UI", 8F);
-            lblR2C5.Location = new Point(440, 48);
+            lblR2C5.Location = new Point(902, 99);
             lblR2C5.Margin = new Padding(0);
             lblR2C5.Name = "lblR2C5";
-            lblR2C5.Size = new Size(84, 21);
+            lblR2C5.Size = new Size(172, 45);
             lblR2C5.TabIndex = 14;
             lblR2C5.Text = "100.00%";
             lblR2C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2146,10 +2211,10 @@
             // 
             lblR3C1.Dock = DockStyle.Fill;
             lblR3C1.Font = new Font("Segoe UI", 8F);
-            lblR3C1.Location = new Point(1, 70);
+            lblR3C1.Location = new Point(1, 145);
             lblR3C1.Margin = new Padding(0);
             lblR3C1.Name = "lblR3C1";
-            lblR3C1.Size = new Size(186, 21);
+            lblR3C1.Size = new Size(384, 45);
             lblR3C1.TabIndex = 15;
             lblR3C1.Text = "Insulation Test";
             lblR3C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2158,10 +2223,10 @@
             // 
             lblR3C2.Dock = DockStyle.Fill;
             lblR3C2.Font = new Font("Segoe UI", 8F);
-            lblR3C2.Location = new Point(188, 70);
+            lblR3C2.Location = new Point(386, 145);
             lblR3C2.Margin = new Padding(0);
             lblR3C2.Name = "lblR3C2";
-            lblR3C2.Size = new Size(83, 21);
+            lblR3C2.Size = new Size(171, 45);
             lblR3C2.TabIndex = 16;
             lblR3C2.Text = "62";
             lblR3C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2170,10 +2235,10 @@
             // 
             lblR3C3.Dock = DockStyle.Fill;
             lblR3C3.Font = new Font("Segoe UI", 8F);
-            lblR3C3.Location = new Point(272, 70);
+            lblR3C3.Location = new Point(558, 145);
             lblR3C3.Margin = new Padding(0);
             lblR3C3.Name = "lblR3C3";
-            lblR3C3.Size = new Size(83, 21);
+            lblR3C3.Size = new Size(171, 45);
             lblR3C3.TabIndex = 17;
             lblR3C3.Text = "61";
             lblR3C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2183,10 +2248,10 @@
             lblR3C4.Dock = DockStyle.Fill;
             lblR3C4.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblR3C4.ForeColor = Color.FromArgb(220, 38, 38);
-            lblR3C4.Location = new Point(356, 70);
+            lblR3C4.Location = new Point(730, 145);
             lblR3C4.Margin = new Padding(0);
             lblR3C4.Name = "lblR3C4";
-            lblR3C4.Size = new Size(83, 21);
+            lblR3C4.Size = new Size(171, 45);
             lblR3C4.TabIndex = 18;
             lblR3C4.Text = "1";
             lblR3C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2196,10 +2261,10 @@
             lblR3C5.Dock = DockStyle.Fill;
             lblR3C5.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblR3C5.ForeColor = Color.FromArgb(220, 38, 38);
-            lblR3C5.Location = new Point(440, 70);
+            lblR3C5.Location = new Point(902, 145);
             lblR3C5.Margin = new Padding(0);
             lblR3C5.Name = "lblR3C5";
-            lblR3C5.Size = new Size(84, 21);
+            lblR3C5.Size = new Size(172, 45);
             lblR3C5.TabIndex = 19;
             lblR3C5.Text = "98.39%";
             lblR3C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2208,10 +2273,10 @@
             // 
             lblR4C1.Dock = DockStyle.Fill;
             lblR4C1.Font = new Font("Segoe UI", 8F);
-            lblR4C1.Location = new Point(1, 92);
+            lblR4C1.Location = new Point(1, 191);
             lblR4C1.Margin = new Padding(0);
             lblR4C1.Name = "lblR4C1";
-            lblR4C1.Size = new Size(186, 21);
+            lblR4C1.Size = new Size(384, 45);
             lblR4C1.TabIndex = 20;
             lblR4C1.Text = "Functional Test";
             lblR4C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2220,10 +2285,10 @@
             // 
             lblR4C2.Dock = DockStyle.Fill;
             lblR4C2.Font = new Font("Segoe UI", 8F);
-            lblR4C2.Location = new Point(188, 92);
+            lblR4C2.Location = new Point(386, 191);
             lblR4C2.Margin = new Padding(0);
             lblR4C2.Name = "lblR4C2";
-            lblR4C2.Size = new Size(83, 21);
+            lblR4C2.Size = new Size(171, 45);
             lblR4C2.TabIndex = 21;
             lblR4C2.Text = "62";
             lblR4C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2232,10 +2297,10 @@
             // 
             lblR4C3.Dock = DockStyle.Fill;
             lblR4C3.Font = new Font("Segoe UI", 8F);
-            lblR4C3.Location = new Point(272, 92);
+            lblR4C3.Location = new Point(558, 191);
             lblR4C3.Margin = new Padding(0);
             lblR4C3.Name = "lblR4C3";
-            lblR4C3.Size = new Size(83, 21);
+            lblR4C3.Size = new Size(171, 45);
             lblR4C3.TabIndex = 22;
             lblR4C3.Text = "62";
             lblR4C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2244,10 +2309,10 @@
             // 
             lblR4C4.Dock = DockStyle.Fill;
             lblR4C4.Font = new Font("Segoe UI", 8F);
-            lblR4C4.Location = new Point(356, 92);
+            lblR4C4.Location = new Point(730, 191);
             lblR4C4.Margin = new Padding(0);
             lblR4C4.Name = "lblR4C4";
-            lblR4C4.Size = new Size(83, 21);
+            lblR4C4.Size = new Size(171, 45);
             lblR4C4.TabIndex = 23;
             lblR4C4.Text = "0";
             lblR4C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2256,10 +2321,10 @@
             // 
             lblR4C5.Dock = DockStyle.Fill;
             lblR4C5.Font = new Font("Segoe UI", 8F);
-            lblR4C5.Location = new Point(440, 92);
+            lblR4C5.Location = new Point(902, 191);
             lblR4C5.Margin = new Padding(0);
             lblR4C5.Name = "lblR4C5";
-            lblR4C5.Size = new Size(84, 21);
+            lblR4C5.Size = new Size(172, 45);
             lblR4C5.TabIndex = 24;
             lblR4C5.Text = "100.00%";
             lblR4C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2269,10 +2334,10 @@
             lblR5C1.BackColor = Color.FromArgb(248, 250, 252);
             lblR5C1.Dock = DockStyle.Fill;
             lblR5C1.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblR5C1.Location = new Point(1, 114);
+            lblR5C1.Location = new Point(1, 237);
             lblR5C1.Margin = new Padding(0);
             lblR5C1.Name = "lblR5C1";
-            lblR5C1.Size = new Size(186, 24);
+            lblR5C1.Size = new Size(384, 52);
             lblR5C1.TabIndex = 25;
             lblR5C1.Text = "Total";
             lblR5C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2282,10 +2347,10 @@
             lblR5C2.BackColor = Color.FromArgb(248, 250, 252);
             lblR5C2.Dock = DockStyle.Fill;
             lblR5C2.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblR5C2.Location = new Point(188, 114);
+            lblR5C2.Location = new Point(386, 237);
             lblR5C2.Margin = new Padding(0);
             lblR5C2.Name = "lblR5C2";
-            lblR5C2.Size = new Size(83, 24);
+            lblR5C2.Size = new Size(171, 52);
             lblR5C2.TabIndex = 26;
             lblR5C2.Text = "310";
             lblR5C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2295,10 +2360,10 @@
             lblR5C3.BackColor = Color.FromArgb(248, 250, 252);
             lblR5C3.Dock = DockStyle.Fill;
             lblR5C3.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblR5C3.Location = new Point(272, 114);
+            lblR5C3.Location = new Point(558, 237);
             lblR5C3.Margin = new Padding(0);
             lblR5C3.Name = "lblR5C3";
-            lblR5C3.Size = new Size(83, 24);
+            lblR5C3.Size = new Size(171, 52);
             lblR5C3.TabIndex = 27;
             lblR5C3.Text = "309";
             lblR5C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2309,10 +2374,10 @@
             lblR5C4.Dock = DockStyle.Fill;
             lblR5C4.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblR5C4.ForeColor = Color.FromArgb(220, 38, 38);
-            lblR5C4.Location = new Point(356, 114);
+            lblR5C4.Location = new Point(730, 237);
             lblR5C4.Margin = new Padding(0);
             lblR5C4.Name = "lblR5C4";
-            lblR5C4.Size = new Size(83, 24);
+            lblR5C4.Size = new Size(171, 52);
             lblR5C4.TabIndex = 28;
             lblR5C4.Text = "1";
             lblR5C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2322,10 +2387,10 @@
             lblR5C5.BackColor = Color.FromArgb(248, 250, 252);
             lblR5C5.Dock = DockStyle.Fill;
             lblR5C5.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblR5C5.Location = new Point(440, 114);
+            lblR5C5.Location = new Point(902, 237);
             lblR5C5.Margin = new Padding(0);
             lblR5C5.Name = "lblR5C5";
-            lblR5C5.Size = new Size(84, 24);
+            lblR5C5.Size = new Size(172, 52);
             lblR5C5.TabIndex = 29;
             lblR5C5.Text = "99.68%";
             lblR5C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2336,26 +2401,27 @@
             lblSumTableTitle.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblSumTableTitle.ForeColor = Color.FromArgb(30, 41, 59);
             lblSumTableTitle.Location = new Point(0, 0);
+            lblSumTableTitle.Margin = new Padding(6, 0, 6, 0);
             lblSumTableTitle.Name = "lblSumTableTitle";
-            lblSumTableTitle.Size = new Size(525, 29);
+            lblSumTableTitle.Size = new Size(1075, 62);
             lblSumTableTitle.TabIndex = 0;
             lblSumTableTitle.Text = "TEST RESULT SUMMARY";
             // 
             // pnlResultBox
             // 
             pnlResultBox.ColumnCount = 2;
-            pnlResultBox.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 144F));
+            pnlResultBox.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 267F));
             pnlResultBox.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            pnlResultBox.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 11F));
+            pnlResultBox.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
             pnlResultBox.Controls.Add(lblResultTitle, 0, 0);
             pnlResultBox.Controls.Add(lblPassBox, 1, 0);
             pnlResultBox.Dock = DockStyle.Fill;
-            pnlResultBox.Location = new Point(3, 693);
-            pnlResultBox.Margin = new Padding(3, 7, 3, 7);
+            pnlResultBox.Location = new Point(6, 1538);
+            pnlResultBox.Margin = new Padding(6, 15, 6, 15);
             pnlResultBox.Name = "pnlResultBox";
             pnlResultBox.RowCount = 1;
             pnlResultBox.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            pnlResultBox.Size = new Size(519, 33);
+            pnlResultBox.Size = new Size(1063, 70);
             pnlResultBox.TabIndex = 3;
             // 
             // lblResultTitle
@@ -2366,7 +2432,7 @@
             lblResultTitle.Location = new Point(0, 0);
             lblResultTitle.Margin = new Padding(0);
             lblResultTitle.Name = "lblResultTitle";
-            lblResultTitle.Size = new Size(144, 33);
+            lblResultTitle.Size = new Size(267, 70);
             lblResultTitle.TabIndex = 0;
             lblResultTitle.Text = "RESULT :";
             lblResultTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -2377,10 +2443,10 @@
             lblPassBox.Dock = DockStyle.Fill;
             lblPassBox.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
             lblPassBox.ForeColor = Color.FromArgb(4, 120, 87);
-            lblPassBox.Location = new Point(152, 3);
-            lblPassBox.Margin = new Padding(8, 3, 8, 0);
+            lblPassBox.Location = new Point(282, 6);
+            lblPassBox.Margin = new Padding(15, 6, 15, 0);
             lblPassBox.Name = "lblPassBox";
-            lblPassBox.Size = new Size(359, 30);
+            lblPassBox.Size = new Size(766, 64);
             lblPassBox.TabIndex = 1;
             lblPassBox.Text = "PASS";
             lblPassBox.TextAlign = ContentAlignment.MiddleCenter;
@@ -2392,13 +2458,13 @@
             pnlNotesBox.Controls.Add(lblNotesTitle, 0, 0);
             pnlNotesBox.Controls.Add(pnlNotesCard, 0, 1);
             pnlNotesBox.Dock = DockStyle.Fill;
-            pnlNotesBox.Location = new Point(3, 733);
-            pnlNotesBox.Margin = new Padding(3, 0, 3, 0);
+            pnlNotesBox.Location = new Point(6, 1623);
+            pnlNotesBox.Margin = new Padding(6, 0, 6, 0);
             pnlNotesBox.Name = "pnlNotesBox";
             pnlNotesBox.RowCount = 2;
-            pnlNotesBox.RowStyles.Add(new RowStyle(SizeType.Absolute, 19F));
+            pnlNotesBox.RowStyles.Add(new RowStyle(SizeType.Absolute, 41F));
             pnlNotesBox.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            pnlNotesBox.Size = new Size(519, 108);
+            pnlNotesBox.Size = new Size(1063, 230);
             pnlNotesBox.TabIndex = 4;
             // 
             // lblNotesTitle
@@ -2409,7 +2475,7 @@
             lblNotesTitle.Location = new Point(0, 0);
             lblNotesTitle.Margin = new Padding(0);
             lblNotesTitle.Name = "lblNotesTitle";
-            lblNotesTitle.Size = new Size(519, 19);
+            lblNotesTitle.Size = new Size(1063, 41);
             lblNotesTitle.TabIndex = 0;
             lblNotesTitle.Text = "NOTES";
             lblNotesTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -2419,10 +2485,10 @@
             pnlNotesCard.BackColor = Color.White;
             pnlNotesCard.Controls.Add(lblNotesContent);
             pnlNotesCard.Dock = DockStyle.Fill;
-            pnlNotesCard.Location = new Point(0, 28);
-            pnlNotesCard.Margin = new Padding(0, 9, 0, 0);
+            pnlNotesCard.Location = new Point(0, 60);
+            pnlNotesCard.Margin = new Padding(0, 19, 0, 0);
             pnlNotesCard.Name = "pnlNotesCard";
-            pnlNotesCard.Size = new Size(519, 80);
+            pnlNotesCard.Size = new Size(1063, 170);
             pnlNotesCard.TabIndex = 1;
             // 
             // lblNotesContent
@@ -2433,22 +2499,22 @@
             lblNotesContent.Location = new Point(0, 0);
             lblNotesContent.Margin = new Padding(0);
             lblNotesContent.Name = "lblNotesContent";
-            lblNotesContent.Size = new Size(519, 80);
+            lblNotesContent.Size = new Size(1063, 170);
             lblNotesContent.TabIndex = 0;
             lblNotesContent.Text = "- All test parameters are within specification.";
             // 
             // Reports
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             AutoScrollMinSize = new Size(1300, 800);
             BackColor = Color.FromArgb(244, 245, 247);
             Controls.Add(tblMain);
             Font = new Font("Segoe UI", 9F);
-            Margin = new Padding(3, 2, 3, 2);
+            Margin = new Padding(6, 4, 6, 4);
             Name = "Reports";
-            Size = new Size(2154, 1149);
+            Size = new Size(4000, 2451);
             tblMain.ResumeLayout(false);
             pnlTopHeader.ResumeLayout(false);
             splitLeftCenterRight.Panel1.ResumeLayout(false);
@@ -2489,6 +2555,8 @@
             cardTrend.ResumeLayout(false);
             tblColRight.ResumeLayout(false);
             tblColRight.PerformLayout();
+            cardPreviewTop.ResumeLayout(false);
+            cardPreviewTop.PerformLayout();
             flpPreviewButtons.ResumeLayout(false);
             pnlPreviewContainer.ResumeLayout(false);
             cardPaper.ResumeLayout(false);
@@ -2515,6 +2583,7 @@
 
 
 
+
         private System.Windows.Forms.TableLayoutPanel tblMain;
 
         private System.Windows.Forms.Panel pnlTopHeader;
@@ -2524,6 +2593,8 @@
         private System.Windows.Forms.SplitContainer splitMainTopBottom;
 
         private System.Windows.Forms.SplitContainer splitLeftCenterRight;
+
+        private System.Windows.Forms.Panel cardPreviewTop;
 
         private System.Windows.Forms.SplitContainer splitLeftRight;
 
@@ -2555,9 +2626,9 @@
 
         private System.Windows.Forms.Label lblFilterType;
 
-        private System.Windows.Forms.TextBox txtModel;
+        private System.Windows.Forms.ComboBox cmbModel;
 
-        private System.Windows.Forms.TextBox txtType;
+        private System.Windows.Forms.ComboBox cmbType;
 
         private System.Windows.Forms.TableLayoutPanel tblFilterGrid2;
 
@@ -2565,9 +2636,9 @@
 
         private System.Windows.Forms.Label lblFilterOperator;
 
-        private System.Windows.Forms.TextBox txtArea;
+        private System.Windows.Forms.ComboBox cmbArea;
 
-        private System.Windows.Forms.TextBox txtOperator;
+        private System.Windows.Forms.ComboBox cmbOperator;
 
         private System.Windows.Forms.TableLayoutPanel tblFilterGrid3;
 
@@ -2631,12 +2702,13 @@
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colReportName;
 
+        private System.Windows.Forms.DataGridViewTextBoxColumn colReportType;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colDateGenerated;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colGeneratedBy;
 
-        private System.Windows.Forms.DataGridViewTextBoxColumn colResult;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colSize;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colAction;
 
@@ -2675,11 +2747,11 @@
         private System.Windows.Forms.Panel pnlPreviewContainer;
 
         private System.Windows.Forms.Button btnEditReport;
-        
+
         private System.Windows.Forms.Button btnDeleteReport;
-        
+
         private System.Windows.Forms.Button btnSaveReportEdit;
-        
+
         private System.Windows.Forms.Button btnCancelReportEdit;
 
         private System.Windows.Forms.Panel cardPaper;

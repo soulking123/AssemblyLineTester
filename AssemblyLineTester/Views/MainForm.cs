@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Views.Pages;
+using AssemblyLineTester.Views.Pages;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Helpers;
 
@@ -326,7 +326,7 @@ namespace AssemblyLineTester.Views
             }
 
             if (pnlContent == null) return;
-            NativeMethods.SetRedraw(pnlContent.Handle, false);
+            AssemblyLineTester.Helpers.NativeMethods.SetRedraw(pnlContent.Handle, false);
             pnlContent.SuspendLayout();
             try
             {
@@ -420,7 +420,7 @@ namespace AssemblyLineTester.Views
         {
             var menuButtons = SidebarMenuButtons;
 
-            NativeMethods.SetRedraw(this.Handle, false);
+            AssemblyLineTester.Helpers.NativeMethods.SetRedraw(splitContainer1.Handle, false); // WM_SETREDRAW false
             this.SuspendLayout();
             splitContainer1.SuspendLayout();
             splitContainer1.Panel1.SuspendLayout();
@@ -481,8 +481,8 @@ namespace AssemblyLineTester.Views
                 splitContainer1.Panel1.ResumeLayout(true);
                 splitContainer1.ResumeLayout(true);
                 this.ResumeLayout(true);
-                NativeMethods.SetRedraw(this.Handle, true); 
-                this.Refresh();
+                AssemblyLineTester.Helpers.NativeMethods.SetRedraw(splitContainer1.Handle, true); // WM_SETREDRAW true
+                splitContainer1.Refresh();
             }
         }
 
