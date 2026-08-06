@@ -21,6 +21,7 @@ namespace AssemblyLineTester
             AppTime.SelfCheck();
             LicenseService.SelfCheck();
             TestSettingService.SelfCheck();
+            Views.Pages.TestParametersPage.SelfCheck();
             FileLogService.Info("Startup", AppInfo.Describe());
 
             // PdfSharp needs code page 1252, which .NET does not register by default.

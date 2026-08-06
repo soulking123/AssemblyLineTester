@@ -32,7 +32,11 @@ namespace AssemblyLineTester.Models
         public string MeasurementUnit { get; set; } = string.Empty;
         
         public double? ExpectedValue { get; set; }                          //100
-        
+
         public double? Tolerance { get; set; }                              //10
+
+        public string Color { get; set; } = string.Empty;                   // BLK, RED, BLU
+
+        public string Gauge { get; set; } = string.Empty;                   // 18 AWG, 2.5 mm2
     }
 }

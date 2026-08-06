@@ -1234,6 +1234,10 @@ namespace AssemblyLineTester.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ConfigId")
                         .HasColumnType("INTEGER");
 
@@ -1244,6 +1248,10 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FromLabel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Gauge")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

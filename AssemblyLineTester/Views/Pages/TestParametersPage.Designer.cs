@@ -1,4 +1,4 @@
-namespace AssemblyLineTester.Views.Pages
+﻿namespace AssemblyLineTester.Views.Pages
 {
     partial class TestParametersPage
     {
@@ -38,6 +38,8 @@ namespace AssemblyLineTester.Views.Pages
             colNo = new DataGridViewTextBoxColumn();
             colNetId = new DataGridViewTextBoxColumn();
             colHarnessGroup = new DataGridViewTextBoxColumn();
+            colColor = new DataGridViewTextBoxColumn();
+            colGauge = new DataGridViewTextBoxColumn();
             colFromAddr = new DataGridViewTextBoxColumn();
             colFromLabel = new DataGridViewTextBoxColumn();
             colToAddr = new DataGridViewTextBoxColumn();
@@ -74,6 +76,8 @@ namespace AssemblyLineTester.Views.Pages
             btnExport = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnReset = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnImport = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnImportExcel = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnTemplate = new AssemblyLineTester.Views.Controls.RoundedButton();
             pnlHeaderTop = new Panel();
             lblHeaderTop = new Label();
             pnlRightBox = new Panel();
@@ -248,7 +252,7 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.CausesValidation = false;
             gridConfig.ColumnHeadersHeight = 45;
             gridConfig.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colNetId, colHarnessGroup, colFromAddr, colFromLabel, colToAddr, colToLabel, colTestType, colLowerLimit, colUpperLimit, colExpectedValue, colTolerance, colUnit });
+            gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colHarnessGroup, colColor, colGauge, colNetId, colFromAddr, colFromLabel, colToAddr, colToLabel, colTestType, colLowerLimit, colUpperLimit, colExpectedValue, colTolerance, colUnit });
             gridConfig.Dock = DockStyle.Fill;
             gridConfig.EnableHeadersVisualStyles = false;
             gridConfig.Location = new Point(0, 283);
@@ -262,44 +266,65 @@ namespace AssemblyLineTester.Views.Pages
             // colNo
             // 
             colNo.HeaderText = "No.";
-            colNo.MinimumWidth = 50;
+            colNo.MinimumWidth = 44;
+            colNo.FillWeight = 4F;
             colNo.Name = "colNo";
             colNo.ReadOnly = true;
+            // 
+            // colColor
+            // 
+            colColor.HeaderText = "Color";
+            colColor.MinimumWidth = 70;
+            colColor.FillWeight = 8F;
+            colColor.Name = "colColor";
+            // 
+            // colGauge
+            // 
+            colGauge.HeaderText = "Gauge";
+            colGauge.MinimumWidth = 70;
+            colGauge.FillWeight = 8F;
+            colGauge.Name = "colGauge";
             // 
             // colNetId
             // 
             colNetId.HeaderText = "Net-ID";
-            colNetId.MinimumWidth = 110;
+            colNetId.MinimumWidth = 90;
+            colNetId.FillWeight = 12F;
             colNetId.Name = "colNetId";
             // 
             // colHarnessGroup
             // 
             colHarnessGroup.HeaderText = "Harness-Group";
-            colHarnessGroup.MinimumWidth = 130;
+            colHarnessGroup.MinimumWidth = 110;
+            colHarnessGroup.FillWeight = 16F;
             colHarnessGroup.Name = "colHarnessGroup";
             // 
             // colFromAddr
             // 
             colFromAddr.HeaderText = "From";
-            colFromAddr.MinimumWidth = 90;
+            colFromAddr.MinimumWidth = 52;
+            colFromAddr.FillWeight = 5F;
             colFromAddr.Name = "colFromAddr";
             // 
             // colFromLabel
             // 
             colFromLabel.HeaderText = "Net-From\nLabel";
-            colFromLabel.MinimumWidth = 100;
+            colFromLabel.MinimumWidth = 95;
+            colFromLabel.FillWeight = 13F;
             colFromLabel.Name = "colFromLabel";
             // 
             // colToAddr
             // 
             colToAddr.HeaderText = "To";
-            colToAddr.MinimumWidth = 90;
+            colToAddr.MinimumWidth = 52;
+            colToAddr.FillWeight = 5F;
             colToAddr.Name = "colToAddr";
             // 
             // colToLabel
             // 
             colToLabel.HeaderText = "Net-To\nLabel";
-            colToLabel.MinimumWidth = 100;
+            colToLabel.MinimumWidth = 95;
+            colToLabel.FillWeight = 13F;
             colToLabel.Name = "colToLabel";
             // 
             // colTestType
@@ -307,39 +332,45 @@ namespace AssemblyLineTester.Views.Pages
             colTestType.FlatStyle = FlatStyle.Flat;
             colTestType.HeaderText = "Test Type";
             colTestType.Items.AddRange(new object[] { "WIRE", "4WIRE", "TWISTED PAIR", "SIGNATURE WIRE", "RESISTOR", "4RESISTOR", "CAPACITOR", "DIODE", "SIGNATURE DIODE", "OPEN", "CLOSE", "LINK", "PROBE", "COMMENT", "LUA COMPONENT" });
-            colTestType.MinimumWidth = 120;
+            colTestType.MinimumWidth = 115;
+            colTestType.FillWeight = 15F;
             colTestType.Name = "colTestType";
             // 
             // colLowerLimit
             // 
             colLowerLimit.HeaderText = "Lower\nLimit";
-            colLowerLimit.MinimumWidth = 80;
+            colLowerLimit.MinimumWidth = 62;
+            colLowerLimit.FillWeight = 7F;
             colLowerLimit.Name = "colLowerLimit";
             colLowerLimit.ReadOnly = true;
             // 
             // colUpperLimit
             // 
             colUpperLimit.HeaderText = "Upper\nLimit";
-            colUpperLimit.MinimumWidth = 80;
+            colUpperLimit.MinimumWidth = 62;
+            colUpperLimit.FillWeight = 7F;
             colUpperLimit.Name = "colUpperLimit";
             colUpperLimit.ReadOnly = true;
             // 
             // colExpectedValue
             // 
             colExpectedValue.HeaderText = "Expected\nValue";
-            colExpectedValue.MinimumWidth = 110;
+            colExpectedValue.MinimumWidth = 78;
+            colExpectedValue.FillWeight = 9F;
             colExpectedValue.Name = "colExpectedValue";
             // 
             // colTolerance
             // 
             colTolerance.HeaderText = "Tolerance";
-            colTolerance.MinimumWidth = 90;
+            colTolerance.MinimumWidth = 70;
+            colTolerance.FillWeight = 8F;
             colTolerance.Name = "colTolerance";
             // 
             // colUnit
             // 
             colUnit.HeaderText = "Measurement";
-            colUnit.MinimumWidth = 110;
+            colUnit.MinimumWidth = 88;
+            colUnit.FillWeight = 10F;
             colUnit.Name = "colUnit";
             colUnit.Resizable = DataGridViewTriState.True;
             colUnit.SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -581,7 +612,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlButtons.Dock = DockStyle.Top;
             pnlButtons.Location = new Point(0, 35);
             pnlButtons.Name = "pnlButtons";
-            pnlButtons.Size = new Size(675, 38);
+            pnlButtons.Size = new Size(675, 58);
             pnlButtons.TabIndex = 1;
             // 
             // tblButtons
@@ -598,7 +629,7 @@ namespace AssemblyLineTester.Views.Pages
             tblButtons.Name = "tblButtons";
             tblButtons.RowCount = 1;
             tblButtons.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblButtons.Size = new Size(675, 38);
+            tblButtons.Size = new Size(675, 58);
             tblButtons.TabIndex = 0;
             // 
             // flpButtonsLeft
@@ -612,8 +643,8 @@ namespace AssemblyLineTester.Views.Pages
             flpButtonsLeft.Location = new Point(0, 0);
             flpButtonsLeft.Margin = new Padding(0);
             flpButtonsLeft.Name = "flpButtonsLeft";
-            flpButtonsLeft.Padding = new Padding(9, 5, 0, 5);
-            flpButtonsLeft.Size = new Size(337, 38);
+            flpButtonsLeft.Padding = new Padding(9, 6, 0, 18);
+            flpButtonsLeft.Size = new Size(337, 58);
             flpButtonsLeft.TabIndex = 0;
             flpButtonsLeft.WrapContents = false;
             // 
@@ -687,13 +718,16 @@ namespace AssemblyLineTester.Views.Pages
             flpButtonsRight.Controls.Add(btnExport);
             flpButtonsRight.Controls.Add(btnReset);
             flpButtonsRight.Controls.Add(btnImport);
+            flpButtonsRight.Controls.Add(btnImportExcel);
+            flpButtonsRight.Controls.Add(btnTemplate);
             flpButtonsRight.Dock = DockStyle.Fill;
             flpButtonsRight.FlowDirection = FlowDirection.RightToLeft;
             flpButtonsRight.Location = new Point(337, 0);
             flpButtonsRight.Margin = new Padding(0);
             flpButtonsRight.Name = "flpButtonsRight";
-            flpButtonsRight.Padding = new Padding(0, 5, 9, 5);
-            flpButtonsRight.Size = new Size(338, 38);
+            flpButtonsRight.Padding = new Padding(0, 6, 9, 18);
+            flpButtonsRight.WrapContents = false;
+            flpButtonsRight.Size = new Size(338, 58);
             flpButtonsRight.TabIndex = 1;
             flpButtonsRight.WrapContents = false;
             // 
@@ -707,15 +741,16 @@ namespace AssemblyLineTester.Views.Pages
             btnExport.ForeColor = Color.FromArgb(30, 41, 59);
             btnExport.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnExport.HoverForeColor = Color.Empty;
-            btnExport.Location = new Point(216, 5);
             btnExport.Margin = new Padding(6, 0, 0, 0);
             btnExport.Name = "btnExport";
             btnExport.NormalBackColor = Color.FromArgb(203, 213, 225);
             btnExport.PressedBackColor = Color.FromArgb(100, 116, 139);
             btnExport.PressedForeColor = Color.Empty;
-            btnExport.Size = new Size(113, 28);
+            btnExport.AutoSize = true;
+            btnExport.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            btnExport.Padding = new Padding(14, 4, 14, 4);
             btnExport.TabIndex = 5;
-            btnExport.Text = "Save Config";
+            btnExport.Text = "Save";
             btnExport.UseVisualStyleBackColor = false;
             // 
             // btnReset
@@ -728,15 +763,16 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.ForeColor = Color.FromArgb(220, 38, 38);
             btnReset.HoverBackColor = Color.FromArgb(254, 226, 226);
             btnReset.HoverForeColor = Color.Empty;
-            btnReset.Location = new Point(107, 5);
             btnReset.Margin = new Padding(6, 0, 0, 0);
             btnReset.Name = "btnReset";
             btnReset.NormalBackColor = Color.FromArgb(203, 213, 225);
             btnReset.PressedBackColor = Color.FromArgb(254, 202, 202);
             btnReset.PressedForeColor = Color.Empty;
-            btnReset.Size = new Size(103, 28);
+            btnReset.AutoSize = true;
+            btnReset.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            btnReset.Padding = new Padding(14, 4, 14, 4);
             btnReset.TabIndex = 4;
-            btnReset.Text = "Reset Config";
+            btnReset.Text = "Reset";
             btnReset.UseVisualStyleBackColor = false;
             // 
             // btnImport
@@ -749,15 +785,58 @@ namespace AssemblyLineTester.Views.Pages
             btnImport.ForeColor = Color.FromArgb(30, 41, 59);
             btnImport.HoverBackColor = Color.FromArgb(148, 163, 184);
             btnImport.HoverForeColor = Color.Empty;
-            btnImport.Location = new Point(-12, 5);
-            btnImport.Margin = new Padding(0);
+            btnImport.Margin = new Padding(6, 0, 0, 0);
             btnImport.Name = "btnImport";
             btnImport.NormalBackColor = Color.FromArgb(203, 213, 225);
             btnImport.PressedBackColor = Color.FromArgb(100, 116, 139);
             btnImport.PressedForeColor = Color.Empty;
-            btnImport.Size = new Size(113, 28);
+            btnImport.AutoSize = true;
+            btnImport.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            btnImport.Padding = new Padding(14, 4, 14, 4);
             btnImport.TabIndex = 3;
-            btnImport.Text = "Edit Config";
+            btnImport.Text = "Edit";
+            //
+            // btnImportExcel
+            //
+            btnImportExcel.BackColor = Color.FromArgb(203, 213, 225);
+            btnImportExcel.BorderRadius = 14;
+            btnImportExcel.FlatAppearance.BorderSize = 0;
+            btnImportExcel.FlatStyle = FlatStyle.Flat;
+            btnImportExcel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnImportExcel.ForeColor = Color.FromArgb(30, 41, 59);
+            btnImportExcel.HoverBackColor = Color.FromArgb(148, 163, 184);
+            btnImportExcel.HoverForeColor = Color.Empty;
+            btnImportExcel.Margin = new Padding(6, 0, 0, 0);
+            btnImportExcel.Name = "btnImportExcel";
+            btnImportExcel.NormalBackColor = Color.FromArgb(203, 213, 225);
+            btnImportExcel.PressedBackColor = Color.FromArgb(100, 116, 139);
+            btnImportExcel.PressedForeColor = Color.Empty;
+            btnImportExcel.AutoSize = true;
+            btnImportExcel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            btnImportExcel.Padding = new Padding(14, 4, 14, 4);
+            btnImportExcel.TabIndex = 4;
+            btnImportExcel.Text = "Import";
+            //
+            // btnTemplate
+            //
+            btnTemplate.BackColor = Color.FromArgb(203, 213, 225);
+            btnTemplate.BorderRadius = 14;
+            btnTemplate.FlatAppearance.BorderSize = 0;
+            btnTemplate.FlatStyle = FlatStyle.Flat;
+            btnTemplate.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnTemplate.ForeColor = Color.FromArgb(30, 41, 59);
+            btnTemplate.HoverBackColor = Color.FromArgb(148, 163, 184);
+            btnTemplate.HoverForeColor = Color.Empty;
+            btnTemplate.Margin = new Padding(6, 0, 0, 0);
+            btnTemplate.Name = "btnTemplate";
+            btnTemplate.NormalBackColor = Color.FromArgb(203, 213, 225);
+            btnTemplate.PressedBackColor = Color.FromArgb(100, 116, 139);
+            btnTemplate.PressedForeColor = Color.Empty;
+            btnTemplate.AutoSize = true;
+            btnTemplate.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            btnTemplate.Padding = new Padding(14, 4, 14, 4);
+            btnTemplate.TabIndex = 5;
+            btnTemplate.Text = "Template";
             btnImport.UseVisualStyleBackColor = false;
             // 
             // pnlHeaderTop
@@ -900,6 +979,8 @@ namespace AssemblyLineTester.Views.Pages
         private DataGridView gridConfig;
         private DataGridViewTextBoxColumn colNetId;
         private DataGridViewTextBoxColumn colHarnessGroup;
+        private DataGridViewTextBoxColumn colColor;
+        private DataGridViewTextBoxColumn colGauge;
         private DataGridViewTextBoxColumn colFromLabel;
         private DataGridViewTextBoxColumn colToLabel;
         private DataGridViewComboBoxColumn colTestType;
@@ -930,6 +1011,8 @@ namespace AssemblyLineTester.Views.Pages
         private AssemblyLineTester.Views.Controls.RoundedButton btnExport;
         private AssemblyLineTester.Views.Controls.RoundedButton btnReset;
         private AssemblyLineTester.Views.Controls.RoundedButton btnImport;
+        private AssemblyLineTester.Views.Controls.RoundedButton btnImportExcel;
+        private AssemblyLineTester.Views.Controls.RoundedButton btnTemplate;
         private AssemblyLineTester.Views.Controls.RoundedButton btnRemove;
         private AssemblyLineTester.Views.Controls.RoundedButton btnAdd;
         private AssemblyLineTester.Views.Controls.RoundedButton btnTotalNet;

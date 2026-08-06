@@ -93,6 +93,8 @@ namespace AssemblyLineTester.Views.Pages
             if (btnExport != null) btnExport.Click += BtnExport_Click;
             if (btnImport != null) btnImport.Click += BtnImport_Click;
             if (btnReset != null) btnReset.Click += BtnReset_Click;
+            if (btnImportExcel != null) btnImportExcel.Click += BtnImportExcel_Click;
+            if (btnTemplate != null) btnTemplate.Click += BtnTemplate_Click;
 
         }
 
@@ -157,6 +159,403 @@ namespace AssemblyLineTester.Views.Pages
                 EnableDoubleBufferingRecursive(child);
             }
         }
+        // Columns a workbook row must fill in. Color and Gauge are deliberately absent: they are
+        // new, so files written before they existed would otherwise all be rejected.
+        private static readonly string[] RequiredImportColumns =
+            { "From", "To", "Test Type", "Lower Limit", "Upper Limit", "Tolerance", "Expected Value" };
+
+        // Everything wrong with one workbook row, named by its spreadsheet row number.
+        internal static List<string> ValidateImportRow(Dictionary<string, string> values, int rowNumber, List<string> allowedTestTypes)
+        {
+            var problems = new List<string>();
+
+            foreach (var required in RequiredImportColumns)
+            {
+                if (!values.TryGetValue(required, out string? value) || string.IsNullOrWhiteSpace(value))
+                    problems.Add($"Row {rowNumber}: {required} is empty.");
+            }
+
+            values.TryGetValue("Test Type", out string? testType);
+            if (!string.IsNullOrWhiteSpace(testType) && !allowedTestTypes.Contains(testType, StringComparer.OrdinalIgnoreCase))
+            {
+                problems.Add($"Row {rowNumber}: Test Type '{testType}' is not one of the types ticked under Settings.");
+            }
+
+            return problems;
+        }
+
+        /// <summary>Debug-only guard on the import rules.</summary>
+        [Conditional("DEBUG")]
+        public static void SelfCheck()
+        {
+            var allowed = new List<string> { "4WIRE", "OPEN" };
+
+            Dictionary<string, string> Row(string from = "1", string type = "4WIRE") => new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["From"] = from, ["To"] = "12", ["Test Type"] = type, ["Lower Limit"] = "0",
+                ["Upper Limit"] = "1", ["Tolerance"] = "±5%", ["Expected Value"] = "0.5"
+            };
+
+            Debug.Assert(ValidateImportRow(Row(), 2, allowed).Count == 0, "a complete row must pass");
+            Debug.Assert(ValidateImportRow(Row(from: " "), 2, allowed).Count == 1, "whitespace must not count as filled in");
+            Debug.Assert(ValidateImportRow(Row(type: "PLASMA"), 7, allowed)[0].Contains("Row 7"), "the problem must name its row");
+            Debug.Assert(ValidateImportRow(Row(type: "open"), 2, allowed).Count == 0, "test type must match regardless of case");
+            Debug.Assert(ValidateImportRow(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), 2, allowed).Count
+                         == RequiredImportColumns.Length, "a row missing every column must report every column");
+
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+            var sheet = workbook.Worksheets.Add("check");
+
+            sheet.Cell(1, 1).Value = "CONFIG SUMMARY";
+            sheet.Cell(2, 1).Value = SummaryConfigName;
+            sheet.Cell(2, 2).Value = "Main Harness Test";
+
+            Debug.Assert(FindHeaderRow(sheet) == 0, "a file with only a summary block has no header row");
+
+            for (int i = 0; i < RequiredImportColumns.Length; i++)
+            {
+                sheet.Cell(7, i + 1).Value = RequiredImportColumns[i];
+            }
+
+            Debug.Assert(FindHeaderRow(sheet) == 7, "the header must be found below the summary block, not assumed on row 1");
+        }
+
+        private void BtnImportExcel_Click(object? sender, EventArgs e)
+        {
+            if (!CheckEditPermission()) return;
+
+            using var dialog = new OpenFileDialog
+            {
+                Title = "Import Test Parameters",
+                Filter = "Excel workbook (*.xlsx)|*.xlsx|All files (*.*)|*.*"
+            };
+
+            if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+            try
+            {
+                ImportWorkbook(dialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("TestParametersPage.BtnImportExcel_Click", "Could not read the workbook.", ex);
+                MessageBox.Show($"Could not read the file: {ex.Message}", "Import",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Loads a workbook into the grid, or reports every problem and loads nothing.
+        /// </summary>
+        /// <remarks>
+        /// All-or-nothing on purpose: a partial import looks finished, and the operator would run a
+        /// harness against a net list quietly missing the rows that failed.
+        /// </remarks>
+        // The first row that carries the required column names; 0 when the file has none.
+        private static int FindHeaderRow(ClosedXML.Excel.IXLWorksheet sheet)
+        {
+            int lastRow = Math.Min(sheet.LastRowUsed()?.RowNumber() ?? 1, 40);
+
+            for (int r = 1; r <= lastRow; r++)
+            {
+                var texts = sheet.Row(r).CellsUsed()
+                    .Select(c => c.GetString().Trim())
+                    .Where(t => t.Length > 0)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                if (RequiredImportColumns.All(texts.Contains)) return r;
+            }
+
+            return 0;
+        }
+
+        // Pulls the Config Summary block back into the page, when the file carries one.
+        private void ReadConfigSummary(ClosedXML.Excel.IXLWorksheet sheet, int headerRowNumber)
+        {
+            var found = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            for (int r = 1; r < headerRowNumber; r++)
+            {
+                string label = sheet.Cell(r, 1).GetString().Trim();
+                if (label.Length == 0) continue;
+                found[label] = sheet.Cell(r, 2).GetString().Trim();
+            }
+
+            void Apply(TextBox box, string label)
+            {
+                if (found.TryGetValue(label, out string? value) && !string.IsNullOrWhiteSpace(value)) box.Text = value;
+            }
+
+            Apply(txtConfigName, SummaryConfigName);
+            Apply(txtProductModel, SummaryProductModel);
+            Apply(txtConnectionResistance, SummaryConnectionResistance);
+            Apply(txtInsulationResistance, SummaryInsulationResistance);
+        }
+
+        private void ImportWorkbook(string path)
+        {
+            using var workbook = new ClosedXML.Excel.XLWorkbook(path);
+            var sheet = workbook.Worksheets.First();
+
+            // The header no longer sits on row 1: the Config Summary block is written above it, and
+            // an operator may well add notes of their own, so the row is searched for rather than
+            // assumed.
+            int headerRowNumber = FindHeaderRow(sheet);
+            if (headerRowNumber == 0)
+            {
+                MessageBox.Show(
+                    "No header row was found. The file needs a row containing the column names.\r\n\r\n" +
+                    "Use Template to get a file with the expected layout.",
+                    "Import", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            ReadConfigSummary(sheet, headerRowNumber);
+
+            var headerRow = sheet.Row(headerRowNumber);
+
+            // Matched by header text, not position, so a file with the columns rearranged still loads.
+            var columnAt = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            for (int c = 1; c <= headerRow.LastCellUsed()?.Address.ColumnNumber; c++)
+            {
+                string header = headerRow.Cell(c).GetString().Trim();
+                if (header.Length > 0 && !columnAt.ContainsKey(header)) columnAt[header] = c;
+            }
+
+            var missingHeaders = RequiredImportColumns.Where(h => !columnAt.ContainsKey(h)).ToList();
+            if (missingHeaders.Count > 0)
+            {
+                MessageBox.Show(
+                    $"These columns are missing from the file:\r\n\r\n{string.Join("\r\n", missingHeaders)}\r\n\r\n" +
+                    "Use Template to get a file with the expected header row.",
+                    "Import", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var allowedTestTypes = TestSettingService.GetEnabledTestTypeNames();
+            var problems = new List<string>();
+            var rows = new List<Dictionary<string, string>>();
+
+            int lastRow = sheet.LastRowUsed()?.RowNumber() ?? headerRowNumber;
+            for (int r = headerRowNumber + 1; r <= lastRow; r++)
+            {
+                var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var (header, index) in columnAt)
+                {
+                    values[header] = sheet.Cell(r, index).GetString().Trim();
+                }
+
+                if (values.Values.All(string.IsNullOrWhiteSpace)) continue;
+
+                problems.AddRange(ValidateImportRow(values, r, allowedTestTypes));
+                rows.Add(values);
+            }
+
+            if (rows.Count == 0)
+            {
+                MessageBox.Show("The file has a header row but no data.", "Import",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (problems.Count > 0)
+            {
+                const int shown = 12;
+                string detail = string.Join("\r\n", problems.Take(shown));
+                if (problems.Count > shown) detail += $"\r\n... and {problems.Count - shown} more.";
+
+                MessageBox.Show(
+                    $"{problems.Count} problem(s) found. Nothing has been imported.\r\n\r\n{detail}",
+                    "Import", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (gridConfig.Rows.Count > 0 &&
+                MessageBox.Show($"Replace the {gridConfig.Rows.Count} row(s) currently in the grid with {rows.Count} imported row(s)?",
+                    "Import", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            gridConfig.Rows.Clear();
+            foreach (var values in rows)
+            {
+                var cells = new object[gridConfig.Columns.Count];
+                for (int i = 0; i < gridConfig.Columns.Count; i++)
+                {
+                    var column = gridConfig.Columns[i];
+                    string header = column.HeaderText.Replace("\n", " ");
+                    cells[i] = column.Name == "colNo" ? "" : (values.TryGetValue(header, out string? v) ? v : "");
+                }
+
+                int idx = gridConfig.Rows.Add(cells);
+
+                // Measurement is not in the file, so it comes from the test type the row declares.
+                string rowTestType = gridConfig.Rows[idx].Cells["colTestType"].Value?.ToString() ?? "";
+                gridConfig.Rows[idx].Cells["colUnit"].Value = UnitConversionHelper.GetBaseUnit(rowTestType);
+
+                UpdateRowUnitDropdown(idx);
+                RecalculateRowLimits(gridConfig.Rows[idx]);
+            }
+
+            RenumberRows();
+            UpdateTotalNetCount();
+            UpdateDiagramSize();
+            picPreview.Invalidate();
+
+            MessageBox.Show($"{rows.Count} row(s) imported.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        // Columns an Excel file never carries: "No." is a display counter, and "Measurement" is the
+        // unit the test type already implies. Both are regenerated on import rather than typed in.
+        private static readonly string[] NonExportedColumns = { "colNo", "colUnit" };
+
+        private List<DataGridViewColumn> ExportableColumns() =>
+            gridConfig.Columns.Cast<DataGridViewColumn>().Where(c => !NonExportedColumns.Contains(c.Name)).ToList();
+
+        // Writes an empty workbook whose header row matches the grid, so an operator filling it in
+        // cannot invent a column order the importer would then have to guess at.
+        private void BtnTemplate_Click(object? sender, EventArgs e) =>
+            WriteWorkbook("test-parameter-template.xlsx", "Template", includeRows: false);
+
+        // The same layout as the template, with the current grid contents under the header.
+        private void ExportGridToExcel()
+        {
+            string suggested = string.IsNullOrWhiteSpace(txtConfigName.Text)
+                ? "test-parameters.xlsx"
+                : $"{txtConfigName.Text.Trim()}.xlsx";
+
+            WriteWorkbook(suggested, "Export", includeRows: true);
+        }
+
+        // Labels used for the Config Summary block, and read back by the importer.
+        private const string SummaryConfigName = "Config Name";
+        private const string SummaryProductModel = "Product Model";
+        private const string SummaryConnectionResistance = "Connection Resistance (mOhm)";
+        private const string SummaryInsulationResistance = "Insulation Resistance (MOhm)";
+
+        // Mirrors the Config Summary panel above the grid, and returns the row the table starts on.
+        private int WriteConfigSummary(ClosedXML.Excel.IXLWorksheet sheet, int columnCount)
+        {
+            var title = sheet.Cell(1, 1);
+            title.Value = "CONFIG SUMMARY";
+            title.Style.Font.Bold = true;
+            title.Style.Font.FontSize = 12;
+            title.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(30, 41, 59);
+            sheet.Range(1, 1, 1, Math.Max(4, columnCount)).Merge();
+
+            var fields = new (string Label, string Value)[]
+            {
+                (SummaryConfigName, txtConfigName.Text?.Trim() ?? ""),
+                (SummaryProductModel, txtProductModel.Text?.Trim() ?? ""),
+                (SummaryConnectionResistance, txtConnectionResistance.Text?.Trim() ?? ""),
+                (SummaryInsulationResistance, txtInsulationResistance.Text?.Trim() ?? "")
+            };
+
+            int row = 2;
+            foreach (var (label, value) in fields)
+            {
+                var labelCell = sheet.Cell(row, 1);
+                labelCell.Value = label;
+                labelCell.Style.Font.Bold = true;
+                labelCell.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(71, 85, 105);
+
+                var valueCell = sheet.Cell(row, 2);
+                valueCell.Value = value;
+                valueCell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromArgb(248, 250, 252);
+                valueCell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Hair;
+                valueCell.Style.Border.OutsideBorderColor = ClosedXML.Excel.XLColor.FromArgb(203, 213, 225);
+                sheet.Range(row, 2, row, 4).Merge();
+
+                row++;
+            }
+
+            // One blank row so the summary reads as its own block, then the table header.
+            return row + 1;
+        }
+
+        private void WriteWorkbook(string suggestedFileName, string caption, bool includeRows)
+        {
+            using var dialog = new SaveFileDialog
+            {
+                Title = includeRows ? "Export Test Parameters" : "Save Test Parameter Template",
+                Filter = "Excel workbook (*.xlsx)|*.xlsx",
+                FileName = suggestedFileName
+            };
+
+            if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+            try
+            {
+                var columns = ExportableColumns();
+
+                using var workbook = new ClosedXML.Excel.XLWorkbook();
+                var sheet = workbook.Worksheets.Add("Test Parameters");
+
+                int headerRow = WriteConfigSummary(sheet, columns.Count);
+
+                for (int i = 0; i < columns.Count; i++)
+                {
+                    string header = columns[i].HeaderText.Replace("\n", " ");
+                    bool required = RequiredImportColumns.Contains(header, StringComparer.OrdinalIgnoreCase);
+
+                    var cell = sheet.Cell(headerRow, i + 1);
+                    cell.Value = header;
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(30, 41, 59);
+                    cell.Style.Fill.BackgroundColor = required
+                        ? ClosedXML.Excel.XLColor.FromArgb(203, 213, 225)
+                        : ClosedXML.Excel.XLColor.FromArgb(241, 245, 249);
+                    cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                    cell.Style.Alignment.Vertical = ClosedXML.Excel.XLAlignmentVerticalValues.Center;
+                    cell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                    cell.Style.Border.OutsideBorderColor = ClosedXML.Excel.XLColor.FromArgb(148, 163, 184);
+
+                    // The importer rejects the whole file over one blank required cell, so which
+                    // columns those are has to be visible in the file itself, not only in a manual.
+                    cell.GetComment().AddText(required
+                        ? "Required. The import fails if this is empty."
+                        : "Optional.");
+                }
+
+                if (includeRows)
+                {
+                    int row = headerRow + 1;
+                    foreach (DataGridViewRow gridRow in gridConfig.Rows)
+                    {
+                        if (gridRow.IsNewRow) continue;
+
+                        for (int i = 0; i < columns.Count; i++)
+                        {
+                            sheet.Cell(row, i + 1).Value = gridRow.Cells[columns[i].Index].Value?.ToString() ?? "";
+                        }
+                        row++;
+                    }
+
+                    if (row > headerRow + 1)
+                    {
+                        sheet.Range(headerRow + 1, 1, row - 1, columns.Count)
+                            .Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Hair;
+                    }
+                }
+
+                sheet.Row(headerRow).Height = 22;
+                sheet.Columns(1, columns.Count).AdjustToContents(minWidth: 10, maxWidth: 28);
+                sheet.SheetView.FreezeRows(headerRow);
+                sheet.Range(headerRow, 1, headerRow, columns.Count).SetAutoFilter();
+                workbook.SaveAs(dialog.FileName);
+
+                MessageBox.Show($"Saved to:\r\n{dialog.FileName}", caption,
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error($"TestParametersPage.WriteWorkbook({caption})", "Could not write the workbook.", ex);
+                MessageBox.Show($"Could not save the file: {ex.Message}", caption,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         // The Settings default, but only if the type column can actually hold it - a default that
         // Test Type Available has since switched off would make the new row's cell reject its value.
         private string ResolveDefaultTestType()
@@ -232,7 +631,7 @@ namespace AssemblyLineTester.Views.Pages
             int nextToAddr = nextFromAddr + 1;
 
             int idx = gridConfig.Rows.Add(
-                newIdx.ToString(), "Elec-Control-001", "Low Voltage Supply",
+                newIdx.ToString(), "Elec-Control-001", "", "", "Low Voltage Supply",
                 nextFromAddr.ToString(), $"X1-0{newIdx}", nextToAddr.ToString(), $"Y1-0{newIdx}",
                 defaultType, "0", "0", "0", "-", defaultUnit);
 
@@ -351,8 +750,10 @@ namespace AssemblyLineTester.Views.Pages
 
                 int idx = gridConfig.Rows.Add(
                     net.SequenceNo.ToString(),
-                    net.NetId,
                     net.HarnessGroup,
+                    net.Color,
+                    net.Gauge,
+                    net.NetId,
                     net.FromAddress.ToString(),
                     net.FromLabel,
                     net.ToAddress.ToString(),
@@ -403,19 +804,39 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
+            // The Excel file is an extra copy, never a substitute: only the database version can be
+            // loaded back and run on the line, so that write happens either way.
+            var destination = MessageBox.Show(
+                "Where should this configuration go?\r\n\r\n" +
+                "Yes\t-  Save to the database\r\n" +
+                "No\t-  Save to the database and export an Excel file\r\n" +
+                "Cancel\t-  Do nothing",
+                "Save", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+            if (destination == DialogResult.Cancel) return;
+
+            // The export is skipped when the database write did not happen, so a spreadsheet can
+            // never claim a configuration that was rejected or that the operator declined to overwrite.
+            if (!TrySaveConfigToDatabase()) return;
+
+            if (destination == DialogResult.No) ExportGridToExcel();
+        }
+
+        // Returns false when the configuration was rejected or the operator backed out.
+        private bool TrySaveConfigToDatabase()
+        {
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
             if (config == null)
             {
-                MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
             }
             config.CreatedBy = SessionManager.CurrentUser?.Username ?? "Unknown";
-            Debug.WriteLine($"curernt user : {config.CreatedBy}");
 
             if (string.IsNullOrWhiteSpace(config.ConfigName))
             {
-                MessageBox.Show("Config Name is required.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                MessageBox.Show("Config Name is required.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
             }
 
             var existing = _configService.GetConfigurationByName(config.ConfigName);
@@ -428,26 +849,27 @@ namespace AssemblyLineTester.Views.Pages
                     if (!string.IsNullOrWhiteSpace(_loadedConfigName) && string.Equals(_loadedConfigName, config.ConfigName, StringComparison.OrdinalIgnoreCase))
                     {
                         var res = MessageBox.Show($"Overwrite existing configuration '{config.ConfigName}'?", "Confirm Overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                        if (res != DialogResult.Yes) return;
+                        if (res != DialogResult.Yes) return false;
 
                         _configService.SaveConfig(config);
                         _loadedConfigName = config.ConfigName;
-                        MessageBox.Show("Configuration overwritten successfully.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        return;
+                        MessageBox.Show("Configuration overwritten successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return true;
                     }
 
-                    MessageBox.Show("A configuration with the same name already exists. Load it from Edit Config to overwrite or choose a different name.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    MessageBox.Show("A configuration with the same name already exists. Load it from Edit to overwrite or choose a different name.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
                 }
 
-                Debug.WriteLine($"curernt userrr : {config.CreatedBy}");
                 _configService.SaveConfig(config);
                 _loadedConfigName = config.ConfigName;
-                MessageBox.Show("Configuration saved successfully.", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Configuration saved successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to save configuration:\n{ex.Message}", "Save Config", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Failed to save configuration:\n{ex.Message}", "Save", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
         }
 
@@ -1086,7 +1508,9 @@ namespace AssemblyLineTester.Views.Pages
                     LowerLimit = lower,
                     UpperLimit = upper,
                     Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? ""
+                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
+                    Color = row.Cells["colColor"].Value?.ToString() ?? "",
+                    Gauge = row.Cells["colGauge"].Value?.ToString() ?? ""
                 });
             }
 
@@ -1151,8 +1575,10 @@ namespace AssemblyLineTester.Views.Pages
 
                     gridConfig.Rows.Add(
                         seqNo.ToString(),       //No
-                        "",                     //Net-ID
                         "",                     //Harness Group
+                        "",                     //Color
+                        "",                     //Gauge
+                        "",                     //Net-ID
                         fromAddr.ToString(),    // from
                         "",                     // from label
                         toAddr.ToString(),      // to
