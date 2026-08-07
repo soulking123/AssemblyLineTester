@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Models.Dto;
+using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Data;
 using AssemblyLineTester.Views.Modals;
@@ -293,12 +293,12 @@ namespace AssemblyLineTester.Views.Pages
             var activeConfig = _configService.GetActiveConfig();
 
             lblProgDetails.Text = activeConfig is null
-                ? "No test program has been run yet."
-                : $"Config Name      : {activeConfig.ConfigName}\n" +
-                  $"Product Model    : {activeConfig.ProductModel}\n" +
-                  $"Total Test       : {activeConfig.Nets.Count}\n" +
-                  $"Created By       : {activeConfig.CreatedBy}\n" +
-                  $"Last Update      : {activeConfig.UpdatedAt:dd MMM yyyy HH:mm}";
+                ? "-\n-\n-\n-\n-"
+                : $"{activeConfig.ConfigName}\n" +
+                  $"{activeConfig.ProductModel}\n" +
+                  $"{activeConfig.Nets.Count}\n" +
+                  $"{activeConfig.CreatedBy}\n" +
+                  $"{activeConfig.UpdatedAt:dd MMM yyyy HH:mm}";
         }
 
         private void GridRecent_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)

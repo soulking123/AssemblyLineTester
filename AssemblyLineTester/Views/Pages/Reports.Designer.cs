@@ -803,8 +803,8 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblSummaryCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblSummaryCards.Controls.Add(pnlSumTotal, 0, 0);
-            tblSummaryCards.Controls.Add(pnlSumPass, 1, 0);
-            tblSummaryCards.Controls.Add(pnlSumFail, 0, 1);
+            tblSummaryCards.Controls.Add(pnlSumPass, 0, 1);
+            tblSummaryCards.Controls.Add(pnlSumFail, 1, 1);
             tblSummaryCards.Dock = DockStyle.Fill;
             tblSummaryCards.Location = new Point(6, 562);
             tblSummaryCards.Margin = new Padding(6, 4, 6, 4);
@@ -818,11 +818,12 @@ namespace AssemblyLineTester.Views.Pages
             // pnlSumTotal
             // 
             pnlSumTotal.BackColor = Color.FromArgb(248, 250, 252);
+            tblSummaryCards.SetColumnSpan(pnlSumTotal, 2);
             pnlSumTotal.Controls.Add(lblSumTotalKey);
             pnlSumTotal.Controls.Add(lblSumTotalVal);
             pnlSumTotal.Dock = DockStyle.Fill;
             pnlSumTotal.Location = new Point(0, 0);
-            pnlSumTotal.Margin = new Padding(0, 0, 6, 6);
+            pnlSumTotal.Margin = new Padding(0, 0, 0, 6);
             pnlSumTotal.Name = "pnlSumTotal";
             pnlSumTotal.Padding = new Padding(17, 23, 17, 23);
             pnlSumTotal.Size = new Size(455, 198);
@@ -860,8 +861,8 @@ namespace AssemblyLineTester.Views.Pages
             pnlSumPass.Controls.Add(lblSumPassKey);
             pnlSumPass.Controls.Add(lblSumPassVal);
             pnlSumPass.Dock = DockStyle.Fill;
-            pnlSumPass.Location = new Point(467, 0);
-            pnlSumPass.Margin = new Padding(6, 0, 0, 6);
+            pnlSumPass.Location = new Point(0, 217);
+            pnlSumPass.Margin = new Padding(0, 13, 11, 0);
             pnlSumPass.Name = "pnlSumPass";
             pnlSumPass.Padding = new Padding(17, 23, 17, 23);
             pnlSumPass.Size = new Size(455, 198);
@@ -899,8 +900,8 @@ namespace AssemblyLineTester.Views.Pages
             pnlSumFail.Controls.Add(lblSumFailKey);
             pnlSumFail.Controls.Add(lblSumFailVal);
             pnlSumFail.Dock = DockStyle.Fill;
-            pnlSumFail.Location = new Point(0, 217);
-            pnlSumFail.Margin = new Padding(0, 13, 11, 0);
+            pnlSumFail.Location = new Point(472, 217);
+            pnlSumFail.Margin = new Padding(11, 13, 0, 0);
             pnlSumFail.Name = "pnlSumFail";
             pnlSumFail.Padding = new Padding(17, 23, 17, 23);
             pnlSumFail.Size = new Size(450, 192);

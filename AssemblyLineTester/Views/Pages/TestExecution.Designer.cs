@@ -66,8 +66,8 @@
             tblStatusLabels = new TableLayoutPanel();
             lblStartTimeKey = new Label();
             lblStartTimeVal = new Label();
-            lblEstimatedKey = new Label();
-            lblEstimatedVal = new Label();
+            lblElapsedKey = new Label();
+            lblElapsedTimeVal = new Label();
             lblEndTimeKey = new Label();
             lblEndTimeVal = new Label();
             lblStatusRunning = new Label();
@@ -622,8 +622,8 @@
             tblStatusLabels.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
             tblStatusLabels.Controls.Add(lblStartTimeKey, 0, 0);
             tblStatusLabels.Controls.Add(lblStartTimeVal, 1, 0);
-            tblStatusLabels.Controls.Add(lblEstimatedKey, 0, 2);
-            tblStatusLabels.Controls.Add(lblEstimatedVal, 1, 2);
+            tblStatusLabels.Controls.Add(lblElapsedKey, 0, 1);
+            tblStatusLabels.Controls.Add(lblElapsedTimeVal, 1, 1);
             tblStatusLabels.Controls.Add(lblEndTimeKey, 0, 3);
             tblStatusLabels.Controls.Add(lblEndTimeVal, 1, 3);
             tblStatusLabels.Dock = DockStyle.Fill;
@@ -631,8 +631,8 @@
             tblStatusLabels.Name = "tblStatusLabels";
             tblStatusLabels.RowCount = 4;
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 47.513813F));
+            tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 2.20994473F));
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblStatusLabels.Size = new Size(639, 362);
             tblStatusLabels.TabIndex = 2;
@@ -663,31 +663,31 @@
             lblStartTimeVal.Text = "15 Mar 2026 10:30:20 AM";
             lblStartTimeVal.TextAlign = ContentAlignment.MiddleRight;
             // 
-            // lblEstimatedKey
+            // lblElapsedKey
             // 
-            lblEstimatedKey.AutoSize = true;
-            lblEstimatedKey.Dock = DockStyle.Fill;
-            lblEstimatedKey.Font = new Font("Segoe UI", 8.5F);
-            lblEstimatedKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblEstimatedKey.Location = new Point(3, 180);
-            lblEstimatedKey.Name = "lblEstimatedKey";
-            lblEstimatedKey.Size = new Size(249, 90);
-            lblEstimatedKey.TabIndex = 4;
-            lblEstimatedKey.Text = "Estimated Time :";
-            lblEstimatedKey.TextAlign = ContentAlignment.MiddleLeft;
+            lblElapsedKey.AutoSize = true;
+            lblElapsedKey.Dock = DockStyle.Fill;
+            lblElapsedKey.Font = new Font("Segoe UI", 8.5F);
+            lblElapsedKey.ForeColor = Color.FromArgb(100, 116, 139);
+            lblElapsedKey.Location = new Point(3, 90);
+            lblElapsedKey.Name = "lblElapsedKey";
+            lblElapsedKey.Size = new Size(249, 172);
+            lblElapsedKey.TabIndex = 2;
+            lblElapsedKey.Text = "Elapsed Time :";
+            lblElapsedKey.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblEstimatedVal
+            // lblElapsedTimeVal
             // 
-            lblEstimatedVal.AutoSize = true;
-            lblEstimatedVal.Dock = DockStyle.Fill;
-            lblEstimatedVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblEstimatedVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblEstimatedVal.Location = new Point(258, 180);
-            lblEstimatedVal.Name = "lblEstimatedVal";
-            lblEstimatedVal.Size = new Size(378, 90);
-            lblEstimatedVal.TabIndex = 5;
-            lblEstimatedVal.Text = "00:09:01";
-            lblEstimatedVal.TextAlign = ContentAlignment.MiddleRight;
+            lblElapsedTimeVal.AutoSize = true;
+            lblElapsedTimeVal.Dock = DockStyle.Fill;
+            lblElapsedTimeVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblElapsedTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
+            lblElapsedTimeVal.Location = new Point(258, 90);
+            lblElapsedTimeVal.Name = "lblElapsedTimeVal";
+            lblElapsedTimeVal.Size = new Size(378, 172);
+            lblElapsedTimeVal.TabIndex = 3;
+            lblElapsedTimeVal.Text = "00:02:15";
+            lblElapsedTimeVal.TextAlign = ContentAlignment.MiddleRight;
             // 
             // lblEndTimeKey
             // 
@@ -983,8 +983,8 @@
         private System.Windows.Forms.TableLayoutPanel tblStatusLabels;
         private System.Windows.Forms.Label lblStartTimeKey;
         private System.Windows.Forms.Label lblStartTimeVal;
-        private System.Windows.Forms.Label lblEstimatedKey;
-        private System.Windows.Forms.Label lblEstimatedVal;
+        private System.Windows.Forms.Label lblElapsedKey;
+        private System.Windows.Forms.Label lblElapsedTimeVal;
         private System.Windows.Forms.Label lblEndTimeKey;
         private System.Windows.Forms.Label lblEndTimeVal;
         private System.Windows.Forms.Label lblStatusRunning;
