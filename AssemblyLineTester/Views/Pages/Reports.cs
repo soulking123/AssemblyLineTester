@@ -78,7 +78,6 @@ namespace AssemblyLineTester.Views.Pages
             cardTrend.Controls.Add(chartTrend);
             cardTrend.Controls.SetChildIndex(chartTrend, 0);
 
-            if (cmbReportType.Items.Count > 0) cmbReportType.SelectedIndex = 0;
             if (cmbModel.Items.Count > 0) cmbModel.SelectedIndex = 0;
             if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
@@ -792,7 +791,6 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumTotal, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumPass, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumFail, 10, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumProg, 10, Color.FromArgb(34, 40, 49), 2.5f);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlPreviewContainer, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardPaper, 10, Color.FromArgb(34, 40, 49), 2.5f);

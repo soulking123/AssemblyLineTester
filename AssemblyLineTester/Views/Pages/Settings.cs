@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,6 +10,7 @@ using System.Text;
 using System.Windows.Forms;
 using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Services;
+using AssemblyLineTester.Data;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -44,10 +45,6 @@ namespace AssemblyLineTester.Views.Pages
             InitializeComponent();
             SetupInteractiveTabs();
             EnableDoubleBuffering();
-            if (cmbLang.Items.Count > 0) cmbLang.SelectedIndex = 0;
-            if (cmbDateFormat.Items.Count > 0) cmbDateFormat.SelectedIndex = 0;
-            if (cmbTimeFormat.Items.Count > 0) cmbTimeFormat.SelectedIndex = 0;
-            if (cmbAutoLogout.Items.Count > 0) cmbAutoLogout.SelectedIndex = 0;
             if (cmbRefresh.Items.Count > 0) cmbRefresh.SelectedIndex = 0;
             SetupEvents();
             LoadFileSettings();
@@ -369,6 +366,7 @@ namespace AssemblyLineTester.Views.Pages
         private void SetupEvents()
         {
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardGeneral, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardMaintenanceState, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardTestSettings, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardAppSettings, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnBrowseData, 8, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
@@ -387,6 +385,98 @@ namespace AssemblyLineTester.Views.Pages
             PopulateTestResultColumns();
             BuildTickListEditButtons();
             SetTickListsEditable(false);
+            SetupMaintenanceEvents();
+        }
+
+        private void SetupMaintenanceEvents()
+        {
+            BindMaintenanceState();
+
+            btnEditMaintenance.Click += (s, e) => 
+            {
+                txtRemainingDays.ReadOnly = false;
+                txtRemainingHours.ReadOnly = false;
+                btnCancelMaintenance.Visible = true;
+                btnUpdateMaintenance.Visible = true;
+                lblEditHint.Visible = true;
+            };
+
+            btnCancelMaintenance.Click += (s, e) =>
+            {
+                txtRemainingDays.ReadOnly = true;
+                txtRemainingHours.ReadOnly = true;
+                btnCancelMaintenance.Visible = false;
+                btnUpdateMaintenance.Visible = false;
+                lblEditHint.Visible = false;
+                BindMaintenanceState();
+            };
+
+            btnResetMaintenance.Click += (s, e) =>
+            {
+                if (MessageBox.Show("Are you sure you want to reset maintenance counters to their default values?", "Reset Maintenance", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    using (var db = new AppDbContext())
+                    {
+                        var state = db.MaintenanceStates.FirstOrDefault(s => s.Id == 1);
+                        if (state != null)
+                        {
+                            state.RemainingMaintDays = 180;
+                            state.RemainingMaintHours = 2160.0;
+                            db.SaveChanges();
+                            MaintenanceService.StartTracking();
+                            BindMaintenanceState();
+                        }
+                    }
+                }
+            };
+
+            btnUpdateMaintenance.Click += (s, e) =>
+            {
+                if (int.TryParse(txtRemainingDays.Text, out int days) && double.TryParse(txtRemainingHours.Text, out double hours))
+                {
+                    using (var db = new AppDbContext())
+                    {
+                        var state = db.MaintenanceStates.FirstOrDefault(s => s.Id == 1);
+                        if (state != null)
+                        {
+                            state.RemainingMaintDays = days;
+                            state.RemainingMaintHours = hours;
+                            db.SaveChanges();
+                            MaintenanceService.StartTracking();
+                        }
+                    }
+                    txtRemainingDays.ReadOnly = true;
+                    txtRemainingHours.ReadOnly = true;
+                    btnCancelMaintenance.Visible = false;
+                    btnUpdateMaintenance.Visible = false;
+                    lblEditHint.Visible = false;
+                    BindMaintenanceState();
+                }
+                else
+                {
+                    MessageBox.Show("Please enter valid numeric values for days and hours.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            };
+            
+            var refreshTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+            refreshTimer.Tick += (s, e) => 
+            {
+                if (this.Visible)
+                {
+                    TimeSpan timeToday = TimeSpan.FromSeconds(MaintenanceService.ActiveOperatingSeconds);
+                    lblOperatingTimeTodayVal.Text = timeToday.ToString(@"hh\:mm\:ss");
+                }
+            };
+            refreshTimer.Start();
+        }
+
+        private void BindMaintenanceState()
+        {
+            txtRemainingDays.Text = MaintenanceService.RemainingDays.ToString();
+            txtRemainingHours.Text = MaintenanceService.RemainingHours.ToString("0");
+            lblLastUsageVal.Text = MaintenanceService.LastUsageDate.ToString("dd MMM yyyy");
+            TimeSpan timeToday = TimeSpan.FromSeconds(MaintenanceService.ActiveOperatingSeconds);
+            lblOperatingTimeTodayVal.Text = timeToday.ToString(@"hh\:mm\:ss");
         }
 
         // Gives the card a real header row - title left, actions right, one baseline - instead of

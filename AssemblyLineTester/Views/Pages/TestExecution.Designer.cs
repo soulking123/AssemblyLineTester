@@ -66,8 +66,6 @@
             tblStatusLabels = new TableLayoutPanel();
             lblStartTimeKey = new Label();
             lblStartTimeVal = new Label();
-            lblElapsedKey = new Label();
-            lblElapsedTimeVal = new Label();
             lblEstimatedKey = new Label();
             lblEstimatedVal = new Label();
             lblEndTimeKey = new Label();
@@ -624,8 +622,6 @@
             tblStatusLabels.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
             tblStatusLabels.Controls.Add(lblStartTimeKey, 0, 0);
             tblStatusLabels.Controls.Add(lblStartTimeVal, 1, 0);
-            tblStatusLabels.Controls.Add(lblElapsedKey, 0, 1);
-            tblStatusLabels.Controls.Add(lblElapsedTimeVal, 1, 1);
             tblStatusLabels.Controls.Add(lblEstimatedKey, 0, 2);
             tblStatusLabels.Controls.Add(lblEstimatedVal, 1, 2);
             tblStatusLabels.Controls.Add(lblEndTimeKey, 0, 3);
@@ -666,32 +662,6 @@
             lblStartTimeVal.TabIndex = 1;
             lblStartTimeVal.Text = "15 Mar 2026 10:30:20 AM";
             lblStartTimeVal.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // lblElapsedKey
-            // 
-            lblElapsedKey.AutoSize = true;
-            lblElapsedKey.Dock = DockStyle.Fill;
-            lblElapsedKey.Font = new Font("Segoe UI", 8.5F);
-            lblElapsedKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblElapsedKey.Location = new Point(3, 90);
-            lblElapsedKey.Name = "lblElapsedKey";
-            lblElapsedKey.Size = new Size(249, 90);
-            lblElapsedKey.TabIndex = 2;
-            lblElapsedKey.Text = "Elapsed Time :";
-            lblElapsedKey.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblElapsedTimeVal
-            // 
-            lblElapsedTimeVal.AutoSize = true;
-            lblElapsedTimeVal.Dock = DockStyle.Fill;
-            lblElapsedTimeVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblElapsedTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblElapsedTimeVal.Location = new Point(258, 90);
-            lblElapsedTimeVal.Name = "lblElapsedTimeVal";
-            lblElapsedTimeVal.Size = new Size(378, 90);
-            lblElapsedTimeVal.TabIndex = 3;
-            lblElapsedTimeVal.Text = "00:02:15";
-            lblElapsedTimeVal.TextAlign = ContentAlignment.MiddleRight;
             // 
             // lblEstimatedKey
             // 
@@ -783,7 +753,6 @@
             tblRow2.RowCount = 2;
             tblRow2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tblRow2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblRow2.SetRowSpan(cardLiveDetails, 2);
             tblRow2.Size = new Size(2670, 951);
             tblRow2.TabIndex = 2;
             // 
@@ -793,10 +762,11 @@
             cardLiveDetails.Controls.Add(gridLiveDetails);
             cardLiveDetails.Controls.Add(pnlLiveDetailsHeader);
             cardLiveDetails.Dock = DockStyle.Fill;
-            cardLiveDetails.Location = new Point(5, 5);
+            cardLiveDetails.Location = new Point(3, 3);
             cardLiveDetails.Name = "cardLiveDetails";
             cardLiveDetails.Padding = new Padding(10);
-            cardLiveDetails.Size = new Size(1992, 941);
+            tblRow2.SetRowSpan(cardLiveDetails, 2);
+            cardLiveDetails.Size = new Size(1996, 945);
             cardLiveDetails.TabIndex = 0;
             // 
             // gridLiveDetails
@@ -812,7 +782,7 @@
             gridLiveDetails.ReadOnly = true;
             gridLiveDetails.RowHeadersVisible = false;
             gridLiveDetails.RowHeadersWidth = 82;
-            gridLiveDetails.Size = new Size(1305, 859);
+            gridLiveDetails.Size = new Size(1976, 863);
             gridLiveDetails.TabIndex = 1;
             // 
             // pnlLiveDetailsHeader
@@ -822,7 +792,7 @@
             pnlLiveDetailsHeader.Dock = DockStyle.Top;
             pnlLiveDetailsHeader.Location = new Point(10, 10);
             pnlLiveDetailsHeader.Name = "pnlLiveDetailsHeader";
-            pnlLiveDetailsHeader.Size = new Size(1305, 62);
+            pnlLiveDetailsHeader.Size = new Size(1976, 62);
             pnlLiveDetailsHeader.TabIndex = 0;
             // 
             // btnViewWiringDiagram
@@ -835,7 +805,7 @@
             btnViewWiringDiagram.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnViewWiringDiagram.ForeColor = Color.White;
             btnViewWiringDiagram.HoverForeColor = Color.Empty;
-            btnViewWiringDiagram.Location = new Point(1036, 12);
+            btnViewWiringDiagram.Location = new Point(1707, 12);
             btnViewWiringDiagram.Name = "btnViewWiringDiagram";
             btnViewWiringDiagram.NormalBackColor = Color.FromArgb(37, 99, 235);
             btnViewWiringDiagram.PressedForeColor = Color.Empty;
@@ -851,7 +821,7 @@
             lblLiveDetailsTitle.ForeColor = Color.FromArgb(30, 41, 59);
             lblLiveDetailsTitle.Location = new Point(0, 0);
             lblLiveDetailsTitle.Name = "lblLiveDetailsTitle";
-            lblLiveDetailsTitle.Size = new Size(1305, 62);
+            lblLiveDetailsTitle.Size = new Size(1976, 62);
             lblLiveDetailsTitle.TabIndex = 0;
             lblLiveDetailsTitle.Text = "LIVE TEST DETAILS";
             lblLiveDetailsTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -862,10 +832,10 @@
             cardTestSummary.Controls.Add(listBoxTestSummary);
             cardTestSummary.Controls.Add(lblTestSummaryTitle);
             cardTestSummary.Dock = DockStyle.Fill;
-            cardTestSummary.Location = new Point(2007, 5);
+            cardTestSummary.Location = new Point(2005, 3);
             cardTestSummary.Name = "cardTestSummary";
             cardTestSummary.Padding = new Padding(10);
-            cardTestSummary.Size = new Size(658, 467);
+            cardTestSummary.Size = new Size(662, 469);
             cardTestSummary.TabIndex = 0;
             // 
             // listBoxTestSummary
@@ -877,7 +847,7 @@
             listBoxTestSummary.Location = new Point(10, 56);
             listBoxTestSummary.Name = "listBoxTestSummary";
             listBoxTestSummary.ScrollAlwaysVisible = true;
-            listBoxTestSummary.Size = new Size(637, 878);
+            listBoxTestSummary.Size = new Size(642, 403);
             listBoxTestSummary.TabIndex = 2;
             // 
             // lblTestSummaryTitle
@@ -887,7 +857,7 @@
             lblTestSummaryTitle.ForeColor = Color.FromArgb(30, 41, 59);
             lblTestSummaryTitle.Location = new Point(10, 10);
             lblTestSummaryTitle.Name = "lblTestSummaryTitle";
-            lblTestSummaryTitle.Size = new Size(637, 46);
+            lblTestSummaryTitle.Size = new Size(642, 46);
             lblTestSummaryTitle.TabIndex = 0;
             lblTestSummaryTitle.Text = "TEST SUMMARY";
             lblTestSummaryTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -898,26 +868,14 @@
             cardNotes.Controls.Add(txtNotes);
             cardNotes.Controls.Add(lblNotesTitle);
             cardNotes.Dock = DockStyle.Fill;
-            cardNotes.Location = new Point(2007, 482);
+            cardNotes.Location = new Point(2005, 478);
             cardNotes.Name = "cardNotes";
             cardNotes.Padding = new Padding(10);
-            cardNotes.Size = new Size(658, 467);
+            cardNotes.Size = new Size(662, 470);
             cardNotes.TabIndex = 1;
-            //
-            // lblNotesTitle
             // 
-            lblNotesTitle.Dock = DockStyle.Top;
-            lblNotesTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblNotesTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblNotesTitle.Location = new Point(10, 10);
-            lblNotesTitle.Name = "lblNotesTitle";
-            lblNotesTitle.Size = new Size(638, 47);
-            lblNotesTitle.TabIndex = 0;
-            lblNotesTitle.Text = "NOTES";
-            lblNotesTitle.TextAlign = ContentAlignment.MiddleLeft;
-            //
             // txtNotes
-            //
+            // 
             txtNotes.BorderStyle = BorderStyle.FixedSingle;
             txtNotes.Dock = DockStyle.Fill;
             txtNotes.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -927,8 +885,20 @@
             txtNotes.Multiline = true;
             txtNotes.Name = "txtNotes";
             txtNotes.ScrollBars = ScrollBars.Vertical;
-            txtNotes.Size = new Size(638, 888);
+            txtNotes.Size = new Size(642, 403);
             txtNotes.TabIndex = 1;
+            // 
+            // lblNotesTitle
+            // 
+            lblNotesTitle.Dock = DockStyle.Top;
+            lblNotesTitle.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblNotesTitle.ForeColor = Color.FromArgb(30, 41, 59);
+            lblNotesTitle.Location = new Point(10, 10);
+            lblNotesTitle.Name = "lblNotesTitle";
+            lblNotesTitle.Size = new Size(642, 47);
+            lblNotesTitle.TabIndex = 0;
+            lblNotesTitle.Text = "NOTES";
+            lblNotesTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // TestExecution
             // 
@@ -1013,8 +983,6 @@
         private System.Windows.Forms.TableLayoutPanel tblStatusLabels;
         private System.Windows.Forms.Label lblStartTimeKey;
         private System.Windows.Forms.Label lblStartTimeVal;
-        private System.Windows.Forms.Label lblElapsedKey;
-        private System.Windows.Forms.Label lblElapsedTimeVal;
         private System.Windows.Forms.Label lblEstimatedKey;
         private System.Windows.Forms.Label lblEstimatedVal;
         private System.Windows.Forms.Label lblEndTimeKey;
