@@ -1,4 +1,4 @@
-namespace AssemblyLineTester.Views.Pages
+﻿namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -49,7 +49,7 @@ namespace AssemblyLineTester.Views.Pages
             lblRemainingDays = new Label();
             lblRemainingHours = new Label();
             txtRemainingDays = new TextBox();
-            txtRemainingHours = new TextBox();
+            txtRemainingHours = new MaskedTextBox();
             pnlMaintInfo = new Panel();
             tblMaintInfo = new TableLayoutPanel();
             lblOperatingTimeTodayTitle = new Label();
@@ -545,7 +545,11 @@ namespace AssemblyLineTester.Views.Pages
             txtRemainingHours.ReadOnly = true;
             txtRemainingHours.Size = new Size(472, 41);
             txtRemainingHours.TabIndex = 6;
-            txtRemainingHours.Text = "1440";
+            txtRemainingHours.Mask = "0000:00:00";
+            txtRemainingHours.PromptChar = '_';
+            txtRemainingHours.InsertKeyMode = InsertKeyMode.Overwrite;
+            txtRemainingHours.TextAlign = HorizontalAlignment.Left;
+            txtRemainingHours.Text = "0024:00:00";
             // 
             // pnlMaintInfo
             // 
@@ -1601,7 +1605,7 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Label lblRemainingDays;
         private System.Windows.Forms.Label lblRemainingHours;
         private System.Windows.Forms.TextBox txtRemainingDays;
-        private System.Windows.Forms.TextBox txtRemainingHours;
+        private System.Windows.Forms.MaskedTextBox txtRemainingHours;
         private System.Windows.Forms.Panel pnlMaintInfo;
         private System.Windows.Forms.TableLayoutPanel tblMaintInfo;
         private System.Windows.Forms.Label lblOperatingTimeTodayTitle;

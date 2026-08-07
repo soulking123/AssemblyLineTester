@@ -53,6 +53,73 @@ namespace AssemblyLineTester.Views
             {
                 PromptPasswordChange(mandatory: true);
             }
+
+            StartMaintenanceWatch();
+        }
+
+        private System.Windows.Forms.Timer? _maintenanceWatch;
+        private bool _maintenancePromptOpen;
+
+        // Checked on a timer as well as at sign-in, because the allowance can run out mid-shift.
+        private void StartMaintenanceWatch()
+        {
+            PromptMaintenanceIfDue();
+
+            _maintenanceWatch = new System.Windows.Forms.Timer { Interval = 30000 };
+            _maintenanceWatch.Tick += (s, e) => PromptMaintenanceIfDue();
+            _maintenanceWatch.Start();
+        }
+
+        /// <summary>
+        /// Holds the application on a modal prompt for as long as maintenance is overdue.
+        /// </summary>
+        /// <remarks>
+        /// Whoever may reset gets a button that lands on the Settings tab holding the countdown;
+        /// everyone else can only sign out, so an overdue rig cannot quietly keep testing.
+        /// </remarks>
+        private void PromptMaintenanceIfDue()
+        {
+            // A queued tick can still arrive after the window has gone, and ShowDialog on a disposed
+            // form throws rather than doing nothing.
+            if (IsDisposed || Disposing || !IsHandleCreated) return;
+
+            if (_maintenancePromptOpen || !MaintenanceService.IsDue) return;
+
+            // Settings is the one place the countdown can be cleared, so the prompt stays out of the
+            // way while the operator is standing on it. Leaving that page brings the block back.
+            bool mayReset = SessionManager.HasPermission("Action.Maintenance.Reset");
+            if (mayReset && btnSettings.IsActive) return;
+
+            _maintenancePromptOpen = true;
+            try
+            {
+                float scale = UIStyleHelper.GetHostScaleFactor(this);
+
+                using var prompt = new AssemblyLineTester.Views.Modals.MaintenanceDuePromptForm(scale);
+                DialogResult result = prompt.ShowDialog(this);
+
+                if (result == DialogResult.Abort)
+                {
+                    BtnLogOut_Click(this, EventArgs.Empty);
+                    return;
+                }
+
+                if (mayReset && result == DialogResult.OK) OpenMaintenanceSettings();
+            }
+            finally
+            {
+                _maintenancePromptOpen = false;
+            }
+        }
+
+        // Lands on the Settings page, where the maintenance card lives.
+        private void OpenMaintenanceSettings()
+        {
+            if (btnSettings == null) return;
+
+            UserControl? targetPage = GetOrInitPage("btnSettings");
+            SetActiveMenu(btnSettings, targetPage);
+            pageSettings?.OpenGeneralTab();
         }
 
         public MainForm()
@@ -279,6 +346,10 @@ namespace AssemblyLineTester.Views
             FileLogService.Info("Navigation",
                 $"{clickedButton.Name,-22} construct {built.ElapsedMilliseconds,5} ms   show {shown.ElapsedMilliseconds,5} ms" +
                 (firstVisit ? "   (first visit)" : ""));
+
+            // Checked here as well as on the timer, or leaving Settings buys half a minute of
+            // unblocked testing on a rig that is overdue.
+            PromptMaintenanceIfDue();
         }
 
         // Whether a page has already been built, without building it as a side effect.
@@ -681,6 +752,15 @@ namespace AssemblyLineTester.Views
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            // A WinForms timer outlives the form that made it, so an unstopped one keeps firing
+            // against a disposed window every 30 seconds until the process ends.
+            if (_maintenanceWatch != null)
+            {
+                _maintenanceWatch.Stop();
+                _maintenanceWatch.Dispose();
+                _maintenanceWatch = null;
+            }
+
             base.OnFormClosed(e);
             if (!IsLoggingOut) Application.Exit();
         }

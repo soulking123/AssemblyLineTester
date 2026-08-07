@@ -361,10 +361,17 @@ namespace AssemblyLineTester.Views.Pages
             TimeSpan timeToday = TimeSpan.FromSeconds(MaintenanceService.ActiveOperatingSeconds);
             lblOpTimeVal.Text = timeToday.ToString(@"hh\:mm\:ss");
 
-            lblMaintVal.Text = $"{MaintenanceService.RemainingDays} Days";
+            lblMaintVal.Text = MaintenanceService.IsDue
+                ? "DUE"
+                : $"{MaintenanceService.RemainingDays} Days";
 
-            double currentRemainingHours = Math.Max(0, MaintenanceService.RemainingHours - (MaintenanceService.ActiveOperatingSeconds / 3600.0));
-            lblMaintSub.Text = $"Or {currentRemainingHours:N1} Hours";
+            lblMaintSub.Text = MaintenanceService.IsDue
+                ? MaintenanceService.DueReason
+                : $"Or {MaintenanceService.FormatHours(MaintenanceService.RemainingHoursLive)}";
+
+            // Red once either countdown is spent, so the card says it before the prompt does.
+            Color maintColor = MaintenanceService.IsDue ? Color.FromArgb(220, 38, 38) : Color.FromArgb(30, 41, 59);
+            lblMaintVal.ForeColor = maintColor;
         }
 
         protected override void OnVisibleChanged(EventArgs e)

@@ -331,6 +331,7 @@ namespace AssemblyLineTester.Views.Pages
             splitLeftCenterRight.Panel2.Controls.Add(tblColRight);
             splitLeftCenterRight.Size = new Size(3966, 2331);
             splitLeftCenterRight.SplitterDistance = 2772;
+            splitLeftCenterRight.FixedPanel = FixedPanel.Panel2;
             splitLeftCenterRight.SplitterWidth = 11;
             splitLeftCenterRight.TabIndex = 1;
             // 

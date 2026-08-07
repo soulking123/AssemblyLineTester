@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -29,6 +29,15 @@ namespace AssemblyLineTester.Views.Pages
         private Button? _btnEditTicks;
         private Button? _btnSaveTicks;
         private Button? _btnCancelTicks;
+
+        // Jumps to the General tab, which carries the maintenance countdown.
+        public void OpenGeneralTab()
+        {
+            if (lblTabGen != null)
+            {
+                Tab_Click(lblTabGen, EventArgs.Empty);
+            }
+        }
 
         // Jumps straight to the Users & Roles tab.
         public void OpenUsersAndRolesTab()
@@ -391,74 +400,88 @@ namespace AssemblyLineTester.Views.Pages
             SetupMaintenanceEvents();
         }
 
+        private static bool HasMaintenancePermission()
+        {
+            if (SessionManager.HasPermission("Action.Maintenance.Reset")) return true;
+            MessageBox.Show("You do not have permission to change the maintenance countdown.",
+                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
+        private void SetMaintenanceEditable(bool editable)
+        {
+            txtRemainingDays.ReadOnly = !editable;
+            txtRemainingHours.ReadOnly = !editable;
+            txtRemainingDays.BackColor = editable ? Color.White : Color.FromArgb(241, 245, 249);
+            txtRemainingHours.BackColor = editable ? Color.White : Color.FromArgb(241, 245, 249);
+
+            btnCancelMaintenance.Visible = editable;
+            btnUpdateMaintenance.Visible = editable;
+            lblEditHint.Visible = editable;
+        }
+
+        // Single path to the countdown, so every change is permission-checked and logged once.
+        private bool ApplyMaintenance(int days, double hours)
+        {
+            if (!MaintenanceService.SetRemaining(days, hours))
+            {
+                MessageBox.Show("The maintenance countdown could not be saved. Check the log and try again.",
+                    "Maintenance", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            BindMaintenanceState();
+            return true;
+        }
+
         private void SetupMaintenanceEvents()
         {
             BindMaintenanceState();
+            SetMaintenanceEditable(false);
 
-            btnEditMaintenance.Click += (s, e) => 
+            btnEditMaintenance.Click += (s, e) =>
             {
-                txtRemainingDays.ReadOnly = false;
-                txtRemainingHours.ReadOnly = false;
-                btnCancelMaintenance.Visible = true;
-                btnUpdateMaintenance.Visible = true;
-                lblEditHint.Visible = true;
+                if (HasMaintenancePermission()) SetMaintenanceEditable(true);
             };
 
             btnCancelMaintenance.Click += (s, e) =>
             {
-                txtRemainingDays.ReadOnly = true;
-                txtRemainingHours.ReadOnly = true;
-                btnCancelMaintenance.Visible = false;
-                btnUpdateMaintenance.Visible = false;
-                lblEditHint.Visible = false;
+                SetMaintenanceEditable(false);
                 BindMaintenanceState();
             };
 
             btnResetMaintenance.Click += (s, e) =>
             {
-                if (MessageBox.Show("Are you sure you want to reset maintenance counters to their default values?", "Reset Maintenance", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (!HasMaintenancePermission()) return;
+
+                if (MessageBox.Show(
+                        $"Reset the maintenance countdown to the interval set here?\r\n\r\n" +
+                        $"{MaintenanceService.IntervalDays} day(s) or {MaintenanceService.FormatHours(MaintenanceService.IntervalHours)} of operating time.",
+                        "Reset Maintenance", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+                if (!MaintenanceService.ResetToInterval())
                 {
-                    using (var db = new AppDbContext())
-                    {
-                        var state = db.MaintenanceStates.FirstOrDefault(s => s.Id == 1);
-                        if (state != null)
-                        {
-                            state.RemainingMaintDays = 180;
-                            state.RemainingMaintHours = 2160.0;
-                            db.SaveChanges();
-                            MaintenanceService.StartTracking();
-                            BindMaintenanceState();
-                        }
-                    }
+                    MessageBox.Show("The maintenance countdown could not be reset. Check the log and try again.",
+                        "Maintenance", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
+
+                BindMaintenanceState();
             };
 
             btnUpdateMaintenance.Click += (s, e) =>
             {
-                if (int.TryParse(txtRemainingDays.Text, out int days) && double.TryParse(txtRemainingHours.Text, out double hours))
+                if (!HasMaintenancePermission()) return;
+
+                if (!int.TryParse(txtRemainingDays.Text, out int days) || days < 0 ||
+                    !MaintenanceService.TryParseHours(txtRemainingHours.Text, out double hours))
                 {
-                    using (var db = new AppDbContext())
-                    {
-                        var state = db.MaintenanceStates.FirstOrDefault(s => s.Id == 1);
-                        if (state != null)
-                        {
-                            state.RemainingMaintDays = days;
-                            state.RemainingMaintHours = hours;
-                            db.SaveChanges();
-                            MaintenanceService.StartTracking();
-                        }
-                    }
-                    txtRemainingDays.ReadOnly = true;
-                    txtRemainingHours.ReadOnly = true;
-                    btnCancelMaintenance.Visible = false;
-                    btnUpdateMaintenance.Visible = false;
-                    lblEditHint.Visible = false;
-                    BindMaintenanceState();
+                    MessageBox.Show("Enter days as a whole number, and time as HH:MM:SS (a plain number of hours also works).",
+                        "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
-                else
-                {
-                    MessageBox.Show("Please enter valid numeric values for days and hours.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+
+                if (ApplyMaintenance(days, hours)) SetMaintenanceEditable(false);
             };
             
             var refreshTimer = new System.Windows.Forms.Timer { Interval = 1000 };
@@ -476,7 +499,7 @@ namespace AssemblyLineTester.Views.Pages
         private void BindMaintenanceState()
         {
             txtRemainingDays.Text = MaintenanceService.RemainingDays.ToString();
-            txtRemainingHours.Text = MaintenanceService.RemainingHours.ToString("0");
+            txtRemainingHours.Text = MaintenanceService.FormatHoursPadded(MaintenanceService.RemainingHours);
             lblLastUsageVal.Text = MaintenanceService.LastUsageDate.ToString("dd MMM yyyy");
             TimeSpan timeToday = TimeSpan.FromSeconds(MaintenanceService.ActiveOperatingSeconds);
             lblOperatingTimeTodayVal.Text = timeToday.ToString(@"hh\:mm\:ss");

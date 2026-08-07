@@ -21,6 +21,7 @@ namespace AssemblyLineTester
             AppTime.SelfCheck();
             LicenseService.SelfCheck();
             TestSettingService.SelfCheck();
+            MaintenanceService.SelfCheck();
             Views.Pages.TestParametersPage.SelfCheck();
             FileLogService.Info("Startup", AppInfo.Describe());
 
