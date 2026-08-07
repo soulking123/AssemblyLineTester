@@ -1,20 +1,21 @@
-﻿using System;
+using AssemblyLineTester.Helpers;
+using AssemblyLineTester.Models.Dto;
+using AssemblyLineTester.Services;
+using PdfSharp.Pdf.Content.Objects;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using AssemblyLineTester.Helpers;
-using AssemblyLineTester.Models.Dto;
-using AssemblyLineTester.Services;
 
 namespace AssemblyLineTester.Views.Pages
 {
     public partial class Reports : UserControl
     {
         private readonly TestReportService _reportService = new();
-        private readonly ReportExcelExportService _excelExportService = new();
         private readonly ReportPdfExportService _pdfExportService = new();
+        private readonly ReportExcelExportService _excelExportService = new();
         private int _currentPage = 1;
         private readonly int _pageSize = 10;
         private int _totalPages = 1;
@@ -23,6 +24,7 @@ namespace AssemblyLineTester.Views.Pages
         private ReportFilter _appliedFilter = new();
         private Chart chartTrend = null!;
 
+        // --- Report Edit/Delete feature ---
         private bool _isEditingReport;
         private TextBox _txtEditSn = null!;
 
@@ -30,7 +32,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             InitializeComponent();
             this.Load += Reports_Load;
-            this.VisibleChanged += Reports_VisibleChanged; 
+            this.VisibleChanged += Reports_VisibleChanged;
             SetupEditableReportFields();
         }
 
@@ -46,7 +48,8 @@ namespace AssemblyLineTester.Views.Pages
             InitializeCustomStyles();
             WireEvents();
 
-            // Designer fonts skip the AutoScale pass, so they are scaled explicitly here.
+            // Designer fonts sit out WinForms' AutoScale pass; without this the text keeps its
+            // authored size inside containers that were already scaled, and overflows them.
             UIStyleHelper.ScaleExplicitFonts(this, UIStyleHelper.GetHostScaleFactor(this));
 
             _appliedFilter = new ReportFilter { Page = _currentPage, PageSize = _pageSize };
@@ -65,7 +68,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void InitializeCustomStyles()
         {
-            // Built in code; the Designer cannot serialise a Chart cleanly.
+            // Create Chart programmatically to avoid WinForms Designer serialization issues
             chartTrend = new Chart
             {
                 Dock = DockStyle.Fill,
@@ -75,8 +78,11 @@ namespace AssemblyLineTester.Views.Pages
             cardTrend.Controls.Add(chartTrend);
             cardTrend.Controls.SetChildIndex(chartTrend, 0);
 
-            if (cmbReportType.Items.Count > 0) cmbReportType.SelectedIndex = 0;
+            if (cmbModel.Items.Count > 0) cmbModel.SelectedIndex = 0;
+            if (cmbType.Items.Count > 0) cmbType.SelectedIndex = 0;
+            if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
+            // Plain date picker, no checkbox - dd/MM/yy format, user picks whenever they want.
             dtpStart.Format = DateTimePickerFormat.Custom;
             dtpStart.CustomFormat = "dd/MM/yy";
             dtpEnd.Format = DateTimePickerFormat.Custom;
@@ -92,10 +98,12 @@ namespace AssemblyLineTester.Views.Pages
 
             if (gridReports.Columns["colNo"] is { } colNo)
                 colNo.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            if (gridReports.Columns["colReportType"] is { } colReportType)
+                colReportType.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             if (gridReports.Columns["colDateGenerated"] is { } colDateGenerated)
                 colDateGenerated.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            if (gridReports.Columns["colResult"] is { } colResult)
-                colResult.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            if (gridReports.Columns["colSize"] is { } colSize)
+                colSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             if (gridReports.Columns["colAction"] is { } colAction)
                 colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             gridReports.CellFormatting += GridReports_CellFormatting;
@@ -110,6 +118,7 @@ namespace AssemblyLineTester.Views.Pages
                 btnCancelReportEdit.Visible = false;
 
                 _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
+                _txtEditSn = CreateOverlayTextBox(lblGenSnVal);
 
                 btnEditReport.Click += (s, e) => EnterEditMode();
                 btnSaveReportEdit.Click += (s, e) => SaveReportEdit();
@@ -117,8 +126,6 @@ namespace AssemblyLineTester.Views.Pages
 
                 btnDeleteReport.Click += (s, e) =>
                 {
-                    if (!HasReportEditPermission()) return;
-
                     if (_selectedReportId is null)
                     {
                         MessageBox.Show("Please select a report to delete.", "Delete Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -156,20 +163,8 @@ namespace AssemblyLineTester.Views.Pages
             return tb;
         }
 
-        // Shared by Edit and Delete; both rewrite or destroy a signed test record.
-        private static bool HasReportEditPermission()
-        {
-            if (SessionManager.HasPermission("Action.Reports.Edit")) return true;
-
-            MessageBox.Show("You do not have permission to amend or delete saved test reports.",
-                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return false;
-        }
-
         private void EnterEditMode()
         {
-            if (!HasReportEditPermission()) return;
-
             if (_selectedReportId is null)
             {
                 MessageBox.Show("Please select a report to edit.", "Edit Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -232,9 +227,6 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Shared: this runs per grid row, and a Font is a GDI handle nothing here disposes.
-        private static readonly Font ActionButtonFont = new("Segoe UI", 7.5F, FontStyle.Bold);
-
         private static Button CreateActionButton(string text, Color backColor)
         {
             return new Button
@@ -245,13 +237,14 @@ namespace AssemblyLineTester.Views.Pages
                 FlatStyle = FlatStyle.Flat,
                 Size = new Size(64, 30),
                 Margin = new Padding(3, 2, 0, 0),
-                Font = ActionButtonFont,
+                Font = new Font("Segoe UI", 7.5F, FontStyle.Bold),
                 UseVisualStyleBackColor = false
             };
         }
 
         private void WireEvents()
         {
+            // Generate = read current control values and apply them as the new filter.
             btnGenerate.Click += (s, e) =>
             {
                 _currentPage = 1;
@@ -260,6 +253,7 @@ namespace AssemblyLineTester.Views.Pages
                 RenderReportData(_appliedFilter);
             };
 
+            // Reset = clear controls back to defaults AND clear the applied filter (show everything again).
             btnReset.Click += (s, e) =>
             {
                 ResetFilterControls();
@@ -363,10 +357,10 @@ namespace AssemblyLineTester.Views.Pages
         {
             dtpStart.Value = DateTime.Now.AddDays(-30);
             dtpEnd.Value = DateTime.Now;
-            txtModel.Text = string.Empty;
-            txtType.Text = string.Empty;
-            txtArea.Text = string.Empty;
-            txtOperator.Text = string.Empty;
+            cmbModel.SelectedIndex = 0;
+            cmbType.SelectedIndex = 0;
+            cmbArea.SelectedIndex = 0;
+            cmbOperator.SelectedIndex = 0;
             cmbResult.SelectedIndex = 0;
             txtPartNumber.Text = string.Empty;
         }
@@ -380,17 +374,18 @@ namespace AssemblyLineTester.Views.Pages
                 PageSize = _pageSize
             };
 
-            if (!string.IsNullOrWhiteSpace(txtModel.Text))
-                filter.ProductModel = txtModel.Text.Trim();
+            if (!string.Equals(cmbModel.Text, "All Models", StringComparison.OrdinalIgnoreCase))
+                filter.ProductModel = cmbModel.Text;
 
-            if (!string.IsNullOrWhiteSpace(txtType.Text))
-                filter.ProductType = txtType.Text.Trim();
+            if (!string.Equals(cmbType.Text, "All Types", StringComparison.OrdinalIgnoreCase))
+                filter.ProductType = cmbType.Text;
 
-            if (!string.IsNullOrWhiteSpace(txtArea.Text))
-                filter.Area = txtArea.Text.Trim();
+            if (!string.Equals(cmbArea.Text, "All Areas", StringComparison.OrdinalIgnoreCase))
+                filter.Area = cmbArea.Text;
 
-            if (!string.IsNullOrWhiteSpace(txtOperator.Text))
-                filter.Operator = txtOperator.Text.Trim();
+            if (!string.IsNullOrWhiteSpace(cmbOperator.Text)
+                && !string.Equals(cmbOperator.Text, "All Operators", StringComparison.OrdinalIgnoreCase))
+                filter.Operator = cmbOperator.Text;
 
             if (!string.Equals(cmbResult.Text, "All Results", StringComparison.OrdinalIgnoreCase))
                 filter.Result = cmbResult.Text.ToUpperInvariant();
@@ -521,9 +516,10 @@ namespace AssemblyLineTester.Views.Pages
                 int rowIdx = gridReports.Rows.Add(
                     no++,
                     r.ReportName,
-                    AppTime.ToLocal(r.DateGenerated).ToString("dd MMM yyyy, HH:mm"),
-                    r.GeneratedBy,
                     r.OverallResult,
+                    r.DateGenerated.ToString("dd MMM yyyy, HH:mm"),
+                    r.GeneratedBy,
+                    "-",
                     "View / Export");
                 gridReports.Rows[rowIdx].Tag = r.ReportId;
                 gridReports.Rows[rowIdx].Height = gridReports.RowTemplate.Height;
@@ -569,9 +565,10 @@ namespace AssemblyLineTester.Views.Pages
                 lblPageInfo.Text = $"Showing {start} to {end} of {totalCount} entries";
             }
 
-            UIStyleHelper.ClearAndDispose(flpPageButtons.Controls);
+            flpPageButtons.Controls.Clear();
 
-            // Built after layout, so they still carry designer-era sizes and need scaling.
+            // These buttons are built after the page was laid out, so they carry designer-era
+            // sizes that nothing has scaled yet.
             float scale = UIStyleHelper.GetHostScaleFactor(this);
 
             var btnLast = CreatePageButton("»", false, _currentPage < _totalPages, (s, e) => GoToPage(_totalPages), scale);
@@ -649,6 +646,7 @@ namespace AssemblyLineTester.Views.Pages
                 btn.Click += onClick;
             }
 
+            // Set from the shared statics above, so it is explicit and will not scale on its own.
             btn.Font = UIStyleHelper.ScaleFont(btn.Font, scale);
 
             return btn;
@@ -760,24 +758,20 @@ namespace AssemblyLineTester.Views.Pages
 
             string colName = gridReports.Columns[e.ColumnIndex].Name;
 
-            if (colName == "colResult")
+            if (colName == "colReportType")
             {
-                e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
-
-                switch (e.Value.ToString())
+                string? val = e.Value.ToString();
+                if (val == "Summary Report")
                 {
-                    case "PASS":
-                        e.CellStyle.BackColor = Color.FromArgb(220, 252, 231);
-                        e.CellStyle.ForeColor = Color.FromArgb(22, 101, 52);
-                        break;
-                    case "FAIL":
-                        e.CellStyle.BackColor = Color.FromArgb(254, 226, 226);
-                        e.CellStyle.ForeColor = Color.FromArgb(153, 27, 27);
-                        break;
-                    default:
-                        e.CellStyle.BackColor = Color.FromArgb(241, 245, 249);
-                        e.CellStyle.ForeColor = Color.FromArgb(51, 65, 85);
-                        break;
+                    e.CellStyle.BackColor = Color.FromArgb(224, 242, 254);
+                    e.CellStyle.ForeColor = Color.FromArgb(3, 105, 161);
+                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
+                }
+                else
+                {
+                    e.CellStyle.BackColor = Color.FromArgb(241, 245, 249);
+                    e.CellStyle.ForeColor = Color.FromArgb(51, 65, 85);
+                    e.CellStyle.Font = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
                 }
             }
             else if (colName == "colAction")
@@ -792,20 +786,18 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardFilters, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardTrend, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardReportList, 12, Color.FromArgb(34, 40, 49), 2.5f);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardPreviewTop, 12, Color.FromArgb(34, 40, 49), 2.5f);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumTotal, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumPass, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumFail, 10, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlSumProg, 10, Color.FromArgb(34, 40, 49), 2.5f);
 
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlPreviewContainer, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardPaper, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlGenInfoBox, 8, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlNotesCard, 8, Color.FromArgb(34, 40, 49), 2.5f);
-
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnGenerate, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnReset, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(226, 232, 240), Color.FromArgb(203, 213, 225), Color.Transparent);
-
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportPDF, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExportExcel, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225));
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnPrint, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225));

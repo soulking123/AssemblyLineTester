@@ -1,4 +1,4 @@
-﻿namespace AssemblyLineTester.Views.Pages
+namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -28,31 +28,39 @@
             lblHeader = new Label();
             flpTabs = new FlowLayoutPanel();
             lblTabGen = new Label();
-            lblTabTest = new Label();
-            lblTabHw = new Label();
             lblTabUsers = new Label();
-            lblTabNotif = new Label();
             lblTabBackup = new Label();
             lblTabSysInfo = new Label();
             tblContent = new TableLayoutPanel();
             tblLeftColumn = new TableLayoutPanel();
+            tblTopRowContainer = new TableLayoutPanel();
             cardGeneral = new Panel();
             tblGenCard = new TableLayoutPanel();
             lblGenTitle = new Label();
-            lblCompName = new Label();
+            lblCompanyName = new Label();
             lblSysName = new Label();
             txtCompanyName = new TextBox();
-            txtSystemName = new TextBox();
-            lblLang = new Label();
-            lblDateFormat = new Label();
-            lblTimeFormat = new Label();
-            cmbLang = new ComboBox();
-            cmbDateFormat = new ComboBox();
-            cmbTimeFormat = new ComboBox();
-            lblAutoLogout = new Label();
-            chkConfirmExit = new CheckBox();
-            chkDarkMode = new CheckBox();
-            cmbAutoLogout = new ComboBox();
+            txtSysName = new TextBox();
+            cardMaintenanceState = new Panel();
+            tblMaintCard = new TableLayoutPanel();
+            lblMaintTitle = new Label();
+            btnResetMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnEditMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
+            lblRemainingDays = new Label();
+            lblRemainingHours = new Label();
+            txtRemainingDays = new TextBox();
+            txtRemainingHours = new TextBox();
+            pnlMaintInfo = new Panel();
+            tblMaintInfo = new TableLayoutPanel();
+            lblOperatingTimeTodayTitle = new Label();
+            lblOperatingTimeTodayVal = new Label();
+            lblLastUsageTitle = new Label();
+            lblLastUsageVal = new Label();
+            flpMaintActions = new FlowLayoutPanel();
+            flpMaintHeaderActions = new FlowLayoutPanel();
+            btnUpdateMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnCancelMaintenance = new AssemblyLineTester.Views.Controls.RoundedButton();
+            lblEditHint = new Label();
             cardTestSettings = new Panel();
             tblTestCard = new TableLayoutPanel();
             lblTestTitle = new Label();
@@ -108,15 +116,24 @@
             chkSoundNotif = new CheckBox();
             chkConfirmDelete = new CheckBox();
             chkAuditTrail = new CheckBox();
+            lblTabTest = new Label();
+            lblTabHw = new Label();
+            lblTabNotif = new Label();
             tblMain.SuspendLayout();
             flpTabs.SuspendLayout();
             tblContent.SuspendLayout();
             tblLeftColumn.SuspendLayout();
+            tblTopRowContainer.SuspendLayout();
             cardGeneral.SuspendLayout();
             tblGenCard.SuspendLayout();
+            cardMaintenanceState.SuspendLayout();
+            tblMaintCard.SuspendLayout();
+            pnlMaintInfo.SuspendLayout();
+            tblMaintInfo.SuspendLayout();
+            flpMaintActions.SuspendLayout();
+            flpMaintHeaderActions.SuspendLayout();
             cardTestSettings.SuspendLayout();
             tblTestCard.SuspendLayout();
-            flpLearnConn.SuspendLayout();
             tblDataBrowse.SuspendLayout();
             tblReportBrowse.SuspendLayout();
             flpTestResultCol.SuspendLayout();
@@ -191,57 +208,18 @@
             lblTabGen.TabIndex = 0;
             lblTabGen.Text = "General";
             // 
-            // lblTabTest
-            // 
-            lblTabTest.AutoSize = true;
-            lblTabTest.Cursor = Cursors.Hand;
-            lblTabTest.Font = new Font("Segoe UI", 10.5F);
-            lblTabTest.ForeColor = Color.FromArgb(100, 116, 139);
-            lblTabTest.Location = new Point(185, 21);
-            lblTabTest.Margin = new Padding(0, 21, 67, 0);
-            lblTabTest.Name = "lblTabTest";
-            lblTabTest.Size = new Size(211, 38);
-            lblTabTest.TabIndex = 1;
-            lblTabTest.Text = "Test Parameters";
-            // 
-            // lblTabHw
-            // 
-            lblTabHw.AutoSize = true;
-            lblTabHw.Cursor = Cursors.Hand;
-            lblTabHw.Font = new Font("Segoe UI", 10.5F);
-            lblTabHw.ForeColor = Color.FromArgb(100, 116, 139);
-            lblTabHw.Location = new Point(463, 21);
-            lblTabHw.Margin = new Padding(0, 21, 67, 0);
-            lblTabHw.Name = "lblTabHw";
-            lblTabHw.Size = new Size(313, 38);
-            lblTabHw.TabIndex = 2;
-            lblTabHw.Text = "Hardware Configuration";
-            // 
             // lblTabUsers
             // 
             lblTabUsers.AutoSize = true;
             lblTabUsers.Cursor = Cursors.Hand;
             lblTabUsers.Font = new Font("Segoe UI", 10.5F);
             lblTabUsers.ForeColor = Color.FromArgb(100, 116, 139);
-            lblTabUsers.Location = new Point(843, 21);
+            lblTabUsers.Location = new Point(185, 21);
             lblTabUsers.Margin = new Padding(0, 21, 67, 0);
             lblTabUsers.Name = "lblTabUsers";
             lblTabUsers.Size = new Size(167, 38);
             lblTabUsers.TabIndex = 3;
             lblTabUsers.Text = "Users & Roles";
-            // 
-            // lblTabNotif
-            // 
-            lblTabNotif.AutoSize = true;
-            lblTabNotif.Cursor = Cursors.Hand;
-            lblTabNotif.Font = new Font("Segoe UI", 10.5F);
-            lblTabNotif.ForeColor = Color.FromArgb(100, 116, 139);
-            lblTabNotif.Location = new Point(1077, 21);
-            lblTabNotif.Margin = new Padding(0, 21, 67, 0);
-            lblTabNotif.Name = "lblTabNotif";
-            lblTabNotif.Size = new Size(173, 38);
-            lblTabNotif.TabIndex = 4;
-            lblTabNotif.Text = "Notifications";
             // 
             // lblTabBackup
             // 
@@ -249,7 +227,7 @@
             lblTabBackup.Cursor = Cursors.Hand;
             lblTabBackup.Font = new Font("Segoe UI", 10.5F);
             lblTabBackup.ForeColor = Color.FromArgb(100, 116, 139);
-            lblTabBackup.Location = new Point(1317, 21);
+            lblTabBackup.Location = new Point(419, 21);
             lblTabBackup.Margin = new Padding(0, 21, 67, 0);
             lblTabBackup.Name = "lblTabBackup";
             lblTabBackup.Size = new Size(215, 38);
@@ -262,7 +240,7 @@
             lblTabSysInfo.Cursor = Cursors.Hand;
             lblTabSysInfo.Font = new Font("Segoe UI", 10.5F);
             lblTabSysInfo.ForeColor = Color.FromArgb(100, 116, 139);
-            lblTabSysInfo.Location = new Point(1599, 21);
+            lblTabSysInfo.Location = new Point(701, 21);
             lblTabSysInfo.Margin = new Padding(0, 21, 67, 0);
             lblTabSysInfo.Name = "lblTabSysInfo";
             lblTabSysInfo.Size = new Size(257, 38);
@@ -290,7 +268,7 @@
             tblLeftColumn.AutoSize = true;
             tblLeftColumn.ColumnCount = 1;
             tblLeftColumn.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblLeftColumn.Controls.Add(cardGeneral, 0, 0);
+            tblLeftColumn.Controls.Add(tblTopRowContainer, 0, 0);
             tblLeftColumn.Controls.Add(cardTestSettings, 0, 1);
             tblLeftColumn.Controls.Add(cardAppSettings, 0, 3);
             tblLeftColumn.Dock = DockStyle.Fill;
@@ -305,6 +283,23 @@
             tblLeftColumn.Size = new Size(1968, 1255);
             tblLeftColumn.TabIndex = 0;
             // 
+            // tblTopRowContainer
+            // 
+            tblTopRowContainer.AutoSize = true;
+            tblTopRowContainer.ColumnCount = 2;
+            tblTopRowContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblTopRowContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblTopRowContainer.Controls.Add(cardGeneral, 0, 0);
+            tblTopRowContainer.Controls.Add(cardMaintenanceState, 1, 0);
+            tblTopRowContainer.Dock = DockStyle.Fill;
+            tblTopRowContainer.Location = new Point(0, 0);
+            tblTopRowContainer.Margin = new Padding(0, 0, 0, 19);
+            tblTopRowContainer.Name = "tblTopRowContainer";
+            tblTopRowContainer.RowCount = 1;
+            tblTopRowContainer.RowStyles.Add(new RowStyle());
+            tblTopRowContainer.Size = new Size(1968, 356);
+            tblTopRowContainer.TabIndex = 0;
+            // 
             // cardGeneral
             // 
             cardGeneral.AutoSize = true;
@@ -313,9 +308,9 @@
             cardGeneral.Controls.Add(tblGenCard);
             cardGeneral.Dock = DockStyle.Fill;
             cardGeneral.Location = new Point(0, 0);
-            cardGeneral.Margin = new Padding(0, 0, 0, 19);
+            cardGeneral.Margin = new Padding(0, 0, 10, 0);
             cardGeneral.Name = "cardGeneral";
-            cardGeneral.Size = new Size(1968, 372);
+            cardGeneral.Size = new Size(974, 356);
             cardGeneral.TabIndex = 0;
             // 
             // tblGenCard
@@ -329,34 +324,20 @@
             tblGenCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.666F));
             tblGenCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.67F));
             tblGenCard.Controls.Add(lblGenTitle, 0, 0);
-            tblGenCard.Controls.Add(lblCompName, 0, 1);
+            tblGenCard.Controls.Add(lblCompanyName, 0, 1);
             tblGenCard.Controls.Add(lblSysName, 3, 1);
             tblGenCard.Controls.Add(txtCompanyName, 0, 2);
-            tblGenCard.Controls.Add(txtSystemName, 3, 2);
-            tblGenCard.Controls.Add(lblLang, 0, 3);
-            tblGenCard.Controls.Add(lblDateFormat, 2, 3);
-            tblGenCard.Controls.Add(lblTimeFormat, 4, 3);
-            tblGenCard.Controls.Add(cmbLang, 0, 4);
-            tblGenCard.Controls.Add(cmbDateFormat, 2, 4);
-            tblGenCard.Controls.Add(cmbTimeFormat, 4, 4);
-            tblGenCard.Controls.Add(lblAutoLogout, 0, 5);
-            tblGenCard.Controls.Add(chkConfirmExit, 2, 5);
-            tblGenCard.Controls.Add(chkDarkMode, 4, 5);
-            tblGenCard.Controls.Add(cmbAutoLogout, 0, 6);
+            tblGenCard.Controls.Add(txtSysName, 3, 2);
             tblGenCard.Dock = DockStyle.Top;
             tblGenCard.Location = new Point(0, 0);
             tblGenCard.Margin = new Padding(8);
             tblGenCard.Name = "tblGenCard";
             tblGenCard.Padding = new Padding(15, 0, 15, 15);
-            tblGenCard.RowCount = 7;
+            tblGenCard.RowCount = 3;
             tblGenCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             tblGenCard.RowStyles.Add(new RowStyle());
             tblGenCard.RowStyles.Add(new RowStyle());
-            tblGenCard.RowStyles.Add(new RowStyle());
-            tblGenCard.RowStyles.Add(new RowStyle());
-            tblGenCard.RowStyles.Add(new RowStyle());
-            tblGenCard.RowStyles.Add(new RowStyle());
-            tblGenCard.Size = new Size(1968, 372);
+            tblGenCard.Size = new Size(974, 166);
             tblGenCard.TabIndex = 0;
             // 
             // lblGenTitle
@@ -368,23 +349,23 @@
             lblGenTitle.Location = new Point(15, 0);
             lblGenTitle.Margin = new Padding(0, 0, 0, 14);
             lblGenTitle.Name = "lblGenTitle";
-            lblGenTitle.Size = new Size(1938, 36);
+            lblGenTitle.Size = new Size(944, 36);
             lblGenTitle.TabIndex = 0;
             lblGenTitle.Text = "GENERAL SETTINGS";
             lblGenTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblCompName
+            // lblCompanyName
             // 
-            lblCompName.AutoSize = true;
-            tblGenCard.SetColumnSpan(lblCompName, 3);
-            lblCompName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblCompName.ForeColor = Color.FromArgb(51, 65, 85);
-            lblCompName.Location = new Point(15, 60);
-            lblCompName.Margin = new Padding(0, 10, 0, 4);
-            lblCompName.Name = "lblCompName";
-            lblCompName.Size = new Size(196, 32);
-            lblCompName.TabIndex = 1;
-            lblCompName.Text = "Company Name";
+            lblCompanyName.AutoSize = true;
+            tblGenCard.SetColumnSpan(lblCompanyName, 3);
+            lblCompanyName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblCompanyName.ForeColor = Color.FromArgb(51, 65, 85);
+            lblCompanyName.Location = new Point(15, 60);
+            lblCompanyName.Margin = new Padding(0, 10, 0, 4);
+            lblCompanyName.Name = "lblCompanyName";
+            lblCompanyName.Size = new Size(196, 32);
+            lblCompanyName.TabIndex = 1;
+            lblCompanyName.Text = "Company Name";
             // 
             // lblSysName
             // 
@@ -392,7 +373,7 @@
             tblGenCard.SetColumnSpan(lblSysName, 3);
             lblSysName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblSysName.ForeColor = Color.FromArgb(51, 65, 85);
-            lblSysName.Location = new Point(996, 60);
+            lblSysName.Location = new Point(501, 60);
             lblSysName.Margin = new Padding(15, 10, 0, 4);
             lblSysName.Name = "lblSysName";
             lblSysName.Size = new Size(168, 32);
@@ -407,159 +388,325 @@
             txtCompanyName.Location = new Point(15, 96);
             txtCompanyName.Margin = new Padding(0, 0, 15, 14);
             txtCompanyName.Name = "txtCompanyName";
-            txtCompanyName.Size = new Size(951, 41);
+            txtCompanyName.Size = new Size(456, 41);
             txtCompanyName.TabIndex = 3;
             txtCompanyName.Text = "Caterpillar Inc.";
             // 
-            // txtSystemName
+            // txtSysName
             // 
-            txtSystemName.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            tblGenCard.SetColumnSpan(txtSystemName, 3);
-            txtSystemName.Font = new Font("Segoe UI", 9.5F);
-            txtSystemName.Location = new Point(996, 96);
-            txtSystemName.Margin = new Padding(15, 0, 0, 14);
-            txtSystemName.Name = "txtSystemName";
-            txtSystemName.Size = new Size(957, 41);
-            txtSystemName.TabIndex = 4;
-            txtSystemName.Text = "Assembly Line Test Rig #4";
+            txtSysName.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            tblGenCard.SetColumnSpan(txtSysName, 3);
+            txtSysName.Font = new Font("Segoe UI", 9.5F);
+            txtSysName.Location = new Point(501, 96);
+            txtSysName.Margin = new Padding(15, 0, 0, 14);
+            txtSysName.Name = "txtSysName";
+            txtSysName.Size = new Size(458, 41);
+            txtSysName.TabIndex = 4;
+            txtSysName.Text = "Assembly Line Test Rig #4";
             // 
-            // lblLang
+            // cardMaintenanceState
             // 
-            lblLang.AutoSize = true;
-            tblGenCard.SetColumnSpan(lblLang, 2);
-            lblLang.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblLang.ForeColor = Color.FromArgb(51, 65, 85);
-            lblLang.Location = new Point(15, 161);
-            lblLang.Margin = new Padding(0, 10, 0, 4);
-            lblLang.Name = "lblLang";
-            lblLang.Size = new Size(125, 32);
-            lblLang.TabIndex = 5;
-            lblLang.Text = "Language";
+            cardMaintenanceState.AutoSize = true;
+            cardMaintenanceState.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            cardMaintenanceState.BackColor = Color.White;
+            cardMaintenanceState.Controls.Add(tblMaintCard);
+            cardMaintenanceState.Dock = DockStyle.Fill;
+            cardMaintenanceState.Location = new Point(994, 0);
+            cardMaintenanceState.Margin = new Padding(10, 0, 0, 0);
+            cardMaintenanceState.Name = "cardMaintenanceState";
+            cardMaintenanceState.Size = new Size(974, 356);
+            cardMaintenanceState.TabIndex = 1;
             // 
-            // lblDateFormat
+            // tblMaintCard
             // 
-            lblDateFormat.AutoSize = true;
-            tblGenCard.SetColumnSpan(lblDateFormat, 2);
-            lblDateFormat.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblDateFormat.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDateFormat.Location = new Point(669, 161);
-            lblDateFormat.Margin = new Padding(10, 10, 0, 4);
-            lblDateFormat.Name = "lblDateFormat";
-            lblDateFormat.Size = new Size(155, 32);
-            lblDateFormat.TabIndex = 6;
-            lblDateFormat.Text = "Date Format";
+            tblMaintCard.AutoSize = true;
+            tblMaintCard.ColumnCount = 4;
+            tblMaintCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblMaintCard.ColumnStyles.Add(new ColumnStyle());
+            tblMaintCard.ColumnStyles.Add(new ColumnStyle());
+            tblMaintCard.ColumnStyles.Add(new ColumnStyle());
+            tblMaintCard.Controls.Add(lblMaintTitle, 0, 0);
+            tblMaintCard.Controls.Add(flpMaintHeaderActions, 2, 0);
+                        tblMaintCard.Controls.Add(lblRemainingDays, 0, 1);
+            tblMaintCard.Controls.Add(lblRemainingHours, 2, 1);
+            tblMaintCard.Controls.Add(txtRemainingDays, 0, 2);
+            tblMaintCard.Controls.Add(txtRemainingHours, 2, 2);
+            tblMaintCard.Controls.Add(pnlMaintInfo, 0, 3);
+            tblMaintCard.Controls.Add(flpMaintActions, 0, 4);
+            tblMaintCard.Dock = DockStyle.Top;
+            tblMaintCard.Location = new Point(0, 0);
+            tblMaintCard.Margin = new Padding(8);
+            tblMaintCard.Name = "tblMaintCard";
+            tblMaintCard.Padding = new Padding(15, 0, 15, 15);
+            tblMaintCard.RowCount = 5;
+            tblMaintCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+            tblMaintCard.RowStyles.Add(new RowStyle());
+            tblMaintCard.RowStyles.Add(new RowStyle());
+            tblMaintCard.RowStyles.Add(new RowStyle());
+            tblMaintCard.RowStyles.Add(new RowStyle());
+            tblMaintCard.Size = new Size(974, 356);
+            tblMaintCard.TabIndex = 0;
             // 
-            // lblTimeFormat
+            // lblMaintTitle
             // 
-            lblTimeFormat.AutoSize = true;
-            tblGenCard.SetColumnSpan(lblTimeFormat, 2);
-            lblTimeFormat.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblTimeFormat.ForeColor = Color.FromArgb(51, 65, 85);
-            lblTimeFormat.Location = new Point(1313, 161);
-            lblTimeFormat.Margin = new Padding(10, 10, 0, 4);
-            lblTimeFormat.Name = "lblTimeFormat";
-            lblTimeFormat.Size = new Size(158, 32);
-            lblTimeFormat.TabIndex = 7;
-            lblTimeFormat.Text = "Time Format";
+            lblMaintTitle.AutoSize = true;
+            tblMaintCard.SetColumnSpan(lblMaintTitle, 2);
+            lblMaintTitle.Dock = DockStyle.Fill;
+            lblMaintTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            lblMaintTitle.ForeColor = Color.FromArgb(51, 65, 85);
+            lblMaintTitle.Location = new Point(18, 0);
+            lblMaintTitle.Name = "lblMaintTitle";
+            lblMaintTitle.Size = new Size(451, 50);
+            lblMaintTitle.TabIndex = 0;
+            lblMaintTitle.Text = "MAINTENANCE STATE";
+            lblMaintTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // cmbLang
+            // btnResetMaintenance
             // 
-            cmbLang.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            tblGenCard.SetColumnSpan(cmbLang, 2);
-            cmbLang.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbLang.FlatStyle = FlatStyle.Flat;
-            cmbLang.Font = new Font("Segoe UI", 9.5F);
-            cmbLang.Items.AddRange(new object[] { "English", "Spanish", "German", "Japanese" });
-            cmbLang.Location = new Point(15, 197);
-            cmbLang.Margin = new Padding(0, 0, 10, 14);
-            cmbLang.Name = "cmbLang";
-            cmbLang.Size = new Size(634, 43);
-            cmbLang.TabIndex = 8;
+                        btnResetMaintenance.BackColor = Color.FromArgb(239, 246, 255);
+            btnResetMaintenance.BorderRadius = 8;
+            btnResetMaintenance.FlatStyle = FlatStyle.Flat;
+            btnResetMaintenance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnResetMaintenance.ForeColor = Color.FromArgb(30, 58, 138);
+            btnResetMaintenance.HoverForeColor = Color.Empty;
+            btnResetMaintenance.Location = new Point(475, 5);
+            btnResetMaintenance.Margin = new Padding(10, 5, 0, 5);
+            btnResetMaintenance.Name = "btnResetMaintenance";
+            btnResetMaintenance.PressedForeColor = Color.Empty;
+            btnResetMaintenance.Size = new Size(120, 40);
+            btnResetMaintenance.TabIndex = 1;
+            btnResetMaintenance.Text = "Reset";
+            btnResetMaintenance.UseVisualStyleBackColor = false;
             // 
-            // cmbDateFormat
+            // btnEditMaintenance
             // 
-            cmbDateFormat.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            tblGenCard.SetColumnSpan(cmbDateFormat, 2);
-            cmbDateFormat.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbDateFormat.FlatStyle = FlatStyle.Flat;
-            cmbDateFormat.Font = new Font("Segoe UI", 9.5F);
-            cmbDateFormat.Items.AddRange(new object[] { "DD MMM YYYY", "YYYY-MM-DD", "MM/DD/YYYY" });
-            cmbDateFormat.Location = new Point(669, 197);
-            cmbDateFormat.Margin = new Padding(10, 0, 10, 14);
-            cmbDateFormat.Name = "cmbDateFormat";
-            cmbDateFormat.Size = new Size(624, 43);
-            cmbDateFormat.TabIndex = 9;
+                        btnEditMaintenance.BackColor = Color.FromArgb(253, 230, 138);
+            btnEditMaintenance.BorderRadius = 8;
+            btnEditMaintenance.FlatStyle = FlatStyle.Flat;
+            btnEditMaintenance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnEditMaintenance.ForeColor = Color.FromArgb(69, 26, 3);
+            btnEditMaintenance.HoverForeColor = Color.Empty;
+            btnEditMaintenance.Location = new Point(836, 5);
+            btnEditMaintenance.Margin = new Padding(10, 5, 0, 5);
+            btnEditMaintenance.Name = "btnEditMaintenance";
+            btnEditMaintenance.PressedForeColor = Color.Empty;
+            btnEditMaintenance.Size = new Size(120, 40);
+            btnEditMaintenance.TabIndex = 2;
+            btnEditMaintenance.Text = "✏️ Edit";
+            btnEditMaintenance.UseVisualStyleBackColor = false;
             // 
-            // cmbTimeFormat
+            // lblRemainingDays
             // 
-            cmbTimeFormat.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            tblGenCard.SetColumnSpan(cmbTimeFormat, 2);
-            cmbTimeFormat.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbTimeFormat.FlatStyle = FlatStyle.Flat;
-            cmbTimeFormat.Font = new Font("Segoe UI", 9.5F);
-            cmbTimeFormat.Items.AddRange(new object[] { "12 Hour (AM/PM)", "24 Hour" });
-            cmbTimeFormat.Location = new Point(1313, 197);
-            cmbTimeFormat.Margin = new Padding(10, 0, 0, 14);
-            cmbTimeFormat.Name = "cmbTimeFormat";
-            cmbTimeFormat.Size = new Size(640, 43);
-            cmbTimeFormat.TabIndex = 10;
+            lblRemainingDays.AutoSize = true;
+            tblMaintCard.SetColumnSpan(lblRemainingDays, 2);
+            lblRemainingDays.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblRemainingDays.ForeColor = Color.FromArgb(100, 116, 139);
+            lblRemainingDays.Location = new Point(15, 60);
+            lblRemainingDays.Margin = new Padding(0, 10, 0, 4);
+            lblRemainingDays.Name = "lblRemainingDays";
+            lblRemainingDays.Size = new Size(195, 32);
+            lblRemainingDays.TabIndex = 3;
+            lblRemainingDays.Text = "Remaining days";
             // 
-            // lblAutoLogout
+            // lblRemainingHours
             // 
-            lblAutoLogout.AutoSize = true;
-            tblGenCard.SetColumnSpan(lblAutoLogout, 2);
-            lblAutoLogout.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblAutoLogout.ForeColor = Color.FromArgb(51, 65, 85);
-            lblAutoLogout.Location = new Point(15, 264);
-            lblAutoLogout.Margin = new Padding(0, 10, 0, 4);
-            lblAutoLogout.Name = "lblAutoLogout";
-            lblAutoLogout.Size = new Size(158, 32);
-            lblAutoLogout.TabIndex = 11;
-            lblAutoLogout.Text = "Auto Logout";
+            lblRemainingHours.AutoSize = true;
+            tblMaintCard.SetColumnSpan(lblRemainingHours, 2);
+            lblRemainingHours.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblRemainingHours.ForeColor = Color.FromArgb(100, 116, 139);
+            lblRemainingHours.Location = new Point(487, 60);
+            lblRemainingHours.Margin = new Padding(15, 10, 0, 4);
+            lblRemainingHours.Name = "lblRemainingHours";
+            lblRemainingHours.Size = new Size(208, 32);
+            lblRemainingHours.TabIndex = 4;
+            lblRemainingHours.Text = "Remaining hours";
             // 
-            // chkConfirmExit
+            // txtRemainingDays
             // 
-            chkConfirmExit.AutoSize = true;
-            chkConfirmExit.Checked = true;
-            chkConfirmExit.CheckState = CheckState.Checked;
-            tblGenCard.SetColumnSpan(chkConfirmExit, 2);
-            chkConfirmExit.Font = new Font("Segoe UI", 9.5F);
-            chkConfirmExit.ForeColor = Color.FromArgb(30, 41, 59);
-            chkConfirmExit.Location = new Point(669, 274);
-            chkConfirmExit.Margin = new Padding(10, 20, 10, 10);
-            chkConfirmExit.Name = "chkConfirmExit";
-            tblGenCard.SetRowSpan(chkConfirmExit, 2);
-            chkConfirmExit.Size = new Size(392, 40);
-            chkConfirmExit.TabIndex = 12;
-            chkConfirmExit.Text = "Show confirmation before exit";
+            txtRemainingDays.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            tblMaintCard.SetColumnSpan(txtRemainingDays, 2);
+            txtRemainingDays.Font = new Font("Segoe UI", 9.5F);
+            txtRemainingDays.Location = new Point(15, 96);
+            txtRemainingDays.Margin = new Padding(0, 0, 15, 14);
+            txtRemainingDays.Name = "txtRemainingDays";
+            txtRemainingDays.ReadOnly = true;
+            txtRemainingDays.Size = new Size(442, 41);
+            txtRemainingDays.TabIndex = 5;
+            txtRemainingDays.Text = "180";
             // 
-            // chkDarkMode
+            // txtRemainingHours
             // 
-            chkDarkMode.AutoSize = true;
-            tblGenCard.SetColumnSpan(chkDarkMode, 2);
-            chkDarkMode.Font = new Font("Segoe UI", 9.5F);
-            chkDarkMode.ForeColor = Color.FromArgb(30, 41, 59);
-            chkDarkMode.Location = new Point(1313, 274);
-            chkDarkMode.Margin = new Padding(10, 20, 10, 10);
-            chkDarkMode.Name = "chkDarkMode";
-            tblGenCard.SetRowSpan(chkDarkMode, 2);
-            chkDarkMode.Size = new Size(253, 40);
-            chkDarkMode.TabIndex = 13;
-            chkDarkMode.Text = "Enable dark mode";
+            txtRemainingHours.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            tblMaintCard.SetColumnSpan(txtRemainingHours, 2);
+            txtRemainingHours.Font = new Font("Segoe UI", 9.5F);
+            txtRemainingHours.Location = new Point(487, 96);
+            txtRemainingHours.Margin = new Padding(15, 0, 0, 14);
+            txtRemainingHours.Name = "txtRemainingHours";
+            txtRemainingHours.ReadOnly = true;
+            txtRemainingHours.Size = new Size(472, 41);
+            txtRemainingHours.TabIndex = 6;
+            txtRemainingHours.Text = "1440";
             // 
-            // cmbAutoLogout
+            // pnlMaintInfo
             // 
-            cmbAutoLogout.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            tblGenCard.SetColumnSpan(cmbAutoLogout, 2);
-            cmbAutoLogout.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbAutoLogout.FlatStyle = FlatStyle.Flat;
-            cmbAutoLogout.Font = new Font("Segoe UI", 9.5F);
-            cmbAutoLogout.Items.AddRange(new object[] { "30 Minutes", "15 Minutes", "1 Hour", "Never" });
-            cmbAutoLogout.Location = new Point(15, 300);
-            cmbAutoLogout.Margin = new Padding(0, 0, 10, 14);
-            cmbAutoLogout.Name = "cmbAutoLogout";
-            cmbAutoLogout.Size = new Size(634, 43);
-            cmbAutoLogout.TabIndex = 14;
+            pnlMaintInfo.AutoSize = true;
+            pnlMaintInfo.BackColor = Color.FromArgb(248, 250, 252);
+            tblMaintCard.SetColumnSpan(pnlMaintInfo, 4);
+            pnlMaintInfo.Controls.Add(tblMaintInfo);
+            pnlMaintInfo.Dock = DockStyle.Fill;
+            pnlMaintInfo.Location = new Point(15, 166);
+            pnlMaintInfo.Margin = new Padding(0, 15, 0, 15);
+            pnlMaintInfo.Name = "pnlMaintInfo";
+            pnlMaintInfo.Padding = new Padding(15);
+            pnlMaintInfo.Size = new Size(944, 102);
+            pnlMaintInfo.TabIndex = 7;
+            // 
+            // tblMaintInfo
+            // 
+            tblMaintInfo.AutoSize = true;
+            tblMaintInfo.ColumnCount = 2;
+            tblMaintInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblMaintInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblMaintInfo.Controls.Add(lblOperatingTimeTodayTitle, 0, 0);
+            tblMaintInfo.Controls.Add(lblOperatingTimeTodayVal, 1, 0);
+            tblMaintInfo.Controls.Add(lblLastUsageTitle, 0, 1);
+            tblMaintInfo.Controls.Add(lblLastUsageVal, 1, 1);
+            tblMaintInfo.Dock = DockStyle.Fill;
+            tblMaintInfo.Location = new Point(15, 15);
+            tblMaintInfo.Name = "tblMaintInfo";
+            tblMaintInfo.RowCount = 2;
+            tblMaintInfo.RowStyles.Add(new RowStyle());
+            tblMaintInfo.RowStyles.Add(new RowStyle());
+            tblMaintInfo.Size = new Size(914, 72);
+            tblMaintInfo.TabIndex = 0;
+            // 
+            // lblOperatingTimeTodayTitle
+            // 
+            lblOperatingTimeTodayTitle.AutoSize = true;
+            lblOperatingTimeTodayTitle.Font = new Font("Segoe UI", 9F);
+            lblOperatingTimeTodayTitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblOperatingTimeTodayTitle.Location = new Point(0, 0);
+            lblOperatingTimeTodayTitle.Margin = new Padding(0, 0, 0, 8);
+            lblOperatingTimeTodayTitle.Name = "lblOperatingTimeTodayTitle";
+            lblOperatingTimeTodayTitle.Size = new Size(243, 32);
+            lblOperatingTimeTodayTitle.TabIndex = 0;
+            lblOperatingTimeTodayTitle.Text = "Operating time today";
+            // 
+            // lblOperatingTimeTodayVal
+            // 
+            lblOperatingTimeTodayVal.AutoSize = true;
+            lblOperatingTimeTodayVal.Dock = DockStyle.Right;
+            lblOperatingTimeTodayVal.Font = new Font("Segoe UI", 9F);
+            lblOperatingTimeTodayVal.ForeColor = Color.FromArgb(51, 65, 85);
+            lblOperatingTimeTodayVal.Location = new Point(812, 0);
+            lblOperatingTimeTodayVal.Margin = new Padding(0, 0, 0, 8);
+            lblOperatingTimeTodayVal.Name = "lblOperatingTimeTodayVal";
+            lblOperatingTimeTodayVal.Size = new Size(102, 32);
+            lblOperatingTimeTodayVal.TabIndex = 1;
+            lblOperatingTimeTodayVal.Text = "00:00:00";
+            // 
+            // lblLastUsageTitle
+            // 
+            lblLastUsageTitle.AutoSize = true;
+            lblLastUsageTitle.Font = new Font("Segoe UI", 9F);
+            lblLastUsageTitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblLastUsageTitle.Location = new Point(0, 40);
+            lblLastUsageTitle.Margin = new Padding(0);
+            lblLastUsageTitle.Name = "lblLastUsageTitle";
+            lblLastUsageTitle.Size = new Size(125, 32);
+            lblLastUsageTitle.TabIndex = 2;
+            lblLastUsageTitle.Text = "Last usage";
+            // 
+            // lblLastUsageVal
+            // 
+            lblLastUsageVal.AutoSize = true;
+            lblLastUsageVal.Dock = DockStyle.Right;
+            lblLastUsageVal.Font = new Font("Segoe UI", 9F);
+            lblLastUsageVal.ForeColor = Color.FromArgb(51, 65, 85);
+            lblLastUsageVal.Location = new Point(773, 40);
+            lblLastUsageVal.Margin = new Padding(0);
+            lblLastUsageVal.Name = "lblLastUsageVal";
+            lblLastUsageVal.Size = new Size(141, 32);
+            lblLastUsageVal.TabIndex = 3;
+            lblLastUsageVal.Text = "01 Jan 2026";
+
+            // 
+            // flpMaintHeaderActions
+            // 
+            flpMaintHeaderActions.AutoSize = true;
+            tblMaintCard.SetColumnSpan(flpMaintHeaderActions, 2);
+            flpMaintHeaderActions.Controls.Add(btnEditMaintenance);
+            flpMaintHeaderActions.Controls.Add(btnResetMaintenance);
+            flpMaintHeaderActions.Dock = DockStyle.Right;
+            flpMaintHeaderActions.FlowDirection = FlowDirection.RightToLeft;
+            flpMaintHeaderActions.Location = new Point(716, 0);
+            flpMaintHeaderActions.Margin = new Padding(0);
+            flpMaintHeaderActions.Name = "flpMaintHeaderActions";
+            flpMaintHeaderActions.Size = new Size(240, 50);
+            flpMaintHeaderActions.TabIndex = 9;
+            // 
+            // flpMaintActions
+            // 
+            flpMaintActions.AutoSize = true;
+            tblMaintCard.SetColumnSpan(flpMaintActions, 4);
+            flpMaintActions.Controls.Add(btnUpdateMaintenance);
+            flpMaintActions.Controls.Add(btnCancelMaintenance);
+            flpMaintActions.Controls.Add(lblEditHint);
+            flpMaintActions.Dock = DockStyle.Right;
+            flpMaintActions.FlowDirection = FlowDirection.RightToLeft;
+            flpMaintActions.Location = new Point(195, 286);
+            flpMaintActions.Name = "flpMaintActions";
+            flpMaintActions.Size = new Size(761, 52);
+            flpMaintActions.TabIndex = 8;
+            // 
+            // btnUpdateMaintenance
+            // 
+            btnUpdateMaintenance.BackColor = Color.FromArgb(253, 230, 138);
+            btnUpdateMaintenance.BorderRadius = 8;
+            btnUpdateMaintenance.FlatStyle = FlatStyle.Flat;
+            btnUpdateMaintenance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnUpdateMaintenance.ForeColor = Color.FromArgb(69, 26, 3);
+            btnUpdateMaintenance.HoverForeColor = Color.Empty;
+            btnUpdateMaintenance.Location = new Point(611, 3);
+            btnUpdateMaintenance.Margin = new Padding(10, 3, 0, 3);
+            btnUpdateMaintenance.Name = "btnUpdateMaintenance";
+            btnUpdateMaintenance.PressedForeColor = Color.Empty;
+            btnUpdateMaintenance.Size = new Size(150, 46);
+            btnUpdateMaintenance.TabIndex = 1;
+            btnUpdateMaintenance.Text = "🔄 Update";
+            btnUpdateMaintenance.UseVisualStyleBackColor = false;
+            btnUpdateMaintenance.Visible = false;
+            // 
+            // btnCancelMaintenance
+            // 
+            btnCancelMaintenance.BackColor = Color.White;
+            btnCancelMaintenance.BorderRadius = 8;
+            btnCancelMaintenance.FlatStyle = FlatStyle.Flat;
+            btnCancelMaintenance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnCancelMaintenance.ForeColor = Color.FromArgb(51, 65, 85);
+            btnCancelMaintenance.HoverForeColor = Color.Empty;
+            btnCancelMaintenance.Location = new Point(451, 3);
+            btnCancelMaintenance.Margin = new Padding(10, 3, 10, 3);
+            btnCancelMaintenance.Name = "btnCancelMaintenance";
+            btnCancelMaintenance.PressedForeColor = Color.Empty;
+            btnCancelMaintenance.Size = new Size(140, 46);
+            btnCancelMaintenance.TabIndex = 0;
+            btnCancelMaintenance.Text = "Cancel";
+            btnCancelMaintenance.UseVisualStyleBackColor = false;
+            btnCancelMaintenance.Visible = false;
+            // 
+            // lblEditHint
+            // 
+            lblEditHint.Anchor = AnchorStyles.Right;
+            lblEditHint.AutoSize = true;
+            lblEditHint.Font = new Font("Segoe UI", 8.5F);
+            lblEditHint.ForeColor = Color.FromArgb(148, 163, 184);
+            lblEditHint.Location = new Point(3, 10);
+            lblEditHint.Name = "lblEditHint";
+            lblEditHint.Size = new Size(435, 31);
+            lblEditHint.TabIndex = 2;
+            lblEditHint.Text = "Update and Cancel appear only after Edit";
+            lblEditHint.Visible = false;
             // 
             // cardTestSettings
             // 
@@ -568,7 +715,7 @@
             cardTestSettings.BackColor = Color.White;
             cardTestSettings.Controls.Add(tblTestCard);
             cardTestSettings.Dock = DockStyle.Fill;
-            cardTestSettings.Location = new Point(0, 391);
+            cardTestSettings.Location = new Point(0, 375);
             cardTestSettings.Margin = new Padding(0, 0, 0, 19);
             cardTestSettings.Name = "cardTestSettings";
             cardTestSettings.Size = new Size(1968, 730);
@@ -863,7 +1010,7 @@
             flpTestTypeAvail.Margin = new Padding(0, 0, 15, 14);
             flpTestTypeAvail.MaximumSize = new Size(460, 400);
             flpTestTypeAvail.Name = "flpTestTypeAvail";
-            flpTestTypeAvail.Size = new Size(460, 400);
+            flpTestTypeAvail.Size = new Size(0, 0);
             flpTestTypeAvail.TabIndex = 13;
             // 
             // flpLearnConn
@@ -873,7 +1020,7 @@
             flpLearnConn.Location = new Point(499, 300);
             flpLearnConn.Margin = new Padding(0, 0, 15, 14);
             flpLearnConn.Name = "flpLearnConn";
-            flpLearnConn.Size = new Size(183, 250);
+            flpLearnConn.Size = new Size(0, 0);
             flpLearnConn.TabIndex = 21;
             // 
             // lblDataStorage
@@ -937,7 +1084,6 @@
             btnBrowseData.Anchor = AnchorStyles.None;
             btnBrowseData.BackColor = Color.FromArgb(241, 245, 249);
             btnBrowseData.Cursor = Cursors.Hand;
-            btnBrowseData.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
             btnBrowseData.FlatStyle = FlatStyle.Flat;
             btnBrowseData.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnBrowseData.ForeColor = Color.FromArgb(51, 65, 85);
@@ -986,7 +1132,6 @@
             btnBrowseReport.Anchor = AnchorStyles.None;
             btnBrowseReport.BackColor = Color.FromArgb(241, 245, 249);
             btnBrowseReport.Cursor = Cursors.Hand;
-            btnBrowseReport.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
             btnBrowseReport.FlatStyle = FlatStyle.Flat;
             btnBrowseReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnBrowseReport.ForeColor = Color.FromArgb(51, 65, 85);
@@ -999,7 +1144,7 @@
             btnBrowseReport.TabIndex = 1;
             btnBrowseReport.Text = "Browse";
             btnBrowseReport.UseVisualStyleBackColor = false;
-            //
+            // 
             // flpTestResultCol
             // 
             flpTestResultCol.AutoSize = true;
@@ -1187,10 +1332,10 @@
             cardAppSettings.BackColor = Color.White;
             cardAppSettings.Controls.Add(tblAppCard);
             cardAppSettings.Dock = DockStyle.Fill;
-            cardAppSettings.Location = new Point(0, 1140);
+            cardAppSettings.Location = new Point(0, 1124);
             cardAppSettings.Margin = new Padding(0);
             cardAppSettings.Name = "cardAppSettings";
-            cardAppSettings.Size = new Size(1968, 115);
+            cardAppSettings.Size = new Size(1968, 131);
             cardAppSettings.TabIndex = 3;
             // 
             // tblAppCard
@@ -1327,6 +1472,45 @@
             chkAuditTrail.TabIndex = 7;
             chkAuditTrail.Text = "Enable audit trail";
             // 
+            // lblTabTest
+            // 
+            lblTabTest.AutoSize = true;
+            lblTabTest.Cursor = Cursors.Hand;
+            lblTabTest.Font = new Font("Segoe UI", 10.5F);
+            lblTabTest.ForeColor = Color.FromArgb(100, 116, 139);
+            lblTabTest.Location = new Point(185, 21);
+            lblTabTest.Margin = new Padding(0, 21, 67, 0);
+            lblTabTest.Name = "lblTabTest";
+            lblTabTest.Size = new Size(211, 38);
+            lblTabTest.TabIndex = 1;
+            lblTabTest.Text = "Test Parameters";
+            // 
+            // lblTabHw
+            // 
+            lblTabHw.AutoSize = true;
+            lblTabHw.Cursor = Cursors.Hand;
+            lblTabHw.Font = new Font("Segoe UI", 10.5F);
+            lblTabHw.ForeColor = Color.FromArgb(100, 116, 139);
+            lblTabHw.Location = new Point(463, 21);
+            lblTabHw.Margin = new Padding(0, 21, 67, 0);
+            lblTabHw.Name = "lblTabHw";
+            lblTabHw.Size = new Size(313, 38);
+            lblTabHw.TabIndex = 2;
+            lblTabHw.Text = "Hardware Configuration";
+            // 
+            // lblTabNotif
+            // 
+            lblTabNotif.AutoSize = true;
+            lblTabNotif.Cursor = Cursors.Hand;
+            lblTabNotif.Font = new Font("Segoe UI", 10.5F);
+            lblTabNotif.ForeColor = Color.FromArgb(100, 116, 139);
+            lblTabNotif.Location = new Point(1077, 21);
+            lblTabNotif.Margin = new Padding(0, 21, 67, 0);
+            lblTabNotif.Name = "lblTabNotif";
+            lblTabNotif.Size = new Size(173, 38);
+            lblTabNotif.TabIndex = 4;
+            lblTabNotif.Text = "Notifications";
+            // 
             // Settings
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
@@ -1344,16 +1528,28 @@
             tblContent.PerformLayout();
             tblLeftColumn.ResumeLayout(false);
             tblLeftColumn.PerformLayout();
+            tblTopRowContainer.ResumeLayout(false);
+            tblTopRowContainer.PerformLayout();
             cardGeneral.ResumeLayout(false);
             cardGeneral.PerformLayout();
             tblGenCard.ResumeLayout(false);
             tblGenCard.PerformLayout();
+            cardMaintenanceState.ResumeLayout(false);
+            cardMaintenanceState.PerformLayout();
+            tblMaintCard.ResumeLayout(false);
+            tblMaintCard.PerformLayout();
+            pnlMaintInfo.ResumeLayout(false);
+            pnlMaintInfo.PerformLayout();
+            tblMaintInfo.ResumeLayout(false);
+            tblMaintInfo.PerformLayout();
+            flpMaintActions.ResumeLayout(false);
+            flpMaintActions.PerformLayout();
+            flpMaintHeaderActions.ResumeLayout(false);
+            flpMaintHeaderActions.PerformLayout();
             cardTestSettings.ResumeLayout(false);
             cardTestSettings.PerformLayout();
             tblTestCard.ResumeLayout(false);
             tblTestCard.PerformLayout();
-            flpLearnConn.ResumeLayout(false);
-            flpLearnConn.PerformLayout();
             tblDataBrowse.ResumeLayout(false);
             tblDataBrowse.PerformLayout();
             tblReportBrowse.ResumeLayout(false);
@@ -1396,28 +1592,36 @@
         private System.Windows.Forms.TableLayoutPanel tblLeftColumn;
 
         private System.Windows.Forms.Panel cardGeneral;
+        private System.Windows.Forms.TableLayoutPanel tblTopRowContainer;
+        private System.Windows.Forms.Panel cardMaintenanceState;
+        private System.Windows.Forms.TableLayoutPanel tblMaintCard;
+        private System.Windows.Forms.Label lblMaintTitle;
+        private Controls.RoundedButton btnEditMaintenance;
+        private Controls.RoundedButton btnResetMaintenance;
+        private System.Windows.Forms.Label lblRemainingDays;
+        private System.Windows.Forms.Label lblRemainingHours;
+        private System.Windows.Forms.TextBox txtRemainingDays;
+        private System.Windows.Forms.TextBox txtRemainingHours;
+        private System.Windows.Forms.Panel pnlMaintInfo;
+        private System.Windows.Forms.TableLayoutPanel tblMaintInfo;
+        private System.Windows.Forms.Label lblOperatingTimeTodayTitle;
+        private System.Windows.Forms.Label lblOperatingTimeTodayVal;
+        private System.Windows.Forms.Label lblLastUsageTitle;
+        private System.Windows.Forms.Label lblLastUsageVal;
+        private System.Windows.Forms.FlowLayoutPanel flpMaintActions;
+        private System.Windows.Forms.FlowLayoutPanel flpMaintHeaderActions;
+        private System.Windows.Forms.Label lblEditHint;
+        private Controls.RoundedButton btnCancelMaintenance;
+        private Controls.RoundedButton btnUpdateMaintenance;
+
 
         private System.Windows.Forms.TableLayoutPanel tblGenCard;
 
         private System.Windows.Forms.Label lblGenTitle;
-        private System.Windows.Forms.Label lblCompName;
+        private System.Windows.Forms.Label lblCompanyName;
         private System.Windows.Forms.TextBox txtCompanyName;
         private System.Windows.Forms.Label lblSysName;
-        private System.Windows.Forms.TextBox txtSystemName;
-
-        private System.Windows.Forms.Label lblLang;
-        private System.Windows.Forms.ComboBox cmbLang;
-        private System.Windows.Forms.Label lblDateFormat;
-        private System.Windows.Forms.ComboBox cmbDateFormat;
-        private System.Windows.Forms.Label lblTimeFormat;
-        private System.Windows.Forms.ComboBox cmbTimeFormat;
-
-        private System.Windows.Forms.Label lblAutoLogout;
-        private System.Windows.Forms.ComboBox cmbAutoLogout;
-
-        private System.Windows.Forms.CheckBox chkConfirmExit;
-
-        private System.Windows.Forms.CheckBox chkDarkMode;
+        private System.Windows.Forms.TextBox txtSysName;
 
         private System.Windows.Forms.Panel cardTestSettings;
 

@@ -84,12 +84,6 @@ namespace AssemblyLineTester.Views.Pages
         private void SetupTimer()
         {
             _elapsedTimer.Interval = 1000;
-            _elapsedTimer.Tick += ElapsedTimer_Tick;
-        }
-
-        private void ElapsedTimer_Tick(object? sender, EventArgs e)
-        {
-            lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
         private void OnTestFinishedSuccessfully()
@@ -108,7 +102,6 @@ namespace AssemblyLineTester.Views.Pages
             // Shown on screen, never stored, so local time is the right choice here.
             _endTime = DateTime.Now;
             lblEndTimeVal.Text = _endTime.ToString("dd MMM yyyy hh:mm:ss tt");
-            lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
         // Fills the Product Model, Type, Area, Part Number and ECN dropdowns.
@@ -313,7 +306,6 @@ namespace AssemblyLineTester.Views.Pages
                 if (token.IsCancellationRequested) return;
                 lblStatusRunning.Text = "Finished";
                 lblStatusRunning.ForeColor = Color.Green;
-                lblElapsedTimeVal.Text = "00:00:00";
 
                 OnTestFinishedSuccessfully();
 
@@ -630,7 +622,6 @@ namespace AssemblyLineTester.Views.Pages
                     lblStatusRunning.ForeColor = Color.Red;
                     StopTestTiming();
                     lblStartTimeVal.Text = "-";
-                    lblElapsedTimeVal.Text = "-";
                     lblEndTimeVal.Text = "-";
                     listBoxTestSummary.Items.Clear();
                     gridLiveDetails.Rows.Clear();
