@@ -132,22 +132,32 @@ namespace AssemblyLineTester.Views.Pages
         // third Test Type column rendered as checkboxes with no text.
         private void LayoutTickLists()
         {
-            MatchTickMarginsToDesigner();
-
-            foreach (var flow in new[] { flpTestTypeAvail, flpLearnConn, flpTestResultCol })
+            // The panels sit inside a chain of AutoSize containers, so every MaximumSize write
+            // relayouts the whole page. Suspending the page turns three cascades into one.
+            SuspendLayout();
+            try
             {
-                flow.PerformLayout();
+                MatchTickMarginsToDesigner();
 
-                var boxes = flow.Controls.Cast<Control>().ToList();
-                if (boxes.Count == 0 || flow.MaximumSize.Height <= 0) continue;
+                foreach (var flow in new[] { flpTestTypeAvail, flpLearnConn, flpTestResultCol })
+                {
+                    var boxes = flow.Controls.Cast<Control>().ToList();
+                    if (boxes.Count == 0 || flow.MaximumSize.Height <= 0) continue;
 
-                int widest = boxes.Max(b => b.Width + b.Margin.Horizontal);
-                int pitch = boxes.Max(b => b.Height + b.Margin.Vertical);
+                    // PreferredSize answers from the control itself. Reading Width/Height instead
+                    // meant forcing a layout pass first, three times, on an AutoSize chain.
+                    int widest = boxes.Max(b => b.PreferredSize.Width + b.Margin.Horizontal);
+                    int pitch = boxes.Max(b => b.PreferredSize.Height + b.Margin.Vertical);
 
-                int perColumn = Math.Max(1, flow.MaximumSize.Height / Math.Max(1, pitch));
-                int columns = (int)Math.Ceiling(boxes.Count / (double)perColumn);
+                    int perColumn = Math.Max(1, flow.MaximumSize.Height / Math.Max(1, pitch));
+                    int columns = (int)Math.Ceiling(boxes.Count / (double)perColumn);
 
-                flow.MaximumSize = new Size(columns * widest, flow.MaximumSize.Height);
+                    flow.MaximumSize = new Size(columns * widest, flow.MaximumSize.Height);
+                }
+            }
+            finally
+            {
+                ResumeLayout(true);
             }
         }
 
@@ -296,7 +306,7 @@ namespace AssemblyLineTester.Views.Pages
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupRestorePage != null) _backupRestorePage.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
-                    settingSystemInfo.Visible = false;
+                    if (settingSystemInfo != null) settingSystemInfo.Visible = false;
                 }
                 else if (clickedLabel == lblTabUsers)
                 {
@@ -315,7 +325,7 @@ namespace AssemblyLineTester.Views.Pages
                     }
                     _usersAndRolesPage.Visible = true;
                     _usersAndRolesPage.BringToFront();
-                    settingSystemInfo.Visible = false;
+                    if (settingSystemInfo != null) settingSystemInfo.Visible = false;
                 }
                 else if (clickedLabel == lblTabSysInfo)
                 {
@@ -324,6 +334,7 @@ namespace AssemblyLineTester.Views.Pages
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupRestorePage != null) _backupRestorePage.Visible = false;
 
+                    settingSystemInfo ??= new SettingSystemInfo();
                     if (!pnlPageContainer.Controls.Contains(settingSystemInfo))
                     {
                         settingSystemInfo.Dock = DockStyle.Fill;
@@ -338,7 +349,7 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = false;
                     if (tblUcContainer != null) tblUcContainer.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
-                    settingSystemInfo.Visible = false;
+                    if (settingSystemInfo != null) settingSystemInfo.Visible = false;
 
                     if (_backupRestorePage == null)
                     {
@@ -358,7 +369,7 @@ namespace AssemblyLineTester.Views.Pages
                     tblContent.Visible = false;
                     if (_usersAndRolesPage != null) _usersAndRolesPage.Visible = false;
                     if (_backupRestorePage != null) _backupRestorePage.Visible = false;
-                    settingSystemInfo.Visible = false;
+                    if (settingSystemInfo != null) settingSystemInfo.Visible = false;
                     if (tblUcContainer != null && lblUnderConstructionTitle != null)
                     {
                         lblUnderConstructionTitle.Text = $"{clickedLabel.Text.Trim()} — Under Construction";
@@ -684,13 +695,21 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulateTestTypes()
         {
-            UIStyleHelper.ClearAndDispose(flpTestTypeAvail.Controls);
-            _typeBoxes.Clear();
-            foreach (var check in TestSettingService.GetTestTypeChecks())
+            flpTestTypeAvail.SuspendLayout();
+            try
             {
-                var box = BuildCheck(check.DisplayName, check.IsChecked);
-                flpTestTypeAvail.Controls.Add(box);
-                _typeBoxes.Add((check.Id, box));
+                UIStyleHelper.ClearAndDispose(flpTestTypeAvail.Controls);
+                _typeBoxes.Clear();
+                foreach (var check in TestSettingService.GetTestTypeChecks())
+                {
+                    var box = BuildCheck(check.DisplayName, check.IsChecked);
+                    flpTestTypeAvail.Controls.Add(box);
+                    _typeBoxes.Add((check.Id, box));
+                }
+            }
+            finally
+            {
+                flpTestTypeAvail.ResumeLayout(false);
             }
 
             PopulateDefaultTestType();
@@ -726,13 +745,21 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulateLearnConnections()
         {
-            UIStyleHelper.ClearAndDispose(flpLearnConn.Controls);
-            _learnBoxes.Clear();
-            foreach (var conn in TestSettingService.GetLearnConnections())
+            flpLearnConn.SuspendLayout();
+            try
             {
-                var box = BuildCheck(conn.DisplayName, conn.IsChecked);
-                flpLearnConn.Controls.Add(box);
-                _learnBoxes.Add((conn.Id, box));
+                UIStyleHelper.ClearAndDispose(flpLearnConn.Controls);
+                _learnBoxes.Clear();
+                foreach (var conn in TestSettingService.GetLearnConnections())
+                {
+                    var box = BuildCheck(conn.DisplayName, conn.IsChecked);
+                    flpLearnConn.Controls.Add(box);
+                    _learnBoxes.Add((conn.Id, box));
+                }
+            }
+            finally
+            {
+                flpLearnConn.ResumeLayout(false);
             }
         }
 

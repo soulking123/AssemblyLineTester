@@ -23,7 +23,6 @@
         private void InitializeComponent()
 
         {
-            settingSystemInfo = new SettingSystemInfo();
             tblMain = new TableLayoutPanel();
             lblHeader = new Label();
             flpTabs = new FlowLayoutPanel();
@@ -141,14 +140,6 @@
             tblAppCard.SuspendLayout();
             SuspendLayout();
             // 
-            // settingSystemInfo
-            // 
-            settingSystemInfo.Dock = DockStyle.Fill;
-            settingSystemInfo.Location = new Point(1283, 13);
-            settingSystemInfo.Margin = new Padding(13);
-            settingSystemInfo.Name = "settingSystemInfo";
-            settingSystemInfo.Size = new Size(698, 1255);
-            settingSystemInfo.TabIndex = 1;
             // 
             // tblMain
             // 
@@ -1568,7 +1559,7 @@
 
         }
 
-        private SettingSystemInfo settingSystemInfo;
+        private SettingSystemInfo? settingSystemInfo;
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tblMain;
