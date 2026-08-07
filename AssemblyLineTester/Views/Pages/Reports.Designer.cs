@@ -71,7 +71,7 @@ namespace AssemblyLineTester.Views.Pages
             tblMain = new TableLayoutPanel();
             pnlTopHeader = new Panel();
             lblPageHeader = new Label();
-            splitLeftCenterRight = new SplitContainer();
+            tblLeftCenterRight = new TableLayoutPanel();
             splitMainTopBottom = new SplitContainer();
             splitLeftRight = new SplitContainer();
             tblColLeft = new TableLayoutPanel();
@@ -225,10 +225,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumProgVal = new Label();
             tblMain.SuspendLayout();
             pnlTopHeader.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)splitLeftCenterRight).BeginInit();
-            splitLeftCenterRight.Panel1.SuspendLayout();
-            splitLeftCenterRight.Panel2.SuspendLayout();
-            splitLeftCenterRight.SuspendLayout();
+            tblLeftCenterRight.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitMainTopBottom).BeginInit();
             splitMainTopBottom.Panel1.SuspendLayout();
             splitMainTopBottom.Panel2.SuspendLayout();
@@ -279,7 +276,7 @@ namespace AssemblyLineTester.Views.Pages
             tblMain.ColumnCount = 1;
             tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblMain.Controls.Add(pnlTopHeader, 0, 0);
-            tblMain.Controls.Add(splitLeftCenterRight, 0, 1);
+            tblMain.Controls.Add(tblLeftCenterRight, 0, 1);
             tblMain.Dock = DockStyle.Fill;
             tblMain.Location = new Point(0, 0);
             tblMain.Margin = new Padding(6, 4, 6, 4);
@@ -313,26 +310,21 @@ namespace AssemblyLineTester.Views.Pages
             lblPageHeader.Text = "📑  REPORTS";
             lblPageHeader.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // splitLeftCenterRight
+            // tblLeftCenterRight
             // 
-            splitLeftCenterRight.Dock = DockStyle.Fill;
-            splitLeftCenterRight.Location = new Point(17, 103);
-            splitLeftCenterRight.Margin = new Padding(17, 9, 17, 17);
-            splitLeftCenterRight.Name = "splitLeftCenterRight";
-            // 
-            // splitLeftCenterRight.Panel1
-            // 
-            splitLeftCenterRight.Panel1.AutoScroll = true;
-            splitLeftCenterRight.Panel1.Controls.Add(splitMainTopBottom);
-            // 
-            // splitLeftCenterRight.Panel2
-            // 
-            splitLeftCenterRight.Panel2.AutoScroll = true;
-            splitLeftCenterRight.Panel2.Controls.Add(tblColRight);
-            splitLeftCenterRight.Size = new Size(3966, 2331);
-            splitLeftCenterRight.SplitterDistance = 2772;
-            splitLeftCenterRight.SplitterWidth = 11;
-            splitLeftCenterRight.TabIndex = 1;
+            tblLeftCenterRight.ColumnCount = 2;
+            tblLeftCenterRight.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
+            tblLeftCenterRight.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+            tblLeftCenterRight.Controls.Add(splitMainTopBottom, 0, 0);
+            tblLeftCenterRight.Controls.Add(tblColRight, 1, 0);
+            tblLeftCenterRight.Dock = DockStyle.Fill;
+            tblLeftCenterRight.Location = new Point(17, 103);
+            tblLeftCenterRight.Margin = new Padding(17, 9, 17, 17);
+            tblLeftCenterRight.Name = "tblLeftCenterRight";
+            tblLeftCenterRight.RowCount = 1;
+            tblLeftCenterRight.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblLeftCenterRight.Size = new Size(3966, 2331);
+            tblLeftCenterRight.TabIndex = 1;
             // 
             // splitMainTopBottom
             // 
@@ -351,7 +343,7 @@ namespace AssemblyLineTester.Views.Pages
             // splitMainTopBottom.Panel2
             // 
             splitMainTopBottom.Panel2.Controls.Add(cardTrend);
-            splitMainTopBottom.Size = new Size(2772, 2331);
+            splitMainTopBottom.Size = new Size(2776, 2331);
             splitMainTopBottom.SplitterDistance = 1013;
             splitMainTopBottom.SplitterWidth = 11;
             splitMainTopBottom.TabIndex = 0;
@@ -370,8 +362,8 @@ namespace AssemblyLineTester.Views.Pages
             // splitLeftRight.Panel2
             // 
             splitLeftRight.Panel2.Controls.Add(cardReportList);
-            splitLeftRight.Size = new Size(2772, 1013);
-            splitLeftRight.SplitterDistance = 974;
+            splitLeftRight.Size = new Size(2776, 1013);
+            splitLeftRight.SplitterDistance = 975;
             splitLeftRight.SplitterWidth = 11;
             splitLeftRight.TabIndex = 0;
             // 
@@ -386,7 +378,7 @@ namespace AssemblyLineTester.Views.Pages
             tblColLeft.Name = "tblColLeft";
             tblColLeft.RowCount = 1;
             tblColLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblColLeft.Size = new Size(974, 1013);
+            tblColLeft.Size = new Size(975, 1013);
             tblColLeft.TabIndex = 0;
             // 
             // cardFilters
@@ -399,7 +391,7 @@ namespace AssemblyLineTester.Views.Pages
             cardFilters.Margin = new Padding(0);
             cardFilters.Name = "cardFilters";
             cardFilters.Padding = new Padding(20, 19, 20, 19);
-            cardFilters.Size = new Size(974, 1013);
+            cardFilters.Size = new Size(975, 1013);
             cardFilters.TabIndex = 0;
             // 
             // tblFilterControls
@@ -433,7 +425,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterControls.RowStyles.Add(new RowStyle(SizeType.Absolute, 32F));
             tblFilterControls.RowStyles.Add(new RowStyle());
             tblFilterControls.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblFilterControls.Size = new Size(934, 975);
+            tblFilterControls.Size = new Size(935, 975);
             tblFilterControls.TabIndex = 0;
             // 
             // lblDateRange
@@ -463,7 +455,7 @@ namespace AssemblyLineTester.Views.Pages
             tblDateRange.Name = "tblDateRange";
             tblDateRange.RowCount = 1;
             tblDateRange.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblDateRange.Size = new Size(934, 68);
+            tblDateRange.Size = new Size(935, 68);
             tblDateRange.TabIndex = 3;
             // 
             // dtpStart
@@ -501,7 +493,7 @@ namespace AssemblyLineTester.Views.Pages
             dtpEnd.Location = new Point(486, 14);
             dtpEnd.Margin = new Padding(7, 9, 7, 9);
             dtpEnd.Name = "dtpEnd";
-            dtpEnd.Size = new Size(441, 39);
+            dtpEnd.Size = new Size(442, 39);
             dtpEnd.TabIndex = 2;
             // 
             // lblFilters
@@ -534,7 +526,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterGrid1.RowCount = 2;
             tblFilterGrid1.RowStyles.Add(new RowStyle());
             tblFilterGrid1.RowStyles.Add(new RowStyle());
-            tblFilterGrid1.Size = new Size(934, 72);
+            tblFilterGrid1.Size = new Size(935, 72);
             tblFilterGrid1.TabIndex = 5;
             // 
             // lblFilterModel
@@ -584,7 +576,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbType.Location = new Point(473, 32);
             cmbType.Margin = new Padding(6, 0, 0, 0);
             cmbType.Name = "cmbType";
-            cmbType.Size = new Size(461, 40);
+            cmbType.Size = new Size(462, 40);
             cmbType.TabIndex = 3;
             // 
             // tblFilterGrid2
@@ -605,7 +597,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterGrid2.RowCount = 2;
             tblFilterGrid2.RowStyles.Add(new RowStyle());
             tblFilterGrid2.RowStyles.Add(new RowStyle());
-            tblFilterGrid2.Size = new Size(934, 72);
+            tblFilterGrid2.Size = new Size(935, 72);
             tblFilterGrid2.TabIndex = 7;
             // 
             // lblFilterArea
@@ -655,7 +647,7 @@ namespace AssemblyLineTester.Views.Pages
             cmbOperator.Location = new Point(473, 32);
             cmbOperator.Margin = new Padding(6, 0, 0, 0);
             cmbOperator.Name = "cmbOperator";
-            cmbOperator.Size = new Size(461, 40);
+            cmbOperator.Size = new Size(462, 40);
             cmbOperator.TabIndex = 3;
             // 
             // tblFilterGrid3
@@ -676,7 +668,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterGrid3.RowCount = 2;
             tblFilterGrid3.RowStyles.Add(new RowStyle());
             tblFilterGrid3.RowStyles.Add(new RowStyle());
-            tblFilterGrid3.Size = new Size(934, 72);
+            tblFilterGrid3.Size = new Size(935, 72);
             tblFilterGrid3.TabIndex = 5;
             // 
             // lblFilterResult
@@ -724,7 +716,7 @@ namespace AssemblyLineTester.Views.Pages
             txtPartNumber.Margin = new Padding(6, 0, 0, 0);
             txtPartNumber.Name = "txtPartNumber";
             txtPartNumber.PlaceholderText = "Search by Part Number...";
-            txtPartNumber.Size = new Size(461, 39);
+            txtPartNumber.Size = new Size(462, 39);
             txtPartNumber.TabIndex = 3;
             // 
             // tblFilterButtons
@@ -740,7 +732,7 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterButtons.Name = "tblFilterButtons";
             tblFilterButtons.RowCount = 1;
             tblFilterButtons.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblFilterButtons.Size = new Size(934, 66);
+            tblFilterButtons.Size = new Size(935, 66);
             tblFilterButtons.TabIndex = 8;
             // 
             // btnGenerate
@@ -770,7 +762,7 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.Location = new Point(613, 0);
             btnReset.Margin = new Padding(6, 0, 0, 0);
             btnReset.Name = "btnReset";
-            btnReset.Size = new Size(321, 66);
+            btnReset.Size = new Size(322, 66);
             btnReset.TabIndex = 1;
             btnReset.Text = "Reset";
             btnReset.UseVisualStyleBackColor = false;
@@ -782,7 +774,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlSeparator.Location = new Point(0, 491);
             pnlSeparator.Margin = new Padding(0, 17, 0, 17);
             pnlSeparator.Name = "pnlSeparator";
-            pnlSeparator.Size = new Size(934, 1);
+            pnlSeparator.Size = new Size(935, 1);
             pnlSeparator.TabIndex = 9;
             // 
             // lblSummaryTitle
@@ -793,7 +785,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSummaryTitle.Location = new Point(0, 506);
             lblSummaryTitle.Margin = new Padding(0, 0, 0, 11);
             lblSummaryTitle.Name = "lblSummaryTitle";
-            lblSummaryTitle.Size = new Size(934, 41);
+            lblSummaryTitle.Size = new Size(935, 41);
             lblSummaryTitle.TabIndex = 10;
             lblSummaryTitle.Text = "SUMMARY (08 Mar 2026 - 15 Mar 2026)";
             // 
@@ -812,7 +804,7 @@ namespace AssemblyLineTester.Views.Pages
             tblSummaryCards.RowCount = 2;
             tblSummaryCards.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tblSummaryCards.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblSummaryCards.Size = new Size(922, 409);
+            tblSummaryCards.Size = new Size(923, 409);
             tblSummaryCards.TabIndex = 1;
             // 
             // pnlSumTotal
@@ -826,7 +818,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlSumTotal.Margin = new Padding(0, 0, 0, 6);
             pnlSumTotal.Name = "pnlSumTotal";
             pnlSumTotal.Padding = new Padding(17, 23, 17, 23);
-            pnlSumTotal.Size = new Size(455, 198);
+            pnlSumTotal.Size = new Size(923, 198);
             pnlSumTotal.TabIndex = 0;
             // 
             // lblSumTotalKey
@@ -837,7 +829,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumTotalKey.Location = new Point(17, 23);
             lblSumTotalKey.Margin = new Padding(6, 0, 6, 0);
             lblSumTotalKey.Name = "lblSumTotalKey";
-            lblSumTotalKey.Size = new Size(421, 26);
+            lblSumTotalKey.Size = new Size(889, 26);
             lblSumTotalKey.TabIndex = 0;
             lblSumTotalKey.Text = "TOTAL TESTED";
             lblSumTotalKey.TextAlign = ContentAlignment.MiddleCenter;
@@ -850,7 +842,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumTotalVal.Location = new Point(17, 23);
             lblSumTotalVal.Margin = new Padding(11, 0, 11, 0);
             lblSumTotalVal.Name = "lblSumTotalVal";
-            lblSumTotalVal.Size = new Size(421, 152);
+            lblSumTotalVal.Size = new Size(889, 152);
             lblSumTotalVal.TabIndex = 1;
             lblSumTotalVal.Text = "215";
             lblSumTotalVal.TextAlign = ContentAlignment.MiddleCenter;
@@ -865,7 +857,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlSumPass.Margin = new Padding(0, 13, 11, 0);
             pnlSumPass.Name = "pnlSumPass";
             pnlSumPass.Padding = new Padding(17, 23, 17, 23);
-            pnlSumPass.Size = new Size(455, 198);
+            pnlSumPass.Size = new Size(450, 192);
             pnlSumPass.TabIndex = 1;
             // 
             // lblSumPassKey
@@ -876,7 +868,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumPassKey.Location = new Point(17, 23);
             lblSumPassKey.Margin = new Padding(6, 0, 6, 0);
             lblSumPassKey.Name = "lblSumPassKey";
-            lblSumPassKey.Size = new Size(421, 26);
+            lblSumPassKey.Size = new Size(416, 26);
             lblSumPassKey.TabIndex = 0;
             lblSumPassKey.Text = "PASS";
             lblSumPassKey.TextAlign = ContentAlignment.MiddleCenter;
@@ -889,7 +881,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumPassVal.Location = new Point(17, 23);
             lblSumPassVal.Margin = new Padding(11, 0, 11, 0);
             lblSumPassVal.Name = "lblSumPassVal";
-            lblSumPassVal.Size = new Size(421, 152);
+            lblSumPassVal.Size = new Size(416, 146);
             lblSumPassVal.TabIndex = 1;
             lblSumPassVal.Text = "212 (98.60%)";
             lblSumPassVal.TextAlign = ContentAlignment.MiddleCenter;
@@ -904,7 +896,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlSumFail.Margin = new Padding(11, 13, 0, 0);
             pnlSumFail.Name = "pnlSumFail";
             pnlSumFail.Padding = new Padding(17, 23, 17, 23);
-            pnlSumFail.Size = new Size(450, 192);
+            pnlSumFail.Size = new Size(451, 192);
             pnlSumFail.TabIndex = 2;
             // 
             // lblSumFailKey
@@ -915,7 +907,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumFailKey.Location = new Point(17, 23);
             lblSumFailKey.Margin = new Padding(6, 0, 6, 0);
             lblSumFailKey.Name = "lblSumFailKey";
-            lblSumFailKey.Size = new Size(416, 26);
+            lblSumFailKey.Size = new Size(417, 26);
             lblSumFailKey.TabIndex = 0;
             lblSumFailKey.Text = "FAIL";
             lblSumFailKey.TextAlign = ContentAlignment.MiddleCenter;
@@ -928,7 +920,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumFailVal.Location = new Point(17, 23);
             lblSumFailVal.Margin = new Padding(11, 0, 11, 0);
             lblSumFailVal.Name = "lblSumFailVal";
-            lblSumFailVal.Size = new Size(416, 146);
+            lblSumFailVal.Size = new Size(417, 146);
             lblSumFailVal.TabIndex = 1;
             lblSumFailVal.Text = "3 (1.40%)";
             lblSumFailVal.TextAlign = ContentAlignment.MiddleCenter;
@@ -942,7 +934,7 @@ namespace AssemblyLineTester.Views.Pages
             cardReportList.Margin = new Padding(0, 0, 13, 0);
             cardReportList.Name = "cardReportList";
             cardReportList.Padding = new Padding(20, 19, 20, 19);
-            cardReportList.Size = new Size(1787, 1013);
+            cardReportList.Size = new Size(1790, 1013);
             cardReportList.TabIndex = 1;
             // 
             // tblCenter
@@ -960,7 +952,7 @@ namespace AssemblyLineTester.Views.Pages
             tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 55F));
             tblCenter.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tblCenter.RowStyles.Add(new RowStyle(SizeType.Absolute, 66F));
-            tblCenter.Size = new Size(1747, 975);
+            tblCenter.Size = new Size(1750, 975);
             tblCenter.TabIndex = 0;
             // 
             // lblReportListTitle
@@ -971,7 +963,7 @@ namespace AssemblyLineTester.Views.Pages
             lblReportListTitle.Location = new Point(6, 0);
             lblReportListTitle.Margin = new Padding(6, 0, 6, 0);
             lblReportListTitle.Name = "lblReportListTitle";
-            lblReportListTitle.Size = new Size(1735, 55);
+            lblReportListTitle.Size = new Size(1738, 55);
             lblReportListTitle.TabIndex = 0;
             lblReportListTitle.Text = "REPORT LIST (Total: 18)";
             lblReportListTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -1017,7 +1009,7 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.RowHeadersWidth = 82;
             gridReports.RowTemplate.Height = 44;
             gridReports.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridReports.Size = new Size(1747, 798);
+            gridReports.Size = new Size(1750, 798);
             gridReports.TabIndex = 1;
             // 
             // colNo
@@ -1099,7 +1091,7 @@ namespace AssemblyLineTester.Views.Pages
             tblPagination.Name = "tblPagination";
             tblPagination.RowCount = 1;
             tblPagination.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblPagination.Size = new Size(1747, 66);
+            tblPagination.Size = new Size(1750, 66);
             tblPagination.TabIndex = 2;
             // 
             // lblPageInfo
@@ -1110,7 +1102,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPageInfo.Location = new Point(6, 0);
             lblPageInfo.Margin = new Padding(6, 0, 6, 0);
             lblPageInfo.Name = "lblPageInfo";
-            lblPageInfo.Size = new Size(861, 66);
+            lblPageInfo.Size = new Size(863, 66);
             lblPageInfo.TabIndex = 0;
             lblPageInfo.Text = "Showing 1 to 10 of 18 entries";
             lblPageInfo.TextAlign = ContentAlignment.MiddleLeft;
@@ -1126,10 +1118,10 @@ namespace AssemblyLineTester.Views.Pages
             flpPageButtons.Controls.Add(btnPageFirst);
             flpPageButtons.Dock = DockStyle.Fill;
             flpPageButtons.FlowDirection = FlowDirection.RightToLeft;
-            flpPageButtons.Location = new Point(873, 4);
+            flpPageButtons.Location = new Point(875, 4);
             flpPageButtons.Margin = new Padding(0, 4, 0, 0);
             flpPageButtons.Name = "flpPageButtons";
-            flpPageButtons.Size = new Size(874, 62);
+            flpPageButtons.Size = new Size(875, 62);
             flpPageButtons.TabIndex = 1;
             // 
             // btnPageLast
@@ -1138,7 +1130,7 @@ namespace AssemblyLineTester.Views.Pages
             btnPageLast.FlatAppearance.BorderSize = 0;
             btnPageLast.FlatStyle = FlatStyle.Flat;
             btnPageLast.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPageLast.Location = new Point(809, 0);
+            btnPageLast.Location = new Point(810, 0);
             btnPageLast.Margin = new Padding(4, 0, 0, 0);
             btnPageLast.Name = "btnPageLast";
             btnPageLast.Size = new Size(65, 62);
@@ -1152,7 +1144,7 @@ namespace AssemblyLineTester.Views.Pages
             btnPageNext.FlatAppearance.BorderSize = 0;
             btnPageNext.FlatStyle = FlatStyle.Flat;
             btnPageNext.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPageNext.Location = new Point(744, 0);
+            btnPageNext.Location = new Point(745, 0);
             btnPageNext.Margin = new Padding(4, 0, 0, 0);
             btnPageNext.Name = "btnPageNext";
             btnPageNext.Size = new Size(61, 70);
@@ -1166,7 +1158,7 @@ namespace AssemblyLineTester.Views.Pages
             btnPageDots.FlatAppearance.BorderSize = 0;
             btnPageDots.FlatStyle = FlatStyle.Flat;
             btnPageDots.Font = new Font("Segoe UI", 8.5F);
-            btnPageDots.Location = new Point(686, 0);
+            btnPageDots.Location = new Point(687, 0);
             btnPageDots.Margin = new Padding(4, 0, 0, 0);
             btnPageDots.Name = "btnPageDots";
             btnPageDots.Size = new Size(54, 47);
@@ -1180,7 +1172,7 @@ namespace AssemblyLineTester.Views.Pages
             btnPage2.FlatAppearance.BorderSize = 0;
             btnPage2.FlatStyle = FlatStyle.Flat;
             btnPage2.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPage2.Location = new Point(624, 0);
+            btnPage2.Location = new Point(625, 0);
             btnPage2.Margin = new Padding(4, 0, 0, 0);
             btnPage2.Name = "btnPage2";
             btnPage2.Size = new Size(58, 62);
@@ -1195,7 +1187,7 @@ namespace AssemblyLineTester.Views.Pages
             btnPage1.FlatStyle = FlatStyle.Flat;
             btnPage1.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             btnPage1.ForeColor = Color.White;
-            btnPage1.Location = new Point(562, 0);
+            btnPage1.Location = new Point(563, 0);
             btnPage1.Margin = new Padding(4, 0, 0, 0);
             btnPage1.Name = "btnPage1";
             btnPage1.Size = new Size(58, 62);
@@ -1209,7 +1201,7 @@ namespace AssemblyLineTester.Views.Pages
             btnPagePrev.FlatAppearance.BorderSize = 0;
             btnPagePrev.FlatStyle = FlatStyle.Flat;
             btnPagePrev.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPagePrev.Location = new Point(497, 0);
+            btnPagePrev.Location = new Point(498, 0);
             btnPagePrev.Margin = new Padding(4, 0, 0, 0);
             btnPagePrev.Name = "btnPagePrev";
             btnPagePrev.Size = new Size(61, 62);
@@ -1223,7 +1215,7 @@ namespace AssemblyLineTester.Views.Pages
             btnPageFirst.FlatAppearance.BorderSize = 0;
             btnPageFirst.FlatStyle = FlatStyle.Flat;
             btnPageFirst.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            btnPageFirst.Location = new Point(428, 0);
+            btnPageFirst.Location = new Point(429, 0);
             btnPageFirst.Margin = new Padding(4, 0, 0, 0);
             btnPageFirst.Name = "btnPageFirst";
             btnPageFirst.Size = new Size(65, 62);
@@ -1240,7 +1232,7 @@ namespace AssemblyLineTester.Views.Pages
             cardTrend.Margin = new Padding(0);
             cardTrend.Name = "cardTrend";
             cardTrend.Padding = new Padding(20, 19, 20, 19);
-            cardTrend.Size = new Size(2772, 1307);
+            cardTrend.Size = new Size(2776, 1307);
             cardTrend.TabIndex = 2;
             // 
             // lblTrendTitle
@@ -1251,7 +1243,7 @@ namespace AssemblyLineTester.Views.Pages
             lblTrendTitle.Location = new Point(20, 19);
             lblTrendTitle.Margin = new Padding(6, 0, 6, 0);
             lblTrendTitle.Name = "lblTrendTitle";
-            lblTrendTitle.Size = new Size(2732, 43);
+            lblTrendTitle.Size = new Size(2736, 43);
             lblTrendTitle.TabIndex = 0;
             lblTrendTitle.Text = "RESULT TREND";
             // 
@@ -1262,13 +1254,13 @@ namespace AssemblyLineTester.Views.Pages
             tblColRight.Controls.Add(cardPreviewTop, 0, 0);
             tblColRight.Controls.Add(pnlPreviewContainer, 0, 1);
             tblColRight.Dock = DockStyle.Fill;
-            tblColRight.Location = new Point(0, 0);
-            tblColRight.Margin = new Padding(0);
+            tblColRight.Location = new Point(2792, 0);
+            tblColRight.Margin = new Padding(16, 0, 0, 0);
             tblColRight.Name = "tblColRight";
             tblColRight.RowCount = 2;
             tblColRight.RowStyles.Add(new RowStyle());
             tblColRight.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblColRight.Size = new Size(1183, 2331);
+            tblColRight.Size = new Size(1174, 2331);
             tblColRight.TabIndex = 2;
             // 
             // cardPreviewTop
@@ -1283,7 +1275,7 @@ namespace AssemblyLineTester.Views.Pages
             cardPreviewTop.Margin = new Padding(0, 0, 0, 11);
             cardPreviewTop.Name = "cardPreviewTop";
             cardPreviewTop.Padding = new Padding(20, 19, 20, 19);
-            cardPreviewTop.Size = new Size(1183, 329);
+            cardPreviewTop.Size = new Size(1174, 329);
             cardPreviewTop.TabIndex = 0;
             // 
             // flpPreviewButtons
@@ -1313,7 +1305,7 @@ namespace AssemblyLineTester.Views.Pages
             flpPreviewButtons.RowStyles.Add(new RowStyle());
             flpPreviewButtons.RowStyles.Add(new RowStyle());
             flpPreviewButtons.RowStyles.Add(new RowStyle());
-            flpPreviewButtons.Size = new Size(1143, 246);
+            flpPreviewButtons.Size = new Size(1134, 246);
             flpPreviewButtons.TabIndex = 1;
             // 
             // btnExportPDF
@@ -1328,7 +1320,7 @@ namespace AssemblyLineTester.Views.Pages
             btnExportPDF.Location = new Point(7, 9);
             btnExportPDF.Margin = new Padding(7, 9, 7, 9);
             btnExportPDF.Name = "btnExportPDF";
-            btnExportPDF.Size = new Size(366, 62);
+            btnExportPDF.Size = new Size(364, 62);
             btnExportPDF.TabIndex = 0;
             btnExportPDF.Text = "Export PDF";
             btnExportPDF.UseVisualStyleBackColor = false;
@@ -1342,10 +1334,10 @@ namespace AssemblyLineTester.Views.Pages
             btnExportExcel.FlatStyle = FlatStyle.Flat;
             btnExportExcel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnExportExcel.ForeColor = Color.FromArgb(40, 167, 69);
-            btnExportExcel.Location = new Point(387, 9);
+            btnExportExcel.Location = new Point(385, 9);
             btnExportExcel.Margin = new Padding(7, 9, 7, 9);
             btnExportExcel.Name = "btnExportExcel";
-            btnExportExcel.Size = new Size(366, 62);
+            btnExportExcel.Size = new Size(364, 62);
             btnExportExcel.TabIndex = 1;
             btnExportExcel.Text = "Export Excel";
             btnExportExcel.UseVisualStyleBackColor = false;
@@ -1359,10 +1351,10 @@ namespace AssemblyLineTester.Views.Pages
             btnPrint.FlatStyle = FlatStyle.Flat;
             btnPrint.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnPrint.ForeColor = Color.Black;
-            btnPrint.Location = new Point(767, 9);
+            btnPrint.Location = new Point(763, 9);
             btnPrint.Margin = new Padding(7, 9, 7, 9);
             btnPrint.Name = "btnPrint";
-            btnPrint.Size = new Size(369, 62);
+            btnPrint.Size = new Size(364, 62);
             btnPrint.TabIndex = 2;
             btnPrint.Text = "Print";
             btnPrint.UseVisualStyleBackColor = false;
@@ -1379,7 +1371,7 @@ namespace AssemblyLineTester.Views.Pages
             btnEditReport.Location = new Point(7, 89);
             btnEditReport.Margin = new Padding(7, 9, 7, 9);
             btnEditReport.Name = "btnEditReport";
-            btnEditReport.Size = new Size(556, 62);
+            btnEditReport.Size = new Size(553, 62);
             btnEditReport.TabIndex = 3;
             btnEditReport.Text = "Edit";
             btnEditReport.UseVisualStyleBackColor = false;
@@ -1393,10 +1385,10 @@ namespace AssemblyLineTester.Views.Pages
             btnDeleteReport.FlatStyle = FlatStyle.Flat;
             btnDeleteReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnDeleteReport.ForeColor = Color.White;
-            btnDeleteReport.Location = new Point(577, 89);
+            btnDeleteReport.Location = new Point(574, 89);
             btnDeleteReport.Margin = new Padding(7, 9, 7, 9);
             btnDeleteReport.Name = "btnDeleteReport";
-            btnDeleteReport.Size = new Size(559, 62);
+            btnDeleteReport.Size = new Size(553, 62);
             btnDeleteReport.TabIndex = 4;
             btnDeleteReport.Text = "Delete";
             btnDeleteReport.UseVisualStyleBackColor = false;
@@ -1413,7 +1405,7 @@ namespace AssemblyLineTester.Views.Pages
             btnCancelReportEdit.Location = new Point(7, 169);
             btnCancelReportEdit.Margin = new Padding(7, 9, 7, 9);
             btnCancelReportEdit.Name = "btnCancelReportEdit";
-            btnCancelReportEdit.Size = new Size(556, 68);
+            btnCancelReportEdit.Size = new Size(553, 68);
             btnCancelReportEdit.TabIndex = 6;
             btnCancelReportEdit.Text = "Cancel";
             btnCancelReportEdit.UseVisualStyleBackColor = false;
@@ -1428,10 +1420,10 @@ namespace AssemblyLineTester.Views.Pages
             btnSaveReportEdit.FlatStyle = FlatStyle.Flat;
             btnSaveReportEdit.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSaveReportEdit.ForeColor = Color.White;
-            btnSaveReportEdit.Location = new Point(577, 169);
+            btnSaveReportEdit.Location = new Point(574, 169);
             btnSaveReportEdit.Margin = new Padding(7, 9, 7, 9);
             btnSaveReportEdit.Name = "btnSaveReportEdit";
-            btnSaveReportEdit.Size = new Size(559, 68);
+            btnSaveReportEdit.Size = new Size(553, 68);
             btnSaveReportEdit.TabIndex = 5;
             btnSaveReportEdit.Text = "Save";
             btnSaveReportEdit.UseVisualStyleBackColor = false;
@@ -1445,7 +1437,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPreviewTitle.Location = new Point(20, 19);
             lblPreviewTitle.Margin = new Padding(6, 0, 6, 0);
             lblPreviewTitle.Name = "lblPreviewTitle";
-            lblPreviewTitle.Size = new Size(1143, 45);
+            lblPreviewTitle.Size = new Size(1134, 45);
             lblPreviewTitle.TabIndex = 0;
             lblPreviewTitle.Text = "REPORT PREVIEW";
             lblPreviewTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -1460,7 +1452,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlPreviewContainer.Margin = new Padding(0);
             pnlPreviewContainer.Name = "pnlPreviewContainer";
             pnlPreviewContainer.Padding = new Padding(28, 35, 28, 35);
-            pnlPreviewContainer.Size = new Size(1183, 1991);
+            pnlPreviewContainer.Size = new Size(1174, 1991);
             pnlPreviewContainer.TabIndex = 1;
             // 
             // cardPaper
@@ -1474,7 +1466,7 @@ namespace AssemblyLineTester.Views.Pages
             cardPaper.Margin = new Padding(6, 4, 6, 4);
             cardPaper.Name = "cardPaper";
             cardPaper.Padding = new Padding(26, 34, 26, 34);
-            cardPaper.Size = new Size(1127, 1921);
+            cardPaper.Size = new Size(1118, 1921);
             cardPaper.TabIndex = 0;
             // 
             // tblPaperContent
@@ -1496,7 +1488,7 @@ namespace AssemblyLineTester.Views.Pages
             tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
             tblPaperContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 230F));
-            tblPaperContent.Size = new Size(1073, 1851);
+            tblPaperContent.Size = new Size(1064, 1851);
             tblPaperContent.TabIndex = 0;
             // 
             // tblPaperHeader
@@ -1512,7 +1504,7 @@ namespace AssemblyLineTester.Views.Pages
             tblPaperHeader.Name = "tblPaperHeader";
             tblPaperHeader.RowCount = 1;
             tblPaperHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblPaperHeader.Size = new Size(1073, 88);
+            tblPaperHeader.Size = new Size(1064, 88);
             tblPaperHeader.TabIndex = 0;
             // 
             // flpPaperLogo
@@ -1523,7 +1515,7 @@ namespace AssemblyLineTester.Views.Pages
             flpPaperLogo.Location = new Point(0, 0);
             flpPaperLogo.Margin = new Padding(0);
             flpPaperLogo.Name = "flpPaperLogo";
-            flpPaperLogo.Size = new Size(536, 88);
+            flpPaperLogo.Size = new Size(532, 88);
             flpPaperLogo.TabIndex = 0;
             flpPaperLogo.WrapContents = false;
             // 
@@ -1557,10 +1549,10 @@ namespace AssemblyLineTester.Views.Pages
             lblPaperMeta.Dock = DockStyle.Fill;
             lblPaperMeta.Font = new Font("Segoe UI", 8F);
             lblPaperMeta.ForeColor = Color.FromArgb(71, 85, 105);
-            lblPaperMeta.Location = new Point(542, 0);
+            lblPaperMeta.Location = new Point(538, 0);
             lblPaperMeta.Margin = new Padding(6, 0, 6, 0);
             lblPaperMeta.Name = "lblPaperMeta";
-            lblPaperMeta.Size = new Size(525, 88);
+            lblPaperMeta.Size = new Size(520, 88);
             lblPaperMeta.TabIndex = 1;
             lblPaperMeta.Text = "Report No.: TR-20260315-103020\r\nDate: 15 Mar 2026\r\nPage: 1 of 2";
             lblPaperMeta.TextAlign = ContentAlignment.TopRight;
@@ -1575,7 +1567,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlGenInfoBox.Margin = new Padding(0, 0, 0, 17);
             pnlGenInfoBox.Name = "pnlGenInfoBox";
             pnlGenInfoBox.Padding = new Padding(32, 36, 32, 36);
-            pnlGenInfoBox.Size = new Size(1073, 365);
+            pnlGenInfoBox.Size = new Size(1064, 365);
             pnlGenInfoBox.TabIndex = 1;
             // 
             // tblGenGrid
@@ -1615,7 +1607,7 @@ namespace AssemblyLineTester.Views.Pages
             tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
             tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
             tblGenGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tblGenGrid.Size = new Size(1009, 229);
+            tblGenGrid.Size = new Size(1000, 229);
             tblGenGrid.TabIndex = 1;
             // 
             // lblGenModelKey
@@ -1626,7 +1618,7 @@ namespace AssemblyLineTester.Views.Pages
             lblGenModelKey.Location = new Point(6, 0);
             lblGenModelKey.Margin = new Padding(6, 0, 6, 0);
             lblGenModelKey.Name = "lblGenModelKey";
-            lblGenModelKey.Size = new Size(240, 45);
+            lblGenModelKey.Size = new Size(238, 45);
             lblGenModelKey.TabIndex = 0;
             lblGenModelKey.Text = "Product Model:";
             lblGenModelKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1636,10 +1628,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenModelVal.Dock = DockStyle.Fill;
             lblGenModelVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenModelVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenModelVal.Location = new Point(258, 0);
+            lblGenModelVal.Location = new Point(256, 0);
             lblGenModelVal.Margin = new Padding(6, 0, 6, 0);
             lblGenModelVal.Name = "lblGenModelVal";
-            lblGenModelVal.Size = new Size(240, 45);
+            lblGenModelVal.Size = new Size(238, 45);
             lblGenModelVal.TabIndex = 1;
             lblGenModelVal.Text = "6060";
             lblGenModelVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1649,10 +1641,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenEcnKey.Dock = DockStyle.Fill;
             lblGenEcnKey.Font = new Font("Segoe UI", 8F);
             lblGenEcnKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenEcnKey.Location = new Point(510, 0);
+            lblGenEcnKey.Location = new Point(506, 0);
             lblGenEcnKey.Margin = new Padding(6, 0, 6, 0);
             lblGenEcnKey.Name = "lblGenEcnKey";
-            lblGenEcnKey.Size = new Size(240, 45);
+            lblGenEcnKey.Size = new Size(238, 45);
             lblGenEcnKey.TabIndex = 2;
             lblGenEcnKey.Text = "ECN No:";
             lblGenEcnKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1662,10 +1654,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenEcnVal.Dock = DockStyle.Fill;
             lblGenEcnVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenEcnVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenEcnVal.Location = new Point(762, 0);
+            lblGenEcnVal.Location = new Point(756, 0);
             lblGenEcnVal.Margin = new Padding(6, 0, 6, 0);
             lblGenEcnVal.Name = "lblGenEcnVal";
-            lblGenEcnVal.Size = new Size(241, 45);
+            lblGenEcnVal.Size = new Size(238, 45);
             lblGenEcnVal.TabIndex = 3;
             lblGenEcnVal.Text = "123.R001";
             lblGenEcnVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1678,7 +1670,7 @@ namespace AssemblyLineTester.Views.Pages
             lblGenTypeKey.Location = new Point(6, 45);
             lblGenTypeKey.Margin = new Padding(6, 0, 6, 0);
             lblGenTypeKey.Name = "lblGenTypeKey";
-            lblGenTypeKey.Size = new Size(240, 45);
+            lblGenTypeKey.Size = new Size(238, 45);
             lblGenTypeKey.TabIndex = 4;
             lblGenTypeKey.Text = "Product Type:";
             lblGenTypeKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1688,10 +1680,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenTypeVal.Dock = DockStyle.Fill;
             lblGenTypeVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenTypeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenTypeVal.Location = new Point(258, 45);
+            lblGenTypeVal.Location = new Point(256, 45);
             lblGenTypeVal.Margin = new Padding(6, 0, 6, 0);
             lblGenTypeVal.Name = "lblGenTypeVal";
-            lblGenTypeVal.Size = new Size(240, 45);
+            lblGenTypeVal.Size = new Size(238, 45);
             lblGenTypeVal.TabIndex = 5;
             lblGenTypeVal.Text = "AC";
             lblGenTypeVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1701,10 +1693,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenRevKey.Dock = DockStyle.Fill;
             lblGenRevKey.Font = new Font("Segoe UI", 8F);
             lblGenRevKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenRevKey.Location = new Point(510, 45);
+            lblGenRevKey.Location = new Point(506, 45);
             lblGenRevKey.Margin = new Padding(6, 0, 6, 0);
             lblGenRevKey.Name = "lblGenRevKey";
-            lblGenRevKey.Size = new Size(240, 45);
+            lblGenRevKey.Size = new Size(238, 45);
             lblGenRevKey.TabIndex = 6;
             lblGenRevKey.Text = "Revision:";
             lblGenRevKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1714,10 +1706,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenRevVal.Dock = DockStyle.Fill;
             lblGenRevVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenRevVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenRevVal.Location = new Point(762, 45);
+            lblGenRevVal.Location = new Point(756, 45);
             lblGenRevVal.Margin = new Padding(6, 0, 6, 0);
             lblGenRevVal.Name = "lblGenRevVal";
-            lblGenRevVal.Size = new Size(241, 45);
+            lblGenRevVal.Size = new Size(238, 45);
             lblGenRevVal.TabIndex = 7;
             lblGenRevVal.Text = "A";
             lblGenRevVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1730,7 +1722,7 @@ namespace AssemblyLineTester.Views.Pages
             lblGenAreaKey.Location = new Point(6, 90);
             lblGenAreaKey.Margin = new Padding(6, 0, 6, 0);
             lblGenAreaKey.Name = "lblGenAreaKey";
-            lblGenAreaKey.Size = new Size(240, 45);
+            lblGenAreaKey.Size = new Size(238, 45);
             lblGenAreaKey.TabIndex = 8;
             lblGenAreaKey.Text = "Area:";
             lblGenAreaKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1740,10 +1732,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenAreaVal.Dock = DockStyle.Fill;
             lblGenAreaVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenAreaVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenAreaVal.Location = new Point(258, 90);
+            lblGenAreaVal.Location = new Point(256, 90);
             lblGenAreaVal.Margin = new Padding(6, 0, 6, 0);
             lblGenAreaVal.Name = "lblGenAreaVal";
-            lblGenAreaVal.Size = new Size(240, 45);
+            lblGenAreaVal.Size = new Size(238, 45);
             lblGenAreaVal.TabIndex = 9;
             lblGenAreaVal.Text = "Engine Control";
             lblGenAreaVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1753,10 +1745,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenOpKey.Dock = DockStyle.Fill;
             lblGenOpKey.Font = new Font("Segoe UI", 8F);
             lblGenOpKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenOpKey.Location = new Point(510, 90);
+            lblGenOpKey.Location = new Point(506, 90);
             lblGenOpKey.Margin = new Padding(6, 0, 6, 0);
             lblGenOpKey.Name = "lblGenOpKey";
-            lblGenOpKey.Size = new Size(240, 45);
+            lblGenOpKey.Size = new Size(238, 45);
             lblGenOpKey.TabIndex = 10;
             lblGenOpKey.Text = "Operator:";
             lblGenOpKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1766,10 +1758,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenOpVal.Dock = DockStyle.Fill;
             lblGenOpVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenOpVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenOpVal.Location = new Point(762, 90);
+            lblGenOpVal.Location = new Point(756, 90);
             lblGenOpVal.Margin = new Padding(6, 0, 6, 0);
             lblGenOpVal.Name = "lblGenOpVal";
-            lblGenOpVal.Size = new Size(241, 45);
+            lblGenOpVal.Size = new Size(238, 45);
             lblGenOpVal.TabIndex = 11;
             lblGenOpVal.Text = "Fally";
             lblGenOpVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1782,7 +1774,7 @@ namespace AssemblyLineTester.Views.Pages
             lblGenPartKey.Location = new Point(6, 135);
             lblGenPartKey.Margin = new Padding(6, 0, 6, 0);
             lblGenPartKey.Name = "lblGenPartKey";
-            lblGenPartKey.Size = new Size(240, 45);
+            lblGenPartKey.Size = new Size(238, 45);
             lblGenPartKey.TabIndex = 12;
             lblGenPartKey.Text = "Part Number:";
             lblGenPartKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1792,10 +1784,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenPartVal.Dock = DockStyle.Fill;
             lblGenPartVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenPartVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenPartVal.Location = new Point(258, 135);
+            lblGenPartVal.Location = new Point(256, 135);
             lblGenPartVal.Margin = new Padding(6, 0, 6, 0);
             lblGenPartVal.Name = "lblGenPartVal";
-            lblGenPartVal.Size = new Size(240, 45);
+            lblGenPartVal.Size = new Size(238, 45);
             lblGenPartVal.TabIndex = 13;
             lblGenPartVal.Text = "WH-ENG-001";
             lblGenPartVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1805,10 +1797,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenTimeKey.Dock = DockStyle.Fill;
             lblGenTimeKey.Font = new Font("Segoe UI", 8F);
             lblGenTimeKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenTimeKey.Location = new Point(510, 135);
+            lblGenTimeKey.Location = new Point(506, 135);
             lblGenTimeKey.Margin = new Padding(6, 0, 6, 0);
             lblGenTimeKey.Name = "lblGenTimeKey";
-            lblGenTimeKey.Size = new Size(240, 45);
+            lblGenTimeKey.Size = new Size(238, 45);
             lblGenTimeKey.TabIndex = 14;
             lblGenTimeKey.Text = "Test Time:";
             lblGenTimeKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1818,10 +1810,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenTimeVal.Dock = DockStyle.Fill;
             lblGenTimeVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenTimeVal.Location = new Point(762, 135);
+            lblGenTimeVal.Location = new Point(756, 135);
             lblGenTimeVal.Margin = new Padding(6, 0, 6, 0);
             lblGenTimeVal.Name = "lblGenTimeVal";
-            lblGenTimeVal.Size = new Size(241, 45);
+            lblGenTimeVal.Size = new Size(238, 45);
             lblGenTimeVal.TabIndex = 15;
             lblGenTimeVal.Text = "00:09:01";
             lblGenTimeVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1834,7 +1826,7 @@ namespace AssemblyLineTester.Views.Pages
             lblGenSnKey.Location = new Point(6, 180);
             lblGenSnKey.Margin = new Padding(6, 0, 6, 0);
             lblGenSnKey.Name = "lblGenSnKey";
-            lblGenSnKey.Size = new Size(240, 49);
+            lblGenSnKey.Size = new Size(238, 49);
             lblGenSnKey.TabIndex = 16;
             lblGenSnKey.Text = "Serial Number:";
             lblGenSnKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1844,10 +1836,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenSnVal.Dock = DockStyle.Fill;
             lblGenSnVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenSnVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenSnVal.Location = new Point(258, 180);
+            lblGenSnVal.Location = new Point(256, 180);
             lblGenSnVal.Margin = new Padding(6, 0, 6, 0);
             lblGenSnVal.Name = "lblGenSnVal";
-            lblGenSnVal.Size = new Size(240, 49);
+            lblGenSnVal.Size = new Size(238, 49);
             lblGenSnVal.TabIndex = 17;
             lblGenSnVal.Text = "SN12350";
             lblGenSnVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1857,10 +1849,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenResKey.Dock = DockStyle.Fill;
             lblGenResKey.Font = new Font("Segoe UI", 8F);
             lblGenResKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblGenResKey.Location = new Point(510, 180);
+            lblGenResKey.Location = new Point(506, 180);
             lblGenResKey.Margin = new Padding(6, 0, 6, 0);
             lblGenResKey.Name = "lblGenResKey";
-            lblGenResKey.Size = new Size(240, 49);
+            lblGenResKey.Size = new Size(238, 49);
             lblGenResKey.TabIndex = 18;
             lblGenResKey.Text = "Result:";
             lblGenResKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -1870,10 +1862,10 @@ namespace AssemblyLineTester.Views.Pages
             lblGenResVal.Dock = DockStyle.Fill;
             lblGenResVal.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblGenResVal.ForeColor = Color.FromArgb(4, 120, 87);
-            lblGenResVal.Location = new Point(762, 180);
+            lblGenResVal.Location = new Point(756, 180);
             lblGenResVal.Margin = new Padding(6, 0, 6, 0);
             lblGenResVal.Name = "lblGenResVal";
-            lblGenResVal.Size = new Size(241, 49);
+            lblGenResVal.Size = new Size(238, 49);
             lblGenResVal.TabIndex = 19;
             lblGenResVal.Text = "PASS";
             lblGenResVal.TextAlign = ContentAlignment.MiddleLeft;
@@ -1886,7 +1878,7 @@ namespace AssemblyLineTester.Views.Pages
             lblGenTitle.Location = new Point(32, 36);
             lblGenTitle.Margin = new Padding(6, 0, 6, 0);
             lblGenTitle.Name = "lblGenTitle";
-            lblGenTitle.Size = new Size(1009, 64);
+            lblGenTitle.Size = new Size(1000, 64);
             lblGenTitle.TabIndex = 0;
             lblGenTitle.Text = "GENERAL INFORMATION";
             // 
@@ -1899,7 +1891,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlSummaryTableContainer.Location = new Point(0, 504);
             pnlSummaryTableContainer.Margin = new Padding(0, 17, 0, 17);
             pnlSummaryTableContainer.Name = "pnlSummaryTableContainer";
-            pnlSummaryTableContainer.Size = new Size(1073, 1000);
+            pnlSummaryTableContainer.Size = new Size(1064, 1000);
             pnlSummaryTableContainer.TabIndex = 2;
             // 
             // tblTestSummary
@@ -1953,7 +1945,7 @@ namespace AssemblyLineTester.Views.Pages
             tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
             tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
             tblTestSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 51F));
-            tblTestSummary.Size = new Size(1073, 290);
+            tblTestSummary.Size = new Size(1064, 290);
             tblTestSummary.TabIndex = 1;
             // 
             // lblSumH1
@@ -1964,7 +1956,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumH1.Location = new Point(1, 1);
             lblSumH1.Margin = new Padding(0);
             lblSumH1.Name = "lblSumH1";
-            lblSumH1.Size = new Size(384, 51);
+            lblSumH1.Size = new Size(380, 51);
             lblSumH1.TabIndex = 0;
             lblSumH1.Text = "Test Type";
             lblSumH1.TextAlign = ContentAlignment.MiddleLeft;
@@ -1974,10 +1966,10 @@ namespace AssemblyLineTester.Views.Pages
             lblSumH2.BackColor = Color.FromArgb(241, 245, 249);
             lblSumH2.Dock = DockStyle.Fill;
             lblSumH2.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            lblSumH2.Location = new Point(386, 1);
+            lblSumH2.Location = new Point(382, 1);
             lblSumH2.Margin = new Padding(0);
             lblSumH2.Name = "lblSumH2";
-            lblSumH2.Size = new Size(170, 51);
+            lblSumH2.Size = new Size(169, 51);
             lblSumH2.TabIndex = 1;
             lblSumH2.Text = "Total";
             lblSumH2.TextAlign = ContentAlignment.MiddleCenter;
@@ -1987,10 +1979,10 @@ namespace AssemblyLineTester.Views.Pages
             lblSumH3.BackColor = Color.FromArgb(241, 245, 249);
             lblSumH3.Dock = DockStyle.Fill;
             lblSumH3.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            lblSumH3.Location = new Point(557, 1);
+            lblSumH3.Location = new Point(552, 1);
             lblSumH3.Margin = new Padding(0);
             lblSumH3.Name = "lblSumH3";
-            lblSumH3.Size = new Size(170, 51);
+            lblSumH3.Size = new Size(169, 51);
             lblSumH3.TabIndex = 2;
             lblSumH3.Text = "Pass";
             lblSumH3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2000,10 +1992,10 @@ namespace AssemblyLineTester.Views.Pages
             lblSumH4.BackColor = Color.FromArgb(241, 245, 249);
             lblSumH4.Dock = DockStyle.Fill;
             lblSumH4.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            lblSumH4.Location = new Point(728, 1);
+            lblSumH4.Location = new Point(722, 1);
             lblSumH4.Margin = new Padding(0);
             lblSumH4.Name = "lblSumH4";
-            lblSumH4.Size = new Size(170, 51);
+            lblSumH4.Size = new Size(169, 51);
             lblSumH4.TabIndex = 3;
             lblSumH4.Text = "Fail";
             lblSumH4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2013,10 +2005,10 @@ namespace AssemblyLineTester.Views.Pages
             lblSumH5.BackColor = Color.FromArgb(241, 245, 249);
             lblSumH5.Dock = DockStyle.Fill;
             lblSumH5.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            lblSumH5.Location = new Point(899, 1);
+            lblSumH5.Location = new Point(892, 1);
             lblSumH5.Margin = new Padding(0);
             lblSumH5.Name = "lblSumH5";
-            lblSumH5.Size = new Size(173, 51);
+            lblSumH5.Size = new Size(171, 51);
             lblSumH5.TabIndex = 4;
             lblSumH5.Text = "Pass Rate";
             lblSumH5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2028,7 +2020,7 @@ namespace AssemblyLineTester.Views.Pages
             lblR1C1.Location = new Point(1, 53);
             lblR1C1.Margin = new Padding(0);
             lblR1C1.Name = "lblR1C1";
-            lblR1C1.Size = new Size(384, 45);
+            lblR1C1.Size = new Size(380, 45);
             lblR1C1.TabIndex = 5;
             lblR1C1.Text = "Continuity Test";
             lblR1C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2037,10 +2029,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR1C2.Dock = DockStyle.Fill;
             lblR1C2.Font = new Font("Segoe UI", 8F);
-            lblR1C2.Location = new Point(386, 53);
+            lblR1C2.Location = new Point(382, 53);
             lblR1C2.Margin = new Padding(0);
             lblR1C2.Name = "lblR1C2";
-            lblR1C2.Size = new Size(170, 45);
+            lblR1C2.Size = new Size(169, 45);
             lblR1C2.TabIndex = 6;
             lblR1C2.Text = "62";
             lblR1C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2049,10 +2041,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR1C3.Dock = DockStyle.Fill;
             lblR1C3.Font = new Font("Segoe UI", 8F);
-            lblR1C3.Location = new Point(557, 53);
+            lblR1C3.Location = new Point(552, 53);
             lblR1C3.Margin = new Padding(0);
             lblR1C3.Name = "lblR1C3";
-            lblR1C3.Size = new Size(170, 45);
+            lblR1C3.Size = new Size(169, 45);
             lblR1C3.TabIndex = 7;
             lblR1C3.Text = "62";
             lblR1C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2061,10 +2053,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR1C4.Dock = DockStyle.Fill;
             lblR1C4.Font = new Font("Segoe UI", 8F);
-            lblR1C4.Location = new Point(728, 53);
+            lblR1C4.Location = new Point(722, 53);
             lblR1C4.Margin = new Padding(0);
             lblR1C4.Name = "lblR1C4";
-            lblR1C4.Size = new Size(170, 45);
+            lblR1C4.Size = new Size(169, 45);
             lblR1C4.TabIndex = 8;
             lblR1C4.Text = "0";
             lblR1C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2073,10 +2065,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR1C5.Dock = DockStyle.Fill;
             lblR1C5.Font = new Font("Segoe UI", 8F);
-            lblR1C5.Location = new Point(899, 53);
+            lblR1C5.Location = new Point(892, 53);
             lblR1C5.Margin = new Padding(0);
             lblR1C5.Name = "lblR1C5";
-            lblR1C5.Size = new Size(173, 45);
+            lblR1C5.Size = new Size(171, 45);
             lblR1C5.TabIndex = 9;
             lblR1C5.Text = "100.00%";
             lblR1C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2088,7 +2080,7 @@ namespace AssemblyLineTester.Views.Pages
             lblR2C1.Location = new Point(1, 99);
             lblR2C1.Margin = new Padding(0);
             lblR2C1.Name = "lblR2C1";
-            lblR2C1.Size = new Size(384, 45);
+            lblR2C1.Size = new Size(380, 45);
             lblR2C1.TabIndex = 10;
             lblR2C1.Text = "Short Circuit Test";
             lblR2C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2097,10 +2089,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR2C2.Dock = DockStyle.Fill;
             lblR2C2.Font = new Font("Segoe UI", 8F);
-            lblR2C2.Location = new Point(386, 99);
+            lblR2C2.Location = new Point(382, 99);
             lblR2C2.Margin = new Padding(0);
             lblR2C2.Name = "lblR2C2";
-            lblR2C2.Size = new Size(170, 45);
+            lblR2C2.Size = new Size(169, 45);
             lblR2C2.TabIndex = 11;
             lblR2C2.Text = "62";
             lblR2C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2109,10 +2101,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR2C3.Dock = DockStyle.Fill;
             lblR2C3.Font = new Font("Segoe UI", 8F);
-            lblR2C3.Location = new Point(557, 99);
+            lblR2C3.Location = new Point(552, 99);
             lblR2C3.Margin = new Padding(0);
             lblR2C3.Name = "lblR2C3";
-            lblR2C3.Size = new Size(170, 45);
+            lblR2C3.Size = new Size(169, 45);
             lblR2C3.TabIndex = 12;
             lblR2C3.Text = "62";
             lblR2C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2121,10 +2113,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR2C4.Dock = DockStyle.Fill;
             lblR2C4.Font = new Font("Segoe UI", 8F);
-            lblR2C4.Location = new Point(728, 99);
+            lblR2C4.Location = new Point(722, 99);
             lblR2C4.Margin = new Padding(0);
             lblR2C4.Name = "lblR2C4";
-            lblR2C4.Size = new Size(170, 45);
+            lblR2C4.Size = new Size(169, 45);
             lblR2C4.TabIndex = 13;
             lblR2C4.Text = "0";
             lblR2C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2133,10 +2125,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR2C5.Dock = DockStyle.Fill;
             lblR2C5.Font = new Font("Segoe UI", 8F);
-            lblR2C5.Location = new Point(899, 99);
+            lblR2C5.Location = new Point(892, 99);
             lblR2C5.Margin = new Padding(0);
             lblR2C5.Name = "lblR2C5";
-            lblR2C5.Size = new Size(173, 45);
+            lblR2C5.Size = new Size(171, 45);
             lblR2C5.TabIndex = 14;
             lblR2C5.Text = "100.00%";
             lblR2C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2148,7 +2140,7 @@ namespace AssemblyLineTester.Views.Pages
             lblR3C1.Location = new Point(1, 145);
             lblR3C1.Margin = new Padding(0);
             lblR3C1.Name = "lblR3C1";
-            lblR3C1.Size = new Size(384, 45);
+            lblR3C1.Size = new Size(380, 45);
             lblR3C1.TabIndex = 15;
             lblR3C1.Text = "Insulation Test";
             lblR3C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2157,10 +2149,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR3C2.Dock = DockStyle.Fill;
             lblR3C2.Font = new Font("Segoe UI", 8F);
-            lblR3C2.Location = new Point(386, 145);
+            lblR3C2.Location = new Point(382, 145);
             lblR3C2.Margin = new Padding(0);
             lblR3C2.Name = "lblR3C2";
-            lblR3C2.Size = new Size(170, 45);
+            lblR3C2.Size = new Size(169, 45);
             lblR3C2.TabIndex = 16;
             lblR3C2.Text = "62";
             lblR3C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2169,10 +2161,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR3C3.Dock = DockStyle.Fill;
             lblR3C3.Font = new Font("Segoe UI", 8F);
-            lblR3C3.Location = new Point(557, 145);
+            lblR3C3.Location = new Point(552, 145);
             lblR3C3.Margin = new Padding(0);
             lblR3C3.Name = "lblR3C3";
-            lblR3C3.Size = new Size(170, 45);
+            lblR3C3.Size = new Size(169, 45);
             lblR3C3.TabIndex = 17;
             lblR3C3.Text = "61";
             lblR3C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2182,10 +2174,10 @@ namespace AssemblyLineTester.Views.Pages
             lblR3C4.Dock = DockStyle.Fill;
             lblR3C4.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblR3C4.ForeColor = Color.FromArgb(220, 38, 38);
-            lblR3C4.Location = new Point(728, 145);
+            lblR3C4.Location = new Point(722, 145);
             lblR3C4.Margin = new Padding(0);
             lblR3C4.Name = "lblR3C4";
-            lblR3C4.Size = new Size(170, 45);
+            lblR3C4.Size = new Size(169, 45);
             lblR3C4.TabIndex = 18;
             lblR3C4.Text = "1";
             lblR3C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2195,10 +2187,10 @@ namespace AssemblyLineTester.Views.Pages
             lblR3C5.Dock = DockStyle.Fill;
             lblR3C5.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblR3C5.ForeColor = Color.FromArgb(220, 38, 38);
-            lblR3C5.Location = new Point(899, 145);
+            lblR3C5.Location = new Point(892, 145);
             lblR3C5.Margin = new Padding(0);
             lblR3C5.Name = "lblR3C5";
-            lblR3C5.Size = new Size(173, 45);
+            lblR3C5.Size = new Size(171, 45);
             lblR3C5.TabIndex = 19;
             lblR3C5.Text = "98.39%";
             lblR3C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2210,7 +2202,7 @@ namespace AssemblyLineTester.Views.Pages
             lblR4C1.Location = new Point(1, 191);
             lblR4C1.Margin = new Padding(0);
             lblR4C1.Name = "lblR4C1";
-            lblR4C1.Size = new Size(384, 45);
+            lblR4C1.Size = new Size(380, 45);
             lblR4C1.TabIndex = 20;
             lblR4C1.Text = "Functional Test";
             lblR4C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2219,10 +2211,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR4C2.Dock = DockStyle.Fill;
             lblR4C2.Font = new Font("Segoe UI", 8F);
-            lblR4C2.Location = new Point(386, 191);
+            lblR4C2.Location = new Point(382, 191);
             lblR4C2.Margin = new Padding(0);
             lblR4C2.Name = "lblR4C2";
-            lblR4C2.Size = new Size(170, 45);
+            lblR4C2.Size = new Size(169, 45);
             lblR4C2.TabIndex = 21;
             lblR4C2.Text = "62";
             lblR4C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2231,10 +2223,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR4C3.Dock = DockStyle.Fill;
             lblR4C3.Font = new Font("Segoe UI", 8F);
-            lblR4C3.Location = new Point(557, 191);
+            lblR4C3.Location = new Point(552, 191);
             lblR4C3.Margin = new Padding(0);
             lblR4C3.Name = "lblR4C3";
-            lblR4C3.Size = new Size(170, 45);
+            lblR4C3.Size = new Size(169, 45);
             lblR4C3.TabIndex = 22;
             lblR4C3.Text = "62";
             lblR4C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2243,10 +2235,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR4C4.Dock = DockStyle.Fill;
             lblR4C4.Font = new Font("Segoe UI", 8F);
-            lblR4C4.Location = new Point(728, 191);
+            lblR4C4.Location = new Point(722, 191);
             lblR4C4.Margin = new Padding(0);
             lblR4C4.Name = "lblR4C4";
-            lblR4C4.Size = new Size(170, 45);
+            lblR4C4.Size = new Size(169, 45);
             lblR4C4.TabIndex = 23;
             lblR4C4.Text = "0";
             lblR4C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2255,10 +2247,10 @@ namespace AssemblyLineTester.Views.Pages
             // 
             lblR4C5.Dock = DockStyle.Fill;
             lblR4C5.Font = new Font("Segoe UI", 8F);
-            lblR4C5.Location = new Point(899, 191);
+            lblR4C5.Location = new Point(892, 191);
             lblR4C5.Margin = new Padding(0);
             lblR4C5.Name = "lblR4C5";
-            lblR4C5.Size = new Size(173, 45);
+            lblR4C5.Size = new Size(171, 45);
             lblR4C5.TabIndex = 24;
             lblR4C5.Text = "100.00%";
             lblR4C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2271,7 +2263,7 @@ namespace AssemblyLineTester.Views.Pages
             lblR5C1.Location = new Point(1, 237);
             lblR5C1.Margin = new Padding(0);
             lblR5C1.Name = "lblR5C1";
-            lblR5C1.Size = new Size(384, 52);
+            lblR5C1.Size = new Size(380, 52);
             lblR5C1.TabIndex = 25;
             lblR5C1.Text = "Total";
             lblR5C1.TextAlign = ContentAlignment.MiddleLeft;
@@ -2281,10 +2273,10 @@ namespace AssemblyLineTester.Views.Pages
             lblR5C2.BackColor = Color.FromArgb(248, 250, 252);
             lblR5C2.Dock = DockStyle.Fill;
             lblR5C2.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblR5C2.Location = new Point(386, 237);
+            lblR5C2.Location = new Point(382, 237);
             lblR5C2.Margin = new Padding(0);
             lblR5C2.Name = "lblR5C2";
-            lblR5C2.Size = new Size(170, 52);
+            lblR5C2.Size = new Size(169, 52);
             lblR5C2.TabIndex = 26;
             lblR5C2.Text = "310";
             lblR5C2.TextAlign = ContentAlignment.MiddleCenter;
@@ -2294,10 +2286,10 @@ namespace AssemblyLineTester.Views.Pages
             lblR5C3.BackColor = Color.FromArgb(248, 250, 252);
             lblR5C3.Dock = DockStyle.Fill;
             lblR5C3.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblR5C3.Location = new Point(557, 237);
+            lblR5C3.Location = new Point(552, 237);
             lblR5C3.Margin = new Padding(0);
             lblR5C3.Name = "lblR5C3";
-            lblR5C3.Size = new Size(170, 52);
+            lblR5C3.Size = new Size(169, 52);
             lblR5C3.TabIndex = 27;
             lblR5C3.Text = "309";
             lblR5C3.TextAlign = ContentAlignment.MiddleCenter;
@@ -2308,10 +2300,10 @@ namespace AssemblyLineTester.Views.Pages
             lblR5C4.Dock = DockStyle.Fill;
             lblR5C4.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblR5C4.ForeColor = Color.FromArgb(220, 38, 38);
-            lblR5C4.Location = new Point(728, 237);
+            lblR5C4.Location = new Point(722, 237);
             lblR5C4.Margin = new Padding(0);
             lblR5C4.Name = "lblR5C4";
-            lblR5C4.Size = new Size(170, 52);
+            lblR5C4.Size = new Size(169, 52);
             lblR5C4.TabIndex = 28;
             lblR5C4.Text = "1";
             lblR5C4.TextAlign = ContentAlignment.MiddleCenter;
@@ -2321,10 +2313,10 @@ namespace AssemblyLineTester.Views.Pages
             lblR5C5.BackColor = Color.FromArgb(248, 250, 252);
             lblR5C5.Dock = DockStyle.Fill;
             lblR5C5.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblR5C5.Location = new Point(899, 237);
+            lblR5C5.Location = new Point(892, 237);
             lblR5C5.Margin = new Padding(0);
             lblR5C5.Name = "lblR5C5";
-            lblR5C5.Size = new Size(173, 52);
+            lblR5C5.Size = new Size(171, 52);
             lblR5C5.TabIndex = 29;
             lblR5C5.Text = "99.68%";
             lblR5C5.TextAlign = ContentAlignment.MiddleCenter;
@@ -2337,7 +2329,7 @@ namespace AssemblyLineTester.Views.Pages
             lblSumTableTitle.Location = new Point(0, 0);
             lblSumTableTitle.Margin = new Padding(6, 0, 6, 0);
             lblSumTableTitle.Name = "lblSumTableTitle";
-            lblSumTableTitle.Size = new Size(1073, 62);
+            lblSumTableTitle.Size = new Size(1064, 62);
             lblSumTableTitle.TabIndex = 0;
             lblSumTableTitle.Text = "TEST RESULT SUMMARY";
             // 
@@ -2355,7 +2347,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlResultBox.Name = "pnlResultBox";
             pnlResultBox.RowCount = 1;
             pnlResultBox.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            pnlResultBox.Size = new Size(1061, 70);
+            pnlResultBox.Size = new Size(1052, 70);
             pnlResultBox.TabIndex = 3;
             // 
             // lblResultTitle
@@ -2380,7 +2372,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPassBox.Location = new Point(282, 6);
             lblPassBox.Margin = new Padding(15, 6, 15, 0);
             lblPassBox.Name = "lblPassBox";
-            lblPassBox.Size = new Size(764, 64);
+            lblPassBox.Size = new Size(755, 64);
             lblPassBox.TabIndex = 1;
             lblPassBox.Text = "PASS";
             lblPassBox.TextAlign = ContentAlignment.MiddleCenter;
@@ -2398,7 +2390,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlNotesBox.RowCount = 2;
             pnlNotesBox.RowStyles.Add(new RowStyle(SizeType.Absolute, 41F));
             pnlNotesBox.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            pnlNotesBox.Size = new Size(1061, 230);
+            pnlNotesBox.Size = new Size(1052, 230);
             pnlNotesBox.TabIndex = 4;
             // 
             // lblNotesTitle
@@ -2409,7 +2401,7 @@ namespace AssemblyLineTester.Views.Pages
             lblNotesTitle.Location = new Point(0, 0);
             lblNotesTitle.Margin = new Padding(0);
             lblNotesTitle.Name = "lblNotesTitle";
-            lblNotesTitle.Size = new Size(1061, 41);
+            lblNotesTitle.Size = new Size(1052, 41);
             lblNotesTitle.TabIndex = 0;
             lblNotesTitle.Text = "NOTES";
             lblNotesTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -2422,7 +2414,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlNotesCard.Location = new Point(0, 60);
             pnlNotesCard.Margin = new Padding(0, 19, 0, 0);
             pnlNotesCard.Name = "pnlNotesCard";
-            pnlNotesCard.Size = new Size(1061, 170);
+            pnlNotesCard.Size = new Size(1052, 170);
             pnlNotesCard.TabIndex = 1;
             // 
             // lblNotesContent
@@ -2433,7 +2425,7 @@ namespace AssemblyLineTester.Views.Pages
             lblNotesContent.Location = new Point(0, 0);
             lblNotesContent.Margin = new Padding(0);
             lblNotesContent.Name = "lblNotesContent";
-            lblNotesContent.Size = new Size(1061, 170);
+            lblNotesContent.Size = new Size(1052, 170);
             lblNotesContent.TabIndex = 0;
             lblNotesContent.Text = "- All test parameters are within specification.";
             // 
@@ -2515,10 +2507,7 @@ namespace AssemblyLineTester.Views.Pages
             Size = new Size(4000, 2451);
             tblMain.ResumeLayout(false);
             pnlTopHeader.ResumeLayout(false);
-            splitLeftCenterRight.Panel1.ResumeLayout(false);
-            splitLeftCenterRight.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitLeftCenterRight).EndInit();
-            splitLeftCenterRight.ResumeLayout(false);
+            tblLeftCenterRight.ResumeLayout(false);
             splitMainTopBottom.Panel1.ResumeLayout(false);
             splitMainTopBottom.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitMainTopBottom).EndInit();
@@ -2590,7 +2579,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.SplitContainer splitMainTopBottom;
 
-        private System.Windows.Forms.SplitContainer splitLeftCenterRight;
+        private System.Windows.Forms.TableLayoutPanel tblLeftCenterRight;
 
         private System.Windows.Forms.Panel cardPreviewTop;
 
