@@ -65,6 +65,8 @@ namespace AssemblyLineTester.Views.Pages
             btnChangeProg = new Button();
             picHarness = new PictureBox();
             lblProgDetails = new Label();
+            lblProgColons = new Label();
+            lblProgKeys = new Label();
             lblActiveProgTitle = new Label();
             tblMiddle = new TableLayoutPanel();
             cardSummary = new Panel();
@@ -343,6 +345,8 @@ namespace AssemblyLineTester.Views.Pages
             cardActiveProg.Controls.Add(btnChangeProg);
             cardActiveProg.Controls.Add(picHarness);
             cardActiveProg.Controls.Add(lblProgDetails);
+            cardActiveProg.Controls.Add(lblProgColons);
+            cardActiveProg.Controls.Add(lblProgKeys);
             cardActiveProg.Controls.Add(lblActiveProgTitle);
             cardActiveProg.Dock = DockStyle.Fill;
             cardActiveProg.Location = new Point(1708, 10);
@@ -385,12 +389,36 @@ namespace AssemblyLineTester.Views.Pages
             lblProgDetails.AutoSize = true;
             lblProgDetails.Font = new Font("Segoe UI", 9F);
             lblProgDetails.ForeColor = Color.FromArgb(51, 65, 85);
-            lblProgDetails.Location = new Point(24, 72);
+            lblProgDetails.Location = new Point(244, 72);
             lblProgDetails.Margin = new Padding(5, 0, 5, 0);
             lblProgDetails.Name = "lblProgDetails";
-            lblProgDetails.Size = new Size(326, 160);
-            lblProgDetails.TabIndex = 1;
-            lblProgDetails.Text = "Product Model : 6060\r\nProduct Type  : AC\r\nArea          : Engine Control\r\nPart Number   : WH-ENG-001\r\nECN No.       : 123.R001";
+            lblProgDetails.Size = new Size(158, 160);
+            lblProgDetails.TabIndex = 5;
+            lblProgDetails.Text = "WH-ENG-001\r\n6060\r\n45\r\nAdmin\r\n123.R001";
+            // 
+            // lblProgColons
+            // 
+            lblProgColons.AutoSize = true;
+            lblProgColons.Font = new Font("Segoe UI", 9F);
+            lblProgColons.ForeColor = Color.FromArgb(51, 65, 85);
+            lblProgColons.Location = new Point(206, 72);
+            lblProgColons.Margin = new Padding(5, 0, 5, 0);
+            lblProgColons.Name = "lblProgColons";
+            lblProgColons.Size = new Size(19, 160);
+            lblProgColons.TabIndex = 4;
+            lblProgColons.Text = ":\r\n:\r\n:\r\n:\r\n:";
+            // 
+            // lblProgKeys
+            // 
+            lblProgKeys.AutoSize = true;
+            lblProgKeys.Font = new Font("Segoe UI", 9F);
+            lblProgKeys.ForeColor = Color.FromArgb(51, 65, 85);
+            lblProgKeys.Location = new Point(24, 72);
+            lblProgKeys.Margin = new Padding(5, 0, 5, 0);
+            lblProgKeys.Name = "lblProgKeys";
+            lblProgKeys.Size = new Size(172, 160);
+            lblProgKeys.TabIndex = 1;
+            lblProgKeys.Text = "Config Name\r\nProduct Model\r\nTotal Test\r\nCreated By\r\nLast Update";
             // 
             // lblActiveProgTitle
             // 
@@ -1201,6 +1229,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.PictureBox picHarness;
 
+        private System.Windows.Forms.Label lblProgKeys;
+        private System.Windows.Forms.Label lblProgColons;
         private System.Windows.Forms.Label lblProgDetails;
 
         private System.Windows.Forms.Label lblActiveProgTitle;

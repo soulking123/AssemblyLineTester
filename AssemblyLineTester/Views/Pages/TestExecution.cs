@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Data;
+using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
@@ -44,7 +44,6 @@ namespace AssemblyLineTester.Views.Pages
         public TestExecution()
         {
             InitializeComponent();
-            SetupFilterDropdowns();
             SetupGridLiveDetails();
             SetupDiagramPointers();
             btnLoadProgram.Click += BtnLoadProgram_Click;
@@ -84,6 +83,12 @@ namespace AssemblyLineTester.Views.Pages
         private void SetupTimer()
         {
             _elapsedTimer.Interval = 1000;
+            _elapsedTimer.Tick += ElapsedTimer_Tick;
+        }
+
+        private void ElapsedTimer_Tick(object? sender, EventArgs e)
+        {
+            lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
         private void OnTestFinishedSuccessfully()
@@ -102,32 +107,10 @@ namespace AssemblyLineTester.Views.Pages
             // Shown on screen, never stored, so local time is the right choice here.
             _endTime = DateTime.Now;
             lblEndTimeVal.Text = _endTime.ToString("dd MMM yyyy hh:mm:ss tt");
+            lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
-        // Fills the Product Model, Type, Area, Part Number and ECN dropdowns.
-        private void SetupFilterDropdowns()
-        {
-            cmbProductModel.Items.Clear();
-            cmbProductModel.Items.AddRange(new object[] { "6060", "6070", "8080", "9090" });
-            cmbProductModel.SelectedIndex = 0;
 
-            cmbProductType.Items.Clear();
-            cmbProductType.Items.AddRange(new object[] { "AC", "DC", "Hybrid" });
-            cmbProductType.SelectedIndex = 0;
-
-            cmbArea.Items.Clear();
-            cmbArea.Items.Clear();
-            cmbArea.Items.AddRange(new object[] { "Engine Control", "Cabin Interior", "Chassis", "Dashboard" });
-            cmbArea.SelectedIndex = 0;
-
-            cmbPartNumber.Items.Clear();
-            cmbPartNumber.Items.AddRange(new object[] { "WH-ENG-001", "WH-ENG-002", "WH-CAB-005", "WH-CHS-010" });
-            cmbPartNumber.SelectedIndex = 0;
-
-            cmbEcnNo.Items.Clear();
-            cmbEcnNo.Items.AddRange(new object[] { "123.R001", "123.R002", "124.R000" });
-            cmbEcnNo.SelectedIndex = 0;
-        }
 
         // Rebuilds the live grid header after the result-column ticks were saved in Settings.
         public void ReloadResultColumns() => SetupGridLiveDetails();
@@ -289,8 +272,8 @@ namespace AssemblyLineTester.Views.Pages
 
                     var reportService = new TestReportService();
                     _currentReportId = reportService.SaveDraftLiveTestReport(
-                        cmbProductModel.Text, cmbProductType.Text, cmbArea.Text, cmbEcnNo.Text, "1.0",
-                        cmbPartNumber.Text, AppTime.UtcNow, _loadedRows, overallResult);
+                        activeConfig.ProductModel, "N/A", "N/A", "N/A", "1.0",
+                        "N/A", AppTime.UtcNow, _loadedRows, overallResult);
 
                     //ShowSummary(_loadedRows, overallResult);
 
@@ -306,6 +289,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (token.IsCancellationRequested) return;
                 lblStatusRunning.Text = "Finished";
                 lblStatusRunning.ForeColor = Color.Green;
+                lblElapsedTimeVal.Text = "00:00:00";
 
                 OnTestFinishedSuccessfully();
 
@@ -622,6 +606,7 @@ namespace AssemblyLineTester.Views.Pages
                     lblStatusRunning.ForeColor = Color.Red;
                     StopTestTiming();
                     lblStartTimeVal.Text = "-";
+                    lblElapsedTimeVal.Text = "-";
                     lblEndTimeVal.Text = "-";
                     listBoxTestSummary.Items.Clear();
                     gridLiveDetails.Rows.Clear();
@@ -664,14 +649,17 @@ namespace AssemblyLineTester.Views.Pages
             bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
             string overallResult = allPass ? "PASS" : "FAIL";
 
+            TestConfiguration? activeConfig = _configService.GetActiveConfig();
+            string productModel = activeConfig?.ProductModel ?? "N/A";
+
             using var modal = new AssemblyLineTester.Views.Modals.SaveTestReportModalForm(
-                cmbProductModel.Text,
-                cmbEcnNo.Text,
-                cmbProductType.Text,
+                productModel,
+                "N/A",
+                "N/A",
                 "1.0",
-                cmbArea.Text,
+                "N/A",
                 SessionManager.CurrentUser?.FullName ?? "Unknown",
-                cmbPartNumber.Text,
+                "N/A",
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
                 AppTime.UtcNow,
@@ -927,7 +915,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private void SetupEvents()
         {
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlFilterCard, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardMachineOverview, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardAreaDetail, 12, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardHarnessConn, 12, Color.FromArgb(34, 40, 49), 2.5f);

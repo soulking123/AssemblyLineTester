@@ -60,7 +60,13 @@ namespace AssemblyLineTester.Services
             var existing = db.DefaultTestSettings.AsNoTracking().OrderBy(d => d.Id).FirstOrDefault();
             if (existing != null) return existing;
 
-            var seeded = new DefaultTestSetting();
+            // DefaultTestTypeId is a required foreign key, so the zero a new object starts with
+            // points at a TestType that cannot exist and the insert is refused. The first seeded
+            // type stands in until the operator picks one on the Settings card.
+            int firstTypeId = db.TestTypes.AsNoTracking().OrderBy(t => t.Id).Select(t => t.Id).FirstOrDefault();
+            if (firstTypeId == 0) return new DefaultTestSetting();
+
+            var seeded = new DefaultTestSetting { DefaultTestTypeId = firstTypeId };
             db.DefaultTestSettings.Add(seeded);
             db.SaveChanges();
             return seeded;
@@ -85,12 +91,18 @@ namespace AssemblyLineTester.Services
                 var row = db.DefaultTestSettings.OrderBy(d => d.Id).FirstOrDefault();
                 if (row == null)
                 {
-                    row = new DefaultTestSetting();
+                    row = new DefaultTestSetting
+                    {
+                        DefaultTestTypeId = db.TestTypes.AsNoTracking().OrderBy(t => t.Id).Select(t => t.Id).FirstOrDefault()
+                    };
                     db.DefaultTestSettings.Add(row);
                 }
 
                 row.TotalTestPointsAvailable = values.TotalTestPointsAvailable;
-                row.DefaultTestTypeId = values.DefaultTestTypeId;
+
+                // Zero means nothing was selected, and the foreign key has no row to point at.
+                // Keeping the stored type is better than refusing the whole save over it.
+                if (values.DefaultTestTypeId > 0) row.DefaultTestTypeId = values.DefaultTestTypeId;
                 row.DefaultMaxWireResistance = values.DefaultMaxWireResistance;
                 row.DefaultWireInstallationResistance = values.DefaultWireInstallationResistance;
                 row.DefaultResistorValue = values.DefaultResistorValue;
