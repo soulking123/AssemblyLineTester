@@ -138,11 +138,11 @@ namespace AssemblyLineTester.Services
             }
             if (roleId == 3) // Engineer
             {
-                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.TestConfig.Edit" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Reports.Edit" or "Action.TestHistory.Delete" or "Action.Maintenance.Reset";
+                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.TestConfig.Edit" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Reports.Edit" or "Action.TestHistory.Delete" or "Action.Maintenance.Reset" or "Action.HarnessDatabase.Edit" or "Action.Settings.Edit";
             }
             if (roleId == 4) // Technician
             {
-                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Maintenance.Reset";
+                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.SystemLog" or "Page.Settings" or "Action.TestExecution.Run" or "Action.Instruments.Calibrate" or "Action.Reports.Export" or "Action.Maintenance.Reset" or "Action.HarnessDatabase.Edit";
             }
             if (roleId == 5) // Quality
             {
@@ -178,7 +178,9 @@ namespace AssemblyLineTester.Services
                 // Appended, never slotted mid-list: seed ids follow position and would renumber.
                 ("Action.Reports.Edit", "System & Logs", "Amend and Delete Saved Test Reports"),
                 ("Action.TestHistory.Delete", "System & Logs", "Delete Test History Records"),
-                ("Action.Maintenance.Reset", "System & Logs", "Reset the Maintenance Countdown")
+                ("Action.Maintenance.Reset", "System & Logs", "Reset the Maintenance Countdown"),
+                ("Action.HarnessDatabase.Edit", "Test Operations", "Add, Edit, and Delete Harnesses and Connectors"),
+                ("Action.Settings.Edit", "System & Logs", "Change Default Test Settings")
             };
         }
     }

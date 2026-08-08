@@ -1,4 +1,4 @@
-namespace AssemblyLineTester.Views.Pages
+﻿namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -50,9 +50,9 @@ namespace AssemblyLineTester.Views.Pages
             lblModule = new Label();
             cmbModule = new ComboBox();
             lblUser = new Label();
-            cmbUser = new ComboBox();
+            txtUser = new TextBox();
             lblAction = new Label();
-            cmbAction = new ComboBox();
+            txtAction = new TextBox();
             lblKeyword = new Label();
             txtKeyword = new TextBox();
             flpActionButtons = new FlowLayoutPanel();
@@ -174,9 +174,9 @@ namespace AssemblyLineTester.Views.Pages
             tblFilterInputs.Controls.Add(lblModule, 2, 0);
             tblFilterInputs.Controls.Add(cmbModule, 2, 1);
             tblFilterInputs.Controls.Add(lblUser, 3, 0);
-            tblFilterInputs.Controls.Add(cmbUser, 3, 1);
+            tblFilterInputs.Controls.Add(txtUser, 3, 1);
             tblFilterInputs.Controls.Add(lblAction, 4, 0);
-            tblFilterInputs.Controls.Add(cmbAction, 4, 1);
+            tblFilterInputs.Controls.Add(txtAction, 4, 1);
             tblFilterInputs.Controls.Add(lblKeyword, 5, 0);
             tblFilterInputs.Controls.Add(txtKeyword, 5, 1);
             tblFilterInputs.Dock = DockStyle.Fill;
@@ -326,19 +326,15 @@ namespace AssemblyLineTester.Views.Pages
             lblUser.Text = "User";
             lblUser.TextAlign = ContentAlignment.BottomLeft;
             // 
-            // cmbUser
+            // txtUser
             // 
-            cmbUser.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            cmbUser.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbUser.FlatStyle = FlatStyle.System;
-            cmbUser.Font = new Font("Segoe UI", 9.5F);
-            cmbUser.FormattingEnabled = true;
-            cmbUser.Items.AddRange(new object[] { "All", "System", "Fally" });
-            cmbUser.Location = new Point(1198, 70);
-            cmbUser.Margin = new Padding(4);
-            cmbUser.Name = "cmbUser";
-            cmbUser.Size = new Size(291, 43);
-            cmbUser.TabIndex = 11;
+            txtUser.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtUser.Font = new Font("Segoe UI", 9.5F);
+            txtUser.Location = new Point(1198, 70);
+            txtUser.Margin = new Padding(4);
+            txtUser.Name = "txtUser";
+            txtUser.Size = new Size(291, 43);
+            txtUser.TabIndex = 11;
             // 
             // lblAction
             // 
@@ -354,19 +350,15 @@ namespace AssemblyLineTester.Views.Pages
             lblAction.Text = "Action";
             lblAction.TextAlign = ContentAlignment.BottomLeft;
             // 
-            // cmbAction
+            // txtAction
             // 
-            cmbAction.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            cmbAction.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbAction.FlatStyle = FlatStyle.System;
-            cmbAction.Font = new Font("Segoe UI", 9.5F);
-            cmbAction.FormattingEnabled = true;
-            cmbAction.Items.AddRange(new object[] { "All", "Start Test", "Load Program", "Step Complete", "Test Complete", "Update", "Connection Lost", "Reconnected", "Login", "Backup" });
-            cmbAction.Location = new Point(1497, 70);
-            cmbAction.Margin = new Padding(4);
-            cmbAction.Name = "cmbAction";
-            cmbAction.Size = new Size(291, 43);
-            cmbAction.TabIndex = 13;
+            txtAction.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtAction.Font = new Font("Segoe UI", 9.5F);
+            txtAction.Location = new Point(1497, 70);
+            txtAction.Margin = new Padding(4);
+            txtAction.Name = "txtAction";
+            txtAction.Size = new Size(291, 43);
+            txtAction.TabIndex = 13;
             // 
             // lblKeyword
             // 
@@ -881,11 +873,11 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.Label lblUser;
 
-        private System.Windows.Forms.ComboBox cmbUser;
+        private System.Windows.Forms.TextBox txtUser;
 
         private System.Windows.Forms.Label lblAction;
 
-        private System.Windows.Forms.ComboBox cmbAction;
+        private System.Windows.Forms.TextBox txtAction;
 
         private System.Windows.Forms.Label lblKeyword;
 

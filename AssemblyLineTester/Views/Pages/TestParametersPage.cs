@@ -610,6 +610,17 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        // Action.TestExecution.Run was in the permission matrix from the start but nothing read it,
+        // so switching it off changed nothing. Both start paths route through here.
+        private bool CheckRunPermission()
+        {
+            if (SessionManager.HasPermission("Action.TestExecution.Run")) return true;
+
+            MessageBox.Show("You do not have permission to run tests.", "Access Denied",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
         private bool CheckEditPermission()
         {
             if (!SessionManager.HasPermission("Action.TestConfig.Edit"))
@@ -1743,6 +1754,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void btnStartAll_Click(object? sender, EventArgs e)
         {
+            if (!CheckRunPermission()) return;
+
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
@@ -1786,6 +1799,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private async void btnStartSelected_Click(object? sender, EventArgs e)
         {
+            if (!CheckRunPermission()) return;
+
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;

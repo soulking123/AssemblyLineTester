@@ -429,6 +429,10 @@ namespace AssemblyLineTester.Views.Pages
             btnCancelMaintenance.Visible = editable;
             btnUpdateMaintenance.Visible = editable;
             lblEditHint.Visible = editable;
+
+            // Reset would overwrite the figures being typed with the stored interval, so the two
+            // actions cannot be offered at the same time.
+            btnResetMaintenance.Enabled = !editable;
         }
 
         // Single path to the countdown, so every change is permission-checked and logged once.
@@ -524,7 +528,10 @@ namespace AssemblyLineTester.Views.Pages
             _btnSaveTicks = BuildCardButton("💾  Save", Color.FromArgb(250, 204, 21), Color.FromArgb(30, 41, 59));
             _btnCancelTicks = BuildCardButton("Cancel", Color.FromArgb(241, 245, 249), Color.FromArgb(71, 85, 105));
 
-            _btnEditTicks.Click += (s, e) => SetTickListsEditable(true);
+            _btnEditTicks.Click += (s, e) =>
+            {
+                if (HasSettingsEditPermission()) SetTickListsEditable(true);
+            };
             _btnCancelTicks.Click += (s, e) => { ReloadTickLists(); SetTickListsEditable(false); };
             _btnSaveTicks.Click += BtnSaveTicks_Click;
 
@@ -628,8 +635,18 @@ namespace AssemblyLineTester.Views.Pages
         }
 
         // Writes all three tick lists, then pushes them into the pages already built from them.
+        private static bool HasSettingsEditPermission()
+        {
+            if (SessionManager.HasPermission("Action.Settings.Edit")) return true;
+            MessageBox.Show("You do not have permission to change the default test settings.",
+                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
         private void BtnSaveTicks_Click(object? sender, EventArgs e)
         {
+            if (!HasSettingsEditPermission()) return;
+
             bool allSaved = true;
 
             allSaved &= TestSettingService.SaveTestTypeChecks(_typeBoxes.Select(t => (t.Id, t.Box.Checked)));
