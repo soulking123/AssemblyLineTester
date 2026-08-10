@@ -17,11 +17,13 @@ namespace AssemblyLineTester.Helpers
         // Name of the PC, carried on every log line.
         public static string MachineName { get; } = SafeMachineName();
 
+        private static readonly Lazy<IReadOnlyList<string>> _machineIds = new(() => ReadMachineIds());
+
         // MAC addresses of the physical adapters; a licence is locked to one of these.
-        public static IReadOnlyList<string> MachineIds { get; } = ReadMachineIds();
+        public static IReadOnlyList<string> MachineIds => _machineIds.Value;
 
         // The one quoted when requesting a licence, and shown on the Settings page.
-        public static string PrimaryMachineId { get; } = MachineIds.Count > 0 ? MachineIds[0] : "";
+        public static string PrimaryMachineId => MachineIds.Count > 0 ? MachineIds[0] : "";
 
         // ProgramData, not LocalApplicationData: logs must survive the next shift's Windows user.
         public static string DataDirectory { get; } = Path.Combine(

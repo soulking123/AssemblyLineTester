@@ -62,16 +62,19 @@ namespace AssemblyLineTester.Views.Pages
         }
 
         // Fills the status card from the process, the database file and the data folder.
-        private void LoadSystemStatus()
+        private async void LoadSystemStatus()
         {
             lblStValApp.Text = $"Running {AppInfo.Version}";
             lblStValApp.ForeColor = Ok;
 
-            var (dbText, dbOk) = DescribeDatabase();
+            var (dbText, dbOk) = await System.Threading.Tasks.Task.Run(() => DescribeDatabase());
+            var (fileText, fileOk) = await System.Threading.Tasks.Task.Run(() => DescribeFileStorage());
+
+            if (this.IsDisposed) return;
+
             lblStValDb.Text = dbText;
             lblStValDb.ForeColor = dbOk ? Ok : Bad;
 
-            var (fileText, fileOk) = DescribeFileStorage();
             lblStValFile.Text = fileText;
             lblStValFile.ForeColor = fileOk ? Ok : Bad;
 
@@ -137,17 +140,23 @@ namespace AssemblyLineTester.Views.Pages
         }
 
         // Fills the licence card and the status row from the signed licence on disk.
-        private void LoadLicenseInfo()
+        private async void LoadLicenseInfo()
         {
-            var (result, payload) = LicenseService.Validate();
+            var (result, payload) = await System.Threading.Tasks.Task.Run(() => LicenseService.Validate());
+
+            // Read machine IDs off the UI thread to prevent blocking
+            var machineIdsCount = await System.Threading.Tasks.Task.Run(() => AppInfo.MachineIds.Count);
+            var primaryMachineId = await System.Threading.Tasks.Task.Run(() => AppInfo.PrimaryMachineId);
+
+            if (this.IsDisposed) return;
 
             bool valid = result == LicenseValidationResult.Valid;
             lblStValLic.Text = DescribeLicenseStatus(result);
             lblStValLic.ForeColor = valid ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38);
 
-            lblLicValKey.Text = AppInfo.MachineIds.Count > 0
-                ? AppInfo.FormatMachineId(AppInfo.PrimaryMachineId)
-                : "No physical adapter found";
+            lblLicValKey.Text = machineIdsCount > 0
+               ? AppInfo.FormatMachineId(primaryMachineId)
+               : "No physical adapter found";
 
             if (payload == null)
             {

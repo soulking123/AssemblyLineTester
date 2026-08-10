@@ -33,6 +33,7 @@ namespace AssemblyLineTester.Views
         private Reports? pageReports;
         private Settings? pageSettings;
         private UserManagement? pageUserManagement;
+        private System.Threading.Tasks.Task? _settingsPreloadTask;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -55,6 +56,35 @@ namespace AssemblyLineTester.Views
             }
 
             StartMaintenanceWatch();
+
+            // Start preloading the Settings page in the background
+            _settingsPreloadTask = System.Threading.Tasks.Task.Run(async () =>
+            {
+                var data = new AssemblyLineTester.Models.SettingsPreloadData();
+                var task1 = System.Threading.Tasks.Task.Run(() => data.TestTypes = AssemblyLineTester.Services.TestSettingService.GetTestTypes());
+                var task2 = System.Threading.Tasks.Task.Run(() => data.TestTypeChecks = AssemblyLineTester.Services.TestSettingService.GetTestTypeChecks());
+                var task3 = System.Threading.Tasks.Task.Run(() => data.LearnConnections = AssemblyLineTester.Services.TestSettingService.GetLearnConnections());
+                var task4 = System.Threading.Tasks.Task.Run(() => data.TestResultChecks = AssemblyLineTester.Services.TestSettingService.GetTestResultChecks());
+                await System.Threading.Tasks.Task.WhenAll(task1, task2, task3, task4);
+
+                var tcs = new System.Threading.Tasks.TaskCompletionSource<bool>();
+                this.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (pageSettings == null)
+                        {
+                            pageSettings = new Settings(data);
+                        }
+                        tcs.SetResult(true);
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                    }
+                }));
+                await tcs.Task;
+            });
         }
 
         private System.Windows.Forms.Timer? _maintenanceWatch;
@@ -329,7 +359,7 @@ namespace AssemblyLineTester.Views
 
         // ponytail: timing left in on purpose while page-switch lag is being chased. Remove the
         // three Stopwatch lines once the numbers stop being interesting.
-        private void BtnMenu_Click(object sender, EventArgs e)
+        private async void BtnMenu_Click(object sender, EventArgs e)
         {
             if (sender is not AssemblyLineTester.Views.Controls.MenuButton clickedButton) return;
 
@@ -340,6 +370,10 @@ namespace AssemblyLineTester.Views
             built.Stop();
 
             var shown = System.Diagnostics.Stopwatch.StartNew();
+            if (clickedButton.Name == "btnSettings" && pageSettings == null && _settingsPreloadTask != null)
+            {
+                try { await _settingsPreloadTask; } catch { }
+            }
             SetActiveMenu(clickedButton, targetPage);
             shown.Stop();
 
