@@ -1,4 +1,4 @@
-﻿
+
 using AssemblyLineTester.Services;
 using FontAwesome.Sharp;
 using System;
@@ -130,6 +130,28 @@ namespace AssemblyLineTester.Views.Pages
                 LoadTestTypeColumnItems();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
+                LoadProductModels();
+            }
+        }
+
+        private void LoadProductModels()
+        {
+            try
+            {
+                using var db = new Data.AppDbContext();
+                var models = db.ProductHarnesses
+                    .Select(p => p.ProductModel)
+                    .Where(m => !string.IsNullOrEmpty(m))
+                    .Distinct()
+                    .OrderBy(m => m)
+                    .ToArray();
+                
+                txtProductModel.Items.Clear();
+                txtProductModel.Items.AddRange(models);
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("TestParametersPage.LoadProductModels", "Failed to load product models", ex);
             }
         }
         private void EnableDoubleBuffering()
@@ -282,7 +304,7 @@ namespace AssemblyLineTester.Views.Pages
                 found[label] = sheet.Cell(r, 2).GetString().Trim();
             }
 
-            void Apply(TextBox box, string label)
+            void Apply(Control box, string label)
             {
                 if (found.TryGetValue(label, out string? value) && !string.IsNullOrWhiteSpace(value)) box.Text = value;
             }
