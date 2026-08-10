@@ -1,4 +1,4 @@
-﻿namespace AssemblyLineTester.Views.Pages
+namespace AssemblyLineTester.Views.Pages
 {
     partial class TestParametersPage
     {
@@ -57,7 +57,7 @@
             txtConfigName = new TextBox();
             tblCellProductModel = new TableLayoutPanel();
             lblProductModel = new Label();
-            txtProductModel = new TextBox();
+            txtProductModel = new ComboBox();
             tblCellConnRes = new TableLayoutPanel();
             lblConnectionResistance = new Label();
             txtConnectionResistance = new TextBox();
@@ -488,6 +488,7 @@
             lblProductModel.Size = new Size(112, 20);
             lblProductModel.TabIndex = 0;
             lblProductModel.Text = "Product Model";
+            // 
             // 
             // txtProductModel
             // 
@@ -999,7 +1000,7 @@
         private Label lblConnectionResistance;
         private Label lblInsulationResistance;
         internal TextBox txtConfigName;
-        internal TextBox txtProductModel;
+        internal ComboBox txtProductModel;
         internal TextBox txtConnectionResistance;
         internal TextBox txtInsulationResistance;
         private Panel pnlConfigInfoHeader;
