@@ -427,8 +427,7 @@ namespace AssemblyLineTester.Views.Pages
             PopulateTestTypes();
             PopulateTestResultColumns();
             LoadDefaultTestSettings();
-            BuildTickListEditButtons();
-            SetTickListsEditable(false);
+
             SetupMaintenanceEvents();
         }
 
