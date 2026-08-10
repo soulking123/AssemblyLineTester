@@ -647,12 +647,29 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!HasSettingsEditPermission()) return;
 
+            var defaults = ReadDefaultsFromCard();
+
+            // Checked before anything is written: the tick lists save first, so rejecting the
+            // defaults afterwards would leave the card half-saved.
+            if (defaults.TotalTestPointsAvailable % 2 != 0)
+            {
+                MessageBox.Show(
+                    $"Total Test Point Available must be an even number.\r\n\r\n" +
+                    $"{defaults.TotalTestPointsAvailable} is odd. Test points are wired in pairs, " +
+                    $"so one point would be left with nothing to test against.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                txtTotalTestPoint.Focus();
+                txtTotalTestPoint.SelectAll();
+                return;
+            }
+
             bool allSaved = true;
 
             allSaved &= TestSettingService.SaveTestTypeChecks(_typeBoxes.Select(t => (t.Id, t.Box.Checked)));
             allSaved &= TestSettingService.SaveLearnConnectionChecks(_learnBoxes.Select(t => (t.Id, t.Box.Checked)));
             allSaved &= TestSettingService.SaveTestResultChecks(_resultBoxes.Select(t => (t.Id, t.Box.Checked)));
-            allSaved &= TestSettingService.SaveDefaults(ReadDefaultsFromCard());
+            allSaved &= TestSettingService.SaveDefaults(defaults);
 
             if (!allSaved)
             {
