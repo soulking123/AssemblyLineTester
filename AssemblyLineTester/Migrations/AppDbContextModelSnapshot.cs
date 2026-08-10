@@ -70,6 +70,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("TestTypeId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("TestTypeValue")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TestTypeId");
@@ -82,35 +85,40 @@ namespace AssemblyLineTester.Migrations
                             Id = 1,
                             DisplayName = "Wire",
                             IsChecked = true,
-                            TestTypeId = 15
+                            TestTypeId = 15,
+                            TestTypeValue = 0
                         },
                         new
                         {
                             Id = 2,
                             DisplayName = "Resistance",
                             IsChecked = true,
-                            TestTypeId = 11
+                            TestTypeId = 11,
+                            TestTypeValue = 1
                         },
                         new
                         {
                             Id = 3,
                             DisplayName = "Capacitor",
                             IsChecked = true,
-                            TestTypeId = 3
+                            TestTypeId = 3,
+                            TestTypeValue = 2
                         },
                         new
                         {
                             Id = 4,
                             DisplayName = "Diode",
                             IsChecked = true,
-                            TestTypeId = 6
+                            TestTypeId = 6,
+                            TestTypeValue = 4
                         },
                         new
                         {
                             Id = 5,
                             DisplayName = "Twisted Pair",
                             IsChecked = true,
-                            TestTypeId = 14
+                            TestTypeId = 14,
+                            TestTypeValue = 8
                         });
                 });
 

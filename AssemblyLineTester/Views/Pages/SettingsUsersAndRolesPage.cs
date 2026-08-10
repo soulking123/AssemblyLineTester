@@ -166,6 +166,8 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PopulatePermissionGrid(TableLayoutPanel container, List<RolePermission> perms, bool isAdmin)
         {
+            AddMissingToggles(container, perms);
+
             foreach (CheckBox chk in container.Controls.OfType<CheckBox>())
             {
                 string permKey = chk.Tag?.ToString() ?? string.Empty;
@@ -183,8 +185,46 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void AdjustCardHeights()
+        // A permission key added after this page was drawn has no designer checkbox, so one is built
+        // here instead - otherwise the key is stuck at its seeded default with no way to change it.
+        private static void AddMissingToggles(TableLayoutPanel container, List<RolePermission> perms)
         {
+            var existing = container.Controls.OfType<CheckBox>().ToList();
+            if (existing.Count == 0) return;
+
+            var tagged = existing.Select(c => c.Tag?.ToString()).ToHashSet();
+            var missing = perms.Where(p => !tagged.Contains(p.PermissionKey)).ToList();
+            if (missing.Count == 0) return;
+
+            var template = existing[0];
+            int slot = existing.Count;
+
+            container.SuspendLayout();
+            foreach (var rp in missing)
+            {
+                var chk = new CheckBox
+                {
+                    AutoSize = true,
+                    Font = template.Font,
+                    ForeColor = template.ForeColor,
+                    Margin = template.Margin,
+                    Tag = rp.PermissionKey,
+                    Text = rp.Description,
+                    UseVisualStyleBackColor = true
+                };
+
+                // Row 0 holds the card title, so the toggles start one row down.
+                int row = slot / container.ColumnCount + 1;
+                while (container.RowCount < row + 1)
+                {
+                    container.RowStyles.Add(new RowStyle());
+                    container.RowCount++;
+                }
+
+                container.Controls.Add(chk, slot % container.ColumnCount, row);
+                slot++;
+            }
+            container.ResumeLayout(true);
         }
 
         private async void BtnSaveChanges_Click(object? sender, EventArgs e)

@@ -59,6 +59,8 @@ namespace AssemblyLineTester.Services
         // Applies the toggle states for one role, refreshing the session if it is the active role.
         public void UpdatePermissions(int roleId, Dictionary<string, bool> updatedToggles)
         {
+            RequireUserManagementRights();
+
             // Administrator can never lose Settings or User Management, or nobody can undo it.
             if (roleId == 1)
             {
@@ -103,6 +105,8 @@ namespace AssemblyLineTester.Services
         // Puts every permission for one role back to its shipped default.
         public void ResetRoleToDefaults(int roleId)
         {
+            RequireUserManagementRights();
+
             using var db = new AppDbContext();
             var existing = db.RolePermissions.Where(rp => rp.RoleId == roleId).ToList();
 
@@ -125,6 +129,15 @@ namespace AssemblyLineTester.Services
             {
                 SessionManager.RefreshPermissions();
                 System.Windows.Forms.Application.OpenForms.OfType<AssemblyLineTester.Views.MainForm>().FirstOrDefault()?.ApplyRolePermissions();
+            }
+        }
+
+        // Rewriting a role's rights is user management, not a settings tweak: Page.Settings is not enough.
+        private static void RequireUserManagementRights()
+        {
+            if (!SessionManager.HasPermission("Action.UserManagement.Edit"))
+            {
+                throw new UnauthorizedAccessException("Access denied. You are not allowed to change role permissions.");
             }
         }
 
@@ -152,7 +165,10 @@ namespace AssemblyLineTester.Services
             {
                 return key is "Page.Dashboard" or "Page.TestExecution" or "Page.HarnessDatabase" or "Page.TestHistory" or "Page.Reports" or "Page.SystemLog" or "Action.TestExecution.Run" or "Action.Reports.Export" or "Action.Reports.Edit" or "Action.TestHistory.Delete";
             }
-            return false;
+            // A role beyond the six shipped ones starts at the lowest useful rung rather than at
+            // nothing, so Reset Defaults cannot strip it down to an account that cannot sign in
+            // anywhere. Everything past the Dashboard is granted deliberately.
+            return key == "Page.Dashboard";
         }
 
         public static (string Key, string Group, string Description)[] GetStandardPermissionDefinitions()

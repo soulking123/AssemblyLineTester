@@ -280,11 +280,11 @@ namespace AssemblyLineTester.Data
 
             // The five types the Learn Connection modal offers, pointed at their TestType rows.
             modelBuilder.Entity<LearnConnection>().HasData(
-                new LearnConnection { Id = 1, TestTypeId = 15, DisplayName = "Wire", IsChecked = true },
-                new LearnConnection { Id = 2, TestTypeId = 11, DisplayName = "Resistance", IsChecked = true },
-                new LearnConnection { Id = 3, TestTypeId = 3, DisplayName = "Capacitor", IsChecked = true },
-                new LearnConnection { Id = 4, TestTypeId = 6, DisplayName = "Diode", IsChecked = true },
-                new LearnConnection { Id = 5, TestTypeId = 14, DisplayName = "Twisted Pair", IsChecked = true }
+                new LearnConnection { Id = 1, TestTypeId = 15, DisplayName = "Wire", IsChecked = true, TestTypeValue = 0 },
+                new LearnConnection { Id = 2, TestTypeId = 11, DisplayName = "Resistance", IsChecked = true, TestTypeValue = 1 },
+                new LearnConnection { Id = 3, TestTypeId = 3, DisplayName = "Capacitor", IsChecked = true, TestTypeValue = 2 },
+                new LearnConnection { Id = 4, TestTypeId = 6, DisplayName = "Diode", IsChecked = true, TestTypeValue = 4 },
+                new LearnConnection { Id = 5, TestTypeId = 14, DisplayName = "Twisted Pair", IsChecked = true, TestTypeValue = 8 }
             );
 
             // TestResultName doubles as the column header wherever a result row is rendered.
