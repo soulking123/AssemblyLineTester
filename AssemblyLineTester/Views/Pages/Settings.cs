@@ -563,7 +563,7 @@ namespace AssemblyLineTester.Views.Pages
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = false,
-                BackColor = Color.Transparent,
+                BackColor = Color.White,
                 Margin = new Padding(0)
             };
             actions.Controls.Add(_btnCancelTicks);
@@ -577,7 +577,7 @@ namespace AssemblyLineTester.Views.Pages
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 ColumnCount = 2,
                 RowCount = 1,
-                BackColor = Color.Transparent,
+                BackColor = Color.White,
                 Padding = new Padding(15, 14, 24, 10),
                 Margin = new Padding(0)
             };
@@ -598,6 +598,7 @@ namespace AssemblyLineTester.Views.Pages
             header.Controls.Add(actions, 1, 0);
 
             cardTestSettings.Controls.Add(header);
+            header.SendToBack();
         }
 
         // AutoSize rather than a fixed width: ScaleExplicitFonts grows the caption at Load and a
