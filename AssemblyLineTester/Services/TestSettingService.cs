@@ -23,10 +23,26 @@ namespace AssemblyLineTester.Services
             return db.LearnConnections.AsNoTracking().Include(c => c.TestType).OrderBy(c => c.Id).ToList();
         }
 
+        // The column order of the Test Parameters grid, which the live run and the exports follow so
+        // one net reads the same way on every page. Seed ids track insertion, not position, so the
+        // order is stated here rather than by renumbering rows an operator has already ticked.
+        private static readonly string[] ResultColumnOrder =
+        {
+            "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "To",
+            "Net To Label", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
+            "Tolerance", "Measurement"
+        };
+
         public static List<TestResultCheck> GetTestResultChecks()
         {
             using var db = new AppDbContext();
-            return db.TestResultChecks.AsNoTracking().OrderBy(c => c.Id).ToList();
+            var checks = db.TestResultChecks.AsNoTracking().ToList();
+
+            // A column this list has never heard of sorts to the end instead of disappearing.
+            return checks
+                .OrderBy(c => Array.IndexOf(ResultColumnOrder, c.TestResultName) is int i && i >= 0 ? i : int.MaxValue)
+                .ThenBy(c => c.Id)
+                .ToList();
         }
 
         // Names of the result columns the operator left ticked, in their seeded display order.

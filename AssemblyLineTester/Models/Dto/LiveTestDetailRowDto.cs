@@ -30,6 +30,8 @@
         public double? LowerLimit { get; set; }
         public double? Tolerance { get; set; }
         public string Unit { get; set; } = string.Empty;
+        public string Color { get; set; } = string.Empty;
+        public string Gauge { get; set; } = string.Empty;
 
         // Empty for an instrument-driven run, which knows nothing about harness groups.
         public string HarnessGroup { get; set; } = string.Empty;

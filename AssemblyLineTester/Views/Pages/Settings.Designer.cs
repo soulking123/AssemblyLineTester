@@ -1,4 +1,4 @@
-﻿namespace AssemblyLineTester.Views.Pages
+namespace AssemblyLineTester.Views.Pages
 
 {
 
@@ -314,13 +314,19 @@
             tblGenCard.Controls.Add(lblSysName, 3, 1);
             tblGenCard.Controls.Add(txtCompanyName, 0, 2);
             tblGenCard.Controls.Add(txtSysName, 3, 2);
+            tblGenCard.Controls.Add(lblDataStorage, 0, 3);
+            tblGenCard.Controls.Add(lblReportStorage, 3, 3);
+            tblGenCard.Controls.Add(tblDataBrowse, 0, 4);
+            tblGenCard.Controls.Add(tblReportBrowse, 3, 4);
             tblGenCard.Dock = DockStyle.Top;
             tblGenCard.Location = new Point(0, 0);
             tblGenCard.Margin = new Padding(8);
             tblGenCard.Name = "tblGenCard";
             tblGenCard.Padding = new Padding(15, 0, 15, 15);
-            tblGenCard.RowCount = 3;
+            tblGenCard.RowCount = 5;
             tblGenCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+            tblGenCard.RowStyles.Add(new RowStyle());
+            tblGenCard.RowStyles.Add(new RowStyle());
             tblGenCard.RowStyles.Add(new RowStyle());
             tblGenCard.RowStyles.Add(new RowStyle());
             tblGenCard.Size = new Size(987, 166);
@@ -382,6 +388,10 @@
             // 
             txtSysName.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             tblGenCard.SetColumnSpan(txtSysName, 3);
+            tblGenCard.SetColumnSpan(lblDataStorage, 3);
+            tblGenCard.SetColumnSpan(lblReportStorage, 3);
+            tblGenCard.SetColumnSpan(tblDataBrowse, 3);
+            tblGenCard.SetColumnSpan(tblReportBrowse, 3);
             txtSysName.Font = new Font("Segoe UI", 9.5F);
             txtSysName.Location = new Point(507, 96);
             txtSysName.Margin = new Padding(15, 0, 0, 14);
@@ -720,40 +730,34 @@
             tblTestCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tblTestCard.Controls.Add(lblTestTitle, 0, 0);
             tblTestCard.Controls.Add(lblTotalTestPoint, 0, 1);
-            tblTestCard.Controls.Add(lblDefTestType, 1, 1);
-            tblTestCard.Controls.Add(lblDefResistorVal, 2, 1);
-            tblTestCard.Controls.Add(lblDefMaxWireRes, 3, 1);
             tblTestCard.Controls.Add(txtTotalTestPoint, 0, 2);
+            tblTestCard.Controls.Add(lblDefTestType, 1, 1);
             tblTestCard.Controls.Add(cmbDefTestType, 1, 2);
+            tblTestCard.Controls.Add(lblDefResistorVal, 2, 1);
             tblTestCard.Controls.Add(txtDefResistorVal, 2, 2);
-            tblTestCard.Controls.Add(txtDefMaxWireRes, 3, 2);
-            tblTestCard.Controls.Add(lblDefCapacitorTol, 0, 3);
-            tblTestCard.Controls.Add(lblDefResistorTol, 1, 3);
+            tblTestCard.Controls.Add(lblDefResistorTol, 3, 1);
+            tblTestCard.Controls.Add(txtDefResistorTol, 3, 2);
+            tblTestCard.Controls.Add(lblDefCapacitorVal, 0, 3);
+            tblTestCard.Controls.Add(txtDefCapacitorVal, 0, 4);
+            tblTestCard.Controls.Add(lblDefCapacitorTol, 1, 3);
+            tblTestCard.Controls.Add(txtDefCapacitorTol, 1, 4);
             tblTestCard.Controls.Add(lblDefWireInsRes, 2, 3);
-            tblTestCard.Controls.Add(lblDefCapacitorVal, 3, 3);
-            tblTestCard.Controls.Add(txtDefCapacitorTol, 0, 4);
-            tblTestCard.Controls.Add(txtDefResistorTol, 1, 4);
             tblTestCard.Controls.Add(txtDefWireInsRes, 2, 4);
-            tblTestCard.Controls.Add(txtDefCapacitorVal, 3, 4);
+            tblTestCard.Controls.Add(lblDefMaxWireRes, 3, 3);
+            tblTestCard.Controls.Add(txtDefMaxWireRes, 3, 4);
             tblTestCard.Controls.Add(lblTestTypeAvail, 0, 5);
             tblTestCard.Controls.Add(lblLearnConn, 1, 5);
             tblTestCard.Controls.Add(lblTestResultCol, 2, 5);
             tblTestCard.Controls.Add(flpTestTypeAvail, 0, 6);
             tblTestCard.Controls.Add(flpLearnConn, 1, 6);
-            tblTestCard.Controls.Add(lblDataStorage, 0, 7);
-            tblTestCard.Controls.Add(lblReportStorage, 2, 7);
-            tblTestCard.Controls.Add(tblDataBrowse, 0, 8);
-            tblTestCard.Controls.Add(tblReportBrowse, 2, 8);
             tblTestCard.Controls.Add(flpTestResultCol, 2, 6);
             tblTestCard.Dock = DockStyle.Top;
             tblTestCard.Location = new Point(0, 0);
             tblTestCard.Margin = new Padding(8);
             tblTestCard.Name = "tblTestCard";
             tblTestCard.Padding = new Padding(15, 0, 15, 15);
-            tblTestCard.RowCount = 9;
+            tblTestCard.RowCount = 7;
             tblTestCard.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
-            tblTestCard.RowStyles.Add(new RowStyle());
-            tblTestCard.RowStyles.Add(new RowStyle());
             tblTestCard.RowStyles.Add(new RowStyle());
             tblTestCard.RowStyles.Add(new RowStyle());
             tblTestCard.RowStyles.Add(new RowStyle());
@@ -798,7 +802,7 @@
             lblDefTestType.Name = "lblDefTestType";
             lblDefTestType.Size = new Size(211, 32);
             lblDefTestType.TabIndex = 2;
-            lblDefTestType.Text = "Default Test Type";
+            lblDefTestType.Text = "Test Type";
             // 
             // lblDefResistorVal
             // 
@@ -810,7 +814,7 @@
             lblDefResistorVal.Name = "lblDefResistorVal";
             lblDefResistorVal.Size = new Size(308, 32);
             lblDefResistorVal.TabIndex = 3;
-            lblDefResistorVal.Text = "Default Resistor Value (Ω)";
+            lblDefResistorVal.Text = "Resistor Value (Ω)";
             // 
             // lblDefMaxWireRes
             // 
@@ -822,7 +826,7 @@
             lblDefMaxWireRes.Name = "lblDefMaxWireRes";
             lblDefMaxWireRes.Size = new Size(384, 32);
             lblDefMaxWireRes.TabIndex = 4;
-            lblDefMaxWireRes.Text = "Default Max Wire Resistance (Ω)";
+            lblDefMaxWireRes.Text = "Max Wire Resistance (Ω)";
             // 
             // txtTotalTestPoint
             // 
@@ -876,7 +880,7 @@
             lblDefCapacitorTol.Name = "lblDefCapacitorTol";
             lblDefCapacitorTol.Size = new Size(377, 32);
             lblDefCapacitorTol.TabIndex = 17;
-            lblDefCapacitorTol.Text = "Default Capacitor Tolerance (%)";
+            lblDefCapacitorTol.Text = "Capacitor Tolerance (%)";
             // 
             // lblDefResistorTol
             // 
@@ -888,7 +892,7 @@
             lblDefResistorTol.Name = "lblDefResistorTol";
             lblDefResistorTol.Size = new Size(359, 32);
             lblDefResistorTol.TabIndex = 10;
-            lblDefResistorTol.Text = "Default Resistor Tolerance (%)";
+            lblDefResistorTol.Text = "Resistor Tolerance (%)";
             // 
             // lblDefWireInsRes
             // 
@@ -900,7 +904,7 @@
             lblDefWireInsRes.Name = "lblDefWireInsRes";
             lblDefWireInsRes.Size = new Size(400, 32);
             lblDefWireInsRes.TabIndex = 11;
-            lblDefWireInsRes.Text = "Default Wire Insulation Res. (MΩ)";
+            lblDefWireInsRes.Text = "Min Wire Insulation Res. (MΩ)";
             // 
             // lblDefCapacitorVal
             // 
@@ -912,7 +916,7 @@
             lblDefCapacitorVal.Name = "lblDefCapacitorVal";
             lblDefCapacitorVal.Size = new Size(335, 32);
             lblDefCapacitorVal.TabIndex = 12;
-            lblDefCapacitorVal.Text = "Default Capacitor Value (µF)";
+            lblDefCapacitorVal.Text = "Capacitor Value (μF)";
             // 
             // txtDefCapacitorTol
             // 
@@ -1015,7 +1019,6 @@
             // lblDataStorage
             // 
             lblDataStorage.AutoSize = true;
-            tblTestCard.SetColumnSpan(lblDataStorage, 2);
             lblDataStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDataStorage.ForeColor = Color.FromArgb(51, 65, 85);
             lblDataStorage.Location = new Point(15, 625);
@@ -1028,7 +1031,6 @@
             // lblReportStorage
             // 
             lblReportStorage.AutoSize = true;
-            tblTestCard.SetColumnSpan(lblReportStorage, 2);
             lblReportStorage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblReportStorage.ForeColor = Color.FromArgb(51, 65, 85);
             lblReportStorage.Location = new Point(1012, 625);
@@ -1042,7 +1044,6 @@
             // 
             tblDataBrowse.AutoSize = true;
             tblDataBrowse.ColumnCount = 2;
-            tblTestCard.SetColumnSpan(tblDataBrowse, 2);
             tblDataBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblDataBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
             tblDataBrowse.Controls.Add(txtDataPath, 0, 0);
@@ -1090,7 +1091,6 @@
             // 
             tblReportBrowse.AutoSize = true;
             tblReportBrowse.ColumnCount = 2;
-            tblTestCard.SetColumnSpan(tblReportBrowse, 2);
             tblReportBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblReportBrowse.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
             tblReportBrowse.Controls.Add(txtReportPath, 0, 0);

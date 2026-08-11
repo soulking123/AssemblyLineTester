@@ -300,7 +300,11 @@ namespace AssemblyLineTester.Data
                 new TestResultCheck { Id = 9, TestResultName = "Upper Limit", IsChecked = true },
                 new TestResultCheck { Id = 10, TestResultName = "Expected Value", IsChecked = true },
                 new TestResultCheck { Id = 11, TestResultName = "Tolerance", IsChecked = true },
-                new TestResultCheck { Id = 12, TestResultName = "Measurement", IsChecked = true }
+                new TestResultCheck { Id = 12, TestResultName = "Measurement", IsChecked = true },
+
+                // Appended, never slotted mid-list: seed ids follow position and would renumber.
+                new TestResultCheck { Id = 13, TestResultName = "Color", IsChecked = true },
+                new TestResultCheck { Id = 14, TestResultName = "Gauge", IsChecked = true }
             );
 
             modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());

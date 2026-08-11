@@ -140,7 +140,7 @@ namespace AssemblyLineTester.Views.Pages
         // the margin from a designer box is what makes all three lists share one row pitch.
         private void MatchTickMarginsToDesigner()
         {
-            foreach (var (_, box) in _typeBoxes.Concat(_learnBoxes))
+            foreach (var (_, box) in _typeBoxes.Concat(_learnBoxes).Concat(_resultBoxes))
             {
                 box.Margin = chkResNetId.Margin;
                 box.Font = chkResNetId.Font;
@@ -824,27 +824,36 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // The twelve boxes stay in the designer for their layout; only their state comes from the table.
+        // The designer boxes stay for their layout; a column added to the table after the page was
+        // drawn gets a box built here, or it would be stuck at its seeded state with no way to untick.
         private void PopulateTestResultColumns()
         {
             var checks = _preloadData?.TestResultChecks ?? TestSettingService.GetTestResultChecks();
             _resultBoxes.Clear();
             flpTestResultCol.SuspendLayout();
 
-            foreach (Control control in flpTestResultCol.Controls)
+            foreach (var check in checks)
             {
-                if (control is not CheckBox box) continue;
+                var box = flpTestResultCol.Controls.OfType<CheckBox>()
+                    .FirstOrDefault(c => c.Text == check.TestResultName);
 
-                var check = checks.FirstOrDefault(c => c.TestResultName == box.Text);
-                if (check == null)
+                if (box == null)
                 {
-                    box.Enabled = false;
-                    continue;
+                    box = BuildCheck(check.TestResultName, check.IsChecked);
+                    flpTestResultCol.Controls.Add(box);
                 }
 
                 box.Checked = check.IsChecked;
                 _resultBoxes.Add((check.Id, box));
             }
+
+            // A designer box with no row behind it can only mislead, so it is shown disabled.
+            foreach (var orphan in flpTestResultCol.Controls.OfType<CheckBox>()
+                         .Where(c => checks.All(k => k.TestResultName != c.Text)))
+            {
+                orphan.Enabled = false;
+            }
+
             flpTestResultCol.ResumeLayout(false);
         }
 
