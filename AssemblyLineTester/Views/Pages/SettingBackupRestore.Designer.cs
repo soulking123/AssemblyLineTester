@@ -30,8 +30,6 @@ namespace AssemblyLineTester.Views
             btnBrowseRecap = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnRecap = new AssemblyLineTester.Views.Controls.RoundedButton();
             lblRollbackTo = new Label();
-            lblDatabaseLocation = new Label();
-            txtDatabasePath = new TextBox();
             txtRollbackPath = new TextBox();
             flpRollbackBtns = new FlowLayoutPanel();
             btnBrowseRollback = new AssemblyLineTester.Views.Controls.RoundedButton();
@@ -54,11 +52,11 @@ namespace AssemblyLineTester.Views
             tblMainLayout.Location = new Point(0, 0);
             tblMainLayout.Margin = new Padding(0);
             tblMainLayout.Name = "tblMainLayout";
-            tblMainLayout.Padding = new Padding(13);
+            tblMainLayout.Padding = new Padding(7, 6, 7, 6);
             tblMainLayout.RowCount = 2;
-            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 47.34098F));
-            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 52.65902F));
-            tblMainLayout.Size = new Size(1733, 985);
+            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 47.3333321F));
+            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 52.6666679F));
+            tblMainLayout.Size = new Size(933, 462);
             tblMainLayout.TabIndex = 0;
             // 
             // cardBackupRestore
@@ -68,10 +66,10 @@ namespace AssemblyLineTester.Views
             cardBackupRestore.BackColor = Color.White;
             cardBackupRestore.Controls.Add(tblBackupRestore);
             cardBackupRestore.Dock = DockStyle.Fill;
-            cardBackupRestore.Location = new Point(13, 13);
-            cardBackupRestore.Margin = new Padding(0, 0, 0, 19);
+            cardBackupRestore.Location = new Point(7, 6);
+            cardBackupRestore.Margin = new Padding(0, 0, 0, 9);
             cardBackupRestore.Name = "cardBackupRestore";
-            cardBackupRestore.Size = new Size(1707, 435);
+            cardBackupRestore.Size = new Size(919, 204);
             cardBackupRestore.TabIndex = 1;
             // 
             // tblBackupRestore
@@ -94,24 +92,19 @@ namespace AssemblyLineTester.Views
             tblBackupRestore.Controls.Add(lblRollbackTo, 0, 5);
             tblBackupRestore.Controls.Add(txtRollbackPath, 0, 6);
             tblBackupRestore.Controls.Add(flpRollbackBtns, 4, 6);
-            tblBackupRestore.Controls.Add(lblDatabaseLocation, 0, 7);
-            tblBackupRestore.Controls.Add(txtDatabasePath, 0, 8);
             tblBackupRestore.Dock = DockStyle.Top;
             tblBackupRestore.Location = new Point(0, 0);
-            tblBackupRestore.Margin = new Padding(6, 7, 6, 7);
             tblBackupRestore.Name = "tblBackupRestore";
-            tblBackupRestore.Padding = new Padding(15, 0, 15, 15);
-            tblBackupRestore.RowCount = 9;
-            tblBackupRestore.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+            tblBackupRestore.Padding = new Padding(8, 0, 8, 7);
+            tblBackupRestore.RowCount = 7;
+            tblBackupRestore.RowStyles.Add(new RowStyle(SizeType.Absolute, 23F));
             tblBackupRestore.RowStyles.Add(new RowStyle());
             tblBackupRestore.RowStyles.Add(new RowStyle());
             tblBackupRestore.RowStyles.Add(new RowStyle());
             tblBackupRestore.RowStyles.Add(new RowStyle());
             tblBackupRestore.RowStyles.Add(new RowStyle());
             tblBackupRestore.RowStyles.Add(new RowStyle());
-            tblBackupRestore.RowStyles.Add(new RowStyle());
-            tblBackupRestore.RowStyles.Add(new RowStyle());
-            tblBackupRestore.Size = new Size(1707, 404);
+            tblBackupRestore.Size = new Size(919, 192);
             tblBackupRestore.TabIndex = 0;
             // 
             // lblTitle
@@ -120,10 +113,10 @@ namespace AssemblyLineTester.Views
             lblTitle.Dock = DockStyle.Fill;
             lblTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(15, 23, 42);
-            lblTitle.Location = new Point(15, 0);
-            lblTitle.Margin = new Padding(0, 0, 0, 14);
+            lblTitle.Location = new Point(8, 0);
+            lblTitle.Margin = new Padding(0, 0, 0, 7);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(1677, 36);
+            lblTitle.Size = new Size(903, 16);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "BACKUP & RESTORE";
             lblTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -134,10 +127,10 @@ namespace AssemblyLineTester.Views
             tblBackupRestore.SetColumnSpan(lblAutoRecap, 3);
             lblAutoRecap.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblAutoRecap.ForeColor = Color.FromArgb(51, 65, 85);
-            lblAutoRecap.Location = new Point(15, 60);
-            lblAutoRecap.Margin = new Padding(0, 10, 0, 4);
+            lblAutoRecap.Location = new Point(8, 28);
+            lblAutoRecap.Margin = new Padding(0, 5, 0, 2);
             lblAutoRecap.Name = "lblAutoRecap";
-            lblAutoRecap.Size = new Size(222, 32);
+            lblAutoRecap.Size = new Size(108, 15);
             lblAutoRecap.TabIndex = 1;
             lblAutoRecap.Text = "Auto Recap Every:";
             // 
@@ -150,10 +143,10 @@ namespace AssemblyLineTester.Views
             cboAutoRecap.Font = new Font("Segoe UI", 9.5F);
             cboAutoRecap.FormattingEnabled = true;
             cboAutoRecap.Items.AddRange(new object[] { "Everyday", "7 days", "2 weeks", "1 month" });
-            cboAutoRecap.Location = new Point(15, 101);
-            cboAutoRecap.Margin = new Padding(0, 0, 15, 14);
+            cboAutoRecap.Location = new Point(8, 45);
+            cboAutoRecap.Margin = new Padding(0, 0, 8, 7);
             cboAutoRecap.Name = "cboAutoRecap";
-            cboAutoRecap.Size = new Size(822, 43);
+            cboAutoRecap.Size = new Size(442, 25);
             cboAutoRecap.TabIndex = 2;
             // 
             // btnResetDefault
@@ -164,11 +157,11 @@ namespace AssemblyLineTester.Views
             btnResetDefault.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnResetDefault.ForeColor = Color.FromArgb(15, 23, 42);
             btnResetDefault.HoverForeColor = Color.Empty;
-            btnResetDefault.Location = new Point(867, 96);
-            btnResetDefault.Margin = new Padding(15, 0, 0, 14);
+            btnResetDefault.Location = new Point(466, 45);
+            btnResetDefault.Margin = new Padding(8, 0, 0, 7);
             btnResetDefault.Name = "btnResetDefault";
             btnResetDefault.PressedForeColor = Color.Empty;
-            btnResetDefault.Size = new Size(249, 53);
+            btnResetDefault.Size = new Size(134, 25);
             btnResetDefault.TabIndex = 3;
             btnResetDefault.Text = "Reset to default";
             btnResetDefault.UseVisualStyleBackColor = true;
@@ -180,10 +173,10 @@ namespace AssemblyLineTester.Views
             tblBackupRestore.SetColumnSpan(lblManualRecap, 6);
             lblManualRecap.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblManualRecap.ForeColor = Color.FromArgb(51, 65, 85);
-            lblManualRecap.Location = new Point(15, 173);
-            lblManualRecap.Margin = new Padding(0, 10, 0, 4);
+            lblManualRecap.Location = new Point(8, 82);
+            lblManualRecap.Margin = new Padding(0, 5, 0, 2);
             lblManualRecap.Name = "lblManualRecap";
-            lblManualRecap.Size = new Size(182, 32);
+            lblManualRecap.Size = new Size(87, 15);
             lblManualRecap.TabIndex = 4;
             lblManualRecap.Text = "Manual Recap:";
             // 
@@ -192,11 +185,11 @@ namespace AssemblyLineTester.Views
             txtManualRecapPath.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             tblBackupRestore.SetColumnSpan(txtManualRecapPath, 4);
             txtManualRecapPath.Font = new Font("Segoe UI", 9.5F);
-            txtManualRecapPath.Location = new Point(15, 215);
-            txtManualRecapPath.Margin = new Padding(0, 0, 15, 14);
+            txtManualRecapPath.Location = new Point(8, 99);
+            txtManualRecapPath.Margin = new Padding(0, 0, 8, 7);
             txtManualRecapPath.Name = "txtManualRecapPath";
             txtManualRecapPath.ReadOnly = true;
-            txtManualRecapPath.Size = new Size(1101, 41);
+            txtManualRecapPath.Size = new Size(592, 24);
             txtManualRecapPath.TabIndex = 5;
             // 
             // flpRecapBtns
@@ -205,10 +198,10 @@ namespace AssemblyLineTester.Views
             tblBackupRestore.SetColumnSpan(flpRecapBtns, 2);
             flpRecapBtns.Controls.Add(btnBrowseRecap);
             flpRecapBtns.Controls.Add(btnRecap);
-            flpRecapBtns.Location = new Point(1146, 209);
-            flpRecapBtns.Margin = new Padding(15, 0, 0, 14);
+            flpRecapBtns.Location = new Point(616, 99);
+            flpRecapBtns.Margin = new Padding(8, 0, 0, 7);
             flpRecapBtns.Name = "flpRecapBtns";
-            flpRecapBtns.Size = new Size(346, 53);
+            flpRecapBtns.Size = new Size(186, 25);
             flpRecapBtns.TabIndex = 6;
             // 
             // btnBrowseRecap
@@ -219,10 +212,10 @@ namespace AssemblyLineTester.Views
             btnBrowseRecap.ForeColor = Color.FromArgb(15, 23, 42);
             btnBrowseRecap.HoverForeColor = Color.Empty;
             btnBrowseRecap.Location = new Point(0, 0);
-            btnBrowseRecap.Margin = new Padding(0, 0, 22, 0);
+            btnBrowseRecap.Margin = new Padding(0, 0, 12, 0);
             btnBrowseRecap.Name = "btnBrowseRecap";
             btnBrowseRecap.PressedForeColor = Color.Empty;
-            btnBrowseRecap.Size = new Size(162, 53);
+            btnBrowseRecap.Size = new Size(87, 25);
             btnBrowseRecap.TabIndex = 0;
             btnBrowseRecap.Text = "Browse";
             btnBrowseRecap.UseVisualStyleBackColor = true;
@@ -235,11 +228,11 @@ namespace AssemblyLineTester.Views
             btnRecap.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnRecap.ForeColor = Color.FromArgb(15, 23, 42);
             btnRecap.HoverForeColor = Color.Empty;
-            btnRecap.Location = new Point(184, 0);
+            btnRecap.Location = new Point(99, 0);
             btnRecap.Margin = new Padding(0);
             btnRecap.Name = "btnRecap";
             btnRecap.PressedForeColor = Color.Empty;
-            btnRecap.Size = new Size(162, 53);
+            btnRecap.Size = new Size(87, 25);
             btnRecap.TabIndex = 1;
             btnRecap.Text = "Recap";
             btnRecap.UseVisualStyleBackColor = true;
@@ -251,10 +244,10 @@ namespace AssemblyLineTester.Views
             tblBackupRestore.SetColumnSpan(lblRollbackTo, 6);
             lblRollbackTo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblRollbackTo.ForeColor = Color.FromArgb(51, 65, 85);
-            lblRollbackTo.Location = new Point(15, 286);
-            lblRollbackTo.Margin = new Padding(0, 10, 0, 4);
+            lblRollbackTo.Location = new Point(8, 136);
+            lblRollbackTo.Margin = new Padding(0, 5, 0, 2);
             lblRollbackTo.Name = "lblRollbackTo";
-            lblRollbackTo.Size = new Size(152, 32);
+            lblRollbackTo.Size = new Size(73, 15);
             lblRollbackTo.TabIndex = 7;
             lblRollbackTo.Text = "Rollback To:";
             // 
@@ -263,35 +256,12 @@ namespace AssemblyLineTester.Views
             txtRollbackPath.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             tblBackupRestore.SetColumnSpan(txtRollbackPath, 4);
             txtRollbackPath.Font = new Font("Segoe UI", 9.5F);
-            txtRollbackPath.Location = new Point(15, 328);
-            txtRollbackPath.Margin = new Padding(0, 0, 15, 14);
+            txtRollbackPath.Location = new Point(8, 153);
+            txtRollbackPath.Margin = new Padding(0, 0, 8, 7);
             txtRollbackPath.Name = "txtRollbackPath";
             txtRollbackPath.ReadOnly = true;
-            txtRollbackPath.Size = new Size(1101, 41);
+            txtRollbackPath.Size = new Size(592, 24);
             txtRollbackPath.TabIndex = 8;
-            //
-            // lblDatabaseLocation
-            //
-            lblDatabaseLocation.AutoSize = true;
-            tblBackupRestore.SetColumnSpan(lblDatabaseLocation, 6);
-            lblDatabaseLocation.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblDatabaseLocation.ForeColor = Color.FromArgb(51, 65, 85);
-            lblDatabaseLocation.Margin = new Padding(0, 10, 0, 4);
-            lblDatabaseLocation.Name = "lblDatabaseLocation";
-            lblDatabaseLocation.Size = new Size(200, 32);
-            lblDatabaseLocation.TabIndex = 9;
-            lblDatabaseLocation.Text = "Database Location:";
-            //
-            // txtDatabasePath
-            //
-            txtDatabasePath.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            tblBackupRestore.SetColumnSpan(txtDatabasePath, 6);
-            txtDatabasePath.Font = new Font("Segoe UI", 9.5F);
-            txtDatabasePath.Margin = new Padding(0, 0, 15, 14);
-            txtDatabasePath.Name = "txtDatabasePath";
-            txtDatabasePath.ReadOnly = true;
-            txtDatabasePath.Size = new Size(1101, 41);
-            txtDatabasePath.TabIndex = 10;
             // 
             // flpRollbackBtns
             // 
@@ -299,10 +269,10 @@ namespace AssemblyLineTester.Views
             tblBackupRestore.SetColumnSpan(flpRollbackBtns, 2);
             flpRollbackBtns.Controls.Add(btnBrowseRollback);
             flpRollbackBtns.Controls.Add(btnRollback);
-            flpRollbackBtns.Location = new Point(1146, 322);
-            flpRollbackBtns.Margin = new Padding(15, 0, 0, 14);
+            flpRollbackBtns.Location = new Point(616, 153);
+            flpRollbackBtns.Margin = new Padding(8, 0, 0, 7);
             flpRollbackBtns.Name = "flpRollbackBtns";
-            flpRollbackBtns.Size = new Size(346, 53);
+            flpRollbackBtns.Size = new Size(186, 25);
             flpRollbackBtns.TabIndex = 9;
             // 
             // btnBrowseRollback
@@ -313,10 +283,10 @@ namespace AssemblyLineTester.Views
             btnBrowseRollback.ForeColor = Color.FromArgb(15, 23, 42);
             btnBrowseRollback.HoverForeColor = Color.Empty;
             btnBrowseRollback.Location = new Point(0, 0);
-            btnBrowseRollback.Margin = new Padding(0, 0, 22, 0);
+            btnBrowseRollback.Margin = new Padding(0, 0, 12, 0);
             btnBrowseRollback.Name = "btnBrowseRollback";
             btnBrowseRollback.PressedForeColor = Color.Empty;
-            btnBrowseRollback.Size = new Size(162, 53);
+            btnBrowseRollback.Size = new Size(87, 25);
             btnBrowseRollback.TabIndex = 0;
             btnBrowseRollback.Text = "Browse";
             btnBrowseRollback.UseVisualStyleBackColor = true;
@@ -329,11 +299,11 @@ namespace AssemblyLineTester.Views
             btnRollback.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnRollback.ForeColor = Color.FromArgb(15, 23, 42);
             btnRollback.HoverForeColor = Color.Empty;
-            btnRollback.Location = new Point(184, 0);
+            btnRollback.Location = new Point(99, 0);
             btnRollback.Margin = new Padding(0);
             btnRollback.Name = "btnRollback";
             btnRollback.PressedForeColor = Color.Empty;
-            btnRollback.Size = new Size(162, 53);
+            btnRollback.Size = new Size(87, 25);
             btnRollback.TabIndex = 1;
             btnRollback.Text = "Rollback";
             btnRollback.UseVisualStyleBackColor = true;
@@ -341,13 +311,12 @@ namespace AssemblyLineTester.Views
             // 
             // SettingBackupRestore
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Transparent;
             Controls.Add(tblMainLayout);
-            Margin = new Padding(6, 7, 6, 7);
             Name = "SettingBackupRestore";
-            Size = new Size(1733, 985);
+            Size = new Size(933, 462);
             tblMainLayout.ResumeLayout(false);
             tblMainLayout.PerformLayout();
             cardBackupRestore.ResumeLayout(false);
@@ -380,7 +349,5 @@ namespace AssemblyLineTester.Views
         private TextBox txtManualRecapPath;
         private Label lblRollbackTo;
         private TextBox txtRollbackPath;
-        private Label lblDatabaseLocation;
-        private TextBox txtDatabasePath;
     }
 }

@@ -28,10 +28,6 @@ namespace AssemblyLineTester.Views
         // where either of them actually lives.
         private void ShowStoragePaths()
         {
-            txtDatabasePath.Text = AssemblyLineTester.Services.DatabaseBackupService.DbPath;
-            txtDatabasePath.ReadOnly = true;
-            txtDatabasePath.BackColor = Color.FromArgb(241, 245, 249);
-
             txtManualRecapPath.Text = AssemblyLineTester.Services.DatabaseBackupService.AutoBackupFolder;
         }
 

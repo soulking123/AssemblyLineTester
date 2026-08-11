@@ -15,264 +15,317 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         private void InitializeComponent()
         {
-            this.tableLayoutPanelMain = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanelLeft = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanelToolbar = new System.Windows.Forms.TableLayoutPanel();
-            this.btnAddTestPoint = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.btnEdit = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.btnDelete = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.btnImportCsv = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.txtSearch = new System.Windows.Forms.TextBox();
-            this.btnSearch = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.btnSave = new AssemblyLineTester.Views.Controls.RoundedButton();
-            this.gridWiring = new System.Windows.Forms.DataGridView();
-            this.colNetId = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colFromAddr = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colToAddr = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colTestType = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.colExpected = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tableLayoutPanelRight = new System.Windows.Forms.TableLayoutPanel();
-            this.lblTestParameterDetails = new System.Windows.Forms.Label();
-            this.picDiagram = new System.Windows.Forms.PictureBox();
-            
-            this.tableLayoutPanelMain.SuspendLayout();
-            this.tableLayoutPanelLeft.SuspendLayout();
-            this.tableLayoutPanelToolbar.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridWiring)).BeginInit();
-            this.tableLayoutPanelRight.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picDiagram)).BeginInit();
-            this.SuspendLayout();
-            
+            tableLayoutPanelMain = new TableLayoutPanel();
+            tableLayoutPanelLeft = new TableLayoutPanel();
+            tableLayoutPanelToolbar = new TableLayoutPanel();
+            btnAddTestPoint = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnEdit = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnDelete = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnImportCsv = new AssemblyLineTester.Views.Controls.RoundedButton();
+            txtSearch = new TextBox();
+            btnSearch = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnSave = new AssemblyLineTester.Views.Controls.RoundedButton();
+            gridWiring = new DataGridView();
+            colNetId = new DataGridViewTextBoxColumn();
+            colFromAddr = new DataGridViewTextBoxColumn();
+            colToAddr = new DataGridViewTextBoxColumn();
+            colTestType = new DataGridViewComboBoxColumn();
+            colExpected = new DataGridViewTextBoxColumn();
+            tableLayoutPanelRight = new TableLayoutPanel();
+            lblTestParameterDetails = new Label();
+            picDiagram = new PictureBox();
+            tableLayoutPanelMain.SuspendLayout();
+            tableLayoutPanelLeft.SuspendLayout();
+            tableLayoutPanelToolbar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)gridWiring).BeginInit();
+            tableLayoutPanelRight.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picDiagram).BeginInit();
+            SuspendLayout();
+            // 
             // tableLayoutPanelMain
-            this.tableLayoutPanelMain.ColumnCount = 2;
-            this.tableLayoutPanelMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70F));
-            this.tableLayoutPanelMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
-            this.tableLayoutPanelMain.Controls.Add(this.tableLayoutPanelLeft, 0, 0);
-            this.tableLayoutPanelMain.Controls.Add(this.tableLayoutPanelRight, 1, 0);
-            this.tableLayoutPanelMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelMain.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanelMain.Name = "tableLayoutPanelMain";
-            this.tableLayoutPanelMain.RowCount = 1;
-            this.tableLayoutPanelMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelMain.Size = new System.Drawing.Size(1000, 600);
-            this.tableLayoutPanelMain.TabIndex = 0;
-            
+            // 
+            tableLayoutPanelMain.ColumnCount = 2;
+            tableLayoutPanelMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 56.8F));
+            tableLayoutPanelMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 43.2F));
+            tableLayoutPanelMain.Controls.Add(tableLayoutPanelLeft, 0, 0);
+            tableLayoutPanelMain.Controls.Add(tableLayoutPanelRight, 1, 0);
+            tableLayoutPanelMain.Dock = DockStyle.Fill;
+            tableLayoutPanelMain.Location = new Point(0, 0);
+            tableLayoutPanelMain.Margin = new Padding(3, 2, 3, 2);
+            tableLayoutPanelMain.Name = "tableLayoutPanelMain";
+            tableLayoutPanelMain.RowCount = 1;
+            tableLayoutPanelMain.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanelMain.Size = new Size(875, 450);
+            tableLayoutPanelMain.TabIndex = 0;
+            // 
             // tableLayoutPanelLeft
-            this.tableLayoutPanelLeft.ColumnCount = 1;
-            this.tableLayoutPanelLeft.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelLeft.Controls.Add(this.tableLayoutPanelToolbar, 0, 0);
-            this.tableLayoutPanelLeft.Controls.Add(this.gridWiring, 0, 1);
-            this.tableLayoutPanelLeft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelLeft.Location = new System.Drawing.Point(10, 10);
-            this.tableLayoutPanelLeft.Margin = new System.Windows.Forms.Padding(10);
-            this.tableLayoutPanelLeft.Name = "tableLayoutPanelLeft";
-            this.tableLayoutPanelLeft.RowCount = 2;
-            this.tableLayoutPanelLeft.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelLeft.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelLeft.Size = new System.Drawing.Size(680, 580);
-            this.tableLayoutPanelLeft.TabIndex = 0;
-            
+            // 
+            tableLayoutPanelLeft.ColumnCount = 1;
+            tableLayoutPanelLeft.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanelLeft.Controls.Add(tableLayoutPanelToolbar, 0, 0);
+            tableLayoutPanelLeft.Controls.Add(gridWiring, 0, 1);
+            tableLayoutPanelLeft.Dock = DockStyle.Fill;
+            tableLayoutPanelLeft.Location = new Point(9, 8);
+            tableLayoutPanelLeft.Margin = new Padding(9, 8, 9, 8);
+            tableLayoutPanelLeft.Name = "tableLayoutPanelLeft";
+            tableLayoutPanelLeft.RowCount = 2;
+            tableLayoutPanelLeft.RowStyles.Add(new RowStyle());
+            tableLayoutPanelLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanelLeft.Size = new Size(479, 434);
+            tableLayoutPanelLeft.TabIndex = 0;
+            // 
             // tableLayoutPanelToolbar
-            this.tableLayoutPanelToolbar.AutoSize = true;
-            this.tableLayoutPanelToolbar.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanelToolbar.ColumnCount = 4;
-            this.tableLayoutPanelToolbar.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanelToolbar.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanelToolbar.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanelToolbar.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelToolbar.Controls.Add(this.btnAddTestPoint, 0, 0);
-            this.tableLayoutPanelToolbar.Controls.Add(this.btnEdit, 1, 0);
-            this.tableLayoutPanelToolbar.Controls.Add(this.btnDelete, 2, 0);
-            this.tableLayoutPanelToolbar.Controls.Add(this.btnImportCsv, 3, 0);
-            this.tableLayoutPanelToolbar.Controls.Add(this.txtSearch, 0, 1);
-            this.tableLayoutPanelToolbar.Controls.Add(this.btnSearch, 2, 1);
-            this.tableLayoutPanelToolbar.Controls.Add(this.btnSave, 3, 1);
-            this.tableLayoutPanelToolbar.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelToolbar.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanelToolbar.Margin = new System.Windows.Forms.Padding(0, 0, 0, 10);
-            this.tableLayoutPanelToolbar.Name = "tableLayoutPanelToolbar";
-            this.tableLayoutPanelToolbar.RowCount = 2;
-            this.tableLayoutPanelToolbar.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelToolbar.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelToolbar.Size = new System.Drawing.Size(680, 84);
-            this.tableLayoutPanelToolbar.TabIndex = 1;
-            
+            // 
+            tableLayoutPanelToolbar.AutoSize = true;
+            tableLayoutPanelToolbar.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            tableLayoutPanelToolbar.ColumnCount = 4;
+            tableLayoutPanelToolbar.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanelToolbar.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanelToolbar.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanelToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanelToolbar.Controls.Add(btnAddTestPoint, 0, 0);
+            tableLayoutPanelToolbar.Controls.Add(btnEdit, 1, 0);
+            tableLayoutPanelToolbar.Controls.Add(btnDelete, 2, 0);
+            tableLayoutPanelToolbar.Controls.Add(btnImportCsv, 3, 0);
+            tableLayoutPanelToolbar.Controls.Add(txtSearch, 0, 1);
+            tableLayoutPanelToolbar.Controls.Add(btnSearch, 2, 1);
+            tableLayoutPanelToolbar.Controls.Add(btnSave, 3, 1);
+            tableLayoutPanelToolbar.Dock = DockStyle.Fill;
+            tableLayoutPanelToolbar.Location = new Point(0, 0);
+            tableLayoutPanelToolbar.Margin = new Padding(0, 0, 0, 8);
+            tableLayoutPanelToolbar.Name = "tableLayoutPanelToolbar";
+            tableLayoutPanelToolbar.RowCount = 2;
+            tableLayoutPanelToolbar.RowStyles.Add(new RowStyle());
+            tableLayoutPanelToolbar.RowStyles.Add(new RowStyle());
+            tableLayoutPanelToolbar.Size = new Size(479, 60);
+            tableLayoutPanelToolbar.TabIndex = 1;
+            // 
             // btnAddTestPoint
-            this.btnAddTestPoint.NormalBackColor = System.Drawing.Color.FromArgb(250, 204, 21);
-            this.btnAddTestPoint.HoverBackColor = System.Drawing.Color.FromArgb(254, 216, 53);
-            this.btnAddTestPoint.PressedBackColor = System.Drawing.Color.FromArgb(234, 186, 10);
-            this.btnAddTestPoint.BorderRadius = 8;
-            this.btnAddTestPoint.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnAddTestPoint.Location = new System.Drawing.Point(3, 3);
-            this.btnAddTestPoint.Name = "btnAddTestPoint";
-            this.btnAddTestPoint.Size = new System.Drawing.Size(140, 35);
-            this.btnAddTestPoint.TabIndex = 0;
-            this.btnAddTestPoint.Text = "+ Add Test Point";
-            
+            // 
+            btnAddTestPoint.BackColor = Color.FromArgb(250, 204, 21);
+            btnAddTestPoint.BorderRadius = 8;
+            btnAddTestPoint.FlatStyle = FlatStyle.Flat;
+            btnAddTestPoint.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnAddTestPoint.ForeColor = Color.FromArgb(15, 23, 42);
+            btnAddTestPoint.HoverForeColor = Color.Empty;
+            btnAddTestPoint.Location = new Point(3, 2);
+            btnAddTestPoint.Margin = new Padding(3, 2, 3, 2);
+            btnAddTestPoint.Name = "btnAddTestPoint";
+            btnAddTestPoint.PressedForeColor = Color.Empty;
+            btnAddTestPoint.Size = new Size(122, 26);
+            btnAddTestPoint.TabIndex = 0;
+            btnAddTestPoint.Text = "+ Add Test Point";
+            btnAddTestPoint.UseVisualStyleBackColor = false;
+            // 
             // btnEdit
-            this.btnEdit.NormalBackColor = System.Drawing.Color.FromArgb(226, 232, 240);
-            this.btnEdit.HoverBackColor = System.Drawing.Color.FromArgb(241, 245, 249);
-            this.btnEdit.PressedBackColor = System.Drawing.Color.FromArgb(203, 213, 225);
-            this.btnEdit.BorderRadius = 8;
-            this.btnEdit.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnEdit.Location = new System.Drawing.Point(149, 3);
-            this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(60, 35);
-            this.btnEdit.TabIndex = 1;
-            this.btnEdit.Text = "Edit";
-            
+            // 
+            btnEdit.BackColor = Color.FromArgb(226, 232, 240);
+            btnEdit.BorderRadius = 8;
+            btnEdit.FlatStyle = FlatStyle.Flat;
+            btnEdit.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnEdit.ForeColor = Color.FromArgb(15, 23, 42);
+            btnEdit.HoverBackColor = Color.FromArgb(241, 245, 249);
+            btnEdit.HoverForeColor = Color.Empty;
+            btnEdit.Location = new Point(131, 2);
+            btnEdit.Margin = new Padding(3, 2, 3, 2);
+            btnEdit.Name = "btnEdit";
+            btnEdit.NormalBackColor = Color.FromArgb(226, 232, 240);
+            btnEdit.PressedBackColor = Color.FromArgb(203, 213, 225);
+            btnEdit.PressedForeColor = Color.Empty;
+            btnEdit.Size = new Size(52, 26);
+            btnEdit.TabIndex = 1;
+            btnEdit.Text = "Edit";
+            btnEdit.UseVisualStyleBackColor = false;
+            // 
             // btnDelete
-            this.btnDelete.NormalBackColor = System.Drawing.Color.FromArgb(254, 226, 226);
-            this.btnDelete.HoverBackColor = System.Drawing.Color.FromArgb(254, 242, 242);
-            this.btnDelete.PressedBackColor = System.Drawing.Color.FromArgb(252, 165, 165);
-            this.btnDelete.BorderRadius = 8;
-            this.btnDelete.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnDelete.Location = new System.Drawing.Point(215, 3);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(70, 35);
-            this.btnDelete.TabIndex = 2;
-            this.btnDelete.Text = "Delete";
-            
+            // 
+            btnDelete.BackColor = Color.FromArgb(254, 226, 226);
+            btnDelete.BorderRadius = 8;
+            btnDelete.FlatStyle = FlatStyle.Flat;
+            btnDelete.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnDelete.ForeColor = Color.FromArgb(15, 23, 42);
+            btnDelete.HoverBackColor = Color.FromArgb(254, 242, 242);
+            btnDelete.HoverForeColor = Color.Empty;
+            btnDelete.Location = new Point(190, 2);
+            btnDelete.Margin = new Padding(3, 2, 3, 2);
+            btnDelete.Name = "btnDelete";
+            btnDelete.NormalBackColor = Color.FromArgb(254, 226, 226);
+            btnDelete.PressedBackColor = Color.FromArgb(252, 165, 165);
+            btnDelete.PressedForeColor = Color.Empty;
+            btnDelete.Size = new Size(61, 26);
+            btnDelete.TabIndex = 2;
+            btnDelete.Text = "Delete";
+            btnDelete.UseVisualStyleBackColor = false;
+            // 
             // btnImportCsv
-            this.btnImportCsv.NormalBackColor = System.Drawing.Color.FromArgb(241, 245, 249);
-            this.btnImportCsv.HoverBackColor = System.Drawing.Color.FromArgb(248, 250, 252);
-            this.btnImportCsv.PressedBackColor = System.Drawing.Color.FromArgb(226, 232, 240);
-            this.btnImportCsv.BorderRadius = 8;
-            this.btnImportCsv.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnImportCsv.Location = new System.Drawing.Point(291, 3);
-            this.btnImportCsv.Name = "btnImportCsv";
-            this.btnImportCsv.Size = new System.Drawing.Size(100, 35);
-            this.btnImportCsv.TabIndex = 3;
-            this.btnImportCsv.Text = "Import CSV";
-            
+            // 
+            btnImportCsv.BackColor = Color.FromArgb(241, 245, 249);
+            btnImportCsv.BorderRadius = 8;
+            btnImportCsv.FlatStyle = FlatStyle.Flat;
+            btnImportCsv.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnImportCsv.ForeColor = Color.FromArgb(15, 23, 42);
+            btnImportCsv.HoverBackColor = Color.FromArgb(248, 250, 252);
+            btnImportCsv.HoverForeColor = Color.Empty;
+            btnImportCsv.Location = new Point(257, 2);
+            btnImportCsv.Margin = new Padding(3, 2, 3, 2);
+            btnImportCsv.Name = "btnImportCsv";
+            btnImportCsv.NormalBackColor = Color.FromArgb(241, 245, 249);
+            btnImportCsv.PressedBackColor = Color.FromArgb(226, 232, 240);
+            btnImportCsv.PressedForeColor = Color.Empty;
+            btnImportCsv.Size = new Size(88, 26);
+            btnImportCsv.TabIndex = 3;
+            btnImportCsv.Text = "Import CSV";
+            btnImportCsv.UseVisualStyleBackColor = false;
+            // 
             // txtSearch
-            this.txtSearch.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tableLayoutPanelToolbar.SetColumnSpan(this.txtSearch, 2);
-            this.txtSearch.Location = new System.Drawing.Point(3, 49);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(206, 27);
-            this.txtSearch.TabIndex = 4;
-            
+            // 
+            txtSearch.Anchor = AnchorStyles.Left;
+            tableLayoutPanelToolbar.SetColumnSpan(txtSearch, 2);
+            txtSearch.Location = new Point(3, 33);
+            txtSearch.Margin = new Padding(3, 2, 3, 2);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(181, 23);
+            txtSearch.TabIndex = 4;
+            // 
             // btnSearch
-            this.btnSearch.NormalBackColor = System.Drawing.Color.FromArgb(241, 245, 249);
-            this.btnSearch.HoverBackColor = System.Drawing.Color.FromArgb(248, 250, 252);
-            this.btnSearch.PressedBackColor = System.Drawing.Color.FromArgb(226, 232, 240);
-            this.btnSearch.BorderRadius = 8;
-            this.btnSearch.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnSearch.Location = new System.Drawing.Point(215, 44);
-            this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(70, 35);
-            this.btnSearch.TabIndex = 5;
-            this.btnSearch.Text = "Search";
-            
+            // 
+            btnSearch.BackColor = Color.FromArgb(241, 245, 249);
+            btnSearch.BorderRadius = 8;
+            btnSearch.FlatStyle = FlatStyle.Flat;
+            btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnSearch.ForeColor = Color.FromArgb(15, 23, 42);
+            btnSearch.HoverBackColor = Color.FromArgb(248, 250, 252);
+            btnSearch.HoverForeColor = Color.Empty;
+            btnSearch.Location = new Point(190, 32);
+            btnSearch.Margin = new Padding(3, 2, 3, 2);
+            btnSearch.Name = "btnSearch";
+            btnSearch.NormalBackColor = Color.FromArgb(241, 245, 249);
+            btnSearch.PressedBackColor = Color.FromArgb(226, 232, 240);
+            btnSearch.PressedForeColor = Color.Empty;
+            btnSearch.Size = new Size(61, 26);
+            btnSearch.TabIndex = 5;
+            btnSearch.Text = "Search";
+            btnSearch.UseVisualStyleBackColor = false;
+            // 
             // btnSave
-            this.btnSave.NormalBackColor = System.Drawing.Color.FromArgb(74, 222, 128);
-            this.btnSave.HoverBackColor = System.Drawing.Color.FromArgb(134, 239, 172);
-            this.btnSave.PressedBackColor = System.Drawing.Color.FromArgb(34, 197, 94);
-            this.btnSave.BorderRadius = 8;
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnSave.Location = new System.Drawing.Point(291, 44);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(60, 35);
-            this.btnSave.TabIndex = 6;
-            this.btnSave.Text = "Save";
-            
+            // 
+            btnSave.BackColor = Color.FromArgb(74, 222, 128);
+            btnSave.BorderRadius = 8;
+            btnSave.FlatStyle = FlatStyle.Flat;
+            btnSave.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnSave.ForeColor = Color.FromArgb(15, 23, 42);
+            btnSave.HoverBackColor = Color.FromArgb(134, 239, 172);
+            btnSave.HoverForeColor = Color.Empty;
+            btnSave.Location = new Point(257, 32);
+            btnSave.Margin = new Padding(3, 2, 3, 2);
+            btnSave.Name = "btnSave";
+            btnSave.NormalBackColor = Color.FromArgb(74, 222, 128);
+            btnSave.PressedBackColor = Color.FromArgb(34, 197, 94);
+            btnSave.PressedForeColor = Color.Empty;
+            btnSave.Size = new Size(52, 26);
+            btnSave.TabIndex = 6;
+            btnSave.Text = "Save";
+            btnSave.UseVisualStyleBackColor = false;
+            // 
             // gridWiring
-            this.gridWiring.AllowUserToAddRows = true;
-            this.gridWiring.AllowUserToDeleteRows = true;
-            this.gridWiring.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.gridWiring.BackgroundColor = System.Drawing.Color.White;
-            this.gridWiring.ColumnHeadersHeight = 45;
-            this.gridWiring.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colNetId,
-            this.colFromAddr,
-            this.colToAddr,
-            this.colTestType,
-            this.colExpected});
-            this.gridWiring.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridWiring.Location = new System.Drawing.Point(0, 94);
-            this.gridWiring.Margin = new System.Windows.Forms.Padding(0);
-            this.gridWiring.Name = "gridWiring";
-            this.gridWiring.RowHeadersVisible = false;
-            this.gridWiring.RowTemplate.Height = 35;
-            this.gridWiring.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gridWiring.Size = new System.Drawing.Size(680, 486);
-            this.gridWiring.TabIndex = 2;
-            
+            // 
+            gridWiring.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            gridWiring.BackgroundColor = Color.White;
+            gridWiring.ColumnHeadersHeight = 45;
+            gridWiring.Columns.AddRange(new DataGridViewColumn[] { colNetId, colFromAddr, colToAddr, colTestType, colExpected });
+            gridWiring.Dock = DockStyle.Fill;
+            gridWiring.Location = new Point(0, 68);
+            gridWiring.Margin = new Padding(0);
+            gridWiring.Name = "gridWiring";
+            gridWiring.RowHeadersVisible = false;
+            gridWiring.RowTemplate.Height = 35;
+            gridWiring.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            gridWiring.Size = new Size(479, 366);
+            gridWiring.TabIndex = 2;
+            // 
             // colNetId
-            this.colNetId.HeaderText = "Net ID";
-            this.colNetId.Name = "colNetId";
-            
+            // 
+            colNetId.HeaderText = "Net ID";
+            colNetId.Name = "colNetId";
+            // 
             // colFromAddr
-            this.colFromAddr.HeaderText = "From";
-            this.colFromAddr.Name = "colFromAddr";
-            
+            // 
+            colFromAddr.HeaderText = "From";
+            colFromAddr.Name = "colFromAddr";
+            // 
             // colToAddr
-            this.colToAddr.HeaderText = "To";
-            this.colToAddr.Name = "colToAddr";
-            
+            // 
+            colToAddr.HeaderText = "To";
+            colToAddr.Name = "colToAddr";
+            // 
             // colTestType
-            this.colTestType.HeaderText = "Type";
-            this.colTestType.Name = "colTestType";
-            
+            // 
+            colTestType.HeaderText = "Type";
+            colTestType.Name = "colTestType";
+            // 
             // colExpected
-            this.colExpected.HeaderText = "Expected";
-            this.colExpected.Name = "colExpected";
-            
+            // 
+            colExpected.HeaderText = "Expected";
+            colExpected.Name = "colExpected";
+            // 
             // tableLayoutPanelRight
-            this.tableLayoutPanelRight.ColumnCount = 1;
-            this.tableLayoutPanelRight.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelRight.Controls.Add(this.lblTestParameterDetails, 0, 0);
-            this.tableLayoutPanelRight.Controls.Add(this.picDiagram, 0, 1);
-            this.tableLayoutPanelRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelRight.Location = new System.Drawing.Point(710, 10);
-            this.tableLayoutPanelRight.Margin = new System.Windows.Forms.Padding(10);
-            this.tableLayoutPanelRight.Name = "tableLayoutPanelRight";
-            this.tableLayoutPanelRight.RowCount = 2;
-            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelRight.Size = new System.Drawing.Size(280, 580);
-            this.tableLayoutPanelRight.TabIndex = 1;
-            
+            // 
+            tableLayoutPanelRight.ColumnCount = 1;
+            tableLayoutPanelRight.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanelRight.Controls.Add(lblTestParameterDetails, 0, 0);
+            tableLayoutPanelRight.Controls.Add(picDiagram, 0, 1);
+            tableLayoutPanelRight.Dock = DockStyle.Fill;
+            tableLayoutPanelRight.Location = new Point(506, 8);
+            tableLayoutPanelRight.Margin = new Padding(9, 8, 9, 8);
+            tableLayoutPanelRight.Name = "tableLayoutPanelRight";
+            tableLayoutPanelRight.RowCount = 2;
+            tableLayoutPanelRight.RowStyles.Add(new RowStyle());
+            tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanelRight.Size = new Size(360, 434);
+            tableLayoutPanelRight.TabIndex = 1;
+            // 
             // lblTestParameterDetails
-            this.lblTestParameterDetails.AutoSize = true;
-            this.lblTestParameterDetails.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblTestParameterDetails.ForeColor = System.Drawing.Color.FromArgb(15, 23, 42);
-            this.lblTestParameterDetails.Location = new System.Drawing.Point(0, 0);
-            this.lblTestParameterDetails.Margin = new System.Windows.Forms.Padding(0, 0, 0, 10);
-            this.lblTestParameterDetails.Name = "lblTestParameterDetails";
-            this.lblTestParameterDetails.Size = new System.Drawing.Size(200, 23);
-            this.lblTestParameterDetails.TabIndex = 0;
-            this.lblTestParameterDetails.Text = "TEST PARAMETER DETAILS";
-            
+            // 
+            lblTestParameterDetails.AutoSize = true;
+            lblTestParameterDetails.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblTestParameterDetails.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTestParameterDetails.Location = new Point(0, 0);
+            lblTestParameterDetails.Margin = new Padding(0, 0, 0, 8);
+            lblTestParameterDetails.Name = "lblTestParameterDetails";
+            lblTestParameterDetails.Size = new Size(182, 19);
+            lblTestParameterDetails.TabIndex = 0;
+            lblTestParameterDetails.Text = "TEST PARAMETER DETAILS";
+            // 
             // picDiagram
-            this.picDiagram.BackColor = System.Drawing.Color.FromArgb(248, 250, 252);
-            this.picDiagram.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.picDiagram.Location = new System.Drawing.Point(0, 33);
-            this.picDiagram.Margin = new System.Windows.Forms.Padding(0);
-            this.picDiagram.Name = "picDiagram";
-            this.picDiagram.Size = new System.Drawing.Size(280, 547);
-            this.picDiagram.TabIndex = 1;
-            this.picDiagram.TabStop = false;
-            
+            // 
+            picDiagram.BackColor = Color.FromArgb(248, 250, 252);
+            picDiagram.Dock = DockStyle.Fill;
+            picDiagram.Location = new Point(0, 27);
+            picDiagram.Margin = new Padding(0);
+            picDiagram.Name = "picDiagram";
+            picDiagram.Size = new Size(360, 407);
+            picDiagram.TabIndex = 1;
+            picDiagram.TabStop = false;
+            // 
             // HarnessWiringTab
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.tableLayoutPanelMain);
-            this.Name = "HarnessWiringTab";
-            this.Size = new System.Drawing.Size(1000, 600);
-            
-            this.tableLayoutPanelMain.ResumeLayout(false);
-            this.tableLayoutPanelLeft.ResumeLayout(false);
-            this.tableLayoutPanelLeft.PerformLayout();
-            this.tableLayoutPanelToolbar.ResumeLayout(false);
-            this.tableLayoutPanelToolbar.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridWiring)).EndInit();
-            this.tableLayoutPanelRight.ResumeLayout(false);
-            this.tableLayoutPanelRight.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picDiagram)).EndInit();
-            this.ResumeLayout(false);
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
+            Controls.Add(tableLayoutPanelMain);
+            Margin = new Padding(3, 2, 3, 2);
+            Name = "HarnessWiringTab";
+            Size = new Size(875, 450);
+            tableLayoutPanelMain.ResumeLayout(false);
+            tableLayoutPanelLeft.ResumeLayout(false);
+            tableLayoutPanelLeft.PerformLayout();
+            tableLayoutPanelToolbar.ResumeLayout(false);
+            tableLayoutPanelToolbar.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)gridWiring).EndInit();
+            tableLayoutPanelRight.ResumeLayout(false);
+            tableLayoutPanelRight.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picDiagram).EndInit();
+            ResumeLayout(false);
         }
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanelMain;
