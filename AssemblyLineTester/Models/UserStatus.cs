@@ -20,7 +20,7 @@ namespace AssemblyLineTester.Models
         // An allow-list: a status added later stays refused until someone widens this deliberately.
         public static bool CanSignIn(int statusId) => statusId == Active;
 
-        // Debug-only guard on the sign-in gate.
+        // Debug-only guard on the sign-in gate
         [Conditional("DEBUG")]
         public static void SelfCheck()
         {

@@ -109,8 +109,6 @@ namespace AssemblyLineTester.Views.Pages
                 colReportType.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             if (gridReports.Columns["colDateGenerated"] is { } colDateGenerated)
                 colDateGenerated.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            if (gridReports.Columns["colSize"] is { } colSize)
-                colSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             if (gridReports.Columns["colAction"] is { } colAction)
                 colAction.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             gridReports.CellFormatting += GridReports_CellFormatting;
@@ -528,7 +526,6 @@ namespace AssemblyLineTester.Views.Pages
                     r.OverallResult,
                     r.DateGenerated.ToString("dd MMM yyyy, HH:mm"),
                     r.GeneratedBy,
-                    "-",
                     "View");
                 gridReports.Rows[rowIdx].Tag = r.ReportId;
                 gridReports.Rows[rowIdx].Height = gridReports.RowTemplate.Height;

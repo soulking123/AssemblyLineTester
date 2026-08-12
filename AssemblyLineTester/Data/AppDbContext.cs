@@ -254,19 +254,19 @@ namespace AssemblyLineTester.Data
             modelBuilder.Entity<TestType>().HasData(
                 new TestType { Id = 1, TestTypeName = "4RESISTOR", DisplayName = "4RESISTOR" },
                 new TestType { Id = 2, TestTypeName = "4WIRE", DisplayName = "4WIRE" },
-                new TestType { Id = 3, TestTypeName = "CAPACITOR", DisplayName = "CAPACITOR" },
+                new TestType { Id = 3, TestTypeName = "CAPACITOR", DisplayName = "CAPACITOR", TestTypeValue = 2 },
                 new TestType { Id = 4, TestTypeName = "CLOSE", DisplayName = "CLOSE" },
                 new TestType { Id = 5, TestTypeName = "COMMENT", DisplayName = "COMMENT" },
-                new TestType { Id = 6, TestTypeName = "DIODE", DisplayName = "DIODE" },
+                new TestType { Id = 6, TestTypeName = "DIODE", DisplayName = "DIODE", TestTypeValue = 4 },
                 new TestType { Id = 7, TestTypeName = "LINK", DisplayName = "LINK" },
                 new TestType { Id = 8, TestTypeName = "LUA COMPONENT", DisplayName = "LUA COMPONENT" },
                 new TestType { Id = 9, TestTypeName = "OPEN", DisplayName = "OPEN" },
                 new TestType { Id = 10, TestTypeName = "PROBE", DisplayName = "PROBE" },
-                new TestType { Id = 11, TestTypeName = "RESISTOR", DisplayName = "RESISTOR" },
+                new TestType { Id = 11, TestTypeName = "RESISTOR", DisplayName = "RESISTOR", TestTypeValue = 1 },
                 new TestType { Id = 12, TestTypeName = "SIGNATURE DIODE", DisplayName = "SIGNATURE DIODE" },
                 new TestType { Id = 13, TestTypeName = "SIGNATURE WIRE", DisplayName = "SIGNATURE WIRE" },
-                new TestType { Id = 14, TestTypeName = "TWISTED PAIR", DisplayName = "TWISTED PAIR" },
-                new TestType { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE" }
+                new TestType { Id = 14, TestTypeName = "TWISTED PAIR", DisplayName = "TWISTED PAIR", TestTypeValue = 8 },
+                new TestType { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE", TestTypeValue = 0 }
             );
 
             // One check row per test type, so the Settings list is complete the first time it opens.
@@ -290,11 +290,11 @@ namespace AssemblyLineTester.Data
 
             // The five types the Learn Connection modal offers, pointed at their TestType rows.
             modelBuilder.Entity<LearnConnection>().HasData(
-                new LearnConnection { Id = 1, TestTypeId = 15, DisplayName = "Wire", IsChecked = true, TestTypeValue = 0 },
-                new LearnConnection { Id = 2, TestTypeId = 11, DisplayName = "Resistance", IsChecked = true, TestTypeValue = 1 },
-                new LearnConnection { Id = 3, TestTypeId = 3, DisplayName = "Capacitor", IsChecked = true, TestTypeValue = 2 },
-                new LearnConnection { Id = 4, TestTypeId = 6, DisplayName = "Diode", IsChecked = true, TestTypeValue = 4 },
-                new LearnConnection { Id = 5, TestTypeId = 14, DisplayName = "Twisted Pair", IsChecked = true, TestTypeValue = 8 }
+                new LearnConnection { Id = 1, TestTypeId = 15, DisplayName = "Wire", IsChecked = true },
+                new LearnConnection { Id = 2, TestTypeId = 11, DisplayName = "Resistance", IsChecked = true },
+                new LearnConnection { Id = 3, TestTypeId = 3, DisplayName = "Capacitor", IsChecked = true },
+                new LearnConnection { Id = 4, TestTypeId = 6, DisplayName = "Diode", IsChecked = true },
+                new LearnConnection { Id = 5, TestTypeId = 14, DisplayName = "Twisted Pair", IsChecked = true }
             );
 
             // TestResultName doubles as the column header wherever a result row is rendered.

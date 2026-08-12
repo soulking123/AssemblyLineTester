@@ -12,7 +12,5 @@ namespace AssemblyLineTester.Models
 
         public bool IsChecked { get; set; }
         public string DisplayName { get; set; } = string.Empty;
-
-        public int TestTypeValue { get; set; }
     }
 }

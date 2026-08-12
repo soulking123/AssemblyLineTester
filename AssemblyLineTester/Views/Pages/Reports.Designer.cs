@@ -66,7 +66,6 @@ namespace AssemblyLineTester.Views.Pages
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
             tblMain = new TableLayoutPanel();
             pnlTopHeader = new Panel();
@@ -120,7 +119,6 @@ namespace AssemblyLineTester.Views.Pages
             colReportType = new DataGridViewTextBoxColumn();
             colDateGenerated = new DataGridViewTextBoxColumn();
             colGeneratedBy = new DataGridViewTextBoxColumn();
-            colSize = new DataGridViewTextBoxColumn();
             colAction = new DataGridViewTextBoxColumn();
             tblPagination = new TableLayoutPanel();
             lblPageInfo = new Label();
@@ -935,7 +933,7 @@ namespace AssemblyLineTester.Views.Pages
             gridReports.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             gridReports.ColumnHeadersHeight = 48;
             gridReports.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridReports.Columns.AddRange(new DataGridViewColumn[] { colNo, colReportName, colReportType, colDateGenerated, colGeneratedBy, colSize, colAction });
+            gridReports.Columns.AddRange(new DataGridViewColumn[] { colNo, colReportName, colReportType, colDateGenerated, colGeneratedBy, colAction });
             dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle7.BackColor = Color.White;
             dataGridViewCellStyle7.Font = new Font("Segoe UI", 9F);
@@ -1004,16 +1002,6 @@ namespace AssemblyLineTester.Views.Pages
             colGeneratedBy.MinimumWidth = 100;
             colGeneratedBy.Name = "colGeneratedBy";
             colGeneratedBy.ReadOnly = true;
-            // 
-            // colSize
-            // 
-            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleRight;
-            colSize.DefaultCellStyle = dataGridViewCellStyle5;
-            colSize.FillWeight = 45F;
-            colSize.HeaderText = "Size";
-            colSize.MinimumWidth = 60;
-            colSize.Name = "colSize";
-            colSize.ReadOnly = true;
             // 
             // colAction
             // 
@@ -2606,7 +2594,6 @@ namespace AssemblyLineTester.Views.Pages
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colGeneratedBy;
 
-        private System.Windows.Forms.DataGridViewTextBoxColumn colSize;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn colAction;
 
