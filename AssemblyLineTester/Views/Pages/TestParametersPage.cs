@@ -774,7 +774,7 @@ namespace AssemblyLineTester.Views.Pages
             highlightedRows.Clear();
 
             txtConfigName.Text = config.ConfigName;
-            txtProductModel.Text = config.ProductModel;
+            txtProductModel.Text = config.ProductModelName;
 
             foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
             {
@@ -1545,7 +1545,7 @@ namespace AssemblyLineTester.Views.Pages
             return new TestConfiguration
             {
                 ConfigName = configName,
-                ProductModel = productModel,
+                ProductModelName = productModel,
                 Description = description,
                 Nets = nets
             };
@@ -2042,7 +2042,7 @@ namespace AssemblyLineTester.Views.Pages
             return new TestConfiguration
             {
                 ConfigName = configName,
-                ProductModel = productModel,
+                ProductModelName = productModel,
                 Description = description,
                 Nets = nets
             };

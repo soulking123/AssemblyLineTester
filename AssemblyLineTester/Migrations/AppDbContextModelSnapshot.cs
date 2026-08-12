@@ -17,6 +17,34 @@ namespace AssemblyLineTester.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
 
+            modelBuilder.Entity("AssemblyLineTester.Models.Area", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Desc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Areas");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Riser Cabinet"
+                        });
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.DefaultTestSetting", b =>
                 {
                     b.Property<int>("Id")
@@ -160,6 +188,49 @@ namespace AssemblyLineTester.Migrations
                             OperatingSecondsToday = 0.0,
                             RemainingMaintDays = 180,
                             RemainingMaintHours = 2160.0
+                        });
+                });
+
+            modelBuilder.Entity("AssemblyLineTester.Models.ProductModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Desc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ProductModels");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "6020"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "6030"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "6040"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "6060"
                         });
                 });
 
@@ -1496,12 +1567,25 @@ namespace AssemblyLineTester.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("HipotVoltage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ProductModel")
+                    b.Property<double>("MaxWireResistance")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("MinComponentResistance")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("MinInsulationResistance")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("ProductModelName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ProductModel");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -1626,9 +1710,10 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("PassCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ProductModel")
+                    b.Property<string>("ProductModelName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ProductModel");
 
                     b.Property<string>("ProductType")
                         .IsRequired()
@@ -2267,6 +2352,21 @@ namespace AssemblyLineTester.Migrations
                     b.ToTable("ProductHarnesses");
                 });
 
+            modelBuilder.Entity("TestConfigurationTestType", b =>
+                {
+                    b.Property<int>("TestConfigurationConfigId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TestTypesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("TestConfigurationConfigId", "TestTypesId");
+
+                    b.HasIndex("TestTypesId");
+
+                    b.ToTable("TestConfigurationTestType");
+                });
+
             modelBuilder.Entity("AssemblyLineTester.Models.DefaultTestSetting", b =>
                 {
                     b.HasOne("AssemblyLineTester.Models.TestType", "DefaultTestType")
@@ -2415,6 +2515,21 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Connector");
 
                     b.Navigation("ProductHarness");
+                });
+
+            modelBuilder.Entity("TestConfigurationTestType", b =>
+                {
+                    b.HasOne("AssemblyLineTester.Models.TestConfiguration", null)
+                        .WithMany()
+                        .HasForeignKey("TestConfigurationConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AssemblyLineTester.Models.TestType", null)
+                        .WithMany()
+                        .HasForeignKey("TestTypesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.Role", b =>

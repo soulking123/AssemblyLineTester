@@ -274,7 +274,7 @@ namespace AssemblyLineTester.Views.Pages
 
                     var reportService = new TestReportService();
                     _currentReportId = reportService.SaveDraftLiveTestReport(
-                        activeConfig.ProductModel, "N/A", "N/A", "N/A", "1.0",
+                        activeConfig.ProductModelName, "N/A", "N/A", "N/A", "1.0",
                         "N/A", AppTime.UtcNow, _loadedRows, overallResult);
 
                     //ShowSummary(_loadedRows, overallResult);
@@ -652,7 +652,7 @@ namespace AssemblyLineTester.Views.Pages
             string overallResult = allPass ? "PASS" : "FAIL";
 
             TestConfiguration? activeConfig = _configService.GetActiveConfig();
-            string productModel = activeConfig?.ProductModel ?? "N/A";
+            string productModel = activeConfig?.ProductModelName ?? "N/A";
 
             using var modal = new AssemblyLineTester.Views.Modals.SaveTestReportModalForm(
                 productModel,
@@ -789,7 +789,7 @@ namespace AssemblyLineTester.Views.Pages
             if (activeConfig != null)
             {
                 var harnessService = new AssemblyLineTester.Services.HarnessService();
-                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModel || h.Name == activeConfig.ConfigName);
+                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModelName || h.Name == activeConfig.ConfigName);
                 if (harness != null && harness.ImagePaths != null && harness.ImagePaths.Count > 0)
                 {
                     try
@@ -879,7 +879,7 @@ namespace AssemblyLineTester.Views.Pages
             if (activeConfig != null)
             {
                 var harnessService = new AssemblyLineTester.Services.HarnessService();
-                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModel || h.Name == activeConfig.ConfigName);
+                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModelName || h.Name == activeConfig.ConfigName);
                 if (harness != null && harness.ImagePaths != null)
                 {
                     paths.AddRange(harness.ImagePaths);
@@ -898,7 +898,7 @@ namespace AssemblyLineTester.Views.Pages
             if (activeConfig != null)
             {
                 var harnessService = new AssemblyLineTester.Services.HarnessService();
-                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModel || h.Name == activeConfig.ConfigName);
+                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModelName || h.Name == activeConfig.ConfigName);
                 if (harness != null)
                 {
                     var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);

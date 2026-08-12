@@ -123,7 +123,7 @@ namespace AssemblyLineTester.Views.Modals
             var filtered = string.IsNullOrWhiteSpace(query)
                 ? _allConfigs
                 : _allConfigs.Where(c => c.ConfigName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                                         c.ProductModel.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+                                         c.ProductModelName.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
 
             PopulateGrid(filtered);
         }
@@ -135,7 +135,7 @@ namespace AssemblyLineTester.Views.Modals
             {
                 int idx = gridConfigs.Rows.Add(
                     c.ConfigName,
-                    c.ProductModel,
+                    c.ProductModelName,
                     AppTime.ToLocal(c.CreatedAt).ToString("g"),
                     c.UpdatedAt?.ToString("g") ?? "-",
                     c.IsActive ? "Yes" : "No",

@@ -152,7 +152,7 @@ namespace AssemblyLineTester.Services
             {
                 ReportNumber = report.ReportNumber,
                 TestDateTime = AppTime.ToLocal(report.TestDateTime),
-                ProductModel = report.ProductModel,
+                ProductModel = report.ProductModelName,
                 ProductType = report.ProductType,
                 Area = report.Area,
                 ECNNumber = report.ECNNumber,
@@ -183,7 +183,7 @@ namespace AssemblyLineTester.Services
             var report = new TestReport
             {
                 ReportNumber = NextReportNumber(db),
-                ProductModel = productModel ?? "",
+                ProductModelName = productModel ?? "",
                 ProductType = productType ?? "",
                 Area = area ?? "",
                 ECNNumber = ecnNumber ?? "",

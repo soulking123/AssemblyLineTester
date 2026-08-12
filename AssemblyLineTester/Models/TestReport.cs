@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AssemblyLineTester.Models
 {
@@ -24,7 +25,11 @@ namespace AssemblyLineTester.Models
 
         public string ReportNumber { get; set; } = string.Empty;
 
-        public string ProductModel { get; set; } = string.Empty;
+        // Named apart from the ProductModel entity it holds the name of; the column keeps its old
+        // name so the rename costs no migration.
+        [Column("ProductModel")]
+        public string ProductModelName { get; set; } = string.Empty;
+
         public string ProductType { get; set; } = string.Empty;
         public string Area { get; set; } = string.Empty;
         public string ECNNumber { get; set; } = string.Empty;

@@ -40,7 +40,7 @@ namespace AssemblyLineTester.Services
 
                 if (existingProgram != null)
                 {
-                    existingProgram.ProductModel = config.ProductModel;
+                    existingProgram.ProductModelName = config.ProductModelName;
                     existingProgram.Description = config.Description;
                     existingProgram.UpdatedAt = DateTime.UtcNow;
 
@@ -69,7 +69,7 @@ namespace AssemblyLineTester.Services
                 new SystemLogService().Log(
                     Models.SystemLog.LogSeverity.Info, "Test Configuration",
                     existingProgram != null ? "Update Test Config" : "Create Test Config",
-                    $"Test config '{config.ConfigName}' saved for model {config.ProductModel} with {config.Nets.Count} nets.");
+                    $"Test config '{config.ConfigName}' saved for model {config.ProductModelName} with {config.Nets.Count} nets.");
             }
         }
 
