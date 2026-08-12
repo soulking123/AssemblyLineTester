@@ -347,7 +347,10 @@ namespace AssemblyLineTester.Services
             {
                 g.DrawRectangle(hdrBg, x, y, cols[i], rowH);
                 g.DrawRectangle(XPens.LightGray, x, y, cols[i], rowH);
-                g.DrawString(headers[i], fontBold, XBrushes.Black, new XRect(x + 3, y + 4, cols[i] - 6, rowH), XStringFormats.TopLeft);
+                // Clipped like the cells below: an overlong heading used to run under its neighbour,
+                // which then painted over it and left the text looking chopped.
+                g.DrawString(Ellipsize(g, headers[i], fontBold, cols[i] - 6), fontBold, XBrushes.Black,
+                    new XRect(x + 3, y + 4, cols[i] - 6, rowH), XStringFormats.TopLeft);
                 x += cols[i];
             }
 
@@ -359,10 +362,14 @@ namespace AssemblyLineTester.Services
         private static readonly Dictionary<string, double> DetailColumnWeights = new()
         {
             ["Net-ID"] = 0.9,
-            ["Harness Group"] = 2.5,
-            ["From"] = 1.0,
+            // Holds about 13 characters at Arial 9. It used to take 2.5, which is twice what
+            // "J12-J34" needs and squeezed every column to its right.
+            ["Harness Group"] = 1.3,
+            // Pin addresses, never more than 5 characters. The floor is the "From" heading, not the
+            // values: any narrower and the heading itself would be the thing that gets ellipsized.
+            ["From"] = 0.7,
             ["Net From Label"] = 1.4,
-            ["To"] = 1.0,
+            ["To"] = 0.7,
             ["Net To Label"] = 1.4,
             ["Test Type"] = 1.8,
             ["Lower Limit"] = 0.9,

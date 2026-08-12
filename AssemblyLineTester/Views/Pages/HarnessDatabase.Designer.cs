@@ -69,14 +69,10 @@ namespace AssemblyLineTester.Views.Pages
             panelFilters = new Panel();
             lblProductModel = new Label();
             cmbProductModel = new ComboBox();
-            lblProductType = new Label();
-            cmbProductType = new ComboBox();
             lblArea = new Label();
             cmbArea = new ComboBox();
             lblPartNumber = new Label();
             txtPartNumber = new TextBox();
-            lblStatus = new Label();
-            cmbStatus = new ComboBox();
             btnSearch = new Button();
             btnReset = new Button();
             btnAddHarness = new Button();
@@ -600,14 +596,10 @@ namespace AssemblyLineTester.Views.Pages
             panelFilters.BackColor = Color.White;
             panelFilters.Controls.Add(lblProductModel);
             panelFilters.Controls.Add(cmbProductModel);
-            panelFilters.Controls.Add(lblProductType);
-            panelFilters.Controls.Add(cmbProductType);
             panelFilters.Controls.Add(lblArea);
             panelFilters.Controls.Add(cmbArea);
             panelFilters.Controls.Add(lblPartNumber);
             panelFilters.Controls.Add(txtPartNumber);
-            panelFilters.Controls.Add(lblStatus);
-            panelFilters.Controls.Add(cmbStatus);
             panelFilters.Controls.Add(btnSearch);
             panelFilters.Controls.Add(btnReset);
             panelFilters.Controls.Add(btnAddHarness);
@@ -641,97 +633,51 @@ namespace AssemblyLineTester.Views.Pages
             cmbProductModel.Size = new Size(141, 25);
             cmbProductModel.TabIndex = 0;
             // 
-            // lblProductType
-            // 
-            lblProductType.AutoSize = true;
-            lblProductType.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblProductType.ForeColor = Color.FromArgb(71, 85, 105);
-            lblProductType.Location = new Point(171, 9);
-            lblProductType.Margin = new Padding(0);
-            lblProductType.Name = "lblProductType";
-            lblProductType.Size = new Size(80, 15);
-            lblProductType.TabIndex = 6;
-            lblProductType.Text = "Product Type";
-            // 
-            // cmbProductType
-            // 
-            cmbProductType.FlatStyle = FlatStyle.System;
-            cmbProductType.Font = new Font("Segoe UI", 9.5F);
-            cmbProductType.FormattingEnabled = true;
-            cmbProductType.Location = new Point(171, 27);
-            cmbProductType.Margin = new Padding(0);
-            cmbProductType.Name = "cmbProductType";
-            cmbProductType.Size = new Size(141, 25);
-            cmbProductType.TabIndex = 1;
-            // 
             // lblArea
-            // 
+            //
             lblArea.AutoSize = true;
             lblArea.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblArea.ForeColor = Color.FromArgb(71, 85, 105);
-            lblArea.Location = new Point(324, 9);
+            lblArea.Location = new Point(171, 9);
             lblArea.Margin = new Padding(0);
             lblArea.Name = "lblArea";
             lblArea.Size = new Size(33, 15);
-            lblArea.TabIndex = 7;
+            lblArea.TabIndex = 6;
             lblArea.Text = "Area";
-            // 
+            //
             // cmbArea
-            // 
+            //
             cmbArea.FlatStyle = FlatStyle.System;
             cmbArea.Font = new Font("Segoe UI", 9.5F);
             cmbArea.FormattingEnabled = true;
-            cmbArea.Location = new Point(324, 27);
+            cmbArea.Location = new Point(171, 27);
             cmbArea.Margin = new Padding(0);
             cmbArea.Name = "cmbArea";
             cmbArea.Size = new Size(158, 25);
-            cmbArea.TabIndex = 2;
-            // 
+            cmbArea.TabIndex = 1;
+            //
             // lblPartNumber
-            // 
+            //
             lblPartNumber.AutoSize = true;
             lblPartNumber.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblPartNumber.ForeColor = Color.FromArgb(71, 85, 105);
-            lblPartNumber.Location = new Point(494, 9);
+            lblPartNumber.Location = new Point(342, 9);
             lblPartNumber.Margin = new Padding(0);
             lblPartNumber.Name = "lblPartNumber";
             lblPartNumber.Size = new Size(79, 15);
-            lblPartNumber.TabIndex = 8;
+            lblPartNumber.TabIndex = 7;
             lblPartNumber.Text = "Part Number";
-            // 
+            //
             // txtPartNumber
-            // 
+            //
             txtPartNumber.Font = new Font("Segoe UI", 9.5F);
-            txtPartNumber.Location = new Point(494, 27);
+            txtPartNumber.Location = new Point(342, 27);
             txtPartNumber.Margin = new Padding(0);
             txtPartNumber.Name = "txtPartNumber";
             txtPartNumber.PlaceholderText = "Search part number";
             txtPartNumber.Size = new Size(184, 24);
-            txtPartNumber.TabIndex = 3;
-            // 
-            // lblStatus
-            // 
-            lblStatus.AutoSize = true;
-            lblStatus.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblStatus.ForeColor = Color.FromArgb(71, 85, 105);
-            lblStatus.Location = new Point(691, 9);
-            lblStatus.Margin = new Padding(0);
-            lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(42, 15);
-            lblStatus.TabIndex = 9;
-            lblStatus.Text = "Status";
-            // 
-            // cmbStatus
-            // 
-            cmbStatus.FlatStyle = FlatStyle.System;
-            cmbStatus.Font = new Font("Segoe UI", 9.5F);
-            cmbStatus.FormattingEnabled = true;
-            cmbStatus.Location = new Point(691, 27);
-            cmbStatus.Margin = new Padding(0);
-            cmbStatus.Name = "cmbStatus";
-            cmbStatus.Size = new Size(123, 25);
-            cmbStatus.TabIndex = 4;
-            // 
+            txtPartNumber.TabIndex = 2;
+            //
             // btnSearch
             // 
             btnSearch.BackColor = Color.FromArgb(250, 204, 21);
@@ -740,7 +686,7 @@ namespace AssemblyLineTester.Views.Pages
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSearch.ForeColor = Color.FromArgb(15, 23, 42);
-            btnSearch.Location = new Point(827, 25);
+            btnSearch.Location = new Point(539, 25);
             btnSearch.Margin = new Padding(0);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(83, 25);
@@ -756,7 +702,7 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.FlatStyle = FlatStyle.Flat;
             btnReset.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnReset.ForeColor = Color.FromArgb(51, 65, 85);
-            btnReset.Location = new Point(919, 25);
+            btnReset.Location = new Point(631, 25);
             btnReset.Margin = new Padding(0);
             btnReset.Name = "btnReset";
             btnReset.Size = new Size(74, 25);
@@ -926,14 +872,11 @@ namespace AssemblyLineTester.Views.Pages
         private Label lblTitle;
         private TableLayoutPanel tableLayoutPanelMain;
         private Panel panelFilters;
-        private Label lblStatus;
         private Button btnReset;
         private Label lblPartNumber;
         private Button btnSearch;
         private Label lblArea;
-        private Label lblProductType;
         private Label lblProductModel;
-        private ComboBox cmbStatus;
         private TextBox txtPartNumber;
         private ComboBox cmbArea;
         private ComboBox cmbProductType;

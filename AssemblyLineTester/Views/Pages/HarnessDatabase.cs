@@ -210,7 +210,6 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.Click += (s, e) =>
             {
                 cmbProductModel.SelectedIndex = 0;
-                cmbProductType.SelectedIndex = 0;
                 cmbArea.SelectedIndex = 0;
                 txtPartNumber.Clear();
                 ApplyFilters();
@@ -295,13 +294,11 @@ namespace AssemblyLineTester.Views.Pages
             try
             {
                 string model = cmbProductModel.SelectedItem?.ToString() ?? "All";
-                string type = cmbProductType.SelectedItem?.ToString() ?? "All";
                 string area = cmbArea.SelectedItem?.ToString() ?? "All";
                 string partNumberQuery = txtPartNumber.Text.Trim();
 
                 _filteredHarnessEntities = _allHarnessEntities.Where(h =>
                     (model == "All" || h.ProductModel == model) &&
-                    (type == "All" || h.ProductType == type) &&
                     (area == "All" || h.Area == area) &&
                     (string.IsNullOrEmpty(partNumberQuery) ||
                      h.ConnectorList.Any(c => c.PartNumber.Contains(partNumberQuery, StringComparison.OrdinalIgnoreCase)) ||
@@ -358,19 +355,16 @@ namespace AssemblyLineTester.Views.Pages
             {
                 _allHarnessEntities = _harnessService.GetAllHarnesses();
 
+                // Taken from the reference tables, not from the harnesses already stored: a model
+                // nobody has built a harness for yet still has to be selectable.
                 cmbProductModel.Items.Clear();
                 cmbProductModel.Items.Add("All");
-                cmbProductModel.Items.AddRange(_allHarnessEntities.Select(h => h.ProductModel).Distinct().OrderBy(m => m).ToArray());
+                cmbProductModel.Items.AddRange(LookupService.GetProductModelNames().ToArray());
                 cmbProductModel.SelectedIndex = 0;
-
-                cmbProductType.Items.Clear();
-                cmbProductType.Items.Add("All");
-                cmbProductType.Items.AddRange(_allHarnessEntities.Select(h => h.ProductType).Distinct().OrderBy(t => t).ToArray());
-                cmbProductType.SelectedIndex = 0;
 
                 cmbArea.Items.Clear();
                 cmbArea.Items.Add("All");
-                cmbArea.Items.AddRange(_allHarnessEntities.Select(h => h.Area).Distinct().OrderBy(a => a).ToArray());
+                cmbArea.Items.AddRange(LookupService.GetAreaNames().ToArray());
                 cmbArea.SelectedIndex = 0;
 
                 _filteredHarnessEntities = new List<ProductHarness>(_allHarnessEntities);
