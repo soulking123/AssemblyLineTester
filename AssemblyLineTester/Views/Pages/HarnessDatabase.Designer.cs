@@ -67,6 +67,8 @@ namespace AssemblyLineTester.Views.Pages
             lblTitle = new Label();
             tableLayoutPanelMain = new TableLayoutPanel();
             panelFilters = new Panel();
+            tblFilterInner = new TableLayoutPanel();
+            tblFilterInputs = new TableLayoutPanel();
             lblProductModel = new Label();
             cmbProductModel = new ComboBox();
             lblProductType = new Label();
@@ -77,6 +79,7 @@ namespace AssemblyLineTester.Views.Pages
             txtPartNumber = new TextBox();
             lblStatus = new Label();
             cmbStatus = new ComboBox();
+            flpActionButtons = new FlowLayoutPanel();
             btnSearch = new Button();
             btnReset = new Button();
             btnAddHarness = new Button();
@@ -97,6 +100,9 @@ namespace AssemblyLineTester.Views.Pages
             panelCardTestSummary.SuspendLayout();
             tableLayoutPanelMain.SuspendLayout();
             panelFilters.SuspendLayout();
+            tblFilterInner.SuspendLayout();
+            tblFilterInputs.SuspendLayout();
+            flpActionButtons.SuspendLayout();
             SuspendLayout();
             // 
             // splitContainerMain
@@ -104,7 +110,7 @@ namespace AssemblyLineTester.Views.Pages
             splitContainerMain.Dock = DockStyle.Fill;
             splitContainerMain.IsSplitterFixed = true;
             splitContainerMain.Location = new Point(19, 126);
-            splitContainerMain.Margin = new Padding(5, 5, 5, 5);
+            splitContainerMain.Margin = new Padding(5);
             splitContainerMain.Name = "splitContainerMain";
             // 
             // splitContainerMain.Panel1
@@ -131,7 +137,7 @@ namespace AssemblyLineTester.Views.Pages
             tableLayoutPanelLeft.Location = new Point(0, 0);
             tableLayoutPanelLeft.Margin = new Padding(0);
             tableLayoutPanelLeft.Name = "tableLayoutPanelLeft";
-            tableLayoutPanelLeft.Padding = new Padding(2, 2, 2, 2);
+            tableLayoutPanelLeft.Padding = new Padding(2);
             tableLayoutPanelLeft.RowCount = 3;
             tableLayoutPanelLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 38F));
             tableLayoutPanelLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
@@ -382,13 +388,13 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // flpNavigation
             // 
+            flpNavigation.AutoSize = true;
             flpNavigation.Controls.Add(lblNavGeneral);
             flpNavigation.Controls.Add(lblNavConnector);
             flpNavigation.Controls.Add(lblNavWiring);
             flpNavigation.Location = new Point(215, 5);
             flpNavigation.Margin = new Padding(2, 1, 2, 1);
             flpNavigation.Name = "flpNavigation";
-            flpNavigation.AutoSize = true;
             flpNavigation.Size = new Size(538, 35);
             flpNavigation.TabIndex = 1;
             // 
@@ -598,19 +604,7 @@ namespace AssemblyLineTester.Views.Pages
             // panelFilters
             // 
             panelFilters.BackColor = Color.White;
-            panelFilters.Controls.Add(lblProductModel);
-            panelFilters.Controls.Add(cmbProductModel);
-            panelFilters.Controls.Add(lblProductType);
-            panelFilters.Controls.Add(cmbProductType);
-            panelFilters.Controls.Add(lblArea);
-            panelFilters.Controls.Add(cmbArea);
-            panelFilters.Controls.Add(lblPartNumber);
-            panelFilters.Controls.Add(txtPartNumber);
-            panelFilters.Controls.Add(lblStatus);
-            panelFilters.Controls.Add(cmbStatus);
-            panelFilters.Controls.Add(btnSearch);
-            panelFilters.Controls.Add(btnReset);
-            panelFilters.Controls.Add(btnAddHarness);
+            panelFilters.Controls.Add(tblFilterInner);
             panelFilters.Dock = DockStyle.Fill;
             panelFilters.Location = new Point(14, 50);
             panelFilters.Margin = new Padding(0, 0, 0, 12);
@@ -618,12 +612,56 @@ namespace AssemblyLineTester.Views.Pages
             panelFilters.Size = new Size(2835, 59);
             panelFilters.TabIndex = 1;
             // 
+            // tblFilterInner
+            // 
+            tblFilterInner.ColumnCount = 2;
+            tblFilterInner.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblFilterInner.ColumnStyles.Add(new ColumnStyle());
+            tblFilterInner.Controls.Add(tblFilterInputs, 0, 0);
+            tblFilterInner.Controls.Add(flpActionButtons, 1, 0);
+            tblFilterInner.Dock = DockStyle.Fill;
+            tblFilterInner.Location = new Point(0, 0);
+            tblFilterInner.Margin = new Padding(0);
+            tblFilterInner.Name = "tblFilterInner";
+            tblFilterInner.RowCount = 1;
+            tblFilterInner.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblFilterInner.Size = new Size(2835, 59);
+            tblFilterInner.TabIndex = 0;
+            // 
+            // tblFilterInputs
+            // 
+            tblFilterInputs.ColumnCount = 5;
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblFilterInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblFilterInputs.Controls.Add(lblProductModel, 0, 0);
+            tblFilterInputs.Controls.Add(cmbProductModel, 0, 1);
+            tblFilterInputs.Controls.Add(lblProductType, 1, 0);
+            tblFilterInputs.Controls.Add(cmbProductType, 1, 1);
+            tblFilterInputs.Controls.Add(lblArea, 2, 0);
+            tblFilterInputs.Controls.Add(cmbArea, 2, 1);
+            tblFilterInputs.Controls.Add(lblPartNumber, 3, 0);
+            tblFilterInputs.Controls.Add(txtPartNumber, 3, 1);
+            tblFilterInputs.Controls.Add(lblStatus, 4, 0);
+            tblFilterInputs.Controls.Add(cmbStatus, 4, 1);
+            tblFilterInputs.Dock = DockStyle.Fill;
+            tblFilterInputs.Location = new Point(0, 0);
+            tblFilterInputs.Margin = new Padding(0);
+            tblFilterInputs.Name = "tblFilterInputs";
+            tblFilterInputs.RowCount = 2;
+            tblFilterInputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 15F));
+            tblFilterInputs.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblFilterInputs.Size = new Size(2482, 59);
+            tblFilterInputs.TabIndex = 0;
+            // 
             // lblProductModel
             // 
             lblProductModel.AutoSize = true;
             lblProductModel.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblProductModel.ForeColor = Color.FromArgb(71, 85, 105);
-            lblProductModel.Location = new Point(17, 9);
+            lblProductModel.Location = new Point(0, 0);
             lblProductModel.Margin = new Padding(0);
             lblProductModel.Name = "lblProductModel";
             lblProductModel.Size = new Size(89, 15);
@@ -632,13 +670,15 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // cmbProductModel
             // 
+            cmbProductModel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            cmbProductModel.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbProductModel.FlatStyle = FlatStyle.System;
             cmbProductModel.Font = new Font("Segoe UI", 9.5F);
             cmbProductModel.FormattingEnabled = true;
-            cmbProductModel.Location = new Point(17, 27);
-            cmbProductModel.Margin = new Padding(0);
+            cmbProductModel.Location = new Point(0, 24);
+            cmbProductModel.Margin = new Padding(0, 0, 10, 0);
             cmbProductModel.Name = "cmbProductModel";
-            cmbProductModel.Size = new Size(141, 25);
+            cmbProductModel.Size = new Size(486, 25);
             cmbProductModel.TabIndex = 0;
             // 
             // lblProductType
@@ -646,7 +686,7 @@ namespace AssemblyLineTester.Views.Pages
             lblProductType.AutoSize = true;
             lblProductType.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblProductType.ForeColor = Color.FromArgb(71, 85, 105);
-            lblProductType.Location = new Point(171, 9);
+            lblProductType.Location = new Point(496, 0);
             lblProductType.Margin = new Padding(0);
             lblProductType.Name = "lblProductType";
             lblProductType.Size = new Size(80, 15);
@@ -655,13 +695,15 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // cmbProductType
             // 
+            cmbProductType.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            cmbProductType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbProductType.FlatStyle = FlatStyle.System;
             cmbProductType.Font = new Font("Segoe UI", 9.5F);
             cmbProductType.FormattingEnabled = true;
-            cmbProductType.Location = new Point(171, 27);
-            cmbProductType.Margin = new Padding(0);
+            cmbProductType.Location = new Point(496, 24);
+            cmbProductType.Margin = new Padding(0, 0, 10, 0);
             cmbProductType.Name = "cmbProductType";
-            cmbProductType.Size = new Size(141, 25);
+            cmbProductType.Size = new Size(486, 25);
             cmbProductType.TabIndex = 1;
             // 
             // lblArea
@@ -669,7 +711,7 @@ namespace AssemblyLineTester.Views.Pages
             lblArea.AutoSize = true;
             lblArea.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblArea.ForeColor = Color.FromArgb(71, 85, 105);
-            lblArea.Location = new Point(324, 9);
+            lblArea.Location = new Point(992, 0);
             lblArea.Margin = new Padding(0);
             lblArea.Name = "lblArea";
             lblArea.Size = new Size(33, 15);
@@ -678,13 +720,15 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // cmbArea
             // 
+            cmbArea.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            cmbArea.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbArea.FlatStyle = FlatStyle.System;
             cmbArea.Font = new Font("Segoe UI", 9.5F);
             cmbArea.FormattingEnabled = true;
-            cmbArea.Location = new Point(324, 27);
-            cmbArea.Margin = new Padding(0);
+            cmbArea.Location = new Point(992, 24);
+            cmbArea.Margin = new Padding(0, 0, 10, 0);
             cmbArea.Name = "cmbArea";
-            cmbArea.Size = new Size(158, 25);
+            cmbArea.Size = new Size(486, 25);
             cmbArea.TabIndex = 2;
             // 
             // lblPartNumber
@@ -692,7 +736,7 @@ namespace AssemblyLineTester.Views.Pages
             lblPartNumber.AutoSize = true;
             lblPartNumber.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblPartNumber.ForeColor = Color.FromArgb(71, 85, 105);
-            lblPartNumber.Location = new Point(494, 9);
+            lblPartNumber.Location = new Point(1488, 0);
             lblPartNumber.Margin = new Padding(0);
             lblPartNumber.Name = "lblPartNumber";
             lblPartNumber.Size = new Size(79, 15);
@@ -701,12 +745,13 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // txtPartNumber
             // 
+            txtPartNumber.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtPartNumber.Font = new Font("Segoe UI", 9.5F);
-            txtPartNumber.Location = new Point(494, 27);
-            txtPartNumber.Margin = new Padding(0);
+            txtPartNumber.Location = new Point(1488, 25);
+            txtPartNumber.Margin = new Padding(0, 0, 10, 0);
             txtPartNumber.Name = "txtPartNumber";
             txtPartNumber.PlaceholderText = "Search part number";
-            txtPartNumber.Size = new Size(184, 24);
+            txtPartNumber.Size = new Size(486, 24);
             txtPartNumber.TabIndex = 3;
             // 
             // lblStatus
@@ -714,7 +759,7 @@ namespace AssemblyLineTester.Views.Pages
             lblStatus.AutoSize = true;
             lblStatus.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             lblStatus.ForeColor = Color.FromArgb(71, 85, 105);
-            lblStatus.Location = new Point(691, 9);
+            lblStatus.Location = new Point(1984, 0);
             lblStatus.Margin = new Padding(0);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(42, 15);
@@ -723,14 +768,32 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // cmbStatus
             // 
+            cmbStatus.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            cmbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbStatus.FlatStyle = FlatStyle.System;
             cmbStatus.Font = new Font("Segoe UI", 9.5F);
             cmbStatus.FormattingEnabled = true;
-            cmbStatus.Location = new Point(691, 27);
-            cmbStatus.Margin = new Padding(0);
+            cmbStatus.Location = new Point(1984, 24);
+            cmbStatus.Margin = new Padding(0, 0, 10, 0);
             cmbStatus.Name = "cmbStatus";
-            cmbStatus.Size = new Size(123, 25);
+            cmbStatus.Size = new Size(488, 25);
             cmbStatus.TabIndex = 4;
+            // 
+            // flpActionButtons
+            // 
+            flpActionButtons.AutoSize = true;
+            flpActionButtons.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flpActionButtons.Controls.Add(btnSearch);
+            flpActionButtons.Controls.Add(btnReset);
+            flpActionButtons.Controls.Add(btnAddHarness);
+            flpActionButtons.Dock = DockStyle.Fill;
+            flpActionButtons.Location = new Point(2482, 0);
+            flpActionButtons.Margin = new Padding(0);
+            flpActionButtons.Name = "flpActionButtons";
+            flpActionButtons.Padding = new Padding(0, 15, 0, 0);
+            flpActionButtons.Size = new Size(353, 59);
+            flpActionButtons.TabIndex = 1;
+            flpActionButtons.WrapContents = false;
             // 
             // btnSearch
             // 
@@ -740,10 +803,10 @@ namespace AssemblyLineTester.Views.Pages
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSearch.ForeColor = Color.FromArgb(15, 23, 42);
-            btnSearch.Location = new Point(827, 25);
-            btnSearch.Margin = new Padding(0);
+            btnSearch.Location = new Point(0, 15);
+            btnSearch.Margin = new Padding(0, 0, 10, 0);
             btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(83, 25);
+            btnSearch.Size = new Size(83, 34);
             btnSearch.TabIndex = 0;
             btnSearch.Text = "Search";
             btnSearch.UseVisualStyleBackColor = false;
@@ -756,10 +819,10 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.FlatStyle = FlatStyle.Flat;
             btnReset.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnReset.ForeColor = Color.FromArgb(51, 65, 85);
-            btnReset.Location = new Point(919, 25);
-            btnReset.Margin = new Padding(0);
+            btnReset.Location = new Point(93, 15);
+            btnReset.Margin = new Padding(0, 0, 10, 0);
             btnReset.Name = "btnReset";
-            btnReset.Size = new Size(74, 25);
+            btnReset.Size = new Size(74, 34);
             btnReset.TabIndex = 1;
             btnReset.Text = "Reset";
             btnReset.UseVisualStyleBackColor = false;
@@ -773,10 +836,10 @@ namespace AssemblyLineTester.Views.Pages
             btnAddHarness.FlatStyle = FlatStyle.Flat;
             btnAddHarness.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnAddHarness.ForeColor = Color.FromArgb(15, 23, 42);
-            btnAddHarness.Location = new Point(2652, 23);
-            btnAddHarness.Margin = new Padding(0);
+            btnAddHarness.Location = new Point(177, 15);
+            btnAddHarness.Margin = new Padding(0, 0, 10, 0);
             btnAddHarness.Name = "btnAddHarness";
-            btnAddHarness.Size = new Size(166, 29);
+            btnAddHarness.Size = new Size(166, 34);
             btnAddHarness.TabIndex = 10;
             btnAddHarness.Text = "+ Add New Harness";
             btnAddHarness.UseVisualStyleBackColor = false;
@@ -787,7 +850,7 @@ namespace AssemblyLineTester.Views.Pages
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(244, 245, 247);
             Controls.Add(tableLayoutPanelMain);
-            Margin = new Padding(5, 5, 5, 5);
+            Margin = new Padding(5);
             Name = "HarnessDatabase";
             Size = new Size(2863, 1462);
             splitContainerMain.Panel1.ResumeLayout(false);
@@ -814,7 +877,11 @@ namespace AssemblyLineTester.Views.Pages
             tableLayoutPanelMain.ResumeLayout(false);
             tableLayoutPanelMain.PerformLayout();
             panelFilters.ResumeLayout(false);
-            panelFilters.PerformLayout();
+            tblFilterInner.ResumeLayout(false);
+            tblFilterInner.PerformLayout();
+            tblFilterInputs.ResumeLayout(false);
+            tblFilterInputs.PerformLayout();
+            flpActionButtons.ResumeLayout(false);
             ResumeLayout(false);
 
         }
@@ -926,6 +993,9 @@ namespace AssemblyLineTester.Views.Pages
         private Label lblTitle;
         private TableLayoutPanel tableLayoutPanelMain;
         private Panel panelFilters;
+        private TableLayoutPanel tblFilterInner;
+        private TableLayoutPanel tblFilterInputs;
+        private FlowLayoutPanel flpActionButtons;
         private Label lblStatus;
         private Button btnReset;
         private Label lblPartNumber;
