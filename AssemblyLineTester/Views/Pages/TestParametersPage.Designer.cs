@@ -64,6 +64,9 @@ namespace AssemblyLineTester.Views.Pages
             tblCellCompRes = new TableLayoutPanel();
             lblComponentResistance = new Label();
             txtComponentResistance = new TextBox();
+            tblCellNote = new TableLayoutPanel();
+            lblNote = new Label();
+            txtNote = new TextBox();
             tblCellInsRes = new TableLayoutPanel();
             lblInsulationResistance = new Label();
             txtInsulationResistance = new TextBox();
@@ -101,6 +104,7 @@ namespace AssemblyLineTester.Views.Pages
             tblCellProductModel.SuspendLayout();
             tblCellConnRes.SuspendLayout();
             tblCellCompRes.SuspendLayout();
+            tblCellNote.SuspendLayout();
             tblCellInsRes.SuspendLayout();
             pnlConfigInfoHeader.SuspendLayout();
             pnlButtons.SuspendLayout();
@@ -407,6 +411,7 @@ namespace AssemblyLineTester.Views.Pages
             tblConfigInfo.Controls.Add(tblCellConnRes, 0, 1);
             tblConfigInfo.Controls.Add(tblCellInsRes, 2, 1);
             tblConfigInfo.Controls.Add(tblCellCompRes, 0, 2);
+            tblConfigInfo.Controls.Add(tblCellNote, 2, 2);
             tblConfigInfo.Controls.Add(btnLearnConnection, 0, 3);
             tblConfigInfo.Controls.Add(btnStartAll, 1, 3);
             tblConfigInfo.Controls.Add(btnStartSelected, 2, 3);
@@ -589,8 +594,48 @@ namespace AssemblyLineTester.Views.Pages
             txtComponentResistance.Text = "N/A";
             txtComponentResistance.ReadOnly = true;
             // 
+            // tblCellNote
+            //
+            tblConfigInfo.SetColumnSpan(tblCellNote, 2);
+            tblCellNote.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblCellNote.Controls.Add(lblNote, 0, 0);
+            tblCellNote.Controls.Add(txtNote, 0, 1);
+            tblCellNote.Dock = DockStyle.Fill;
+            tblCellNote.Location = new Point(337, 136);
+            tblCellNote.Margin = new Padding(9, 2, 4, 5);
+            tblCellNote.Name = "tblCellNote";
+            tblCellNote.RowCount = 2;
+            tblCellNote.RowStyles.Add(new RowStyle());
+            tblCellNote.RowStyles.Add(new RowStyle());
+            tblCellNote.Size = new Size(316, 56);
+            tblCellNote.TabIndex = 5;
+            //
+            // lblNote
+            //
+            lblNote.AutoSize = true;
+            lblNote.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblNote.ForeColor = Color.FromArgb(100, 116, 139);
+            lblNote.Location = new Point(0, 0);
+            lblNote.Margin = new Padding(0, 0, 0, 6);
+            lblNote.Name = "lblNote";
+            lblNote.Size = new Size(207, 20);
+            lblNote.TabIndex = 0;
+            lblNote.Text = "Note";
+            //
+            // txtNote
+            //
+            txtNote.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtNote.CausesValidation = false;
+            txtNote.Font = new Font("Segoe UI", 10F);
+            txtNote.Location = new Point(0, 26);
+            txtNote.Margin = new Padding(0);
+            txtNote.Name = "txtNote";
+            txtNote.PlaceholderText = "Optional note for this configuration";
+            txtNote.Size = new Size(316, 30);
+            txtNote.TabIndex = 1;
+            //
             // tblCellInsRes
-            // 
+            //
             tblConfigInfo.SetColumnSpan(tblCellInsRes, 2);
             tblCellInsRes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblCellInsRes.Controls.Add(lblInsulationResistance, 0, 0);
@@ -1002,6 +1047,8 @@ namespace AssemblyLineTester.Views.Pages
             tblCellConnRes.PerformLayout();
             tblCellCompRes.ResumeLayout(false);
             tblCellCompRes.PerformLayout();
+            tblCellNote.ResumeLayout(false);
+            tblCellNote.PerformLayout();
             tblCellInsRes.ResumeLayout(false);
             tblCellInsRes.PerformLayout();
             pnlConfigInfoHeader.ResumeLayout(false);
@@ -1043,16 +1090,19 @@ namespace AssemblyLineTester.Views.Pages
         private TableLayoutPanel tblCellProductModel;
         private TableLayoutPanel tblCellConnRes;
         private TableLayoutPanel tblCellCompRes;
+        private TableLayoutPanel tblCellNote;
         private TableLayoutPanel tblCellInsRes;
         private Label lblConfigName;
         private Label lblProductModel;
         private Label lblConnectionResistance;
         private Label lblComponentResistance;
+        private Label lblNote;
         private Label lblInsulationResistance;
         internal TextBox txtConfigName;
         internal ComboBox txtProductModel;
         internal TextBox txtConnectionResistance;
         internal TextBox txtComponentResistance;
+        internal TextBox txtNote;
         internal TextBox txtInsulationResistance;
         private Panel pnlConfigInfoHeader;
         private Label lblConfigInfoHeader;

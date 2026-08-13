@@ -313,6 +313,9 @@ namespace AssemblyLineTester.Views.Pages
             Apply(txtProductModel, SummaryProductModel);
             Apply(txtConnectionResistance, SummaryConnectionResistance);
             Apply(txtInsulationResistance, SummaryInsulationResistance);
+            Apply(txtNote, SummaryNote);
+
+            // Component Resistance is read-only on the page, so the file may show it but never sets it.
         }
 
         private void ImportWorkbook(string path)
@@ -455,7 +458,9 @@ namespace AssemblyLineTester.Views.Pages
         private const string SummaryConfigName = "Config Name";
         private const string SummaryProductModel = "Product Model";
         private const string SummaryConnectionResistance = "Connection Resistance (mOhm)";
+        private const string SummaryComponentResistance = "Component Resistance (mOhm)";
         private const string SummaryInsulationResistance = "Insulation Resistance (MOhm)";
+        private const string SummaryNote = "Note";
 
         // Mirrors the Config Summary panel above the grid, and returns the row the table starts on.
         private int WriteConfigSummary(ClosedXML.Excel.IXLWorksheet sheet, int columnCount)
@@ -472,7 +477,9 @@ namespace AssemblyLineTester.Views.Pages
                 (SummaryConfigName, txtConfigName.Text?.Trim() ?? ""),
                 (SummaryProductModel, txtProductModel.Text?.Trim() ?? ""),
                 (SummaryConnectionResistance, txtConnectionResistance.Text?.Trim() ?? ""),
-                (SummaryInsulationResistance, txtInsulationResistance.Text?.Trim() ?? "")
+                (SummaryComponentResistance, txtComponentResistance.Text?.Trim() ?? ""),
+                (SummaryInsulationResistance, txtInsulationResistance.Text?.Trim() ?? ""),
+                (SummaryNote, txtNote.Text?.Trim() ?? "")
             };
 
             int row = 2;
@@ -486,7 +493,7 @@ namespace AssemblyLineTester.Views.Pages
                 var valueCell = sheet.Cell(row, 2);
                 valueCell.Value = value;
                 valueCell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromArgb(248, 250, 252);
-                valueCell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Hair;
+                valueCell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
                 valueCell.Style.Border.OutsideBorderColor = ClosedXML.Excel.XLColor.FromArgb(203, 213, 225);
                 sheet.Range(row, 2, row, 4).Merge();
 
