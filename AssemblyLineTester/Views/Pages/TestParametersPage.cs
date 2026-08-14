@@ -864,31 +864,8 @@ namespace AssemblyLineTester.Views.Pages
             _loadedConfigName = config.ConfigName;
         }
 
-        private static (string expected, string tolerance) DeriveExpectedAndTolerance(double? lower, double? upper)
-        {
-            if (!lower.HasValue && !upper.HasValue) return ("0", "±0%");
-            if (lower.HasValue && upper.HasValue)
-            {
-                double mid = (lower.Value + upper.Value) / 2.0;
-                double tolPct = mid == 0 ? 0 : Math.Abs((upper.Value - mid) / mid * 100.0);
-                return (FormatLimit(mid), $"±{FormatLimit(tolPct)}%");
-            }
-            double val = lower ?? upper!.Value;
-            return (FormatLimit(val), "±0%");
-        }
-
         private void BtnExport_Click(object? sender, EventArgs e)
         {
-
-            var duplicateAddresses = GetDuplicateAddresses();
-            if (duplicateAddresses.Count > 0)
-            {
-                MessageBox.Show(
-                    $"Duplicate address found: {string.Join(", ", duplicateAddresses)}.\n" +
-                    "Every Net-From / Net-To Address must be unique across the whole configuration.",
-                    "Duplicate Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
 
             using var dlg = new Views.Modals.ExportOptionsModalForm();
             if (dlg.ShowDialog(this) != DialogResult.OK) return;
@@ -907,14 +884,15 @@ namespace AssemblyLineTester.Views.Pages
         // Returns false when the configuration was rejected or the operator backed out.
         private bool TrySaveConfigToDatabase()
         {
-            var selectedTestTypes = GetSelectedTestTypesFromGrid();
-            Debug.WriteLine("=== Selected Test Types from Grid ===");
-            foreach (var tt in selectedTestTypes)
-            {
-                Debug.WriteLine($"  - ID: {tt.Id}, DisplayName: {tt.DisplayName}, TestTypeName: {tt.TestTypeName}");
-            }
+            List<TestType> presentTestTypes = GetSelectedTestTypesFromGrid();
+            //foreach (var tt in presentTestTypes)
+            //{
+            //    Debug.WriteLine(tt.TestTypeName);
+            //    Debug.WriteLine(tt.TestTypeValue);
+            //}
 
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
+            config.TestTypes = presentTestTypes;
             if (config == null)
             {
                 MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -1237,7 +1215,7 @@ namespace AssemblyLineTester.Views.Pages
                 string expStr = row.Cells["colExpectedValue"].Value?.ToString() ?? "0";
                 string tolStr = row.Cells["colTolerance"].Value?.ToString() ?? "±0%";
 
-                if (double.TryParse(expStr, out double expectedVal))
+                if (double.TryParse(expStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expectedVal))
                 {
                     (double minTolPct, double maxTolPct, string formattedTol) = ParseClampAndFormatTolerance(tolStr);
 
@@ -1586,7 +1564,11 @@ namespace AssemblyLineTester.Views.Pages
 
         private TestConfiguration? BuildConfigurationFromGrid(string configName, string productModel, string? description)
         {
+            //var testTypes = GetSelectedTestTypesFromGrid();
+
             var nets = new List<TestConfigNet>();
+
+
 
             for (int i = 0; i < gridConfig.Rows.Count; i++)
             {
@@ -1604,9 +1586,9 @@ namespace AssemblyLineTester.Views.Pages
                     return null;
                 }
 
-                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), out double expected);
-                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), out double lower);
-                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), out double upper);
+                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expected);
+                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lower);
+                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double upper);
 
                 string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
                 var tt = _configService.GetTestTypeByName(testTypeName);
@@ -1643,6 +1625,7 @@ namespace AssemblyLineTester.Views.Pages
                 MaxWireResistance = maxWireRes,
                 MinInsulationResistance = minInsRes,
                 MinComponentResistance = minCompRes,
+                //TestTypes = testTypes,
                 Nets = nets
             };
         }

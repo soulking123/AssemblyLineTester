@@ -181,16 +181,6 @@ namespace AssemblyLineTester.Views.Pages
                     _customTestText = configService.ConvertToProgramText(dlg.SelectedConfiguration);
                     var resNet = dlg.SelectedConfiguration.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
                     config = configService.GetConfigurationByName(dlg.SelectedConfiguration.ConfigName);
-                    Debug.WriteLine("==========================================================");
-                    Debug.WriteLine(config?.ConfigName ?? "null");
-                    if (config?.TestTypes != null)
-                    {
-                        foreach (var tt in config.TestTypes)
-                        {
-                            Debug.WriteLine(tt.TestTypeName);
-                            Debug.WriteLine(tt.TestTypeValue);
-                        }
-                    }
 
                     if (resNet != null && resNet.UpperLimit.HasValue)
                     {
@@ -290,7 +280,7 @@ namespace AssemblyLineTester.Views.Pages
                         activeConfig.ProductModelName, "N/A", "N/A", "N/A", "1.0",
                         "N/A", AppTime.UtcNow, _loadedRows, overallResult);
 
-                    //ShowSummary(_loadedRows, overallResult);
+                    ShowSummary(_loadedRows, overallResult);
 
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
@@ -415,48 +405,83 @@ namespace AssemblyLineTester.Views.Pages
                         var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
                         if (list != null)
                         {
+                            var configNets = config.Nets?.OrderBy(n => n.SequenceNo).ToList();
+
                             int step = 1;
-                            foreach (var measurement in list)
+                            for (int idx = 0; idx < list.Count; idx++)
                             {
-                                var status = LiveTestStatus.Pending;
-                                string statusStr = measurement.Status1?.Trim() ?? "";
-                                if (measurement.Value1 <= _continuityResistance)
+                                var measurement = list[idx];
+                                var net = (configNets != null && idx < configNets.Count) ? configNets[idx] : null;
+
+                                string rowTestType = string.IsNullOrWhiteSpace(measurement.Instruction) ? "Wire" : measurement.Instruction;
+
+                                double? lowerLimit = null;
+                                double? upperLimit = null;
+                                string expectedValStr = string.Empty;
+                                string unitStr = string.Empty;
+                                double? toleranceVal = null;
+                                LiveTestStatus status = LiveTestStatus.Pending;
+
+                                bool isWire = rowTestType.Equals("WIRE", StringComparison.OrdinalIgnoreCase);
+
+                                if (isWire)
                                 {
-                                    status = LiveTestStatus.Pass;
+                                    double maxWireRes = config.MaxWireResistance > 0 ? config.MaxWireResistance : _continuityResistance;
+                                    upperLimit = maxWireRes;
+                                    status = (measurement.Value1 <= maxWireRes) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
                                 }
                                 else
                                 {
-                                    status = LiveTestStatus.Fail;
-                                }
-
-                                string rowTestType = "WIRE";
-                                if (!string.IsNullOrEmpty(measurement.Instruction))
-                                {
-                                    string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
-                                    if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
+                                    if (net != null)
                                     {
-                                        rowTestType = "WIRE";
+                                        lowerLimit = net.LowerLimit;
+                                        upperLimit = net.UpperLimit;
+                                        toleranceVal = net.Tolerance;
+                                        unitStr = net.MeasurementUnit ?? "";
+                                        if (net.ExpectedValue.HasValue)
+                                        {
+                                            expectedValStr = net.ExpectedValue.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                                        }
                                     }
-                                    else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
+
+                                    if (lowerLimit.HasValue && upperLimit.HasValue)
                                     {
-                                        rowTestType = "OPEN";
+                                        status = (measurement.Value1 >= lowerLimit.Value && measurement.Value1 <= upperLimit.Value)
+                                            ? LiveTestStatus.Pass
+                                            : LiveTestStatus.Fail;
+                                    }
+                                    else if (upperLimit.HasValue)
+                                    {
+                                        status = (measurement.Value1 <= upperLimit.Value)
+                                            ? LiveTestStatus.Pass
+                                            : LiveTestStatus.Fail;
+                                    }
+                                    else if (lowerLimit.HasValue)
+                                    {
+                                        status = (measurement.Value1 >= lowerLimit.Value)
+                                            ? LiveTestStatus.Pass
+                                            : LiveTestStatus.Fail;
                                     }
                                     else
                                     {
-                                        rowTestType = measurement.Instruction;
+                                        status = LiveTestStatus.Pass;
                                     }
                                 }
 
                                 _loadedRows.Add(new LiveTestDetailRowDto
                                 {
                                     StepNo = step++,
-                                    NetId = measurement.Instruction ?? "",
+                                    NetId = net?.NetId ?? measurement.Instruction ?? "",
                                     TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
                                     FromPoint = $"{measurement.Point1}",
                                     ToPoint = $"{measurement.Point2}",
                                     TestType = rowTestType,
                                     MeasuredValue = Math.Round(measurement.Value1, 3),
-                                    UpperLimit = _continuityResistance,
+                                    ExpectedValue = expectedValStr,
+                                    LowerLimit = lowerLimit,
+                                    UpperLimit = upperLimit,
+                                    Tolerance = toleranceVal,
+                                    Unit = unitStr,
                                     Status = status
                                 });
                             }
