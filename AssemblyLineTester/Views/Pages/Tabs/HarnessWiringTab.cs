@@ -113,11 +113,37 @@ namespace AssemblyLineTester.Views.Pages.Tabs
                 string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
                 string toLabel = toAddr; 
 
-                DiagramNode lNode = new DiagramNode { RowIndex = i, Address = fromAddr, Label = fromLabel, IsLeft = true };
-                rawLeftNodes.Add(lNode);
+                var lNode = rawLeftNodes.FirstOrDefault(n => n.Address == fromAddr);
+                if (lNode == null)
+                {
+                    lNode = new DiagramNode { RowIndices = new List<int> { i }, Address = fromAddr, Label = fromLabel, IsLeft = true };
+                    rawLeftNodes.Add(lNode);
+                }
+                else
+                {
+                    lNode.RowIndices.Add(i);
+                    if ((string.IsNullOrEmpty(lNode.Label) || lNode.Label == "NC" || lNode.Label == "Unexpected") && 
+                        !string.IsNullOrEmpty(fromLabel) && fromLabel != "NC" && fromLabel != "Unexpected")
+                    {
+                        lNode.Label = fromLabel;
+                    }
+                }
 
-                DiagramNode rNode = new DiagramNode { RowIndex = i, Address = toAddr, Label = toLabel, IsLeft = false };
-                rawRightNodes.Add(rNode);
+                var rNode = rawRightNodes.FirstOrDefault(n => n.Address == toAddr);
+                if (rNode == null)
+                {
+                    rNode = new DiagramNode { RowIndices = new List<int> { i }, Address = toAddr, Label = toLabel, IsLeft = false };
+                    rawRightNodes.Add(rNode);
+                }
+                else
+                {
+                    rNode.RowIndices.Add(i);
+                    if ((string.IsNullOrEmpty(rNode.Label) || rNode.Label == "NC" || rNode.Label == "Unexpected") && 
+                        !string.IsNullOrEmpty(toLabel) && toLabel != "NC" && toLabel != "Unexpected")
+                    {
+                        rNode.Label = toLabel;
+                    }
+                }
             }
 
             var sortedLeftNodes = rawLeftNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
@@ -142,8 +168,8 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
             for (int i = 0; i < rowCount; i++)
             {
-                var lNode = leftNodes.FirstOrDefault(n => n.RowIndex == i);
-                var rNode = rightNodes.FirstOrDefault(n => n.RowIndex == i);
+                var lNode = leftNodes.FirstOrDefault(n => n.RowIndices.Contains(i));
+                var rNode = rightNodes.FirstOrDefault(n => n.RowIndices.Contains(i));
 
                 if (lNode != null && rNode != null)
                 {
@@ -194,7 +220,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                DrawNodeAndLabel(g, node, highlightedRows.Contains(node.RowIndex), fontLabel, fontAddr, sfLabel, sfAddr);
+                DrawNodeAndLabel(g, node, node.RowIndices.Any(idx => highlightedRows.Contains(idx)), fontLabel, fontAddr, sfLabel, sfAddr);
             }
         }
 
@@ -206,6 +232,15 @@ namespace AssemblyLineTester.Views.Pages.Tabs
                 using SolidBrush haloFill = new SolidBrush(Color.FromArgb(254, 240, 138));
                 using Pen haloBorder = new Pen(Color.FromArgb(245, 158, 11), 3f);
                 DrawRoundedRectangle(g, haloFill, haloBorder, haloRect, 24f);
+            }
+
+            if (!string.IsNullOrEmpty(node.Label) && node.Label != "NC" && node.Label != "Unexpected" && node.Label.Trim() != "")
+            {
+                using SolidBrush labelBg = new SolidBrush(isHighlight ? Color.FromArgb(254, 249, 195) : Color.FromArgb(226, 232, 240));
+                using Pen labelBorder = new Pen(isHighlight ? Color.FromArgb(245, 158, 11) : Color.FromArgb(203, 213, 225), 1.5f);
+                using SolidBrush labelText = new SolidBrush(Color.FromArgb(30, 41, 59));
+                DrawRoundedRectangle(g, labelBg, labelBorder, node.LabelRect, 8f);
+                g.DrawString(node.Label, fontLabel, labelText, node.LabelRect, sfLabel);
             }
 
             Color nodeColor = node.IsLeft ? Color.FromArgb(0, 180, 216) : Color.FromArgb(74, 222, 128);
@@ -235,7 +270,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         private class DiagramNode
         {
-            public int RowIndex { get; set; }
+            public List<int> RowIndices { get; set; } = new List<int>();
             public string Address { get; set; } = "";
             public string Label { get; set; } = "";
             public RectangleF NodeRect { get; set; }

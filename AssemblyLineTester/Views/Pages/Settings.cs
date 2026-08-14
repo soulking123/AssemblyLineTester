@@ -132,6 +132,7 @@ namespace AssemblyLineTester.Views.Pages
                 tblTestCard.ResumeLayout(true);
                 
                 isLoaded = true;
+                _preloadData = null;
             }
         }
 
@@ -654,6 +655,11 @@ namespace AssemblyLineTester.Views.Pages
             PopulateLearnConnections();
             PopulateTestResultColumns();
             LoadDefaultTestSettings();
+
+            float scale = AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this);
+            AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(flpTestTypeAvail, scale);
+            AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(flpLearnConn, scale);
+            LayoutTickLists();
         }
 
         // Writes all three tick lists, then pushes them into the pages already built from them.
