@@ -70,6 +70,7 @@ namespace AssemblyLineTester.Views.Pages
 
             _tabGeneral.Initialize(OnEditHarness_Click, OnDeleteHarness_Click);
             _tabConnector.Initialize();
+            _tabConnector.ConnectorChanged += (s, e) => ReloadSelectedHarness();
             
             EnableDoubleBufferingRecursive(panelTabContent);
         }
@@ -237,19 +238,28 @@ namespace AssemblyLineTester.Views.Pages
             using var modal = new AssemblyLineTester.Views.Modals.HarnessModalForm(_harnessService, _selectedHarness);
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
-                int editedId = _selectedHarness.ProductHarnessId;
-                PopulateHarnessData();
-                var refreshed = _allHarnessEntities.FirstOrDefault(h => h.ProductHarnessId == editedId);
-                if (refreshed != null)
-                {
-                    _selectedHarness = refreshed;
-                    _tabGeneral.RenderHarnessSelected(refreshed);
-                    _tabConnector.RefreshConnectorGrid();
-                    PopulateBottomCards();
-                }
+                ReloadSelectedHarness();
             }
         }
-        
+
+        // Re-reads the selected harness (and the reference lists) from the DB and re-renders the
+        // General tab from it. Anything that can change a connector's stored data - editing the
+        // harness itself, or editing/adding/deleting one of its connectors from the Connector tab -
+        // routes through here, so the General tab's Connector dropdown never shows a stale image.
+        private void ReloadSelectedHarness()
+        {
+            if (_selectedHarness == null) return;
+
+            int selectedId = _selectedHarness.ProductHarnessId;
+            PopulateHarnessData();
+            var refreshed = _allHarnessEntities.FirstOrDefault(h => h.ProductHarnessId == selectedId);
+            if (refreshed == null) return;
+
+            _selectedHarness = refreshed;
+            _tabGeneral.RenderHarnessSelected(refreshed);
+            PopulateBottomCards();
+        }
+
         private void OnDeleteHarness_Click(object? sender, EventArgs e)
         {
             if (!HasHarnessEditPermission()) return;
