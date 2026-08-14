@@ -290,7 +290,7 @@ namespace AssemblyLineTester.Services
                 sumPresentTestType += testType.TestTypeValue;
             }
 
-            List<string> testTypeCode = ["0",
+            List<string> testTypeCode = ["58D817-6J350",
             "56ACDF-MULTI",
             "56ACDF-MULTI",
             "4344B1-MULTI",
@@ -338,10 +338,17 @@ namespace AssemblyLineTester.Services
 
             string compResStr = compResist == (int)compResist ? ((int)compResist).ToString() : compResist.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
 
-            sb.AppendLine("WIRE LIST SIGNATURE:80EF1F-8T8M0");
-            sb.AppendLine("INSUL TEST PARM SIGNATURE:6F6F0");
+            
+            if (sumPresentTestType != 0)
+            {
+                sb.AppendLine("WIRE LIST SIGNATURE:80EF1F-8T8M0");
+                sb.AppendLine("INSUL TEST PARM SIGNATURE:6F6F0");
+            }
             sb.AppendLine($"CONNECTION RESIS  {connResist.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)} ohm");
-            sb.AppendLine($"COMPONENT RESIS >  {compResStr} ohm");
+            if (sumPresentTestType != 0)
+            {
+                sb.AppendLine($"COMPONENT RESIS >  {compResStr} ohm");
+            }
             sb.AppendLine($"LV INSULATION RESIS  {insResStr}");
             sb.AppendLine($"HIPOT VOLTAGE  {hipotStr}");
             sb.AppendLine("** TEST METHOD SINGLE");
