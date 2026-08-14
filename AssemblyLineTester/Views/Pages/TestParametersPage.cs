@@ -29,7 +29,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private class DiagramNode
         {
-            public int RowIndex { get; set; }
+            public List<int> RowIndices { get; set; } = [];
             public string Address { get; set; } = "";
             public string Label { get; set; } = "";
             public RectangleF NodeRect { get; set; }
@@ -828,15 +828,7 @@ namespace AssemblyLineTester.Views.Pages
         private void BtnExport_Click(object? sender, EventArgs e)
         {
 
-            var duplicateAddresses = GetDuplicateAddresses();
-            if (duplicateAddresses.Count > 0)
-            {
-                MessageBox.Show(
-                    $"Duplicate address found: {string.Join(", ", duplicateAddresses)}.\n" +
-                    "Every Net-From / Net-To Address must be unique across the whole configuration.",
-                    "Duplicate Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+
 
             using var dlg = new Views.Modals.ExportOptionsModalForm();
             if (dlg.ShowDialog(this) != DialogResult.OK) return;
@@ -986,25 +978,6 @@ namespace AssemblyLineTester.Views.Pages
             var row = gridConfig.Rows[e.RowIndex];
             if (row.IsNewRow) return;
 
-            var colFromAddr = gridConfig.Columns["colFromAddr"];
-            var colToAddr = gridConfig.Columns["colToAddr"];
-
-            if ((colFromAddr != null && e.ColumnIndex == colFromAddr.Index) ||
-                (colToAddr != null && e.ColumnIndex == colToAddr.Index))
-            {
-                string columnName = e.ColumnIndex == colFromAddr!.Index ? "colFromAddr" : "colToAddr";
-                string label = columnName == "colFromAddr" ? "Net-From Address" : "Net-To Address";
-                string newValue = e.FormattedValue?.ToString()?.Trim() ?? "";
-
-                if (!string.IsNullOrWhiteSpace(newValue) && IsAddressUsedElsewhere(newValue, e.RowIndex, columnName))
-                {
-                    MessageBox.Show(
-                        $"{label} '{newValue}' is already used elsewhere (as a From or To address). Duplicate address is not allowed.",
-                        "Duplicate Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    e.Cancel = true;
-                    return;
-                }
-            }
 
             var colTolerance = gridConfig.Columns["colTolerance"];
             if (colTolerance != null && e.ColumnIndex == colTolerance.Index)
@@ -1258,11 +1231,23 @@ namespace AssemblyLineTester.Views.Pages
         {
             PointF pt = e.Location;
 
-            foreach (var node in leftNodes.Concat(rightNodes).OrderByDescending(n => highlightedRows.Contains(n.RowIndex)))
+            foreach (var node in leftNodes.Concat(rightNodes).OrderByDescending(n => n.RowIndices.Any(idx => highlightedRows.Contains(idx))))
             {
                 if (IsPointInRect(pt, node.NodeRect) || IsPointInRect(pt, node.LabelRect))
                 {
-                    ToggleHighlight(node.RowIndex);
+                    bool isHighlighted = node.RowIndices.Any(idx => highlightedRows.Contains(idx));
+                    foreach (var idx in node.RowIndices)
+                    {
+                        if (isHighlighted)
+                        {
+                            highlightedRows.Remove(idx);
+                        }
+                        else
+                        {
+                            highlightedRows.Add(idx);
+                        }
+                    }
+                    picPreview.Invalidate();
                     return;
                 }
             }
@@ -1349,23 +1334,49 @@ namespace AssemblyLineTester.Views.Pages
                 string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
                 string toLabel = row.Cells["colToLabel"].Value?.ToString() ?? $"Y1-0{i + 1}";
 
-                DiagramNode lNode = new()
+                var lNode = rawLeftNodes.FirstOrDefault(n => n.Address == fromAddr);
+                if (lNode == null)
                 {
-                    RowIndex = i,
-                    Address = fromAddr,
-                    Label = fromLabel,
-                    IsLeft = true
-                };
-                rawLeftNodes.Add(lNode);
+                    lNode = new DiagramNode
+                    {
+                        RowIndices = [i],
+                        Address = fromAddr,
+                        Label = fromLabel,
+                        IsLeft = true
+                    };
+                    rawLeftNodes.Add(lNode);
+                }
+                else
+                {
+                    lNode.RowIndices.Add(i);
+                    if ((string.IsNullOrEmpty(lNode.Label) || lNode.Label == "NC" || lNode.Label == "Unexpected") && 
+                        !string.IsNullOrEmpty(fromLabel) && fromLabel != "NC" && fromLabel != "Unexpected")
+                    {
+                        lNode.Label = fromLabel;
+                    }
+                }
 
-                DiagramNode rNode = new()
+                var rNode = rawRightNodes.FirstOrDefault(n => n.Address == toAddr);
+                if (rNode == null)
                 {
-                    RowIndex = i,
-                    Address = toAddr,
-                    Label = toLabel,
-                    IsLeft = false
-                };
-                rawRightNodes.Add(rNode);
+                    rNode = new DiagramNode
+                    {
+                        RowIndices = [i],
+                        Address = toAddr,
+                        Label = toLabel,
+                        IsLeft = false
+                    };
+                    rawRightNodes.Add(rNode);
+                }
+                else
+                {
+                    rNode.RowIndices.Add(i);
+                    if ((string.IsNullOrEmpty(rNode.Label) || rNode.Label == "NC" || rNode.Label == "Unexpected") && 
+                        !string.IsNullOrEmpty(toLabel) && toLabel != "NC" && toLabel != "Unexpected")
+                    {
+                        rNode.Label = toLabel;
+                    }
+                }
             }
 
             var sortedLeftNodes = rawLeftNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
@@ -1390,8 +1401,12 @@ namespace AssemblyLineTester.Views.Pages
 
             for (int i = 0; i < rowCount; i++)
             {
-                var lNode = leftNodes.FirstOrDefault(n => n.RowIndex == i);
-                var rNode = rightNodes.FirstOrDefault(n => n.RowIndex == i);
+                DataGridViewRow row = gridConfig.Rows[i];
+                string fromAddr = row.Cells["colFromAddr"].Value?.ToString() ?? "0";
+                string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
+
+                var lNode = leftNodes.FirstOrDefault(n => n.Address == fromAddr);
+                var rNode = rightNodes.FirstOrDefault(n => n.Address == toAddr);
 
                 if (lNode != null && rNode != null)
                 {
@@ -1428,7 +1443,7 @@ namespace AssemblyLineTester.Views.Pages
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                if (!highlightedRows.Contains(node.RowIndex))
+                if (!node.RowIndices.Any(idx => highlightedRows.Contains(idx)))
                 {
                     DrawNodeAndLabel(g, node, false, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
@@ -1447,7 +1462,7 @@ namespace AssemblyLineTester.Views.Pages
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                if (highlightedRows.Contains(node.RowIndex))
+                if (node.RowIndices.Any(idx => highlightedRows.Contains(idx)))
                 {
                     DrawNodeAndLabel(g, node, true, fontLabel, fontAddr, sfLabel, sfAddr);
                 }

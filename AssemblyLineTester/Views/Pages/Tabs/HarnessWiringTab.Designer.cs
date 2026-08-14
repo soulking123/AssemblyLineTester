@@ -45,8 +45,8 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             // tableLayoutPanelMain
             // 
             tableLayoutPanelMain.ColumnCount = 2;
-            tableLayoutPanelMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 56.8F));
-            tableLayoutPanelMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 43.2F));
+            tableLayoutPanelMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 51.6571426F));
+            tableLayoutPanelMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 48.3428574F));
             tableLayoutPanelMain.Controls.Add(tableLayoutPanelLeft, 0, 0);
             tableLayoutPanelMain.Controls.Add(tableLayoutPanelRight, 1, 0);
             tableLayoutPanelMain.Dock = DockStyle.Fill;
@@ -71,7 +71,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             tableLayoutPanelLeft.RowCount = 2;
             tableLayoutPanelLeft.RowStyles.Add(new RowStyle());
             tableLayoutPanelLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelLeft.Size = new Size(479, 434);
+            tableLayoutPanelLeft.Size = new Size(434, 434);
             tableLayoutPanelLeft.TabIndex = 0;
             // 
             // tableLayoutPanelToolbar
@@ -97,7 +97,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             tableLayoutPanelToolbar.RowCount = 2;
             tableLayoutPanelToolbar.RowStyles.Add(new RowStyle());
             tableLayoutPanelToolbar.RowStyles.Add(new RowStyle());
-            tableLayoutPanelToolbar.Size = new Size(479, 60);
+            tableLayoutPanelToolbar.Size = new Size(434, 60);
             tableLayoutPanelToolbar.TabIndex = 1;
             // 
             // btnAddTestPoint
@@ -240,7 +240,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             gridWiring.RowHeadersVisible = false;
             gridWiring.RowTemplate.Height = 35;
             gridWiring.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridWiring.Size = new Size(479, 366);
+            gridWiring.Size = new Size(434, 366);
             gridWiring.TabIndex = 2;
             // 
             // colNetId
@@ -275,13 +275,13 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             tableLayoutPanelRight.Controls.Add(lblTestParameterDetails, 0, 0);
             tableLayoutPanelRight.Controls.Add(picDiagram, 0, 1);
             tableLayoutPanelRight.Dock = DockStyle.Fill;
-            tableLayoutPanelRight.Location = new Point(506, 8);
+            tableLayoutPanelRight.Location = new Point(461, 8);
             tableLayoutPanelRight.Margin = new Padding(9, 8, 9, 8);
             tableLayoutPanelRight.Name = "tableLayoutPanelRight";
             tableLayoutPanelRight.RowCount = 2;
             tableLayoutPanelRight.RowStyles.Add(new RowStyle());
             tableLayoutPanelRight.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelRight.Size = new Size(360, 434);
+            tableLayoutPanelRight.Size = new Size(405, 434);
             tableLayoutPanelRight.TabIndex = 1;
             // 
             // lblTestParameterDetails
@@ -303,7 +303,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             picDiagram.Location = new Point(0, 27);
             picDiagram.Margin = new Padding(0);
             picDiagram.Name = "picDiagram";
-            picDiagram.Size = new Size(360, 407);
+            picDiagram.Size = new Size(405, 407);
             picDiagram.TabIndex = 1;
             picDiagram.TabStop = false;
             // 

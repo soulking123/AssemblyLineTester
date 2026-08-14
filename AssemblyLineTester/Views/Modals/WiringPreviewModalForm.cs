@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -34,7 +34,7 @@ namespace AssemblyLineTester.Views.Modals
 
         private class DiagramNode
         {
-            public int RowIndex { get; set; }
+            public List<int> RowIndices { get; set; } = [];
             public string Address { get; set; } = "";
             public string Label { get; set; } = "";
             public RectangleF NodeRect { get; set; }
@@ -217,9 +217,23 @@ namespace AssemblyLineTester.Views.Modals
                 {
                     if (result.Status == LiveTestStatus.Fail)
                     {
+                        string ExtractNumber(string point)
+                        {
+                            if (string.IsNullOrEmpty(point)) return point;
+                            var parts = point.Split('-');
+                            if (parts.Length == 2 && int.TryParse(parts[1], out int num))
+                            {
+                                return num.ToString();
+                            }
+                            return point;
+                        }
+
+                        string resFrom = ExtractNumber(result.FromPoint ?? "");
+                        string resTo = ExtractNumber(result.ToPoint ?? "");
+
                         var existingNet = netDefinitions.FirstOrDefault(n => 
-                            (n.FromAddr == result.FromPoint && n.ToAddr == result.ToPoint) || 
-                            (n.FromAddr == result.ToPoint && n.ToAddr == result.FromPoint));
+                            (n.FromAddr == resFrom && n.ToAddr == resTo) || 
+                            (n.FromAddr == resTo && n.ToAddr == resFrom));
                         
                         if (existingNet != null)
                         {
@@ -227,25 +241,13 @@ namespace AssemblyLineTester.Views.Modals
                         }
                         else
                         {
-                            // Unexpected connection
-                            string ExtractNumber(string point)
-                            {
-                                if (string.IsNullOrEmpty(point)) return point;
-                                var parts = point.Split('-');
-                                if (parts.Length == 2 && int.TryParse(parts[1], out int num))
-                                {
-                                    return num.ToString();
-                                }
-                                return point;
-                            }
-
                             var newNet = new WiringNetInfo
                             {
                                 RowIndex = nextRowIndex++,
                                 FromLabel = string.IsNullOrEmpty(result.NetId) ? "Unexpected" : result.NetId,
-                                FromAddr = ExtractNumber(result.FromPoint ?? ""),
+                                FromAddr = resFrom,
                                 ToLabel = string.IsNullOrEmpty(result.NetId) ? "Unexpected" : result.NetId,
-                                ToAddr = ExtractNumber(result.ToPoint ?? "")
+                                ToAddr = resTo
                             };
                             netDefinitions.Add(newNet);
                             errorRows.Add(newNet.RowIndex);
@@ -327,11 +329,17 @@ namespace AssemblyLineTester.Views.Modals
         {
             PointF pt = e.Location;
 
-            foreach (var node in leftNodes.Concat(rightNodes).OrderByDescending(n => highlightedRows.Contains(n.RowIndex)))
+            foreach (var node in leftNodes.Concat(rightNodes).OrderByDescending(n => n.RowIndices.Any(idx => highlightedRows.Contains(idx))))
             {
                 if (IsPointInRect(pt, node.NodeRect) || IsPointInRect(pt, node.LabelRect))
                 {
-                    ToggleHighlight(node.RowIndex);
+                    bool isHighlighted = node.RowIndices.Any(idx => highlightedRows.Contains(idx));
+                    foreach (var idx in node.RowIndices)
+                    {
+                        if (isHighlighted) highlightedRows.Remove(idx);
+                        else highlightedRows.Add(idx);
+                    }
+                    picPreview.Invalidate();
                     return;
                 }
             }
@@ -414,23 +422,49 @@ namespace AssemblyLineTester.Views.Modals
             {
                 var net = netDefinitions[i];
 
-                DiagramNode lNode = new()
+                var lNode = rawLeftNodes.FirstOrDefault(n => n.Address == net.FromAddr);
+                if (lNode == null)
                 {
-                    RowIndex = i,
-                    Address = net.FromAddr,
-                    Label = net.FromLabel,
-                    IsLeft = true
-                };
-                rawLeftNodes.Add(lNode);
+                    lNode = new DiagramNode
+                    {
+                        RowIndices = [i],
+                        Address = net.FromAddr,
+                        Label = net.FromLabel,
+                        IsLeft = true
+                    };
+                    rawLeftNodes.Add(lNode);
+                }
+                else
+                {
+                    lNode.RowIndices.Add(i);
+                    if ((string.IsNullOrEmpty(lNode.Label) || lNode.Label == "NC" || lNode.Label == "Unexpected") && 
+                        !string.IsNullOrEmpty(net.FromLabel) && net.FromLabel != "NC" && net.FromLabel != "Unexpected")
+                    {
+                        lNode.Label = net.FromLabel;
+                    }
+                }
 
-                DiagramNode rNode = new()
+                var rNode = rawRightNodes.FirstOrDefault(n => n.Address == net.ToAddr);
+                if (rNode == null)
                 {
-                    RowIndex = i,
-                    Address = net.ToAddr,
-                    Label = net.ToLabel,
-                    IsLeft = false
-                };
-                rawRightNodes.Add(rNode);
+                    rNode = new DiagramNode
+                    {
+                        RowIndices = [i],
+                        Address = net.ToAddr,
+                        Label = net.ToLabel,
+                        IsLeft = false
+                    };
+                    rawRightNodes.Add(rNode);
+                }
+                else
+                {
+                    rNode.RowIndices.Add(i);
+                    if ((string.IsNullOrEmpty(rNode.Label) || rNode.Label == "NC" || rNode.Label == "Unexpected") && 
+                        !string.IsNullOrEmpty(net.ToLabel) && net.ToLabel != "NC" && net.ToLabel != "Unexpected")
+                    {
+                        rNode.Label = net.ToLabel;
+                    }
+                }
             }
 
             var sortedLeftNodes = rawLeftNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
@@ -455,8 +489,9 @@ namespace AssemblyLineTester.Views.Modals
 
             for (int i = 0; i < rowCount; i++)
             {
-                var lNode = leftNodes.FirstOrDefault(n => n.RowIndex == i);
-                var rNode = rightNodes.FirstOrDefault(n => n.RowIndex == i);
+                var net = netDefinitions[i];
+                var lNode = leftNodes.FirstOrDefault(n => n.Address == net.FromAddr);
+                var rNode = rightNodes.FirstOrDefault(n => n.Address == net.ToAddr);
 
                 if (lNode != null && rNode != null)
                 {
@@ -494,7 +529,9 @@ namespace AssemblyLineTester.Views.Modals
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                if (!highlightedRows.Contains(node.RowIndex) && !errorRows.Contains(node.RowIndex))
+                bool isError = node.RowIndices.Any(idx => errorRows.Contains(idx));
+                bool isHighlighted = node.RowIndices.Any(idx => highlightedRows.Contains(idx));
+                if (!isHighlighted && !isError)
                 {
                     DrawNodeAndLabel(g, node, false, false, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
@@ -531,11 +568,13 @@ namespace AssemblyLineTester.Views.Modals
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                if (errorRows.Contains(node.RowIndex))
+                bool isError = node.RowIndices.Any(idx => errorRows.Contains(idx));
+                bool isHighlighted = node.RowIndices.Any(idx => highlightedRows.Contains(idx));
+                if (isError)
                 {
-                    DrawNodeAndLabel(g, node, highlightedRows.Contains(node.RowIndex), true, fontLabel, fontAddr, sfLabel, sfAddr);
+                    DrawNodeAndLabel(g, node, isHighlighted, true, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
-                else if (highlightedRows.Contains(node.RowIndex))
+                else if (isHighlighted)
                 {
                     DrawNodeAndLabel(g, node, true, false, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
