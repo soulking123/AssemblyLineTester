@@ -531,11 +531,10 @@ namespace AssemblyLineTester.Services
                     return;
                 }
 
-                string firstPin = currentNetPins[0];
-                for (int i = 1; i < currentNetPins.Count; i++)
+                for (int i = 0; i < currentNetPins.Count - 1; i++)
                 {
-                    string fromPinStr = firstPin;
-                    string toPinStr = currentNetPins[i];
+                    string fromPinStr = currentNetPins[i];
+                    string toPinStr = currentNetPins[i + 1];
 
                     if (fromPinStr == toPinStr) continue;
 
@@ -553,8 +552,8 @@ namespace AssemblyLineTester.Services
                         FromLabel = fromPinStr,
                         ToAddress = ParsePin(toPinStr),
                         ToLabel = toPinStr,
-                        HarnessGroup = currentNetGroupId,
-                        NetId = currentNetGroupId,
+                        HarnessGroup = "",
+                        NetId = "",
                         UpperLimit = connResist
                     };
 

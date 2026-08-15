@@ -1677,24 +1677,7 @@ namespace AssemblyLineTester.Views.Pages
 
             try
             {
-                var selectedRows = GetAllRowIndices();
-                if (selectedRows.Count == 0)
-                {
-                    MessageBox.Show(this, "Empty Row to Start.", "No Row Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (!ValidateRowsForZeroValues(selectedRows)) return;
-
-                var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", "", null);
-                if (config == null || config.Nets.Count == 0) return;
-
-                await Task.Run(() => ExecuteTestForRows(selectedRows, config, token), token);
-
-                if (!token.IsCancellationRequested)
-                {
-                    MessageBox.Show(this, "Finished testing all connections", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+                await StartAllV2(token);
             }
             catch (OperationCanceledException)
             {
@@ -1727,24 +1710,7 @@ namespace AssemblyLineTester.Views.Pages
 
             try
             {
-                var selectedRows = GetSelectedOrHighlightedRowIndices();
-                if (selectedRows.Count == 0)
-                {
-                    MessageBox.Show(this, "Please click or select at least one row to test.", "No Row Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (!ValidateRowsForZeroValues(selectedRows)) return;
-
-                var config = BuildConfigurationForRows(selectedRows, txtConfigName.Text?.Trim() ?? "", "", null);
-                if (config == null || config.Nets.Count == 0) return;
-
-                await Task.Run(() => ExecuteTestForRows(selectedRows, config, token), token);
-
-                if (!token.IsCancellationRequested)
-                {
-                    MessageBox.Show(this, "Finished testing selected connections", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+                await StartSelectedV2(token);
             }
             catch (OperationCanceledException)
             {
@@ -1757,6 +1723,189 @@ namespace AssemblyLineTester.Views.Pages
                 btnStartAll.Enabled = true;
                 btnStartSelected.Enabled = true;
                 btnAbort.Enabled = false;
+            }
+        }
+
+        public async Task StartAllV2(System.Threading.CancellationToken token = default)
+        {
+            var selectedRows = GetAllRowIndices();
+            if (selectedRows.Count == 0)
+            {
+                MessageBox.Show(this, "Empty Row to Start.", "No Row Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            await Task.Run(() => ExecuteTestForRowsV2(selectedRows, token), token);
+
+            if (!token.IsCancellationRequested)
+            {
+                MessageBox.Show(this, "Finished testing all connections (V2)", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        public async Task StartSelectedV2(System.Threading.CancellationToken token = default)
+        {
+            var selectedRows = GetSelectedOrHighlightedRowIndices();
+            if (selectedRows.Count == 0)
+            {
+                MessageBox.Show(this, "Please click or select at least one row to test.", "No Row Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            await Task.Run(() => ExecuteTestForRowsV2(selectedRows, token), token);
+
+            if (!token.IsCancellationRequested)
+            {
+                MessageBox.Show(this, "Finished testing selected connections (V2)", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void ExecuteTestForRowsV2(List<int> targetRowIndices, System.Threading.CancellationToken token = default)
+        {
+            if (token.IsCancellationRequested) return;
+
+            if (targetRowIndices.Count == 0)
+            {
+                ShowMessageBoxOnUI("No valid rows selected for testing.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Validate that all target rows have colFromLabel and colToLabel filled
+            for (int k = 0; k < targetRowIndices.Count; k++)
+            {
+                int rowIndex = targetRowIndices[k];
+                if (rowIndex < 0 || rowIndex >= gridConfig.Rows.Count) continue;
+                var row = gridConfig.Rows[rowIndex];
+                if (row.IsNewRow) continue;
+
+                string fromLabel = row.Cells["colFromLabel"].Value?.ToString()?.Trim() ?? "";
+                string toLabel = row.Cells["colToLabel"].Value?.ToString()?.Trim() ?? "";
+
+                if (string.IsNullOrWhiteSpace(fromLabel) || string.IsNullOrWhiteSpace(toLabel))
+                {
+                    ShowMessageBoxOnUI($"Row {rowIndex + 1}: Net-From Label and Net-To Label must be filled before testing.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            bool isConnected = _instrument.Connect();
+            if (!isConnected)
+            {
+                ShowMessageBoxOnUI("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (token.IsCancellationRequested) return;
+
+            for (int k = 0; k < targetRowIndices.Count; k++)
+            {
+                if (token.IsCancellationRequested) return;
+
+                int rowIndex = targetRowIndices[k];
+                if (rowIndex < 0 || rowIndex >= gridConfig.Rows.Count) continue;
+                var row = gridConfig.Rows[rowIndex];
+                if (row.IsNewRow) continue;
+
+                //int nextFromAddr = row.Cells["colFromAddr"].Value;
+                //int nextToAddr = row.Cells["colToAddr"].Value;
+
+                //string from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3"),
+
+                string fromLabel = row.Cells["colFromLabel"].Value?.ToString()?.Trim() ?? "";
+                string toLabel = row.Cells["colToLabel"].Value?.ToString()?.Trim() ?? "";
+                string testTypeName = row.Cells["colTestType"].Value?.ToString()?.Trim()?.ToUpperInvariant() ?? "WIRE";
+
+                string resultValueStr = "";
+
+                if (testTypeName == "CAPACITOR")
+                {
+                    resultValueStr = _instrument.GetCapacitance(fromLabel, toLabel).MeasuredValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                }
+                else if (testTypeName == "DIODE" || testTypeName == "SIGNATURE DIODE")
+                {
+                    dynamic res = _instrument.GetDiode(fromLabel, toLabel);
+                    resultValueStr = ExtractDiodeValue(res);
+                }
+                else if (testTypeName == "TWISTED PAIR")
+                {
+                    dynamic res = _instrument.GetTwistedPair(fromLabel, toLabel);
+                    resultValueStr = ExtractTwistedPairValue(res);
+                }
+                else
+                {
+                    // Default: WIRE, 4WIRE, RESISTOR, 4RESISTOR, SIGNATURE WIRE
+                    resultValueStr = _instrument.GetRessistance(fromLabel, toLabel).MeasuredValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                }
+
+                UpdateGridRowUnitValue(rowIndex, resultValueStr);
+            }
+        }
+
+        
+
+        private static string ExtractDiodeValue(dynamic res)
+        {
+            if (res == null) return "Error";
+            try
+            {
+                if (res.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+                {
+                    return res.DllCallResult.ToString();
+                }
+            }
+            catch { }
+
+            try { return ((double)res.ForwardVoltage).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
+            try { return ((double)res.MeasurementValue).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
+            try { return ((double)res.Value).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
+
+            return "0.00";
+        }
+
+        private static string ExtractTwistedPairValue(dynamic res)
+        {
+            if (res == null) return "Error";
+            try
+            {
+                if (res.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+                {
+                    return res.DllCallResult.ToString();
+                }
+            }
+            catch { }
+
+            try { return ((bool)res.Value) ? "Pass" : "Failed"; } catch { }
+            try { return ((bool)res.FunctionResult) ? "Pass" : "Failed"; } catch { }
+            try { return ((bool)res.Result) ? "Pass" : "Failed"; } catch { }
+
+            return "Failed";
+        }
+
+        private void UpdateGridRowUnitValue(int rowIndex, string valStr)
+        {
+            void Action()
+            {
+                if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
+                {
+                    var row = gridConfig.Rows[rowIndex];
+                    row.Cells["colUnit"].Value = valStr;
+
+                    int colIdx = gridConfig.Columns["colUnit"]?.Index ?? -1;
+                    if (colIdx >= 0)
+                    {
+                        gridConfig.UpdateCellValue(colIdx, rowIndex);
+                    }
+                    gridConfig.InvalidateRow(rowIndex);
+                }
+            }
+
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(Action));
+            }
+            else
+            {
+                Action();
             }
         }
 
