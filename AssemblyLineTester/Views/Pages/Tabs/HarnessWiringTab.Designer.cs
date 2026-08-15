@@ -33,13 +33,13 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             colExpected = new DataGridViewTextBoxColumn();
             tableLayoutPanelRight = new TableLayoutPanel();
             lblTestParameterDetails = new Label();
-            picDiagram = new PictureBox();
+            picDiagram = new AssemblyLineTester.Views.Controls.SchematicDiagramControl();
             tableLayoutPanelMain.SuspendLayout();
             tableLayoutPanelLeft.SuspendLayout();
             tableLayoutPanelToolbar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridWiring).BeginInit();
             tableLayoutPanelRight.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picDiagram).BeginInit();
+
             SuspendLayout();
             // 
             // tableLayoutPanelMain
@@ -324,7 +324,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             ((System.ComponentModel.ISupportInitialize)gridWiring).EndInit();
             tableLayoutPanelRight.ResumeLayout(false);
             tableLayoutPanelRight.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)picDiagram).EndInit();
+
             ResumeLayout(false);
         }
 
@@ -346,6 +346,6 @@ namespace AssemblyLineTester.Views.Pages.Tabs
         private System.Windows.Forms.DataGridViewComboBoxColumn colTestType;
         private System.Windows.Forms.DataGridViewTextBoxColumn colExpected;
         private System.Windows.Forms.Label lblTestParameterDetails;
-        private System.Windows.Forms.PictureBox picDiagram;
+        private AssemblyLineTester.Views.Controls.SchematicDiagramControl picDiagram;
     }
 }

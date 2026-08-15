@@ -85,7 +85,7 @@ namespace AssemblyLineTester.Views.Pages
             lblHeaderTop = new Label();
             pnlRightBox = new Panel();
             pnlPreviewScroll = new Panel();
-            picPreview = new PictureBox();
+            picPreview = new AssemblyLineTester.Views.Controls.SchematicDiagramControl();
             pnlHeaderBottom = new Panel();
             lblHeaderBottom = new Label();
             ((System.ComponentModel.ISupportInitialize)splitContainerMain).BeginInit();
@@ -109,7 +109,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlHeaderTop.SuspendLayout();
             pnlRightBox.SuspendLayout();
             pnlPreviewScroll.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picPreview).BeginInit();
+
             pnlHeaderBottom.SuspendLayout();
             SuspendLayout();
             // 
@@ -955,7 +955,6 @@ namespace AssemblyLineTester.Views.Pages
             picPreview.Name = "picPreview";
             picPreview.Size = new Size(482, 586);
             picPreview.TabIndex = 1;
-            picPreview.TabStop = false;
             // 
             // pnlHeaderBottom
             // 
@@ -1020,7 +1019,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlHeaderTop.ResumeLayout(false);
             pnlRightBox.ResumeLayout(false);
             pnlPreviewScroll.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)picPreview).EndInit();
+
             pnlHeaderBottom.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -1080,7 +1079,7 @@ namespace AssemblyLineTester.Views.Pages
         private Label lblHeaderTop;
         private Panel pnlRightBox;
         private Panel pnlPreviewScroll;
-        private PictureBox picPreview;
+        private AssemblyLineTester.Views.Controls.SchematicDiagramControl picPreview;
         private Panel pnlHeaderBottom;
         private Label lblHeaderBottom;
         private DataGridViewTextBoxColumn colNo;

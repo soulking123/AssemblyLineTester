@@ -18,9 +18,7 @@ namespace AssemblyLineTester.Views.Pages
     public partial class TestParametersPage : UserControl
     {
         private readonly HashSet<int> highlightedRows = new();
-        private readonly List<DiagramNode> leftNodes = new();
-        private readonly List<DiagramNode> rightNodes = new();
-        private readonly List<DiagramConnection> connections = new();
+
         private readonly TestConfigService _configService = new TestConfigService();
         private readonly InstrumentService _instrument = new InstrumentService();
         private string _customTestText = string.Empty;
@@ -30,26 +28,7 @@ namespace AssemblyLineTester.Views.Pages
         private DefaultTestSetting defaultTest = TestSettingService.GetDefaults();
         private int defaultTestPoint;
 
-        private class DiagramNode
-        {
-            public List<int> RowIndices { get; set; } = [];
-            public string Address { get; set; } = "";
-            public string Label { get; set; } = "";
-            public RectangleF NodeRect { get; set; }
-            public RectangleF LabelRect { get; set; }
-            public bool IsLeft { get; set; }
-        }
 
-        private class DiagramConnection
-        {
-            public int RowIndex { get; set; }
-            public PointF StartPoint { get; set; }
-            public PointF EndPoint { get; set; }
-            public PointF Control1 { get; set; }
-            public PointF Control2 { get; set; }
-            public DiagramNode LeftNode { get; set; } = null!;
-            public DiagramNode RightNode { get; set; } = null!;
-        }
 
         protected override void OnLoad(EventArgs e)
         {
@@ -60,7 +39,7 @@ namespace AssemblyLineTester.Views.Pages
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
                 loadDefaultParameter();
-                picPreview.Invalidate();
+                UpdateDiagram();
             }
         }
         private void loadDefaultParameter()
@@ -93,11 +72,9 @@ namespace AssemblyLineTester.Views.Pages
 
             txtConnectionResistance.TextChanged += (s, e) => RecalculateAllRows();
 
-            picPreview.Paint += PicPreview_Paint;
-            picPreview.MouseDown += PicPreview_MouseDown;
-            picPreview.Resize += (s, e) => picPreview.Invalidate();
-            pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
-            splitContainerMain.SplitterMoved += (s, e) => { UpdateDiagramSize(); picPreview.Invalidate(); };
+            picPreview.DiagramRowClicked += PicPreview_DiagramRowClicked;
+            pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); UpdateDiagram(); };
+            splitContainerMain.SplitterMoved += (s, e) => { UpdateDiagramSize(); UpdateDiagram(); };
 
             if (btnAdd != null) btnAdd.Click += BtnAdd_Click;
             if (btnRemove != null) btnRemove.Click += BtnRemove_Click;
@@ -444,7 +421,7 @@ namespace AssemblyLineTester.Views.Pages
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
-            picPreview.Invalidate();
+            UpdateDiagram();
 
             MessageBox.Show($"{rows.Count} row(s) imported.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -711,7 +688,7 @@ namespace AssemblyLineTester.Views.Pages
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
-            picPreview.Invalidate();
+            UpdateDiagram();
         }
 
         // Next address unused in either column; From and To share one pool.
@@ -765,7 +742,7 @@ namespace AssemblyLineTester.Views.Pages
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
-            picPreview.Invalidate();
+            UpdateDiagram();
         }
 
         private void BtnReset_Click(object? sender, EventArgs e)
@@ -785,7 +762,7 @@ namespace AssemblyLineTester.Views.Pages
                 loadDefaultParameter();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
-                picPreview.Invalidate();
+                UpdateDiagram();
             }
         }
 
@@ -859,7 +836,7 @@ namespace AssemblyLineTester.Views.Pages
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
-            picPreview.Invalidate();
+            UpdateDiagram();
 
             _loadedConfigName = config.ConfigName;
         }
@@ -993,7 +970,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             UpdateTotalNetCount();
             UpdateDiagramSize();
-            picPreview.Invalidate();
+            UpdateDiagram();
         }
 
         private void GridConfig_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
@@ -1021,7 +998,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             UpdateTotalNetCount();
             UpdateDiagramSize();
-            picPreview.Invalidate();
+            UpdateDiagram();
         }
 
         private static readonly string[] ContinuityLikeTypes = TestConfigService.ContinuityLikeTestTypes;
@@ -1277,7 +1254,7 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             UpdateGridHighlights();
-            picPreview.Invalidate();
+            UpdateDiagram();
         }
 
         private void UpdateGridHighlights()
@@ -1300,330 +1277,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void PicPreview_MouseDown(object? sender, MouseEventArgs e)
-        {
-            PointF pt = e.Location;
 
-            foreach (var node in leftNodes.Concat(rightNodes).OrderByDescending(n => n.RowIndices.Any(idx => highlightedRows.Contains(idx))))
-            {
-                if (IsPointInRect(pt, node.NodeRect) || IsPointInRect(pt, node.LabelRect))
-                {
-                    bool isHighlighted = node.RowIndices.Any(idx => highlightedRows.Contains(idx));
-                    foreach (var idx in node.RowIndices)
-                    {
-                        if (isHighlighted)
-                        {
-                            highlightedRows.Remove(idx);
-                        }
-                        else
-                        {
-                            highlightedRows.Add(idx);
-                        }
-                    }
-                    picPreview.Invalidate();
-                    return;
-                }
-            }
-
-            foreach (var conn in connections.OrderByDescending(c => highlightedRows.Contains(c.RowIndex)))
-            {
-                if (IsPointNearBezier(pt, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint, 12f))
-                {
-                    ToggleHighlight(conn.RowIndex);
-                    return;
-                }
-            }
-        }
-
-        private static bool IsPointInRect(PointF pt, RectangleF rect)
-        {
-            return pt.X >= rect.Left && pt.X <= rect.Right && pt.Y >= rect.Top && pt.Y <= rect.Bottom;
-        }
-
-        private static bool IsPointNearBezier(PointF pt, PointF p0, PointF p1, PointF p2, PointF p3, float threshold)
-        {
-            int steps = 40;
-            for (int i = 0; i <= steps; i++)
-            {
-                float t = i / (float)steps;
-                float u = 1 - t;
-                float tt = t * t;
-                float uu = u * u;
-                float uuu = uu * u;
-                float ttt = tt * t;
-
-                float x = uuu * p0.X + 3 * uu * t * p1.X + 3 * u * tt * p2.X + ttt * p3.X;
-                float y = uuu * p0.Y + 3 * uu * t * p1.Y + 3 * u * tt * p2.Y + ttt * p3.Y;
-
-                float dx = pt.X - x;
-                float dy = pt.Y - y;
-                if (Math.Sqrt(dx * dx + dy * dy) <= threshold)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private void PicPreview_Paint(object? sender, PaintEventArgs e)
-        {
-            Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
-            Rectangle r = picPreview.ClientRectangle;
-
-            using SolidBrush bgBrush = new(Color.FromArgb(248, 250, 252));
-            g.FillRectangle(bgBrush, r);
-
-            using SolidBrush dotBrush = new(Color.FromArgb(226, 232, 240));
-            for (int x = 20; x < r.Width; x += 25)
-            {
-                for (int y = 20; y < r.Height; y += 25)
-                {
-                    g.FillEllipse(dotBrush, x - 1, y - 1, 2, 2);
-                }
-            }
-
-            leftNodes.Clear();
-            rightNodes.Clear();
-            connections.Clear();
-
-            int rowCount = gridConfig.Rows.Count;
-            if (rowCount == 0) return;
-
-            float availHeight = r.Height - 100;
-            float startY = 50f;
-            float rowSpacing = Math.Max(55f, availHeight / Math.Max(rowCount, 1));
-
-            int maxPin = 0;
-            var allNodesDict = new Dictionary<string, DiagramNode>();
-
-            for (int i = 0; i < rowCount; i++)
-            {
-                DataGridViewRow row = gridConfig.Rows[i];
-                string fromAddr = row.Cells["colFromAddr"].Value?.ToString() ?? "0";
-                string fromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? $"X1-0{i + 1}";
-                string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
-                string toLabel = row.Cells["colToLabel"].Value?.ToString() ?? $"Y1-0{i + 1}";
-
-                void ProcessNode(string addr, string label)
-                {
-                    if (string.IsNullOrEmpty(addr) || addr == "0") return;
-
-                    if (!allNodesDict.TryGetValue(addr, out DiagramNode n))
-                    {
-                        n = new DiagramNode { RowIndices = [i], Address = addr, Label = label };
-                        allNodesDict[addr] = n;
-                    }
-                    else
-                    {
-                        if (!n.RowIndices.Contains(i)) n.RowIndices.Add(i);
-                        if ((string.IsNullOrEmpty(n.Label) || n.Label == "NC" || n.Label == "Unexpected") &&
-                            !string.IsNullOrEmpty(label) && label != "NC" && label != "Unexpected")
-                        {
-                            n.Label = label;
-                        }
-                    }
-
-                    if (int.TryParse(addr, out int num) && num > maxPin)
-                        maxPin = num;
-                }
-
-                ProcessNode(fromAddr, fromLabel);
-                ProcessNode(toAddr, toLabel);
-            }
-
-            int splitPoint = 32;
-            if (maxPin > 128) splitPoint = 128;
-            else if (maxPin > 64) splitPoint = 64;
-
-            var sortedUniqueNodes = allNodesDict.Values.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
-
-            List<DiagramNode> rawLeftNodes = new List<DiagramNode>();
-            List<DiagramNode> rawRightNodes = new List<DiagramNode>();
-
-            foreach (var node in sortedUniqueNodes)
-            {
-                if (int.TryParse(node.Address, out int val))
-                {
-                    if (val <= splitPoint)
-                    {
-                        node.IsLeft = true;
-                        rawLeftNodes.Add(node);
-                    }
-                    else
-                    {
-                        node.IsLeft = false;
-                        rawRightNodes.Add(node);
-                    }
-                }
-                else
-                {
-                    node.IsLeft = false;
-                    rawRightNodes.Add(node);
-                }
-            }
-
-            float rowSpacingLeft = Math.Max(55f, availHeight / Math.Max(rawLeftNodes.Count, 1));
-            for (int idx = 0; idx < rawLeftNodes.Count; idx++)
-            {
-                float yPos = startY + idx * rowSpacingLeft;
-                var lNode = rawLeftNodes[idx];
-                lNode.NodeRect = new(185, yPos - 22, 50, 44);
-                lNode.LabelRect = new(45, yPos - 18, 132, 36);
-                leftNodes.Add(lNode);
-            }
-
-            float rowSpacingRight = Math.Max(55f, availHeight / Math.Max(rawRightNodes.Count, 1));
-            for (int idx = 0; idx < rawRightNodes.Count; idx++)
-            {
-                float yPos = startY + idx * rowSpacingRight;
-                var rNode = rawRightNodes[idx];
-                rNode.NodeRect = new(r.Width - 235, yPos - 22, 50, 44);
-                rNode.LabelRect = new(r.Width - 177, yPos - 18, 132, 36);
-                rightNodes.Add(rNode);
-            }
-
-            for (int i = 0; i < rowCount; i++)
-            {
-                DataGridViewRow row = gridConfig.Rows[i];
-                string fromAddr = row.Cells["colFromAddr"].Value?.ToString() ?? "0";
-                string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
-
-                var lNode = leftNodes.Concat(rightNodes).FirstOrDefault(n => n.Address == fromAddr);
-                var rNode = leftNodes.Concat(rightNodes).FirstOrDefault(n => n.Address == toAddr);
-
-                if (lNode != null && rNode != null)
-                {
-                    PointF startPt;
-                    PointF endPt;
-                    PointF c1;
-                    PointF c2;
-
-                    if (lNode.IsLeft && rNode.IsLeft)
-                    {
-                        startPt = new PointF(lNode.NodeRect.Right, lNode.NodeRect.Top + lNode.NodeRect.Height / 2);
-                        endPt = new PointF(rNode.NodeRect.Right, rNode.NodeRect.Top + rNode.NodeRect.Height / 2);
-                        float offset = Math.Max(Math.Abs(endPt.Y - startPt.Y) * 0.8f, 60f);
-                        c1 = new PointF(startPt.X + offset, startPt.Y);
-                        c2 = new PointF(endPt.X + offset, endPt.Y);
-                    }
-                    else if (!lNode.IsLeft && !rNode.IsLeft)
-                    {
-                        startPt = new PointF(lNode.NodeRect.Left, lNode.NodeRect.Top + lNode.NodeRect.Height / 2);
-                        endPt = new PointF(rNode.NodeRect.Left, rNode.NodeRect.Top + rNode.NodeRect.Height / 2);
-                        float offset = Math.Max(Math.Abs(endPt.Y - startPt.Y) * 0.8f, 60f);
-                        c1 = new PointF(startPt.X - offset, startPt.Y);
-                        c2 = new PointF(endPt.X - offset, endPt.Y);
-                    }
-                    else
-                    {
-                        var leftSideNode = lNode.IsLeft ? lNode : rNode;
-                        var rightSideNode = lNode.IsLeft ? rNode : lNode;
-
-                        startPt = new PointF(leftSideNode.NodeRect.Right, leftSideNode.NodeRect.Top + leftSideNode.NodeRect.Height / 2);
-                        endPt = new PointF(rightSideNode.NodeRect.Left, rightSideNode.NodeRect.Top + rightSideNode.NodeRect.Height / 2);
-                        float offset = (endPt.X - startPt.X) * 0.45f;
-                        c1 = new PointF(startPt.X + offset, startPt.Y);
-                        c2 = new PointF(endPt.X - offset, endPt.Y);
-                    }
-
-                    connections.Add(new DiagramConnection
-                    {
-                        RowIndex = i,
-                        StartPoint = startPt,
-                        EndPoint = endPt,
-                        Control1 = c1,
-                        Control2 = c2,
-                        LeftNode = lNode,
-                        RightNode = rNode
-                    });
-                }
-            }
-
-            using Pen blackPen = new(Color.Black, 3f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
-            foreach (var conn in connections)
-            {
-                if (!highlightedRows.Contains(conn.RowIndex))
-                {
-                    g.DrawBezier(blackPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
-                }
-            }
-
-            using Font fontLabel = new("Segoe UI", 9.5F, FontStyle.Bold);
-            using Font fontAddr = new("Segoe UI", 10.5F, FontStyle.Bold);
-            using StringFormat sfLabel = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap, Trimming = StringTrimming.EllipsisCharacter };
-            using StringFormat sfAddr = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.NoClip };
-
-            foreach (var node in leftNodes.Concat(rightNodes))
-            {
-                if (!node.RowIndices.Any(idx => highlightedRows.Contains(idx)))
-                {
-                    DrawNodeAndLabel(g, node, false, fontLabel, fontAddr, sfLabel, sfAddr);
-                }
-            }
-
-            using Pen glowPen = new(Color.FromArgb(254, 240, 138), 11f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
-            using Pen innerPen = new(Color.FromArgb(13, 110, 253), 3.5f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
-            foreach (var conn in connections)
-            {
-                if (highlightedRows.Contains(conn.RowIndex))
-                {
-                    g.DrawBezier(glowPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
-                    g.DrawBezier(innerPen, conn.StartPoint, conn.Control1, conn.Control2, conn.EndPoint);
-                }
-            }
-
-            foreach (var node in leftNodes.Concat(rightNodes))
-            {
-                if (node.RowIndices.Any(idx => highlightedRows.Contains(idx)))
-                {
-                    DrawNodeAndLabel(g, node, true, fontLabel, fontAddr, sfLabel, sfAddr);
-                }
-            }
-        }
-
-        private static void DrawNodeAndLabel(Graphics g, DiagramNode node, bool isHighlight, Font fontLabel, Font fontAddr, StringFormat sfLabel, StringFormat sfAddr)
-        {
-            if (isHighlight)
-            {
-                RectangleF haloRect = RectangleF.Inflate(node.NodeRect, 6f, 6f);
-                using SolidBrush haloFill = new(Color.FromArgb(254, 240, 138));
-                using Pen haloBorder = new(Color.FromArgb(245, 158, 11), 3f);
-                DrawRoundedRectangle(g, haloFill, haloBorder, haloRect, 24f);
-            }
-
-            using SolidBrush labelBg = new(isHighlight ? Color.FromArgb(254, 249, 195) : Color.FromArgb(226, 232, 240));
-            using Pen labelBorder = new(isHighlight ? Color.FromArgb(245, 158, 11) : Color.FromArgb(203, 213, 225), 1.5f);
-            using SolidBrush labelText = new(Color.FromArgb(30, 41, 59));
-            DrawRoundedRectangle(g, labelBg, labelBorder, node.LabelRect, 8f);
-            g.DrawString(node.Label, fontLabel, labelText, node.LabelRect, sfLabel);
-
-            Color nodeColor = node.IsLeft ? Color.FromArgb(0, 180, 216) : Color.FromArgb(74, 222, 128);
-            using SolidBrush nodeFill = new(nodeColor);
-            using Pen nodeBorder = new(Color.FromArgb(15, 23, 42), 2f);
-            using SolidBrush addrText = new(Color.FromArgb(15, 23, 42));
-            DrawRoundedRectangle(g, nodeFill, nodeBorder, node.NodeRect, 20f);
-
-            float dynamicSize = node.Address.Length >= 4 ? 7.5F : (node.Address.Length == 3 ? 8.5F : (node.Address.Length == 2 ? 9.5F : 10.5F));
-            using Font dynamicAddrFont = new("Segoe UI", dynamicSize, FontStyle.Bold);
-            g.DrawString(node.Address, dynamicAddrFont, addrText, node.NodeRect, sfAddr);
-        }
-
-        private static void DrawRoundedRectangle(Graphics g, Brush brush, Pen pen, RectangleF rect, float radius)
-        {
-            using GraphicsPath path = new();
-            float d = radius * 2;
-            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
-            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
-            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
-            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
-            path.CloseFigure();
-
-            g.FillPath(brush, path);
-            g.DrawPath(pen, path);
-        }
 
         private TestConfiguration? BuildConfigurationFromGrid(string configName, string productModel, string? description)
         {
@@ -1809,8 +1463,7 @@ namespace AssemblyLineTester.Views.Pages
                         "",                     // lower limit
                         "",                     // upper limit
                         "",                     // expected value
-                        "",                     // tolerance
-                        "-"
+                        ""                      // tolerance
                     );
                 }
             }
@@ -1818,7 +1471,42 @@ namespace AssemblyLineTester.Views.Pages
             RenumberRows();
             UpdateTotalNetCount();
             UpdateDiagramSize();
-            picPreview.Invalidate();
+            UpdateDiagram();
+        }
+
+        private void PicPreview_DiagramRowClicked(int rowIndex)
+        {
+            if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count && !gridConfig.Rows[rowIndex].IsNewRow)
+            {
+                gridConfig.ClearSelection();
+                gridConfig.Rows[rowIndex].Selected = true;
+                gridConfig.FirstDisplayedScrollingRowIndex = rowIndex;
+            }
+        }
+
+        private void UpdateDiagram()
+        {
+            var nets = new List<AssemblyLineTester.Views.Controls.DiagramNetDefinition>();
+            var highlighted = new HashSet<int>();
+
+            for (int i = 0; i < gridConfig.Rows.Count; i++)
+            {
+                var row = gridConfig.Rows[i];
+                if (row.IsNewRow) continue;
+
+                nets.Add(new AssemblyLineTester.Views.Controls.DiagramNetDefinition
+                {
+                    RowIndex = i,
+                    FromAddress = row.Cells["colFromAddr"].Value?.ToString() ?? "0",
+                    FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? $"X1-0{i + 1}",
+                    ToAddress = row.Cells["colToAddr"].Value?.ToString() ?? "0",
+                    ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? $"Y1-0{i + 1}",
+                    IsError = false
+                });
+            }
+
+            picPreview.RenderDiagram(nets, defaultTestPoint);
+            picPreview.SetHighlightedRows(highlightedRows);
         }
 
         private List<int> GetAllRowIndices()
