@@ -58,8 +58,9 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader.Controls.Add(iconLogo);
             pnlCustomHeader.Dock = DockStyle.Top;
             pnlCustomHeader.Location = new Point(0, 0);
+            pnlCustomHeader.Margin = new Padding(2, 1, 2, 1);
             pnlCustomHeader.Name = "pnlCustomHeader";
-            pnlCustomHeader.Size = new Size(942, 80);
+            pnlCustomHeader.Size = new Size(491, 38);
             pnlCustomHeader.TabIndex = 20;
             // 
             // lblCustomTitle
@@ -67,9 +68,10 @@ namespace AssemblyLineTester.Views.Modals
             lblCustomTitle.AutoSize = true;
             lblCustomTitle.Font = new Font("Segoe UI", 11.5F, FontStyle.Bold);
             lblCustomTitle.ForeColor = Color.White;
-            lblCustomTitle.Location = new Point(89, 22);
+            lblCustomTitle.Location = new Point(48, 10);
+            lblCustomTitle.Margin = new Padding(2, 0, 2, 0);
             lblCustomTitle.Name = "lblCustomTitle";
-            lblCustomTitle.Size = new Size(365, 42);
+            lblCustomTitle.Size = new Size(188, 21);
             lblCustomTitle.TabIndex = 0;
             lblCustomTitle.Text = "ADD/EDIT CONNECTOR";
             // 
@@ -80,10 +82,11 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.IconChar = FontAwesome.Sharp.IconChar.Plug;
             iconLogo.IconColor = Color.FromArgb(250, 204, 21);
             iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconLogo.IconSize = 51;
-            iconLogo.Location = new Point(24, 14);
+            iconLogo.IconSize = 24;
+            iconLogo.Location = new Point(13, 7);
+            iconLogo.Margin = new Padding(2, 1, 2, 1);
             iconLogo.Name = "iconLogo";
-            iconLogo.Size = new Size(52, 51);
+            iconLogo.Size = new Size(28, 24);
             iconLogo.TabIndex = 1;
             iconLogo.TabStop = false;
             // 
@@ -93,9 +96,10 @@ namespace AssemblyLineTester.Views.Modals
             pnlHeader.Controls.Add(lblSubtitle);
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Dock = DockStyle.Top;
-            pnlHeader.Location = new Point(0, 80);
+            pnlHeader.Location = new Point(0, 38);
+            pnlHeader.Margin = new Padding(2, 1, 2, 1);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(942, 136);
+            pnlHeader.Size = new Size(491, 64);
             pnlHeader.TabIndex = 19;
             // 
             // lblSubtitle
@@ -103,9 +107,10 @@ namespace AssemblyLineTester.Views.Modals
             lblSubtitle.AutoSize = true;
             lblSubtitle.Font = new Font("Segoe UI", 9.5F);
             lblSubtitle.ForeColor = Color.FromArgb(100, 116, 139);
-            lblSubtitle.Location = new Point(52, 77);
+            lblSubtitle.Location = new Point(28, 36);
+            lblSubtitle.Margin = new Padding(2, 0, 2, 0);
             lblSubtitle.Name = "lblSubtitle";
-            lblSubtitle.Size = new Size(406, 36);
+            lblSubtitle.Size = new Size(206, 17);
             lblSubtitle.TabIndex = 0;
             lblSubtitle.Text = "Enter the connector details below.";
             // 
@@ -114,9 +119,10 @@ namespace AssemblyLineTester.Views.Modals
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblTitle.Location = new Point(49, 24);
+            lblTitle.Location = new Point(26, 11);
+            lblTitle.Margin = new Padding(2, 0, 2, 0);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(358, 54);
+            lblTitle.Size = new Size(181, 28);
             lblTitle.TabIndex = 1;
             lblTitle.Text = "Connector Details";
             // 
@@ -125,18 +131,20 @@ namespace AssemblyLineTester.Views.Modals
             lblPerf.AutoSize = true;
             lblPerf.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblPerf.ForeColor = Color.FromArgb(51, 65, 85);
-            lblPerf.Location = new Point(57, 236);
+            lblPerf.Location = new Point(31, 111);
+            lblPerf.Margin = new Padding(2, 0, 2, 0);
             lblPerf.Name = "lblPerf";
-            lblPerf.Size = new Size(84, 36);
+            lblPerf.Size = new Size(43, 17);
             lblPerf.TabIndex = 18;
             lblPerf.Text = "Perf *";
             // 
             // txtPerf
             // 
             txtPerf.Font = new Font("Segoe UI", 10.5F);
-            txtPerf.Location = new Point(57, 275);
+            txtPerf.Location = new Point(31, 129);
+            txtPerf.Margin = new Padding(2, 1, 2, 1);
             txtPerf.Name = "txtPerf";
-            txtPerf.Size = new Size(388, 45);
+            txtPerf.Size = new Size(211, 26);
             txtPerf.TabIndex = 17;
             // 
             // lblPartNumber
@@ -144,18 +152,20 @@ namespace AssemblyLineTester.Views.Modals
             lblPartNumber.AutoSize = true;
             lblPartNumber.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblPartNumber.ForeColor = Color.FromArgb(51, 65, 85);
-            lblPartNumber.Location = new Point(496, 236);
+            lblPartNumber.Location = new Point(267, 111);
+            lblPartNumber.Margin = new Padding(2, 0, 2, 0);
             lblPartNumber.Name = "lblPartNumber";
-            lblPartNumber.Size = new Size(192, 36);
+            lblPartNumber.Size = new Size(97, 17);
             lblPartNumber.TabIndex = 16;
             lblPartNumber.Text = "Part Number *";
             // 
             // txtPartNumber
             // 
             txtPartNumber.Font = new Font("Segoe UI", 10.5F);
-            txtPartNumber.Location = new Point(496, 275);
+            txtPartNumber.Location = new Point(267, 129);
+            txtPartNumber.Margin = new Padding(2, 1, 2, 1);
             txtPartNumber.Name = "txtPartNumber";
-            txtPartNumber.Size = new Size(388, 45);
+            txtPartNumber.Size = new Size(211, 26);
             txtPartNumber.TabIndex = 15;
             // 
             // lblContactType
@@ -163,18 +173,20 @@ namespace AssemblyLineTester.Views.Modals
             lblContactType.AutoSize = true;
             lblContactType.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblContactType.ForeColor = Color.FromArgb(51, 65, 85);
-            lblContactType.Location = new Point(57, 336);
+            lblContactType.Location = new Point(31, 158);
+            lblContactType.Margin = new Padding(2, 0, 2, 0);
             lblContactType.Name = "lblContactType";
-            lblContactType.Size = new Size(193, 36);
+            lblContactType.Size = new Size(98, 17);
             lblContactType.TabIndex = 14;
             lblContactType.Text = "Contact Type *";
             // 
             // txtContactType
             // 
             txtContactType.Font = new Font("Segoe UI", 10.5F);
-            txtContactType.Location = new Point(57, 375);
+            txtContactType.Location = new Point(31, 176);
+            txtContactType.Margin = new Padding(2, 1, 2, 1);
             txtContactType.Name = "txtContactType";
-            txtContactType.Size = new Size(388, 45);
+            txtContactType.Size = new Size(211, 26);
             txtContactType.TabIndex = 13;
             // 
             // lblContactQuantity
@@ -182,18 +194,20 @@ namespace AssemblyLineTester.Views.Modals
             lblContactQuantity.AutoSize = true;
             lblContactQuantity.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblContactQuantity.ForeColor = Color.FromArgb(51, 65, 85);
-            lblContactQuantity.Location = new Point(496, 336);
+            lblContactQuantity.Location = new Point(267, 158);
+            lblContactQuantity.Margin = new Padding(2, 0, 2, 0);
             lblContactQuantity.Name = "lblContactQuantity";
-            lblContactQuantity.Size = new Size(242, 36);
+            lblContactQuantity.Size = new Size(123, 17);
             lblContactQuantity.TabIndex = 12;
             lblContactQuantity.Text = "Contact Quantity *";
             // 
             // txtContactQuantity
             // 
             txtContactQuantity.Font = new Font("Segoe UI", 10.5F);
-            txtContactQuantity.Location = new Point(496, 375);
+            txtContactQuantity.Location = new Point(267, 176);
+            txtContactQuantity.Margin = new Padding(2, 1, 2, 1);
             txtContactQuantity.Name = "txtContactQuantity";
-            txtContactQuantity.Size = new Size(388, 45);
+            txtContactQuantity.Size = new Size(211, 26);
             txtContactQuantity.TabIndex = 11;
             // 
             // lblWireSize
@@ -201,18 +215,20 @@ namespace AssemblyLineTester.Views.Modals
             lblWireSize.AutoSize = true;
             lblWireSize.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblWireSize.ForeColor = Color.FromArgb(51, 65, 85);
-            lblWireSize.Location = new Point(57, 436);
+            lblWireSize.Location = new Point(31, 204);
+            lblWireSize.Margin = new Padding(2, 0, 2, 0);
             lblWireSize.Name = "lblWireSize";
-            lblWireSize.Size = new Size(146, 36);
+            lblWireSize.Size = new Size(75, 17);
             lblWireSize.TabIndex = 10;
             lblWireSize.Text = "Wire Size *";
             // 
             // txtWireSize
             // 
             txtWireSize.Font = new Font("Segoe UI", 10.5F);
-            txtWireSize.Location = new Point(57, 475);
+            txtWireSize.Location = new Point(31, 223);
+            txtWireSize.Margin = new Padding(2, 1, 2, 1);
             txtWireSize.Name = "txtWireSize";
-            txtWireSize.Size = new Size(388, 45);
+            txtWireSize.Size = new Size(211, 26);
             txtWireSize.TabIndex = 9;
             // 
             // lblCurrentRating
@@ -220,18 +236,20 @@ namespace AssemblyLineTester.Views.Modals
             lblCurrentRating.AutoSize = true;
             lblCurrentRating.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblCurrentRating.ForeColor = Color.FromArgb(51, 65, 85);
-            lblCurrentRating.Location = new Point(496, 436);
+            lblCurrentRating.Location = new Point(267, 204);
+            lblCurrentRating.Margin = new Padding(2, 0, 2, 0);
             lblCurrentRating.Name = "lblCurrentRating";
-            lblCurrentRating.Size = new Size(213, 36);
+            lblCurrentRating.Size = new Size(108, 17);
             lblCurrentRating.TabIndex = 8;
             lblCurrentRating.Text = "Current Rating *";
             // 
             // txtCurrentRating
             // 
             txtCurrentRating.Font = new Font("Segoe UI", 10.5F);
-            txtCurrentRating.Location = new Point(496, 475);
+            txtCurrentRating.Location = new Point(267, 223);
+            txtCurrentRating.Margin = new Padding(2, 1, 2, 1);
             txtCurrentRating.Name = "txtCurrentRating";
-            txtCurrentRating.Size = new Size(388, 45);
+            txtCurrentRating.Size = new Size(211, 26);
             txtCurrentRating.TabIndex = 7;
             // 
             // lblMountingStyle
@@ -239,18 +257,20 @@ namespace AssemblyLineTester.Views.Modals
             lblMountingStyle.AutoSize = true;
             lblMountingStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblMountingStyle.ForeColor = Color.FromArgb(51, 65, 85);
-            lblMountingStyle.Location = new Point(57, 536);
+            lblMountingStyle.Location = new Point(31, 251);
+            lblMountingStyle.Margin = new Padding(2, 0, 2, 0);
             lblMountingStyle.Name = "lblMountingStyle";
-            lblMountingStyle.Size = new Size(222, 36);
+            lblMountingStyle.Size = new Size(113, 17);
             lblMountingStyle.TabIndex = 6;
             lblMountingStyle.Text = "Mounting Style *";
             // 
             // txtMountingStyle
             // 
             txtMountingStyle.Font = new Font("Segoe UI", 10.5F);
-            txtMountingStyle.Location = new Point(57, 575);
+            txtMountingStyle.Location = new Point(31, 270);
+            txtMountingStyle.Margin = new Padding(2, 1, 2, 1);
             txtMountingStyle.Name = "txtMountingStyle";
-            txtMountingStyle.Size = new Size(388, 45);
+            txtMountingStyle.Size = new Size(211, 26);
             txtMountingStyle.TabIndex = 5;
             // 
             // lblImage
@@ -258,19 +278,21 @@ namespace AssemblyLineTester.Views.Modals
             lblImage.AutoSize = true;
             lblImage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblImage.ForeColor = Color.FromArgb(51, 65, 85);
-            lblImage.Location = new Point(496, 536);
-            lblImage.MaximumSize = new Size(388, 0);
+            lblImage.Location = new Point(267, 251);
+            lblImage.Margin = new Padding(2, 0, 2, 0);
+            lblImage.MaximumSize = new Size(209, 0);
             lblImage.Name = "lblImage";
-            lblImage.Size = new Size(372, 64);
+            lblImage.Size = new Size(208, 30);
             lblImage.TabIndex = 4;
             lblImage.Text = "Images (multiple allowed, max 2MB each, JPG/PNG)";
             // 
             // btnChooseImage
             // 
             btnChooseImage.Font = new Font("Segoe UI", 9F);
-            btnChooseImage.Location = new Point(500, 601);
+            btnChooseImage.Location = new Point(269, 282);
+            btnChooseImage.Margin = new Padding(2, 1, 2, 1);
             btnChooseImage.Name = "btnChooseImage";
-            btnChooseImage.Size = new Size(384, 42);
+            btnChooseImage.Size = new Size(207, 29);
             btnChooseImage.TabIndex = 3;
             btnChooseImage.Text = "Choose Images...";
             // 
@@ -278,18 +300,20 @@ namespace AssemblyLineTester.Views.Modals
             // 
             lstImages.Font = new Font("Segoe UI", 8.5F);
             lstImages.IntegralHeight = false;
-            lstImages.Location = new Point(500, 649);
+            lstImages.Location = new Point(269, 313);
+            lstImages.Margin = new Padding(2, 1, 2, 1);
             lstImages.Name = "lstImages";
-            lstImages.Size = new Size(384, 195);
+            lstImages.Size = new Size(209, 94);
             lstImages.TabIndex = 2;
             // 
             // btnRemoveImage
             // 
             btnRemoveImage.Font = new Font("Segoe UI", 8.5F);
             btnRemoveImage.ForeColor = Color.FromArgb(239, 68, 68);
-            btnRemoveImage.Location = new Point(500, 850);
+            btnRemoveImage.Location = new Point(267, 411);
+            btnRemoveImage.Margin = new Padding(2, 1, 2, 1);
             btnRemoveImage.Name = "btnRemoveImage";
-            btnRemoveImage.Size = new Size(384, 38);
+            btnRemoveImage.Size = new Size(213, 27);
             btnRemoveImage.TabIndex = 6;
             btnRemoveImage.Text = "Remove Selected";
             // 
@@ -299,9 +323,10 @@ namespace AssemblyLineTester.Views.Modals
             pnlFooter.Controls.Add(btnCancel);
             pnlFooter.Controls.Add(btnSave);
             pnlFooter.Dock = DockStyle.Bottom;
-            pnlFooter.Location = new Point(0, 906);
+            pnlFooter.Location = new Point(0, 440);
+            pnlFooter.Margin = new Padding(2, 1, 2, 1);
             pnlFooter.Name = "pnlFooter";
-            pnlFooter.Size = new Size(942, 128);
+            pnlFooter.Size = new Size(491, 60);
             pnlFooter.TabIndex = 0;
             // 
             // btnCancel
@@ -316,12 +341,13 @@ namespace AssemblyLineTester.Views.Modals
             btnCancel.ForeColor = Color.FromArgb(71, 85, 105);
             btnCancel.HoverBackColor = Color.FromArgb(226, 232, 240);
             btnCancel.HoverForeColor = Color.Empty;
-            btnCancel.Location = new Point(528, 29);
+            btnCancel.Location = new Point(284, 14);
+            btnCancel.Margin = new Padding(2, 1, 2, 1);
             btnCancel.Name = "btnCancel";
             btnCancel.NormalBackColor = Color.FromArgb(241, 245, 249);
             btnCancel.PressedBackColor = Color.FromArgb(203, 213, 225);
             btnCancel.PressedForeColor = Color.Empty;
-            btnCancel.Size = new Size(171, 70);
+            btnCancel.Size = new Size(92, 33);
             btnCancel.TabIndex = 0;
             btnCancel.Text = "Cancel";
             btnCancel.UseVisualStyleBackColor = false;
@@ -335,10 +361,11 @@ namespace AssemblyLineTester.Views.Modals
             btnSave.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnSave.ForeColor = Color.FromArgb(15, 23, 42);
             btnSave.HoverForeColor = Color.Empty;
-            btnSave.Location = new Point(715, 29);
+            btnSave.Location = new Point(385, 14);
+            btnSave.Margin = new Padding(2, 1, 2, 1);
             btnSave.Name = "btnSave";
             btnSave.PressedForeColor = Color.Empty;
-            btnSave.Size = new Size(171, 70);
+            btnSave.Size = new Size(92, 33);
             btnSave.TabIndex = 1;
             btnSave.Text = "Save";
             btnSave.UseVisualStyleBackColor = false;
@@ -346,11 +373,11 @@ namespace AssemblyLineTester.Views.Modals
             // ConnectorModalForm
             // 
             AcceptButton = btnSave;
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(248, 250, 252);
             CancelButton = btnCancel;
-            ClientSize = new Size(942, 1034);
+            ClientSize = new Size(491, 500);
             Controls.Add(pnlFooter);
             Controls.Add(btnRemoveImage);
             Controls.Add(lstImages);
@@ -374,6 +401,7 @@ namespace AssemblyLineTester.Views.Modals
             Controls.Add(pnlCustomHeader);
             Font = new Font("Segoe UI", 9F);
             FormBorderStyle = FormBorderStyle.None;
+            Margin = new Padding(2, 1, 2, 1);
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "ConnectorModalForm";

@@ -415,73 +415,86 @@ namespace AssemblyLineTester.Views.Modals
             float startY = 50f;
             float rowSpacing = Math.Max(55f, availHeight / Math.Max(rowCount, 1));
 
-            List<DiagramNode> rawLeftNodes = [];
-            List<DiagramNode> rawRightNodes = [];
+            int maxPin = 0;
+            var allNodesDict = new Dictionary<string, DiagramNode>();
 
             for (int i = 0; i < rowCount; i++)
             {
                 var net = netDefinitions[i];
 
-                var lNode = rawLeftNodes.FirstOrDefault(n => n.Address == net.FromAddr);
-                if (lNode == null)
+                void ProcessNode(string addr, string label)
                 {
-                    lNode = new DiagramNode
+                    if (string.IsNullOrEmpty(addr) || addr == "0") return;
+
+                    if (!allNodesDict.TryGetValue(addr, out DiagramNode n))
                     {
-                        RowIndices = [i],
-                        Address = net.FromAddr,
-                        Label = net.FromLabel,
-                        IsLeft = true
-                    };
-                    rawLeftNodes.Add(lNode);
-                }
-                else
-                {
-                    lNode.RowIndices.Add(i);
-                    if ((string.IsNullOrEmpty(lNode.Label) || lNode.Label == "NC" || lNode.Label == "Unexpected") && 
-                        !string.IsNullOrEmpty(net.FromLabel) && net.FromLabel != "NC" && net.FromLabel != "Unexpected")
-                    {
-                        lNode.Label = net.FromLabel;
+                        n = new DiagramNode { RowIndices = [i], Address = addr, Label = label };
+                        allNodesDict[addr] = n;
                     }
+                    else
+                    {
+                        if (!n.RowIndices.Contains(i)) n.RowIndices.Add(i);
+                        if ((string.IsNullOrEmpty(n.Label) || n.Label == "NC" || n.Label == "Unexpected") &&
+                            !string.IsNullOrEmpty(label) && label != "NC" && label != "Unexpected")
+                        {
+                            n.Label = label;
+                        }
+                    }
+
+                    if (int.TryParse(addr, out int num) && num > maxPin)
+                        maxPin = num;
                 }
 
-                var rNode = rawRightNodes.FirstOrDefault(n => n.Address == net.ToAddr);
-                if (rNode == null)
+                ProcessNode(net.FromAddr, net.FromLabel);
+                ProcessNode(net.ToAddr, net.ToLabel);
+            }
+
+            int splitPoint = 32;
+            if (maxPin > 128) splitPoint = 128;
+            else if (maxPin > 64) splitPoint = 64;
+
+            var sortedUniqueNodes = allNodesDict.Values.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
+
+            List<DiagramNode> rawLeftNodes = [];
+            List<DiagramNode> rawRightNodes = [];
+
+            foreach (var node in sortedUniqueNodes)
+            {
+                if (int.TryParse(node.Address, out int val))
                 {
-                    rNode = new DiagramNode
+                    if (val <= splitPoint)
                     {
-                        RowIndices = [i],
-                        Address = net.ToAddr,
-                        Label = net.ToLabel,
-                        IsLeft = false
-                    };
-                    rawRightNodes.Add(rNode);
+                        node.IsLeft = true;
+                        rawLeftNodes.Add(node);
+                    }
+                    else
+                    {
+                        node.IsLeft = false;
+                        rawRightNodes.Add(node);
+                    }
                 }
                 else
                 {
-                    rNode.RowIndices.Add(i);
-                    if ((string.IsNullOrEmpty(rNode.Label) || rNode.Label == "NC" || rNode.Label == "Unexpected") && 
-                        !string.IsNullOrEmpty(net.ToLabel) && net.ToLabel != "NC" && net.ToLabel != "Unexpected")
-                    {
-                        rNode.Label = net.ToLabel;
-                    }
+                    node.IsLeft = false;
+                    rawRightNodes.Add(node);
                 }
             }
 
-            var sortedLeftNodes = rawLeftNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
-            for (int idx = 0; idx < sortedLeftNodes.Count; idx++)
+            float rowSpacingLeft = Math.Max(55f, availHeight / Math.Max(rawLeftNodes.Count, 1));
+            for (int idx = 0; idx < rawLeftNodes.Count; idx++)
             {
-                float yPos = startY + idx * rowSpacing;
-                var lNode = sortedLeftNodes[idx];
+                float yPos = startY + idx * rowSpacingLeft;
+                var lNode = rawLeftNodes[idx];
                 lNode.NodeRect = new(185, yPos - 22, 60, 44);
                 lNode.LabelRect = new(35, yPos - 18, 142, 36);
                 leftNodes.Add(lNode);
             }
 
-            var sortedRightNodes = rawRightNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
-            for (int idx = 0; idx < sortedRightNodes.Count; idx++)
+            float rowSpacingRight = Math.Max(55f, availHeight / Math.Max(rawRightNodes.Count, 1));
+            for (int idx = 0; idx < rawRightNodes.Count; idx++)
             {
-                float yPos = startY + idx * rowSpacing;
-                var rNode = sortedRightNodes[idx];
+                float yPos = startY + idx * rowSpacingRight;
+                var rNode = rawRightNodes[idx];
                 rNode.NodeRect = new(r.Width - 245, yPos - 22, 60, 44);
                 rNode.LabelRect = new(r.Width - 177, yPos - 18, 142, 36);
                 rightNodes.Add(rNode);
@@ -490,22 +503,51 @@ namespace AssemblyLineTester.Views.Modals
             for (int i = 0; i < rowCount; i++)
             {
                 var net = netDefinitions[i];
-                var lNode = leftNodes.FirstOrDefault(n => n.Address == net.FromAddr);
-                var rNode = rightNodes.FirstOrDefault(n => n.Address == net.ToAddr);
+                var lNode = leftNodes.Concat(rightNodes).FirstOrDefault(n => n.Address == net.FromAddr);
+                var rNode = leftNodes.Concat(rightNodes).FirstOrDefault(n => n.Address == net.ToAddr);
 
                 if (lNode != null && rNode != null)
                 {
-                    PointF startPt = new(lNode.NodeRect.Right, lNode.NodeRect.Top + lNode.NodeRect.Height / 2);
-                    PointF endPt = new(rNode.NodeRect.Left, rNode.NodeRect.Top + rNode.NodeRect.Height / 2);
-                    float offset = (endPt.X - startPt.X) * 0.45f;
+                    PointF startPt;
+                    PointF endPt;
+                    PointF c1;
+                    PointF c2;
 
-                    connections.Add(new()
+                    if (lNode.IsLeft && rNode.IsLeft)
+                    {
+                        startPt = new PointF(lNode.NodeRect.Right, lNode.NodeRect.Top + lNode.NodeRect.Height / 2);
+                        endPt = new PointF(rNode.NodeRect.Right, rNode.NodeRect.Top + rNode.NodeRect.Height / 2);
+                        float offset = Math.Max(Math.Abs(endPt.Y - startPt.Y) * 0.8f, 60f);
+                        c1 = new PointF(startPt.X + offset, startPt.Y);
+                        c2 = new PointF(endPt.X + offset, endPt.Y);
+                    }
+                    else if (!lNode.IsLeft && !rNode.IsLeft)
+                    {
+                        startPt = new PointF(lNode.NodeRect.Left, lNode.NodeRect.Top + lNode.NodeRect.Height / 2);
+                        endPt = new PointF(rNode.NodeRect.Left, rNode.NodeRect.Top + rNode.NodeRect.Height / 2);
+                        float offset = Math.Max(Math.Abs(endPt.Y - startPt.Y) * 0.8f, 60f);
+                        c1 = new PointF(startPt.X - offset, startPt.Y);
+                        c2 = new PointF(endPt.X - offset, endPt.Y);
+                    }
+                    else
+                    {
+                        var leftSideNode = lNode.IsLeft ? lNode : rNode;
+                        var rightSideNode = lNode.IsLeft ? rNode : lNode;
+
+                        startPt = new PointF(leftSideNode.NodeRect.Right, leftSideNode.NodeRect.Top + leftSideNode.NodeRect.Height / 2);
+                        endPt = new PointF(rightSideNode.NodeRect.Left, rightSideNode.NodeRect.Top + rightSideNode.NodeRect.Height / 2);
+                        float offset = (endPt.X - startPt.X) * 0.45f;
+                        c1 = new PointF(startPt.X + offset, startPt.Y);
+                        c2 = new PointF(endPt.X - offset, endPt.Y);
+                    }
+
+                    connections.Add(new DiagramConnection
                     {
                         RowIndex = i,
                         StartPoint = startPt,
                         EndPoint = endPt,
-                        Control1 = new(startPt.X + offset, startPt.Y),
-                        Control2 = new(endPt.X - offset, endPt.Y),
+                        Control1 = c1,
+                        Control2 = c2,
                         LeftNode = lNode,
                         RightNode = rNode
                     });
