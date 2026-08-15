@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CtaDotNet.Services;
 using CtaDotNet.Models;
@@ -380,6 +380,70 @@ namespace AssemblyLineTester.Services
                 catch
                 {
                     return (CtaCommandResultCode)(-2);
+                }
+            }
+        }
+
+        public CtaInstructionResult GetRessistance(string Point1, string Point2)
+        {
+            if (!IsConnected) return new CtaInstructionResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.Resistance(_connectionId, Point1, Point2);
+                }
+                catch
+                {
+                    return new CtaInstructionResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+                }
+            }
+        }
+
+        public CtaInstructionResult GetCapacitance(string Point1, string Point2)
+        {
+            if (!IsConnected) return new CtaInstructionResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.Capacitance(_connectionId, Point1, Point2);
+                }
+                catch
+                {
+                    return new CtaInstructionResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+                }
+            }
+        }
+
+        public CtaDiodeResult GetDiode(string Point1, string Point2)
+        {
+            if (!IsConnected) return new CtaDiodeResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.Diode(_connectionId, Point1, Point2);
+                }
+                catch
+                {
+                    return new CtaDiodeResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+                }
+            }
+        }
+
+        public CtaBoolResult GetTwistedPair(string Point1, string Point2)
+        {
+            if (!IsConnected) return new CtaBoolResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.TwistedPair(_connectionId, Point1, Point2);
+                }
+                catch
+                {
+                    return new CtaBoolResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
                 }
             }
         }
