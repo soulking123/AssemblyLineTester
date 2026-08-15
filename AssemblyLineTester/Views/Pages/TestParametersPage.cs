@@ -1670,7 +1670,7 @@ namespace AssemblyLineTester.Views.Pages
                     LowerLimit = lower,
                     UpperLimit = upper,
                     Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
+                    MeasurementUnit = GetValidMeasurementUnit(testTypeName, row.Cells["colUnit"].Value?.ToString()),
                     Color = row.Cells["colColor"].Value?.ToString() ?? "",
                     Gauge = row.Cells["colGauge"].Value?.ToString() ?? ""
                 });
@@ -2198,7 +2198,8 @@ namespace AssemblyLineTester.Views.Pages
                             {
                                 if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
                                 {
-                                    gridConfig.Rows[rowIndex].Cells["colUnit"].Value = valStr;
+                                    gridConfig.Rows[rowIndex].Cells["colExpectedValue"].Value = valStr;
+                                    RecalculateRowLimits(gridConfig.Rows[rowIndex]);
                                 }
                             }));
                         }
@@ -2206,7 +2207,8 @@ namespace AssemblyLineTester.Views.Pages
                         {
                             if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
                             {
-                                gridConfig.Rows[rowIndex].Cells["colUnit"].Value = valStr;
+                                gridConfig.Rows[rowIndex].Cells["colExpectedValue"].Value = valStr;
+                                RecalculateRowLimits(gridConfig.Rows[rowIndex]);
                             }
                         }
                     }
@@ -2278,7 +2280,7 @@ namespace AssemblyLineTester.Views.Pages
                     LowerLimit = lower,
                     UpperLimit = upper,
                     Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
+                    MeasurementUnit = GetValidMeasurementUnit(testTypeName, row.Cells["colUnit"].Value?.ToString()),
                     Color = row.Cells["colColor"].Value?.ToString() ?? "",
                     Gauge = row.Cells["colGauge"].Value?.ToString() ?? ""
                 });
@@ -2298,6 +2300,15 @@ namespace AssemblyLineTester.Views.Pages
                 MinComponentResistance = minCompRes,
                 Nets = nets
             };
+        }
+
+        private static string GetValidMeasurementUnit(string testTypeName, string? rawUnit)
+        {
+            string unit = rawUnit?.Trim() ?? "";
+            string key = string.IsNullOrWhiteSpace(testTypeName) ? "WIRE" : testTypeName.Trim().ToUpperInvariant();
+            var allowedUnits = UnitConversionHelper.GetUnitsForTestType(key);
+            if (allowedUnits.Contains(unit)) return unit;
+            return UnitConversionHelper.GetBaseUnit(key);
         }
 
         private bool ValidateRowsForZeroValues(List<int> targetRowIndices)
