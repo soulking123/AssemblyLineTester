@@ -671,9 +671,9 @@ namespace AssemblyLineTester.Views.Pages
                 "",                             // gauge
                 "",                             // Net-ID
                 nextFromAddr.ToString(),                                    // From
-                "J" + ((nextFromAddr - 1) / 64 + 1).ToString()+ "-" + ((nextFromAddr-1)%64+1).ToString("D3"),                   // Net-From Label
+                "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3"),                   // Net-From Label
                 nextToAddr.ToString(),                                      // To
-                "J" + ((nextToAddr - 1) / 64 + 1).ToString()+ "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // To-From Label
+                "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // To-From Label
                 defaultType,                                                // Test Type
                 lowerLimit.ToString(),                                      // Lower Limit
                 upperLimit.ToString(),                                      // Upper Limit
@@ -1806,35 +1806,55 @@ namespace AssemblyLineTester.Views.Pages
                 var row = gridConfig.Rows[rowIndex];
                 if (row.IsNewRow) continue;
 
-                //int nextFromAddr = row.Cells["colFromAddr"].Value;
-                //int nextToAddr = row.Cells["colToAddr"].Value;
-
-                //string from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3"),
+                int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int nextFromAddr);
+                int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int nextToAddr);
+                string from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3");
+                string to = "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3");
+                if (defaultTestPoint == 128)
+                {
+                    if (nextFromAddr > 64 )
+                    {
+                        nextFromAddr += 64;
+                    }
+                    if (nextToAddr > 64)
+                    {
+                        nextToAddr += 64;
+                    }
+                    from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3");
+                    to = "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3");
+                    
+                }
 
                 string fromLabel = row.Cells["colFromLabel"].Value?.ToString()?.Trim() ?? "";
                 string toLabel = row.Cells["colToLabel"].Value?.ToString()?.Trim() ?? "";
-                string testTypeName = row.Cells["colTestType"].Value?.ToString()?.Trim()?.ToUpperInvariant() ?? "WIRE";
+                string testTypeName = row.Cells["colTestType"].Value?.ToString()?.Trim()?.ToUpperInvariant() ?? "";
+
+                Debug.WriteLine($"from {from}");
+                Debug.WriteLine($"from label {fromLabel}");
+
+                Debug.WriteLine($"to {to}");
+                Debug.WriteLine($"to label {toLabel}");
 
                 string resultValueStr = "";
 
                 if (testTypeName == "CAPACITOR")
                 {
-                    resultValueStr = _instrument.GetCapacitance(fromLabel, toLabel).MeasuredValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                    resultValueStr = _instrument.GetCapacitance(from, to).MeasuredValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 }
                 else if (testTypeName == "DIODE" || testTypeName == "SIGNATURE DIODE")
                 {
-                    dynamic res = _instrument.GetDiode(fromLabel, toLabel);
+                    dynamic res = _instrument.GetDiode(from, to);
                     resultValueStr = ExtractDiodeValue(res);
                 }
                 else if (testTypeName == "TWISTED PAIR")
                 {
-                    dynamic res = _instrument.GetTwistedPair(fromLabel, toLabel);
+                    dynamic res = _instrument.GetTwistedPair(from, to);
                     resultValueStr = ExtractTwistedPairValue(res);
                 }
                 else
                 {
                     // Default: WIRE, 4WIRE, RESISTOR, 4RESISTOR, SIGNATURE WIRE
-                    resultValueStr = _instrument.GetRessistance(fromLabel, toLabel).MeasuredValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                    resultValueStr = _instrument.GetRessistance(from, to).MeasuredValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 }
 
                 UpdateGridRowUnitValue(rowIndex, resultValueStr);
