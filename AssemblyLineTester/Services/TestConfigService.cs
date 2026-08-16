@@ -363,6 +363,7 @@ namespace AssemblyLineTester.Services
                 if (string.IsNullOrWhiteSpace(typeName) || ContinuityLikeTestTypes.Contains(typeName))
                 {
                     wireNets.Add(net);
+                    Debug.WriteLine($"wire nets from {net.FromAddress} to {net.ToAddress}");
                 }
                 else
                 {
@@ -391,8 +392,8 @@ namespace AssemblyLineTester.Services
 
             foreach (var net in wireNets)
             {
-                string fromPin = !string.IsNullOrWhiteSpace(net.FromLabel) ? net.FromLabel : FormatPin(net.FromAddress);
-                string toPin = !string.IsNullOrWhiteSpace(net.ToLabel) ? net.ToLabel : FormatPin(net.ToAddress);
+                string fromPin = FormatPin(net.FromAddress);
+                string toPin = FormatPin(net.ToAddress);
 
                 if (!pinAddresses.ContainsKey(fromPin)) pinAddresses[fromPin] = net.FromAddress;
                 if (!pinAddresses.ContainsKey(toPin)) pinAddresses[toPin] = net.ToAddress;
@@ -456,8 +457,8 @@ namespace AssemblyLineTester.Services
                 int compSeq = 1;
                 foreach (var net in componentNets)
                 {
-                    string fromPin = !string.IsNullOrWhiteSpace(net.FromLabel) ? net.FromLabel : FormatPin(net.FromAddress);
-                    string toPin = !string.IsNullOrWhiteSpace(net.ToLabel) ? net.ToLabel : FormatPin(net.ToAddress);
+                    string fromPin = FormatPin(net.FromAddress);
+                    string toPin = FormatPin(net.ToAddress);
                     string typeName = net.TestType?.TestTypeName?.ToUpperInvariant() ?? "";
                     
                     string shortType = typeName;

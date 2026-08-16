@@ -1285,8 +1285,6 @@ namespace AssemblyLineTester.Views.Pages
 
             var nets = new List<TestConfigNet>();
 
-
-
             for (int i = 0; i < gridConfig.Rows.Count; i++)
             {
                 var row = gridConfig.Rows[i];
@@ -1565,8 +1563,8 @@ namespace AssemblyLineTester.Views.Pages
             {
                 testLearnValue += (byte)(conn.TestType?.TestTypeValue ?? conn.TestTypeValue);
             }
-            Debug.WriteLine("====================================================================");
-            Debug.WriteLine(testLearnValue);
+            //Debug.WriteLine("====================================================================");
+            //Debug.WriteLine(testLearnValue);
 
             InstrumentService.StopMonitoring();
             _testCts?.Cancel();
@@ -1630,7 +1628,11 @@ namespace AssemblyLineTester.Views.Pages
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 config = _configService.ConvertToTestConfig(getTestResult.Result);
-
+                Debug.WriteLine(_customTestText);
+                //foreach (var net in config.Nets)
+                //{
+                //    Debug.WriteLine($"learn btn {net.FromAddress} to {net.ToAddress}");
+                //}
                 if (config != null)
                 {
                     LoadConfigurationIntoGrid(config);
@@ -1735,6 +1737,42 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
+            var config = BuildConfigurationFromGrid("Temporary Test", "Temporary Test", null);
+            if (config == null || config.Nets.Count == 0)
+            {
+                MessageBox.Show(this, "Failed to build configuration from grid.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            _configService.SaveConfig(config);
+
+            _customTestText = _configService.ConvertToProgramText(config);
+            Debug.WriteLine(_customTestText);
+            //foreach (var net in config.Nets)
+            //{
+            //    Debug.WriteLine($"start btn {net.FromAddress} to {net.ToAddress}");
+            //}
+
+            if (string.IsNullOrWhiteSpace(_customTestText))
+            {
+                MessageBox.Show(this, "Generated program text is empty.", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            bool isConnected = _instrument.Connect();
+            if (!isConnected)
+            {
+                MessageBox.Show(this, "Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var putResult = await Task.Run(() => _instrument.PutTestProgram(string.Empty, _customTestText, true), token);
+            if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+            {
+                MessageBox.Show(this, $"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             await Task.Run(() => ExecuteTestForRowsV2(selectedRows, token), token);
 
             if (!token.IsCancellationRequested)
@@ -1749,6 +1787,42 @@ namespace AssemblyLineTester.Views.Pages
             if (selectedRows.Count == 0)
             {
                 MessageBox.Show(this, "Please click or select at least one row to test.", "No Row Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var config = BuildConfigurationForRows(selectedRows, "Temporary Test", "Temporary Test", null);
+            if (config == null || config.Nets.Count == 0)
+            {
+                MessageBox.Show(this, "Failed to build configuration for selected rows.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            _configService.SaveConfig(config);
+
+            _customTestText = _configService.ConvertToProgramText(config);
+            Debug.WriteLine(_customTestText);
+            //foreach (var net in config.Nets)
+            //{
+            //    Debug.WriteLine($"start btn {net.FromAddress} to {net.ToAddress}");
+            //}
+            Debug.WriteLine(_customTestText);
+            if (string.IsNullOrWhiteSpace(_customTestText))
+            {
+                MessageBox.Show(this, "Generated program text is empty.", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            bool isConnected = _instrument.Connect();
+            if (!isConnected)
+            {
+                MessageBox.Show(this, "Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var putResult = await Task.Run(() => _instrument.PutTestProgram(string.Empty, _customTestText, true), token);
+            if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+            {
+                MessageBox.Show(this, $"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
