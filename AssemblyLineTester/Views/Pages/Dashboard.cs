@@ -461,18 +461,20 @@ namespace AssemblyLineTester.Views.Pages
         {
             try
             {
-                using var db = new AppDbContext();
-                using var modal = new SelectTestConfigModalForm(db);
-                if (modal.ShowDialog() == DialogResult.OK)
+                var configService = new TestConfigService();
+                using var modal = new LoadProgramModalForm(configService)
+                {
+                    TitleText = "CHANGE TEST PROGRAM",
+                    ShowBrowseButton = false
+                };
+
+                if (modal.ShowDialog(this) == DialogResult.OK)
                 {
                     var selectedConfig = modal.SelectedConfiguration;
                     if (selectedConfig != null)
                     {
-                        var configService = new TestConfigService();
                         configService.SetActiveConfig(selectedConfig.ConfigName);
-
                         LoadActiveProgram();
-
                         MessageBox.Show($"Successfully changed active program to: {selectedConfig.ConfigName}", "Change Program", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }

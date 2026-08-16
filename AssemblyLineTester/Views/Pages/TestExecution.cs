@@ -51,18 +51,24 @@ namespace AssemblyLineTester.Views.Pages
             btnLoadProgram.Click += BtnLoadProgram_Click;
             SetupEvents();
             SetupTimer();
-
+            this.VisibleChanged += TestExecution_VisibleChanged;
         }
 
-        protected override void OnLoad(EventArgs e)
+        private void TestExecution_VisibleChanged(object? sender, EventArgs e)
         {
-            base.OnLoad(e);
-
-            if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                var configService = new TestConfigService();
-                var activeConfig = configService.GetActiveConfig();
-                if (activeConfig != null)
+                RefreshActiveConfiguration();
+            }
+        }
+
+        private void RefreshActiveConfiguration()
+        {
+            var configService = new TestConfigService();
+            var activeConfig = configService.GetActiveConfig();
+            if (activeConfig != null)
+            {
+                if (config == null || config.ConfigName != activeConfig.ConfigName || config.UpdatedAt != activeConfig.UpdatedAt)
                 {
                     config = activeConfig;
                     _customTestText = configService.ConvertToProgramText(activeConfig);
@@ -74,14 +80,25 @@ namespace AssemblyLineTester.Views.Pages
                     }
                     UpdateProgramInfoDisplay(activeConfig);
                     LoadConfigurationIntoGrid(activeConfig);
-                    Debug.WriteLine($"Loaded active config on startup: {activeConfig.ConfigName}");
+                    Debug.WriteLine($"Refreshed active config on visible: {activeConfig.ConfigName}");
                 }
-                else
-                {
-                    lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
-                    UpdateProgramInfoDisplay(null);
-                    LoadConfigurationIntoGrid(null);
-                }
+            }
+            else if (config != null)
+            {
+                config = null;
+                lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
+                UpdateProgramInfoDisplay(null);
+                LoadConfigurationIntoGrid(null);
+            }
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                RefreshActiveConfiguration();
             }
         }
 
