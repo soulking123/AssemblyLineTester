@@ -1950,7 +1950,7 @@ namespace AssemblyLineTester.Views.Pages
             catch { }
 
             try { return ((double)res.ForwardVoltage).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
-            try { return ((double)res.MeasurementValue).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
+            try { return ((double)res.MeasuredValue).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
             try { return ((double)res.Value).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
 
             return "0.00";

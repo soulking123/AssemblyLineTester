@@ -73,12 +73,14 @@ namespace AssemblyLineTester.Views.Pages
                         _continuityResistance = resNet.UpperLimit.Value;
                     }
                     UpdateProgramInfoDisplay(activeConfig);
+                    LoadConfigurationIntoGrid(activeConfig);
                     Debug.WriteLine($"Loaded active config on startup: {activeConfig.ConfigName}");
                 }
                 else
                 {
                     lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
                     UpdateProgramInfoDisplay(null);
+                    LoadConfigurationIntoGrid(null);
                 }
             }
         }
@@ -116,7 +118,14 @@ namespace AssemblyLineTester.Views.Pages
 
 
         // Rebuilds the live grid header after the result-column ticks were saved in Settings.
-        public void ReloadResultColumns() => SetupGridLiveDetails();
+        public void ReloadResultColumns()
+        {
+            SetupGridLiveDetails();
+            if (config != null && config.Nets != null && config.Nets.Count > 0)
+            {
+                LoadConfigurationIntoGrid(config);
+            }
+        }
 
         // Columns and styling only; rows arrive when a program is loaded.
         private void SetupGridLiveDetails()
@@ -140,6 +149,54 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridLiveDetails);
             gridLiveDetails.RowTemplate.Height = 36;
             gridLiveDetails.ColumnHeadersHeight = 40;
+        }
+
+        private void LoadConfigurationIntoGrid(TestConfiguration? configToLoad)
+        {
+            if (configToLoad == null || configToLoad.Nets == null || configToLoad.Nets.Count == 0)
+            {
+                _loadedRows.Clear();
+                gridLiveDetails.Rows.Clear();
+                return;
+            }
+
+            _loadedRows = new List<LiveTestDetailRowDto>();
+            var sortedNets = configToLoad.Nets.OrderBy(n => n.SequenceNo).ToList();
+
+            for (int i = 0; i < sortedNets.Count; i++)
+            {
+                var net = sortedNets[i];
+                string fromPin = TestConfigService.FormatPin(net.FromAddress);
+                string toPin = TestConfigService.FormatPin(net.ToAddress);
+                string testTypeName = net.TestType?.TestTypeName ?? "WIRE";
+
+                var dto = new LiveTestDetailRowDto
+                {
+                    StepNo = i + 1,
+                    HarnessGroup = net.HarnessGroup ?? "",
+                    NetId = net.NetId ?? "",
+                    FromPoint = net.FromAddress.ToString(),
+                    //FromPoint = fromPin,
+                    FromLabel = net.FromLabel ?? "",
+                    ToPoint = net.ToAddress.ToString(),
+                    //ToPoint = toPin,
+                    ToLabel = net.ToLabel ?? "",
+                    TestType = testTypeName,
+                    Color = net.Color ?? "",
+                    Gauge = net.Gauge ?? "",
+                    LowerLimit = net.LowerLimit,
+                    UpperLimit = net.UpperLimit,
+                    ExpectedValue = net.ExpectedValue.HasValue ? net.ExpectedValue.Value.ToString(CultureInfo.InvariantCulture) : "-",
+                    Tolerance = net.Tolerance,
+                    Unit = net.MeasurementUnit ?? "",
+                    MeasuredValue = null,
+                    Status = LiveTestStatus.Pending
+                };
+
+                _loadedRows.Add(dto);
+            }
+
+            PopulateLiveDetailsGrid(_loadedRows);
         }
 
         // The instrument reports measurements but knows nothing about labels, limits or tolerance;
@@ -191,6 +248,7 @@ namespace AssemblyLineTester.Views.Pages
 
                     UpdateProgramInfoDisplay(config);
                     lblPageHeader.Text = $"TEST EXECUTION - {config.ConfigName}";
+                    LoadConfigurationIntoGrid(config);
 
                     MessageBox.Show($"Test program configuration '{dlg.SelectedConfiguration.ConfigName}' loaded successfully and set as Active.", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Debug.WriteLine($"Loaded program from DB: {dlg.SelectedConfiguration.ConfigName}\n{_customTestText}");
@@ -213,16 +271,26 @@ namespace AssemblyLineTester.Views.Pages
                                     UpperLimit = d.UpperLimit
                                 }).ToList()
                             };
+                            config = tempConfig;
                             _customTestText = configService.ConvertToProgramText(tempConfig);
                             var resNet = tempConfig.Nets.FirstOrDefault(n => n.UpperLimit.HasValue);
                             if (resNet != null && resNet.UpperLimit.HasValue)
                             {
                                 _continuityResistance = resNet.UpperLimit.Value;
                             }
+                            UpdateProgramInfoDisplay(tempConfig);
+                            lblPageHeader.Text = $"TEST EXECUTION - {tempConfig.ConfigName}";
+                            LoadConfigurationIntoGrid(tempConfig);
                         }
                         else
                         {
                             _customTestText = System.IO.File.ReadAllText(dlg.LoadedFilePath);
+                            var textConfig = configService.ConvertToTestConfig(_customTestText);
+                            textConfig.ConfigName = System.IO.Path.GetFileNameWithoutExtension(dlg.LoadedFilePath);
+                            config = textConfig;
+                            UpdateProgramInfoDisplay(textConfig);
+                            lblPageHeader.Text = $"TEST EXECUTION - {textConfig.ConfigName}";
+                            LoadConfigurationIntoGrid(textConfig);
                         }
 
                         MessageBox.Show($"Loaded test program file:\n{dlg.LoadedFilePath}", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -317,7 +385,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void ExecuteTest(TestConfiguration config ,System.Threading.CancellationToken token = default)
+        private void ExecuteTest(TestConfiguration config, System.Threading.CancellationToken token = default)
         {
             try
             {
@@ -327,8 +395,8 @@ namespace AssemblyLineTester.Views.Pages
                 if (!isConnected)
                 {
                     logService.Log(LogSeverity.Error, "Instrument", "Cirris Tester API Is Disconnected",
-                        $"Failed to start test becauses Cirris Tester API is disconnected", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        $"Failed to start test because Cirris Tester API is disconnected", SessionManager.CurrentUser?.Username ?? "Unknown");
+                    ShowMessageBoxOnUI("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -338,233 +406,193 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (token.IsCancellationRequested) return;
 
-                // ======================= put test =======================
+                // Upload test program
                 var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
-                string errorText = "";
-                try
+                if (putResult != CtaCommandResultCode.Success)
                 {
-
-                    if (putResult == CtaCommandResultCode.Success)
-                    {
-                        logService.Log(LogSeverity.Info, "Instrument", "Put Test Program Success.",
-                        $"Generated Program is valid", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    }
-                    else
-                    {
-                        errorText = _instrument.GetLastError()?.Result ?? "";
-                        logService.Log(LogSeverity.Warning, "Instrument", "Put Test Program Failed.",
-                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                        MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-                }
-                catch (Exception)
-                {
-                    logService.Log(LogSeverity.Warning, "Instrument", "Convert Program Failed.",
-                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    string errorText = _instrument.GetLastError()?.Result ?? "";
+                    logService.Log(LogSeverity.Warning, "Instrument", "Put Test Program Failed.",
+                        $"Generated Program is invalid with error message {putResult}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                    ShowMessageBoxOnUI($"Generated Program is invalid. Error message: {putResult}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                if (token.IsCancellationRequested) return;
-
-                // ======================= single test =======================
-                var testResult = _instrument.RunSingleTest(false, true);
-                try
-                {
-                    if (testResult.DllCallResult == CtaCommandResultCode.Success)
-                    {
-                        logService.Log(LogSeverity.Info, "Instrument", "Run Test Program Success.",
-                        $"Success running Test Program with test result : {testResult.TestResultCode}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    }
-                    else
-                    {
-                        errorText = _instrument.GetLastError()?.Result ?? "";
-                        logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Failed.",
-                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                        if (errorText != "ctaSingleTest Command Failed with Error: Command Aborted")
-                        {
-                            MessageBox.Show($"Failed running Test Program with error message {testResult.DllCallResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                        }
-                        return;
-                    }
-                }
-                catch (Exception)
-                {
-                    logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Failed.",
-                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show($"Failed running Test Program with error message2 {testResult.DllCallResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                logService.Log(LogSeverity.Info, "Instrument", "Put Test Program Success.",
+                    $"Generated Program is valid", SessionManager.CurrentUser?.Username ?? "Unknown");
 
                 if (token.IsCancellationRequested) return;
 
-                // ======================= Measured Values =======================
-                var measuredValuesResult = _instrument.GetMeasuredValues();
-                _loadedRows = new List<LiveTestDetailRowDto>();
-                try
+                // Point-by-point measurements row by row
+                for (int i = 0; i < _loadedRows.Count; i++)
                 {
-                    if (measuredValuesResult.DllCallResult == CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
-                    {
-                        var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
-                        if (list != null)
-                        {
-                            var configNets = config.Nets?.OrderBy(n => n.SequenceNo).ToList();
+                    if (token.IsCancellationRequested) return;
 
-                            int step = 1;
-                            for (int idx = 0; idx < list.Count; idx++)
+                    var row = _loadedRows[i];
+                    int.TryParse(row.FromPoint, out int fromPinInt);
+                    int.TryParse(row.ToPoint, out int toPinInt);
+                    string fromPin = TestConfigService.FormatPin(fromPinInt);
+                    string toPin = TestConfigService.FormatPin(toPinInt);
+                    //string toPin = row.ToPoint;
+                    //string fromPin = row.FromPoint;
+                    //string toPin = row.ToPoint;
+                    string testType = (row.TestType ?? "WIRE").Trim().ToUpperInvariant();
+
+                    bool isWire = testType.Equals("WIRE", StringComparison.OrdinalIgnoreCase) || testType.Equals("4WIRE", StringComparison.OrdinalIgnoreCase);
+
+                    if (testType == "CAPACITOR")
+                    {
+                        dynamic res = _instrument.GetCapacitance(fromPin, toPin);
+                        if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
+                        {
+                            double val = (double)res.MeasuredValue;
+                            row.MeasuredValue = Math.Round(val, 3);
+                            if (row.LowerLimit.HasValue && row.UpperLimit.HasValue)
                             {
-                                var measurement = list[idx];
-                                var net = (configNets != null && idx < configNets.Count) ? configNets[idx] : null;
+                                row.Status = (val >= row.LowerLimit.Value && val <= row.UpperLimit.Value) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                            }
+                            else
+                            {
+                                row.Status = LiveTestStatus.Pass;
+                            }
+                        }
+                        else
+                        {
+                            row.Status = LiveTestStatus.Fail;
+                        }
+                    }
+                    else if (testType == "DIODE" || testType == "SIGNATURE DIODE")
+                    {
+                        dynamic res = _instrument.GetDiode(fromPin, toPin);
+                        if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
+                        {
+                            double val = (double)res.ForwardVoltage;
+                            row.MeasuredValue = Math.Round(val, 3);
+                            if (row.LowerLimit.HasValue && row.UpperLimit.HasValue)
+                            {
+                                row.Status = (val >= row.LowerLimit.Value && val <= row.UpperLimit.Value) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                            }
+                            else
+                            {
+                                row.Status = LiveTestStatus.Pass;
+                            }
+                        }
+                        else
+                        {
+                            row.Status = LiveTestStatus.Fail;
+                        }
+                    }
+                    else if (testType == "TWISTED PAIR")
+                    {
+                        dynamic res = _instrument.GetTwistedPair(fromPin, toPin);
+                        if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
+                        {
+                            bool pass = (bool)res.Value;
+                            row.Status = pass ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                        }
+                        else
+                        {
+                            row.Status = LiveTestStatus.Fail;
+                        }
+                    }
+                    else
+                    {
+                        // Default: WIRE, 4WIRE, RESISTOR, 4RESISTOR, SIGNATURE WIRE
+                        dynamic res = _instrument.GetRessistance(fromPin, toPin);
+                        if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
+                        {
+                            double val = (double)res.MeasuredValue;
+                            row.MeasuredValue = Math.Round(val, 3);
 
-                                string rowTestType = string.IsNullOrWhiteSpace(measurement.Instruction) ? "Wire" : measurement.Instruction;
-
-                                double? lowerLimit = null;
-                                double? upperLimit = null;
-                                string expectedValStr = string.Empty;
-                                string unitStr = string.Empty;
-                                double? toleranceVal = null;
-                                LiveTestStatus status = LiveTestStatus.Pending;
-
-                                bool isWire = rowTestType.Equals("WIRE", StringComparison.OrdinalIgnoreCase);
-
-                                if (isWire)
+                            if (isWire)
+                            {
+                                double maxWireRes = config.MaxWireResistance > 0 ? config.MaxWireResistance : _continuityResistance;
+                                row.Status = (val <= maxWireRes) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                            }
+                            else
+                            {
+                                if (row.LowerLimit.HasValue && row.UpperLimit.HasValue)
                                 {
-                                    double maxWireRes = config.MaxWireResistance > 0 ? config.MaxWireResistance : _continuityResistance;
-                                    upperLimit = maxWireRes;
-                                    status = (measurement.Value1 <= maxWireRes) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                                    row.Status = (val >= row.LowerLimit.Value && val <= row.UpperLimit.Value) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
                                 }
                                 else
                                 {
-                                    if (net != null)
-                                    {
-                                        lowerLimit = net.LowerLimit;
-                                        upperLimit = net.UpperLimit;
-                                        toleranceVal = net.Tolerance;
-                                        unitStr = net.MeasurementUnit ?? "";
-                                        if (net.ExpectedValue.HasValue)
-                                        {
-                                            expectedValStr = net.ExpectedValue.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                                        }
-                                    }
-
-                                    if (lowerLimit.HasValue && upperLimit.HasValue)
-                                    {
-                                        status = (measurement.Value1 >= lowerLimit.Value && measurement.Value1 <= upperLimit.Value)
-                                            ? LiveTestStatus.Pass
-                                            : LiveTestStatus.Fail;
-                                    }
-                                    else if (upperLimit.HasValue)
-                                    {
-                                        status = (measurement.Value1 <= upperLimit.Value)
-                                            ? LiveTestStatus.Pass
-                                            : LiveTestStatus.Fail;
-                                    }
-                                    else if (lowerLimit.HasValue)
-                                    {
-                                        status = (measurement.Value1 >= lowerLimit.Value)
-                                            ? LiveTestStatus.Pass
-                                            : LiveTestStatus.Fail;
-                                    }
-                                    else
-                                    {
-                                        status = LiveTestStatus.Pass;
-                                    }
+                                    row.Status = LiveTestStatus.Pass;
                                 }
-
-                                _loadedRows.Add(new LiveTestDetailRowDto
-                                {
-                                    StepNo = step++,
-                                    NetId = net?.NetId ?? measurement.Instruction ?? "",
-                                    TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
-                                    FromPoint = $"{measurement.Point1}",
-                                    ToPoint = $"{measurement.Point2}",
-                                    TestType = rowTestType,
-                                    MeasuredValue = Math.Round(measurement.Value1, 3),
-                                    ExpectedValue = expectedValStr,
-                                    LowerLimit = lowerLimit,
-                                    UpperLimit = upperLimit,
-                                    Tolerance = toleranceVal,
-                                    Unit = unitStr,
-                                    Status = status
-                                });
                             }
                         }
-
-                        ApplyConfigNets(config);
-
-                        logService.Log(LogSeverity.Info, "Instrument", "Get Test Masurement Success.",
-                        $"Success getting test measurement with test result", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    }
-                    else
-                    {
-                        errorText = _instrument.GetLastError()?.Result ?? "";
-                        logService.Log(LogSeverity.Warning, "Instrument", "Get Test Masurement Failed.",
-                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                        MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-                }
-                catch (Exception)
-                {
-                    logService.Log(LogSeverity.Warning, "Instrument", "Get Test Masurement Failed.",
-                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                logService.Log(LogSeverity.Info, "Text Execution", "Start Test Success",
-                        $"Success execute Start Test", SessionManager.CurrentUser?.Username ?? "Unknown");
-
-                try 
-                {
-                    var errorResult = _instrument.GetTestErrors().ObjectReturnValue;
-                    if (errorResult != null && errorResult.DllCallResult == CtaCommandResultCode.Success && errorResult.ErrorList != null)
-                    {
-                        var regex = new Regex(@"Net\s+(?<net>.+?):\s+(?<type>SHORT|OPEN)\s+(?<p1>\S+)\s+to\s+(?<p2>\S+)", RegexOptions.IgnoreCase);
-                        foreach (var error in errorResult.ErrorList)
+                        else
                         {
-                            var match = regex.Match(error.Message);
-                            if (match.Success)
-                            {
-                                string p1 = match.Groups["p1"].Value;
-                                string p2 = match.Groups["p2"].Value;
-                                
-                                bool exists = _loadedRows.Any(r => 
-                                    (r.FromPoint == p1 && r.ToPoint == p2) || 
-                                    (r.FromPoint == p2 && r.ToPoint == p1));
-                                
-                                if (!exists)
-                                {
-                                    _loadedRows.Add(new LiveTestDetailRowDto
-                                    {
-                                        StepNo = _loadedRows.Count > 0 ? _loadedRows.Max(r => r.StepNo) + 1 : 1,
-                                        NetId = match.Groups["net"].Value,
-                                        TestPoint = $"{p1} \u2192 {p2}",
-                                        FromPoint = p1,
-                                        ToPoint = p2,
-                                        TestType = match.Groups["type"].Value.ToUpper(),
-                                        MeasuredValue = null,
-                                        Status = LiveTestStatus.Fail
-                                    });
-                                }
-                            }
+                            row.Status = LiveTestStatus.Fail;
                         }
                     }
+
+                    UpdateLiveDetailsGridRow(i, row);
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to parse test errors: {ex.Message}");
-                }
+
+                logService.Log(LogSeverity.Info, "Text Execution", "Start Test Success",
+                    $"Success execute Start Test", SessionManager.CurrentUser?.Username ?? "Unknown");
             }
             catch (Exception ex)
             {
                 logService.Log(LogSeverity.Error, "Text Execution", "Start Test Failed",
-                        $"Start Test Failed with error message {ex.Message}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                MessageBox.Show($"Start Test Failed with error message {ex.Message}", "Start Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                    $"Start Test Failed with error message {ex.Message}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                ShowMessageBoxOnUI($"Start Test Failed with error message {ex.Message}", "Start Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            
+        }
+
+        private void UpdateLiveDetailsGridRow(int rowIndex, LiveTestDetailRowDto row)
+        {
+            void Action()
+            {
+                if (rowIndex >= 0 && rowIndex < gridLiveDetails.Rows.Count)
+                {
+                    var gridRow = gridLiveDetails.Rows[rowIndex];
+                    for (int colIdx = 0; colIdx < gridLiveDetails.Columns.Count; colIdx++)
+                    {
+                        string header = gridLiveDetails.Columns[colIdx].HeaderText;
+                        if (header == "Status")
+                        {
+                            gridRow.Cells[colIdx].Value = row.Status.ToString().ToUpperInvariant();
+                        }
+                        else if (header == "Measured Value" || header == "Measurement" || header == "Measured")
+                        {
+                            gridRow.Cells[colIdx].Value = row.MeasuredValue.HasValue ? row.MeasuredValue.Value.ToString("F2", CultureInfo.InvariantCulture) : "-";
+                        }
+                        else if (header == "#")
+                        {
+                            gridRow.Cells[colIdx].Value = row.StepNo.ToString();
+                        }
+                        else
+                        {
+                            gridRow.Cells[colIdx].Value = ResultCellValue(row, header);
+                        }
+                    }
+
+                    ApplyStatusStyle(gridRow, row.Status);
+                    gridLiveDetails.InvalidateRow(rowIndex);
+                }
+            }
+
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(Action));
+            }
+            else
+            {
+                Action();
+            }
+        }
+
+        private void ShowMessageBoxOnUI(string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => MessageBox.Show(this, message, caption, buttons, icon)));
+            }
+            else
+            {
+                MessageBox.Show(this, message, caption, buttons, icon);
+            }
         }
 
         private void ShowSummary(List<LiveTestDetailRowDto> rows, string overallResultStatus)

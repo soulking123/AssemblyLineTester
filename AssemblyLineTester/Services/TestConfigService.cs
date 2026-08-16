@@ -504,7 +504,7 @@ namespace AssemblyLineTester.Services
             return sb.ToString();
         }
 
-        private string FormatPin(int address)
+        public static string FormatPin(int address)
         {
             return address <= 64 ? $"J1-{address:D3}" : $"J3-{(address - 64):D3}";
         }
