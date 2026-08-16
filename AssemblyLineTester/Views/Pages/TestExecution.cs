@@ -346,6 +346,11 @@ namespace AssemblyLineTester.Views.Pages
                 try
                 {
                     bool allPass = _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
+                    var getErrorsResp = _instrument.GetTestErrors();
+                    if (getErrorsResp?.ObjectReturnValue?.ErrorList != null && getErrorsResp.ObjectReturnValue.ErrorList.Any(e => e.ErrorID == "156" || e.Message.Contains("SHORT", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        allPass = false;
+                    }
                     string overallResult = allPass ? "PASS" : "FAIL";
 
                     var reportService = new TestReportService();
@@ -419,6 +424,24 @@ namespace AssemblyLineTester.Views.Pages
 
                 logService.Log(LogSeverity.Info, "Instrument", "Put Test Program Success.",
                     $"Generated Program is valid", SessionManager.CurrentUser?.Username ?? "Unknown");
+
+                if (token.IsCancellationRequested) return;
+
+                // Call RunSingleTest to execute the program on hardware so CTA populates test errors (shorts, opens, etc.)
+                var testResult = _instrument.RunSingleTest(false, true);
+                if (testResult != null && testResult.DllCallResult == CtaCommandResultCode.Success)
+                {
+                    logService.Log(LogSeverity.Info, "Instrument", "Run Test Program Success.",
+                        $"Success running Test Program with test result: {testResult.TestResultCode}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                }
+                else
+                {
+                    string errorText = _instrument.GetLastError()?.Result ?? "";
+                    logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Completed with Warnings/Errors.",
+                        $"Run Single Test finished with code: {testResult?.DllCallResult.ToString() ?? "Unknown"}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                }
+
+                if (token.IsCancellationRequested) return;
 
                 if (token.IsCancellationRequested) return;
 
@@ -633,12 +656,17 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     if (errorResult?.ErrorList != null && errorResult.ErrorList.Count > 0)
                     {
-                        listBoxTestSummary.Items.Add("");
-                        listBoxTestSummary.Items.Add("TEST ERRORS");
-                        listBoxTestSummary.Items.Add("");
-                        foreach (var error in errorResult.ErrorList)
+                        var shortErrors = errorResult.ErrorList.Where(e => e.ErrorID == "156" || e.Message.Contains("SHORT", StringComparison.OrdinalIgnoreCase)).ToList();
+                        if (shortErrors.Count > 0)
                         {
-                            listBoxTestSummary.Items.Add(error.Message);
+                            listBoxTestSummary.Items.Add($"✖ SHORT ({shortErrors.Count})");
+                            listBoxTestSummary.Items.Add("");
+                            listBoxTestSummary.Items.Add("SHORT CONNECTION ERRORS");
+                            listBoxTestSummary.Items.Add("");
+                            foreach (var error in shortErrors)
+                            {
+                                listBoxTestSummary.Items.Add(error.Message);
+                            }
                         }
                     }
 
