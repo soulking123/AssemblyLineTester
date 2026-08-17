@@ -541,6 +541,7 @@ namespace AssemblyLineTester.Views.Pages
                         if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
                         {
                             double val = (double)res.MeasuredValue;
+                            Debug.WriteLine($"te {val}");
                             row.MeasuredValue = Math.Round(val, 3);
 
                             if (isWire)

@@ -234,10 +234,10 @@ namespace AssemblyLineTester.Views.Pages
             for (int i = 0; i < RequiredImportColumns.Length; i++)
             {
                 
-                sheet.Cell(7, i + 1).Value = RequiredImportColumns[i];
+                sheet.Cell(8, i + 1).Value = RequiredImportColumns[i];
             }
 
-            Debug.Assert(FindHeaderRow(sheet) == 7, "the header must be found below the summary block, not assumed on row 1");
+            Debug.Assert(FindHeaderRow(sheet) == 8, "the header must be found below the summary block, not assumed on row 1");
         }
 
         private void BtnImportExcel_Click(object? sender, EventArgs e)
@@ -301,14 +301,22 @@ namespace AssemblyLineTester.Views.Pages
                 found[label] = sheet.Cell(r, 2).GetString().Trim();
             }
 
-            void Apply(Control box, string label)
+            void Apply(Control box, string primaryLabel, string? fallbackLabel = null)
             {
-                if (found.TryGetValue(label, out string? value) && !string.IsNullOrWhiteSpace(value)) box.Text = value;
+                if (found.TryGetValue(primaryLabel, out string? value) && !string.IsNullOrWhiteSpace(value))
+                {
+                    box.Text = value;
+                }
+                else if (fallbackLabel != null && found.TryGetValue(fallbackLabel, out string? fallbackValue) && !string.IsNullOrWhiteSpace(fallbackValue))
+                {
+                    box.Text = fallbackValue;
+                }
             }
 
             Apply(txtConfigName, SummaryConfigName);
             Apply(txtProductModel, SummaryProductModel);
-            Apply(txtConnectionResistance, SummaryConnectionResistance);
+            Apply(txtConnectionResistance, SummaryConnectionResistance, SummaryConnectionResistanceOld);
+            Apply(txtComponentResistance, SummaryComponentResistance, SummaryComponentResistanceOld);
             Apply(txtInsulationResistance, SummaryInsulationResistance);
         }
 
@@ -451,7 +459,10 @@ namespace AssemblyLineTester.Views.Pages
         // Labels used for the Config Summary block, and read back by the importer.
         private const string SummaryConfigName = "Config Name";
         private const string SummaryProductModel = "Product Model";
-        private const string SummaryConnectionResistance = "Connection Resistance (mOhm)";
+        private const string SummaryConnectionResistance = "Connection Resistance (Ohm)";
+        private const string SummaryConnectionResistanceOld = "Connection Resistance (mOhm)";
+        private const string SummaryComponentResistance = "Component Resistance (Ohm)";
+        private const string SummaryComponentResistanceOld = "Component Resistance (mOhm)";
         private const string SummaryInsulationResistance = "Insulation Resistance (MOhm)";
 
         // Mirrors the Config Summary panel above the grid, and returns the row the table starts on.
@@ -469,6 +480,7 @@ namespace AssemblyLineTester.Views.Pages
                 (SummaryConfigName, txtConfigName.Text?.Trim() ?? ""),
                 (SummaryProductModel, txtProductModel.Text?.Trim() ?? ""),
                 (SummaryConnectionResistance, txtConnectionResistance.Text?.Trim() ?? ""),
+                (SummaryComponentResistance, txtComponentResistance.Text?.Trim() ?? ""),
                 (SummaryInsulationResistance, txtInsulationResistance.Text?.Trim() ?? "")
             };
 

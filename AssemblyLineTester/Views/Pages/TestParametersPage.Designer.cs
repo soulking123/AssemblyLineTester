@@ -537,7 +537,7 @@ namespace AssemblyLineTester.Views.Pages
             lblConnectionResistance.Name = "lblConnectionResistance";
             lblConnectionResistance.Size = new Size(163, 15);
             lblConnectionResistance.TabIndex = 0;
-            lblConnectionResistance.Text = "Connection Resistance (mΩ)";
+            lblConnectionResistance.Text = "Connection Resistance (Ω)";
             // 
             // txtConnectionResistance
             // 
@@ -616,7 +616,7 @@ namespace AssemblyLineTester.Views.Pages
             lblComponentResistance.Name = "lblComponentResistance";
             lblComponentResistance.Size = new Size(165, 15);
             lblComponentResistance.TabIndex = 0;
-            lblComponentResistance.Text = "Component Resistance (mΩ)";
+            lblComponentResistance.Text = "Component Resistance (Ω)";
             // 
             // txtComponentResistance
             // 
