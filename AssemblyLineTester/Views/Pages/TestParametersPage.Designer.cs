@@ -625,7 +625,7 @@ namespace AssemblyLineTester.Views.Pages
             txtComponentResistance.Location = new Point(0, 19);
             txtComponentResistance.Margin = new Padding(0);
             txtComponentResistance.Name = "txtComponentResistance";
-            txtComponentResistance.ReadOnly = true;
+            txtComponentResistance.ReadOnly = false;
             txtComponentResistance.Size = new Size(274, 25);
             txtComponentResistance.TabIndex = 1;
             txtComponentResistance.Text = "N/A";
