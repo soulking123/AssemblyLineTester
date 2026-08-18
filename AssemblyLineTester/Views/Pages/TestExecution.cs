@@ -365,7 +365,7 @@ namespace AssemblyLineTester.Views.Pages
                 _testStopwatch.Reset();
                 _testStopwatch.Start();
                 _elapsedTimer.Start();
-                await Task.Run(() => ExecuteTest(activeConfig), token);
+                await Task.Run(() => ExecuteTest(activeConfig, token), token);
 
                 if (token.IsCancellationRequested) return;
 
