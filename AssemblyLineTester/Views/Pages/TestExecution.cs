@@ -350,6 +350,17 @@ namespace AssemblyLineTester.Views.Pages
                 _startTime = DateTime.Now;
                 lblStartTimeVal.Text = _startTime.ToString("dd MMM yyyy hh:mm:ss tt");
                 lblEndTimeVal.Text = "-";
+                listBoxTestSummary.Items.Clear();
+
+                if (_loadedRows != null && _loadedRows.Count > 0)
+                {
+                    foreach (var row in _loadedRows)
+                    {
+                        row.MeasuredValue = null;
+                        row.Status = LiveTestStatus.Pending;
+                    }
+                    PopulateLiveDetailsGrid(_loadedRows);
+                }
 
                 _testStopwatch.Reset();
                 _testStopwatch.Start();
@@ -723,10 +734,16 @@ namespace AssemblyLineTester.Views.Pages
                     StopTestTiming();
                     lblStartTimeVal.Text = "-";
                     lblElapsedTimeVal.Text = "-";
-                    lblEndTimeVal.Text = "-";
                     listBoxTestSummary.Items.Clear();
-                    gridLiveDetails.Rows.Clear();
-                    _loadedRows.Clear();
+                    if (_loadedRows != null && _loadedRows.Count > 0)
+                    {
+                        foreach (var row in _loadedRows)
+                        {
+                            row.MeasuredValue = null;
+                            row.Status = LiveTestStatus.Pending;
+                        }
+                        PopulateLiveDetailsGrid(_loadedRows);
+                    }
 
                     MessageBox.Show("Test operation successfully aborted.", "Abort Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
 

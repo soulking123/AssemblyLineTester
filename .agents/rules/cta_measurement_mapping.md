@@ -12,3 +12,11 @@ A harness with 14 grid rows might form only 2 wire groups and 2 components (tota
 
 ## Implementation Requirement
 Always group wire rows into connected components via Disjoint Set Union (DSU) matching `ConvertToProgramText`. Map group index $g$ to `list[g]` for all constituent rows in group $g$, and map component index $c$ to `list[G + c]` for component rows.
+
+---
+
+## Hardware Lock & Health Monitor Invariant
+Background connection health checks (`ServerReady`, `GetServerInformation`) must never block indefinitely on the hardware `_lockObj`.
+- When a test executes across multiple wires (e.g. 30+ wires), `ExecuteTest` holds or repeatedly acquires the lock during point-by-point measurements.
+- Background monitors must use non-blocking `Monitor.TryEnter` with short timeouts and must **never** call `Disconnect()` while active tests are in progress.
+

@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Linq;
 using AssemblyLineTester.Data;
+using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Helpers;
 
@@ -8,6 +9,28 @@ namespace AssemblyLineTester.Services
 {
     public class TestHistoryService
     {
+        public ReportSummary GetHistorySummary(ReportFilter filter)
+        {
+            using var db = new AppDbContext();
+            var query = TestReportQueryHelper.ApplyFilter(db, filter);
+
+            int total = query.Count();
+            int pass = query.Count(r => r.Status == TestStatus.Completed && r.OverallResult == TestResult.Pass);
+            int fail = query.Count(r => r.Status == TestStatus.Completed && r.OverallResult == TestResult.Fail);
+            int inProgress = query.Count(r => r.Status == TestStatus.InProgress);
+            int stopped = query.Count(r => r.Status == TestStatus.Stopped);
+
+            return new ReportSummary
+            {
+                TotalTested = total,
+                PassCount = pass,
+                FailCount = fail,
+                InProgressCount = inProgress,
+                StopCount = stopped,
+                PassRatePercent = total == 0 ? 0 : Math.Round(pass * 100.0 / total, 2)
+            };
+        }
+
         public PagedResult<TestHistoryListItem> GetHistoryList(ReportFilter filter)
         {
             using var db = new AppDbContext();
