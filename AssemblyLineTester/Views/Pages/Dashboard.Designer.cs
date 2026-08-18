@@ -95,7 +95,6 @@ namespace AssemblyLineTester.Views.Pages
             lblSummaryTitle = new Label();
             cardHistory = new Panel();
             gridRecent = new DataGridView();
-            lnkViewAll = new LinkLabel();
             lblRecentTitle = new Label();
             cardOperatingTime = new Panel();
             lblOpTimeSub = new Label();
@@ -761,7 +760,6 @@ namespace AssemblyLineTester.Views.Pages
             cardHistory.BackColor = Color.White;
             tblMiddle.SetColumnSpan(cardHistory, 2);
             cardHistory.Controls.Add(gridRecent);
-            cardHistory.Controls.Add(lnkViewAll);
             cardHistory.Controls.Add(lblRecentTitle);
             cardHistory.Dock = DockStyle.Fill;
             cardHistory.Location = new Point(1742, 10);
@@ -799,20 +797,6 @@ namespace AssemblyLineTester.Views.Pages
             gridRecent.Size = new Size(771, 780);
             gridRecent.TabIndex = 2;
             // 
-            // lnkViewAll
-            // 
-            lnkViewAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            lnkViewAll.AutoSize = true;
-            lnkViewAll.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lnkViewAll.LinkColor = Color.FromArgb(37, 99, 235);
-            lnkViewAll.Location = new Point(688, 29);
-            lnkViewAll.Margin = new Padding(5, 0, 5, 0);
-            lnkViewAll.Name = "lnkViewAll";
-            lnkViewAll.Size = new Size(107, 32);
-            lnkViewAll.TabIndex = 1;
-            lnkViewAll.TabStop = true;
-            lnkViewAll.Text = "View All";
-            // 
             // lblRecentTitle
             // 
             lblRecentTitle.AutoSize = true;
@@ -823,7 +807,7 @@ namespace AssemblyLineTester.Views.Pages
             lblRecentTitle.Name = "lblRecentTitle";
             lblRecentTitle.Size = new Size(344, 41);
             lblRecentTitle.TabIndex = 0;
-            lblRecentTitle.Text = "RECENT TEST HISTORY";
+            lblRecentTitle.Text = "REPORT";
             // 
             // cardOperatingTime
             // 
@@ -1286,8 +1270,6 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Panel cardHistory;
 
         private System.Windows.Forms.DataGridView gridRecent;
-
-        private System.Windows.Forms.LinkLabel lnkViewAll;
 
         private System.Windows.Forms.Label lblRecentTitle;
 

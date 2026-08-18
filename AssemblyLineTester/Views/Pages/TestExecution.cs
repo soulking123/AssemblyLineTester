@@ -28,15 +28,15 @@ namespace AssemblyLineTester.Views.Pages
     public partial class TestExecution : UserControl
     {
         private readonly InstrumentService _instrument = new();
-        private List<LiveTestDetailRowDto> _loadedRows = new();
-        private List<string> _resultColumns = new();
+        private List<LiveTestDetailRowDto> _loadedRows = [];
+        private List<string> _resultColumns = [];
         private readonly TestConfigService _configService = new TestConfigService();
         private string _customTestText = string.Empty;
         private double _continuityResistance;
         private int? _currentReportId;
         private System.Threading.CancellationTokenSource? _testCts;
-        private Stopwatch _testStopwatch = new Stopwatch();
-        private Timer _elapsedTimer = new Timer();
+        private readonly Stopwatch _testStopwatch = new Stopwatch();
+        private readonly Timer _elapsedTimer = new Timer();
         private DateTime _startTime;
         private DateTime _endTime;
         private readonly SystemLogService logService = new();
@@ -182,7 +182,7 @@ namespace AssemblyLineTester.Views.Pages
                     configService.SetActiveConfig(dlg.SelectedConfiguration.ConfigName);
                     _customTestText = configService.ConvertToProgramText(dlg.SelectedConfiguration);
                     var resNet = dlg.SelectedConfiguration.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
-                    config = configService.GetConfigurationByName(dlg.SelectedConfiguration.ConfigName);
+                    config = configService.GetConfigurationByName(dlg.SelectedConfiguration.ConfigName) ?? new();
 
                     if (resNet != null && resNet.UpperLimit.HasValue)
                     {
@@ -236,7 +236,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
       
-        private async void btnStartTest_Click(object? sender, EventArgs e)
+        private async void BtnStartTest_Click(object? sender, EventArgs e)
         {
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
@@ -353,16 +353,16 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         errorText = _instrument.GetLastError()?.Result ?? "";
                         logService.Log(LogSeverity.Warning, "Instrument", "Put Test Program Failed.",
-                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                        MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        $"Generated Program is invalid with error message {putResult}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                        MessageBox.Show($"Generated Program is invalid. Error message : {putResult}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
                 catch (Exception)
                 {
                     logService.Log(LogSeverity.Warning, "Instrument", "Convert Program Failed.",
-                        $"Generated Program is invalid with error message {putResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show($"Generated Program is invalid. Error message : {putResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        $"Generated Program is invalid with error message {putResult}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                    MessageBox.Show($"Generated Program is invalid. Error message : {putResult}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -381,10 +381,10 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         errorText = _instrument.GetLastError()?.Result ?? "";
                         logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Failed.",
-                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                        $"Failed running Test Program with error message {testResult.DllCallResult}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                         if (errorText != "ctaSingleTest Command Failed with Error: Command Aborted")
                         {
-                            MessageBox.Show($"Failed running Test Program with error message {testResult.DllCallResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show($"Failed running Test Program with error message {testResult.DllCallResult}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                         }
                         return;
@@ -393,8 +393,8 @@ namespace AssemblyLineTester.Views.Pages
                 catch (Exception)
                 {
                     logService.Log(LogSeverity.Warning, "Instrument", "Run Test Program Failed.",
-                        $"Failed running Test Program with error message {testResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show($"Failed running Test Program with error message2 {testResult.DllCallResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        $"Failed running Test Program with error message {testResult.DllCallResult}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                    MessageBox.Show($"Failed running Test Program with error message2 {testResult.DllCallResult}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -402,7 +402,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 // ======================= Measured Values =======================
                 var measuredValuesResult = _instrument.GetMeasuredValues();
-                _loadedRows = new List<LiveTestDetailRowDto>();
+                _loadedRows = [];
                 try
                 {
                     if (measuredValuesResult.DllCallResult == CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
@@ -501,16 +501,16 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         errorText = _instrument.GetLastError()?.Result ?? "";
                         logService.Log(LogSeverity.Warning, "Instrument", "Get Test Masurement Failed.",
-                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                        MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                        MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
                 catch (Exception)
                 {
                     logService.Log(LogSeverity.Warning, "Instrument", "Get Test Masurement Failed.",
-                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult.ToString()}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        $"Failed getting test measurement with error message {measuredValuesResult.DllCallResult}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                    MessageBox.Show($"Failed getting test measurement with error message {measuredValuesResult.DllCallResult}, {errorText}", "Get Measurement Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
                 logService.Log(LogSeverity.Info, "Text Execution", "Start Test Success",
@@ -521,7 +521,9 @@ namespace AssemblyLineTester.Views.Pages
                     var errorResult = _instrument.GetTestErrors().ObjectReturnValue;
                     if (errorResult != null && errorResult.DllCallResult == CtaCommandResultCode.Success && errorResult.ErrorList != null)
                     {
-                        var regex = new Regex(@"Net\s+(?<net>.+?):\s+(?<type>SHORT|OPEN)\s+(?<p1>\S+)\s+to\s+(?<p2>\S+)", RegexOptions.IgnoreCase);
+#pragma warning disable SYSLIB1045
+                        var regex = new Regex(@"Net\s+(?<net>.+?):\s+(?<type>SHORT|OPEN)\s+(?<p1>\S+)\s+to\s+(?<p2>\S+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+#pragma warning restore SYSLIB1045
                         foreach (var error in errorResult.ErrorList)
                         {
                             var match = regex.Match(error.Message);
@@ -575,8 +577,8 @@ namespace AssemblyLineTester.Views.Pages
              {
                  TestType = g.Key,
                  Total = g.Count(),
-                 Pass = g.Count(r => r.Status.ToString().ToUpper() == "PASS"),
-                 Fail = g.Count(r => r.Status.ToString().ToUpper() == "FAIL")
+                 Pass = g.Count(r => string.Equals(r.Status.ToString(), "PASS", StringComparison.OrdinalIgnoreCase)),
+                 Fail = g.Count(r => string.Equals(r.Status.ToString(), "FAIL", StringComparison.OrdinalIgnoreCase))
              })
              .ToList();
 
@@ -634,7 +636,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             
         }
-        private async void btnStopTest_Click(object sender, EventArgs e)
+        private async void BtnStopTest_Click(object sender, EventArgs e)
         {
             _testCts?.Cancel();
 
@@ -663,8 +665,8 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     errorText = _instrument.GetLastError()?.Result ?? "";
                     logService.Log(LogSeverity.Error, "Text Execution", "Stop Test Failed",
-                    $"Stop Test Failed with error message {abortResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show($"Stop Test Failed with error message {abortResult.ToString()}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    $"Stop Test Failed with error message {abortResult}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                    MessageBox.Show($"Stop Test Failed with error message {abortResult}\n{errorText}", "Test Configuration Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -814,11 +816,9 @@ namespace AssemblyLineTester.Views.Pages
                     g.FillRectangle(bgBrush, r);
                 }
 
-                using (Brush textBrush = new SolidBrush(Color.FromArgb(148, 163, 184)))
-                {
-                    StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                    g.DrawString("No Image Available", AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold, textBrush, r, sf);
-                }
+                using Brush textBrush = new SolidBrush(Color.FromArgb(148, 163, 184));
+                StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                g.DrawString("No Image Available", AssemblyLineTester.Helpers.UIStyleHelper.Font10Bold, textBrush, r, sf);
             }
         }
 
@@ -883,37 +883,31 @@ namespace AssemblyLineTester.Views.Pages
                 { "💻 Calibration Ver:", "ALT-ECU-v3.4.1" }
             };
 
-            using (Brush bKey = new SolidBrush(Color.FromArgb(71, 85, 105)))
+            using Brush bKey = new SolidBrush(Color.FromArgb(71, 85, 105));
+            float startY = 30;
+            float rowHeight = (r.Height - 60) / 5f;
+
+            for (int i = 0; i < 5; i++)
             {
-                float startY = 30;
-                float rowHeight = (r.Height - 60) / 5f;
+                string key = details[i, 0];
+                string val = details[i, 1];
 
-                for (int i = 0; i < 5; i++)
+                g.DrawString(key, AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, bKey, 30, startY + (i * rowHeight));
+
+                using Brush bVal = new SolidBrush(i == 2 ? Color.FromArgb(13, 110, 253) : Color.FromArgb(15, 23, 42));
+                g.DrawString(val, AssemblyLineTester.Helpers.UIStyleHelper.Font95Regular, bVal, 220, startY + (i * rowHeight));
+
+                if (i < 4)
                 {
-                    string key = details[i, 0];
-                    string val = details[i, 1];
-
-                    g.DrawString(key, AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, bKey, 30, startY + (i * rowHeight));
-
-                    using (Brush bVal = new SolidBrush(i == 2 ? Color.FromArgb(13, 110, 253) : Color.FromArgb(15, 23, 42)))
-                    {
-                        g.DrawString(val, AssemblyLineTester.Helpers.UIStyleHelper.Font95Regular, bVal, 220, startY + (i * rowHeight));
-                    }
-
-                    if (i < 4)
-                    {
-                        using (Pen sepPen = new Pen(Color.FromArgb(241, 245, 249), 1))
-                        {
-                            g.DrawLine(sepPen, 20, startY + (i * rowHeight) + rowHeight - 5, r.Width - 20, startY + (i * rowHeight) + rowHeight - 5);
-                        }
-                    }
+                    using Pen sepPen = new Pen(Color.FromArgb(241, 245, 249), 1);
+                    g.DrawLine(sepPen, 20, startY + (i * rowHeight) + rowHeight - 5, r.Width - 20, startY + (i * rowHeight) + rowHeight - 5);
                 }
             }
         }
 
         private void PicMachineOverview_Click(object? sender, EventArgs e)
         {
-            System.Collections.Generic.List<string> paths = new System.Collections.Generic.List<string>();
+            System.Collections.Generic.List<string> paths = [];
             var configService = new TestConfigService();
             var activeConfig = configService.GetActiveConfig();
             if (activeConfig != null)
@@ -932,7 +926,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PicHarnessConn_Click(object? sender, EventArgs e)
         {
-            System.Collections.Generic.List<string> paths = new System.Collections.Generic.List<string>();
+            System.Collections.Generic.List<string> paths = [];
             var configService = new TestConfigService();
             var activeConfig = configService.GetActiveConfig();
             if (activeConfig != null)
@@ -975,28 +969,34 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewWiringDiagram, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
 
             btnViewWiringDiagram.Click += BtnViewWiringDiagram_Click;
-            btnViewPinMap.Click += BtnViewWiringDiagram_Click;
+            btnViewPinMap.Click += BtnViewPinMap_Click;
             btnSaveReport.Click += BtnSaveReport_Click;
         }
 
         private void BtnViewWiringDiagram_Click(object? sender, EventArgs e)
         {
-            using var modal = new AssemblyLineTester.Views.Modals.WiringPreviewModalForm(_loadedRows);
+            using var modal = new AssemblyLineTester.Views.Modals.WiringPreviewModalForm(_loadedRows, false);
+            modal.ShowDialog(this);
+        }
+
+        private void BtnViewPinMap_Click(object? sender, EventArgs e)
+        {
+            using var modal = new AssemblyLineTester.Views.Modals.WiringPreviewModalForm(_loadedRows, true);
             modal.ShowDialog(this);
         }
 
         private TableLayoutPanel tblProgramInfo = new();
-        private Label lblConfigNameVal = new();
-        private Label lblProductModelVal = new();
-        private Label lblCreatedByVal = new();
-        private Label lblUpdatedAtVal = new();
-        private Label lblTotalNetsVal = new();
-        private Label lblTestTypesVal = new();
-        private Label lblMaxWireResVal = new();
-        private Label lblMinCompResVal = new();
-        private Label lblMinInsResVal = new();
-        private Label lblHipotVoltageVal = new();
-        private Label lblDescriptionVal = new();
+        private readonly Label lblConfigNameVal = new();
+        private readonly Label lblProductModelVal = new();
+        private readonly Label lblCreatedByVal = new();
+        private readonly Label lblUpdatedAtVal = new();
+        private readonly Label lblTotalNetsVal = new();
+        private readonly Label lblTestTypesVal = new();
+        private readonly Label lblMaxWireResVal = new();
+        private readonly Label lblMinCompResVal = new();
+        private readonly Label lblMinInsResVal = new();
+        private readonly Label lblHipotVoltageVal = new();
+        private readonly Label lblDescriptionVal = new();
 
         private void SetupProgramInfoArea()
         {

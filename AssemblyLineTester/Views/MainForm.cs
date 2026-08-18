@@ -172,6 +172,7 @@ namespace AssemblyLineTester.Views
                 }
             }
             catch { /* fallback silently */ }
+            this.MaximizedBounds = Rectangle.Empty;
             this.WindowState = FormWindowState.Maximized;
             expandedWidth = splitContainer1.SplitterDistance;
             collapsedWidth = (int)(expandedWidth * (90f / 380f));
@@ -834,11 +835,20 @@ namespace AssemblyLineTester.Views
         {
             if (this.WindowState == FormWindowState.Maximized)
             {
+                // Currently covering taskbar -> switch to showing taskbar
                 this.WindowState = FormWindowState.Normal;
+                this.Bounds = Screen.FromHandle(this.Handle).WorkingArea;
             }
             else
             {
+                // Currently showing taskbar -> switch to covering taskbar
+                this.MaximizedBounds = Rectangle.Empty;
                 this.WindowState = FormWindowState.Maximized;
+                
+                // Force the window to render above the taskbar
+                this.TopMost = true;
+                this.TopMost = false;
+                this.BringToFront();
             }
             UpdateMaximizeButtonText();
         }

@@ -20,8 +20,11 @@ namespace AssemblyLineTester.Views.Modals
         private readonly List<AssemblyLineTester.Views.Controls.DiagramNetDefinition> netDefinitions = [];
         private readonly List<LiveTestDetailRowDto>? testResults;
 
-        public WiringPreviewModalForm(List<LiveTestDetailRowDto>? results = null)
+        private readonly bool _hideErrorColors;
+
+        public WiringPreviewModalForm(List<LiveTestDetailRowDto>? results = null, bool hideErrorColors = false)
         {
+            _hideErrorColors = hideErrorColors;
             testResults = results;
             InitializeComponent();
             SetupEvents();
@@ -289,7 +292,7 @@ namespace AssemblyLineTester.Views.Modals
             // Sync error rows with netDefinitions
             foreach (var net in netDefinitions)
             {
-                net.IsError = errorRows.Contains(net.RowIndex);
+                net.IsError = _hideErrorColors ? false : errorRows.Contains(net.RowIndex);
             }
 
             picPreview.RenderDiagram(netDefinitions, TestSettingService.GetDefaults().TotalTestPointsAvailable);
