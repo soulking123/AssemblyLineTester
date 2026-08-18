@@ -464,8 +464,7 @@ namespace AssemblyLineTester.Views.Pages
                 var configService = new TestConfigService();
                 using var modal = new LoadProgramModalForm(configService)
                 {
-                    TitleText = "CHANGE TEST PROGRAM",
-                    ShowBrowseButton = false
+                    //TitleText = "CHANGE TEST PROGRAM"
                 };
 
                 if (modal.ShowDialog(this) == DialogResult.OK)

@@ -18,39 +18,6 @@ namespace AssemblyLineTester.Views.Modals
         public TestConfiguration? SelectedConfiguration { get; private set; }
         public string? LoadedFilePath { get; private set; }
 
-        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-        public string TitleText
-        {
-            get => lblHeaderTitle.Text;
-            set => lblHeaderTitle.Text = value;
-        }
-
-        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-        public bool ShowBrowseButton
-        {
-            get => btnBrowseFile.Visible;
-            set
-            {
-                btnBrowseFile.Visible = value;
-                UpdateFooterButtonLocations();
-            }
-        }
-
-        private void UpdateFooterButtonLocations()
-        {
-            if (btnBrowseFile.Visible)
-            {
-                btnLoad.Location = new Point(725, 29);
-                btnBrowseFile.Location = new Point(978, 29);
-                btnCancel.Location = new Point(1248, 29);
-            }
-            else
-            {
-                btnLoad.Location = new Point(978, 29);
-                btnCancel.Location = new Point(1248, 29);
-            }
-        }
-
         public LoadProgramModalForm(TestConfigService configService)
         {
             _configService = configService ?? new TestConfigService();
@@ -60,7 +27,6 @@ namespace AssemblyLineTester.Views.Modals
             SetupGridColumns();
             SetupEvents();
 
-            ShowBrowseButton = false;
             RefreshConfigs();
         }
 
@@ -247,7 +213,7 @@ namespace AssemblyLineTester.Views.Modals
         {
             if (e.Button == MouseButtons.Left)
             {
-            NativeMethods.DragWindow(Handle);
+                NativeMethods.DragWindow(Handle);
             }
         }
     }
