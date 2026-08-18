@@ -67,6 +67,9 @@ namespace AssemblyLineTester.Views.Pages
             tblCellCompRes = new TableLayoutPanel();
             lblComponentResistance = new Label();
             txtComponentResistance = new TextBox();
+            tblCellDescription = new TableLayoutPanel();
+            lblDescription = new Label();
+            txtDescription = new TextBox();
             pnlConfigInfoHeader = new Panel();
             lblConfigInfoHeader = new Label();
             pnlButtons = new Panel();
@@ -101,6 +104,7 @@ namespace AssemblyLineTester.Views.Pages
             tblCellConnRes.SuspendLayout();
             tblCellInsRes.SuspendLayout();
             tblCellCompRes.SuspendLayout();
+            tblCellDescription.SuspendLayout();
             pnlConfigInfoHeader.SuspendLayout();
             pnlButtons.SuspendLayout();
             tblButtons.SuspendLayout();
@@ -406,18 +410,20 @@ namespace AssemblyLineTester.Views.Pages
             tblConfigInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tblConfigInfo.Controls.Add(tblCellConfigName, 0, 0);
             tblConfigInfo.Controls.Add(tblCellProductModel, 2, 0);
-            tblConfigInfo.Controls.Add(tblCellConnRes, 0, 1);
-            tblConfigInfo.Controls.Add(tblCellInsRes, 2, 1);
-            tblConfigInfo.Controls.Add(tblCellCompRes, 0, 2);
-            tblConfigInfo.Controls.Add(btnLearnConnection, 0, 3);
-            tblConfigInfo.Controls.Add(btnStartAll, 1, 3);
-            tblConfigInfo.Controls.Add(btnStartSelected, 2, 3);
-            tblConfigInfo.Controls.Add(btnAbort, 3, 3);
+            tblConfigInfo.Controls.Add(tblCellInsRes, 0, 1);
+            tblConfigInfo.Controls.Add(tblCellDescription, 2, 1);
+            tblConfigInfo.Controls.Add(tblCellConnRes, 0, 2);
+            tblConfigInfo.Controls.Add(tblCellCompRes, 0, 3);
+            tblConfigInfo.Controls.Add(btnLearnConnection, 0, 4);
+            tblConfigInfo.Controls.Add(btnStartAll, 1, 4);
+            tblConfigInfo.Controls.Add(btnStartSelected, 2, 4);
+            tblConfigInfo.Controls.Add(btnAbort, 3, 4);
             tblConfigInfo.Dock = DockStyle.Fill;
             tblConfigInfo.Location = new Point(8, 4);
             tblConfigInfo.Margin = new Padding(0);
             tblConfigInfo.Name = "tblConfigInfo";
-            tblConfigInfo.RowCount = 4;
+            tblConfigInfo.RowCount = 5;
+            tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
             tblConfigInfo.RowStyles.Add(new RowStyle());
@@ -629,6 +635,47 @@ namespace AssemblyLineTester.Views.Pages
             txtComponentResistance.Size = new Size(274, 25);
             txtComponentResistance.TabIndex = 1;
             txtComponentResistance.Text = "N/A";
+            // 
+            // tblCellDescription
+            // 
+            tblConfigInfo.SetColumnSpan(tblCellDescription, 2);
+            tblConfigInfo.SetRowSpan(tblCellDescription, 3);
+            tblCellDescription.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tblCellDescription.Controls.Add(lblDescription, 0, 0);
+            tblCellDescription.Controls.Add(txtDescription, 0, 1);
+            tblCellDescription.Dock = DockStyle.Fill;
+            tblCellDescription.Location = new Point(294, 55);
+            tblCellDescription.Margin = new Padding(8, 2, 4, 4);
+            tblCellDescription.Name = "tblCellDescription";
+            tblCellDescription.RowCount = 2;
+            tblCellDescription.RowStyles.Add(new RowStyle());
+            tblCellDescription.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblCellDescription.Size = new Size(276, 134);
+            tblCellDescription.TabIndex = 5;
+            // 
+            // lblDescription
+            // 
+            lblDescription.AutoSize = true;
+            lblDescription.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblDescription.ForeColor = Color.FromArgb(100, 116, 139);
+            lblDescription.Location = new Point(0, 0);
+            lblDescription.Margin = new Padding(0, 0, 0, 3);
+            lblDescription.Name = "lblDescription";
+            lblDescription.Size = new Size(71, 15);
+            lblDescription.TabIndex = 0;
+            lblDescription.Text = "Description";
+            // 
+            // txtDescription
+            // 
+            txtDescription.Dock = DockStyle.Fill;
+            txtDescription.Font = new Font("Segoe UI", 10F);
+            txtDescription.Location = new Point(0, 18);
+            txtDescription.Margin = new Padding(0);
+            txtDescription.Multiline = true;
+            txtDescription.Name = "txtDescription";
+            txtDescription.ScrollBars = ScrollBars.Vertical;
+            txtDescription.Size = new Size(276, 116);
+            txtDescription.TabIndex = 1;
             // 
             // pnlConfigInfoHeader
             // 
@@ -1010,6 +1057,8 @@ namespace AssemblyLineTester.Views.Pages
             tblCellInsRes.PerformLayout();
             tblCellCompRes.ResumeLayout(false);
             tblCellCompRes.PerformLayout();
+            tblCellDescription.ResumeLayout(false);
+            tblCellDescription.PerformLayout();
             pnlConfigInfoHeader.ResumeLayout(false);
             pnlButtons.ResumeLayout(false);
             tblButtons.ResumeLayout(false);
@@ -1051,16 +1100,19 @@ namespace AssemblyLineTester.Views.Pages
         private TableLayoutPanel tblCellConnRes;
         private TableLayoutPanel tblCellCompRes;
         private TableLayoutPanel tblCellInsRes;
+        private TableLayoutPanel tblCellDescription;
         private Label lblConfigName;
         private Label lblProductModel;
         private Label lblConnectionResistance;
         private Label lblComponentResistance;
         private Label lblInsulationResistance;
+        private Label lblDescription;
         internal TextBox txtConfigName;
         internal ComboBox txtProductModel;
         internal TextBox txtConnectionResistance;
         internal TextBox txtComponentResistance;
         internal TextBox txtInsulationResistance;
+        internal TextBox txtDescription;
         private Panel pnlConfigInfoHeader;
         private Label lblConfigInfoHeader;
         private Panel pnlButtons;
@@ -1086,6 +1138,5 @@ namespace AssemblyLineTester.Views.Pages
         private DataGridViewTextBoxColumn colFromAddr;
         private DataGridViewTextBoxColumn colToAddr;
         private DataGridViewTextBoxColumn colUnit;
-        private Button btnComplex;
     }
 }

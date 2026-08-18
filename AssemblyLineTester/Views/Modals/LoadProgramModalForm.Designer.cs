@@ -25,7 +25,6 @@ namespace AssemblyLineTester.Views.Modals
             lblHeaderTitle = new Label();
             pnlFooter = new Panel();
             btnLoad = new Button();
-            btnBrowseFile = new Button();
             btnCancel = new Button();
             pnlMainContainer = new Panel();
             pnlGridCard = new Panel();
@@ -51,9 +50,8 @@ namespace AssemblyLineTester.Views.Modals
             pnlCustomHeader.Controls.Add(lblHeaderTitle);
             pnlCustomHeader.Dock = DockStyle.Top;
             pnlCustomHeader.Location = new Point(0, 0);
-            pnlCustomHeader.Margin = new Padding(6);
             pnlCustomHeader.Name = "pnlCustomHeader";
-            pnlCustomHeader.Size = new Size(1495, 128);
+            pnlCustomHeader.Size = new Size(805, 60);
             pnlCustomHeader.TabIndex = 0;
             // 
             // iconLogo
@@ -63,11 +61,10 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.IconChar = FontAwesome.Sharp.IconChar.FolderOpen;
             iconLogo.IconColor = Color.FromArgb(56, 189, 248);
             iconLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconLogo.IconSize = 64;
-            iconLogo.Location = new Point(39, 32);
-            iconLogo.Margin = new Padding(6);
+            iconLogo.IconSize = 30;
+            iconLogo.Location = new Point(21, 15);
             iconLogo.Name = "iconLogo";
-            iconLogo.Size = new Size(65, 64);
+            iconLogo.Size = new Size(35, 30);
             iconLogo.SizeMode = PictureBoxSizeMode.CenterImage;
             iconLogo.TabIndex = 0;
             iconLogo.TabStop = false;
@@ -77,10 +74,9 @@ namespace AssemblyLineTester.Views.Modals
             lblHeaderTitle.AutoSize = true;
             lblHeaderTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblHeaderTitle.ForeColor = Color.White;
-            lblHeaderTitle.Location = new Point(120, 38);
-            lblHeaderTitle.Margin = new Padding(6, 0, 6, 0);
+            lblHeaderTitle.Location = new Point(65, 18);
             lblHeaderTitle.Name = "lblHeaderTitle";
-            lblHeaderTitle.Size = new Size(394, 47);
+            lblHeaderTitle.Size = new Size(205, 25);
             lblHeaderTitle.TabIndex = 1;
             lblHeaderTitle.Text = "LOAD TEST PROGRAM";
             // 
@@ -88,13 +84,11 @@ namespace AssemblyLineTester.Views.Modals
             // 
             pnlFooter.BackColor = Color.FromArgb(34, 40, 49);
             pnlFooter.Controls.Add(btnLoad);
-            pnlFooter.Controls.Add(btnBrowseFile);
             pnlFooter.Controls.Add(btnCancel);
             pnlFooter.Dock = DockStyle.Bottom;
-            pnlFooter.Location = new Point(0, 832);
-            pnlFooter.Margin = new Padding(6);
+            pnlFooter.Location = new Point(0, 390);
             pnlFooter.Name = "pnlFooter";
-            pnlFooter.Size = new Size(1495, 128);
+            pnlFooter.Size = new Size(805, 60);
             pnlFooter.TabIndex = 1;
             // 
             // btnLoad
@@ -105,29 +99,12 @@ namespace AssemblyLineTester.Views.Modals
             btnLoad.FlatStyle = FlatStyle.Flat;
             btnLoad.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnLoad.ForeColor = Color.White;
-            btnLoad.Location = new Point(725, 29);
-            btnLoad.Margin = new Padding(6);
+            btnLoad.Location = new Point(540, 14);
             btnLoad.Name = "btnLoad";
-            btnLoad.Size = new Size(234, 70);
+            btnLoad.Size = new Size(126, 33);
             btnLoad.TabIndex = 0;
             btnLoad.Text = "Load";
             btnLoad.UseVisualStyleBackColor = false;
-            // 
-            // btnBrowseFile
-            // 
-            btnBrowseFile.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnBrowseFile.BackColor = Color.FromArgb(14, 165, 233);
-            btnBrowseFile.FlatAppearance.BorderSize = 0;
-            btnBrowseFile.FlatStyle = FlatStyle.Flat;
-            btnBrowseFile.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnBrowseFile.ForeColor = Color.White;
-            btnBrowseFile.Location = new Point(978, 29);
-            btnBrowseFile.Margin = new Padding(6);
-            btnBrowseFile.Name = "btnBrowseFile";
-            btnBrowseFile.Size = new Size(250, 70);
-            btnBrowseFile.TabIndex = 1;
-            btnBrowseFile.Text = "Browse File...";
-            btnBrowseFile.UseVisualStyleBackColor = false;
             // 
             // btnCancel
             // 
@@ -137,10 +114,9 @@ namespace AssemblyLineTester.Views.Modals
             btnCancel.FlatStyle = FlatStyle.Flat;
             btnCancel.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnCancel.ForeColor = Color.FromArgb(51, 65, 85);
-            btnCancel.Location = new Point(1248, 29);
-            btnCancel.Margin = new Padding(6);
+            btnCancel.Location = new Point(672, 14);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(205, 70);
+            btnCancel.Size = new Size(110, 33);
             btnCancel.TabIndex = 2;
             btnCancel.Text = "Close";
             btnCancel.UseVisualStyleBackColor = false;
@@ -151,11 +127,10 @@ namespace AssemblyLineTester.Views.Modals
             pnlMainContainer.Controls.Add(pnlGridCard);
             pnlMainContainer.Controls.Add(pnlSearch);
             pnlMainContainer.Dock = DockStyle.Fill;
-            pnlMainContainer.Location = new Point(0, 128);
-            pnlMainContainer.Margin = new Padding(6);
+            pnlMainContainer.Location = new Point(0, 60);
             pnlMainContainer.Name = "pnlMainContainer";
-            pnlMainContainer.Padding = new Padding(32);
-            pnlMainContainer.Size = new Size(1495, 704);
+            pnlMainContainer.Padding = new Padding(17, 15, 17, 15);
+            pnlMainContainer.Size = new Size(805, 330);
             pnlMainContainer.TabIndex = 2;
             // 
             // pnlGridCard
@@ -163,11 +138,10 @@ namespace AssemblyLineTester.Views.Modals
             pnlGridCard.BackColor = Color.FromArgb(248, 250, 252);
             pnlGridCard.Controls.Add(gridConfigs);
             pnlGridCard.Dock = DockStyle.Fill;
-            pnlGridCard.Location = new Point(32, 122);
-            pnlGridCard.Margin = new Padding(6);
+            pnlGridCard.Location = new Point(17, 57);
             pnlGridCard.Name = "pnlGridCard";
-            pnlGridCard.Padding = new Padding(20, 19, 20, 19);
-            pnlGridCard.Size = new Size(1431, 550);
+            pnlGridCard.Padding = new Padding(11, 9, 11, 9);
+            pnlGridCard.Size = new Size(771, 258);
             pnlGridCard.TabIndex = 1;
             // 
             // gridConfigs
@@ -179,15 +153,14 @@ namespace AssemblyLineTester.Views.Modals
             gridConfigs.BorderStyle = BorderStyle.None;
             gridConfigs.ColumnHeadersHeight = 40;
             gridConfigs.Dock = DockStyle.Fill;
-            gridConfigs.Location = new Point(20, 19);
-            gridConfigs.Margin = new Padding(6);
+            gridConfigs.Location = new Point(11, 9);
             gridConfigs.Name = "gridConfigs";
             gridConfigs.ReadOnly = true;
             gridConfigs.RowHeadersVisible = false;
             gridConfigs.RowHeadersWidth = 51;
             gridConfigs.RowTemplate.Height = 36;
             gridConfigs.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridConfigs.Size = new Size(1391, 512);
+            gridConfigs.Size = new Size(749, 240);
             gridConfigs.TabIndex = 0;
             // 
             // pnlSearch
@@ -197,10 +170,9 @@ namespace AssemblyLineTester.Views.Modals
             pnlSearch.Controls.Add(btnSearch);
             pnlSearch.Controls.Add(btnClear);
             pnlSearch.Dock = DockStyle.Top;
-            pnlSearch.Location = new Point(32, 32);
-            pnlSearch.Margin = new Padding(6);
+            pnlSearch.Location = new Point(17, 15);
             pnlSearch.Name = "pnlSearch";
-            pnlSearch.Size = new Size(1431, 90);
+            pnlSearch.Size = new Size(771, 42);
             pnlSearch.TabIndex = 0;
             // 
             // lblSearch
@@ -208,20 +180,18 @@ namespace AssemblyLineTester.Views.Modals
             lblSearch.AutoSize = true;
             lblSearch.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblSearch.ForeColor = Color.FromArgb(51, 65, 85);
-            lblSearch.Location = new Point(6, 26);
-            lblSearch.Margin = new Padding(6, 0, 6, 0);
+            lblSearch.Location = new Point(3, 12);
             lblSearch.Name = "lblSearch";
-            lblSearch.Size = new Size(308, 36);
+            lblSearch.Size = new Size(156, 17);
             lblSearch.TabIndex = 0;
             lblSearch.Text = "Search by Config Name:";
             // 
             // txtSearch
             // 
             txtSearch.Font = new Font("Segoe UI", 10.5F);
-            txtSearch.Location = new Point(322, 19);
-            txtSearch.Margin = new Padding(6);
+            txtSearch.Location = new Point(173, 9);
             txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(615, 45);
+            txtSearch.Size = new Size(333, 26);
             txtSearch.TabIndex = 1;
             // 
             // btnSearch
@@ -231,10 +201,9 @@ namespace AssemblyLineTester.Views.Modals
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSearch.ForeColor = Color.White;
-            btnSearch.Location = new Point(959, 16);
-            btnSearch.Margin = new Padding(6);
+            btnSearch.Location = new Point(516, 8);
             btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(162, 56);
+            btnSearch.Size = new Size(87, 26);
             btnSearch.TabIndex = 2;
             btnSearch.Text = "Search";
             btnSearch.UseVisualStyleBackColor = false;
@@ -246,26 +215,24 @@ namespace AssemblyLineTester.Views.Modals
             btnClear.FlatStyle = FlatStyle.Flat;
             btnClear.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnClear.ForeColor = Color.FromArgb(51, 65, 85);
-            btnClear.Location = new Point(1138, 16);
-            btnClear.Margin = new Padding(6);
+            btnClear.Location = new Point(613, 8);
             btnClear.Name = "btnClear";
-            btnClear.Size = new Size(162, 56);
+            btnClear.Size = new Size(87, 26);
             btnClear.TabIndex = 3;
             btnClear.Text = "Clear";
             btnClear.UseVisualStyleBackColor = false;
             // 
             // LoadProgramModalForm
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(1495, 960);
+            ClientSize = new Size(805, 450);
             Controls.Add(pnlMainContainer);
             Controls.Add(pnlFooter);
             Controls.Add(pnlCustomHeader);
             Font = new Font("Segoe UI", 9F);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(6);
             Name = "LoadProgramModalForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Load Test Program";
@@ -288,7 +255,6 @@ namespace AssemblyLineTester.Views.Modals
         private Label lblHeaderTitle;
         private Panel pnlFooter;
         private Button btnLoad;
-        private Button btnBrowseFile;
         private Button btnCancel;
         private Panel pnlMainContainer;
         private Panel pnlSearch;

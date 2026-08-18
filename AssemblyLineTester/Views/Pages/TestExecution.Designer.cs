@@ -1,4 +1,4 @@
-﻿namespace AssemblyLineTester.Views.Pages
+namespace AssemblyLineTester.Views.Pages
 {
     partial class TestExecution
     {
@@ -211,7 +211,7 @@
             btnStartTest.TabIndex = 0;
             btnStartTest.Text = "▶ START TEST";
             btnStartTest.UseVisualStyleBackColor = false;
-            btnStartTest.Click += btnStartTest_Click;
+            btnStartTest.Click += BtnStartTest_Click;
             // 
             // btnStopTest
             // 
@@ -231,7 +231,7 @@
             btnStopTest.TabIndex = 1;
             btnStopTest.Text = "⏹ STOP TEST";
             btnStopTest.UseVisualStyleBackColor = false;
-            btnStopTest.Click += btnStopTest_Click;
+            btnStopTest.Click += BtnStopTest_Click;
             // 
             // btnSaveReport
             // 
@@ -347,7 +347,7 @@
             btnViewPinMap.PressedForeColor = Color.Empty;
             btnViewPinMap.Size = new Size(253, 40);
             btnViewPinMap.TabIndex = 1;
-            btnViewPinMap.Text = "?? View Pin Map";
+            btnViewPinMap.Text = "View Pin Map";
             btnViewPinMap.UseVisualStyleBackColor = false;
             // 
             // picHarnessConn
@@ -434,25 +434,25 @@
             tblStatusLabels.Controls.Add(lblEndTimeKey, 0, 3);
             tblStatusLabels.Controls.Add(lblEndTimeVal, 1, 3);
             tblStatusLabels.Dock = DockStyle.Fill;
-            tblStatusLabels.Location = new Point(10, 127);
+            tblStatusLabels.Location = new Point(10, 197);
             tblStatusLabels.Name = "tblStatusLabels";
             tblStatusLabels.RowCount = 4;
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 47.513813F));
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 2.20994473F));
             tblStatusLabels.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblStatusLabels.Size = new Size(639, 401);
+            tblStatusLabels.Size = new Size(639, 331);
             tblStatusLabels.TabIndex = 2;
             // 
             // lblStartTimeKey
             // 
             lblStartTimeKey.AutoSize = true;
             lblStartTimeKey.Dock = DockStyle.Fill;
-            lblStartTimeKey.Font = new Font("Segoe UI", 8.5F);
+            lblStartTimeKey.Font = new Font("Segoe UI", 15F);
             lblStartTimeKey.ForeColor = Color.FromArgb(100, 116, 139);
             lblStartTimeKey.Location = new Point(3, 0);
             lblStartTimeKey.Name = "lblStartTimeKey";
-            lblStartTimeKey.Size = new Size(249, 100);
+            lblStartTimeKey.Size = new Size(249, 82);
             lblStartTimeKey.TabIndex = 0;
             lblStartTimeKey.Text = "Start Time :";
             lblStartTimeKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -461,11 +461,11 @@
             // 
             lblStartTimeVal.AutoSize = true;
             lblStartTimeVal.Dock = DockStyle.Fill;
-            lblStartTimeVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblStartTimeVal.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
             lblStartTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
             lblStartTimeVal.Location = new Point(258, 0);
             lblStartTimeVal.Name = "lblStartTimeVal";
-            lblStartTimeVal.Size = new Size(378, 100);
+            lblStartTimeVal.Size = new Size(378, 82);
             lblStartTimeVal.TabIndex = 1;
             lblStartTimeVal.Text = "15 Mar 2026 10:30:20 AM";
             lblStartTimeVal.TextAlign = ContentAlignment.MiddleRight;
@@ -474,11 +474,11 @@
             // 
             lblElapsedKey.AutoSize = true;
             lblElapsedKey.Dock = DockStyle.Fill;
-            lblElapsedKey.Font = new Font("Segoe UI", 8.5F);
+            lblElapsedKey.Font = new Font("Segoe UI", 15F);
             lblElapsedKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblElapsedKey.Location = new Point(3, 100);
+            lblElapsedKey.Location = new Point(3, 82);
             lblElapsedKey.Name = "lblElapsedKey";
-            lblElapsedKey.Size = new Size(249, 191);
+            lblElapsedKey.Size = new Size(249, 157);
             lblElapsedKey.TabIndex = 2;
             lblElapsedKey.Text = "Elapsed Time :";
             lblElapsedKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -487,11 +487,11 @@
             // 
             lblElapsedTimeVal.AutoSize = true;
             lblElapsedTimeVal.Dock = DockStyle.Fill;
-            lblElapsedTimeVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblElapsedTimeVal.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
             lblElapsedTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblElapsedTimeVal.Location = new Point(258, 100);
+            lblElapsedTimeVal.Location = new Point(258, 82);
             lblElapsedTimeVal.Name = "lblElapsedTimeVal";
-            lblElapsedTimeVal.Size = new Size(378, 191);
+            lblElapsedTimeVal.Size = new Size(378, 157);
             lblElapsedTimeVal.TabIndex = 3;
             lblElapsedTimeVal.Text = "00:02:15";
             lblElapsedTimeVal.TextAlign = ContentAlignment.MiddleRight;
@@ -500,11 +500,11 @@
             // 
             lblEndTimeKey.AutoSize = true;
             lblEndTimeKey.Dock = DockStyle.Fill;
-            lblEndTimeKey.Font = new Font("Segoe UI", 8.5F);
+            lblEndTimeKey.Font = new Font("Segoe UI", 15F);
             lblEndTimeKey.ForeColor = Color.FromArgb(100, 116, 139);
-            lblEndTimeKey.Location = new Point(3, 299);
+            lblEndTimeKey.Location = new Point(3, 246);
             lblEndTimeKey.Name = "lblEndTimeKey";
-            lblEndTimeKey.Size = new Size(249, 102);
+            lblEndTimeKey.Size = new Size(249, 85);
             lblEndTimeKey.TabIndex = 6;
             lblEndTimeKey.Text = "End Time (Est.) :";
             lblEndTimeKey.TextAlign = ContentAlignment.MiddleLeft;
@@ -513,11 +513,11 @@
             // 
             lblEndTimeVal.AutoSize = true;
             lblEndTimeVal.Dock = DockStyle.Fill;
-            lblEndTimeVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblEndTimeVal.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
             lblEndTimeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblEndTimeVal.Location = new Point(258, 299);
+            lblEndTimeVal.Location = new Point(258, 246);
             lblEndTimeVal.Name = "lblEndTimeVal";
-            lblEndTimeVal.Size = new Size(378, 102);
+            lblEndTimeVal.Size = new Size(378, 85);
             lblEndTimeVal.TabIndex = 7;
             lblEndTimeVal.Text = "15 Mar 2026 10:39:21 AM";
             lblEndTimeVal.TextAlign = ContentAlignment.MiddleRight;
@@ -529,7 +529,7 @@
             lblStatusRunning.ForeColor = Color.Gray;
             lblStatusRunning.Location = new Point(10, 56);
             lblStatusRunning.Name = "lblStatusRunning";
-            lblStatusRunning.Size = new Size(639, 71);
+            lblStatusRunning.Size = new Size(639, 141);
             lblStatusRunning.TabIndex = 1;
             lblStatusRunning.Text = "Idle";
             lblStatusRunning.TextAlign = ContentAlignment.MiddleCenter;
@@ -618,7 +618,7 @@
             btnViewWiringDiagram.PressedForeColor = Color.Empty;
             btnViewWiringDiagram.Size = new Size(259, 38);
             btnViewWiringDiagram.TabIndex = 1;
-            btnViewWiringDiagram.Text = "?? Wiring Preview";
+            btnViewWiringDiagram.Text = "Wiring Preview";
             btnViewWiringDiagram.UseVisualStyleBackColor = false;
             // 
             // lblLiveDetailsTitle

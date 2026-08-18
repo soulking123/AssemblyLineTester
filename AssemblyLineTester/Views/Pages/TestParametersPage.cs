@@ -318,6 +318,7 @@ namespace AssemblyLineTester.Views.Pages
             Apply(txtConnectionResistance, SummaryConnectionResistance, SummaryConnectionResistanceOld);
             Apply(txtComponentResistance, SummaryComponentResistance, SummaryComponentResistanceOld);
             Apply(txtInsulationResistance, SummaryInsulationResistance);
+            Apply(txtDescription, SummaryDescription);
         }
 
         private void ImportWorkbook(string path)
@@ -464,6 +465,7 @@ namespace AssemblyLineTester.Views.Pages
         private const string SummaryComponentResistance = "Component Resistance (Ohm)";
         private const string SummaryComponentResistanceOld = "Component Resistance (mOhm)";
         private const string SummaryInsulationResistance = "Insulation Resistance (MOhm)";
+        private const string SummaryDescription = "Description";
 
         // Mirrors the Config Summary panel above the grid, and returns the row the table starts on.
         private int WriteConfigSummary(ClosedXML.Excel.IXLWorksheet sheet, int columnCount)
@@ -481,7 +483,8 @@ namespace AssemblyLineTester.Views.Pages
                 (SummaryProductModel, txtProductModel.Text?.Trim() ?? ""),
                 (SummaryConnectionResistance, txtConnectionResistance.Text?.Trim() ?? ""),
                 (SummaryComponentResistance, txtComponentResistance.Text?.Trim() ?? ""),
-                (SummaryInsulationResistance, txtInsulationResistance.Text?.Trim() ?? "")
+                (SummaryInsulationResistance, txtInsulationResistance.Text?.Trim() ?? ""),
+                (SummaryDescription, txtDescription.Text?.Trim() ?? "")
             };
 
             int row = 2;
@@ -770,6 +773,7 @@ namespace AssemblyLineTester.Views.Pages
                 txtConnectionResistance.Text = "";
                 txtInsulationResistance.Text = "";
                 txtComponentResistance.Text = "";
+                txtDescription.Text = "";
                 _loadedConfigName = null;
                 loadDefaultParameter();
                 UpdateTotalNetCount();
@@ -816,6 +820,7 @@ namespace AssemblyLineTester.Views.Pages
             txtComponentResistance.Text = config.MinComponentResistance > 0 
                 ? config.MinComponentResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
                 : "";
+            txtDescription.Text = config.Description ?? "";
 
             foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
             {
@@ -879,13 +884,13 @@ namespace AssemblyLineTester.Views.Pages
             //    Debug.WriteLine(tt.TestTypeValue);
             //}
 
-            var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
-            config.TestTypes = presentTestTypes;
+            var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", txtDescription.Text?.Trim() ?? "");
             if (config == null)
             {
                 MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
+            config.TestTypes = presentTestTypes;
             config.CreatedBy = SessionManager.CurrentUser?.Username ?? "Unknown";
 
             if (string.IsNullOrWhiteSpace(config.ConfigName))
