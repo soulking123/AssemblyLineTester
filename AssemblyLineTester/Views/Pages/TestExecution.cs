@@ -871,12 +871,16 @@ namespace AssemblyLineTester.Views.Pages
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(209, 231, 221);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(15, 81, 50);
                     break;
+                case LiveTestStatus.Fail:
+                    row.Cells["Status"].Style.BackColor = Color.FromArgb(248, 215, 218);
+                    row.Cells["Status"].Style.ForeColor = Color.FromArgb(132, 32, 41);
+                    break;
                 case LiveTestStatus.Testing:
                     row.DefaultCellStyle.BackColor = Color.FromArgb(255, 251, 235);
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(254, 240, 138);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(133, 77, 14);
                     break;
-                default: // Pending, Fail
+                default: // Pending
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(241, 245, 249);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(100, 116, 139);
                     break;
