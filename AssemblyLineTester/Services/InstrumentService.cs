@@ -329,7 +329,6 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // Starts a complex learn for the given test name and component.
         public CtaCommandResultCode LearnComplexConnection(string testName, byte component)
         {
             if (!IsConnected) return (CtaCommandResultCode)(-1);
@@ -346,7 +345,6 @@ namespace AssemblyLineTester.Services
             }
         }
 
-        // Reads back the learned connection or program text.
         public CtaStringResult GetLearnedConnection(string testName = "")
         {
             if (!IsConnected) return new CtaStringResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };

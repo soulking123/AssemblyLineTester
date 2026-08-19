@@ -20,6 +20,12 @@ namespace AssemblyLineTester.Views.Pages.Tabs
         private List<Connector> _filteredConnectorsForHarness = new();
         private Connector? _selectedConnector;
 
+        // Fires after a connector is added, edited, or deleted, so the harness that owns it can
+        // reload - the General tab's Connector dropdown otherwise keeps the Connector objects it
+        // had when the harness was selected, ImagePath included, and a newly uploaded image never
+        // shows there until something else forces a full reload.
+        public event EventHandler? ConnectorChanged;
+
         public HarnessConnectorTab()
         {
             InitializeComponent();
@@ -136,6 +142,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
+                ConnectorChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -154,6 +161,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
             {
                 RefreshConnectorGrid();
+                ConnectorChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -180,6 +188,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             }
 
             RefreshConnectorGrid();
+            ConnectorChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void DgvConnectors_SelectionChanged(object? sender, EventArgs e)

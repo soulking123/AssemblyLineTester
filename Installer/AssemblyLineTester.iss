@@ -10,7 +10,7 @@
 
 #define AppName        "Assembly Line Harness Tester"
 #define AppShortName   "AssemblyLineTester"
-#define AppVersion     "1.0.0"
+#define AppVersion     "1.0.3"
 #define AppPublisher   "Assembly Line Tester Team"
 #define AppExeName     "AssemblyLineTester.exe"
 #define PublishDir     "..\AssemblyLineTester\bin\Release\net10.0-windows\publish"

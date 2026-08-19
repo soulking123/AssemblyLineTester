@@ -498,7 +498,7 @@ namespace AssemblyLineTester.Views.Pages
                 var valueCell = sheet.Cell(row, 2);
                 valueCell.Value = value;
                 valueCell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromArgb(248, 250, 252);
-                valueCell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Hair;
+                valueCell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
                 valueCell.Style.Border.OutsideBorderColor = ClosedXML.Excel.XLColor.FromArgb(203, 213, 225);
                 sheet.Range(row, 2, row, 4).Merge();
 
