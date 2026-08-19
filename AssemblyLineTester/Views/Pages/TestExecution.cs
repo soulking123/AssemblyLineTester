@@ -83,42 +83,44 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+
         private void SetupTimer()
         {
+            // Set timer to trigger every 1 second (1000 ms)
             _elapsedTimer.Interval = 1000;
             _elapsedTimer.Tick += ElapsedTimer_Tick;
         }
-
-        private void ElapsedTimer_Tick(object? sender, EventArgs e)
+        private void ElapsedTimer_Tick(object sender, EventArgs e)
         {
+            // Update Elapsed Time display every 1 second (HH:mm:ss format)
             lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
         private void OnTestFinishedSuccessfully()
         {
+            // Update Status
             lblStatusRunning.Text = "Finished";
             lblStatusRunning.ForeColor = Color.Green;
+            // Stop Stopwatch & Timer
             StopTestTiming();
         }
-
-        // Stops the clock and writes the final end time and elapsed total to the labels.
         private void StopTestTiming()
         {
+            // 1. Stop Timer & Stopwatch
             _testStopwatch.Stop();
             _elapsedTimer.Stop();
-
-            // Shown on screen, never stored, so local time is the right choice here.
+            // 2. Record & Display End Time
             _endTime = DateTime.Now;
             lblEndTimeVal.Text = _endTime.ToString("dd MMM yyyy hh:mm:ss tt");
+            // 3. Ensure final exact elapsed time is displayed
             lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
-
-
 
         // Rebuilds the live grid header after the result-column ticks were saved in Settings.
         public void ReloadResultColumns() => SetupGridLiveDetails();
 
-        // Columns and styling only; rows arrive when a program is loaded.
+        // Sets up grid columns and styling only. No rows are added here -
+        // the grid stays empty until a config file is loaded via Load Program.
         private void SetupGridLiveDetails()
         {
             gridLiveDetails.Columns.Clear();
@@ -235,7 +237,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
         }
-      
+
         private async void btnStartTest_Click(object? sender, EventArgs e)
         {
             _testCts?.Cancel();
@@ -307,9 +309,9 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch (OperationCanceledException)
             {
-                // Aborted from btnStopTest, nothing left to report.
+                // Task was canceled via btnAbort
             }
-            finally 
+            finally
             {
                 btnLoadProgram.Enabled = true;
                 btnStartTest.Enabled = true;
@@ -317,7 +319,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void ExecuteTest(TestConfiguration config ,System.Threading.CancellationToken token = default)
+        private void ExecuteTest(TestConfiguration config, System.Threading.CancellationToken token = default)
         {
             try
             {
@@ -564,7 +566,7 @@ namespace AssemblyLineTester.Views.Pages
                 MessageBox.Show($"Start Test Failed with error message {ex.Message}", "Start Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            
+
         }
 
         private void ShowSummary(List<LiveTestDetailRowDto> rows, string overallResultStatus)
@@ -632,12 +634,13 @@ namespace AssemblyLineTester.Views.Pages
                 MessageBox.Show($"Display Test Execute Result Failed with error message {Ex.Message}", "Display Test Execute Result Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            
+
         }
         private async void btnStopTest_Click(object sender, EventArgs e)
         {
             _testCts?.Cancel();
 
+            // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
             string errorText = "";
             try
@@ -704,7 +707,7 @@ namespace AssemblyLineTester.Views.Pages
                 "N/A",
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
-                AppTime.UtcNow,
+                DateTime.Now,
                 _loadedRows ?? new List<LiveTestDetailRowDto>(),
                 _currentReportId,
                 txtNotes.Text
@@ -768,7 +771,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private static string FormatNumber(double? value, string format = "0.##") =>
             value?.ToString(format, CultureInfo.InvariantCulture) ?? "";
-      
+
         private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)
         {
             switch (status)
@@ -782,13 +785,13 @@ namespace AssemblyLineTester.Views.Pages
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(254, 240, 138);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(133, 77, 14);
                     break;
-                default:
+                default: // Pending, Fail
                     row.Cells["Status"].Style.BackColor = Color.FromArgb(241, 245, 249);
                     row.Cells["Status"].Style.ForeColor = Color.FromArgb(100, 116, 139);
                     break;
             }
         }
-     
+
         private void SetupDiagramPointers()
         {
             picAreaDetail.Paint += PicAreaDetail_Paint;

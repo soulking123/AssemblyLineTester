@@ -4,10 +4,8 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
-using AssemblyLineTester.Helpers;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -55,7 +53,8 @@ namespace AssemblyLineTester.Views.Pages
         }
 
 
-        // Points every filter, pagination and selection control at the same reload.
+
+        // Registers all filter/pagination/selection controls to a single reload flow.
         private void SetupEvents()
         {
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(pnlFilterCard, 12, Color.FromArgb(34, 40, 49), 2.5f);
@@ -70,26 +69,18 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnExport, 10, Color.FromArgb(241, 245, 249), Color.FromArgb(248, 250, 252), Color.FromArgb(241, 245, 249), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewReport, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
 
-            // Tinted, not solid: the weight belongs to View Report, and a dialog guards the delete.
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnDeleteHistory, 10, Color.FromArgb(254, 242, 242), Color.FromArgb(254, 226, 226), Color.FromArgb(254, 202, 202), Color.FromArgb(254, 202, 202));
-
-            // Red-700 for 4.5:1 contrast on the red-50 fill; red-500 falls short at this size.
-            btnDeleteHistory.ForeColor = Color.FromArgb(185, 28, 28);
-
             AssemblyLineTester.Helpers.UIStyleHelper.SetupBadgeRoundedEdges(lblDetailBadge, 10);
 
             gridData.CellFormatting += gridData_CellFormatting;
             gridData.CellPainting += gridData_CellPainting;
             gridData.CellClick += GridData_CellClick;
             gridSteps.CellFormatting += gridSteps_CellFormatting;
-            
-            chartSummary.PostPaint += ChartSummary_PostPaint;
 
             btnRefresh.Click += (s, ev) => LoadHistoryData();
 
             btnSearch.Click += (s, ev) =>
             {
-                _dateFilterApplied = true;
+                _dateFilterApplied = true; // user explicitly asked for this date range now
                 GoToPage(1);
             };
 
@@ -105,9 +96,14 @@ namespace AssemblyLineTester.Views.Pages
             btnReset.Click += (s, ev) =>
             {
                 ResetFilterControls();
-                _dateFilterApplied = false;
+                _dateFilterApplied = false; // back to showing everything
                 GoToPage(1);
             };
+            {
+                ResetFilterControls();
+                GoToPage(1);
+            }
+            ;
 
             cmbPageSize.SelectedIndexChanged += (s, ev) =>
             {
@@ -160,7 +156,7 @@ namespace AssemblyLineTester.Views.Pages
             LoadHistoryData();
         }
 
-        // Reads the filter controls into a ReportFilter.
+        // Builds the filter DTO from current filter control values.
         private ReportFilter BuildFilter(int page)
         {
             return new ReportFilter
@@ -177,7 +173,7 @@ namespace AssemblyLineTester.Views.Pages
             };
         }
 
-        // Pulls the page of rows and the summary, then refreshes the whole page.
+        // Main entry point: pulls the page of history rows and the summary, refreshes the whole UI.
         private void LoadHistoryData()
         {
             var filter = BuildFilter(_currentPage);
@@ -201,7 +197,7 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // Columns and styling only, once, from the constructor.
+        // Sets up grid columns and styling once; called from the constructor only.
         private void SetupGridColumns()
         {
             AssemblyLineTester.Helpers.UIStyleHelper.StyleDataGridView(gridData);
@@ -258,7 +254,7 @@ namespace AssemblyLineTester.Views.Pages
                     item.TotalTime,
                     item.Operator);
 
-                // The row carries its report id, so a click needs no re-query to find it.
+                // Store the report id on the row so a click can load its detail without a re-query.
                 gridData.Rows[rowIndex].Tag = item.ReportId;
             }
 
@@ -292,7 +288,7 @@ namespace AssemblyLineTester.Views.Pages
             if (_currentPage < 1) _currentPage = 1;
 
             if (flpPageNav is null) return;
-            UIStyleHelper.ClearAndDispose(flpPageNav.Controls);
+            flpPageNav.Controls.Clear();
 
             float scaleX = this.CurrentAutoScaleDimensions.Width / 13f;
             float scaleY = this.CurrentAutoScaleDimensions.Height / 32f;
@@ -435,18 +431,12 @@ namespace AssemblyLineTester.Views.Pages
             btnViewReport.Enabled = true;
             PopulateStepsGrid(detail.Steps);
 
+            // Enable delete button when a detail is loaded
             btnDeleteHistory.Enabled = true;
         }
 
         private void BtnDeleteHistory_Click(object? sender, EventArgs e)
         {
-            if (!SessionManager.HasPermission("Action.TestHistory.Delete"))
-            {
-                MessageBox.Show("You do not have permission to delete test history records.",
-                    "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
             if (gridData.CurrentRow == null || gridData.CurrentRow.Tag is not int reportId)
             {
                 MessageBox.Show("Please select a history item to delete.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -500,7 +490,7 @@ namespace AssemblyLineTester.Views.Pages
                     badge.BackColor = Color.FromArgb(254, 243, 199);
                     badge.ForeColor = Color.FromArgb(146, 64, 14);
                     break;
-                default:
+                default: // STOPPED or unknown
                     badge.BackColor = Color.FromArgb(226, 232, 240);
                     badge.ForeColor = Color.FromArgb(71, 85, 105);
                     break;
@@ -514,7 +504,11 @@ namespace AssemblyLineTester.Views.Pages
             lblLegProgText.Text = $"In Progress : {FormatCountWithPercent(_summary.InProgressCount)}";
             lblLegStopText.Text = $"Stop : {FormatCountWithPercent(_summary.StopCount)}";
 
-            LoadSummaryChart();
+
+            pnlChartContainer.Controls.Clear();
+            var chartPanel = new Panel { Dock = DockStyle.Fill, BackColor = Color.White };
+            chartPanel.Paint += (s, e) => DrawSummaryDoughnut(e, chartPanel);
+            pnlChartContainer.Controls.Add(chartPanel);
         }
 
         private string FormatCountWithPercent(int count)
@@ -523,71 +517,41 @@ namespace AssemblyLineTester.Views.Pages
             return $"{count} ({pct:F1}%)";
         }
 
-        private void LoadSummaryChart()
+        private void DrawSummaryDoughnut(PaintEventArgs e, Panel container)
         {
-            chartSummary.ChartAreas.Clear();
-            chartSummary.Series.Clear();
-            chartSummary.Legends.Clear();
-            chartSummary.BackColor = Color.White;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            int size = Math.Min(container.Width, container.Height) - 20;
+            if (size <= 0) return;
+            int x = (container.Width - size) / 2;
+            int y = (container.Height - size) / 2;
+            var rect = new Rectangle(x, y, size, size);
 
-            ChartArea areaPie = new("PieArea") { BackColor = Color.White };
-            chartSummary.ChartAreas.Add(areaPie);
+            double total = _summary.TotalTested;
+            float passSweep = total <= 0 ? 0 : (float)(_summary.PassCount / total * 360.0);
+            float failSweep = total <= 0 ? 0 : (float)(_summary.FailCount / total * 360.0);
+            float progSweep = total <= 0 ? 0 : (float)(_summary.InProgressCount / total * 360.0);
+            float stopSweep = total <= 0 ? 0 : (float)(_summary.StopCount / total * 360.0);
 
-            Series sSummary = new("Summary") { ChartType = SeriesChartType.Doughnut };
-            sSummary["DoughnutRadius"] = "25";
+            using var penPass = new Pen(Color.FromArgb(76, 175, 80), 18);
+            using var penFail = new Pen(Color.FromArgb(244, 67, 54), 18);
+            using var penProg = new Pen(Color.FromArgb(245, 158, 11), 18);
+            using var penStop = new Pen(Color.FromArgb(148, 163, 184), 18);
 
-            if (_summary.TotalTested == 0)
-            {
-                int emptyIdx = sSummary.Points.AddY(1);
-                sSummary.Points[emptyIdx].Color = Color.FromArgb(226, 232, 240);
-                sSummary.Points[emptyIdx].IsVisibleInLegend = false;
-            }
-            else
-            {
-                var summaryData = new (int Count, Color Color)[]
-                {
-                    (_summary.PassCount, Color.FromArgb(76, 175, 80)),
-                    (_summary.FailCount, Color.FromArgb(244, 67, 54)),
-                    (_summary.InProgressCount, Color.FromArgb(245, 158, 11)),
-                    (_summary.StopCount, Color.FromArgb(148, 163, 184))
-                };
+            float angle = -90f;
+            e.Graphics.DrawArc(penPass, rect, angle, passSweep); angle += passSweep;
+            e.Graphics.DrawArc(penFail, rect, angle, failSweep); angle += failSweep;
+            e.Graphics.DrawArc(penProg, rect, angle, progSweep); angle += progSweep;
+            e.Graphics.DrawArc(penStop, rect, angle, stopSweep);
 
-                foreach (var data in summaryData)
-                {
-                    if (data.Count > 0)
-                    {
-                        int idx = sSummary.Points.AddY(data.Count);
-                        sSummary.Points[idx].Color = data.Color;
-                    }
-                }
-            }
-
-            chartSummary.Series.Add(sSummary);
-        }
-
-        private void ChartSummary_PostPaint(object? sender, ChartPaintEventArgs e)
-        {
-            if (e.ChartElement is ChartArea area)
-            {
-                string numText = _summary.TotalTested.ToString();
-                string subText = "TOTAL";
-
-                using SolidBrush brushNum = new(Color.FromArgb(30, 41, 59));
-                using SolidBrush brushSub = new(Color.FromArgb(100, 116, 139));
-                using StringFormat sf = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-
-                RectangleF chartRect = e.ChartGraphics.GetAbsoluteRectangle(area.Position.ToRectangleF());
-                float centerX = chartRect.Left + (chartRect.Width * 0.50f);
-                float centerY = chartRect.Top + (chartRect.Height * 0.5f);
-
-                e.ChartGraphics.Graphics.DrawString(numText, AssemblyLineTester.Helpers.UIStyleHelper.Font16Bold, brushNum, centerX, centerY - 14, sf);
-                e.ChartGraphics.Graphics.DrawString(subText, AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold, brushSub, centerX, centerY + 14, sf);
-            }
+            string text = $"{_summary.TotalTested}\nTOTAL";
+            using var brush = new SolidBrush(Color.FromArgb(30, 41, 59));
+            using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            e.Graphics.DrawString(text, AssemblyLineTester.Helpers.UIStyleHelper.Font95Bold, brush, new RectangleF(x, y, size, size), format);
         }
 
         private static void gridData_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            // Badges are drawn by gridData_CellPainting.
+            // Badge rendering handled entirely by gridData_CellPainting below.
         }
 
         private void gridData_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
@@ -610,7 +574,7 @@ namespace AssemblyLineTester.Views.Pages
                     case "STOPPED":
                         bgCol = Color.FromArgb(226, 232, 240); fgCol = Color.FromArgb(71, 85, 105);
                         break;
-                    default:
+                    default: // PASS
                         bgCol = Color.FromArgb(209, 231, 221); fgCol = Color.FromArgb(15, 81, 50);
                         break;
                 }

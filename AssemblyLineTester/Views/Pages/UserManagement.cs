@@ -690,7 +690,6 @@ namespace AssemblyLineTester.Views.Pages
         private int Scaled(int value) => Math.Max(1, (int)Math.Round(value * _uiScale));
 
 
-        // Rebuilds the role-proportion doughnut from the current role counts.
         private void LoadRoleChart()
         {
             chartRole.ChartAreas.Clear();

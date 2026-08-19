@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using static AssemblyLineTester.Models.SystemLog;
 using AssemblyLineTester.Helpers;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace AssemblyLineTester.Views
 {
