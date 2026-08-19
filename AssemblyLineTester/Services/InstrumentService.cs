@@ -252,7 +252,7 @@ namespace AssemblyLineTester.Services
 
         public DllDualValueReturnObject<CtaTestErrorResult> GetTestErrors()
         {
-            if (!IsConnected) return null!;
+            if (!IsConnected) return new DllDualValueReturnObject<CtaTestErrorResult> { DllCallResult = CtaCommandResultCode.ConnectionFailed };
             lock (_lockObj)
             {
                 try
@@ -261,7 +261,7 @@ namespace AssemblyLineTester.Services
                 }
                 catch
                 {
-                    return null!;
+                    return new DllDualValueReturnObject<CtaTestErrorResult> { DllCallResult = CtaCommandResultCode.UnknownError };
                 }
             }
         }

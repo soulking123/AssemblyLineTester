@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -156,13 +156,16 @@ namespace AssemblyLineTester.Helpers
 
             DoubleBufferedProperty?.SetValue(card, true);
 
-            if (card is TableLayoutPanel || card.Padding.Left < 4 || card.Padding.Top < 4 || card.Padding.Right < 4 || card.Padding.Bottom < 4)
+            // Calculate required padding to keep child controls safely inside the rounded corners
+            int requiredPadding = (int)Math.Ceiling(radius - (radius - borderWidth / 2f) / 1.4142f) + 1;
+
+            if (card is TableLayoutPanel || card.Padding.Left < requiredPadding || card.Padding.Top < requiredPadding || card.Padding.Right < requiredPadding || card.Padding.Bottom < requiredPadding)
             {
                 card.Padding = new Padding(
-                    Math.Max(card.Padding.Left, 4),
-                    Math.Max(card.Padding.Top, 4),
-                    Math.Max(card.Padding.Right, 4),
-                    Math.Max(card.Padding.Bottom, 4)
+                    Math.Max(card.Padding.Left, requiredPadding),
+                    Math.Max(card.Padding.Top, requiredPadding),
+                    Math.Max(card.Padding.Right, requiredPadding),
+                    Math.Max(card.Padding.Bottom, requiredPadding)
                 );
             }
 

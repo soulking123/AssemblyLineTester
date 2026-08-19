@@ -10,6 +10,7 @@ using System.Linq;
 using System.Windows.Forms;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace AssemblyLineTester.Views.Pages
@@ -25,11 +26,13 @@ namespace AssemblyLineTester.Views.Pages
         private string _customTestText = string.Empty;
         private System.Threading.CancellationTokenSource? _testCts;
         private string? _loadedConfigName = null;
-        private TestConfiguration complexConfig = new();
+        private TestConfiguration config = new();
+        private DefaultTestSetting defaultTest = TestSettingService.GetDefaults();
+        private int defaultTestPoint;
 
         private class DiagramNode
         {
-            public int RowIndex { get; set; }
+            public List<int> RowIndices { get; set; } = [];
             public string Address { get; set; } = "";
             public string Label { get; set; } = "";
             public RectangleF NodeRect { get; set; }
@@ -56,8 +59,16 @@ namespace AssemblyLineTester.Views.Pages
                 AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
+                loadDefaultParameter();
                 picPreview.Invalidate();
             }
+        }
+        private void loadDefaultParameter()
+        {
+            defaultTest = TestSettingService.GetDefaults();
+            defaultTestPoint = defaultTest.TotalTestPointsAvailable;
+            txtConnectionResistance.Text = defaultTest.DefaultMaxWireResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            txtInsulationResistance.Text = defaultTest.DefaultMinInulationResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void SetupEvents()
@@ -125,6 +136,8 @@ namespace AssemblyLineTester.Views.Pages
             InitializeComponent();
             EnableDoubleBuffering();
             SetupEvents();
+            this.VisibleChanged += TestParameterPage_VisibleChanged;
+
             if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime && !DesignMode)
             {
                 LoadTestTypeColumnItems();
@@ -139,8 +152,8 @@ namespace AssemblyLineTester.Views.Pages
             try
             {
                 using var db = new Data.AppDbContext();
-                var models = db.ProductHarnesses
-                    .Select(p => p.ProductModel)
+                var models = db.ProductModels
+                    .Select(p => p.Name)
                     .Where(m => !string.IsNullOrEmpty(m))
                     .Distinct()
                     .OrderBy(m => m)
@@ -152,6 +165,13 @@ namespace AssemblyLineTester.Views.Pages
             catch (Exception ex)
             {
                 FileLogService.Error("TestParametersPage.LoadProductModels", "Failed to load product models", ex);
+            }
+        }
+        private void TestParameterPage_VisibleChanged(object? sender, EventArgs e)
+        {
+            if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                loadDefaultParameter();
             }
         }
         private void EnableDoubleBuffering()
@@ -667,14 +687,29 @@ namespace AssemblyLineTester.Views.Pages
             int newIdx = gridConfig.Rows.Count + 1;
             string defaultType = ResolveDefaultTestType();
             string defaultUnit = UnitConversionHelper.GetBaseUnit(defaultType);
+            int tolerance = defaultType == "RESISTOR" ? defaultTest.DefaultResistorTolerance : defaultType == "CAPACITOR" ? defaultTest.DefaultCapacitorTolerance : 0;
+            double expectedValue = defaultType == "RESISTOR" ? defaultTest.DefaultResistorValue : defaultType == "CAPACITOR" ? defaultTest.DefaultCapacitorValue: 5;
+            double lowerLimit = expectedValue - (tolerance * expectedValue / 100);
+            double upperLimit = expectedValue + (tolerance * expectedValue / 100);
 
             int nextFromAddr = GetNextAvailableAddress();
-            int nextToAddr = nextFromAddr + 1;
-
+            int nextToAddr = nextFromAddr + defaultTestPoint/2;
             int idx = gridConfig.Rows.Add(
-                newIdx.ToString(), "Elec-Control-001", "", "", "Low Voltage Supply",
-                nextFromAddr.ToString(), $"X1-0{newIdx}", nextToAddr.ToString(), $"Y1-0{newIdx}",
-                defaultType, "0", "0", "0", "-", defaultUnit);
+                newIdx.ToString(), 
+                "",                             // harness group
+                "",                             // color
+                "",                             // gauge
+                "",                             // Net-ID
+                nextFromAddr.ToString(),                                    // From
+                "J" + ((nextFromAddr - 1) / 64 + 1).ToString()+ "-" + ((nextFromAddr-1)%64+1).ToString("D3"),                   // Net-From Label
+                nextToAddr.ToString(),                                      // To
+                "J" + ((nextToAddr - 1) / 64 + 1).ToString()+ "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // To-From Label
+                defaultType,                                                // Test Type
+                lowerLimit.ToString(),                                      // Lower Limit
+                upperLimit.ToString(),                                      // Upper Limit
+                expectedValue.ToString() ,       // Expected Value
+                tolerance.ToString(),                                       // Tolerance
+                defaultUnit);                                               // Measurement
 
             UpdateRowUnitDropdown(idx);
             gridConfig.Rows[idx].Cells["colUnit"].Value = defaultUnit;
@@ -689,12 +724,12 @@ namespace AssemblyLineTester.Views.Pages
         // Next address unused in either column; From and To share one pool.
         private int GetNextAvailableAddress()
         {
-            int max = -1;
+            int max = -0;
             foreach (DataGridViewRow row in gridConfig.Rows)
             {
                 if (row.IsNewRow) continue;
                 if (int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int fromVal) && fromVal > max) max = fromVal;
-                if (int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toVal) && toVal > max) max = toVal;
+                //if (int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toVal) && toVal > max) max = toVal;
             }
             return max + 1;
         }
@@ -747,6 +782,14 @@ namespace AssemblyLineTester.Views.Pages
             {
                 gridConfig.Rows.Clear();
                 highlightedRows.Clear();
+                txtConfigName.Text = "";
+                txtProductModel.SelectedIndex = -1;
+                txtProductModel.Text = "";
+                txtConnectionResistance.Text = "";
+                txtInsulationResistance.Text = "";
+                txtComponentResistance.Text = "";
+                _loadedConfigName = null;
+                loadDefaultParameter();
                 UpdateTotalNetCount();
                 UpdateDiagramSize();
                 picPreview.Invalidate();
@@ -780,14 +823,23 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.Rows.Clear();
             highlightedRows.Clear();
 
-            txtConfigName.Text = config.ConfigName;
-            txtProductModel.Text = config.ProductModelName;
+            txtConfigName.Text = config.ConfigName ?? "";
+            txtProductModel.Text = config.ProductModelName ?? "";
+            txtConnectionResistance.Text = config.MaxWireResistance > 0 
+                ? config.MaxWireResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
+                : "";
+            txtInsulationResistance.Text = config.MinInsulationResistance > 0 
+                ? config.MinInsulationResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
+                : "";
+            txtComponentResistance.Text = config.MinComponentResistance > 0 
+                ? config.MinComponentResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
+                : "";
 
             foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
             {
                 string testTypeName = net.TestType?.TestTypeName ?? "";
-                string expected = net.ExpectedValue.HasValue ? FormatLimit(net.ExpectedValue.Value) : "0";
-                string tolerance = net.Tolerance.HasValue ? $"±{FormatLimit(net.Tolerance.Value)}%" : "±0%";
+                string expected = net.ExpectedValue.HasValue ? FormatLimit(net.ExpectedValue.Value) : "-";
+                string tolerance = net.Tolerance.HasValue ? $"±{net.Tolerance.Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture)}%" : "±0%";
 
                 int idx = gridConfig.Rows.Add(
                     net.SequenceNo.ToString(),
@@ -819,32 +871,8 @@ namespace AssemblyLineTester.Views.Pages
             _loadedConfigName = config.ConfigName;
         }
 
-        private static (string expected, string tolerance) DeriveExpectedAndTolerance(double? lower, double? upper)
-        {
-            if (!lower.HasValue && !upper.HasValue) return ("0", "±0%");
-            if (lower.HasValue && upper.HasValue)
-            {
-                double mid = (lower.Value + upper.Value) / 2.0;
-                double tolPct = mid == 0 ? 0 : Math.Abs((upper.Value - mid) / mid * 100.0);
-                return (FormatLimit(mid), $"±{FormatLimit(tolPct)}%");
-            }
-            double val = lower ?? upper!.Value;
-            return (FormatLimit(val), "±0%");
-        }
-
         private void BtnExport_Click(object? sender, EventArgs e)
         {
-
-            var duplicateAddresses = GetDuplicateAddresses();
-            if (duplicateAddresses.Count > 0)
-            {
-                MessageBox.Show(
-                    $"Duplicate address found: {string.Join(", ", duplicateAddresses)}.\n" +
-                    "Every Net-From / Net-To Address must be unique across the whole configuration.",
-                    "Duplicate Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
             using var dlg = new Views.Modals.ExportOptionsModalForm();
             if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
@@ -862,7 +890,15 @@ namespace AssemblyLineTester.Views.Pages
         // Returns false when the configuration was rejected or the operator backed out.
         private bool TrySaveConfigToDatabase()
         {
+            List<TestType> presentTestTypes = GetSelectedTestTypesFromGrid();
+            //foreach (var tt in presentTestTypes)
+            //{
+            //    Debug.WriteLine(tt.TestTypeName);
+            //    Debug.WriteLine(tt.TestTypeValue);
+            //}
+
             var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
+            config.TestTypes = presentTestTypes;
             if (config == null)
             {
                 MessageBox.Show("Failed to build configuration from the grid. Please check entries.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -873,6 +909,12 @@ namespace AssemblyLineTester.Views.Pages
             if (string.IsNullOrWhiteSpace(config.ConfigName))
             {
                 MessageBox.Show("Config Name is required.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(config.ProductModelName))
+            {
+                MessageBox.Show("Product Model is required.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -971,7 +1013,11 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (colTestType != null && e.ColumnIndex == colTestType.Index)
                 {
+                    Debug.WriteLine(e.ColumnIndex);
                     UpdateRowUnitDropdown(e.RowIndex);
+                    
+                    gridConfig.Rows[e.RowIndex].Cells["colExpectedValue"].Value = "0";
+                    gridConfig.Rows[e.RowIndex].Cells["colTolerance"].Value = "0";
                     RecalculateRowLimits(gridConfig.Rows[e.RowIndex]);
                 }
                 else if ((colExpected != null && e.ColumnIndex == colExpected.Index) ||
@@ -992,26 +1038,6 @@ namespace AssemblyLineTester.Views.Pages
             if (e.RowIndex < 0 || e.RowIndex >= gridConfig.Rows.Count) return;
             var row = gridConfig.Rows[e.RowIndex];
             if (row.IsNewRow) return;
-
-            var colFromAddr = gridConfig.Columns["colFromAddr"];
-            var colToAddr = gridConfig.Columns["colToAddr"];
-
-            if ((colFromAddr != null && e.ColumnIndex == colFromAddr.Index) ||
-                (colToAddr != null && e.ColumnIndex == colToAddr.Index))
-            {
-                string columnName = e.ColumnIndex == colFromAddr!.Index ? "colFromAddr" : "colToAddr";
-                string label = columnName == "colFromAddr" ? "Net-From Address" : "Net-To Address";
-                string newValue = e.FormattedValue?.ToString()?.Trim() ?? "";
-
-                if (!string.IsNullOrWhiteSpace(newValue) && IsAddressUsedElsewhere(newValue, e.RowIndex, columnName))
-                {
-                    MessageBox.Show(
-                        $"{label} '{newValue}' is already used elsewhere (as a From or To address). Duplicate address is not allowed.",
-                        "Duplicate Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    e.Cancel = true;
-                    return;
-                }
-            }
 
             var colTolerance = gridConfig.Columns["colTolerance"];
             if (colTolerance != null && e.ColumnIndex == colTolerance.Index)
@@ -1138,9 +1164,10 @@ namespace AssemblyLineTester.Views.Pages
 
             string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
 
-            if (ContinuityLikeTypes.Contains(testType, StringComparer.OrdinalIgnoreCase))
+
+            if (testType == "WIRE")
             {
-                row.Cells["colExpectedValue"].Value = "0";
+                row.Cells["colExpectedValue"].Value = "-";
                 row.Cells["colExpectedValue"].ReadOnly = true;
 
                 row.Cells["colTolerance"].Value = "-";
@@ -1149,15 +1176,32 @@ namespace AssemblyLineTester.Views.Pages
                 row.Cells["colLowerLimit"].Value = "0";
                 row.Cells["colUpperLimit"].Value = txtConnectionResistance.Text?.Trim() ?? "0";
             }
+            else if (testType == "SIGNATURE WIRE")
+            {
+                row.Cells["colExpectedValue"].Value = "-";
+                row.Cells["colExpectedValue"].ReadOnly = true;
+
+                row.Cells["colTolerance"].Value = "-";
+                row.Cells["colTolerance"].ReadOnly = true;
+
+
+                row.Cells["colLowerLimit"].ReadOnly = false;
+                row.Cells["colUpperLimit"].ReadOnly = false;
+                row.Cells["colLowerLimit"].Value = "0";
+                row.Cells["colUpperLimit"].Value = txtConnectionResistance.Text?.Trim() ?? "0";
+            }
             else
             {
                 row.Cells["colExpectedValue"].ReadOnly = false;
                 row.Cells["colTolerance"].ReadOnly = false;
 
+
+                //string expStr = row.Cells["colExpectedValue"].ToString();
+                //string tolStr = row.Cells["colTolerance"].ToString();
                 string expStr = row.Cells["colExpectedValue"].Value?.ToString() ?? "0";
                 string tolStr = row.Cells["colTolerance"].Value?.ToString() ?? "±0%";
 
-                if (double.TryParse(expStr, out double expectedVal))
+                if (double.TryParse(expStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expectedVal))
                 {
                     (double minTolPct, double maxTolPct, string formattedTol) = ParseClampAndFormatTolerance(tolStr);
 
@@ -1179,6 +1223,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
                 else
                 {
+                    Debug.WriteLine("fail");
                     row.Cells["colLowerLimit"].Value = "0";
                     row.Cells["colUpperLimit"].Value = "0";
                 }
@@ -1193,12 +1238,13 @@ namespace AssemblyLineTester.Views.Pages
             }
 
             string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
-            if (double.TryParse(clean, out double val))
+            if (double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val) ||
+                double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out val))
             {
                 if (val > 100.0) val = 100.0;
                 if (val < -100.0) val = -100.0;
 
-                string numStr = FormatLimit(Math.Abs(val));
+                string numStr = Math.Abs(val).ToString("0", System.Globalization.CultureInfo.InvariantCulture);
                 if (tolStr.Contains("±") || (!tolStr.StartsWith("-") && !tolStr.StartsWith("+")))
                 {
                     return (-Math.Abs(val), Math.Abs(val), $"±{numStr}%");
@@ -1217,7 +1263,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private static string FormatLimit(double val)
         {
-            return val.ToString("0.############");
+            return val.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void GridConfig_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -1265,11 +1311,23 @@ namespace AssemblyLineTester.Views.Pages
         {
             PointF pt = e.Location;
 
-            foreach (var node in leftNodes.Concat(rightNodes).OrderByDescending(n => highlightedRows.Contains(n.RowIndex)))
+            foreach (var node in leftNodes.Concat(rightNodes).OrderByDescending(n => n.RowIndices.Any(idx => highlightedRows.Contains(idx))))
             {
                 if (IsPointInRect(pt, node.NodeRect) || IsPointInRect(pt, node.LabelRect))
                 {
-                    ToggleHighlight(node.RowIndex);
+                    bool isHighlighted = node.RowIndices.Any(idx => highlightedRows.Contains(idx));
+                    foreach (var idx in node.RowIndices)
+                    {
+                        if (isHighlighted)
+                        {
+                            highlightedRows.Remove(idx);
+                        }
+                        else
+                        {
+                            highlightedRows.Add(idx);
+                        }
+                    }
+                    picPreview.Invalidate();
                     return;
                 }
             }
@@ -1356,23 +1414,49 @@ namespace AssemblyLineTester.Views.Pages
                 string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
                 string toLabel = row.Cells["colToLabel"].Value?.ToString() ?? $"Y1-0{i + 1}";
 
-                DiagramNode lNode = new()
+                var lNode = rawLeftNodes.FirstOrDefault(n => n.Address == fromAddr);
+                if (lNode == null)
                 {
-                    RowIndex = i,
-                    Address = fromAddr,
-                    Label = fromLabel,
-                    IsLeft = true
-                };
-                rawLeftNodes.Add(lNode);
+                    lNode = new DiagramNode
+                    {
+                        RowIndices = [i],
+                        Address = fromAddr,
+                        Label = fromLabel,
+                        IsLeft = true
+                    };
+                    rawLeftNodes.Add(lNode);
+                }
+                else
+                {
+                    lNode.RowIndices.Add(i);
+                    if ((string.IsNullOrEmpty(lNode.Label) || lNode.Label == "NC" || lNode.Label == "Unexpected") && 
+                        !string.IsNullOrEmpty(fromLabel) && fromLabel != "NC" && fromLabel != "Unexpected")
+                    {
+                        lNode.Label = fromLabel;
+                    }
+                }
 
-                DiagramNode rNode = new()
+                var rNode = rawRightNodes.FirstOrDefault(n => n.Address == toAddr);
+                if (rNode == null)
                 {
-                    RowIndex = i,
-                    Address = toAddr,
-                    Label = toLabel,
-                    IsLeft = false
-                };
-                rawRightNodes.Add(rNode);
+                    rNode = new DiagramNode
+                    {
+                        RowIndices = [i],
+                        Address = toAddr,
+                        Label = toLabel,
+                        IsLeft = false
+                    };
+                    rawRightNodes.Add(rNode);
+                }
+                else
+                {
+                    rNode.RowIndices.Add(i);
+                    if ((string.IsNullOrEmpty(rNode.Label) || rNode.Label == "NC" || rNode.Label == "Unexpected") && 
+                        !string.IsNullOrEmpty(toLabel) && toLabel != "NC" && toLabel != "Unexpected")
+                    {
+                        rNode.Label = toLabel;
+                    }
+                }
             }
 
             var sortedLeftNodes = rawLeftNodes.OrderBy(n => int.TryParse(n.Address, out int val) ? val : n.Address.GetHashCode()).ToList();
@@ -1397,8 +1481,12 @@ namespace AssemblyLineTester.Views.Pages
 
             for (int i = 0; i < rowCount; i++)
             {
-                var lNode = leftNodes.FirstOrDefault(n => n.RowIndex == i);
-                var rNode = rightNodes.FirstOrDefault(n => n.RowIndex == i);
+                DataGridViewRow row = gridConfig.Rows[i];
+                string fromAddr = row.Cells["colFromAddr"].Value?.ToString() ?? "0";
+                string toAddr = row.Cells["colToAddr"].Value?.ToString() ?? "0";
+
+                var lNode = leftNodes.FirstOrDefault(n => n.Address == fromAddr);
+                var rNode = rightNodes.FirstOrDefault(n => n.Address == toAddr);
 
                 if (lNode != null && rNode != null)
                 {
@@ -1435,7 +1523,7 @@ namespace AssemblyLineTester.Views.Pages
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                if (!highlightedRows.Contains(node.RowIndex))
+                if (!node.RowIndices.Any(idx => highlightedRows.Contains(idx)))
                 {
                     DrawNodeAndLabel(g, node, false, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
@@ -1454,7 +1542,7 @@ namespace AssemblyLineTester.Views.Pages
 
             foreach (var node in leftNodes.Concat(rightNodes))
             {
-                if (highlightedRows.Contains(node.RowIndex))
+                if (node.RowIndices.Any(idx => highlightedRows.Contains(idx)))
                 {
                     DrawNodeAndLabel(g, node, true, fontLabel, fontAddr, sfLabel, sfAddr);
                 }
@@ -1504,7 +1592,11 @@ namespace AssemblyLineTester.Views.Pages
 
         private TestConfiguration? BuildConfigurationFromGrid(string configName, string productModel, string? description)
         {
+            //var testTypes = GetSelectedTestTypesFromGrid();
+
             var nets = new List<TestConfigNet>();
+
+
 
             for (int i = 0; i < gridConfig.Rows.Count; i++)
             {
@@ -1522,9 +1614,9 @@ namespace AssemblyLineTester.Views.Pages
                     return null;
                 }
 
-                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), out double expected);
-                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), out double lower);
-                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), out double upper);
+                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expected);
+                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lower);
+                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double upper);
 
                 string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
                 var tt = _configService.GetTestTypeByName(testTypeName);
@@ -1538,7 +1630,7 @@ namespace AssemblyLineTester.Views.Pages
                     ToAddress = toAddr,
                     ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
                     TestTypeId = tt?.Id ?? 0,
-                    TestType = null,
+                    TestType = tt,
                     ExpectedValue = expected,
                     LowerLimit = lower,
                     UpperLimit = upper,
@@ -1549,20 +1641,80 @@ namespace AssemblyLineTester.Views.Pages
                 });
             }
 
+            double.TryParse(txtConnectionResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double maxWireRes);
+            double.TryParse(txtInsulationResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minInsRes);
+            double.TryParse(txtComponentResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minCompRes);
+
             return new TestConfiguration
             {
                 ConfigName = configName,
                 ProductModelName = productModel,
                 Description = description,
+                MaxWireResistance = maxWireRes,
+                MinInsulationResistance = minInsRes,
+                MinComponentResistance = minCompRes,
+                //TestTypes = testTypes,
                 Nets = nets
             };
+        }
+
+        public List<TestType> GetSelectedTestTypesFromGrid()
+        {
+            var selectedList = new List<TestType>();
+            try
+            {
+                using var db = new Data.AppDbContext();
+                var allTestTypes = db.TestTypes.ToList();
+
+                var gridTestTypeNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                for (int i = 0; i < gridConfig.Rows.Count; i++)
+                {
+                    var row = gridConfig.Rows[i];
+                    if (row.IsNewRow) continue;
+
+                    string typeName = row.Cells["colTestType"].Value?.ToString()?.Trim() ?? "";
+                    if (!string.IsNullOrEmpty(typeName))
+                    {
+                        gridTestTypeNames.Add(typeName);
+                    }
+                }
+
+                foreach (var tt in allTestTypes)
+                {
+                    bool isPresent = gridTestTypeNames.Any(gt =>
+                        string.Equals(gt, tt.TestTypeName, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(gt, tt.DisplayName, StringComparison.OrdinalIgnoreCase) ||
+                        (tt.TestTypeName.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase) && (gt.Equals("RESIS", StringComparison.OrdinalIgnoreCase) || gt.Equals("4RESISTOR", StringComparison.OrdinalIgnoreCase))) ||
+                        (tt.TestTypeName.Equals("WIRE", StringComparison.OrdinalIgnoreCase) && (gt.Equals("4WIRE", StringComparison.OrdinalIgnoreCase) || gt.Equals("SIGNATURE WIRE", StringComparison.OrdinalIgnoreCase))) ||
+                        (tt.TestTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) && gt.Equals("CAP", StringComparison.OrdinalIgnoreCase)) ||
+                        (tt.TestTypeName.Equals("DIODE", StringComparison.OrdinalIgnoreCase) && gt.Equals("SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase))
+                    );
+
+                    if (isPresent)
+                    {
+                        selectedList.Add(tt);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("TestParametersPage.GetSelectedTestTypesFromGrid", "Failed to resolve grid test types", ex);
+            }
+
+            return selectedList;
         }
 
         private static double? ParseTolerancePercent(string? tolStr)
         {
             if (string.IsNullOrWhiteSpace(tolStr) || tolStr == "-") return null;
             string clean = tolStr.Replace("±", "").Replace("+", "").Replace("%", "").Trim();
-            return double.TryParse(clean, out double val) ? val : null;
+            if (double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val) ||
+                double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out val))
+            {
+                return val;
+            }
+            return null;
         }
         private void ParseAndPopulateGridFromProgramText(string programText, List<string>? allowedTestTypes = null)
         {
@@ -1609,11 +1761,11 @@ namespace AssemblyLineTester.Views.Pages
                     int toAddr = ParsePinAddress(toPin);
 
                     gridConfig.Rows.Add(
-                        seqNo.ToString(),       //No
-                        "",                     //Harness Group
-                        "",                     //Color
-                        "",                     //Gauge
-                        "",                     //Net-ID
+                        seqNo.ToString(),       // No
+                        "",                     // Harness Group
+                        "",                     // Color
+                        "",                     // Gauge
+                        "",                     // Net-ID
                         fromAddr.ToString(),    // from
                         "",                     // from label
                         toAddr.ToString(),      // to
@@ -1663,6 +1815,8 @@ namespace AssemblyLineTester.Views.Pages
         private async void btnLearnConnection_Click(object? sender, EventArgs e)
         {
             List<string> learnTestTypes;
+            List<LearnConnection> selectedConnections;
+            byte testLearnValue = 0;
 
             // Show the Learn Connection Modal Options
             using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
@@ -1671,6 +1825,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     return; // User cancelled
                 }
+                selectedConnections = modal.SelectedTypes;
 
                 learnTestTypes = modal.SelectedTypes
                     .Select(c => c.TestType?.TestTypeName ?? string.Empty)
@@ -1683,7 +1838,14 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
             }
+            foreach (LearnConnection conn in selectedConnections)
+            {
+                testLearnValue += (byte)(conn.TestType?.TestTypeValue ?? conn.TestTypeValue);
+            }
+            Debug.WriteLine("====================================================================");
+            Debug.WriteLine(testLearnValue);
 
+            InstrumentService.StopMonitoring();
             _testCts?.Cancel();
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
@@ -1694,8 +1856,6 @@ namespace AssemblyLineTester.Views.Pages
             btnStartAll.Enabled = false;
             btnStartSelected.Enabled = false;
             btnAbort.Enabled = true;
-
-
             try
             {
                 //bool isConnected = _instrument.Connect();
@@ -1705,39 +1865,34 @@ namespace AssemblyLineTester.Views.Pages
                 //    return;
                 //}
 
-                var learnResult = await Task.Run(() => _instrument.LearnConnection(), token);
+                //  WIRE = 0
+                //  RESISTORS = 1
+                //  CAPACITORS = 2  
+                //  DIODES = 4
+                //  TWISTED PAIRS = 8
+
+                var learnResult = testLearnValue == 0
+                    ? await Task.Run(() => _instrument.LearnConnection(), token)
+                    : await Task.Run(() => _instrument.LearnComplexConnection("", testLearnValue), token);
+
                 if (token.IsCancellationRequested) return;
 
                 if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                 {
                     string errorMessage = "No Error";
 
-                    // Fast loop: check 4 times, wait 300ms each, to beat the race condition 
-                    // but not so long that the buffer clears itself!
-                    for (int i = 0; i < 4; i++)
-                    {
-                        await Task.Delay(300, token);
-                        var lastErrorObj = _instrument.GetLastError();
-                        errorMessage = lastErrorObj?.Result;
-
-                        if (!string.IsNullOrWhiteSpace(errorMessage) && errorMessage != "No Error")
-                            break; // Caught it!
-                    }
-
                     // Fallback: If the API completely refuses to give the error, force a generic message
                     if (string.IsNullOrWhiteSpace(errorMessage) || errorMessage == "No Error")
                     {
                         errorMessage = "Hardware Learn Aborted. Please check the physical instrument display for details (e.g., resistance too high).";
                     }
-
-                    Debug.WriteLine(errorMessage);
                     MessageBox.Show(this, $"Failed to execute learn operation on instrument.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);
                 if (token.IsCancellationRequested) return;
-                Debug.WriteLine(getTestResult);
+
                 if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
                 {
 
@@ -1747,19 +1902,24 @@ namespace AssemblyLineTester.Views.Pages
 
                 _customTestText = getTestResult.Result;
                 Debug.WriteLine(_customTestText);
-                ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
+                //ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
 
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                complexConfig = _configService.ConvertToTestConfig(getTestResult.Result);
+                config = _configService.ConvertToTestConfig(getTestResult.Result);
 
-                if (complexConfig != null)
+                if (config != null)
                 {
-                    LoadConfigurationIntoGrid(complexConfig);
+                    LoadConfigurationIntoGrid(config);
                 }
-                string checkResult = _configService.ConvertToProgramText(complexConfig);
-                Debug.WriteLine("Convert  = ");
-                Debug.WriteLine(checkResult);
+                string checkResult = _configService.ConvertToProgramText(config);
+                txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                txtComponentResistance.Text = config.MinComponentResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+
+
+                //Debug.WriteLine("Convert  = ");
+                //Debug.WriteLine(checkResult);
             }
             catch (OperationCanceledException)
             {
@@ -1767,6 +1927,8 @@ namespace AssemblyLineTester.Views.Pages
             }
             finally
             {
+
+                InstrumentService.StartMonitoring();
                 btnLearnConnection.Text = originalText;
                 btnLearnConnection.Enabled = true;
                 btnStartAll.Enabled = true;
@@ -1799,7 +1961,12 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
 
-                await Task.Run(() => ExecuteTestForRows(selectedRows, token), token);
+                if (!ValidateRowsForZeroValues(selectedRows)) return;
+
+                var config = BuildConfigurationFromGrid(txtConfigName.Text?.Trim() ?? "", "", null);
+                if (config == null || config.Nets.Count == 0) return;
+
+                await Task.Run(() => ExecuteTestForRows(selectedRows, config, token), token);
 
                 if (!token.IsCancellationRequested)
                 {
@@ -1844,7 +2011,12 @@ namespace AssemblyLineTester.Views.Pages
                     return;
                 }
 
-                await Task.Run(() => ExecuteTestForRows(selectedRows, token), token);
+                if (!ValidateRowsForZeroValues(selectedRows)) return;
+
+                var config = BuildConfigurationForRows(selectedRows, txtConfigName.Text?.Trim() ?? "", "", null);
+                if (config == null || config.Nets.Count == 0) return;
+
+                await Task.Run(() => ExecuteTestForRows(selectedRows, config, token), token);
 
                 if (!token.IsCancellationRequested)
                 {
@@ -1907,29 +2079,26 @@ namespace AssemblyLineTester.Views.Pages
 
 
 
-        private void ExecuteTestForRows(List<int> targetRowIndices, System.Threading.CancellationToken token = default)
+        private void ExecuteTestForRows(List<int> targetRowIndices, TestConfiguration config, System.Threading.CancellationToken token = default)
         {
             if (token.IsCancellationRequested) return;
 
-            if (targetRowIndices.Count == 0)
+            if (targetRowIndices.Count == 0 || config == null || config.Nets.Count == 0)
             {
-                MessageBox.Show(this, "No valid rows selected for testing.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowMessageBoxOnUI("No valid rows selected for testing.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             bool isConnected = _instrument.Connect();
             if (!isConnected)
             {
-                MessageBox.Show(this, "Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowMessageBoxOnUI("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (token.IsCancellationRequested) return;
 
-            var manualConfig = BuildConfigurationForRows(targetRowIndices, txtConfigName.Text?.Trim() ?? "", txtProductModel.Text?.Trim() ?? "", null);
-            if (manualConfig == null || manualConfig.Nets.Count == 0) return;
-
-            _customTestText = _configService.ConvertToProgramText(manualConfig);
+            _customTestText = _configService.ConvertToProgramText(config);
             Debug.WriteLine(_customTestText);
 
             if (token.IsCancellationRequested) return;
@@ -1941,20 +2110,19 @@ namespace AssemblyLineTester.Views.Pages
                     var putResult = _instrument.PutTestProgram(string.Empty, _customTestText, true);
                     if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                     {
-                        //_instrument.Disconnect();
-                        MessageBox.Show(this, $"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ShowMessageBoxOnUI($"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
                 else
                 {
-                    MessageBox.Show(this, "Generated test program text is empty.", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ShowMessageBoxOnUI("Generated test program text is empty.", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, $"Error converting configuration to program text:\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowMessageBoxOnUI($"Error converting configuration to program text:\n{ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -1967,7 +2135,7 @@ namespace AssemblyLineTester.Views.Pages
 
             if (testResult == null || testResult.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
             {
-                MessageBox.Show(this, $"Test execution failed. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Execution Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowMessageBoxOnUI($"Test execution failed. Error: {testResult?.DllCallResult.ToString() ?? "Unknown"}", "Execution Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -1986,27 +2154,50 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         if (token.IsCancellationRequested) return;
                         int rowIndex = targetRowIndices[k];
-                        if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
+                        var measurement = list[k];
+                        string valStr = measurement.Value1.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+
+                        if (this.InvokeRequired)
                         {
-                            var measurement = list[k];
-                            string valStr = measurement.Value1.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
-                            gridConfig.Rows[rowIndex].Cells["colUnit"].Value = valStr;
+                            this.Invoke(new Action(() =>
+                            {
+                                if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
+                                {
+                                    gridConfig.Rows[rowIndex].Cells["colUnit"].Value = valStr;
+                                }
+                            }));
+                        }
+                        else
+                        {
+                            if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
+                            {
+                                gridConfig.Rows[rowIndex].Cells["colUnit"].Value = valStr;
+                            }
                         }
                     }
                 }
                 else
                 {
-                    MessageBox.Show(this, "No measured values returned from instrument.", "Test Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ShowMessageBoxOnUI("No measured values returned from instrument.", "Test Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else
             {
-                MessageBox.Show(this, $"Failed to retrieve measured values. Error: {measuredValuesResult?.DllCallResult.ToString() ?? "Unknown"}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowMessageBoxOnUI($"Failed to retrieve measured values. Error: {measuredValuesResult?.DllCallResult.ToString() ?? "Unknown"}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-
-
+        private void ShowMessageBoxOnUI(string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => MessageBox.Show(this, message, caption, buttons, icon)));
+            }
+            else
+            {
+                MessageBox.Show(this, message, caption, buttons, icon);
+            }
+        }
 
         private TestConfiguration? BuildConfigurationForRows(List<int> targetRowIndices, string configName, string productModel, string? description)
         {
@@ -2031,120 +2222,79 @@ namespace AssemblyLineTester.Views.Pages
                     return null;
                 }
 
+                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expected);
+                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lower);
+                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double upper);
+
                 string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
                 var tt = _configService.GetTestTypeByName(testTypeName);
                 nets.Add(new TestConfigNet
                 {
                     SequenceNo = nets.Count + 1,
+                    NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
+                    HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
                     FromAddress = fromAddr,
+                    FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
                     ToAddress = toAddr,
+                    ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
                     TestTypeId = tt?.Id ?? 0,
-                    TestType = null,
-                    LowerLimit = 10,
-                    UpperLimit = 10,
-                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? ""
+                    TestType = tt,
+                    ExpectedValue = expected,
+                    LowerLimit = lower,
+                    UpperLimit = upper,
+                    Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
+                    MeasurementUnit = row.Cells["colUnit"].Value?.ToString() ?? "",
+                    Color = row.Cells["colColor"].Value?.ToString() ?? "",
+                    Gauge = row.Cells["colGauge"].Value?.ToString() ?? ""
                 });
             }
+
+            double.TryParse(txtConnectionResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double maxWireRes);
+            double.TryParse(txtInsulationResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minInsRes);
+            double.TryParse(txtComponentResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minCompRes);
 
             return new TestConfiguration
             {
                 ConfigName = configName,
                 ProductModelName = productModel,
                 Description = description,
+                MaxWireResistance = maxWireRes,
+                MinInsulationResistance = minInsRes,
+                MinComponentResistance = minCompRes,
                 Nets = nets
             };
         }
 
-        private async void btnComplex_Click(object sender, EventArgs e)
+        private bool ValidateRowsForZeroValues(List<int> targetRowIndices)
         {
-            // Show the Learn Connection Modal Options
-            //using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
-            //{
-            //    if (modal.ShowDialog(this) != DialogResult.OK)
-            //    {
-            //        return; // User cancelled
-            //    }
-
-            //    // Store options in local variables as requested
-            //    bool learnWire = modal.IncludeWire;
-            //    bool learnResistor = modal.IncludeResistor;
-            //    bool learnCapacitor = modal.IncludeCapacitor;
-            //    bool learnDiode = modal.IncludeDiode;
-            //    bool learnTwistedPair = modal.IncludeTwistedPair;
-            //}
-            InstrumentService.StopMonitoring();
-            _testCts?.Cancel();
-            _testCts = new System.Threading.CancellationTokenSource();
-            var token = _testCts.Token;
-
-            string originalText = btnLearnConnection.Text;
-            btnLearnConnection.Text = "Loading.....";
-            btnLearnConnection.Enabled = false;
-            btnStartAll.Enabled = false;
-            btnStartSelected.Enabled = false;
-            btnAbort.Enabled = true;
-
-
-            try
+            foreach (int rowIndex in targetRowIndices)
             {
-                bool isConnected = _instrument.Connect();
-                if (!isConnected)
+                if (rowIndex < 0 || rowIndex >= gridConfig.Rows.Count) continue;
+                var row = gridConfig.Rows[rowIndex];
+                if (row.IsNewRow) continue;
+
+                string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
+                string upperType = testTypeName.Trim().ToUpperInvariant();
+
+                if (!string.IsNullOrWhiteSpace(upperType) && upperType != "WIRE" && upperType != "CONTINUITY")
                 {
-                    MessageBox.Show("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expected);
+                    double? tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString());
+
+                    if (expected <= 0)
+                    {
+                        MessageBox.Show(this, $"Row {rowIndex + 1} ({testTypeName}): Expected Value must be greater than 0.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
+
+                    if (!tolerance.HasValue || tolerance.Value <= 0)
+                    {
+                        MessageBox.Show(this, $"Row {rowIndex + 1} ({testTypeName}): Tolerance must be greater than 0.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
                 }
-                var learnResult = await Task.Run(() => _instrument.LearnComplexConnection("",7), token);
-                if (token.IsCancellationRequested) return;
-
-                if (learnResult == CtaDotNet.Enums.CtaCommandResultCode.Success)
-                {
-                    Debug.WriteLine("complex learn success");
-                }
-                else
-                {
-                    Debug.WriteLine("complex learn failed");
-                }
-
-                var getTestResult = await Task.Run(() =>  _instrument.GetLearnedConnection());
-                if (token.IsCancellationRequested) return;
-                Debug.WriteLine(getTestResult);
-                Debug.WriteLine(getTestResult.Result);
-                if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
-                {
-
-                    MessageBox.Show(this, "Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                complexConfig = _configService.ConvertToTestConfig(getTestResult.Result);
-                Debug.WriteLine("Learned Test Configuration:");
-                Debug.WriteLine(complexConfig);
-
-                if (complexConfig != null)
-                {
-                    LoadConfigurationIntoGrid(complexConfig);
-                }
-                string checkResult = _configService.ConvertToProgramText(complexConfig);
-                Debug.WriteLine("Convert  = ");
-                Debug.WriteLine(checkResult);
-                //_customTestText = getTestResult.Result;
-                //Debug.WriteLine(_customTestText);
-
-                MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (OperationCanceledException)
-            {
-                // Task was canceled via btnAbort
-            }
-            finally
-            {
-                InstrumentService.StartMonitoring();
-                btnLearnConnection.Text = originalText;
-                btnLearnConnection.Enabled = true;
-                btnStartAll.Enabled = true;
-                btnStartSelected.Enabled = true;
-                btnAbort.Enabled = false;
-            }
+            return true;
         }
     }
 }

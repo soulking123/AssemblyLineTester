@@ -81,18 +81,17 @@ namespace AssemblyLineTester.Views.Pages
             // tblMainLayout
             // 
             tblMainLayout.ColumnCount = 2;
-            tblMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 430F));
+            tblMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 232F));
             tblMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tblMainLayout.Controls.Add(cardRoleSelector, 0, 0);
             tblMainLayout.Controls.Add(pnlRightContent, 1, 0);
             tblMainLayout.Dock = DockStyle.Fill;
             tblMainLayout.Location = new Point(0, 0);
-            tblMainLayout.Margin = new Padding(6);
             tblMainLayout.Name = "tblMainLayout";
-            tblMainLayout.Padding = new Padding(22, 26, 22, 26);
+            tblMainLayout.Padding = new Padding(12, 12, 12, 12);
             tblMainLayout.RowCount = 1;
             tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblMainLayout.Size = new Size(2229, 1707);
+            tblMainLayout.Size = new Size(1200, 800);
             tblMainLayout.TabIndex = 0;
             // 
             // cardRoleSelector
@@ -105,11 +104,11 @@ namespace AssemblyLineTester.Views.Pages
             cardRoleSelector.Controls.Add(lblRolesSubheader);
             cardRoleSelector.Controls.Add(lblRolesHeader);
             cardRoleSelector.Dock = DockStyle.Fill;
-            cardRoleSelector.Location = new Point(28, 32);
-            cardRoleSelector.Margin = new Padding(6, 6, 22, 6);
+            cardRoleSelector.Location = new Point(15, 22);
+            cardRoleSelector.Margin = new Padding(3, 10, 12, 3);
             cardRoleSelector.Name = "cardRoleSelector";
-            cardRoleSelector.Padding = new Padding(30, 34, 30, 34);
-            cardRoleSelector.Size = new Size(402, 1643);
+            cardRoleSelector.Padding = new Padding(16, 16, 16, 16);
+            cardRoleSelector.Size = new Size(217, 763);
             cardRoleSelector.TabIndex = 0;
             // 
             // flpRolesList
@@ -123,10 +122,9 @@ namespace AssemblyLineTester.Views.Pages
             flpRolesList.Controls.Add(btnRoleSupervisor);
             flpRolesList.Dock = DockStyle.Fill;
             flpRolesList.FlowDirection = FlowDirection.TopDown;
-            flpRolesList.Location = new Point(30, 179);
-            flpRolesList.Margin = new Padding(6);
+            flpRolesList.Location = new Point(16, 84);
             flpRolesList.Name = "flpRolesList";
-            flpRolesList.Size = new Size(342, 1430);
+            flpRolesList.Size = new Size(185, 663);
             flpRolesList.TabIndex = 2;
             flpRolesList.WrapContents = false;
             // 
@@ -141,10 +139,10 @@ namespace AssemblyLineTester.Views.Pages
             btnRoleAdmin.HoverBackColor = Color.FromArgb(250, 204, 21);
             btnRoleAdmin.HoverForeColor = Color.FromArgb(15, 23, 42);
             btnRoleAdmin.Location = new Point(0, 0);
-            btnRoleAdmin.Margin = new Padding(0, 0, 0, 8);
+            btnRoleAdmin.Margin = new Padding(0, 0, 0, 4);
             btnRoleAdmin.Name = "btnRoleAdmin";
             btnRoleAdmin.PressedForeColor = Color.Empty;
-            btnRoleAdmin.Size = new Size(334, 52);
+            btnRoleAdmin.Size = new Size(180, 24);
             btnRoleAdmin.TabIndex = 0;
             btnRoleAdmin.Tag = 1;
             btnRoleAdmin.Text = "  👑    Administrator";
@@ -161,11 +159,11 @@ namespace AssemblyLineTester.Views.Pages
             btnRoleOperator.ForeColor = Color.FromArgb(30, 41, 59);
             btnRoleOperator.HoverBackColor = Color.FromArgb(250, 204, 21);
             btnRoleOperator.HoverForeColor = Color.FromArgb(15, 23, 42);
-            btnRoleOperator.Location = new Point(0, 60);
-            btnRoleOperator.Margin = new Padding(0, 0, 0, 8);
+            btnRoleOperator.Location = new Point(0, 28);
+            btnRoleOperator.Margin = new Padding(0, 0, 0, 4);
             btnRoleOperator.Name = "btnRoleOperator";
             btnRoleOperator.PressedForeColor = Color.Empty;
-            btnRoleOperator.Size = new Size(334, 52);
+            btnRoleOperator.Size = new Size(180, 24);
             btnRoleOperator.TabIndex = 1;
             btnRoleOperator.Tag = 2;
             btnRoleOperator.Text = "  🏭    Operator";
@@ -182,11 +180,11 @@ namespace AssemblyLineTester.Views.Pages
             btnRoleEngineer.ForeColor = Color.FromArgb(30, 41, 59);
             btnRoleEngineer.HoverBackColor = Color.FromArgb(250, 204, 21);
             btnRoleEngineer.HoverForeColor = Color.FromArgb(15, 23, 42);
-            btnRoleEngineer.Location = new Point(0, 120);
-            btnRoleEngineer.Margin = new Padding(0, 0, 0, 8);
+            btnRoleEngineer.Location = new Point(0, 56);
+            btnRoleEngineer.Margin = new Padding(0, 0, 0, 4);
             btnRoleEngineer.Name = "btnRoleEngineer";
             btnRoleEngineer.PressedForeColor = Color.Empty;
-            btnRoleEngineer.Size = new Size(334, 52);
+            btnRoleEngineer.Size = new Size(180, 24);
             btnRoleEngineer.TabIndex = 2;
             btnRoleEngineer.Tag = 3;
             btnRoleEngineer.Text = "  📐    Engineer";
@@ -203,11 +201,11 @@ namespace AssemblyLineTester.Views.Pages
             btnRoleTechnician.ForeColor = Color.FromArgb(30, 41, 59);
             btnRoleTechnician.HoverBackColor = Color.FromArgb(250, 204, 21);
             btnRoleTechnician.HoverForeColor = Color.FromArgb(15, 23, 42);
-            btnRoleTechnician.Location = new Point(0, 180);
-            btnRoleTechnician.Margin = new Padding(0, 0, 0, 8);
+            btnRoleTechnician.Location = new Point(0, 84);
+            btnRoleTechnician.Margin = new Padding(0, 0, 0, 4);
             btnRoleTechnician.Name = "btnRoleTechnician";
             btnRoleTechnician.PressedForeColor = Color.Empty;
-            btnRoleTechnician.Size = new Size(334, 52);
+            btnRoleTechnician.Size = new Size(180, 24);
             btnRoleTechnician.TabIndex = 3;
             btnRoleTechnician.Tag = 4;
             btnRoleTechnician.Text = "  🔧    Technician";
@@ -224,11 +222,11 @@ namespace AssemblyLineTester.Views.Pages
             btnRoleQuality.ForeColor = Color.FromArgb(30, 41, 59);
             btnRoleQuality.HoverBackColor = Color.FromArgb(250, 204, 21);
             btnRoleQuality.HoverForeColor = Color.FromArgb(15, 23, 42);
-            btnRoleQuality.Location = new Point(0, 240);
-            btnRoleQuality.Margin = new Padding(0, 0, 0, 8);
+            btnRoleQuality.Location = new Point(0, 112);
+            btnRoleQuality.Margin = new Padding(0, 0, 0, 4);
             btnRoleQuality.Name = "btnRoleQuality";
             btnRoleQuality.PressedForeColor = Color.Empty;
-            btnRoleQuality.Size = new Size(334, 52);
+            btnRoleQuality.Size = new Size(180, 24);
             btnRoleQuality.TabIndex = 4;
             btnRoleQuality.Tag = 5;
             btnRoleQuality.Text = "  🔎    Quality";
@@ -245,11 +243,11 @@ namespace AssemblyLineTester.Views.Pages
             btnRoleSupervisor.ForeColor = Color.FromArgb(30, 41, 59);
             btnRoleSupervisor.HoverBackColor = Color.FromArgb(250, 204, 21);
             btnRoleSupervisor.HoverForeColor = Color.FromArgb(15, 23, 42);
-            btnRoleSupervisor.Location = new Point(0, 300);
-            btnRoleSupervisor.Margin = new Padding(0, 0, 0, 8);
+            btnRoleSupervisor.Location = new Point(0, 140);
+            btnRoleSupervisor.Margin = new Padding(0, 0, 0, 4);
             btnRoleSupervisor.Name = "btnRoleSupervisor";
             btnRoleSupervisor.PressedForeColor = Color.Empty;
-            btnRoleSupervisor.Size = new Size(334, 52);
+            btnRoleSupervisor.Size = new Size(180, 24);
             btnRoleSupervisor.TabIndex = 5;
             btnRoleSupervisor.Tag = 6;
             btnRoleSupervisor.Text = "  📋    Supervisor";
@@ -261,10 +259,9 @@ namespace AssemblyLineTester.Views.Pages
             lblRolesSubheader.Dock = DockStyle.Top;
             lblRolesSubheader.Font = new Font("Segoe UI", 9.5F);
             lblRolesSubheader.ForeColor = Color.FromArgb(100, 116, 139);
-            lblRolesSubheader.Location = new Point(30, 102);
-            lblRolesSubheader.Margin = new Padding(6, 0, 6, 0);
+            lblRolesSubheader.Location = new Point(16, 48);
             lblRolesSubheader.Name = "lblRolesSubheader";
-            lblRolesSubheader.Size = new Size(342, 77);
+            lblRolesSubheader.Size = new Size(185, 36);
             lblRolesSubheader.TabIndex = 1;
             lblRolesSubheader.Text = "Select a role to configure permissions";
             // 
@@ -273,10 +270,9 @@ namespace AssemblyLineTester.Views.Pages
             lblRolesHeader.Dock = DockStyle.Top;
             lblRolesHeader.Font = new Font("Segoe UI Semibold", 14F, FontStyle.Bold);
             lblRolesHeader.ForeColor = Color.FromArgb(15, 23, 42);
-            lblRolesHeader.Location = new Point(30, 34);
-            lblRolesHeader.Margin = new Padding(6, 0, 6, 0);
+            lblRolesHeader.Location = new Point(16, 16);
             lblRolesHeader.Name = "lblRolesHeader";
-            lblRolesHeader.Size = new Size(342, 68);
+            lblRolesHeader.Size = new Size(185, 32);
             lblRolesHeader.TabIndex = 0;
             lblRolesHeader.Text = "System Roles";
             // 
@@ -284,10 +280,9 @@ namespace AssemblyLineTester.Views.Pages
             // 
             pnlRightContent.Controls.Add(tblCardsContainer);
             pnlRightContent.Dock = DockStyle.Fill;
-            pnlRightContent.Location = new Point(458, 32);
-            pnlRightContent.Margin = new Padding(6);
+            pnlRightContent.Location = new Point(247, 15);
             pnlRightContent.Name = "pnlRightContent";
-            pnlRightContent.Size = new Size(1743, 1643);
+            pnlRightContent.Size = new Size(938, 770);
             pnlRightContent.TabIndex = 1;
             // 
             // tblCardsContainer
@@ -301,16 +296,15 @@ namespace AssemblyLineTester.Views.Pages
             tblCardsContainer.Controls.Add(cardSystemLogs, 0, 3);
             tblCardsContainer.Dock = DockStyle.Fill;
             tblCardsContainer.Location = new Point(0, 0);
-            tblCardsContainer.Margin = new Padding(6);
             tblCardsContainer.Name = "tblCardsContainer";
-            tblCardsContainer.Padding = new Padding(12, 17, 24, 17);
+            tblCardsContainer.Padding = new Padding(6, 8, 13, 8);
             tblCardsContainer.RowCount = 5;
             tblCardsContainer.RowStyles.Add(new RowStyle());
             tblCardsContainer.RowStyles.Add(new RowStyle());
             tblCardsContainer.RowStyles.Add(new RowStyle());
             tblCardsContainer.RowStyles.Add(new RowStyle());
             tblCardsContainer.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblCardsContainer.Size = new Size(1743, 1643);
+            tblCardsContainer.Size = new Size(938, 770);
             tblCardsContainer.TabIndex = 1;
             // 
             // cardHeader
@@ -323,10 +317,10 @@ namespace AssemblyLineTester.Views.Pages
             cardHeader.BorderSize = 2.5F;
             cardHeader.Controls.Add(pnlActionsHeader);
             cardHeader.Dock = DockStyle.Fill;
-            cardHeader.Location = new Point(12, 17);
-            cardHeader.Margin = new Padding(0, 0, 0, 24);
+            cardHeader.Location = new Point(6, 8);
+            cardHeader.Margin = new Padding(0, 0, 0, 11);
             cardHeader.Name = "cardHeader";
-            cardHeader.Size = new Size(1707, 192);
+            cardHeader.Size = new Size(919, 90);
             cardHeader.TabIndex = 0;
             // 
             // pnlActionsHeader
@@ -338,10 +332,9 @@ namespace AssemblyLineTester.Views.Pages
             pnlActionsHeader.Controls.Add(lblSelectedRoleTitle);
             pnlActionsHeader.Dock = DockStyle.Top;
             pnlActionsHeader.Location = new Point(0, 0);
-            pnlActionsHeader.Margin = new Padding(6);
             pnlActionsHeader.Name = "pnlActionsHeader";
-            pnlActionsHeader.Padding = new Padding(37, 34, 37, 34);
-            pnlActionsHeader.Size = new Size(1707, 192);
+            pnlActionsHeader.Padding = new Padding(20, 16, 20, 16);
+            pnlActionsHeader.Size = new Size(919, 90);
             pnlActionsHeader.TabIndex = 0;
             // 
             // btnSaveChanges
@@ -355,11 +348,10 @@ namespace AssemblyLineTester.Views.Pages
             btnSaveChanges.Font = new Font("Segoe UI Semibold", 10.5F, FontStyle.Bold);
             btnSaveChanges.ForeColor = Color.Black;
             btnSaveChanges.HoverForeColor = Color.Empty;
-            btnSaveChanges.Location = new Point(1404, 85);
-            btnSaveChanges.Margin = new Padding(6);
+            btnSaveChanges.Location = new Point(756, 40);
             btnSaveChanges.Name = "btnSaveChanges";
             btnSaveChanges.PressedForeColor = Color.Empty;
-            btnSaveChanges.Size = new Size(260, 67);
+            btnSaveChanges.Size = new Size(140, 31);
             btnSaveChanges.TabIndex = 3;
             btnSaveChanges.Text = "💾 Save Changes";
             btnSaveChanges.UseVisualStyleBackColor = false;
@@ -376,13 +368,12 @@ namespace AssemblyLineTester.Views.Pages
             btnResetDefaults.ForeColor = Color.FromArgb(71, 85, 105);
             btnResetDefaults.HoverBackColor = Color.FromArgb(226, 232, 240);
             btnResetDefaults.HoverForeColor = Color.Empty;
-            btnResetDefaults.Location = new Point(1132, 85);
-            btnResetDefaults.Margin = new Padding(6);
+            btnResetDefaults.Location = new Point(610, 40);
             btnResetDefaults.Name = "btnResetDefaults";
             btnResetDefaults.NormalBackColor = Color.FromArgb(241, 245, 249);
             btnResetDefaults.PressedBackColor = Color.FromArgb(203, 213, 225);
             btnResetDefaults.PressedForeColor = Color.Empty;
-            btnResetDefaults.Size = new Size(260, 67);
+            btnResetDefaults.Size = new Size(140, 31);
             btnResetDefaults.TabIndex = 2;
             btnResetDefaults.Text = "🔄 Reset Defaults";
             btnResetDefaults.UseVisualStyleBackColor = false;
@@ -392,10 +383,9 @@ namespace AssemblyLineTester.Views.Pages
             lblSelectedRoleDesc.AutoSize = true;
             lblSelectedRoleDesc.Font = new Font("Segoe UI", 10F);
             lblSelectedRoleDesc.ForeColor = Color.FromArgb(100, 116, 139);
-            lblSelectedRoleDesc.Location = new Point(41, 107);
-            lblSelectedRoleDesc.Margin = new Padding(6, 0, 6, 0);
+            lblSelectedRoleDesc.Location = new Point(22, 50);
             lblSelectedRoleDesc.Name = "lblSelectedRoleDesc";
-            lblSelectedRoleDesc.Size = new Size(762, 37);
+            lblSelectedRoleDesc.Size = new Size(396, 19);
             lblSelectedRoleDesc.TabIndex = 1;
             lblSelectedRoleDesc.Text = "Configure what this role can access and perform across the app";
             // 
@@ -404,10 +394,9 @@ namespace AssemblyLineTester.Views.Pages
             lblSelectedRoleTitle.AutoSize = true;
             lblSelectedRoleTitle.Font = new Font("Segoe UI Semibold", 16F, FontStyle.Bold);
             lblSelectedRoleTitle.ForeColor = Color.FromArgb(15, 23, 42);
-            lblSelectedRoleTitle.Location = new Point(37, 34);
-            lblSelectedRoleTitle.Margin = new Padding(6, 0, 6, 0);
+            lblSelectedRoleTitle.Location = new Point(20, 16);
             lblSelectedRoleTitle.Name = "lblSelectedRoleTitle";
-            lblSelectedRoleTitle.Size = new Size(647, 59);
+            lblSelectedRoleTitle.Size = new Size(327, 30);
             lblSelectedRoleTitle.TabIndex = 0;
             lblSelectedRoleTitle.Text = "Role Permissions: Administrator";
             // 
@@ -421,10 +410,10 @@ namespace AssemblyLineTester.Views.Pages
             cardPageAccess.BorderSize = 2.5F;
             cardPageAccess.Controls.Add(tblPageAccessToggles);
             cardPageAccess.Dock = DockStyle.Fill;
-            cardPageAccess.Location = new Point(18, 233);
-            cardPageAccess.Margin = new Padding(6, 0, 6, 24);
+            cardPageAccess.Location = new Point(9, 109);
+            cardPageAccess.Margin = new Padding(3, 0, 3, 11);
             cardPageAccess.Name = "cardPageAccess";
-            cardPageAccess.Size = new Size(1695, 352);
+            cardPageAccess.Size = new Size(913, 177);
             cardPageAccess.TabIndex = 1;
             // 
             // tblPageAccessToggles
@@ -445,16 +434,16 @@ namespace AssemblyLineTester.Views.Pages
             tblPageAccessToggles.Controls.Add(chkPageUserMgmt, 1, 4);
             tblPageAccessToggles.Dock = DockStyle.Top;
             tblPageAccessToggles.Location = new Point(0, 0);
-            tblPageAccessToggles.Margin = new Padding(8);
+            tblPageAccessToggles.Margin = new Padding(4, 4, 4, 4);
             tblPageAccessToggles.Name = "tblPageAccessToggles";
-            tblPageAccessToggles.Padding = new Padding(24, 16, 24, 24);
+            tblPageAccessToggles.Padding = new Padding(13, 8, 13, 11);
             tblPageAccessToggles.RowCount = 5;
-            tblPageAccessToggles.RowStyles.Add(new RowStyle(SizeType.Absolute, 56F));
+            tblPageAccessToggles.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
             tblPageAccessToggles.RowStyles.Add(new RowStyle());
             tblPageAccessToggles.RowStyles.Add(new RowStyle());
             tblPageAccessToggles.RowStyles.Add(new RowStyle());
             tblPageAccessToggles.RowStyles.Add(new RowStyle());
-            tblPageAccessToggles.Size = new Size(1695, 352);
+            tblPageAccessToggles.Size = new Size(913, 177);
             tblPageAccessToggles.TabIndex = 0;
             // 
             // lblCardPageAccessTitle
@@ -462,10 +451,10 @@ namespace AssemblyLineTester.Views.Pages
             tblPageAccessToggles.SetColumnSpan(lblCardPageAccessTitle, 2);
             lblCardPageAccessTitle.Font = new Font("Segoe UI Semibold", 13F, FontStyle.Bold);
             lblCardPageAccessTitle.ForeColor = Color.FromArgb(15, 23, 42);
-            lblCardPageAccessTitle.Location = new Point(24, 16);
+            lblCardPageAccessTitle.Location = new Point(13, 8);
             lblCardPageAccessTitle.Margin = new Padding(0);
             lblCardPageAccessTitle.Name = "lblCardPageAccessTitle";
-            lblCardPageAccessTitle.Size = new Size(1532, 56);
+            lblCardPageAccessTitle.Size = new Size(825, 26);
             lblCardPageAccessTitle.TabIndex = 0;
             lblCardPageAccessTitle.Text = "📁 Page & Menu Access (Sidebar Navigation)";
             lblCardPageAccessTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -475,10 +464,10 @@ namespace AssemblyLineTester.Views.Pages
             chkPageDash.AutoSize = true;
             chkPageDash.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkPageDash.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPageDash.Location = new Point(24, 82);
-            chkPageDash.Margin = new Padding(0, 10, 10, 14);
+            chkPageDash.Location = new Point(13, 39);
+            chkPageDash.Margin = new Padding(0, 5, 5, 7);
             chkPageDash.Name = "chkPageDash";
-            chkPageDash.Size = new Size(327, 40);
+            chkPageDash.Size = new Size(171, 21);
             chkPageDash.TabIndex = 1;
             chkPageDash.Tag = "Page.Dashboard";
             chkPageDash.Text = "Access Dashboard Page";
@@ -489,10 +478,10 @@ namespace AssemblyLineTester.Views.Pages
             chkPageTestExec.AutoSize = true;
             chkPageTestExec.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkPageTestExec.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPageTestExec.Location = new Point(847, 82);
-            chkPageTestExec.Margin = new Padding(0, 10, 10, 14);
+            chkPageTestExec.Location = new Point(456, 39);
+            chkPageTestExec.Margin = new Padding(0, 5, 5, 7);
             chkPageTestExec.Name = "chkPageTestExec";
-            chkPageTestExec.Size = new Size(362, 40);
+            chkPageTestExec.Size = new Size(192, 21);
             chkPageTestExec.TabIndex = 2;
             chkPageTestExec.Tag = "Page.TestExecution";
             chkPageTestExec.Text = "Access Test Execution Page";
@@ -503,10 +492,10 @@ namespace AssemblyLineTester.Views.Pages
             chkPageHarness.AutoSize = true;
             chkPageHarness.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkPageHarness.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPageHarness.Location = new Point(24, 146);
-            chkPageHarness.Margin = new Padding(0, 10, 10, 14);
+            chkPageHarness.Location = new Point(13, 72);
+            chkPageHarness.Margin = new Padding(0, 5, 5, 7);
             chkPageHarness.Name = "chkPageHarness";
-            chkPageHarness.Size = new Size(408, 40);
+            chkPageHarness.Size = new Size(214, 21);
             chkPageHarness.TabIndex = 3;
             chkPageHarness.Tag = "Page.HarnessDatabase";
             chkPageHarness.Text = "Access Harness Database Page";
@@ -517,10 +506,10 @@ namespace AssemblyLineTester.Views.Pages
             chkPageHistory.AutoSize = true;
             chkPageHistory.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkPageHistory.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPageHistory.Location = new Point(847, 146);
-            chkPageHistory.Margin = new Padding(0, 10, 10, 14);
+            chkPageHistory.Location = new Point(456, 72);
+            chkPageHistory.Margin = new Padding(0, 5, 5, 7);
             chkPageHistory.Name = "chkPageHistory";
-            chkPageHistory.Size = new Size(334, 40);
+            chkPageHistory.Size = new Size(178, 21);
             chkPageHistory.TabIndex = 4;
             chkPageHistory.Tag = "Page.TestHistory";
             chkPageHistory.Text = "Access Test History Page";
@@ -531,10 +520,10 @@ namespace AssemblyLineTester.Views.Pages
             chkPageReports.AutoSize = true;
             chkPageReports.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkPageReports.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPageReports.Location = new Point(24, 210);
-            chkPageReports.Margin = new Padding(0, 10, 10, 14);
+            chkPageReports.Location = new Point(13, 105);
+            chkPageReports.Margin = new Padding(0, 5, 5, 7);
             chkPageReports.Name = "chkPageReports";
-            chkPageReports.Size = new Size(407, 40);
+            chkPageReports.Size = new Size(214, 21);
             chkPageReports.TabIndex = 5;
             chkPageReports.Tag = "Page.Reports";
             chkPageReports.Text = "Access Reports & Analytics Page";
@@ -545,10 +534,10 @@ namespace AssemblyLineTester.Views.Pages
             chkPageSysLog.AutoSize = true;
             chkPageSysLog.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkPageSysLog.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPageSysLog.Location = new Point(847, 210);
-            chkPageSysLog.Margin = new Padding(0, 10, 10, 14);
+            chkPageSysLog.Location = new Point(456, 105);
+            chkPageSysLog.Margin = new Padding(0, 5, 5, 7);
             chkPageSysLog.Name = "chkPageSysLog";
-            chkPageSysLog.Size = new Size(331, 40);
+            chkPageSysLog.Size = new Size(175, 21);
             chkPageSysLog.TabIndex = 6;
             chkPageSysLog.Tag = "Page.SystemLog";
             chkPageSysLog.Text = "Access System Log Page";
@@ -559,10 +548,10 @@ namespace AssemblyLineTester.Views.Pages
             chkPageSettings.AutoSize = true;
             chkPageSettings.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkPageSettings.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPageSettings.Location = new Point(24, 274);
-            chkPageSettings.Margin = new Padding(0, 10, 10, 14);
+            chkPageSettings.Location = new Point(13, 138);
+            chkPageSettings.Margin = new Padding(0, 5, 5, 7);
             chkPageSettings.Name = "chkPageSettings";
-            chkPageSettings.Size = new Size(291, 40);
+            chkPageSettings.Size = new Size(154, 21);
             chkPageSettings.TabIndex = 7;
             chkPageSettings.Tag = "Page.Settings";
             chkPageSettings.Text = "Access Settings Page";
@@ -573,10 +562,10 @@ namespace AssemblyLineTester.Views.Pages
             chkPageUserMgmt.AutoSize = true;
             chkPageUserMgmt.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkPageUserMgmt.ForeColor = Color.FromArgb(15, 23, 42);
-            chkPageUserMgmt.Location = new Point(847, 274);
-            chkPageUserMgmt.Margin = new Padding(0, 10, 10, 14);
+            chkPageUserMgmt.Location = new Point(456, 138);
+            chkPageUserMgmt.Margin = new Padding(0, 5, 5, 7);
             chkPageUserMgmt.Name = "chkPageUserMgmt";
-            chkPageUserMgmt.Size = new Size(414, 40);
+            chkPageUserMgmt.Size = new Size(217, 21);
             chkPageUserMgmt.TabIndex = 8;
             chkPageUserMgmt.Tag = "Page.UserManagement";
             chkPageUserMgmt.Text = "Access User Management Page";
@@ -592,10 +581,10 @@ namespace AssemblyLineTester.Views.Pages
             cardTestOps.BorderSize = 2.5F;
             cardTestOps.Controls.Add(tblTestOpsToggles);
             cardTestOps.Dock = DockStyle.Fill;
-            cardTestOps.Location = new Point(18, 609);
-            cardTestOps.Margin = new Padding(6, 0, 6, 24);
+            cardTestOps.Location = new Point(9, 297);
+            cardTestOps.Margin = new Padding(3, 0, 3, 11);
             cardTestOps.Name = "cardTestOps";
-            cardTestOps.Size = new Size(1695, 224);
+            cardTestOps.Size = new Size(913, 111);
             cardTestOps.TabIndex = 2;
             // 
             // tblTestOpsToggles
@@ -611,14 +600,14 @@ namespace AssemblyLineTester.Views.Pages
             tblTestOpsToggles.Controls.Add(chkActCalibrate, 0, 2);
             tblTestOpsToggles.Dock = DockStyle.Top;
             tblTestOpsToggles.Location = new Point(0, 0);
-            tblTestOpsToggles.Margin = new Padding(8);
+            tblTestOpsToggles.Margin = new Padding(4, 4, 4, 4);
             tblTestOpsToggles.Name = "tblTestOpsToggles";
-            tblTestOpsToggles.Padding = new Padding(24, 16, 24, 24);
+            tblTestOpsToggles.Padding = new Padding(13, 8, 13, 11);
             tblTestOpsToggles.RowCount = 3;
-            tblTestOpsToggles.RowStyles.Add(new RowStyle(SizeType.Absolute, 56F));
+            tblTestOpsToggles.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
             tblTestOpsToggles.RowStyles.Add(new RowStyle());
             tblTestOpsToggles.RowStyles.Add(new RowStyle());
-            tblTestOpsToggles.Size = new Size(1695, 224);
+            tblTestOpsToggles.Size = new Size(913, 111);
             tblTestOpsToggles.TabIndex = 0;
             // 
             // lblCardTestOpsTitle
@@ -626,10 +615,10 @@ namespace AssemblyLineTester.Views.Pages
             tblTestOpsToggles.SetColumnSpan(lblCardTestOpsTitle, 2);
             lblCardTestOpsTitle.Font = new Font("Segoe UI Semibold", 13F, FontStyle.Bold);
             lblCardTestOpsTitle.ForeColor = Color.FromArgb(15, 23, 42);
-            lblCardTestOpsTitle.Location = new Point(24, 16);
+            lblCardTestOpsTitle.Location = new Point(13, 8);
             lblCardTestOpsTitle.Margin = new Padding(0);
             lblCardTestOpsTitle.Name = "lblCardTestOpsTitle";
-            lblCardTestOpsTitle.Size = new Size(1532, 56);
+            lblCardTestOpsTitle.Size = new Size(825, 26);
             lblCardTestOpsTitle.TabIndex = 0;
             lblCardTestOpsTitle.Text = "⚡ Test Operations & Hardware Capabilities";
             lblCardTestOpsTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -639,10 +628,10 @@ namespace AssemblyLineTester.Views.Pages
             chkActRun.AutoSize = true;
             chkActRun.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkActRun.ForeColor = Color.FromArgb(15, 23, 42);
-            chkActRun.Location = new Point(24, 82);
-            chkActRun.Margin = new Padding(0, 10, 10, 14);
+            chkActRun.Location = new Point(13, 39);
+            chkActRun.Margin = new Padding(0, 5, 5, 7);
             chkActRun.Name = "chkActRun";
-            chkActRun.Size = new Size(437, 40);
+            chkActRun.Size = new Size(229, 21);
             chkActRun.TabIndex = 1;
             chkActRun.Tag = "Action.TestExecution.Run";
             chkActRun.Text = "Start and Run Testing Operations";
@@ -653,10 +642,10 @@ namespace AssemblyLineTester.Views.Pages
             chkActConfig.AutoSize = true;
             chkActConfig.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkActConfig.ForeColor = Color.FromArgb(15, 23, 42);
-            chkActConfig.Location = new Point(847, 82);
-            chkActConfig.Margin = new Padding(0, 10, 10, 14);
+            chkActConfig.Location = new Point(456, 39);
+            chkActConfig.Margin = new Padding(0, 5, 5, 7);
             chkActConfig.Name = "chkActConfig";
-            chkActConfig.Size = new Size(574, 40);
+            chkActConfig.Size = new Size(302, 21);
             chkActConfig.TabIndex = 2;
             chkActConfig.Tag = "Action.TestConfig.Edit";
             chkActConfig.Text = "Add and Edit Test Parameters & Harness Specs";
@@ -667,10 +656,10 @@ namespace AssemblyLineTester.Views.Pages
             chkActCalibrate.AutoSize = true;
             chkActCalibrate.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkActCalibrate.ForeColor = Color.FromArgb(15, 23, 42);
-            chkActCalibrate.Location = new Point(24, 146);
-            chkActCalibrate.Margin = new Padding(0, 10, 10, 14);
+            chkActCalibrate.Location = new Point(13, 72);
+            chkActCalibrate.Margin = new Padding(0, 5, 5, 7);
             chkActCalibrate.Name = "chkActCalibrate";
-            chkActCalibrate.Size = new Size(602, 40);
+            chkActCalibrate.Size = new Size(311, 21);
             chkActCalibrate.TabIndex = 3;
             chkActCalibrate.Tag = "Action.Instruments.Calibrate";
             chkActCalibrate.Text = "Calibrate and Configure Hardware Instruments";
@@ -686,10 +675,10 @@ namespace AssemblyLineTester.Views.Pages
             cardSystemLogs.BorderSize = 2.5F;
             cardSystemLogs.Controls.Add(tblSystemLogsToggles);
             cardSystemLogs.Dock = DockStyle.Fill;
-            cardSystemLogs.Location = new Point(18, 857);
-            cardSystemLogs.Margin = new Padding(6, 0, 6, 24);
+            cardSystemLogs.Location = new Point(9, 419);
+            cardSystemLogs.Margin = new Padding(3, 0, 3, 11);
             cardSystemLogs.Name = "cardSystemLogs";
-            cardSystemLogs.Size = new Size(1695, 224);
+            cardSystemLogs.Size = new Size(913, 111);
             cardSystemLogs.TabIndex = 3;
             // 
             // tblSystemLogsToggles
@@ -706,14 +695,14 @@ namespace AssemblyLineTester.Views.Pages
             tblSystemLogsToggles.Controls.Add(chkActDbBackup, 1, 2);
             tblSystemLogsToggles.Dock = DockStyle.Top;
             tblSystemLogsToggles.Location = new Point(0, 0);
-            tblSystemLogsToggles.Margin = new Padding(8);
+            tblSystemLogsToggles.Margin = new Padding(4, 4, 4, 4);
             tblSystemLogsToggles.Name = "tblSystemLogsToggles";
-            tblSystemLogsToggles.Padding = new Padding(24, 16, 24, 24);
+            tblSystemLogsToggles.Padding = new Padding(13, 8, 13, 11);
             tblSystemLogsToggles.RowCount = 3;
-            tblSystemLogsToggles.RowStyles.Add(new RowStyle(SizeType.Absolute, 56F));
+            tblSystemLogsToggles.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
             tblSystemLogsToggles.RowStyles.Add(new RowStyle());
             tblSystemLogsToggles.RowStyles.Add(new RowStyle());
-            tblSystemLogsToggles.Size = new Size(1695, 224);
+            tblSystemLogsToggles.Size = new Size(913, 111);
             tblSystemLogsToggles.TabIndex = 0;
             // 
             // lblCardSystemLogsTitle
@@ -721,10 +710,10 @@ namespace AssemblyLineTester.Views.Pages
             tblSystemLogsToggles.SetColumnSpan(lblCardSystemLogsTitle, 2);
             lblCardSystemLogsTitle.Font = new Font("Segoe UI Semibold", 13F, FontStyle.Bold);
             lblCardSystemLogsTitle.ForeColor = Color.FromArgb(15, 23, 42);
-            lblCardSystemLogsTitle.Location = new Point(24, 16);
+            lblCardSystemLogsTitle.Location = new Point(13, 8);
             lblCardSystemLogsTitle.Margin = new Padding(0);
             lblCardSystemLogsTitle.Name = "lblCardSystemLogsTitle";
-            lblCardSystemLogsTitle.Size = new Size(1532, 56);
+            lblCardSystemLogsTitle.Size = new Size(825, 26);
             lblCardSystemLogsTitle.TabIndex = 0;
             lblCardSystemLogsTitle.Text = "🛠️ System Administration & Maintenance";
             lblCardSystemLogsTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -734,10 +723,10 @@ namespace AssemblyLineTester.Views.Pages
             chkActUserEdit.AutoSize = true;
             chkActUserEdit.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkActUserEdit.ForeColor = Color.FromArgb(15, 23, 42);
-            chkActUserEdit.Location = new Point(24, 82);
-            chkActUserEdit.Margin = new Padding(0, 10, 10, 14);
+            chkActUserEdit.Location = new Point(13, 39);
+            chkActUserEdit.Margin = new Padding(0, 5, 5, 7);
             chkActUserEdit.Name = "chkActUserEdit";
-            chkActUserEdit.Size = new Size(540, 40);
+            chkActUserEdit.Size = new Size(283, 21);
             chkActUserEdit.TabIndex = 1;
             chkActUserEdit.Tag = "Action.UserManagement.Edit";
             chkActUserEdit.Text = "Manage User Accounts & Role Assignments";
@@ -748,10 +737,10 @@ namespace AssemblyLineTester.Views.Pages
             chkActExport.AutoSize = true;
             chkActExport.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkActExport.ForeColor = Color.FromArgb(15, 23, 42);
-            chkActExport.Location = new Point(847, 82);
-            chkActExport.Margin = new Padding(0, 10, 10, 14);
+            chkActExport.Location = new Point(456, 39);
+            chkActExport.Margin = new Padding(0, 5, 5, 7);
             chkActExport.Name = "chkActExport";
-            chkActExport.Size = new Size(550, 40);
+            chkActExport.Size = new Size(287, 21);
             chkActExport.TabIndex = 2;
             chkActExport.Tag = "Action.Reports.Export";
             chkActExport.Text = "Export Reports, Analytics & Test Data to CSV";
@@ -762,10 +751,10 @@ namespace AssemblyLineTester.Views.Pages
             chkActLogClear.AutoSize = true;
             chkActLogClear.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkActLogClear.ForeColor = Color.FromArgb(15, 23, 42);
-            chkActLogClear.Location = new Point(24, 146);
-            chkActLogClear.Margin = new Padding(0, 10, 10, 14);
+            chkActLogClear.Location = new Point(13, 72);
+            chkActLogClear.Margin = new Padding(0, 5, 5, 7);
             chkActLogClear.Name = "chkActLogClear";
-            chkActLogClear.Size = new Size(479, 40);
+            chkActLogClear.Size = new Size(251, 21);
             chkActLogClear.TabIndex = 3;
             chkActLogClear.Tag = "Action.SystemLog.Clear";
             chkActLogClear.Text = "Clear and Archive System Event Logs";
@@ -776,10 +765,10 @@ namespace AssemblyLineTester.Views.Pages
             chkActDbBackup.AutoSize = true;
             chkActDbBackup.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             chkActDbBackup.ForeColor = Color.FromArgb(15, 23, 42);
-            chkActDbBackup.Location = new Point(847, 146);
-            chkActDbBackup.Margin = new Padding(0, 10, 10, 14);
+            chkActDbBackup.Location = new Point(456, 72);
+            chkActDbBackup.Margin = new Padding(0, 5, 5, 7);
             chkActDbBackup.Name = "chkActDbBackup";
-            chkActDbBackup.Size = new Size(553, 40);
+            chkActDbBackup.Size = new Size(287, 21);
             chkActDbBackup.TabIndex = 4;
             chkActDbBackup.Tag = "Action.Database.Backup";
             chkActDbBackup.Text = "Perform Database Backup & Restore Actions";
@@ -787,13 +776,12 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // SettingsUsersAndRolesPage
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(241, 245, 249);
             Controls.Add(tblMainLayout);
-            Margin = new Padding(6);
             Name = "SettingsUsersAndRolesPage";
-            Size = new Size(2229, 1707);
+            Size = new Size(1200, 800);
             tblMainLayout.ResumeLayout(false);
             cardRoleSelector.ResumeLayout(false);
             flpRolesList.ResumeLayout(false);

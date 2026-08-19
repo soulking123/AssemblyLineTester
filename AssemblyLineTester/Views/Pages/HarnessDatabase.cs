@@ -37,7 +37,6 @@ namespace AssemblyLineTester.Views.Pages
             dataGridViewList.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             
             dataGridViewList.CellClick += DataGridViewList_CellClick;
-            this.Load += HarnessDatabase_Load;
             
             InitializeCustomStyles();
             InitializeTabs();
@@ -138,8 +137,9 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        private void HarnessDatabase_Load(object? sender, EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
+            base.OnLoad(e);
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
                 AssemblyLineTester.Helpers.UIStyleHelper.ScaleExplicitFonts(this, AssemblyLineTester.Helpers.UIStyleHelper.GetHostScaleFactor(this));
@@ -208,6 +208,11 @@ namespace AssemblyLineTester.Views.Pages
             };
 
             btnSearch.Click += (s, e) => ApplyFilters();
+            cmbProductModel.SelectedIndexChanged += (s, e) => ApplyFilters();
+            cmbProductType.SelectedIndexChanged += (s, e) => ApplyFilters();
+            cmbArea.SelectedIndexChanged += (s, e) => ApplyFilters();
+            cmbStatus.SelectedIndexChanged += (s, e) => ApplyFilters();
+            
             btnReset.Click += (s, e) =>
             {
                 cmbProductModel.SelectedIndex = 0;

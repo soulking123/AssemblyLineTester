@@ -23,10 +23,12 @@
         public string Limit => FormatLimit(LowerLimit, UpperLimit, Unit);
 
         // Symmetric tolerance around the midpoint of the band, "-" without a two-sided band.
+        // Wire is plain continuity, not a component with a rated value - tolerance means nothing here.
         public string Tolerance
         {
             get
             {
+                if (string.Equals(TestType, "WIRE", System.StringComparison.OrdinalIgnoreCase)) return "-";
                 if (ToleranceValue is double recorded) return $"±{recorded:0.##}%";
                 if (LowerLimit is not double lower || UpperLimit is not double upper) return "-";
 

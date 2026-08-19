@@ -40,12 +40,14 @@ namespace AssemblyLineTester.Views.Pages
         private DateTime _startTime;
         private DateTime _endTime;
         private readonly SystemLogService logService = new();
+        private TestConfiguration config = new();
 
         public TestExecution()
         {
             InitializeComponent();
             SetupGridLiveDetails();
             SetupDiagramPointers();
+            SetupProgramInfoArea();
             btnLoadProgram.Click += BtnLoadProgram_Click;
             SetupEvents();
             SetupTimer();
@@ -62,7 +64,7 @@ namespace AssemblyLineTester.Views.Pages
                 var activeConfig = configService.GetActiveConfig();
                 if (activeConfig != null)
                 {
-
+                    config = activeConfig;
                     _customTestText = configService.ConvertToProgramText(activeConfig);
                     lblPageHeader.Text = $"TEST EXECUTION - {activeConfig.ConfigName}";
                     var resNet = activeConfig.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
@@ -70,12 +72,13 @@ namespace AssemblyLineTester.Views.Pages
                     {
                         _continuityResistance = resNet.UpperLimit.Value;
                     }
+                    UpdateProgramInfoDisplay(activeConfig);
                     Debug.WriteLine($"Loaded active config on startup: {activeConfig.ConfigName}");
                 }
                 else
                 {
                     lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
-
+                    UpdateProgramInfoDisplay(null);
                 }
             }
         }
@@ -179,10 +182,15 @@ namespace AssemblyLineTester.Views.Pages
                     configService.SetActiveConfig(dlg.SelectedConfiguration.ConfigName);
                     _customTestText = configService.ConvertToProgramText(dlg.SelectedConfiguration);
                     var resNet = dlg.SelectedConfiguration.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
+                    config = configService.GetConfigurationByName(dlg.SelectedConfiguration.ConfigName);
+
                     if (resNet != null && resNet.UpperLimit.HasValue)
                     {
                         _continuityResistance = resNet.UpperLimit.Value;
                     }
+
+                    UpdateProgramInfoDisplay(config);
+                    lblPageHeader.Text = $"TEST EXECUTION - {config.ConfigName}";
 
                     MessageBox.Show($"Test program configuration '{dlg.SelectedConfiguration.ConfigName}' loaded successfully and set as Active.", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Debug.WriteLine($"Loaded program from DB: {dlg.SelectedConfiguration.ConfigName}\n{_customTestText}");
@@ -277,7 +285,7 @@ namespace AssemblyLineTester.Views.Pages
                         activeConfig.ProductModelName, "N/A", "N/A", "N/A", "1.0",
                         "N/A", AppTime.UtcNow, _loadedRows, overallResult);
 
-                    //ShowSummary(_loadedRows, overallResult);
+                    ShowSummary(_loadedRows, overallResult);
 
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
@@ -402,48 +410,83 @@ namespace AssemblyLineTester.Views.Pages
                         var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList;
                         if (list != null)
                         {
+                            var configNets = config.Nets?.OrderBy(n => n.SequenceNo).ToList();
+
                             int step = 1;
-                            foreach (var measurement in list)
+                            for (int idx = 0; idx < list.Count; idx++)
                             {
-                                var status = LiveTestStatus.Pending;
-                                string statusStr = measurement.Status1?.Trim() ?? "";
-                                if (measurement.Value1 <= _continuityResistance)
+                                var measurement = list[idx];
+                                var net = (configNets != null && idx < configNets.Count) ? configNets[idx] : null;
+
+                                string rowTestType = string.IsNullOrWhiteSpace(measurement.Instruction) ? "Wire" : measurement.Instruction;
+
+                                double? lowerLimit = null;
+                                double? upperLimit = null;
+                                string expectedValStr = string.Empty;
+                                string unitStr = string.Empty;
+                                double? toleranceVal = null;
+                                LiveTestStatus status = LiveTestStatus.Pending;
+
+                                bool isWire = rowTestType.Equals("WIRE", StringComparison.OrdinalIgnoreCase);
+
+                                if (isWire)
                                 {
-                                    status = LiveTestStatus.Pass;
+                                    double maxWireRes = config.MaxWireResistance > 0 ? config.MaxWireResistance : _continuityResistance;
+                                    upperLimit = maxWireRes;
+                                    status = (measurement.Value1 <= maxWireRes) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
                                 }
                                 else
                                 {
-                                    status = LiveTestStatus.Fail;
-                                }
-
-                                string rowTestType = "WIRE";
-                                if (!string.IsNullOrEmpty(measurement.Instruction))
-                                {
-                                    string trimmed = measurement.Instruction.Trim().ToUpperInvariant();
-                                    if (trimmed.Contains("CONNECTION") || trimmed.Contains("RESIS") || trimmed == "WIRE")
+                                    if (net != null)
                                     {
-                                        rowTestType = "WIRE";
+                                        lowerLimit = net.LowerLimit;
+                                        upperLimit = net.UpperLimit;
+                                        toleranceVal = net.Tolerance;
+                                        unitStr = net.MeasurementUnit ?? "";
+                                        if (net.ExpectedValue.HasValue)
+                                        {
+                                            expectedValStr = net.ExpectedValue.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                                        }
                                     }
-                                    else if (trimmed.Contains("INSULATION") || trimmed.Contains("HIPOT") || trimmed == "OPEN")
+
+                                    if (lowerLimit.HasValue && upperLimit.HasValue)
                                     {
-                                        rowTestType = "OPEN";
+                                        status = (measurement.Value1 >= lowerLimit.Value && measurement.Value1 <= upperLimit.Value)
+                                            ? LiveTestStatus.Pass
+                                            : LiveTestStatus.Fail;
+                                    }
+                                    else if (upperLimit.HasValue)
+                                    {
+                                        status = (measurement.Value1 <= upperLimit.Value)
+                                            ? LiveTestStatus.Pass
+                                            : LiveTestStatus.Fail;
+                                    }
+                                    else if (lowerLimit.HasValue)
+                                    {
+                                        status = (measurement.Value1 >= lowerLimit.Value)
+                                            ? LiveTestStatus.Pass
+                                            : LiveTestStatus.Fail;
                                     }
                                     else
                                     {
-                                        rowTestType = measurement.Instruction;
+                                        status = LiveTestStatus.Pass;
                                     }
                                 }
 
                                 _loadedRows.Add(new LiveTestDetailRowDto
                                 {
                                     StepNo = step++,
-                                    NetId = measurement.Instruction ?? "",
+                                    NetId = net?.NetId ?? measurement.Instruction ?? "",
                                     TestPoint = $"{measurement.Point1} \u2192 {measurement.Point2}",
                                     FromPoint = $"{measurement.Point1}",
                                     ToPoint = $"{measurement.Point2}",
                                     TestType = rowTestType,
                                     MeasuredValue = Math.Round(measurement.Value1, 3),
-                                    UpperLimit = _continuityResistance,
+                                    ExpectedValue = expectedValStr,
+                                    LowerLimit = lowerLimit,
+                                    UpperLimit = upperLimit,
+                                    Tolerance = toleranceVal,
+                                    Unit = unitStr,
                                     Status = status
                                 });
                             }
@@ -541,28 +584,27 @@ namespace AssemblyLineTester.Views.Pages
             listBoxTestSummary.Items.Clear();
             listBoxTestSummary.Items.Add($"TEST RESULT = {overallResultStatus}");
 
-            var errorResult = _instrument.GetTestErrors().ObjectReturnValue;
+            var getErrorsResponse = _instrument.GetTestErrors();
+            var errorResult = getErrorsResponse?.ObjectReturnValue;
             string errorText = "";
             try
             {
-                if (errorResult.DllCallResult == CtaCommandResultCode.Success)
+                foreach (var summary in summaryList)
                 {
-                    foreach (var summary in summaryList)
+                    if (summary.Pass == summary.Total)
                     {
-                        if (summary.Pass == summary.Total)
-                        {
-                            listBoxTestSummary.Items.Add($"✔ {summary.TestType} ({summary.Pass}/{summary.Total})");
-                        }
-                        else
-                        {
-                            listBoxTestSummary.Items.Add($"✖ {summary.TestType} ({summary.Pass}/{summary.Total})");
-                        }
+                        listBoxTestSummary.Items.Add($"✔ {summary.TestType} ({summary.Pass}/{summary.Total})");
                     }
+                    else
+                    {
+                        listBoxTestSummary.Items.Add($"✖ {summary.TestType} ({summary.Pass}/{summary.Total})");
+                    }
+                }
 
+                if (getErrorsResponse != null && getErrorsResponse.DllCallResult == CtaCommandResultCode.Success)
+                {
                     if (errorResult?.ErrorList != null && errorResult.ErrorList.Count > 0)
                     {
-
-
                         listBoxTestSummary.Items.Add("");
                         listBoxTestSummary.Items.Add("TEST ERRORS");
                         listBoxTestSummary.Items.Add("");
@@ -578,12 +620,10 @@ namespace AssemblyLineTester.Views.Pages
                 else
                 {
                     errorText = _instrument.GetLastError()?.Result ?? "";
+                    string callResultStr = getErrorsResponse?.DllCallResult.ToString() ?? "NullResponse";
                     logService.Log(LogSeverity.Warning, "Instrument", "Get Test Errors Failed.",
-                    $"Failed getting Test Errors with error message {errorResult.DllCallResult.ToString()}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
-                    MessageBox.Show($"Failed getting Test Errors with error message {errorResult.DllCallResult.ToString()}, {errorText}", "Get Test Errors Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    $"Failed getting Test Errors with error message {callResultStr}, {errorText}", SessionManager.CurrentUser?.Username ?? "Unknown");
                 }
-
             }
             catch (Exception Ex)
             {
@@ -718,7 +758,10 @@ namespace AssemblyLineTester.Views.Pages
             "Lower Limit" => FormatNumber(row.LowerLimit),
             "Upper Limit" => FormatNumber(row.UpperLimit),
             "Expected Value" => row.ExpectedValue,
-            "Tolerance" => row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
+            // Wire is plain continuity, not a component with a rated value - tolerance means nothing here.
+            "Tolerance" => string.Equals(row.TestType, "WIRE", StringComparison.OrdinalIgnoreCase)
+                ? "-"
+                : row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
             "Measurement" => FormatNumber(row.MeasuredValue, "F3"),
             _ => ""
         };
@@ -945,6 +988,146 @@ namespace AssemblyLineTester.Views.Pages
             modal.ShowDialog(this);
         }
 
-        
+        private TableLayoutPanel tblProgramInfo = new();
+        private Label lblConfigNameVal = new();
+        private Label lblProductModelVal = new();
+        private Label lblCreatedByVal = new();
+        private Label lblUpdatedAtVal = new();
+        private Label lblTotalNetsVal = new();
+        private Label lblTestTypesVal = new();
+        private Label lblMaxWireResVal = new();
+        private Label lblMinCompResVal = new();
+        private Label lblMinInsResVal = new();
+        private Label lblHipotVoltageVal = new();
+        private Label lblDescriptionVal = new();
+
+        private void SetupProgramInfoArea()
+        {
+            lblAreaDetailTitle.Text = "📋 TEST PROGRAM INFORMATION";
+
+            if (picAreaDetail != null)
+            {
+                picAreaDetail.Visible = false;
+            }
+
+            var pnlContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                Padding = new Padding(8),
+                BackColor = Color.White
+            };
+
+            tblProgramInfo = new TableLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                ColumnCount = 2,
+                Padding = new Padding(4)
+            };
+            tblProgramInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 48F));
+            tblProgramInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52F));
+
+            AddProgramInfoRow("Config Name:", lblConfigNameVal);
+            AddProgramInfoRow("Product Model:", lblProductModelVal);
+            AddProgramInfoRow("Created By:", lblCreatedByVal);
+            AddProgramInfoRow("Updated At:", lblUpdatedAtVal);
+            AddProgramInfoRow("Total Nets:", lblTotalNetsVal);
+            AddProgramInfoRow("Test Types:", lblTestTypesVal);
+            AddProgramInfoRow("Max Wire Res.:", lblMaxWireResVal);
+            AddProgramInfoRow("Min Component Res.:", lblMinCompResVal);
+            AddProgramInfoRow("Min Insulation Res.:", lblMinInsResVal);
+            AddProgramInfoRow("Hipot Voltage:", lblHipotVoltageVal);
+            AddProgramInfoRow("Description:", lblDescriptionVal);
+
+            pnlContainer.Controls.Add(tblProgramInfo);
+            cardAreaDetail.Controls.Add(pnlContainer);
+            pnlContainer.BringToFront();
+        }
+
+        private void AddProgramInfoRow(string key, Label valLabel)
+        {
+            var keyLabel = new Label
+            {
+                Text = key,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(71, 85, 105),
+                AutoSize = true,
+                Anchor = AnchorStyles.Left,
+                Margin = new Padding(2, 4, 2, 4)
+            };
+
+            valLabel.Text = "-";
+            valLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular);
+            valLabel.ForeColor = Color.FromArgb(30, 41, 59);
+            valLabel.AutoSize = true;
+            valLabel.Anchor = AnchorStyles.Left;
+            valLabel.Margin = new Padding(2, 4, 2, 4);
+
+            int row = tblProgramInfo.RowCount++;
+            tblProgramInfo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tblProgramInfo.Controls.Add(keyLabel, 0, row);
+            tblProgramInfo.Controls.Add(valLabel, 1, row);
+        }
+
+        private void UpdateProgramInfoDisplay(TestConfiguration? cfg)
+        {
+            if (cfg == null)
+            {
+                lblConfigNameVal.Text = "-";
+                lblProductModelVal.Text = "-";
+                lblCreatedByVal.Text = "-";
+                lblUpdatedAtVal.Text = "-";
+                lblTotalNetsVal.Text = "0";
+                lblTestTypesVal.Text = "-";
+                lblMaxWireResVal.Text = "-";
+                lblMinCompResVal.Text = "-";
+                lblMinInsResVal.Text = "-";
+                lblHipotVoltageVal.Text = "OFF";
+                lblDescriptionVal.Text = "-";
+                return;
+            }
+
+            lblConfigNameVal.Text = !string.IsNullOrWhiteSpace(cfg.ConfigName) ? cfg.ConfigName : "-";
+            lblProductModelVal.Text = !string.IsNullOrWhiteSpace(cfg.ProductModelName) ? cfg.ProductModelName : "-";
+            lblCreatedByVal.Text = !string.IsNullOrWhiteSpace(cfg.CreatedBy) ? cfg.CreatedBy : "-";
+            lblUpdatedAtVal.Text = cfg.UpdatedAt.HasValue 
+                ? cfg.UpdatedAt.Value.ToString("dd MMM yyyy HH:mm") 
+                : cfg.CreatedAt.ToString("dd MMM yyyy HH:mm");
+            lblTotalNetsVal.Text = (cfg.Nets?.Count ?? 0).ToString();
+
+            if (cfg.TestTypes != null && cfg.TestTypes.Count > 0)
+            {
+                lblTestTypesVal.Text = string.Join(", ", cfg.TestTypes.Select(t => t.TestTypeName).Where(t => !string.IsNullOrWhiteSpace(t)).Distinct());
+            }
+            else if (cfg.Nets != null && cfg.Nets.Count > 0)
+            {
+                var types = cfg.Nets
+                    .Select(n => n.TestType?.TestTypeName)
+                    .Where(t => !string.IsNullOrWhiteSpace(t))
+                    .Distinct();
+                lblTestTypesVal.Text = types.Any() ? string.Join(", ", types) : "WIRE";
+            }
+            else
+            {
+                lblTestTypesVal.Text = "-";
+            }
+
+            lblMaxWireResVal.Text = cfg.MaxWireResistance > 0 ? $"{cfg.MaxWireResistance.ToString("0.##", CultureInfo.InvariantCulture)} ohm" : "-";
+            lblMinCompResVal.Text = cfg.MinComponentResistance > 0 ? $"{cfg.MinComponentResistance.ToString("0.##", CultureInfo.InvariantCulture)} ohm" : "-";
+
+            if (cfg.MinInsulationResistance >= 1e6)
+                lblMinInsResVal.Text = $"{(cfg.MinInsulationResistance / 1e6).ToString("0.##", CultureInfo.InvariantCulture)} M ohm";
+            else if (cfg.MinInsulationResistance >= 1e3)
+                lblMinInsResVal.Text = $"{(cfg.MinInsulationResistance / 1e3).ToString("0.##", CultureInfo.InvariantCulture)} K ohm";
+            else if (cfg.MinInsulationResistance > 0)
+                lblMinInsResVal.Text = $"{cfg.MinInsulationResistance.ToString("0.##", CultureInfo.InvariantCulture)} ohm";
+            else
+                lblMinInsResVal.Text = "-";
+
+            lblHipotVoltageVal.Text = cfg.HipotVoltage ? "ON" : "OFF";
+            lblDescriptionVal.Text = !string.IsNullOrWhiteSpace(cfg.Description) ? cfg.Description : "-";
+        }
     }
 }
