@@ -14,6 +14,25 @@ namespace AssemblyLineTester.Services
         private static string ImagesRootRelative => Path.Combine("assets", "img", "harness");
         private static string ImagesRoot => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ImagesRootRelative);
 
+        // A stored ProductHarness.ImagePaths entry is relative; this is the one place that turns
+        // it into a real file path, so every page shows the same picture for the same harness.
+        public static string? ResolveImagePath(string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath)) return null;
+
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string candidateBase = Path.Combine(baseDir, relativePath);
+            if (File.Exists(candidateBase)) return candidateBase;
+
+            if (File.Exists(relativePath)) return Path.GetFullPath(relativePath);
+
+            string imagesFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AssemblyLineTester", "Images");
+            string candidateAppData = Path.Combine(imagesFolder, relativePath);
+            return File.Exists(candidateAppData) ? candidateAppData : null;
+        }
+
         // Loads every harness with its connectors, ordered by attach position.
         public List<ProductHarness> GetAllHarnesses()
         {

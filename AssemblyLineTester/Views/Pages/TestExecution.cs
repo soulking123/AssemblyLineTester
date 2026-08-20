@@ -90,6 +90,10 @@ namespace AssemblyLineTester.Views.Pages
                 UpdateProgramInfoDisplay(null);
                 LoadConfigurationIntoGrid(null);
             }
+
+            // Outside the config-changed guard above: the thumbnails come from the harness and its
+            // connectors, which the Harness Database can edit without ever touching the config.
+            LoadImagesFromConfig();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -268,6 +272,7 @@ namespace AssemblyLineTester.Views.Pages
                     UpdateProgramInfoDisplay(config);
                     lblPageHeader.Text = $"TEST EXECUTION - {config.ConfigName}";
                     LoadConfigurationIntoGrid(config);
+                    LoadImagesFromConfig();
 
                     MessageBox.Show($"Test program configuration '{dlg.SelectedConfiguration.ConfigName}' loaded successfully and set as Active.", "Program Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Debug.WriteLine($"Loaded program from DB: {dlg.SelectedConfiguration.ConfigName}\n{_customTestText}");
@@ -970,40 +975,34 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        // The harness the two thumbnails and their modals are built from: whichever ProductHarness
+        // matches the active config's product model. One query, called from every place that needs
+        // it, so a change to the matching rule only has to happen here.
+        private static ProductHarness? GetHarnessForActiveConfig()
+        {
+            var activeConfig = new TestConfigService().GetActiveConfig();
+            if (activeConfig == null) return null;
+
+            return new AssemblyLineTester.Services.HarnessService().GetAllHarnesses()
+                .FirstOrDefault(h => h.ProductModel == activeConfig.ProductModelName || h.Name == activeConfig.ConfigName);
+        }
+
         private void LoadImagesFromConfig()
         {
-            var configService = new TestConfigService();
-            var activeConfig = configService.GetActiveConfig();
-            if (activeConfig != null)
-            {
-                var harnessService = new AssemblyLineTester.Services.HarnessService();
-                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModelName || h.Name == activeConfig.ConfigName);
-                if (harness != null && harness.ImagePaths != null && harness.ImagePaths.Count > 0)
-                {
-                    try
-                    {
-                        if (System.IO.File.Exists(harness.ImagePaths[0]))
-                            picMachineOverview.Image = Image.FromFile(harness.ImagePaths[0]);
-                    } catch { }
-                }
+            var harness = GetHarnessForActiveConfig();
+            if (harness == null) return;
 
-                if (harness != null)
-                {
-                    var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);
-                    if (connectors != null && connectors.Count > 0)
-                    {
-                        var firstConn = System.Linq.Enumerable.FirstOrDefault(connectors, c => !string.IsNullOrEmpty(c.ImagePath));
-                        if (firstConn != null && !string.IsNullOrEmpty(firstConn.ImagePath))
-                        {
-                            try
-                            {
-                                if (System.IO.File.Exists(firstConn.ImagePath))
-                                    picHarnessConn.Image = Image.FromFile(firstConn.ImagePath);
-                            } catch { }
-                        }
-                    }
-                }
-            }
+            string? harnessImage = harness.ImagePaths?
+                .Select(AssemblyLineTester.Services.HarnessService.ResolveImagePath)
+                .FirstOrDefault(p => p != null);
+            AssemblyLineTester.Helpers.ImageLoader.SetImage(picMachineOverview, harnessImage);
+
+            // J1's own first photo, matching the order the modal below walks the full set in.
+            var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);
+            string? firstConnectorImage = connectors
+                .SelectMany(c => AssemblyLineTester.Services.ConnectorService.GetConnectorImagePaths(c))
+                .FirstOrDefault();
+            AssemblyLineTester.Helpers.ImageLoader.SetImage(picHarnessConn, firstConnectorImage);
         }
 
         private void PicAreaDetail_Paint(object? sender, PaintEventArgs e)
@@ -1055,18 +1054,10 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PicMachineOverview_Click(object? sender, EventArgs e)
         {
-            System.Collections.Generic.List<string> paths = [];
-            var configService = new TestConfigService();
-            var activeConfig = configService.GetActiveConfig();
-            if (activeConfig != null)
-            {
-                var harnessService = new AssemblyLineTester.Services.HarnessService();
-                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModelName || h.Name == activeConfig.ConfigName);
-                if (harness != null && harness.ImagePaths != null)
-                {
-                    paths.AddRange(harness.ImagePaths);
-                }
-            }
+            var harness = GetHarnessForActiveConfig();
+            var paths = harness?.ImagePaths?
+                .Select(AssemblyLineTester.Services.HarnessService.ResolveImagePath)
+                .Where(p => p != null).Select(p => p!).ToList() ?? new List<string>();
 
             using var modal = new AssemblyLineTester.Views.Modals.ImagePreviewModalForm(paths, "HARNESS PREVIEW");
             modal.ShowDialog(this);
@@ -1074,24 +1065,16 @@ namespace AssemblyLineTester.Views.Pages
 
         private void PicHarnessConn_Click(object? sender, EventArgs e)
         {
-            System.Collections.Generic.List<string> paths = [];
-            var configService = new TestConfigService();
-            var activeConfig = configService.GetActiveConfig();
-            if (activeConfig != null)
+            var harness = GetHarnessForActiveConfig();
+            var paths = new List<string>();
+            if (harness != null)
             {
-                var harnessService = new AssemblyLineTester.Services.HarnessService();
-                var harness = System.Linq.Enumerable.FirstOrDefault(harnessService.GetAllHarnesses(), h => h.ProductModel == activeConfig.ProductModelName || h.Name == activeConfig.ConfigName);
-                if (harness != null)
+                // Every photo the connector at J1 has, then J2's, and so on - GetConnectorsByHarness
+                // already returns them in attach position order.
+                var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);
+                foreach (var conn in connectors)
                 {
-                    var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);
-                    if (connectors != null)
-                    {
-                        foreach(var conn in connectors)
-                        {
-                            if (!string.IsNullOrEmpty(conn.ImagePath))
-                                paths.Add(conn.ImagePath);
-                        }
-                    }
+                    paths.AddRange(AssemblyLineTester.Services.ConnectorService.GetConnectorImagePaths(conn));
                 }
             }
 

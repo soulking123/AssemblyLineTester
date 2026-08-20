@@ -202,7 +202,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         private void SetHarnessImage(List<string> relativePaths)
         {
-            _harnessImagePaths = relativePaths.Select(ResolveHarnessImagePath).Where(p => p != null).Select(p => p!).ToList();
+            _harnessImagePaths = relativePaths.Select(HarnessService.ResolveImagePath).Where(p => p != null).Select(p => p!).ToList();
             _harnessImageIndex = 0;
             LoadGalleryImage(picHarnessImage, _harnessImagePaths, _harnessImageIndex);
         }
@@ -214,41 +214,12 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             LoadGalleryImage(picMachineArea, _genConnectorImagePaths, _genConnectorImageIndex);
         }
 
-        private static string? ResolveHarnessImagePath(string relativePath)
-        {
-            if (string.IsNullOrWhiteSpace(relativePath)) return null;
-
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string candidateBase = Path.Combine(baseDir, relativePath);
-            if (File.Exists(candidateBase)) return candidateBase;
-
-            if (File.Exists(relativePath)) return Path.GetFullPath(relativePath);
-
-            string imagesFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "AssemblyLineTester", "Images");
-            string candidateAppData = Path.Combine(imagesFolder, relativePath);
-            return File.Exists(candidateAppData) ? candidateAppData : null;
-        }
-
         private static void LoadGalleryImage(PictureBox pic, List<string> paths, int index)
         {
-            var oldImage = pic.Image;
-            pic.Image = null;
-            oldImage?.Dispose();
+            pic.SizeMode = PictureBoxSizeMode.Zoom;
 
-            if (paths.Count > 0 && index >= 0 && index < paths.Count)
-            {
-                try
-                {
-                    pic.SizeMode = PictureBoxSizeMode.Zoom;
-                    pic.Image = Image.FromFile(paths[index]);
-                }
-                catch (Exception ex)
-                {
-                    FileLogService.Warn("HarnessDatabase.ShowImage", $"Image '{paths[index]}' could not be loaded: {ex.Message}");
-                }
-            }
+            string? path = paths.Count > 0 && index >= 0 && index < paths.Count ? paths[index] : null;
+            AssemblyLineTester.Helpers.ImageLoader.SetImage(pic, path);
 
             pic.Invalidate();
         }
