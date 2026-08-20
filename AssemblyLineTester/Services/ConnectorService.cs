@@ -63,6 +63,9 @@ namespace AssemblyLineTester.Services
         // Inserts a connector into the shared catalog and copies its images in.
         public static (Connector? Connector, string? Error) AddConnector(Connector connector, List<string> sourceImagePaths)
         {
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
+                return (null, "You do not have permission to modify connector records.");
+
             string? validationError = Validate(connector);
             if (validationError != null) return (null, validationError);
 
@@ -102,6 +105,9 @@ namespace AssemblyLineTester.Services
         // Updates fields, copies in new images, then removes the ones the user unticked.
         public static (bool Success, string? Error) UpdateConnector(Connector connector, List<string> newSourceImagePaths, List<string> removedImageFileNames)
         {
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
+                return (false, "You do not have permission to modify connector records.");
+
             string? validationError = Validate(connector);
             if (validationError != null) return (false, validationError);
 
@@ -144,6 +150,9 @@ namespace AssemblyLineTester.Services
         // Deletes the connector row and its image folder.
         public static (bool Success, string? Error) DeleteConnector(int connectorId)
         {
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
+                return (false, "You do not have permission to modify connector records.");
+
             using var db = new AppDbContext();
             var existing = db.Connectors.FirstOrDefault(c => c.ConnectorId == connectorId);
             if (existing == null) return (false, "Connector not found.");

@@ -446,17 +446,24 @@ namespace AssemblyLineTester.Views.Pages
             if (MessageBox.Show("Delete this test history and its steps? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
                 return;
 
-            bool ok = _historyService.DeleteHistory(reportId);
-            if (ok)
+            try
             {
-                MessageBox.Show("History deleted.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadHistoryData();
-                ClearDetailPanel();
-                btnDeleteHistory.Enabled = false;
+                bool ok = _historyService.DeleteHistory(reportId);
+                if (ok)
+                {
+                    MessageBox.Show("History deleted.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadHistoryData();
+                    ClearDetailPanel();
+                    btnDeleteHistory.Enabled = false;
+                }
+                else
+                {
+                    MessageBox.Show("Failed to delete history.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Failed to delete history.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

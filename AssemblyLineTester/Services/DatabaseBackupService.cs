@@ -94,6 +94,9 @@ namespace AssemblyLineTester.Services
         // Replaces the live database from a backup file, keeping a safety copy first.
         public static void Restore(string sourcePath)
         {
+            if (!SessionManager.HasPermission("Action.Database.Backup"))
+                throw new UnauthorizedAccessException("You do not have permission to restore the database.");
+
             if (string.IsNullOrWhiteSpace(sourcePath))
                 throw new ArgumentException("Source path is required.", nameof(sourcePath));
             if (!File.Exists(sourcePath))

@@ -127,7 +127,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         private bool HasConnectorEditPermission()
         {
-            if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator")
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
             {
                 MessageBox.Show("You do not have permission to modify connector records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;

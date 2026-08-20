@@ -142,10 +142,17 @@ namespace AssemblyLineTester.Views.Pages
                         "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (confirm != DialogResult.Yes) return;
 
-                    _reportService.DeleteReport(_selectedReportId.Value);
-                    _selectedReportId = null;
-                    ClearPreview();
-                    LoadReportsGrid(_appliedFilter);
+                    try
+                    {
+                        _reportService.DeleteReport(_selectedReportId.Value);
+                        _selectedReportId = null;
+                        ClearPreview();
+                        LoadReportsGrid(_appliedFilter);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Delete Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 };
             }
             catch (Exception ex)

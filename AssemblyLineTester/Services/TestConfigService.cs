@@ -26,6 +26,9 @@ namespace AssemblyLineTester.Services
 
         public void SaveConfig(TestConfiguration config)
         {
+            if (!SessionManager.HasPermission("Action.TestConfig.Edit"))
+                throw new UnauthorizedAccessException("You do not have permission to save test configurations.");
+
             using (var db = new AppDbContext())
             {
                 var dbTestTypes = db.TestTypes.ToDictionary(t => t.Id);
@@ -228,6 +231,9 @@ namespace AssemblyLineTester.Services
 
         public bool DeleteConfiguration(string configName)
         {
+            if (!SessionManager.HasPermission("Action.TestConfig.Edit"))
+                throw new UnauthorizedAccessException("You do not have permission to delete test configurations.");
+
             if (string.IsNullOrWhiteSpace(configName)) return false;
 
             using var db = new AppDbContext();

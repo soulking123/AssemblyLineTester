@@ -35,6 +35,9 @@ namespace AssemblyLineTester.Services
         // Inserts the harness, copies its images in, and links the chosen connectors in order.
         public (bool success, string? error) AddHarness(ProductHarness harness)
         {
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
+                return (false, "You do not have permission to modify harness records.");
+
             try
             {
                 using var db = new AppDbContext();
@@ -74,6 +77,9 @@ namespace AssemblyLineTester.Services
         // Updates harness fields; a path dropped from ImagePaths is unlinked, not deleted from disk.
         public (bool success, string? error) UpdateHarness(ProductHarness harness)
         {
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
+                return (false, "You do not have permission to modify harness records.");
+
             try
             {
                 using var db = new AppDbContext();
@@ -109,6 +115,9 @@ namespace AssemblyLineTester.Services
         // Deletes the harness and its image folder; connectors survive, other harnesses may use them.
         public (bool success, string? error) DeleteHarness(int productHarnessId)
         {
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
+                return (false, "You do not have permission to modify harness records.");
+
             try
             {
                 using var db = new AppDbContext();
