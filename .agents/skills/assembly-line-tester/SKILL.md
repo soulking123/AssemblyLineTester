@@ -57,3 +57,18 @@ dotnet ef database update --project AssemblyLineTester/AssemblyLineTester.csproj
 
 The Inno Setup script is located at `Installer/AssemblyLineTester.iss`.
 To build the installer, open `Installer/AssemblyLineTester.iss` in Inno Setup Compiler or run `ISCC.exe Installer/AssemblyLineTester.iss`.
+
+---
+
+## 5. Cirris EasyWire & CTA Hardware Integration
+
+### Environment & Paths
+- **Default Install Path**: `C:\Program Files (x86)\Cirris\easywire`
+- **Key Binaries**: `easywire.exe`, `EWLauncher.exe`, `CirrisDataAccessService.exe`, `ArchivedReportViewer.exe`
+- **Drivers**: Silicon Labs CP210x Universal Driver (`Silicon_Labs_Driver/`), USBXpress (`SiUSBXp.dll`), and Common Drivers (`CommonDrivers/`).
+
+### CTA Server Communication
+- **Endpoint**: `127.0.0.1:55555` (TCP/IP local server)
+- **Default User**: `User1`
+- **Locking Policy**: All hardware commands are synchronized across `_lockObj`. Background polling tasks must use non-blocking checks (`Monitor.TryEnter`) to avoid false disconnects during multi-wire testing.
+

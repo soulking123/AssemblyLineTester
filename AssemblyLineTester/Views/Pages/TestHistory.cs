@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -178,7 +178,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             var filter = BuildFilter(_currentPage);
             var paged = _historyService.GetHistoryList(filter);
-            _summary = _reportService.GetSummary(filter);
+            _summary = _historyService.GetHistorySummary(filter);
 
             PopulateHistoryGrid(paged);
             UpdateSummaryChart();

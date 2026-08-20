@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CtaDotNet.Services;
 using CtaDotNet.Models;
@@ -114,9 +114,11 @@ namespace AssemblyLineTester.Services
             {
                 var checkTask = System.Threading.Tasks.Task.Run(() =>
                 {
-                    lock (_lockObj)
+                    bool lockAcquired = false;
+                    try
                     {
-                        try
+                        System.Threading.Monitor.TryEnter(_lockObj, 500, ref lockAcquired);
+                        if (lockAcquired)
                         {
                             var readyRes = _service.ServerReady(_connectionId);
                             if (readyRes == null || readyRes.DllCallResult != CtaCommandResultCode.Success || !readyRes.FunctionResult)
@@ -127,14 +129,27 @@ namespace AssemblyLineTester.Services
                             var infoRes = _service.GetServerInformation(_connectionId);
                             return infoRes != null && infoRes.DllCallResult == CtaCommandResultCode.Success && !string.IsNullOrWhiteSpace(infoRes.Result);
                         }
-                        catch
+                        else
                         {
-                            return false;
+                            // Lock is held by an active test operation (e.g. testing 30+ wires).
+                            // The connection is alive and actively processing measurements.
+                            return _connectionId != -1;
+                        }
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                    finally
+                    {
+                        if (lockAcquired)
+                        {
+                            System.Threading.Monitor.Exit(_lockObj);
                         }
                     }
                 });
 
-                var completedTask = await System.Threading.Tasks.Task.WhenAny(checkTask, System.Threading.Tasks.Task.Delay(2000));
+                var completedTask = await System.Threading.Tasks.Task.WhenAny(checkTask, System.Threading.Tasks.Task.Delay(3000));
 
                 if (completedTask == checkTask)
                 {
@@ -148,15 +163,13 @@ namespace AssemblyLineTester.Services
                 }
                 else
                 {
-                    // Timed out - USB most likely unplugged.
-                    Disconnect();
-                    return false;
+                    // Timed out waiting - do not disconnect if a test is busy running.
+                    return _connectionId != -1;
                 }
             }
             catch
             {
-                Disconnect();
-                return false;
+                return _connectionId != -1;
             }
         }
 
@@ -378,6 +391,70 @@ namespace AssemblyLineTester.Services
                 catch
                 {
                     return (CtaCommandResultCode)(-2);
+                }
+            }
+        }
+
+        public CtaInstructionResult GetRessistance(string Point1, string Point2)
+        {
+            if (!IsConnected) return new CtaInstructionResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.Resistance(_connectionId, Point1, Point2);
+                }
+                catch
+                {
+                    return new CtaInstructionResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+                }
+            }
+        }
+
+        public CtaInstructionResult GetCapacitance(string Point1, string Point2)
+        {
+            if (!IsConnected) return new CtaInstructionResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.Capacitance(_connectionId, Point1, Point2);
+                }
+                catch
+                {
+                    return new CtaInstructionResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+                }
+            }
+        }
+
+        public CtaDiodeResult GetDiode(string Point1, string Point2)
+        {
+            if (!IsConnected) return new CtaDiodeResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.Diode(_connectionId, Point1, Point2);
+                }
+                catch
+                {
+                    return new CtaDiodeResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+                }
+            }
+        }
+
+        public CtaBoolResult GetTwistedPair(string Point1, string Point2)
+        {
+            if (!IsConnected) return new CtaBoolResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
+            lock (_lockObj)
+            {
+                try
+                {
+                    return _service.TwistedPair(_connectionId, Point1, Point2);
+                }
+                catch
+                {
+                    return new CtaBoolResult { DllCallResult = CtaCommandResultCode.ConnectionFailed };
                 }
             }
         }

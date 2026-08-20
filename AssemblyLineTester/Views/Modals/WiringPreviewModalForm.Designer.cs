@@ -28,7 +28,7 @@ namespace AssemblyLineTester.Views.Modals
             pnlBodyContainer = new Panel();
             pnlMainCard = new Panel();
             pnlPreviewScroll = new Panel();
-            picPreview = new PictureBox();
+            picPreview = new AssemblyLineTester.Views.Controls.SchematicDiagramControl();
             pnlHeaderTop = new Panel();
             lblHeaderTop = new Label();
             pnlFooter = new Panel();
@@ -39,7 +39,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlBodyContainer.SuspendLayout();
             pnlMainCard.SuspendLayout();
             pnlPreviewScroll.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picPreview).BeginInit();
             pnlHeaderTop.SuspendLayout();
             pnlFooter.SuspendLayout();
             SuspendLayout();
@@ -148,8 +147,7 @@ namespace AssemblyLineTester.Views.Modals
             picPreview.Margin = new Padding(4, 4, 4, 4);
             picPreview.Name = "picPreview";
             picPreview.Size = new Size(1765, 1408);
-            picPreview.TabIndex = 0;
-            picPreview.TabStop = false;
+            picPreview.TabIndex = 2;
             // 
             // pnlHeaderTop
             // 
@@ -242,7 +240,6 @@ namespace AssemblyLineTester.Views.Modals
             pnlBodyContainer.ResumeLayout(false);
             pnlMainCard.ResumeLayout(false);
             pnlPreviewScroll.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)picPreview).EndInit();
             pnlHeaderTop.ResumeLayout(false);
             pnlFooter.ResumeLayout(false);
             ResumeLayout(false);
@@ -257,7 +254,7 @@ namespace AssemblyLineTester.Views.Modals
         private System.Windows.Forms.Panel pnlBodyContainer;
         private System.Windows.Forms.Panel pnlMainCard;
         private System.Windows.Forms.Panel pnlPreviewScroll;
-        private System.Windows.Forms.PictureBox picPreview;
+        private AssemblyLineTester.Views.Controls.SchematicDiagramControl picPreview;
         private System.Windows.Forms.Panel pnlHeaderTop;
         private System.Windows.Forms.Label lblHeaderTop;
         private System.Windows.Forms.Panel pnlFooter;

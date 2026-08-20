@@ -369,6 +369,7 @@ namespace AssemblyLineTester.Services
                 if (string.IsNullOrWhiteSpace(typeName) || ContinuityLikeTestTypes.Contains(typeName))
                 {
                     wireNets.Add(net);
+                    Debug.WriteLine($"wire nets from {net.FromAddress} to {net.ToAddress}");
                 }
                 else
                 {
@@ -376,46 +377,67 @@ namespace AssemblyLineTester.Services
                 }
             }
 
-            // Group wire nets by HarnessGroup (or NetId / shared FromLabel) to combine multi-pin net rows
-            var wireGroups = new System.Collections.Generic.List<System.Collections.Generic.List<TestConfigNet>>();
-            var currentGroup = new System.Collections.Generic.List<TestConfigNet>();
-            string? currentGroupId = null;
+            // Group wire nets using Connected Components (Disjoint Set Union) so parallel/connected pins merge into unified net groups
+            var parent = new System.Collections.Generic.Dictionary<string, string>();
+
+            string Find(string item)
+            {
+                if (!parent.ContainsKey(item)) parent[item] = item;
+                if (parent[item] != item) parent[item] = Find(parent[item]);
+                return parent[item];
+            }
+
+            void Union(string a, string b)
+            {
+                string rootA = Find(a);
+                string rootB = Find(b);
+                if (rootA != rootB) parent[rootA] = rootB;
+            }
+
+            var pinAddresses = new System.Collections.Generic.Dictionary<string, int>();
 
             foreach (var net in wireNets)
             {
+                string fromPin = FormatPin(net.FromAddress);
+                string toPin = FormatPin(net.ToAddress);
+
+                if (!pinAddresses.ContainsKey(fromPin)) pinAddresses[fromPin] = net.FromAddress;
+                if (!pinAddresses.ContainsKey(toPin)) pinAddresses[toPin] = net.ToAddress;
+
                 string? groupId = !string.IsNullOrWhiteSpace(net.HarnessGroup) ? net.HarnessGroup : (!string.IsNullOrWhiteSpace(net.NetId) ? net.NetId : null);
-                if (currentGroup.Count == 0)
+
+                Union(fromPin, toPin);
+
+                if (groupId != null)
                 {
-                    currentGroup.Add(net);
-                    currentGroupId = groupId;
+                    Union(fromPin, "GROUP_" + groupId);
+                    Union(toPin, "GROUP_" + groupId);
                 }
-                else if (groupId != null && groupId == currentGroupId)
-                {
-                    currentGroup.Add(net);
-                }
-                else
-                {
-                    wireGroups.Add(currentGroup);
-                    currentGroup = new System.Collections.Generic.List<TestConfigNet> { net };
-                    currentGroupId = groupId;
-                }
-            }
-            if (currentGroup.Count > 0)
-            {
-                wireGroups.Add(currentGroup);
             }
 
-            int wireSeq = 1;
-            foreach (var grp in wireGroups)
+            // Group all pins by their root ancestor
+            var groupsByRoot = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>>();
+            foreach (var pin in pinAddresses.Keys)
             {
-                var pinList = new System.Collections.Generic.List<string>();
-                foreach (var net in grp)
+                string root = Find(pin);
+                if (!groupsByRoot.ContainsKey(root))
                 {
-                    string fromPin = !string.IsNullOrWhiteSpace(net.FromLabel) ? net.FromLabel : FormatPin(net.FromAddress);
-                    string toPin = !string.IsNullOrWhiteSpace(net.ToLabel) ? net.ToLabel : FormatPin(net.ToAddress);
-                    if (!pinList.Contains(fromPin)) pinList.Add(fromPin);
-                    if (!pinList.Contains(toPin)) pinList.Add(toPin);
+                    groupsByRoot[root] = new System.Collections.Generic.List<string>();
                 }
+                groupsByRoot[root].Add(pin);
+            }
+
+            // Order groups by minimum pin address in each group
+            var sortedGroups = groupsByRoot.Values
+                .OrderBy(grp => grp.Min(p => pinAddresses.TryGetValue(p, out int addr) ? addr : int.MaxValue))
+                .ToList();
+
+            int wireSeq = 1;
+            foreach (var grp in sortedGroups)
+            {
+                var pinList = grp.OrderBy(p => pinAddresses.TryGetValue(p, out int addr) ? addr : int.MaxValue)
+                                 .ThenBy(p => p)
+                                 .ToList();
 
                 for (int pIdx = 0; pIdx < pinList.Count; pIdx += 4)
                 {
@@ -441,8 +463,8 @@ namespace AssemblyLineTester.Services
                 int compSeq = 1;
                 foreach (var net in componentNets)
                 {
-                    string fromPin = !string.IsNullOrWhiteSpace(net.FromLabel) ? net.FromLabel : FormatPin(net.FromAddress);
-                    string toPin = !string.IsNullOrWhiteSpace(net.ToLabel) ? net.ToLabel : FormatPin(net.ToAddress);
+                    string fromPin = FormatPin(net.FromAddress);
+                    string toPin = FormatPin(net.ToAddress);
                     string typeName = net.TestType?.TestTypeName?.ToUpperInvariant() ?? "";
                     
                     string shortType = typeName;
@@ -488,7 +510,7 @@ namespace AssemblyLineTester.Services
             return sb.ToString();
         }
 
-        private string FormatPin(int address)
+        public static string FormatPin(int address)
         {
             return address <= 64 ? $"J1-{address:D3}" : $"J3-{(address - 64):D3}";
         }
@@ -516,11 +538,10 @@ namespace AssemblyLineTester.Services
                     return;
                 }
 
-                string firstPin = currentNetPins[0];
-                for (int i = 1; i < currentNetPins.Count; i++)
+                for (int i = 0; i < currentNetPins.Count - 1; i++)
                 {
-                    string fromPinStr = firstPin;
-                    string toPinStr = currentNetPins[i];
+                    string fromPinStr = currentNetPins[i];
+                    string toPinStr = currentNetPins[i + 1];
 
                     if (fromPinStr == toPinStr) continue;
 
@@ -538,8 +559,8 @@ namespace AssemblyLineTester.Services
                         FromLabel = fromPinStr,
                         ToAddress = ParsePin(toPinStr),
                         ToLabel = toPinStr,
-                        HarnessGroup = currentNetGroupId,
-                        NetId = currentNetGroupId,
+                        HarnessGroup = "",
+                        NetId = "",
                         UpperLimit = connResist
                     };
 

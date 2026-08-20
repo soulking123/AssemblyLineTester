@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -43,7 +43,6 @@ namespace AssemblyLineTester.Views.Modals
         {
             UIStyleHelper.SetupCardRoundedEdges(pnlGridCard, 12, Color.FromArgb(226, 232, 240), 1.5f);
             UIStyleHelper.SetupButtonRoundedEdges(btnLoad, 10, Color.FromArgb(22, 163, 74), Color.FromArgb(34, 197, 94), Color.FromArgb(21, 128, 61), Color.Transparent);
-            UIStyleHelper.SetupButtonRoundedEdges(btnBrowseFile, 10, Color.FromArgb(14, 165, 233), Color.FromArgb(56, 189, 248), Color.FromArgb(2, 132, 199), Color.Transparent);
             UIStyleHelper.SetupButtonRoundedEdges(btnCancel, 10, Color.FromArgb(226, 232, 240), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225), Color.Transparent);
             UIStyleHelper.SetupButtonRoundedEdges(btnSearch, 8, Color.FromArgb(15, 23, 42), Color.FromArgb(30, 41, 59), Color.FromArgb(2, 6, 23), Color.Transparent);
             UIStyleHelper.SetupButtonRoundedEdges(btnClear, 8, Color.FromArgb(226, 232, 240), Color.FromArgb(241, 245, 249), Color.FromArgb(203, 213, 225), Color.Transparent);
@@ -88,7 +87,6 @@ namespace AssemblyLineTester.Views.Modals
             iconLogo.MouseDown += TitleBar_MouseDown;
 
             btnLoad.Click += BtnLoad_Click;
-            btnBrowseFile.Click += BtnBrowseFile_Click;
             btnSearch.Click += (s, e) => FilterGrid();
             btnClear.Click += (s, e) => { txtSearch.Clear(); FilterGrid(); };
             txtSearch.TextChanged += (s, e) => FilterGrid();
@@ -169,23 +167,6 @@ namespace AssemblyLineTester.Views.Modals
             Close();
         }
 
-        private void BtnBrowseFile_Click(object? sender, EventArgs e)
-        {
-            using var ofd = new OpenFileDialog
-            {
-                Title = "Select Test Program File",
-                Filter = "Test Program Files (*.json;*.xml;*.txt)|*.json;*.xml;*.txt|All Files (*.*)|*.*",
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-            };
-
-            if (ofd.ShowDialog(this) == DialogResult.OK)
-            {
-                LoadedFilePath = ofd.FileName;
-                DialogResult = DialogResult.OK;
-                Close();
-            }
-        }
-
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -213,7 +194,7 @@ namespace AssemblyLineTester.Views.Modals
         {
             if (e.Button == MouseButtons.Left)
             {
-            NativeMethods.DragWindow(Handle);
+                NativeMethods.DragWindow(Handle);
             }
         }
     }
