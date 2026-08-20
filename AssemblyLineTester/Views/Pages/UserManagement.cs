@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -186,6 +186,12 @@ namespace AssemblyLineTester.Views.Pages
                 lblLegendVal4.Text = _roleCounts.GetValueOrDefault("Technician", 0).ToString();
                 lblLegendVal5.Text = _roleCounts.GetValueOrDefault("Quality", 0).ToString();
                 lblLegendVal6.Text = _roleCounts.GetValueOrDefault("Supervisor", 0).ToString();
+
+                var actStats = _userService.GetMonthlyActivityStats();
+                lblActVal1.Text = actStats.NewUsers.ToString();
+                lblActVal2.Text = actStats.ActiveLogins.ToString();
+                lblActVal3.Text = actStats.PasswordChanges.ToString();
+                lblActVal4.Text = actStats.FailedLoginAttempts.ToString();
 
                 LoadRoleChart();
                 PopulateUserGrid();

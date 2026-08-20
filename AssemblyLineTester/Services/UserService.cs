@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -205,5 +205,32 @@ namespace AssemblyLineTester.Services
                 "Change Account Status",
                 $"Account '{user.Username}' changed from {previous} to {status.Name}.");
         }
+
+        // Aggregates user activity metrics for the given month (default: current calendar month).
+        public UserActivityStats GetMonthlyActivityStats(DateTime? targetDate = null)
+        {
+            DateTime refDate = targetDate ?? DateTime.Now;
+            DateTime startOfMonthLocal = new DateTime(refDate.Year, refDate.Month, 1, 0, 0, 0, DateTimeKind.Local);
+            DateTime startOfMonthUtc = startOfMonthLocal.ToUniversalTime();
+            DateTime endOfMonthUtc = startOfMonthLocal.AddMonths(1).ToUniversalTime();
+
+            using var db = new AppDbContext();
+
+            int newUsers = db.Users
+                .Count(u => u.CreatedAt >= startOfMonthUtc && u.CreatedAt < endOfMonthUtc);
+
+            var logs = db.SystemLogs
+                .Where(l => l.Timestamp >= startOfMonthUtc && l.Timestamp < endOfMonthUtc)
+                .Select(l => new { l.ActionName, l.ModuleName })
+                .ToList();
+
+            int activeLogins = logs.Count(l => l.ActionName == "Login" || l.ActionName == "Sign In");
+            int passwordChanges = logs.Count(l => l.ActionName == "Change Password" || l.ActionName == "Reset Password");
+            int failedLogins = logs.Count(l => l.ActionName == "Login Failed" || l.ActionName == "Failed Sign In" || l.ActionName == "Login Blocked");
+
+            return new UserActivityStats(newUsers, activeLogins, passwordChanges, failedLogins);
+        }
     }
+
+    public record UserActivityStats(int NewUsers, int ActiveLogins, int PasswordChanges, int FailedLoginAttempts);
 }
