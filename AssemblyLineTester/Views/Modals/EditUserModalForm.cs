@@ -14,7 +14,7 @@ namespace AssemblyLineTester.Views.Modals
 
         // Order matches the seeded Role ids (1-6), the same convention AddUserModalForm relies on.
         private static readonly string[] Roles = ["Administrator", "Operator", "Engineer", "Technician", "Quality", "Supervisor"];
-        private static readonly string[] Statuses = ["Active", "Inactive", "Locked"];
+        private static readonly string[] Statuses = ["Active", "Inactive"];
 
         public EditUserModalForm(UserService userService, User user)
         {

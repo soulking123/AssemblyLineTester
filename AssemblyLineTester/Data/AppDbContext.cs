@@ -227,8 +227,7 @@ namespace AssemblyLineTester.Data
 
             modelBuilder.Entity<UserStatus>().HasData(
                 new UserStatus { Id = 1, Name = "Active", Description = "User is active and allowed to log in" },
-                new UserStatus { Id = 2, Name = "Inactive", Description = "User is inactive and disabled" },
-                new UserStatus { Id = 3, Name = "Locked", Description = "User is locked out due to multiple failed login attempts" }
+                new UserStatus { Id = 2, Name = "Inactive", Description = "User is inactive and disabled" }
             );
 
             // Same starting password as UserService.DefaultNewUserPassword ("Cat12345")

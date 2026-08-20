@@ -137,7 +137,7 @@ namespace AssemblyLineTester.Views.Pages
         private void InitializeFilters()
         {
             cmbFilterStatus.Items.Clear();
-            cmbFilterStatus.Items.AddRange(["Status: All", "Active", "Inactive", "Locked"]);
+            cmbFilterStatus.Items.AddRange(["Status: All", "Active", "Inactive"]);
             cmbFilterStatus.SelectedIndex = 0;
 
             cmbFilterRole.Items.Clear();
@@ -161,7 +161,6 @@ namespace AssemblyLineTester.Views.Pages
                 // Counted by seeded id; the names are editable and renaming one zeroed these.
                 int activeUsers = _allUsers.Count(u => u.StatusId == UserStatus.Active);
                 int inactiveUsers = _allUsers.Count(u => u.StatusId == UserStatus.Inactive);
-                int lockedUsers = _allUsers.Count(u => u.StatusId == UserStatus.Locked);
                 // Local on both sides; CreatedAt is UTC and drifted across the month boundary.
                 int newUsersThisMonth = _allUsers.Count(u =>
                     AppTime.ToLocal(u.CreatedAt).Month == DateTime.Now.Month &&
@@ -173,8 +172,6 @@ namespace AssemblyLineTester.Views.Pages
                 lblKpiSub2.Text = $"Users ({(_totalUserCount > 0 ? (activeUsers * 100.0 / _totalUserCount) : 0):0.0}%)";
                 lblKpiVal3.Text = inactiveUsers.ToString();
                 lblKpiSub3.Text = $"Users ({(_totalUserCount > 0 ? (inactiveUsers * 100.0 / _totalUserCount) : 0):0.0}%)";
-                lblKpiVal4.Text = lockedUsers.ToString();
-                lblKpiSub4.Text = $"Users ({(_totalUserCount > 0 ? (lockedUsers * 100.0 / _totalUserCount) : 0):0.0}%)";
                 lblKpiVal5.Text = latestUser?.FullName ?? "-";
                 lblKpiSub5.Text = AppTime.ToLocal(latestUser?.LastLogin)?.ToString("dd MMM yyyy hh:mm:ss tt") ?? "No logins";
                 lblKpiVal6.Text = newUsersThisMonth.ToString();
@@ -683,8 +680,8 @@ namespace AssemblyLineTester.Views.Pages
                 e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
                 
                 string status = e.Value.ToString() ?? "";
-                Color pillColor = status == "Active" ? Color.FromArgb(220, 252, 231) : (status == "Locked" ? Color.FromArgb(254, 226, 226) : Color.FromArgb(226, 232, 240));
-                Color textColor = status == "Active" ? Color.FromArgb(22, 101, 52) : (status == "Locked" ? Color.FromArgb(153, 27, 27) : Color.FromArgb(71, 85, 105));
+                Color pillColor = status == "Active" ? Color.FromArgb(220, 252, 231) : Color.FromArgb(226, 232, 240);
+                Color textColor = status == "Active" ? Color.FromArgb(22, 101, 52) : Color.FromArgb(71, 85, 105);
                 
                 Size textSize = TextRenderer.MeasureText(status, _pillFont);
                 int badgeWidth = Math.Max(Scaled(72), textSize.Width + Scaled(20));
@@ -828,7 +825,6 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi1, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi2, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi3, 10, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi4, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi5, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi6, 10, Color.FromArgb(34, 40, 49), 2.5f);
 

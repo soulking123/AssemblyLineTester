@@ -2262,12 +2262,6 @@ namespace AssemblyLineTester.Migrations
                             Id = 2,
                             Description = "User is inactive and disabled",
                             Name = "Inactive"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "User is locked out due to multiple failed login attempts",
-                            Name = "Locked"
                         });
                 });
 
