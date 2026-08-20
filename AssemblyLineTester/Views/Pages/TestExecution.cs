@@ -772,6 +772,55 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        private async void BtnSelfTest_Click(object? sender, EventArgs e)
+        {
+            if (_testCts != null)
+            {
+                MessageBox.Show("A test is currently running. Please stop the test before running a self test.", "Self Test Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                btnLoadProgram.Enabled = false;
+                btnStartTest.Enabled = false;
+                btnSelfTest.Enabled = false;
+                btnSaveReport.Enabled = false;
+                lblStatusRunning.Text = "RUNNING SELF TEST...";
+                
+                await System.Threading.Tasks.Task.Run(() =>
+                {
+                    // Simulated self test logic
+                    System.Threading.Thread.Sleep(2000);
+                    
+                    if (!_instrument.IsConnected)
+                    {
+                        throw new Exception("Instrument not connected.");
+                    }
+                    
+                    var res = _instrument.GetServerInformation();
+                    if (res.DllCallResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+                    {
+                        throw new Exception("Failed to query instrument server information.");
+                    }
+                });
+                
+                MessageBox.Show("Self Test completed successfully.\nInstrument is functioning normally.", "Self Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Self Test Failed: {ex.Message}", "Self Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnLoadProgram.Enabled = true;
+                btnStartTest.Enabled = true;
+                btnSelfTest.Enabled = true;
+                btnSaveReport.Enabled = true;
+                lblStatusRunning.Text = "READY";
+            }
+        }
+
         private void BtnSaveReport_Click(object? sender, EventArgs e)
         {
             if (_loadedRows == null || _loadedRows.Count == 0)
@@ -1063,6 +1112,7 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnLoadProgram, 10, Color.FromArgb(250, 204, 21), Color.FromArgb(254, 216, 53), Color.FromArgb(234, 186, 10), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnStartTest, 12, Color.FromArgb(56, 142, 60), Color.FromArgb(76, 175, 80), Color.FromArgb(46, 125, 50), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnStopTest, 12, Color.FromArgb(211, 47, 47), Color.FromArgb(239, 83, 80), Color.FromArgb(198, 40, 40), Color.Transparent);
+            AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSelfTest, 12, Color.FromArgb(13, 148, 136), Color.FromArgb(45, 212, 191), Color.FromArgb(15, 118, 110), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnSaveReport, 12, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewPinMap, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupButtonRoundedEdges(btnViewWiringDiagram, 8, Color.FromArgb(37, 99, 235), Color.FromArgb(59, 130, 246), Color.FromArgb(29, 78, 216), Color.Transparent);

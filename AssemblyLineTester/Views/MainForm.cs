@@ -301,10 +301,15 @@ namespace AssemblyLineTester.Views
             lblTimeText.Text = DateTime.Now.ToString("hh:mm:ss tt");
         }
 
+        private AssemblyLineTester.Views.Controls.CustomToolTipForm? _customToolTipForm;
+        private System.Collections.Generic.Dictionary<Button, string> _tooltipTexts = new();
+
         private void ApplySidebarStyles()
         {
             AssemblyLineTester.Views.Controls.MenuButton[] menuButtons = [btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
             Font menuFont = new("Segoe UI", 11F, FontStyle.Regular);
+
+            _customToolTipForm ??= new AssemblyLineTester.Views.Controls.CustomToolTipForm();
 
             foreach (var btn in menuButtons)
             {
@@ -316,45 +321,76 @@ namespace AssemblyLineTester.Views
                 btn.TextAlign = ContentAlignment.MiddleLeft;
                 btn.Padding = new Padding(10, 0, 0, 0);
                 btn.BackColor = Color.Transparent;
+
+                btn.MouseEnter -= SidebarBtn_MouseEnter;
+                btn.MouseEnter += SidebarBtn_MouseEnter;
+                btn.MouseLeave -= SidebarBtn_MouseLeave;
+                btn.MouseLeave += SidebarBtn_MouseLeave;
             }
 
             btnDashboard.EmojiIcon = "📊";
             btnDashboard.FullText = "  📊    Dashboard";
             btnDashboard.Text = "  📊    Dashboard";
+            _tooltipTexts[btnDashboard] = "Dashboard";
 
             btnTestExecution.EmojiIcon = "⚡";
             btnTestExecution.FullText = "  ⚡    Test Execution";
             btnTestExecution.Text = "  ⚡    Test Execution";
+            _tooltipTexts[btnTestExecution] = "Test Execution";
 
             btnManualTesting.EmojiIcon = "🕹️";
             btnManualTesting.FullText = "  🕹️    Test Parameters";
             btnManualTesting.Text = "  🕹️    Test Parameters";
+            _tooltipTexts[btnManualTesting] = "Test Parameters";
 
             btnHarnessDatabase.EmojiIcon = "🗄️";
             btnHarnessDatabase.FullText = "  🗄️    Harness Database";
             btnHarnessDatabase.Text = "  🗄️    Harness Database";
+            _tooltipTexts[btnHarnessDatabase] = "Harness Database";
 
             btnTestHistory.EmojiIcon = "📜";
             btnTestHistory.FullText = "  📜    Test History";
             btnTestHistory.Text = "  📜    Test History";
+            _tooltipTexts[btnTestHistory] = "Test History";
 
             btnReports.EmojiIcon = "📑";
             btnReports.FullText = "  📑    Reports";
             btnReports.Text = "  📑    Reports";
+            _tooltipTexts[btnReports] = "Reports";
 
             btnSystemLog.EmojiIcon = "🖥️";
             btnSystemLog.FullText = "  🖥️    System Log";
             btnSystemLog.Text = "  🖥️    System Log";
+            _tooltipTexts[btnSystemLog] = "System Log";
 
             btnSettings.EmojiIcon = "⚙️";
             btnSettings.FullText = "  ⚙️    Settings";
             btnSettings.Text = "  ⚙️    Settings";
+            _tooltipTexts[btnSettings] = "Settings";
 
             btnUserManagement.EmojiIcon = "👥";
             btnUserManagement.FullText = "  👥    User Management";
             btnUserManagement.Text = "  👥    User Management";
+            _tooltipTexts[btnUserManagement] = "User Management";
 
             btnDashboard.IsActive = true;
+        }
+
+        private void SidebarBtn_MouseEnter(object? sender, EventArgs e)
+        {
+            if (sender is Button btn && !isSidebarExpanded)
+            {
+                if (_tooltipTexts.TryGetValue(btn, out string text))
+                {
+                    Point screenLoc = btn.PointToScreen(new Point(btn.Width, 0));
+                    _customToolTipForm?.ShowToolTip(text, screenLoc, btn.Height);
+                }
+            }
+        }
+
+        private void SidebarBtn_MouseLeave(object? sender, EventArgs e)
+        {
+            _customToolTipForm?.HideToolTip();
         }
 
         private UserControl? GetOrInitPage(string buttonName)
@@ -596,6 +632,11 @@ namespace AssemblyLineTester.Views
                         currentY += btn.Height + _expandedMenuGap;
                     }
                 }
+                
+                if (isSidebarExpanded)
+                {
+                    _customToolTipForm?.HideToolTip();
+                }
             }
             finally
             {
@@ -604,6 +645,9 @@ namespace AssemblyLineTester.Views
                 splitContainer1.ResumeLayout(true);
                 this.ResumeLayout(true);
                 AssemblyLineTester.Helpers.NativeMethods.SetRedraw(splitContainer1.Handle, true); // WM_SETREDRAW true
+                
+                // Remove focus from the toggle button so it doesn't stay highlighted
+                lblMenu.Focus();
                 splitContainer1.Refresh();
             }
         }

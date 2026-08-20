@@ -36,6 +36,7 @@ namespace AssemblyLineTester.Views.Pages
             btnLoadProgram = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnStartTest = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnStopTest = new AssemblyLineTester.Views.Controls.RoundedButton();
+            btnSelfTest = new AssemblyLineTester.Views.Controls.RoundedButton();
             btnSaveReport = new AssemblyLineTester.Views.Controls.RoundedButton();
             tblRow1 = new TableLayoutPanel();
             cardMachineOverview = new Panel();
@@ -156,22 +157,24 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblActionButtons
             // 
-            tblActionButtons.ColumnCount = 4;
+            tblActionButtons.ColumnCount = 5;
             tblActionButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 320F));
+            tblActionButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
             tblActionButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
             tblActionButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
             tblActionButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
             tblActionButtons.Controls.Add(btnLoadProgram, 0, 0);
             tblActionButtons.Controls.Add(btnStartTest, 1, 0);
             tblActionButtons.Controls.Add(btnStopTest, 2, 0);
-            tblActionButtons.Controls.Add(btnSaveReport, 3, 0);
+            tblActionButtons.Controls.Add(btnSelfTest, 3, 0);
+            tblActionButtons.Controls.Add(btnSaveReport, 4, 0);
             tblActionButtons.Dock = DockStyle.Right;
-            tblActionButtons.Location = new Point(1686, 0);
+            tblActionButtons.Location = new Point(1466, 0);
             tblActionButtons.Margin = new Padding(0);
             tblActionButtons.Name = "tblActionButtons";
             tblActionButtons.RowCount = 1;
             tblActionButtons.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblActionButtons.Size = new Size(980, 60);
+            tblActionButtons.Size = new Size(1200, 60);
             tblActionButtons.TabIndex = 1;
             // 
             // btnLoadProgram
@@ -233,6 +236,26 @@ namespace AssemblyLineTester.Views.Pages
             btnStopTest.UseVisualStyleBackColor = false;
             btnStopTest.Click += BtnStopTest_Click;
             // 
+            // btnSelfTest
+            // 
+            btnSelfTest.BackColor = Color.FromArgb(13, 148, 136);
+            btnSelfTest.Dock = DockStyle.Fill;
+            btnSelfTest.FlatAppearance.BorderSize = 0;
+            btnSelfTest.FlatStyle = FlatStyle.Flat;
+            btnSelfTest.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnSelfTest.ForeColor = Color.White;
+            btnSelfTest.HoverForeColor = Color.Empty;
+            btnSelfTest.Location = new Point(763, 0);
+            btnSelfTest.Margin = new Padding(3, 0, 3, 0);
+            btnSelfTest.Name = "btnSelfTest";
+            btnSelfTest.NormalBackColor = Color.FromArgb(13, 148, 136);
+            btnSelfTest.PressedForeColor = Color.Empty;
+            btnSelfTest.Size = new Size(214, 60);
+            btnSelfTest.TabIndex = 2;
+            btnSelfTest.Text = "SELF TEST";
+            btnSelfTest.UseVisualStyleBackColor = false;
+            btnSelfTest.Click += BtnSelfTest_Click;
+            // 
             // btnSaveReport
             // 
             btnSaveReport.BackColor = Color.FromArgb(37, 99, 235);
@@ -242,13 +265,13 @@ namespace AssemblyLineTester.Views.Pages
             btnSaveReport.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnSaveReport.ForeColor = Color.White;
             btnSaveReport.HoverForeColor = Color.Empty;
-            btnSaveReport.Location = new Point(763, 0);
+            btnSaveReport.Location = new Point(983, 0);
             btnSaveReport.Margin = new Padding(3, 0, 0, 0);
             btnSaveReport.Name = "btnSaveReport";
             btnSaveReport.NormalBackColor = Color.FromArgb(37, 99, 235);
             btnSaveReport.PressedForeColor = Color.Empty;
             btnSaveReport.Size = new Size(217, 60);
-            btnSaveReport.TabIndex = 2;
+            btnSaveReport.TabIndex = 3;
             btnSaveReport.Text = "💾 SAVE";
             btnSaveReport.UseVisualStyleBackColor = false;
             // 
@@ -756,6 +779,7 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.TableLayoutPanel tblActionButtons;
         private AssemblyLineTester.Views.Controls.RoundedButton btnStartTest;
         private AssemblyLineTester.Views.Controls.RoundedButton btnStopTest;
+        private AssemblyLineTester.Views.Controls.RoundedButton btnSelfTest;
         private AssemblyLineTester.Views.Controls.RoundedButton btnSaveReport;
         private System.Windows.Forms.TableLayoutPanel tblRow1;
         private System.Windows.Forms.Panel cardMachineOverview;
@@ -793,3 +817,4 @@ namespace AssemblyLineTester.Views.Pages
         private ListBox listBoxTestSummary;
     }
 }
+
