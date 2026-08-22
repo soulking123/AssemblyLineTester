@@ -436,6 +436,7 @@ namespace AssemblyLineTester.Views.Pages
             lblNavWiring.Size = new Size(175, 19);
             lblNavWiring.TabIndex = 2;
             lblNavWiring.Text = "Wiring && Test Parameter";
+            lblNavWiring.Visible = false;
             // 
             // panelTabContent
             // 
