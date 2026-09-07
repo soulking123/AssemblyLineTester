@@ -1899,8 +1899,8 @@ namespace AssemblyLineTester.Views.Pages
 
                 int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int nextFromAddr);
                 int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int nextToAddr);
-                string from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3");
-                string to = "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3");
+                string from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString();
+                string to = "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString();
                 if (defaultTestPoint == 128)
                 {
                     if (nextFromAddr > 64 )
@@ -1947,6 +1947,7 @@ namespace AssemblyLineTester.Views.Pages
                     // Default: WIRE, 4WIRE, RESISTOR, 4RESISTOR, SIGNATURE WIRE
                     resultValueStr = _instrument.GetRessistance(from, to).MeasuredValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 }
+                Debug.WriteLine($"values = {resultValueStr}");
 
                 UpdateGridRowUnitValue(rowIndex, resultValueStr);
             }

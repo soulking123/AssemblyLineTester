@@ -290,232 +290,402 @@ namespace AssemblyLineTester.Services
 
         public string ConvertToProgramText(TestConfiguration config)
         {
-            int sumPresentTestType = 0;
-            foreach (var testType in config.TestTypes)
-            {
-                sumPresentTestType += testType.TestTypeValue;
-            }
-
-            List<string> testTypeCode = ["58D817-6J350",
-            "56ACDF-MULTI",
-            "56ACDF-MULTI",
-            "4344B1-MULTI",
-            "56ACDF-MULTI",
-            "56ACDF-MULTI",
-            "4344B1-MULTI",
-            "56ACDF-MULTI",
-            "4344B1-MULTI",
-            "56ACDF-MULTI",
-            "4344B1-MULTI",
-            "4344B1-MULTI",
-            "56ACDF-MULTI",
-            "4344B1-MULTI",
-            "4344B1-MULTI",
-            "4344B1-MULTI",
-            ];
+            if (config == null) return string.Empty;
 
             var sb = new System.Text.StringBuilder();
 
-            sb.AppendLine("* ");
-            sb.AppendLine();
-            sb.AppendLine("* CRC Signature: YER8C3");
+            sb.AppendLine("TESTDEFAULTS");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine("    TESTER , 8100, 448, AHED-64");
+            sb.AppendLine("    STARTEVENT , ATTACHED");
+            sb.AppendLine("    SERIALENTRY , NONE");
+            sb.AppendLine("    TESTTYPE , BUILD");
+            sb.AppendLine("    SHOWCONNECTORS , On");
+            sb.AppendLine("    ERRORDETAILS , On");
+            sb.AppendLine("    MEASUREDVALUES , Off");
+            sb.AppendLine("    SHOWCURRENTINSTRUCTION , On");
+            sb.AppendLine("    SOUND , On");
+            sb.AppendLine("    DEBUG , Off");
+            sb.AppendLine("    ERRORLOCATION , Off, 10");
+            sb.AppendLine("    USECOMPONENTRES , On");
+            sb.AppendLine("    USELOTID , Off");
+            sb.AppendLine("    FAVENABLED , Off");
+            sb.AppendLine("    FIRSTARTICLEVERIFIED , Off");
+            sb.AppendLine("    ASSOCIATEDFILE , ");
+            sb.AppendLine("    HVIRVALUES , Off");
+            sb.AppendLine("    USELABELS , Off");
+            sb.AppendLine("    USESSMARTLIGHTS , Off");
+            sb.AppendLine("    COMMONHARDWARE_4W_PATTERN_OFFSET , 32");
+            sb.AppendLine("    DISPLAYCYCLESASTIME , Off");
+            sb.AppendLine("END");
             sb.AppendLine();
 
-            string programName = !string.IsNullOrWhiteSpace(config.ConfigName) ? config.ConfigName : "PROGRAM";
-            sb.AppendLine($"({testTypeCode[sumPresentTestType]}");
-            sb.AppendLine();
-            sb.AppendLine(" J1 D507F1 *[AHED-64,0,0,0,0,0,0,0,0,64] 64 POS. .1\" FEM.");
-            sb.AppendLine(" J3 D507F1 *[AHED-64,0,0,0,0,0,0,0,0,64] 64 POS. .1\" FEM.");
+            sb.AppendLine("GRAPHIC_CONN_TYPES");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine("     AHED-64 , 64, 1, 0, 112, 96, PIN_GROUP, 0, 2, 0, 112, 92, PIN_GROUP, 0, 3, 0, 108, 96, PIN_GROUP, 0, 4, 0, 108, 92, PIN_GROUP, 0, 5, 0, 104, 96, PIN_GROUP, 0, 6, 0, 104, 92, PIN_GROUP, 0, 7, 0, 100, 96, PIN_GROUP, 0, 8, 0, 100, 92, PIN_GROUP, 0, 9, 0, 96, 96, PIN_GROUP, 0, 10, 0, 96, 92, PIN_GROUP, 0, 11, 0, 92, 96, PIN_GROUP, 0, 12, 0, 92, 92, PIN_GROUP, 0, 13, 0, 88, 96, PIN_GROUP, 0, 14, 0, 88, 92, PIN_GROUP, 0, 15, 0, 84, 96, PIN_GROUP, 0, 16, 0, 84, 92, PIN_GROUP, 0, 17, 0, 80, 96, PIN_GROUP, 0, 18, 0, 80, 92, PIN_GROUP, 0, 19, 0, 76, 96, PIN_GROUP, 0, 20, 0, 76, 92, PIN_GROUP, 0, 21, 0, 72, 96, PIN_GROUP, 0, 22, 0, 72, 92, PIN_GROUP, 0, 23, 0, 68, 96, PIN_GROUP, 0, 24, 0, 68, 92, PIN_GROUP, 0, 25, 0, 64, 96, PIN_GROUP, 0, 26, 0, 64, 92, PIN_GROUP, 0, 27, 0, 60, 96, PIN_GROUP, 0, 28, 0, 60, 92, PIN_GROUP, 0, 29, 0, 56, 96, PIN_GROUP, 0, 30, 0, 56, 92, PIN_GROUP, 0, 31, 0, 52, 96, PIN_GROUP, 0, 32, 0, 52, 92, PIN_GROUP, 0, 33, 0, 48, 96, PIN_GROUP, 0, 34, 0, 48, 92, PIN_GROUP, 0, 35, 0, 44, 96, PIN_GROUP, 0, 36, 0, 44, 92, PIN_GROUP, 0, 37, 0, 40, 96, PIN_GROUP, 0, 38, 0, 40, 92, PIN_GROUP, 0, 39, 0, 36, 96, PIN_GROUP, 0, 40, 0, 36, 92, PIN_GROUP, 0, 41, 0, 32, 96, PIN_GROUP, 0, 42, 0, 32, 92, PIN_GROUP, 0, 43, 0, 28, 96, PIN_GROUP, 0, 44, 0, 28, 92, PIN_GROUP, 0, 45, 0, 24, 96, PIN_GROUP, 0, 46, 0, 24, 92, PIN_GROUP, 0, 47, 0, 20, 96, PIN_GROUP, 0, 48, 0, 20, 92, PIN_GROUP, 0, 49, 0, 16, 96, PIN_GROUP, 0, 50, 0, 16, 92, PIN_GROUP, 0, 51, 0, 12, 96, PIN_GROUP, 0, 52, 0, 12, 92, PIN_GROUP, 0, 53, 0, 8, 96, PIN_GROUP, 0, 54, 0, 8, 92, PIN_GROUP, 0, 55, 0, 4, 96, PIN_GROUP, 0, 56, 0, 4, 92, PIN_GROUP, 0, 57, 0, 0, 96, PIN_GROUP, 0, 58, 0, 0, 92, PIN_GROUP, 0, 59, 0, -4, 96, PIN_GROUP, 0, 60, 0, -4, 92, PIN_GROUP, 0, 61, 0, -8, 96, PIN_GROUP, 0, 62, 0, -8, 92, PIN_GROUP, 0, 63, 0, -12, 96, PIN_GROUP, 0, 64, 0, -12, 92, PIN_GROUP, 0, STYLE, Standard, , 0, 3, 1");
+            sb.AppendLine("    GraphicView, 1");
+            sb.AppendLine("    Strapping, 0, 0, 0, 0, 0, 0, 0, 0, 0");
+            sb.AppendLine("    HasImageData, TRUE");
+            sb.AppendLine("END");
             sb.AppendLine();
 
-            double connResist = config.MaxWireResistance > 0 ? config.MaxWireResistance : 10.0;
-            double compResist = config.MinComponentResistance > 0 ? config.MinComponentResistance : 10.1;
-            double insResist = config.MinInsulationResistance > 0 ? config.MinInsulationResistance : 100000.0;
+            sb.AppendLine("INTERFACING");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine("     J1 ,  AHED-64 ");
+            sb.AppendLine("     J2 ,  AHED-64 ");
+            sb.AppendLine("     J3 ,  AHED-64 ");
+            sb.AppendLine("     J4 ,  AHED-64 ");
+            sb.AppendLine("     J5 ,  AHED-64 ");
+            sb.AppendLine("     J6 ,  AHED-64 ");
+            sb.AppendLine("     J7 ,  AHED-64 ");
+            sb.AppendLine("END");
+            sb.AppendLine();
+
+            sb.AppendLine("ATTACH");
+            sb.AppendLine("BEGIN");
+            for (int j = 1; j <= 7; j++)
+            {
+                int startPin = (j - 1) * 64 + 1;
+                var pins = Enumerable.Range(startPin, 64);
+                sb.AppendLine($"     J{j} , {string.Join(", ", pins)}");
+            }
+            sb.AppendLine("END");
+            sb.AppendLine();
+
+            double connResist = config.MaxWireResistance > 0 ? config.MaxWireResistance : 6.0;
+            double compResist = config.MinComponentResistance > 0 ? config.MinComponentResistance : 100.0;
+            double insResist = config.MinInsulationResistance > 0 ? config.MinInsulationResistance : 500000.0;
 
             string insResStr;
             if (insResist >= 1e6)
-                insResStr = (insResist / 1e6).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " M ohm";
+                insResStr = (insResist / 1e6).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " MOhm";
             else if (insResist >= 1e3)
-                insResStr = (insResist / 1e3).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " K ohm";
+                insResStr = (insResist / 1e3).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " kOhm";
             else
-                insResStr = insResist.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " ohm";
+                insResStr = insResist.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " Ohm";
 
-            string hipotStr = config.HipotVoltage ? "ON" : "OFF";
+            string compResStr;
+            if (compResist >= 1e6)
+                compResStr = (compResist / 1e6).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " MOhm";
+            else if (compResist >= 1e3)
+                compResStr = (compResist / 1e3).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " kOhm";
+            else
+                compResStr = compResist.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " Ohm";
 
-            string compResStr = compResist == (int)compResist ? ((int)compResist).ToString() : compResist.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
-
-            
-            if (sumPresentTestType != 0)
-            {
-                sb.AppendLine("WIRE LIST SIGNATURE:80EF1F-8T8M0");
-                sb.AppendLine("INSUL TEST PARM SIGNATURE:6F6F0");
-            }
-            sb.AppendLine($"CONNECTION RESIS  {connResist.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)} ohm");
-            if (sumPresentTestType != 0)
-            {
-                sb.AppendLine($"COMPONENT RESIS >  {compResStr} ohm");
-            }
-            sb.AppendLine($"LV INSULATION RESIS  {insResStr}");
-            sb.AppendLine($"HIPOT VOLTAGE  {hipotStr}");
-            sb.AppendLine("** TEST METHOD SINGLE");
+            sb.AppendLine("PARAMETERS");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    WIRERES , {connResist.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} Ohm");
+            sb.AppendLine("    RESISTORRES , 100 Ohm");
+            //sb.AppendLine($"    RESISTORRES , {compResStr}");
+            sb.AppendLine("    RESISTORTOL ,  10 %");
+            sb.AppendLine("    FORWARDV , 700 mV");
+            sb.AppendLine("    REVERSEV , > 6.00 V");
+            sb.AppendLine("    FORWARDTOL ,  20 %");
+            sb.AppendLine("    REVERSETOL ,  20 %");
+            sb.AppendLine("    SHORTSRES , 500 kOhm");
+            sb.AppendLine("    CAPTOLERANCE ,  20 %");
+            sb.AppendLine("    WIRERESTARE , 0.0 Ohm");
+            sb.AppendLine("    DELAYRESISTANCERES , 0.1 Ohm");
+            sb.AppendLine("    DELAYRESISTANCETOL ,  1 %");
+            sb.AppendLine("    COMMENTDELAY , 5.00 s");
+            sb.AppendLine("    4W_WIRERES , 1.00 Ohm");
+            sb.AppendLine("    4W_WIRERESTARE , 0 mOhm");
+            sb.AppendLine("    4W_WIREMIN , 0 mOhm");
+            sb.AppendLine("    4W_RESISTORRES , 10.0 Ohm");
+            sb.AppendLine("    4W_RESISTORTOL ,  1 %");
+            sb.AppendLine("    COMPONENT_RESISTANCE , 0 Ohm");
+            sb.AppendLine("    INDUCTANCE , 1.00 uH");
+            sb.AppendLine("    INDUCTANCE_TOL ,  10 %");
+            sb.AppendLine("    PIN_CAPACITANCE , 5.0 pF");
+            sb.AppendLine("    PROBE_R_MIN , 0.0 Ohm");
+            sb.AppendLine("    PROBE_R_MAX , 5.0 Ohm");
+            sb.AppendLine("    CAPACITANCE , 1.00 nF");
+            sb.AppendLine("END");
             sb.AppendLine();
 
-            var wireNets = new System.Collections.Generic.List<TestConfigNet>();
-            var componentNets = new System.Collections.Generic.List<TestConfigNet>();
+            sb.AppendLine("INSTRUCTIONS");
+            sb.AppendLine("BEGIN");
 
-            foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
+            var nets = config.Nets?.OrderBy(n => n.SequenceNo).ToList() ?? [];
+            foreach (var net in nets)
             {
                 string typeName = net.TestType?.TestTypeName?.ToUpperInvariant() ?? "";
-                if (string.IsNullOrWhiteSpace(typeName) || ContinuityLikeTestTypes.Contains(typeName))
-                {
-                    wireNets.Add(net);
-                    Debug.WriteLine($"wire nets from {net.FromAddress} to {net.ToAddress}");
-                }
-                else
-                {
-                    componentNets.Add(net);
-                }
-            }
-
-            // Group wire nets using Connected Components (Disjoint Set Union) so parallel/connected pins merge into unified net groups
-            var parent = new System.Collections.Generic.Dictionary<string, string>();
-
-            string Find(string item)
-            {
-                if (!parent.ContainsKey(item)) parent[item] = item;
-                if (parent[item] != item) parent[item] = Find(parent[item]);
-                return parent[item];
-            }
-
-            void Union(string a, string b)
-            {
-                string rootA = Find(a);
-                string rootB = Find(b);
-                if (rootA != rootB) parent[rootA] = rootB;
-            }
-
-            var pinAddresses = new System.Collections.Generic.Dictionary<string, int>();
-
-            foreach (var net in wireNets)
-            {
                 string fromPin = FormatPin(net.FromAddress);
                 string toPin = FormatPin(net.ToAddress);
 
-                if (!pinAddresses.ContainsKey(fromPin)) pinAddresses[fromPin] = net.FromAddress;
-                if (!pinAddresses.ContainsKey(toPin)) pinAddresses[toPin] = net.ToAddress;
-
-                string? groupId = !string.IsNullOrWhiteSpace(net.HarnessGroup) ? net.HarnessGroup : (!string.IsNullOrWhiteSpace(net.NetId) ? net.NetId : null);
-
-                Union(fromPin, toPin);
-
-                if (groupId != null)
+                if (string.IsNullOrWhiteSpace(typeName) || ContinuityLikeTestTypes.Contains(typeName))
                 {
-                    Union(fromPin, "GROUP_" + groupId);
-                    Union(toPin, "GROUP_" + groupId);
+                    double wireLimit = (net.UpperLimit.HasValue && net.UpperLimit.Value > 0)
+                        ? net.UpperLimit.Value
+                        : connResist;
+                    sb.AppendLine($"    WIRE,   {fromPin},  {toPin}, {wireLimit.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} Ohm");
+                }
+                else if (typeName == "RESISTOR")
+                {
+                    double val = net.ExpectedValue ?? 100.0;
+                    string valFormatted = val >= 1e6
+                        ? (val / 1e6).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " MOhm"
+                        : val >= 1e3
+                            ? (val / 1e3).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " kOhm"
+                            : val.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " Ohm";
+
+                    double tol = net.Tolerance ?? 10.0;
+                    sb.AppendLine($"    RESISTOR,   {fromPin},  {toPin}, {valFormatted},  {tol.ToString("0", System.Globalization.CultureInfo.InvariantCulture)} %");
+                }
+                else if (typeName == "DIODE")
+                {
+                    sb.AppendLine($"    DIODE,   {fromPin},  {toPin}");
+                }
+                else if (typeName == "CAPACITOR")
+                {
+                    double val = net.ExpectedValue ?? 1e-9;
+                    string valFormatted = val >= 1e-3
+                        ? (val * 1e3).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " mF"
+                        : val >= 1e-6
+                            ? (val * 1e6).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " uF"
+                            : val >= 1e-9
+                                ? (val * 1e9).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " nF"
+                                : val >= 1e-12
+                                    ? (val * 1e12).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " pF"
+                                    : val.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " F";
+
+                    double tol = net.Tolerance ?? 20.0;
+                    sb.AppendLine($"    CAPACITOR,   {fromPin},  {toPin}, {valFormatted},  {tol.ToString("0", System.Globalization.CultureInfo.InvariantCulture)} %");
+                }
+                else
+                {
+                    sb.AppendLine($"    {typeName},   {fromPin},  {toPin}");
                 }
             }
 
-            // Group all pins by their root ancestor
-            var groupsByRoot = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>>();
-            foreach (var pin in pinAddresses.Keys)
-            {
-                string root = Find(pin);
-                if (!groupsByRoot.ContainsKey(root))
-                {
-                    groupsByRoot[root] = new System.Collections.Generic.List<string>();
-                }
-                groupsByRoot[root].Add(pin);
-            }
-
-            // Order groups by minimum pin address in each group
-            var sortedGroups = groupsByRoot.Values
-                .OrderBy(grp => grp.Min(p => pinAddresses.TryGetValue(p, out int addr) ? addr : int.MaxValue))
-                .ToList();
-
-            int wireSeq = 1;
-            foreach (var grp in sortedGroups)
-            {
-                var pinList = grp.OrderBy(p => pinAddresses.TryGetValue(p, out int addr) ? addr : int.MaxValue)
-                                 .ThenBy(p => p)
-                                 .ToList();
-
-                for (int pIdx = 0; pIdx < pinList.Count; pIdx += 4)
-                {
-                    var chunk = pinList.Skip(pIdx).Take(4);
-                    string chunkText = string.Join("  ", chunk);
-
-                    if (pIdx == 0)
-                    {
-                        sb.AppendLine($"{wireSeq,-3} {chunkText}  ");
-                    }
-                    else
-                    {
-                        sb.AppendLine($"     {chunkText}  ");
-                    }
-                }
-                wireSeq++;
-            }
-
-            if (componentNets.Count > 0)
-            {
-                sb.AppendLine();
-                sb.AppendLine("CHECK COMPONENTS");
-                int compSeq = 1;
-                foreach (var net in componentNets)
-                {
-                    string fromPin = FormatPin(net.FromAddress);
-                    string toPin = FormatPin(net.ToAddress);
-                    string typeName = net.TestType?.TestTypeName?.ToUpperInvariant() ?? "";
-                    
-                    string shortType = typeName;
-                    if (typeName == "RESISTOR") shortType = "RESIS";
-                    else if (typeName == "CAPACITOR") shortType = "CAP";
-
-                    if (shortType == "DIODE")
-                    {
-                        sb.AppendLine($"{compSeq++} DIODE {fromPin} {toPin}");
-                    }
-                    else
-                    {
-                        double val = net.ExpectedValue ?? 0;
-                        string valStr = "";
-                        if (shortType == "RESIS")
-                        {
-                            if (val >= 1e6) valStr = (val / 1e6).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " M ohm";
-                            else if (val >= 1e3) valStr = (val / 1e3).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " K ohm";
-                            else valStr = val.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " ohm";
-                        }
-                        else if (shortType == "CAP")
-                        {
-                            if (val >= 1e-3) valStr = (val * 1e3).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " mF";
-                            else if (val >= 1e-6) valStr = (val * 1e6).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " uF";
-                            else if (val >= 1e-9) valStr = (val * 1e9).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " nF";
-                            else if (val >= 1e-12) valStr = (val * 1e12).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " pF";
-                            else valStr = val.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " F";
-                        }
-                        else
-                        {
-                            valStr = val.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " " + (net.MeasurementUnit ?? "");
-                        }
-
-                        string tol = (net.Tolerance ?? 0).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
-                        sb.AppendLine($"{compSeq++} {shortType} {fromPin} {toPin} {valStr} {tol} %");
-                    }
-                }
-            }
-
+            sb.AppendLine("END");
             sb.AppendLine();
-            sb.AppendLine(")");
+
+            sb.AppendLine("NETNAMES");
+            sb.AppendLine("BEGIN");
+            int netIndex = 1;
+            foreach (var net in nets)
+            {
+                string netName = !string.IsNullOrWhiteSpace(net.NetId) ? net.NetId : $"Net{netIndex}";
+                string fromPin = FormatPin(net.FromAddress);
+                sb.AppendLine($"    {netName} ,  {fromPin}");
+                netIndex++;
+            }
+            sb.AppendLine("END");
+            sb.AppendLine();
+
+            sb.AppendLine("CUSTOM_LABELS");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine("END");
 
             return sb.ToString();
         }
 
         public static string FormatPin(int address)
         {
-            return address <= 64 ? $"J1-{address:D3}" : $"J3-{(address - 64):D3}";
+            if (address <= 0) return "$J1-1";
+            int connIdx = ((address - 1) / 64) + 1;
+            int pinIdx = ((address - 1) % 64) + 1;
+            return $"J{connIdx}-{pinIdx}";
         }
+        //public static string FormatPin(int address)
+        //{
+        //    if (address <= 0) return "$J1-1";
+        //    int connIdx = ((address - 1) / 64) + 1;
+        //    int pinIdx = ((address - 1) % 64) + 1;
+        //    return $"$J{connIdx}-{pinIdx}";
+        //}
 
         public TestConfiguration ConvertToTestConfig(string configText)
+        {
+            if (string.IsNullOrWhiteSpace(configText))
+                return new TestConfiguration();
+
+            string trimmedStart = configText.TrimStart();
+            if (trimmedStart.StartsWith("(") || trimmedStart.StartsWith("*") || configText.Contains("** TEST METHOD", StringComparison.OrdinalIgnoreCase))
+            {
+                return ConvertToTestConfig1100(configText);
+            }
+
+            var config = new TestConfiguration();
+            var lines = configText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            string currentSection = string.Empty;
+            double connResist = 6.0;
+            var wireTestType = GetTestTypeByName("WIRE");
+            var resistorTestType = GetTestTypeByName("RESISTOR");
+            var diodeTestType = GetTestTypeByName("DIODE");
+            var capacitorTestType = GetTestTypeByName("CAPACITOR");
+
+            var netNamesByPin = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var line in lines)
+            {
+                string trimmed = line.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed)) continue;
+
+                if (trimmed.Equals("BEGIN", StringComparison.OrdinalIgnoreCase)) continue;
+                if (trimmed.Equals("END", StringComparison.OrdinalIgnoreCase))
+                {
+                    currentSection = string.Empty;
+                    continue;
+                }
+
+                if (trimmed.Equals("TESTDEFAULTS", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Equals("GRAPHIC_CONN_TYPES", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Equals("INTERFACING", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Equals("ATTACH", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Equals("PARAMETERS", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Equals("INSTRUCTIONS", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Equals("NETNAMES", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Equals("CUSTOM_LABELS", StringComparison.OrdinalIgnoreCase))
+                {
+                    currentSection = trimmed.ToUpperInvariant();
+                    continue;
+                }
+
+                if (currentSection == "PARAMETERS")
+                {
+                    var parts = trimmed.Split(new[] { ',' }, 2);
+                    if (parts.Length == 2)
+                    {
+                        string key = parts[0].Trim().ToUpperInvariant();
+                        string val = parts[1].Trim();
+
+                        if (key == "WIRERES")
+                        {
+                            if (TryParseValueWithUnit(val, out double r))
+                            {
+                                config.MaxWireResistance = r;
+                                connResist = r;
+                            }
+                        }
+                        else if (key == "SHORTSRES")
+                        {
+                            if (TryParseValueWithUnit(val, out double ir))
+                            {
+                                config.MinInsulationResistance = ir;
+                            }
+                        }
+                        else if (key == "RESISTORRES" || key == "COMPONENT_RESISTANCE")
+                        {
+                            if (TryParseValueWithUnit(val, out double cr))
+                            {
+                                config.MinComponentResistance = cr;
+                            }
+                        }
+                    }
+                }
+                else if (currentSection == "INSTRUCTIONS")
+                {
+                    var tokens = trimmed.Split(',').Select(t => t.Trim()).ToArray();
+                    if (tokens.Length >= 3)
+                    {
+                        string instType = tokens[0].ToUpperInvariant();
+                        string fromPinStr = tokens[1];
+                        string toPinStr = tokens[2];
+
+                        var net = new TestConfigNet
+                        {
+                            SequenceNo = config.Nets.Count + 1,
+                            FromAddress = ParsePin(fromPinStr),
+                            FromLabel = fromPinStr,
+                            ToAddress = ParsePin(toPinStr),
+                            ToLabel = toPinStr,
+                            HarnessGroup = "",
+                            NetId = ""
+                        };
+
+                        if (instType == "WIRE" || ContinuityLikeTestTypes.Contains(instType))
+                        {
+                            double wireLimit = connResist;
+                            if (tokens.Length >= 4 && TryParseValueWithUnit(tokens[3], out double limitVal))
+                            {
+                                wireLimit = limitVal;
+                            }
+                            net.UpperLimit = wireLimit;
+                            net.TestType = wireTestType;
+                            net.TestTypeId = wireTestType?.Id ?? 0;
+                        }
+                        else if (instType == "RESISTOR")
+                        {
+                            if (tokens.Length >= 4 && TryParseValueWithUnit(tokens[3], out double expVal))
+                            {
+                                net.ExpectedValue = expVal;
+                            }
+                            if (tokens.Length >= 5 && TryParseTolerance(tokens[4], out double tolVal))
+                            {
+                                net.Tolerance = tolVal;
+                            }
+                            net.TestType = resistorTestType;
+                            net.TestTypeId = resistorTestType?.Id ?? 0;
+                        }
+                        else if (instType == "DIODE")
+                        {
+                            net.TestType = diodeTestType;
+                            net.TestTypeId = diodeTestType?.Id ?? 0;
+                        }
+                        else if (instType == "CAPACITOR")
+                        {
+                            if (tokens.Length >= 4 && TryParseValueWithUnit(tokens[3], out double expVal))
+                            {
+                                net.ExpectedValue = expVal;
+                            }
+                            if (tokens.Length >= 5 && TryParseTolerance(tokens[4], out double tolVal))
+                            {
+                                net.Tolerance = tolVal;
+                            }
+                            net.TestType = capacitorTestType;
+                            net.TestTypeId = capacitorTestType?.Id ?? 0;
+                        }
+                        else
+                        {
+                            var tt = GetTestTypeByName(instType);
+                            net.TestType = tt;
+                            net.TestTypeId = tt?.Id ?? 0;
+                        }
+
+                        config.Nets.Add(net);
+                    }
+                }
+                else if (currentSection == "NETNAMES")
+                {
+                    var parts = trimmed.Split(new[] { ',' }, 2);
+                    if (parts.Length == 2)
+                    {
+                        string netName = parts[0].Trim();
+                        string pin = parts[1].Trim();
+                        if (!string.IsNullOrEmpty(pin) && !string.IsNullOrEmpty(netName))
+                        {
+                            netNamesByPin[pin] = netName;
+                        }
+                    }
+                }
+            }
+
+            int netIdx = 1;
+            foreach (var net in config.Nets)
+            {
+                string pinClean = net.FromLabel.TrimStart('$');
+                string pinWithDollar = "$" + pinClean;
+
+                if (netNamesByPin.TryGetValue(net.FromLabel, out string? name) ||
+                    netNamesByPin.TryGetValue(pinClean, out name) ||
+                    netNamesByPin.TryGetValue(pinWithDollar, out name))
+                {
+                    net.NetId = name;
+                }
+                else
+                {
+                    net.NetId = $"Net{netIdx}";
+                }
+                netIdx++;
+            }
+
+            return config;
+        }
+
+        public TestConfiguration ConvertToTestConfig1100(string configText)
         {
             var config = new TestConfiguration();
             if (string.IsNullOrWhiteSpace(configText))
@@ -773,6 +943,39 @@ namespace AssemblyLineTester.Services
             return config;
         }
 
+        private static bool TryParseValueWithUnit(string text, out double value)
+        {
+            value = 0.0;
+            if (string.IsNullOrWhiteSpace(text)) return false;
+            text = text.Trim();
+
+            var match = System.Text.RegularExpressions.Regex.Match(text, @"^([><\s]*)([-+]?[0-9]*\.?[0-9]+)\s*([a-zA-Z]*)");
+            if (!match.Success) return false;
+
+            if (!double.TryParse(match.Groups[2].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double num))
+                return false;
+
+            string unit = match.Groups[3].Value.Trim();
+            double multiplier = 1.0;
+            if (unit.StartsWith("k", StringComparison.OrdinalIgnoreCase)) multiplier = 1e3;
+            else if (unit.StartsWith("M")) multiplier = 1e6;
+            else if (unit.StartsWith("m")) multiplier = 1e-3;
+            else if (unit.StartsWith("u") || unit.StartsWith("µ")) multiplier = 1e-6;
+            else if (unit.StartsWith("n", StringComparison.OrdinalIgnoreCase)) multiplier = 1e-9;
+            else if (unit.StartsWith("p", StringComparison.OrdinalIgnoreCase)) multiplier = 1e-12;
+
+            value = num * multiplier;
+            return true;
+        }
+
+        private static bool TryParseTolerance(string text, out double tolerance)
+        {
+            tolerance = 0.0;
+            if (string.IsNullOrWhiteSpace(text)) return false;
+            text = text.Replace("%", "").Trim();
+            return double.TryParse(text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out tolerance);
+        }
+
         private static double GetUnitMultiplier(string[] parts, int startIndex)
         {
             if (startIndex >= parts.Length) return 1.0;
@@ -789,17 +992,17 @@ namespace AssemblyLineTester.Services
         private int ParsePin(string pin)
         {
             if (string.IsNullOrWhiteSpace(pin)) return 0;
-            pin = pin.Trim();
-            if (pin.StartsWith("J1-") && pin.Length > 3)
+            pin = pin.Trim().TrimStart('$');
+            if (pin.StartsWith("J", StringComparison.OrdinalIgnoreCase))
             {
-                if (int.TryParse(pin.Substring(3), out int num))
-                    return num;
+                var parts = pin.Substring(1).Split('-');
+                if (parts.Length == 2 && int.TryParse(parts[0], out int connNum) && int.TryParse(parts[1], out int pinNum))
+                {
+                    return (connNum - 1) * 64 + pinNum;
+                }
             }
-            else if (pin.StartsWith("J3-") && pin.Length > 3)
-            {
-                if (int.TryParse(pin.Substring(3), out int num))
-                    return num + 64;
-            }
+            if (int.TryParse(pin, out int directAddr))
+                return directAddr;
             return 0;
         }
     }

@@ -10,7 +10,7 @@ namespace AssemblyLineTester.Services
     public class InstrumentService
     {
         private const string ServerIPandPort = "127.0.0.1:55555";
-        private const string UserName = "User1";
+        private const string UserName = "Master Login";
         private const string Password = "";
 
         private static readonly CtaService _service = new();
