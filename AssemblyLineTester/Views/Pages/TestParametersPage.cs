@@ -1,17 +1,18 @@
 
+using AssemblyLineTester.Models;
+using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using FontAwesome.Sharp;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Windows.Forms;
-using AssemblyLineTester.Models;
-using AssemblyLineTester.Models.Dto;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Text.Json;
+using System.Windows.Forms;
 
 namespace AssemblyLineTester.Views.Pages
 {
@@ -1639,13 +1640,13 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 _customTestText = getTestResult.Result;
-                Debug.WriteLine(_customTestText);
+                //Debug.WriteLine(_customTestText);
                 //ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
 
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 config = _configService.ConvertToTestConfig(getTestResult.Result);
-                Debug.WriteLine(_customTestText);
+                //Debug.WriteLine(_customTestText);
                 //foreach (var net in config.Nets)
                 //{
                 //    Debug.WriteLine($"learn btn {net.FromAddress} to {net.ToAddress}");
@@ -1764,7 +1765,8 @@ namespace AssemblyLineTester.Views.Pages
             _configService.SaveConfig(config);
 
             _customTestText = _configService.ConvertToProgramText(config);
-            Debug.WriteLine(_customTestText);
+
+            //Debug.WriteLine(_customTestText);
             //foreach (var net in config.Nets)
             //{
             //    Debug.WriteLine($"start btn {net.FromAddress} to {net.ToAddress}");
@@ -1783,6 +1785,8 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
+
+
             var putResult = await Task.Run(() => _instrument.PutTestProgram(string.Empty, _customTestText, true), token);
             if (putResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
             {
@@ -1790,12 +1794,14 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
-            await Task.Run(() => ExecuteTestForRowsV2(selectedRows, token), token);
+            await Task.Run(() => ExecuteTestForRows(selectedRows, config, token));
 
-            if (!token.IsCancellationRequested)
-            {
-                MessageBox.Show(this, "Finished testing all connections (V2)", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            //await Task.Run(() => ExecuteTestForRowsV2(selectedRows, token), token);
+
+            //if (!token.IsCancellationRequested)
+            //{
+            //    MessageBox.Show(this, "Finished testing all connections (V2)", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //}
         }
 
         public async Task StartSelectedV2(System.Threading.CancellationToken token = default)
@@ -1817,12 +1823,12 @@ namespace AssemblyLineTester.Views.Pages
             _configService.SaveConfig(config);
 
             _customTestText = _configService.ConvertToProgramText(config);
-            Debug.WriteLine(_customTestText);
+            //Debug.WriteLine(_customTestText);
             //foreach (var net in config.Nets)
             //{
             //    Debug.WriteLine($"start btn {net.FromAddress} to {net.ToAddress}");
             //}
-            Debug.WriteLine(_customTestText);
+            //Debug.WriteLine(_customTestText);
             if (string.IsNullOrWhiteSpace(_customTestText))
             {
                 MessageBox.Show(this, "Generated program text is empty.", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -1842,13 +1848,14 @@ namespace AssemblyLineTester.Views.Pages
                 MessageBox.Show(this, $"Failed to upload custom test program. Error: {putResult}", "Upload Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            await Task.Run(() => ExecuteTestForRows(selectedRows,config, token));
 
-            await Task.Run(() => ExecuteTestForRowsV2(selectedRows, token), token);
+            //if (!token.IsCancellationRequested)
+            //{
+            //    MessageBox.Show(this, "Finished testing selected connections (V2)", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //}
 
-            if (!token.IsCancellationRequested)
-            {
-                MessageBox.Show(this, "Finished testing selected connections (V2)", "Test Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+
         }
 
         private void ExecuteTestForRowsV2(List<int> targetRowIndices, System.Threading.CancellationToken token = default)
@@ -2061,8 +2068,6 @@ namespace AssemblyLineTester.Views.Pages
             return 0;
         }
 
-
-
         private void ExecuteTestForRows(List<int> targetRowIndices, TestConfiguration config, System.Threading.CancellationToken token = default)
         {
             if (token.IsCancellationRequested) return;
@@ -2079,11 +2084,10 @@ namespace AssemblyLineTester.Views.Pages
                 ShowMessageBoxOnUI("Failed to connect to instrument.", "Connection Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
             if (token.IsCancellationRequested) return;
 
             _customTestText = _configService.ConvertToProgramText(config);
-            Debug.WriteLine(_customTestText);
+            //Debug.WriteLine(_customTestText);
 
             if (token.IsCancellationRequested) return;
 
@@ -2139,27 +2143,19 @@ namespace AssemblyLineTester.Views.Pages
                         if (token.IsCancellationRequested) return;
                         int rowIndex = targetRowIndices[k];
                         var measurement = list[k];
-                        string valStr = measurement.Value1.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                        Debug.WriteLine(JsonSerializer.Serialize(measurement));
 
-                        if (this.InvokeRequired)
+                        // 1. Temporary verification: check if Point1 and Point2 match row From and To sequentially
+                        if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
                         {
-                            this.Invoke(new Action(() =>
-                            {
-                                if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
-                                {
-                                    gridConfig.Rows[rowIndex].Cells["colExpectedValue"].Value = valStr;
-                                    RecalculateRowLimits(gridConfig.Rows[rowIndex]);
-                                }
-                            }));
+                            CheckMeasurementRowMatch(gridConfig.Rows[rowIndex], measurement, k);
                         }
-                        else
-                        {
-                            if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
-                            {
-                                gridConfig.Rows[rowIndex].Cells["colExpectedValue"].Value = valStr;
-                                RecalculateRowLimits(gridConfig.Rows[rowIndex]);
-                            }
-                        }
+
+                        // 2. Format measured value (F2 for >= 0.01, full precision for small values like capacitance)
+                        string valStr = FormatMeasuredValue(measurement.Value1);
+
+                        // 3. Update the Measurement column (colUnit) in the grid
+                        UpdateGridRowUnitValue(rowIndex, valStr);
                     }
                 }
                 else
@@ -2171,6 +2167,80 @@ namespace AssemblyLineTester.Views.Pages
             {
                 ShowMessageBoxOnUI($"Failed to retrieve measured values. Error: {measuredValuesResult?.DllCallResult.ToString() ?? "Unknown"}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        /// <summary>
+        /// Formats measurement value:
+        /// - Normal values (>= 0.01): rounded to 2 decimals (e.g. 1.233945 -> "1.23")
+        /// - Small values (< 0.01, e.g. Farads 0.000124): prints full decimal value
+        /// </summary>
+        private static string FormatMeasuredValue(float val)
+        {
+            if (Math.Abs(val) < 1e-12f)
+            {
+                return "0.00";
+            }
+
+            if (Math.Abs(val) >= 0.01f)
+            {
+                return val.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            return val.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Temporary check to verify whether CTA measurement Point1/Point2 match the row From/To sequentially.
+        /// Outputs the result to Debug.WriteLine.
+        /// </summary>
+        private bool CheckMeasurementRowMatch(DataGridViewRow row, CtaDotNet.Models.CtaJsonResult measurement, int index)
+        {
+            int.TryParse(row.Cells["colFromAddr"].Value?.ToString(), out int fromAddr);
+            int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int toAddr);
+
+            string fromLabel = row.Cells["colFromLabel"].Value?.ToString()?.Trim() ?? "";
+            string toLabel = row.Cells["colToLabel"].Value?.ToString()?.Trim() ?? "";
+
+            string expectedFromPin = FormatPinAddress(fromAddr);
+            string expectedToPin = FormatPinAddress(toAddr);
+
+            string actualP1 = NormalizePin(measurement.Point1);
+            string actualP2 = NormalizePin(measurement.Point2);
+            string expFrom = NormalizePin(expectedFromPin);
+            string expTo = NormalizePin(expectedToPin);
+
+            bool pinMatch = (!string.IsNullOrEmpty(actualP1) && !string.IsNullOrEmpty(actualP2)) &&
+                            ((expFrom == actualP1 && expTo == actualP2) || (expFrom == actualP2 && expTo == actualP1));
+
+            bool labelMatch = (!string.IsNullOrEmpty(fromLabel) &&
+                              (fromLabel.Equals(measurement.Point1, StringComparison.OrdinalIgnoreCase) ||
+                               fromLabel.Equals(measurement.NetName, StringComparison.OrdinalIgnoreCase)));
+
+            bool isMatch = pinMatch || labelMatch;
+
+            Debug.WriteLine($"[Row-Check #{index + 1}] Row {row.Index + 1} ({expectedFromPin} -> {expectedToPin}) <=> CTA ({measurement.Point1} -> {measurement.Point2}, Net: {measurement.NetName}) => {(isMatch ? "MATCH OK" : "MISMATCH / VERIFY ORDER")}");
+
+            return isMatch;
+        }
+
+        private static string FormatPinAddress(int address)
+        {
+            if (address <= 0) return "";
+            int conn = ((address - 1) / 64) + 1;
+            int pin = ((address - 1) % 64) + 1;
+            return $"J{conn}-{pin}";
+        }
+
+        private static string NormalizePin(string? pin)
+        {
+            if (string.IsNullOrWhiteSpace(pin)) return "";
+            string clean = pin.Replace("$", "").Trim().ToUpperInvariant();
+            var parts = clean.Split('-');
+            if (parts.Length == 2 && int.TryParse(parts[1], out int pinNum))
+            {
+                return $"{parts[0]}-{pinNum}";
+            }
+            return clean;
         }
 
         private void ShowMessageBoxOnUI(string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)

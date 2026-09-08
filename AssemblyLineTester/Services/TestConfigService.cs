@@ -450,7 +450,7 @@ namespace AssemblyLineTester.Services
                                     : val.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " F";
 
                     double tol = net.Tolerance ?? 20.0;
-                    sb.AppendLine($"    CAPACITOR,   {fromPin},  {toPin}, {valFormatted},  {tol.ToString("0", System.Globalization.CultureInfo.InvariantCulture)} %");
+                    sb.AppendLine($"    CAPACITORTEST,   {fromPin},  {toPin}, {valFormatted},  {tol.ToString("0", System.Globalization.CultureInfo.InvariantCulture)} %");
                 }
                 else
                 {
@@ -463,14 +463,6 @@ namespace AssemblyLineTester.Services
 
             sb.AppendLine("NETNAMES");
             sb.AppendLine("BEGIN");
-            int netIndex = 1;
-            foreach (var net in nets)
-            {
-                string netName = !string.IsNullOrWhiteSpace(net.NetId) ? net.NetId : $"Net{netIndex}";
-                string fromPin = FormatPin(net.FromAddress);
-                sb.AppendLine($"    {netName} ,  {fromPin}");
-                netIndex++;
-            }
             sb.AppendLine("END");
             sb.AppendLine();
 
