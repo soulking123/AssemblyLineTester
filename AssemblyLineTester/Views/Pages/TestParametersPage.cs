@@ -112,6 +112,7 @@ namespace AssemblyLineTester.Views.Pages
         public TestParametersPage()
         {
             InitializeComponent();
+            colUpperLimit.ReadOnly = false;
             EnableDoubleBuffering();
             SetupEvents();
             this.VisibleChanged += TestParameterPage_VisibleChanged;
@@ -1162,7 +1163,11 @@ namespace AssemblyLineTester.Views.Pages
                 row.Cells["colTolerance"].ReadOnly = true;
 
                 row.Cells["colLowerLimit"].Value = "0";
+                row.Cells["colLowerLimit"].ReadOnly = true;
+
+                // Standard WIRE: locked to global connection resistance
                 row.Cells["colUpperLimit"].Value = txtConnectionResistance.Text?.Trim() ?? "0";
+                row.Cells["colUpperLimit"].ReadOnly = true;
             }
             else if (testType == "SIGNATURE WIRE")
             {
@@ -1172,16 +1177,28 @@ namespace AssemblyLineTester.Views.Pages
                 row.Cells["colTolerance"].Value = "-";
                 row.Cells["colTolerance"].ReadOnly = true;
 
-
-                row.Cells["colLowerLimit"].ReadOnly = false;
-                row.Cells["colUpperLimit"].ReadOnly = false;
+                // Lower limit remains 0 and locked
                 row.Cells["colLowerLimit"].Value = "0";
-                row.Cells["colUpperLimit"].Value = txtConnectionResistance.Text?.Trim() ?? "0";
+                row.Cells["colLowerLimit"].ReadOnly = true;
+
+                // Upper limit is EDITABLE for SIGNATURE WIRE
+                row.Cells["colUpperLimit"].ReadOnly = false;
+
+                // Only default to connection resistance if it hasn't been set yet
+                string currentUpper = row.Cells["colUpperLimit"].Value?.ToString()?.Trim() ?? "";
+                if (string.IsNullOrEmpty(currentUpper) || currentUpper == "-" || currentUpper == "0")
+                {
+                    row.Cells["colUpperLimit"].Value = txtConnectionResistance.Text?.Trim() ?? "0";
+                }
             }
             else
             {
                 row.Cells["colExpectedValue"].ReadOnly = false;
                 row.Cells["colTolerance"].ReadOnly = false;
+
+                // Calculated types (RESISTOR, CAPACITOR, etc.): limits are calculated, so keep them read-only
+                row.Cells["colLowerLimit"].ReadOnly = true;
+                row.Cells["colUpperLimit"].ReadOnly = true;
 
 
                 //string expStr = row.Cells["colExpectedValue"].ToString();
@@ -1766,7 +1783,7 @@ namespace AssemblyLineTester.Views.Pages
 
             _customTestText = _configService.ConvertToProgramText(config);
 
-            //Debug.WriteLine(_customTestText);
+            Debug.WriteLine(_customTestText);
             //foreach (var net in config.Nets)
             //{
             //    Debug.WriteLine($"start btn {net.FromAddress} to {net.ToAddress}");
