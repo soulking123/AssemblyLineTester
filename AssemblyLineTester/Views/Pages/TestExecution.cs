@@ -752,12 +752,30 @@ namespace AssemblyLineTester.Views.Pages
 
         }
 
+        private static string ConvertPointToPinNumber(string? point)
+        {
+            if (string.IsNullOrWhiteSpace(point)) return "";
+            string clean = point.Replace("$", "").Trim().ToUpperInvariant();
+            var match = Regex.Match(clean, @"^J(\d+)-(\d+)$");
+            if (match.Success &&
+                int.TryParse(match.Groups[1].Value, out int conn) &&
+                int.TryParse(match.Groups[2].Value, out int pin) &&
+                conn > 0 && pin > 0)
+            {
+                int address = (conn - 1) * 64 + pin;
+                return $"Pin {address}";
+            }
+            return point.Trim();
+        }
+
         private static string FormatShortErrorMessage(dynamic error)
         {
             try
             {
-                string p1 = ((string?)error.Point1)?.Replace("$", "").Trim() ?? "";
-                string p2 = ((string?)error.Point2)?.Replace("$", "").Trim() ?? "";
+                string rawP1 = ((string?)error.Point1)?.Replace("$", "").Trim() ?? "";
+                string rawP2 = ((string?)error.Point2)?.Replace("$", "").Trim() ?? "";
+                string p1 = ConvertPointToPinNumber(rawP1);
+                string p2 = ConvertPointToPinNumber(rawP2);
                 string msg = ((string?)error.Message) ?? "";
 
                 // Extract resistance part from message (e.g. "0.1 Ohm" from "#3 Short Net2 Net6 0.1 Ohm")
@@ -793,7 +811,16 @@ namespace AssemblyLineTester.Views.Pages
                 // Fallback: clean leading error number from Message if present (e.g. "#3 Short ...")
                 if (!string.IsNullOrEmpty(msg))
                 {
-                    return Regex.Replace(msg, @"^#\d+\s*", "");
+                    string cleaned = Regex.Replace(msg, @"^#\d+\s*", "");
+                    cleaned = Regex.Replace(cleaned, @"\bJ(\d+)-(\d+)\b", m =>
+                    {
+                        if (int.TryParse(m.Groups[1].Value, out int conn) && int.TryParse(m.Groups[2].Value, out int pin) && conn > 0 && pin > 0)
+                        {
+                            return $"Pin {(conn - 1) * 64 + pin}";
+                        }
+                        return m.Value;
+                    }, RegexOptions.IgnoreCase);
+                    return cleaned;
                 }
             }
             catch { }
