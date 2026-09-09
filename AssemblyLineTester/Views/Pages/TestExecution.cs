@@ -14,7 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using System.Xml.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using AssemblyLineTester.Helpers;
 using static AssemblyLineTester.Models.SystemLog;
@@ -478,113 +478,94 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (token.IsCancellationRequested) return;
 
-                // Point-by-point measurements row by row
-                for (int i = 0; i < _loadedRows.Count; i++)
+                // Retrieve all measured values in batch
+                var measuredValuesResult = _instrument.GetMeasuredValues();
+                if (measuredValuesResult != null && measuredValuesResult.DllCallResult == CtaCommandResultCode.Success && measuredValuesResult.ObjectReturnValue != null)
                 {
-                    if (token.IsCancellationRequested) return;
+                    var list = measuredValuesResult.ObjectReturnValue.MeasuredValueList ?? [];
+                    int count = Math.Min(_loadedRows.Count, list.Count);
 
-                    var row = _loadedRows[i];
-                    int.TryParse(row.FromPoint, out int fromPinInt);
-                    int.TryParse(row.ToPoint, out int toPinInt);
-                    string fromPin = TestConfigService.FormatPin(fromPinInt);
-                    string toPin = TestConfigService.FormatPin(toPinInt);
-                    //string toPin = row.ToPoint;
-                    //string fromPin = row.FromPoint;
-                    //string toPin = row.ToPoint;
-                    string testType = (row.TestType ?? "WIRE").Trim().ToUpperInvariant();
-
-                    bool isWire = testType.Equals("WIRE", StringComparison.OrdinalIgnoreCase) || testType.Equals("4WIRE", StringComparison.OrdinalIgnoreCase);
-
-                    if (testType == "CAPACITOR")
+                    for (int i = 0; i < count; i++)
                     {
-                        dynamic res = _instrument.GetCapacitance(fromPin, toPin);
-                        if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
+                        if (token.IsCancellationRequested) return;
+
+                        var row = _loadedRows[i];
+                        var measurement = list[i];
+                        Debug.WriteLine(JsonSerializer.Serialize(measurement));
+
+                        // 1. Verification check between row pin addresses and measurement Point1/Point2
+                        CheckMeasurementRowMatch(row, measurement, i);
+
+                        // 2. Extract measured value
+                        double val = (double)measurement.Value1;
+                        row.MeasuredValue = val;
+
+                        // 3. Evaluate Pass/Fail using software limits
+                        string testType = (row.TestType ?? "WIRE").Trim().ToUpperInvariant();
+                        bool isWire = testType.Equals("WIRE", StringComparison.OrdinalIgnoreCase) || testType.Equals("4WIRE", StringComparison.OrdinalIgnoreCase);
+                        bool isSignatureWire = testType.Equals("SIGNATURE WIRE", StringComparison.OrdinalIgnoreCase);
+
+                        if (isWire)
                         {
-                            double val = (double)res.MeasuredValue;
-                            row.MeasuredValue = Math.Round(val, 3);
+                            double maxWireRes = config.MaxWireResistance > 0 ? config.MaxWireResistance : _continuityResistance;
+                            row.Status = (val <= maxWireRes) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                        }
+                        else if (isSignatureWire)
+                        {
+                            double maxWireRes = (row.UpperLimit.HasValue && row.UpperLimit.Value > 0)
+                                ? row.UpperLimit.Value
+                                : (config.MaxWireResistance > 0 ? config.MaxWireResistance : _continuityResistance);
+                            row.Status = (val <= maxWireRes) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                        }
+                        else if (testType == "TWISTED PAIR")
+                        {
+                            row.Status = (val >= 0.5 || string.Equals(measurement.Status1, "PASS", StringComparison.OrdinalIgnoreCase))
+                                ? LiveTestStatus.Pass
+                                : LiveTestStatus.Fail;
+                        }
+                        else
+                        {
+                            // RESISTOR, CAPACITOR, DIODE, SIGNATURE DIODE, etc.
                             if (row.LowerLimit.HasValue && row.UpperLimit.HasValue)
                             {
-                                row.Status = (val >= row.LowerLimit.Value && val <= row.UpperLimit.Value) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                                row.Status = (val >= row.LowerLimit.Value && val <= row.UpperLimit.Value)
+                                    ? LiveTestStatus.Pass
+                                    : LiveTestStatus.Fail;
                             }
                             else
                             {
                                 row.Status = LiveTestStatus.Pass;
                             }
                         }
-                        else
-                        {
-                            row.Status = LiveTestStatus.Fail;
-                        }
-                    }
-                    else if (testType == "DIODE" || testType == "SIGNATURE DIODE")
-                    {
-                        dynamic res = _instrument.GetDiode(fromPin, toPin);
-                        if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
-                        {
-                            double val = (double)res.ForwardVoltage;
-                            row.MeasuredValue = Math.Round(val, 3);
-                            if (row.LowerLimit.HasValue && row.UpperLimit.HasValue)
-                            {
-                                row.Status = (val >= row.LowerLimit.Value && val <= row.UpperLimit.Value) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
-                            }
-                            else
-                            {
-                                row.Status = LiveTestStatus.Pass;
-                            }
-                        }
-                        else
-                        {
-                            row.Status = LiveTestStatus.Fail;
-                        }
-                    }
-                    else if (testType == "TWISTED PAIR")
-                    {
-                        dynamic res = _instrument.GetTwistedPair(fromPin, toPin);
-                        if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
-                        {
-                            bool pass = (bool)res.Value;
-                            row.Status = pass ? LiveTestStatus.Pass : LiveTestStatus.Fail;
-                        }
-                        else
-                        {
-                            row.Status = LiveTestStatus.Fail;
-                        }
-                    }
-                    else
-                    {
-                        // Default: WIRE, 4WIRE, RESISTOR, 4RESISTOR, SIGNATURE WIRE
-                        dynamic res = _instrument.GetRessistance(fromPin, toPin);
-                        if (res != null && res.DllCallResult == CtaCommandResultCode.Success)
-                        {
-                            double val = (double)res.MeasuredValue;
-                            Debug.WriteLine($"te {val}");
-                            row.MeasuredValue = Math.Round(val, 3);
 
-                            if (isWire)
-                            {
-                                double maxWireRes = config.MaxWireResistance > 0 ? config.MaxWireResistance : _continuityResistance;
-                                row.Status = (val <= maxWireRes) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
-                            }
-                            else
-                            {
-                                if (row.LowerLimit.HasValue && row.UpperLimit.HasValue)
-                                {
-                                    row.Status = (val >= row.LowerLimit.Value && val <= row.UpperLimit.Value) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
-                                }
-                                else
-                                {
-                                    row.Status = LiveTestStatus.Pass;
-                                }
-                            }
-                        }
-                        else
-
-                        {
-                            row.Status = LiveTestStatus.Fail;
-                        }
+                        UpdateLiveDetailsGridRow(i, row);
                     }
 
-                    UpdateLiveDetailsGridRow(i, row);
+                    // If instrument returned fewer measurements than loaded rows, mark remaining as Fail
+                    if (count < _loadedRows.Count)
+                    {
+                        for (int i = count; i < _loadedRows.Count; i++)
+                        {
+                            _loadedRows[i].Status = LiveTestStatus.Fail;
+                            UpdateLiveDetailsGridRow(i, _loadedRows[i]);
+                        }
+                        logService.Log(LogSeverity.Warning, "Instrument", "Incomplete Measured Values",
+                            $"Received {count} measured values but expected {_loadedRows.Count}.", SessionManager.CurrentUser?.Username ?? "Unknown");
+                        ShowMessageBoxOnUI($"Instrument returned {count} of {_loadedRows.Count} measurements. Unmeasured connections were marked as FAIL.", "Measurement Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                else
+                {
+                    // Failed to retrieve batch measurements: mark all rows as Fail
+                    for (int i = 0; i < _loadedRows.Count; i++)
+                    {
+                        _loadedRows[i].Status = LiveTestStatus.Fail;
+                        UpdateLiveDetailsGridRow(i, _loadedRows[i]);
+                    }
+                    string errStr = measuredValuesResult?.DllCallResult.ToString() ?? "Unknown";
+                    logService.Log(LogSeverity.Error, "Instrument", "Get Measured Values Failed",
+                        $"Failed to retrieve measured values: {errStr}", SessionManager.CurrentUser?.Username ?? "Unknown");
+                    ShowMessageBoxOnUI($"Failed to retrieve measured values from instrument. Error: {errStr}\nAll rows marked as FAIL.", "Measurement Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 logService.Log(LogSeverity.Info, "Text Execution", "Start Test Success",
@@ -614,7 +595,7 @@ namespace AssemblyLineTester.Views.Pages
                         }
                         else if (header == "Measured Value" || header == "Measurement" || header == "Measured")
                         {
-                            gridRow.Cells[colIdx].Value = row.MeasuredValue.HasValue ? row.MeasuredValue.Value.ToString("F2", CultureInfo.InvariantCulture) : "-";
+                            gridRow.Cells[colIdx].Value = FormatMeasuredValue(row.MeasuredValue);
                         }
                         else if (header == "#")
                         {
@@ -701,7 +682,7 @@ namespace AssemblyLineTester.Views.Pages
                             listBoxTestSummary.Items.Add("");
                             foreach (var error in shortErrors)
                             {
-                                listBoxTestSummary.Items.Add(error.Message);
+                                listBoxTestSummary.Items.Add(FormatShortErrorMessage(error));
                             }
                         }
                     }
@@ -725,6 +706,55 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
+        }
+
+        private static string FormatShortErrorMessage(dynamic error)
+        {
+            try
+            {
+                string p1 = ((string?)error.Point1)?.Replace("$", "").Trim() ?? "";
+                string p2 = ((string?)error.Point2)?.Replace("$", "").Trim() ?? "";
+                string msg = ((string?)error.Message) ?? "";
+
+                // Extract resistance part from message (e.g. "0.1 Ohm" from "#3 Short Net2 Net6 0.1 Ohm")
+                string resistance = "";
+                var match = Regex.Match(msg, @"([\d\.]+\s*(?:mOhm|Ohm|kOhm|MOhm|Ω|mΩ|kΩ|MΩ)[^,]*)", RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    resistance = match.Groups[1].Value.Trim();
+                }
+                else
+                {
+                    // Fallback to Value1 if available
+                    try
+                    {
+                        double val = (double)error.Value1;
+                        if (val > 0)
+                        {
+                            if (val >= 1e6) resistance = (val / 1e6).ToString("0.#", CultureInfo.InvariantCulture) + " MOhm";
+                            else if (val >= 1e3) resistance = (val / 1e3).ToString("0.#", CultureInfo.InvariantCulture) + " kOhm";
+                            else resistance = val.ToString("0.#", CultureInfo.InvariantCulture) + " Ohm";
+                        }
+                    }
+                    catch { }
+                }
+
+                if (!string.IsNullOrEmpty(p1) && !string.IsNullOrEmpty(p2))
+                {
+                    return string.IsNullOrEmpty(resistance)
+                        ? $"Short {p1} - {p2}"
+                        : $"Short {p1} - {p2} {resistance}";
+                }
+
+                // Fallback: clean leading error number from Message if present (e.g. "#3 Short ...")
+                if (!string.IsNullOrEmpty(msg))
+                {
+                    return Regex.Replace(msg, @"^#\d+\s*", "");
+                }
+            }
+            catch { }
+
+            return error?.Message ?? "Short error";
         }
         private async void BtnStopTest_Click(object sender, EventArgs e)
         {
@@ -910,9 +940,66 @@ namespace AssemblyLineTester.Views.Pages
             "Tolerance" => string.Equals(row.TestType, "WIRE", StringComparison.OrdinalIgnoreCase)
                 ? "-"
                 : row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
-            "Measurement" => FormatNumber(row.MeasuredValue, "F3"),
+            "Measurement" => FormatMeasuredValue(row.MeasuredValue),
             _ => ""
         };
+
+        private static string FormatMeasuredValue(double? val)
+        {
+            if (!val.HasValue) return "-";
+            double v = val.Value;
+            if (Math.Abs(v) < 1e-12) return "0.00";
+            if (Math.Abs(v) >= 0.01) return v.ToString("F2", CultureInfo.InvariantCulture);
+            return v.ToString("0.##########", CultureInfo.InvariantCulture);
+        }
+
+        private static bool CheckMeasurementRowMatch(LiveTestDetailRowDto row, CtaDotNet.Models.CtaJsonResult measurement, int index)
+        {
+            string expectedFromPin = FormatPinAddress(row.FromPoint);
+            string expectedToPin = FormatPinAddress(row.ToPoint);
+
+            string actualP1 = NormalizePin(measurement.Point1);
+            string actualP2 = NormalizePin(measurement.Point2);
+            string expFrom = NormalizePin(expectedFromPin);
+            string expTo = NormalizePin(expectedToPin);
+
+            bool pinMatch = (!string.IsNullOrEmpty(actualP1) && !string.IsNullOrEmpty(actualP2)) &&
+                            ((expFrom == actualP1 && expTo == actualP2) || (expFrom == actualP2 && expTo == actualP1));
+
+            bool labelMatch = (!string.IsNullOrEmpty(row.FromLabel) &&
+                              (row.FromLabel.Equals(measurement.Point1, StringComparison.OrdinalIgnoreCase) ||
+                               row.FromLabel.Equals(measurement.NetName, StringComparison.OrdinalIgnoreCase)));
+
+            bool isMatch = pinMatch || labelMatch;
+
+            Debug.WriteLine($"[Row-Check #{index + 1}] Step {row.StepNo} ({expectedFromPin} -> {expectedToPin}) <=> CTA ({measurement.Point1} -> {measurement.Point2}, Net: {measurement.NetName}) => {(isMatch ? "MATCH OK" : "MISMATCH / VERIFY ORDER")}");
+
+            return isMatch;
+        }
+
+        private static string FormatPinAddress(string? point)
+        {
+            if (string.IsNullOrWhiteSpace(point)) return "";
+            if (int.TryParse(point, out int addr) && addr > 0)
+            {
+                int conn = ((addr - 1) / 64) + 1;
+                int pin = ((addr - 1) % 64) + 1;
+                return $"J{conn}-{pin}";
+            }
+            return point.Trim();
+        }
+
+        private static string NormalizePin(string? pin)
+        {
+            if (string.IsNullOrWhiteSpace(pin)) return "";
+            string clean = pin.Replace("$", "").Trim().ToUpperInvariant();
+            var parts = clean.Split('-');
+            if (parts.Length == 2 && int.TryParse(parts[1], out int pinNum))
+            {
+                return $"{parts[0]}-{pinNum}";
+            }
+            return clean;
+        }
 
         private static string FormatNumber(double? value, string format = "0.##") =>
             value?.ToString(format, CultureInfo.InvariantCulture) ?? "";
