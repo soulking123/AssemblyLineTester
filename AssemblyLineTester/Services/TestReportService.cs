@@ -126,23 +126,46 @@ namespace AssemblyLineTester.Services
                 })
                 .ToList();
 
-            var detailDtos = details.Select(d => new TestDetailDto
+            var detailDtos = details.Select(d =>
             {
-                NetId = d.NetId,
-                HarnessGroup = d.HarnessGroup,
-                FromPin = d.FromPin,
-                ToPin = d.ToPin,
-                FromLabel = d.FromLabel,
-                ToLabel = d.ToLabel,
-                TestType = d.TestTypeName,
-                LowerLimit = d.LowerLimit,
-                UpperLimit = d.UpperLimit,
-                ExpectedValue = d.ExpectedValue,
-                ToleranceValue = d.Tolerance,
-                Unit = d.Unit,
-                Measured = d.MeasuredValue.HasValue ? $"{d.MeasuredValue.Value} {d.Unit}" : "N/A",
-                Result = FormatResult(d.Result, d.MeasuredValue),
-                ErrorDetail = d.ErrorDetail
+                bool isDiode = string.Equals(d.TestTypeName, "DIODE", StringComparison.OrdinalIgnoreCase) ||
+                               string.Equals(d.TestTypeName, "SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase);
+
+                double? exp2 = d.ExpectedValue2 ?? (isDiode ? 6.00 : null);
+                double? low2 = d.LowerLimit2 ?? (isDiode ? 4.80 : null);
+                double? up2 = d.UpperLimit2 ?? (isDiode ? 6.00 : null);
+                double? tol2 = d.Tolerance2 ?? (isDiode ? 20.0 : null);
+                double? mVal2 = d.MeasuredValue2 ?? (isDiode ? 6.00 : null);
+                string? pfx2 = d.MeasurementPrefix2 ?? (isDiode ? "> " : null);
+
+                string measuredStr = TestDetailDto.FormatMeasuredRow(d.MeasuredValue, d.MeasurementPrefix, mVal2, pfx2, d.TestTypeName);
+
+                return new TestDetailDto
+                {
+                    NetId = d.NetId,
+                    HarnessGroup = d.HarnessGroup,
+                    FromPin = d.FromPin,
+                    ToPin = d.ToPin,
+                    FromLabel = d.FromLabel,
+                    ToLabel = d.ToLabel,
+                    TestType = d.TestTypeName,
+                    LowerLimit = d.LowerLimit,
+                    UpperLimit = d.UpperLimit,
+                    ExpectedValue = d.ExpectedValue,
+                    ToleranceValue = d.Tolerance,
+                    LowerLimit2 = low2,
+                    UpperLimit2 = up2,
+                    ExpectedValue2 = exp2,
+                    ToleranceValue2 = tol2,
+                    MeasuredValue = d.MeasuredValue,
+                    MeasurementPrefix = d.MeasurementPrefix,
+                    MeasuredValue2 = mVal2,
+                    MeasurementPrefix2 = pfx2,
+                    Unit = d.Unit,
+                    Measured = measuredStr,
+                    Result = FormatResult(d.Result, d.MeasuredValue),
+                    ErrorDetail = d.ErrorDetail
+                };
             }).ToList();
 
 
@@ -228,6 +251,29 @@ namespace AssemblyLineTester.Services
                     bool rowPass = r.Status == LiveTestStatus.Pass;
                     string rowTypeName = ResolveTestTypeName(knownTypeNames, r.TestType);
 
+                    bool isDiode = string.Equals(rowTypeName, "DIODE", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(rowTypeName, "SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase);
+
+                    double? exp1 = null;
+                    double? exp2 = null;
+                    if (!string.IsNullOrWhiteSpace(r.ExpectedValue))
+                    {
+                        var parts = r.ExpectedValue.Split(',');
+                        if (parts.Length > 0 && double.TryParse(parts[0].Trim().TrimStart('>', '<', ' '), NumberStyles.Any, CultureInfo.InvariantCulture, out double e1))
+                        {
+                            exp1 = e1;
+                        }
+                        if (parts.Length > 1 && double.TryParse(parts[1].Trim().TrimStart('>', '<', ' '), NumberStyles.Any, CultureInfo.InvariantCulture, out double e2))
+                        {
+                            exp2 = e2;
+                        }
+                    }
+
+                    if (isDiode)
+                    {
+                        exp2 ??= r.UpperLimit2 ?? 6.0;
+                    }
+
                     details.Add(new TestDetail
                     {
                         ReportId = report.ReportId,
@@ -240,11 +286,18 @@ namespace AssemblyLineTester.Services
                         ToLabel = r.ToLabel,
                         TestTypeName = rowTypeName,
                         MeasuredValue = r.MeasuredValue,
+                        MeasurementPrefix = r.MeasurementPrefix,
                         LowerLimit = r.LowerLimit,
                         UpperLimit = r.UpperLimit,
-                        ExpectedValue = double.TryParse(r.ExpectedValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double expected) ? expected : null,
+                        ExpectedValue = exp1,
                         Tolerance = r.Tolerance,
-                        Unit = string.IsNullOrWhiteSpace(r.Unit) ? "Ω" : r.Unit,
+                        MeasuredValue2 = r.MeasuredValue2,
+                        MeasurementPrefix2 = r.MeasurementPrefix2,
+                        LowerLimit2 = r.LowerLimit2,
+                        UpperLimit2 = r.UpperLimit2,
+                        ExpectedValue2 = exp2,
+                        Tolerance2 = r.Tolerance2 ?? (isDiode ? r.Tolerance : null),
+                        Unit = string.IsNullOrWhiteSpace(r.Unit) ? (isDiode ? "V" : "Ω") : r.Unit,
                         Result = rowPass,
                         ErrorDetail = rowPass ? null : "Measurement out of limits"
                     });

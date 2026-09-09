@@ -20,6 +20,8 @@ namespace AssemblyLineTester.Models.Dto
         public string ExpectedValue { get; set; } = string.Empty;
         public double? MeasuredValue { get; set; }
         public string? MeasurementPrefix { get; set; }
+        public double? MeasuredValue2 { get; set; }
+        public string? MeasurementPrefix2 { get; set; }
         public LiveTestStatus Status { get; set; } = LiveTestStatus.Pending;
 
         // The threshold this row's verdict was decided against, so the report can state it.
@@ -30,6 +32,9 @@ namespace AssemblyLineTester.Models.Dto
         public string ToLabel { get; set; } = string.Empty;
         public double? LowerLimit { get; set; }
         public double? Tolerance { get; set; }
+        public double? LowerLimit2 { get; set; }
+        public double? UpperLimit2 { get; set; }
+        public double? Tolerance2 { get; set; }
         public string Unit { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty;
         public string Gauge { get; set; } = string.Empty;

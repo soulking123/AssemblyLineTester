@@ -342,8 +342,8 @@ namespace AssemblyLineTester.Services
         // Page 2 onwards: detail rows in landscape, spilling onto as many pages as needed.
         private static void DrawDetailPages(PdfDocument doc, ReportDetailDto detail, string logoPath)
         {
-            var font = new XFont("Arial", 9, XFontStyle.Regular);
-            var fontBold = new XFont("Arial", 9, XFontStyle.Bold);
+            var font = new XFont("Arial", 8, XFontStyle.Regular);
+            var fontBold = new XFont("Arial", 8, XFontStyle.Bold);
             double rowH = 18;
 
             var columns = TestSettingService.GetEnabledResultColumns();
@@ -390,41 +390,60 @@ namespace AssemblyLineTester.Services
             string[] headers = columns.Concat(new[] { "Result" }).ToArray();
             var hdrBg = new XSolidBrush(XColor.FromArgb(28, 230, 230, 230));
 
+            double headerH = 22;
             double x = Margin;
             for (int i = 0; i < headers.Length; i++)
             {
-                g.DrawRectangle(hdrBg, x, y, cols[i], rowH);
-                g.DrawRectangle(XPens.LightGray, x, y, cols[i], rowH);
-                // Clipped like the cells below: an overlong heading used to run under its neighbour,
-                // which then painted over it and left the text looking chopped.
-                g.DrawString(Ellipsize(g, headers[i], fontBold, cols[i] - 6), fontBold, XBrushes.Black,
-                    new XRect(x + 3, y + 4, cols[i] - 6, rowH), XStringFormats.TopLeft);
+                g.DrawRectangle(hdrBg, x, y, cols[i], headerH);
+                g.DrawRectangle(XPens.LightGray, x, y, cols[i], headerH);
+                DrawHeaderCell(g, headers[i], fontBold, new XRect(x + 2, y, cols[i] - 4, headerH));
                 x += cols[i];
             }
 
-            return y + rowH;
+            return y + headerH;
+        }
+
+        private static void DrawHeaderCell(XGraphics g, string text, XFont font, XRect rect)
+        {
+            double textW = g.MeasureString(text, font).Width;
+            if (textW <= rect.Width || !text.Contains(' '))
+            {
+                g.DrawString(Ellipsize(g, text, font, rect.Width), font, XBrushes.Black, rect, XStringFormats.CenterLeft);
+            }
+            else
+            {
+                int lastSpace = text.LastIndexOf(' ');
+                string line1 = text.Substring(0, lastSpace).Trim();
+                string line2 = text.Substring(lastSpace + 1).Trim();
+
+                double lineH = font.Height;
+                double topY = rect.Y + (rect.Height - lineH * 2) / 2.0;
+
+                g.DrawString(Ellipsize(g, line1, font, rect.Width), font, XBrushes.Black,
+                    new XRect(rect.X, topY, rect.Width, lineH), XStringFormats.CenterLeft);
+                g.DrawString(Ellipsize(g, line2, font, rect.Width), font, XBrushes.Black,
+                    new XRect(rect.X, topY + lineH, rect.Width, lineH), XStringFormats.CenterLeft);
+            }
         }
 
         // Column widths as fractions of the printable width, so they follow the page size.
         // Relative widths per configurable column; anything unlisted gets an even share.
         private static readonly Dictionary<string, double> DetailColumnWeights = new()
         {
-            ["Net-ID"] = 0.9,
-            // Holds about 13 characters at Arial 9. It used to take 2.5, which is twice what
-            // "J12-J34" needs and squeezed every column to its right.
-            ["Harness Group"] = 1.3,
-            // Pin addresses, never more than 5 characters. The floor is the "From" heading, not the
-            // values: any narrower and the heading itself would be the thing that gets ellipsized.
-            ["From"] = 0.7,
-            ["Net From Label"] = 1.4,
-            ["To"] = 0.7,
-            ["Net To Label"] = 1.4,
-            ["Test Type"] = 1.8,
-            ["Lower Limit"] = 0.9,
-            ["Upper Limit"] = 0.9,
-            ["Expected Value"] = 1.0,
-            ["Tolerance"] = 0.9,
-            ["Measurement"] = 1.2
+            ["Net-ID"] = 0.7,
+            ["Harness Group"] = 0.8,
+            ["From"] = 0.5,
+            ["Net From Label"] = 0.8,
+            ["To"] = 0.5,
+            ["Net To Label"] = 0.8,
+            ["Test Type"] = 0.9,
+            ["Color"] = 0.55,
+            ["Gauge"] = 0.6,
+            ["Lower Limit"] = 1.3,
+            ["Upper Limit"] = 1.3,
+            ["Expected Value"] = 1.3,
+            ["Tolerance"] = 1.05,
+            ["Measurement"] = 1.45
         };
 
         // The trailing entry is the Result column, which is always drawn.
@@ -435,7 +454,7 @@ namespace AssemblyLineTester.Services
             var weights = columns
                 .Select(c => DetailColumnWeights.TryGetValue(c, out double weight) ? weight : 1.0)
                 .ToList();
-            weights.Add(0.8);
+            weights.Add(0.7);
 
             double total = weights.Sum();
             return weights.Select(weight => w * weight / total).ToArray();
@@ -468,15 +487,15 @@ namespace AssemblyLineTester.Services
             {
                 g.DrawRectangle(XPens.LightGray, x, y, cols[i], rowH);
                 var rect = align == XStringFormats.CenterLeft
-                    ? new XRect(x + 3, y, cols[i] - 6, rowH)
-                    : new XRect(x, y + 3, cols[i], rowH);
-                g.DrawString(Ellipsize(g, text, font, cols[i] - 12), font, XBrushes.Black, rect, align);
+                    ? new XRect(x + 2, y, cols[i] - 4, rowH)
+                    : new XRect(x, y + 2, cols[i], rowH);
+                g.DrawString(Ellipsize(g, text, font, cols[i] - 4), font, XBrushes.Black, rect, align);
                 x += cols[i];
             }
 
             for (int i = 0; i < columns.Count; i++)
             {
-                var align = columns[i] is "Harness Group" or "From" or "To" or "Test Type" or "Net From Label" or "Net To Label"
+                var align = columns[i] is "Harness Group" or "From" or "To" or "Test Type" or "Net From Label" or "Net To Label" or "Color" or "Gauge"
                     ? XStringFormats.CenterLeft
                     : XStringFormats.Center;
                 Cell(i, d.Column(columns[i]), align);

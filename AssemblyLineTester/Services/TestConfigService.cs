@@ -145,6 +145,15 @@ namespace AssemblyLineTester.Services
             if (net.UpperLimit.HasValue)
                 net.UpperLimit = UnitConversionHelper.ConvertToBaseUnit(key, net.UpperLimit.Value, enteredUnit);
 
+            if (net.ExpectedValue2.HasValue)
+                net.ExpectedValue2 = UnitConversionHelper.ConvertToBaseUnit(key, net.ExpectedValue2.Value, enteredUnit);
+
+            if (net.LowerLimit2.HasValue)
+                net.LowerLimit2 = UnitConversionHelper.ConvertToBaseUnit(key, net.LowerLimit2.Value, enteredUnit);
+
+            if (net.UpperLimit2.HasValue)
+                net.UpperLimit2 = UnitConversionHelper.ConvertToBaseUnit(key, net.UpperLimit2.Value, enteredUnit);
+
             net.MeasurementUnit = UnitConversionHelper.GetBaseUnit(key);
         }
 
@@ -434,7 +443,24 @@ namespace AssemblyLineTester.Services
                 }
                 else if (typeName == "DIODE")
                 {
-                    sb.AppendLine($"    DIODE,   {fromPin},  {toPin}");
+                    if (net.ExpectedValue2.HasValue || (net.ExpectedValue.HasValue && net.ExpectedValue.Value > 0))
+                    {
+                        double fwdV = net.ExpectedValue ?? 0.70;
+                        double fwdTol = net.Tolerance ?? 20.0;
+                        double revV = net.ExpectedValue2 ?? 6.00;
+                        double revTol = net.Tolerance2 ?? 20.0;
+
+                        string fwdStr = fwdV < 1.0
+                            ? (fwdV * 1000).ToString("0", System.Globalization.CultureInfo.InvariantCulture) + " mV"
+                            : fwdV.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " V";
+                        string revStr = "> " + revV.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " V";
+
+                        sb.AppendLine($"    DIODE,   {fromPin},  {toPin}, {fwdStr},  {fwdTol.ToString("0", System.Globalization.CultureInfo.InvariantCulture)} %, {revStr},  {revTol.ToString("0", System.Globalization.CultureInfo.InvariantCulture)} %");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"    DIODE,   {fromPin},  {toPin}");
+                    }
                 }
                 else if (typeName == "CAPACITOR")
                 {
@@ -504,6 +530,10 @@ namespace AssemblyLineTester.Services
 
             string currentSection = string.Empty;
             double connResist = 6.0;
+            double defaultForwardV = 0.70;
+            double defaultForwardTol = 20.0;
+            double defaultReverseV = 6.00;
+            double defaultReverseTol = 20.0;
             var wireTestType = GetTestTypeByName("WIRE");
             var resistorTestType = GetTestTypeByName("RESISTOR");
             var diodeTestType = GetTestTypeByName("DIODE");
@@ -566,6 +596,34 @@ namespace AssemblyLineTester.Services
                                 config.MinComponentResistance = cr;
                             }
                         }
+                        else if (key == "FORWARDV")
+                        {
+                            if (TryParseValueWithUnit(val, out double fv))
+                            {
+                                defaultForwardV = fv;
+                            }
+                        }
+                        else if (key == "REVERSEV")
+                        {
+                            if (TryParseValueWithUnit(val, out double rv))
+                            {
+                                defaultReverseV = rv;
+                            }
+                        }
+                        else if (key == "FORWARDTOL")
+                        {
+                            if (TryParseTolerance(val, out double ft))
+                            {
+                                defaultForwardTol = ft;
+                            }
+                        }
+                        else if (key == "REVERSETOL")
+                        {
+                            if (TryParseTolerance(val, out double rt))
+                            {
+                                defaultReverseTol = rt;
+                            }
+                        }
                     }
                 }
                 else if (currentSection == "INSTRUCTIONS")
@@ -595,25 +653,67 @@ namespace AssemblyLineTester.Services
                             {
                                 wireLimit = limitVal;
                             }
+                            net.LowerLimit = 0.0;
                             net.UpperLimit = wireLimit;
+                            net.MeasurementUnit = "Ω";
                             net.TestType = wireTestType;
                             net.TestTypeId = wireTestType?.Id ?? 0;
                         }
                         else if (instType == "RESISTOR")
                         {
-                            if (tokens.Length >= 4 && TryParseValueWithUnit(tokens[3], out double expVal))
+                            double expVal = 100.0;
+                            double tolVal = 10.0;
+                            if (tokens.Length >= 4 && TryParseValueWithUnit(tokens[3], out double parsedExp))
                             {
-                                net.ExpectedValue = expVal;
+                                expVal = parsedExp;
                             }
-                            if (tokens.Length >= 5 && TryParseTolerance(tokens[4], out double tolVal))
+                            if (tokens.Length >= 5 && TryParseTolerance(tokens[4], out double parsedTol))
                             {
-                                net.Tolerance = tolVal;
+                                tolVal = parsedTol;
                             }
+                            net.ExpectedValue = expVal;
+                            net.Tolerance = tolVal;
+                            net.LowerLimit = expVal * (1.0 - tolVal / 100.0);
+                            net.UpperLimit = expVal * (1.0 + tolVal / 100.0);
+                            net.MeasurementUnit = "Ω";
                             net.TestType = resistorTestType;
                             net.TestTypeId = resistorTestType?.Id ?? 0;
                         }
                         else if (instType == "DIODE")
                         {
+                            double fwdV = defaultForwardV;
+                            double fwdTol = defaultForwardTol;
+                            double revV = defaultReverseV;
+                            double revTol = defaultReverseTol;
+
+                            if (tokens.Length >= 4 && TryParseValueWithUnit(tokens[3], out double parsedFwdV))
+                            {
+                                fwdV = parsedFwdV;
+                            }
+                            if (tokens.Length >= 5 && TryParseTolerance(tokens[4], out double parsedFwdTol))
+                            {
+                                fwdTol = parsedFwdTol;
+                            }
+                            if (tokens.Length >= 6 && TryParseValueWithUnit(tokens[5], out double parsedRevV))
+                            {
+                                revV = parsedRevV;
+                            }
+                            if (tokens.Length >= 7 && TryParseTolerance(tokens[6], out double parsedRevTol))
+                            {
+                                revTol = parsedRevTol;
+                            }
+
+                            net.ExpectedValue = fwdV;
+                            net.Tolerance = fwdTol;
+                            net.LowerLimit = fwdV * (1.0 - fwdTol / 100.0);
+                            net.UpperLimit = fwdV * (1.0 + fwdTol / 100.0);
+
+                            net.ExpectedValue2 = revV;
+                            net.Tolerance2 = revTol;
+                            net.LowerLimit2 = revV * (1.0 - revTol / 100.0);
+                            net.UpperLimit2 = revV;
+
+                            net.MeasurementUnit = "V";
                             net.TestType = diodeTestType;
                             net.TestTypeId = diodeTestType?.Id ?? 0;
                         }
@@ -627,6 +727,7 @@ namespace AssemblyLineTester.Services
                             {
                                 net.Tolerance = tolVal;
                             }
+                            net.MeasurementUnit = "F";
                             net.TestType = capacitorTestType;
                             net.TestTypeId = capacitorTestType?.Id ?? 0;
                         }

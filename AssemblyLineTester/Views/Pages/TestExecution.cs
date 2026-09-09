@@ -206,7 +206,13 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 string expValStr = "-";
-                if (net.ExpectedValue.HasValue)
+                if (testTypeName.Equals("DIODE", StringComparison.OrdinalIgnoreCase))
+                {
+                    double fwdExp = net.ExpectedValue ?? 0.70;
+                    double revExp = net.ExpectedValue2 ?? 6.00;
+                    expValStr = $"{FormatLimitValue(fwdExp, testTypeName)}, > {FormatLimitValue(revExp, testTypeName)}";
+                }
+                else if (net.ExpectedValue.HasValue)
                 {
                     expValStr = testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) || (net.ExpectedValue.Value > 0 && net.ExpectedValue.Value < 0.01)
                         ? net.ExpectedValue.Value.ToString("0.##########", CultureInfo.InvariantCulture)
@@ -229,8 +235,11 @@ namespace AssemblyLineTester.Views.Pages
                     Gauge = net.Gauge ?? "",
                     LowerLimit = lower,
                     UpperLimit = upper,
+                    LowerLimit2 = net.LowerLimit2,
+                    UpperLimit2 = net.UpperLimit2,
                     ExpectedValue = expValStr,
                     Tolerance = net.Tolerance,
+                    Tolerance2 = net.Tolerance2,
                     Unit = net.MeasurementUnit ?? "",
                     MeasuredValue = null,
                     Status = LiveTestStatus.Pending
@@ -260,6 +269,7 @@ namespace AssemblyLineTester.Views.Pages
                 row.FromLabel = net.FromLabel;
                 row.ToLabel = net.ToLabel;
                 row.Tolerance = net.Tolerance;
+                row.Tolerance2 = net.Tolerance2;
                 row.Unit = net.MeasurementUnit;
                 row.Color = net.Color;
                 row.Gauge = net.Gauge;
@@ -278,8 +288,16 @@ namespace AssemblyLineTester.Views.Pages
                 }
                 row.LowerLimit = lower;
                 row.UpperLimit = upper;
+                row.LowerLimit2 = net.LowerLimit2;
+                row.UpperLimit2 = net.UpperLimit2;
 
-                if (net.ExpectedValue.HasValue)
+                if (testTypeName.Equals("DIODE", StringComparison.OrdinalIgnoreCase))
+                {
+                    double fwdExp = net.ExpectedValue ?? 0.70;
+                    double revExp = net.ExpectedValue2 ?? 6.00;
+                    row.ExpectedValue = $"{FormatLimitValue(fwdExp, testTypeName)}, > {FormatLimitValue(revExp, testTypeName)}";
+                }
+                else if (net.ExpectedValue.HasValue)
                 {
                     row.ExpectedValue = testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) || (net.ExpectedValue.Value > 0 && net.ExpectedValue.Value < 0.01)
                         ? net.ExpectedValue.Value.ToString("0.##########", CultureInfo.InvariantCulture)
@@ -551,10 +569,18 @@ namespace AssemblyLineTester.Views.Pages
                         else if (status1.Contains("<")) row.MeasurementPrefix = "< ";
                         else row.MeasurementPrefix = null;
 
+                        double val2 = (double)measurement.Value2;
+                        row.MeasuredValue2 = val2;
+                        string status2 = measurement.Status2?.Trim() ?? "";
+                        if (status2.Contains(">")) row.MeasurementPrefix2 = "> ";
+                        else if (status2.Contains("<")) row.MeasurementPrefix2 = "< ";
+                        else row.MeasurementPrefix2 = null;
+
                         // 3. Evaluate Pass/Fail using software limits
                         string testType = (row.TestType ?? "WIRE").Trim().ToUpperInvariant();
                         bool isWire = testType.Equals("WIRE", StringComparison.OrdinalIgnoreCase) || testType.Equals("4WIRE", StringComparison.OrdinalIgnoreCase);
                         bool isSignatureWire = testType.Equals("SIGNATURE WIRE", StringComparison.OrdinalIgnoreCase);
+                        bool isDiode = testType.Equals("DIODE", StringComparison.OrdinalIgnoreCase) || testType.Equals("SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase);
 
                         if (isWire)
                         {
@@ -574,9 +600,20 @@ namespace AssemblyLineTester.Views.Pages
                                 ? LiveTestStatus.Pass
                                 : LiveTestStatus.Fail;
                         }
+                        else if (isDiode)
+                        {
+                            // Forward Voltage check: LowerLimit <= val <= UpperLimit
+                            bool fwdPass = (!row.LowerLimit.HasValue || val >= row.LowerLimit.Value) &&
+                                           (!row.UpperLimit.HasValue || val <= row.UpperLimit.Value);
+
+                            // Reverse Voltage check: val2 >= LowerLimit2 or status2 indicates over range
+                            bool revPass = (!row.LowerLimit2.HasValue || val2 >= row.LowerLimit2.Value || status2.Contains(">"));
+
+                            row.Status = (fwdPass && revPass) ? LiveTestStatus.Pass : LiveTestStatus.Fail;
+                        }
                         else
                         {
-                            // RESISTOR, CAPACITOR, DIODE, SIGNATURE DIODE, etc.
+                            // RESISTOR, CAPACITOR, etc.
                             if (row.LowerLimit.HasValue && row.UpperLimit.HasValue)
                             {
                                 row.Status = (val >= row.LowerLimit.Value && val <= row.UpperLimit.Value)
@@ -646,7 +683,7 @@ namespace AssemblyLineTester.Views.Pages
                         }
                         else if (header == "Measured Value" || header == "Measurement" || header == "Measured")
                         {
-                            gridRow.Cells[colIdx].Value = FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix);
+                            gridRow.Cells[colIdx].Value = FormatMeasuredRowValue(row);
                         }
                         else if (header == "#")
                         {
@@ -1016,18 +1053,39 @@ namespace AssemblyLineTester.Views.Pages
             "Test Type" => row.TestType,
             "Color" => row.Color,
             "Gauge" => row.Gauge,
-            "Lower Limit" => FormatLimitValue(row.LowerLimit, row.TestType),
-            "Upper Limit" => FormatLimitValue(row.UpperLimit, row.TestType),
+            "Lower Limit" => (string.Equals(row.TestType, "DIODE", StringComparison.OrdinalIgnoreCase) && row.LowerLimit2.HasValue)
+                ? $"{FormatLimitValue(row.LowerLimit, row.TestType)}, > {FormatLimitValue(row.LowerLimit2, row.TestType)}"
+                : FormatLimitValue(row.LowerLimit, row.TestType),
+            "Upper Limit" => (string.Equals(row.TestType, "DIODE", StringComparison.OrdinalIgnoreCase) && row.UpperLimit2.HasValue)
+                ? $"{FormatLimitValue(row.UpperLimit, row.TestType)}, > {FormatLimitValue(row.UpperLimit2, row.TestType)}"
+                : FormatLimitValue(row.UpperLimit, row.TestType),
             "Expected Value" => FormatExpectedValue(row.ExpectedValue, row.TestType),
             // Wire is plain continuity, not a component with a rated value - tolerance means nothing here.
             "Tolerance" => string.Equals(row.TestType, "WIRE", StringComparison.OrdinalIgnoreCase)
                 ? "-"
-                : row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
-            "Measurement" => FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix),
-            "Measured Value" => FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix),
-            "Measured" => FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix),
+                : (string.Equals(row.TestType, "DIODE", StringComparison.OrdinalIgnoreCase) && row.Tolerance2.HasValue)
+                    ? $"±{row.Tolerance?.ToString("0.##", CultureInfo.InvariantCulture)}%, ±{row.Tolerance2?.ToString("0.##", CultureInfo.InvariantCulture)}%"
+                    : row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
+            "Measurement" => FormatMeasuredRowValue(row),
+            "Measured Value" => FormatMeasuredRowValue(row),
+            "Measured" => FormatMeasuredRowValue(row),
             _ => ""
         };
+
+        private static string FormatMeasuredRowValue(LiveTestDetailRowDto row)
+        {
+            string testType = (row.TestType ?? "").Trim().ToUpperInvariant();
+            bool isDiode = testType.Equals("DIODE", StringComparison.OrdinalIgnoreCase) || testType.Equals("SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase);
+
+            if (isDiode && (row.MeasuredValue2.HasValue || row.MeasurementPrefix2 != null))
+            {
+                string fwdStr = FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix);
+                string revStr = FormatMeasuredValue(row.MeasuredValue2, row.MeasurementPrefix2);
+                return $"{fwdStr}, {revStr}";
+            }
+
+            return FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix);
+        }
 
         private static string FormatMeasuredValue(double? val, string? prefix = null)
         {
@@ -1099,6 +1157,14 @@ namespace AssemblyLineTester.Views.Pages
             if (string.Equals(testType, "CAPACITOR", StringComparison.OrdinalIgnoreCase) || (Math.Abs(v) > 0 && Math.Abs(v) < 0.01))
             {
                 return v.ToString("0.##########", CultureInfo.InvariantCulture);
+            }
+            if (string.Equals(testType, "DIODE", StringComparison.OrdinalIgnoreCase))
+            {
+                string s = v.ToString("0.####", CultureInfo.InvariantCulture);
+                if (!s.Contains('.')) return s + ".00";
+                var parts = s.Split('.');
+                if (parts[1].Length < 2) return parts[0] + "." + parts[1].PadRight(2, '0');
+                return s;
             }
             return v.ToString("0.##", CultureInfo.InvariantCulture);
         }

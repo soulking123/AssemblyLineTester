@@ -1493,6 +1493,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("ExpectedValue")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("ExpectedValue2")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("FromAddress")
                         .HasColumnType("INTEGER");
 
@@ -1509,6 +1512,9 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<double?>("LowerLimit")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("LowerLimit2")
                         .HasColumnType("REAL");
 
                     b.Property<string>("MeasurementUnit")
@@ -1535,7 +1541,13 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("Tolerance")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("Tolerance2")
+                        .HasColumnType("REAL");
+
                     b.Property<double?>("UpperLimit")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("UpperLimit2")
                         .HasColumnType("REAL");
 
                     b.HasKey("NetConfigId");
@@ -1607,6 +1619,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("ExpectedValue")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("ExpectedValue2")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("FromLabel")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1622,8 +1637,20 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("LowerLimit")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("LowerLimit2")
+                        .HasColumnType("REAL");
+
                     b.Property<double?>("MeasuredValue")
                         .HasColumnType("REAL");
+
+                    b.Property<double?>("MeasuredValue2")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("MeasurementPrefix")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MeasurementPrefix2")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NetId")
                         .IsRequired()
@@ -1650,11 +1677,17 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("Tolerance")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("Tolerance2")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<double?>("UpperLimit")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("UpperLimit2")
                         .HasColumnType("REAL");
 
                     b.HasKey("DetailId");

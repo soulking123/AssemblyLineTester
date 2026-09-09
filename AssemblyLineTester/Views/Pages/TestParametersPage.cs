@@ -693,8 +693,15 @@ namespace AssemblyLineTester.Views.Pages
 
             if (gridConfig.Columns["colTestType"] is DataGridViewComboBoxColumn testTypeCol)
             {
+                var existingRowTypes = gridConfig.Rows.Cast<DataGridViewRow>()
+                    .Where(r => !r.IsNewRow && r.Cells["colTestType"].Value != null)
+                    .Select(r => r.Cells["colTestType"].Value?.ToString() ?? "")
+                    .Where(s => !string.IsNullOrWhiteSpace(s));
+
+                var allItems = names.Union(existingRowTypes, StringComparer.OrdinalIgnoreCase).ToList();
+
                 testTypeCol.Items.Clear();
-                testTypeCol.Items.AddRange(names.Cast<object>().ToArray());
+                testTypeCol.Items.AddRange(allItems.Cast<object>().ToArray());
             }
         }
 
@@ -941,12 +948,46 @@ namespace AssemblyLineTester.Views.Pages
             {
                 string testTypeName = net.TestType?.TestTypeName ?? "";
                 bool isCapacitor = testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase);
-                string expected = net.ExpectedValue.HasValue 
-                    ? (isCapacitor ? FormatCapacitorLimit(net.ExpectedValue.Value) : FormatLimit(net.ExpectedValue.Value)) 
-                    : "-";
-                string tolerance = net.Tolerance.HasValue ? $"±{net.Tolerance.Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture)}%" : "±0%";
-                string lowerStr = isCapacitor ? FormatCapacitorLimit(net.LowerLimit ?? 0) : FormatLimit(net.LowerLimit ?? 0);
-                string upperStr = isCapacitor ? FormatCapacitorLimit(net.UpperLimit ?? 0) : FormatLimit(net.UpperLimit ?? 0);
+                bool isDiode = testTypeName.Equals("DIODE", StringComparison.OrdinalIgnoreCase);
+
+                if (gridConfig.Columns["colTestType"] is DataGridViewComboBoxColumn testTypeCol)
+                {
+                    if (!string.IsNullOrWhiteSpace(testTypeName) && !testTypeCol.Items.Contains(testTypeName))
+                    {
+                        testTypeCol.Items.Add(testTypeName);
+                    }
+                }
+
+                string expected;
+                string tolerance;
+                string lowerStr;
+                string upperStr;
+
+                if (isDiode)
+                {
+                    double fwdExp = net.ExpectedValue ?? 0.70;
+                    double revExp = net.ExpectedValue2 ?? 6.00;
+                    double fwdTol = net.Tolerance ?? 20.0;
+                    double revTol = net.Tolerance2 ?? 20.0;
+                    double fwdLower = net.LowerLimit ?? (fwdExp * (1.0 - fwdTol / 100.0));
+                    double fwdUpper = net.UpperLimit ?? (fwdExp * (1.0 + fwdTol / 100.0));
+                    double revLower = net.LowerLimit2 ?? (revExp * (1.0 - revTol / 100.0));
+                    double revUpper = net.UpperLimit2 ?? revExp;
+
+                    expected = $"{FormatDiodeValue(fwdExp)}, > {FormatDiodeValue(revExp)}";
+                    tolerance = $"±{fwdTol.ToString("0", System.Globalization.CultureInfo.InvariantCulture)}%, ±{revTol.ToString("0", System.Globalization.CultureInfo.InvariantCulture)}%";
+                    lowerStr = $"{FormatDiodeValue(fwdLower)}, > {FormatDiodeValue(revLower)}";
+                    upperStr = $"{FormatDiodeValue(fwdUpper)}, > {FormatDiodeValue(revUpper)}";
+                }
+                else
+                {
+                    expected = net.ExpectedValue.HasValue 
+                        ? (isCapacitor ? FormatCapacitorLimit(net.ExpectedValue.Value) : FormatLimit(net.ExpectedValue.Value)) 
+                        : "-";
+                    tolerance = net.Tolerance.HasValue ? $"±{net.Tolerance.Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture)}%" : "±0%";
+                    lowerStr = isCapacitor ? FormatCapacitorLimit(net.LowerLimit ?? 0) : FormatLimit(net.LowerLimit ?? 0);
+                    upperStr = isCapacitor ? FormatCapacitorLimit(net.UpperLimit ?? 0) : FormatLimit(net.UpperLimit ?? 0);
+                }
 
                 int idx = gridConfig.Rows.Add(
                     net.SequenceNo.ToString(),
@@ -963,10 +1004,10 @@ namespace AssemblyLineTester.Views.Pages
                     upperStr,
                     expected,
                     tolerance,
-                    net.MeasurementUnit ?? "");
+                    isDiode ? (string.IsNullOrEmpty(net.MeasurementUnit) ? "V" : net.MeasurementUnit) : (net.MeasurementUnit ?? ""));
 
                 UpdateRowUnitDropdown(idx);
-                gridConfig.Rows[idx].Cells["colUnit"].Value = net.MeasurementUnit ?? "";
+                gridConfig.Rows[idx].Cells["colUnit"].Value = isDiode ? (string.IsNullOrEmpty(net.MeasurementUnit) ? "V" : net.MeasurementUnit) : (net.MeasurementUnit ?? "");
                 RecalculateRowLimits(gridConfig.Rows[idx]);
             }
 
@@ -1156,6 +1197,12 @@ namespace AssemblyLineTester.Views.Pages
                         gridConfig.Rows[e.RowIndex].Cells["colUpperLimit"].Value = connRes.ToString(System.Globalization.CultureInfo.InvariantCulture);
                         gridConfig.Rows[e.RowIndex].Cells["colUnit"].Value = "Ω";
                     }
+                    else if (selectedType.Equals("DIODE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        gridConfig.Rows[e.RowIndex].Cells["colExpectedValue"].Value = "0.72, > 6.00";
+                        gridConfig.Rows[e.RowIndex].Cells["colTolerance"].Value = "±20%, ±20%";
+                        gridConfig.Rows[e.RowIndex].Cells["colUnit"].Value = "V";
+                    }
                     else
                     {
                         gridConfig.Rows[e.RowIndex].Cells["colExpectedValue"].Value = "0";
@@ -1193,6 +1240,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (ContinuityLikeTypes.Contains(testType, StringComparer.OrdinalIgnoreCase)) return;
                 if (testType.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase)) return;
                 if (testType.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase)) return;
+                if (testType.Equals("DIODE", StringComparison.OrdinalIgnoreCase)) return;
 
                 string input = e.FormattedValue?.ToString() ?? "";
                 if (!string.IsNullOrWhiteSpace(input) && input != "-")
@@ -1216,6 +1264,12 @@ namespace AssemblyLineTester.Views.Pages
             if (row.IsNewRow) return;
 
             string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
+
+            if (testType.Equals("DIODE", StringComparison.OrdinalIgnoreCase))
+            {
+                RecalculateRowLimits(row);
+                return;
+            }
 
             if (testType.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase))
             {
@@ -1769,6 +1823,68 @@ namespace AssemblyLineTester.Views.Pages
                     row.Cells["colUpperLimit"].Value = GetCurrentConnectionResistance().ToString(System.Globalization.CultureInfo.InvariantCulture);
                 }
             }
+            else if (testType.Equals("DIODE", StringComparison.OrdinalIgnoreCase))
+            {
+                row.Cells["colExpectedValue"].ReadOnly = false;
+                row.Cells["colTolerance"].ReadOnly = false;
+                row.Cells["colLowerLimit"].ReadOnly = true;
+                row.Cells["colUpperLimit"].ReadOnly = true;
+
+                string expStr = row.Cells["colExpectedValue"].Value?.ToString() ?? "";
+                string tolStr = row.Cells["colTolerance"].Value?.ToString() ?? "";
+
+                var expParts = expStr.Split(',').Select(p => p.Trim()).ToArray();
+                var tolParts = tolStr.Split(',').Select(p => p.Trim()).ToArray();
+
+                string fwdExpRaw = expParts.Length > 0 ? expParts[0] : "";
+                string revExpRaw = expParts.Length > 1 ? expParts[1] : "";
+
+                string fwdTolRaw = tolParts.Length > 0 ? tolParts[0] : "";
+                string revTolRaw = tolParts.Length > 1 ? tolParts[1] : "";
+
+                double fwdExp = 0.70;
+                string cleanFwdExp = fwdExpRaw.TrimStart('>', '<', ' ');
+                if (double.TryParse(cleanFwdExp, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double pFwdExp) && pFwdExp > 0)
+                {
+                    fwdExp = pFwdExp;
+                }
+
+                double revExp = 6.00;
+                string cleanRevExp = revExpRaw.TrimStart('>', '<', ' ');
+                if (double.TryParse(cleanRevExp, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double pRevExp) && pRevExp > 0)
+                {
+                    revExp = pRevExp;
+                }
+
+                (double minFwdTol, double maxFwdTol, string formattedFwdTol) = ParseClampAndFormatTolerance(fwdTolRaw);
+                (double minRevTol, double maxRevTol, string formattedRevTol) = ParseClampAndFormatTolerance(revTolRaw);
+
+                if (string.IsNullOrWhiteSpace(fwdTolRaw) || fwdTolRaw == "-" || fwdTolRaw == "±0%")
+                {
+                    formattedFwdTol = "±20%";
+                    minFwdTol = -20;
+                    maxFwdTol = 20;
+                }
+                if (string.IsNullOrWhiteSpace(revTolRaw) || revTolRaw == "-" || revTolRaw == "±0%")
+                {
+                    formattedRevTol = "±20%";
+                    minRevTol = -20;
+                    maxRevTol = 20;
+                }
+
+                row.Cells["colTolerance"].Value = $"{formattedFwdTol}, {formattedRevTol}";
+                row.Cells["colExpectedValue"].Value = $"{FormatDiodeValue(fwdExp)}, > {FormatDiodeValue(revExp)}";
+
+                double fwdLower = fwdExp * (1.0 + (minFwdTol / 100.0));
+                double fwdUpper = fwdExp * (1.0 + (maxFwdTol / 100.0));
+                if (fwdLower > fwdUpper) (fwdLower, fwdUpper) = (fwdUpper, fwdLower);
+
+                double revLower = revExp * (1.0 + (minRevTol / 100.0));
+                double revUpper = revExp;
+
+                row.Cells["colLowerLimit"].Value = $"{FormatDiodeValue(fwdLower)}, > {FormatDiodeValue(revLower)}";
+                row.Cells["colUpperLimit"].Value = $"{FormatDiodeValue(fwdUpper)}, > {FormatDiodeValue(revUpper)}";
+            }
             else
             {
                 row.Cells["colExpectedValue"].ReadOnly = false;
@@ -1852,6 +1968,15 @@ namespace AssemblyLineTester.Views.Pages
             return (0, 0, "±0%");
         }
 
+        private static string FormatDiodeValue(double val)
+        {
+            string s = val.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture);
+            if (!s.Contains('.')) return s + ".00";
+            var parts = s.Split('.');
+            if (parts[1].Length < 2) return parts[0] + "." + parts[1].PadRight(2, '0');
+            return s;
+        }
+
         private static string FormatLimit(double val)
         {
             return val.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
@@ -1927,11 +2052,65 @@ namespace AssemblyLineTester.Views.Pages
                     return null;
                 }
 
-                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expected);
-                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lower);
-                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double upper);
+                double? expected1 = null;
+                double? expected2 = null;
+                double? lower1 = null;
+                double? lower2 = null;
+                double? upper1 = null;
+                double? upper2 = null;
+                double? tol1 = null;
+                double? tol2 = null;
 
                 string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
+                if (testTypeName.Equals("DIODE", StringComparison.OrdinalIgnoreCase))
+                {
+                    string expText = row.Cells["colExpectedValue"].Value?.ToString() ?? "";
+                    string tolText = row.Cells["colTolerance"].Value?.ToString() ?? "";
+                    string lowText = row.Cells["colLowerLimit"].Value?.ToString() ?? "";
+                    string uppText = row.Cells["colUpperLimit"].Value?.ToString() ?? "";
+
+                    var expParts = expText.Split(',').Select(p => p.Trim().TrimStart('>', '<', ' ')).ToArray();
+                    var tolParts = tolText.Split(',').Select(p => p.Trim()).ToArray();
+                    var lowParts = lowText.Split(',').Select(p => p.Trim().TrimStart('>', '<', ' ')).ToArray();
+                    var uppParts = uppText.Split(',').Select(p => p.Trim().TrimStart('>', '<', ' ')).ToArray();
+
+                    if (expParts.Length > 0 && double.TryParse(expParts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double e1)) expected1 = e1;
+                    if (expParts.Length > 1 && double.TryParse(expParts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double e2)) expected2 = e2;
+
+                    if (lowParts.Length > 0 && double.TryParse(lowParts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double l1)) lower1 = l1;
+                    if (lowParts.Length > 1 && double.TryParse(lowParts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double l2)) lower2 = l2;
+
+                    if (uppParts.Length > 0 && double.TryParse(uppParts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double u1)) upper1 = u1;
+                    if (uppParts.Length > 1 && double.TryParse(uppParts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double u2)) upper2 = u2;
+
+                    if (tolParts.Length > 0) tol1 = ParseTolerancePercent(tolParts[0]);
+                    if (tolParts.Length > 1) tol2 = ParseTolerancePercent(tolParts[1]);
+
+                    expected1 ??= 0.70;
+                    tol1 ??= 20.0;
+                    lower1 ??= (expected1.Value * (1.0 - tol1.Value / 100.0));
+                    upper1 ??= (expected1.Value * (1.0 + tol1.Value / 100.0));
+
+                    expected2 ??= 6.00;
+                    tol2 ??= 20.0;
+                    lower2 ??= (expected2.Value * (1.0 - tol2.Value / 100.0));
+                    upper2 ??= expected2.Value;
+                }
+                else
+                {
+                    if (double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expVal))
+                        expected1 = expVal;
+                    if (double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lowVal))
+                        lower1 = lowVal;
+                    if (double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double uppVal))
+                        upper1 = uppVal;
+                    tol1 = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString());
+                }
+
+                double expected = expected1 ?? 0;
+                double lower = lower1 ?? 0;
+                double upper = upper1 ?? 0;
+
                 if (testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase))
                 {
                     if (expected < 0.0000000001 || expected > 0.001)
@@ -1990,10 +2169,14 @@ namespace AssemblyLineTester.Views.Pages
                     ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
                     TestTypeId = tt?.Id ?? 0,
                     TestType = tt,
-                    ExpectedValue = expected,
-                    LowerLimit = lower,
-                    UpperLimit = upper,
-                    Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
+                    ExpectedValue = expected1,
+                    LowerLimit = lower1,
+                    UpperLimit = upper1,
+                    Tolerance = tol1,
+                    ExpectedValue2 = expected2,
+                    LowerLimit2 = lower2,
+                    UpperLimit2 = upper2,
+                    Tolerance2 = tol2,
                     MeasurementUnit = GetValidMeasurementUnit(testTypeName, row.Cells["colUnit"].Value?.ToString()),
                     Color = row.Cells["colColor"].Value?.ToString() ?? "",
                     Gauge = row.Cells["colGauge"].Value?.ToString() ?? ""
@@ -2209,7 +2392,131 @@ namespace AssemblyLineTester.Views.Pages
             }
             return set.OrderBy(idx => idx).ToList();
         }
+        private async void btnLearnConnection_Click(object? sender, EventArgs e)
+        {
+            List<string> learnTestTypes;
+            List<LearnConnection> selectedConnections;
+            byte testLearnValue = 0;
 
+            // Show the Learn Connection Modal Options
+            using (var modal = new AssemblyLineTester.Views.Modals.LearnConnectionModalForm())
+            {
+                if (modal.ShowDialog(this) != DialogResult.OK)
+                {
+                    return; // User cancelled
+                }
+                selectedConnections = modal.SelectedTypes;
+
+                learnTestTypes = modal.SelectedTypes
+                    .Select(c => c.TestType?.TestTypeName ?? string.Empty)
+                    .Where(name => name.Length > 0)
+                    .ToList();
+                if (learnTestTypes.Count == 0)
+                {
+                    MessageBox.Show(this, "Select at least one connection type to learn.",
+                        "Nothing Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+            foreach (LearnConnection conn in selectedConnections)
+            {
+                byte val = (byte)(conn.TestType?.TestTypeValue ?? conn.TestTypeValue);
+                if (val == 0)
+                {
+                    string name = conn.DisplayName?.Trim().ToUpperInvariant() ?? "";
+                    if (name.Contains("RESIST")) val = 1;
+                    else if (name.Contains("CAPACIT")) val = 2;
+                    else if (name.Contains("DIODE")) val = 4;
+                    else if (name.Contains("TWIST")) val = 8;
+                }
+                testLearnValue += val;
+            }
+            //Debug.WriteLine("====================================================================");
+            //Debug.WriteLine(testLearnValue);
+
+            InstrumentService.StopMonitoring();
+            _testCts?.Cancel();
+            _testCts = new System.Threading.CancellationTokenSource();
+            var token = _testCts.Token;
+
+            string originalText = btnLearnConnection.Text;
+            btnLearnConnection.Text = "Loading.....";
+            btnLearnConnection.Enabled = false;
+            btnStartAll.Enabled = false;
+            btnStartSelected.Enabled = false;
+            btnAbort.Enabled = true;
+            try
+            {
+
+                var learnResult = testLearnValue == 0
+                    ? await Task.Run(() => _instrument.LearnConnection(), token)
+                    : await Task.Run(() => _instrument.LearnComplexConnection("", testLearnValue), token);
+
+                if (token.IsCancellationRequested) return;
+
+                if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
+                {
+                    string errorMessage = "No Error";
+
+                    // Fallback: If the API completely refuses to give the error, force a generic message
+                    if (string.IsNullOrWhiteSpace(errorMessage) || errorMessage == "No Error")
+                    {
+                        errorMessage = "Hardware Learn Aborted. Please check the actual error message from Instrument for further clarification.";
+                    }
+                    MessageBox.Show(this, $"Failed to execute learn operation on instrument.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);
+                if (token.IsCancellationRequested) return;
+
+                if (getTestResult == null || string.IsNullOrWhiteSpace(getTestResult.Result))
+                {
+
+                    MessageBox.Show(this, "Failed to retrieve learned test program text from instrument.", "Learn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                _customTestText = getTestResult.Result;
+                Debug.WriteLine(_customTestText);
+                //ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
+
+                MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                config = _configService.ConvertToTestConfig(getTestResult.Result);
+                //Debug.WriteLine(_customTestText);
+                //foreach (var net in config.Nets)
+                //{
+                //    Debug.WriteLine($"learn btn {net.FromAddress} to {net.ToAddress}");
+                //}
+                if (config != null)
+                {
+                    LoadConfigurationIntoGrid(config);
+                }
+                string checkResult = _configService.ConvertToProgramText(config);
+                txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                //txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                //txtComponentResistance.Text = config.MinComponentResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+
+
+            }
+            catch (OperationCanceledException)
+            {
+                // Task was canceled via btnAbort
+            }
+            finally
+            {
+
+                InstrumentService.StartMonitoring();
+                btnLearnConnection.Text = originalText;
+                btnLearnConnection.Enabled = true;
+                btnStartAll.Enabled = true;
+                btnStartSelected.Enabled = true;
+                btnAbort.Enabled = false;
+            }
+        }
+
+        /*
         private async void btnLearnConnection_Click(object? sender, EventArgs e)
         {
             List<string> learnTestTypes;
@@ -2299,7 +2606,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 _customTestText = getTestResult.Result;
-                //Debug.WriteLine(_customTestText);
+                Debug.WriteLine(_customTestText);
                 //ParseAndPopulateGridFromProgramText(_customTestText, learnTestTypes);
 
                 MessageBox.Show(this, "Connection learned and table updated successfully!", "Learn Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -2338,7 +2645,7 @@ namespace AssemblyLineTester.Views.Pages
                 btnAbort.Enabled = false;
             }
         }
-
+        */
         private async void btnStartAll_Click(object? sender, EventArgs e)
         {
             if (!CheckRunPermission()) return;
@@ -2633,6 +2940,22 @@ namespace AssemblyLineTester.Views.Pages
             }
             catch { }
 
+            try
+            {
+                double fwd = (double)res.ForwardVoltage;
+                double rev = (double)res.ReverseVoltage;
+                byte fvStatus = 0;
+                byte rvStatus = 0;
+                try { fvStatus = (byte)res.FVStatus; } catch { }
+                try { rvStatus = (byte)res.RVStatus; } catch { }
+
+                string fwdPrefix = (fvStatus == 2) ? "> " : ((fvStatus == 1) ? "< " : "");
+                string revPrefix = (rvStatus == 2) ? "> " : ((rvStatus == 1) ? "< " : "");
+
+                return $"{fwdPrefix}{fwd.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}, {revPrefix}{rev.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}";
+            }
+            catch { }
+
             try { return ((double)res.ForwardVoltage).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
             try { return ((double)res.MeasuredValue).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
             try { return ((double)res.Value).ToString("F2", System.Globalization.CultureInfo.InvariantCulture); } catch { }
@@ -2811,7 +3134,26 @@ namespace AssemblyLineTester.Views.Pages
                         }
 
                         // 2. Format measured value (F2 for >= 0.01, full precision for small values like capacitance) with > / < prefix
-                        string valStr = FormatMeasuredValue(measurement.Value1, measurement.Status1);
+                        string rowTestType = "";
+                        if (rowIndex >= 0 && rowIndex < gridConfig.Rows.Count)
+                        {
+                            rowTestType = gridConfig.Rows[rowIndex].Cells["colTestType"].Value?.ToString()?.Trim()?.ToUpperInvariant() ?? "";
+                        }
+                        bool isDiode = rowTestType.Equals("DIODE", StringComparison.OrdinalIgnoreCase) ||
+                                       rowTestType.Equals("SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase) ||
+                                       string.Equals(measurement.Type, "DIODE", StringComparison.OrdinalIgnoreCase);
+
+                        string valStr;
+                        if (isDiode)
+                        {
+                            string fwdStr = FormatMeasuredValue(measurement.Value1, measurement.Status1);
+                            string revStr = FormatMeasuredValue(measurement.Value2, measurement.Status2);
+                            valStr = $"{fwdStr}, {revStr}";
+                        }
+                        else
+                        {
+                            valStr = FormatMeasuredValue(measurement.Value1, measurement.Status1);
+                        }
 
                         // 3. Update the Measurement column (colUnit) in the grid
                         UpdateGridRowUnitValue(rowIndex, valStr);
@@ -2950,11 +3292,65 @@ namespace AssemblyLineTester.Views.Pages
                     return null;
                 }
 
-                double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expected);
-                double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lower);
-                double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double upper);
+                double? expected1 = null;
+                double? expected2 = null;
+                double? lower1 = null;
+                double? lower2 = null;
+                double? upper1 = null;
+                double? upper2 = null;
+                double? tol1 = null;
+                double? tol2 = null;
 
                 string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
+                if (testTypeName.Equals("DIODE", StringComparison.OrdinalIgnoreCase))
+                {
+                    string expText = row.Cells["colExpectedValue"].Value?.ToString() ?? "";
+                    string tolText = row.Cells["colTolerance"].Value?.ToString() ?? "";
+                    string lowText = row.Cells["colLowerLimit"].Value?.ToString() ?? "";
+                    string uppText = row.Cells["colUpperLimit"].Value?.ToString() ?? "";
+
+                    var expParts = expText.Split(',').Select(p => p.Trim().TrimStart('>', '<', ' ')).ToArray();
+                    var tolParts = tolText.Split(',').Select(p => p.Trim()).ToArray();
+                    var lowParts = lowText.Split(',').Select(p => p.Trim().TrimStart('>', '<', ' ')).ToArray();
+                    var uppParts = uppText.Split(',').Select(p => p.Trim().TrimStart('>', '<', ' ')).ToArray();
+
+                    if (expParts.Length > 0 && double.TryParse(expParts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double e1)) expected1 = e1;
+                    if (expParts.Length > 1 && double.TryParse(expParts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double e2)) expected2 = e2;
+
+                    if (lowParts.Length > 0 && double.TryParse(lowParts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double l1)) lower1 = l1;
+                    if (lowParts.Length > 1 && double.TryParse(lowParts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double l2)) lower2 = l2;
+
+                    if (uppParts.Length > 0 && double.TryParse(uppParts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double u1)) upper1 = u1;
+                    if (uppParts.Length > 1 && double.TryParse(uppParts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double u2)) upper2 = u2;
+
+                    if (tolParts.Length > 0) tol1 = ParseTolerancePercent(tolParts[0]);
+                    if (tolParts.Length > 1) tol2 = ParseTolerancePercent(tolParts[1]);
+
+                    expected1 ??= 0.70;
+                    tol1 ??= 20.0;
+                    lower1 ??= (expected1.Value * (1.0 - tol1.Value / 100.0));
+                    upper1 ??= (expected1.Value * (1.0 + tol1.Value / 100.0));
+
+                    expected2 ??= 6.00;
+                    tol2 ??= 20.0;
+                    lower2 ??= (expected2.Value * (1.0 - tol2.Value / 100.0));
+                    upper2 ??= expected2.Value;
+                }
+                else
+                {
+                    if (double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expVal))
+                        expected1 = expVal;
+                    if (double.TryParse(row.Cells["colLowerLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lowVal))
+                        lower1 = lowVal;
+                    if (double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double uppVal))
+                        upper1 = uppVal;
+                    tol1 = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString());
+                }
+
+                double expected = expected1 ?? 0;
+                double lower = lower1 ?? 0;
+                double upper = upper1 ?? 0;
+
                 if (testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase))
                 {
                     if (expected < 0.0000000001 || expected > 0.001)
@@ -3013,10 +3409,14 @@ namespace AssemblyLineTester.Views.Pages
                     ToLabel = row.Cells["colToLabel"].Value?.ToString() ?? "",
                     TestTypeId = tt?.Id ?? 0,
                     TestType = tt,
-                    ExpectedValue = expected,
-                    LowerLimit = lower,
-                    UpperLimit = upper,
-                    Tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString()),
+                    ExpectedValue = expected1,
+                    LowerLimit = lower1,
+                    UpperLimit = upper1,
+                    Tolerance = tol1,
+                    ExpectedValue2 = expected2,
+                    LowerLimit2 = lower2,
+                    UpperLimit2 = upper2,
+                    Tolerance2 = tol2,
                     MeasurementUnit = GetValidMeasurementUnit(testTypeName, row.Cells["colUnit"].Value?.ToString()),
                     Color = row.Cells["colColor"].Value?.ToString() ?? "",
                     Gauge = row.Cells["colGauge"].Value?.ToString() ?? ""
@@ -3116,6 +3516,32 @@ namespace AssemblyLineTester.Views.Pages
                             ? $"between 0.1 and {maxAllowed:F2} Ω (at least 1 Ω below the smallest resistor lower limit of {maxAllowed + 1.0:F2} Ω)."
                             : "between 0.1 and 500,000 Ω (500k).";
                         MessageBox.Show(this, $"Row {rowIndex + 1} ({testTypeName}): Upper limit must be {reason}", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
+                }
+                else if (upperType == "DIODE")
+                {
+                    string expText = row.Cells["colExpectedValue"].Value?.ToString() ?? "";
+                    string tolText = row.Cells["colTolerance"].Value?.ToString() ?? "";
+                    var expParts = expText.Split(',').Select(p => p.Trim().TrimStart('>', '<', ' ')).ToArray();
+                    var tolParts = tolText.Split(',').Select(p => p.Trim()).ToArray();
+
+                    double exp1 = 0, exp2 = 0;
+                    if (expParts.Length > 0) double.TryParse(expParts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out exp1);
+                    if (expParts.Length > 1) double.TryParse(expParts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out exp2);
+
+                    double? tol1 = tolParts.Length > 0 ? ParseTolerancePercent(tolParts[0]) : null;
+                    double? tol2 = tolParts.Length > 1 ? ParseTolerancePercent(tolParts[1]) : null;
+
+                    if (exp1 <= 0 || (expParts.Length > 1 && exp2 <= 0))
+                    {
+                        MessageBox.Show(this, $"Row {rowIndex + 1} ({testTypeName}): Expected Value must be greater than 0.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
+
+                    if (!tol1.HasValue || tol1.Value <= 0 || (tolParts.Length > 1 && (!tol2.HasValue || tol2.Value <= 0)))
+                    {
+                        MessageBox.Show(this, $"Row {rowIndex + 1} ({testTypeName}): Tolerance must be greater than 0.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return false;
                     }
                 }

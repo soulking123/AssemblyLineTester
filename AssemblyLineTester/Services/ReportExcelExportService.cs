@@ -218,12 +218,12 @@ namespace AssemblyLineTester.Services
                 for (int c = 0; c < columns.Count; c++)
                 {
                     var cell = ws2.Cell(rr, c + 2);
-                    // Limits stay numeric so the columns sort numerically; everything else is text.
+                    // Limits stay numeric so the columns sort numerically; dual values (diode) or non-numeric stay formatted text.
                     switch (columns[c])
                     {
-                        case "Lower Limit" when d.LowerLimit.HasValue: cell.Value = d.LowerLimit.Value; break;
-                        case "Upper Limit" when d.UpperLimit.HasValue: cell.Value = d.UpperLimit.Value; break;
-                        case "Expected Value" when d.ExpectedValue.HasValue: cell.Value = d.ExpectedValue.Value; break;
+                        case "Lower Limit" when d.LowerLimit.HasValue && !d.LowerLimit2.HasValue: cell.Value = d.LowerLimit.Value; break;
+                        case "Upper Limit" when d.UpperLimit.HasValue && !d.UpperLimit2.HasValue: cell.Value = d.UpperLimit.Value; break;
+                        case "Expected Value" when d.ExpectedValue.HasValue && !d.ExpectedValue2.HasValue: cell.Value = d.ExpectedValue.Value; break;
                         default: cell.Value = d.Column(columns[c]); break;
                     }
                 }
