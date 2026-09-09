@@ -172,7 +172,7 @@ namespace AssemblyLineTester.Services
             };
         }
 
-        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false, string? notes = null, string? errorSummary = null)
+        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false, string? notes = null, string? errorSummary = null, DateTime? endDateTime = null)
         {
             using var db = new AppDbContext();
 
@@ -180,6 +180,13 @@ namespace AssemblyLineTester.Services
             int passCount = rows != null ? rows.Count(r => r.Status == LiveTestStatus.Pass) : 0;
             int totalCount = rows != null ? rows.Count : 0;
             int failCount = totalCount - passCount;
+
+            DateTime startUtc = testDateTime == default ? AppTime.UtcNow : (testDateTime.Kind == DateTimeKind.Utc ? testDateTime : AppTime.ToUtc(testDateTime));
+            DateTime endUtc = endDateTime.HasValue ? (endDateTime.Value.Kind == DateTimeKind.Utc ? endDateTime.Value : AppTime.ToUtc(endDateTime.Value)) : AppTime.UtcNow;
+            if (endUtc < startUtc)
+            {
+                endUtc = startUtc;
+            }
 
             var report = new TestReport
             {
@@ -192,9 +199,8 @@ namespace AssemblyLineTester.Services
                 PartNumber = partNumber ?? "",
                 SerialNumber = string.IsNullOrEmpty(serialNumber) ? $"SN-{DateTime.Now:HHmmss}" : serialNumber,
                 Operator = string.IsNullOrEmpty(operatorName) ? "Unknown" : operatorName,
-                // Stored UTC; ReportNumber and the fallback serial stay local, they are labels.
-                TestDateTime = testDateTime == default ? AppTime.UtcNow : testDateTime,
-                EndDateTime = AppTime.UtcNow,
+                TestDateTime = startUtc,
+                EndDateTime = endUtc,
                 TotalNets = totalCount,
                 PassCount = passCount,
                 FailCount = failCount,
@@ -295,14 +301,15 @@ namespace AssemblyLineTester.Services
 
         public int SaveDraftLiveTestReport(
             string productModel, string productType, string area, string ecnNumber, string revision,
-            string partNumber, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, string? errorSummary = null)
+            string partNumber, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr,
+            string? errorSummary = null, DateTime? endDateTime = null)
         {
             string operatorName = SessionManager.CurrentUser?.FullName ?? "Unknown";
             return SaveLiveTestReport(
                 productModel, productType, area, ecnNumber, revision, partNumber,
                 serialNumber: $"PENDING-{testDateTime:HHmmss}",
                 operatorName: operatorName,
-                testDateTime, rows, overallResultStr, isDraft: true, errorSummary: errorSummary);
+                testDateTime, rows, overallResultStr, isDraft: true, errorSummary: errorSummary, endDateTime: endDateTime);
         }
 
         // Removes drafts older than the given age; confirmed reports are never touched.

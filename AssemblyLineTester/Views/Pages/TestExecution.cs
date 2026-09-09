@@ -415,6 +415,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 if (token.IsCancellationRequested) return;
 
+                StopTestTiming();
 
                 PopulateLiveDetailsGrid(_loadedRows);
                 try
@@ -431,10 +432,17 @@ namespace AssemblyLineTester.Views.Pages
 
                     string summaryText = string.Join("\r\n", listBoxTestSummary.Items.Cast<object>().Select(x => x.ToString()));
 
+                    DateTime startUtc = AppTime.ToUtc(_startTime);
+                    DateTime endUtc = AppTime.ToUtc(_endTime);
+                    if (endUtc <= startUtc && _testStopwatch.Elapsed.TotalSeconds > 0)
+                    {
+                        endUtc = startUtc.Add(_testStopwatch.Elapsed);
+                    }
+
                     var reportService = new TestReportService();
                     _currentReportId = reportService.SaveDraftLiveTestReport(
                         activeConfig.ProductModelName, "N/A", "N/A", "N/A", "1.0",
-                        "N/A", AppTime.UtcNow, _loadedRows, overallResult, errorSummary: summaryText);
+                        "N/A", startUtc, _loadedRows, overallResult, errorSummary: summaryText, endDateTime: endUtc);
 
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
@@ -448,9 +456,6 @@ namespace AssemblyLineTester.Views.Pages
                 if (token.IsCancellationRequested) return;
                 lblStatusRunning.Text = "Finished";
                 lblStatusRunning.ForeColor = Color.Green;
-                lblElapsedTimeVal.Text = "00:00:00";
-
-                OnTestFinishedSuccessfully();
 
 
             }
@@ -959,7 +964,7 @@ namespace AssemblyLineTester.Views.Pages
                 "N/A",
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
-                DateTime.Now,
+                _startTime != default ? _startTime : DateTime.Now,
                 _loadedRows ?? new List<LiveTestDetailRowDto>(),
                 _currentReportId,
                 txtNotes.Text,
