@@ -430,6 +430,7 @@ namespace AssemblyLineTester.Views.Pages
             txtDefResistorTol.Leave += (s, e) => ValidateAndClampTolerance(txtDefResistorTol, "Resistor", 2, 93);
             txtDefCapacitorTol.Leave += (s, e) => ValidateAndClampTolerance(txtDefCapacitorTol, "Capacitor", 10, 99);
             txtDefCapacitorVal.Leave += (s, e) => ValidateAndClampDouble(txtDefCapacitorVal, "Capacitor value", 0.0000000001, 0.001);
+            txtDefMaxWireRes.Leave += (s, e) => ValidateAndClampDouble(txtDefMaxWireRes, "Continuity resistance", 0.1, 100);
 
             PopulateTestTypes();
             PopulateTestResultColumns();
@@ -682,6 +683,7 @@ namespace AssemblyLineTester.Views.Pages
             ValidateAndClampTolerance(txtDefResistorTol, "Resistor", 2, 93);
             ValidateAndClampTolerance(txtDefCapacitorTol, "Capacitor", 10, 99);
             ValidateAndClampDouble(txtDefCapacitorVal, "Capacitor value", 0.0000000001, 0.001);
+            ValidateAndClampDouble(txtDefMaxWireRes, "Continuity resistance", 0.1, 100);
 
             var defaults = ReadDefaultsFromCard();
 
