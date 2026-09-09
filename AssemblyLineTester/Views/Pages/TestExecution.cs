@@ -193,6 +193,26 @@ namespace AssemblyLineTester.Views.Pages
                 string toPin = TestConfigService.FormatPin(net.ToAddress);
                 string testTypeName = net.TestType?.TestTypeName ?? "WIRE";
 
+                double? lower = net.LowerLimit;
+                double? upper = net.UpperLimit;
+                if (testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) || testTypeName.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase))
+                {
+                    if ((!lower.HasValue || lower.Value == 0) && (!upper.HasValue || upper.Value == 0) && net.ExpectedValue.HasValue && net.Tolerance.HasValue)
+                    {
+                        double tol = Math.Abs(net.Tolerance.Value);
+                        lower = net.ExpectedValue.Value * (1.0 - (tol / 100.0));
+                        upper = net.ExpectedValue.Value * (1.0 + (tol / 100.0));
+                    }
+                }
+
+                string expValStr = "-";
+                if (net.ExpectedValue.HasValue)
+                {
+                    expValStr = testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) || (net.ExpectedValue.Value > 0 && net.ExpectedValue.Value < 0.01)
+                        ? net.ExpectedValue.Value.ToString("0.##########", CultureInfo.InvariantCulture)
+                        : net.ExpectedValue.Value.ToString(CultureInfo.InvariantCulture);
+                }
+
                 var dto = new LiveTestDetailRowDto
                 {
                     StepNo = i + 1,
@@ -207,9 +227,9 @@ namespace AssemblyLineTester.Views.Pages
                     TestType = testTypeName,
                     Color = net.Color ?? "",
                     Gauge = net.Gauge ?? "",
-                    LowerLimit = net.LowerLimit,
-                    UpperLimit = net.UpperLimit,
-                    ExpectedValue = net.ExpectedValue.HasValue ? net.ExpectedValue.Value.ToString(CultureInfo.InvariantCulture) : "-",
+                    LowerLimit = lower,
+                    UpperLimit = upper,
+                    ExpectedValue = expValStr,
                     Tolerance = net.Tolerance,
                     Unit = net.MeasurementUnit ?? "",
                     MeasuredValue = null,
@@ -239,13 +259,32 @@ namespace AssemblyLineTester.Views.Pages
 
                 row.FromLabel = net.FromLabel;
                 row.ToLabel = net.ToLabel;
-                row.LowerLimit = net.LowerLimit;
                 row.Tolerance = net.Tolerance;
                 row.Unit = net.MeasurementUnit;
                 row.Color = net.Color;
                 row.Gauge = net.Gauge;
-                if (net.UpperLimit.HasValue) row.UpperLimit = net.UpperLimit;
-                if (net.ExpectedValue.HasValue) row.ExpectedValue = net.ExpectedValue.Value.ToString(CultureInfo.InvariantCulture);
+
+                double? lower = net.LowerLimit;
+                double? upper = net.UpperLimit;
+                string testTypeName = net.TestType?.TestTypeName ?? row.TestType;
+                if (testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) || testTypeName.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase))
+                {
+                    if ((!lower.HasValue || lower.Value == 0) && (!upper.HasValue || upper.Value == 0) && net.ExpectedValue.HasValue && net.Tolerance.HasValue)
+                    {
+                        double tol = Math.Abs(net.Tolerance.Value);
+                        lower = net.ExpectedValue.Value * (1.0 - (tol / 100.0));
+                        upper = net.ExpectedValue.Value * (1.0 + (tol / 100.0));
+                    }
+                }
+                row.LowerLimit = lower;
+                row.UpperLimit = upper;
+
+                if (net.ExpectedValue.HasValue)
+                {
+                    row.ExpectedValue = testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase) || (net.ExpectedValue.Value > 0 && net.ExpectedValue.Value < 0.01)
+                        ? net.ExpectedValue.Value.ToString("0.##########", CultureInfo.InvariantCulture)
+                        : net.ExpectedValue.Value.ToString(CultureInfo.InvariantCulture);
+                }
                 if (string.IsNullOrWhiteSpace(row.NetId)) row.NetId = net.NetId;
                 if (string.IsNullOrWhiteSpace(row.HarnessGroup)) row.HarnessGroup = net.HarnessGroup;
             }
@@ -363,6 +402,7 @@ namespace AssemblyLineTester.Views.Pages
                     foreach (var row in _loadedRows)
                     {
                         row.MeasuredValue = null;
+                        row.MeasurementPrefix = null;
                         row.Status = LiveTestStatus.Pending;
                     }
                     PopulateLiveDetailsGrid(_loadedRows);
@@ -496,9 +536,13 @@ namespace AssemblyLineTester.Views.Pages
                         // 1. Verification check between row pin addresses and measurement Point1/Point2
                         CheckMeasurementRowMatch(row, measurement, i);
 
-                        // 2. Extract measured value
+                        // 2. Extract measured value and prefix
                         double val = (double)measurement.Value1;
                         row.MeasuredValue = val;
+                        string status1 = measurement.Status1?.Trim() ?? "";
+                        if (status1.Contains(">")) row.MeasurementPrefix = "> ";
+                        else if (status1.Contains("<")) row.MeasurementPrefix = "< ";
+                        else row.MeasurementPrefix = null;
 
                         // 3. Evaluate Pass/Fail using software limits
                         string testType = (row.TestType ?? "WIRE").Trim().ToUpperInvariant();
@@ -595,7 +639,7 @@ namespace AssemblyLineTester.Views.Pages
                         }
                         else if (header == "Measured Value" || header == "Measurement" || header == "Measured")
                         {
-                            gridRow.Cells[colIdx].Value = FormatMeasuredValue(row.MeasuredValue);
+                            gridRow.Cells[colIdx].Value = FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix);
                         }
                         else if (header == "#")
                         {
@@ -778,6 +822,7 @@ namespace AssemblyLineTester.Views.Pages
                         foreach (var row in _loadedRows)
                         {
                             row.MeasuredValue = null;
+                            row.MeasurementPrefix = null;
                             row.Status = LiveTestStatus.Pending;
                         }
                         PopulateLiveDetailsGrid(_loadedRows);
@@ -933,24 +978,29 @@ namespace AssemblyLineTester.Views.Pages
             "Test Type" => row.TestType,
             "Color" => row.Color,
             "Gauge" => row.Gauge,
-            "Lower Limit" => FormatNumber(row.LowerLimit),
-            "Upper Limit" => FormatNumber(row.UpperLimit),
-            "Expected Value" => row.ExpectedValue,
+            "Lower Limit" => FormatLimitValue(row.LowerLimit, row.TestType),
+            "Upper Limit" => FormatLimitValue(row.UpperLimit, row.TestType),
+            "Expected Value" => FormatExpectedValue(row.ExpectedValue, row.TestType),
             // Wire is plain continuity, not a component with a rated value - tolerance means nothing here.
             "Tolerance" => string.Equals(row.TestType, "WIRE", StringComparison.OrdinalIgnoreCase)
                 ? "-"
                 : row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
-            "Measurement" => FormatMeasuredValue(row.MeasuredValue),
+            "Measurement" => FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix),
+            "Measured Value" => FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix),
+            "Measured" => FormatMeasuredValue(row.MeasuredValue, row.MeasurementPrefix),
             _ => ""
         };
 
-        private static string FormatMeasuredValue(double? val)
+        private static string FormatMeasuredValue(double? val, string? prefix = null)
         {
             if (!val.HasValue) return "-";
             double v = val.Value;
-            if (Math.Abs(v) < 1e-12) return "0.00";
-            if (Math.Abs(v) >= 0.01) return v.ToString("F2", CultureInfo.InvariantCulture);
-            return v.ToString("0.##########", CultureInfo.InvariantCulture);
+            string numStr;
+            if (Math.Abs(v) < 1e-12) numStr = "0.00";
+            else if (Math.Abs(v) >= 0.01) numStr = v.ToString("F2", CultureInfo.InvariantCulture);
+            else numStr = v.ToString("0.##########", CultureInfo.InvariantCulture);
+
+            return (prefix ?? "") + numStr;
         }
 
         private static bool CheckMeasurementRowMatch(LiveTestDetailRowDto row, CtaDotNet.Models.CtaJsonResult measurement, int index)
@@ -1003,6 +1053,30 @@ namespace AssemblyLineTester.Views.Pages
 
         private static string FormatNumber(double? value, string format = "0.##") =>
             value?.ToString(format, CultureInfo.InvariantCulture) ?? "";
+
+        private static string FormatLimitValue(double? val, string testType)
+        {
+            if (!val.HasValue) return "";
+            double v = val.Value;
+            if (string.Equals(testType, "CAPACITOR", StringComparison.OrdinalIgnoreCase) || (Math.Abs(v) > 0 && Math.Abs(v) < 0.01))
+            {
+                return v.ToString("0.##########", CultureInfo.InvariantCulture);
+            }
+            return v.ToString("0.##", CultureInfo.InvariantCulture);
+        }
+
+        private static string FormatExpectedValue(string? valStr, string testType)
+        {
+            if (string.IsNullOrWhiteSpace(valStr) || valStr == "-") return "-";
+            if (double.TryParse(valStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double dVal))
+            {
+                if (string.Equals(testType, "CAPACITOR", StringComparison.OrdinalIgnoreCase) || (dVal > 0 && dVal < 0.01))
+                {
+                    return dVal.ToString("0.##########", CultureInfo.InvariantCulture);
+                }
+            }
+            return valStr;
+        }
 
         private static void ApplyStatusStyle(DataGridViewRow row, LiveTestStatus status)
         {

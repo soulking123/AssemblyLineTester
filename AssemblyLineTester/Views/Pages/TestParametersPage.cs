@@ -55,6 +55,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             gridConfig.CellValueChanged += GridConfig_CellValueChanged;
             gridConfig.CellValidating += GridConfig_CellValidating;
+            gridConfig.CellEndEdit += GridConfig_CellEndEdit;
             gridConfig.RowsRemoved += GridConfig_RowsChanged;
             gridConfig.RowsAdded += GridConfig_RowsChanged;
             gridConfig.CurrentCellDirtyStateChanged += GridConfig_CurrentCellDirtyStateChanged;
@@ -671,6 +672,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!CheckEditPermission()) return;
 
+            defaultTest = TestSettingService.GetDefaults();
             int newIdx = gridConfig.Rows.Count + 1;
             string defaultType = ResolveDefaultTestType();
             string defaultUnit = UnitConversionHelper.GetBaseUnit(defaultType);
@@ -678,6 +680,11 @@ namespace AssemblyLineTester.Views.Pages
             double expectedValue = defaultType == "RESISTOR" ? defaultTest.DefaultResistorValue : defaultType == "CAPACITOR" ? defaultTest.DefaultCapacitorValue: 5;
             double lowerLimit = expectedValue - (tolerance * expectedValue / 100);
             double upperLimit = expectedValue + (tolerance * expectedValue / 100);
+
+            string lowerStr = defaultType == "CAPACITOR" ? FormatCapacitorLimit(lowerLimit) : lowerLimit.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string upperStr = defaultType == "CAPACITOR" ? FormatCapacitorLimit(upperLimit) : upperLimit.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string expStr = defaultType == "CAPACITOR" ? expectedValue.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture) : expectedValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string tolStr = defaultType == "CAPACITOR" ? $"±{tolerance}%" : (defaultType == "RESISTOR" ? $"±{tolerance}%" : tolerance.ToString());
 
             int nextFromAddr = GetNextAvailableAddress();
             int nextToAddr = nextFromAddr + defaultTestPoint/2;
@@ -692,10 +699,10 @@ namespace AssemblyLineTester.Views.Pages
                 nextToAddr.ToString(),                                      // To
                 "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // To-From Label
                 defaultType,                                                // Test Type
-                lowerLimit.ToString(),                                      // Lower Limit
-                upperLimit.ToString(),                                      // Upper Limit
-                expectedValue.ToString() ,       // Expected Value
-                tolerance.ToString(),                                       // Tolerance
+                lowerStr,                                                   // Lower Limit
+                upperStr,                                                   // Upper Limit
+                expStr,                                                     // Expected Value
+                tolStr,                                                     // Tolerance
                 defaultUnit);                                               // Measurement
 
             UpdateRowUnitDropdown(idx);
@@ -827,8 +834,13 @@ namespace AssemblyLineTester.Views.Pages
             foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
             {
                 string testTypeName = net.TestType?.TestTypeName ?? "";
-                string expected = net.ExpectedValue.HasValue ? FormatLimit(net.ExpectedValue.Value) : "-";
+                bool isCapacitor = testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase);
+                string expected = net.ExpectedValue.HasValue 
+                    ? (isCapacitor ? FormatCapacitorLimit(net.ExpectedValue.Value) : FormatLimit(net.ExpectedValue.Value)) 
+                    : "-";
                 string tolerance = net.Tolerance.HasValue ? $"±{net.Tolerance.Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture)}%" : "±0%";
+                string lowerStr = isCapacitor ? FormatCapacitorLimit(net.LowerLimit ?? 0) : FormatLimit(net.LowerLimit ?? 0);
+                string upperStr = isCapacitor ? FormatCapacitorLimit(net.UpperLimit ?? 0) : FormatLimit(net.UpperLimit ?? 0);
 
                 int idx = gridConfig.Rows.Add(
                     net.SequenceNo.ToString(),
@@ -841,8 +853,8 @@ namespace AssemblyLineTester.Views.Pages
                     net.ToAddress.ToString(),
                     net.ToLabel,
                     testTypeName,
-                    FormatLimit(net.LowerLimit ?? 0),
-                    FormatLimit(net.UpperLimit ?? 0),
+                    lowerStr,
+                    upperStr,
                     expected,
                     tolerance,
                     net.MeasurementUnit ?? "");
@@ -1005,8 +1017,26 @@ namespace AssemblyLineTester.Views.Pages
                     Debug.WriteLine(e.ColumnIndex);
                     UpdateRowUnitDropdown(e.RowIndex);
                     
-                    gridConfig.Rows[e.RowIndex].Cells["colExpectedValue"].Value = "0";
-                    gridConfig.Rows[e.RowIndex].Cells["colTolerance"].Value = "0";
+                    string selectedType = gridConfig.Rows[e.RowIndex].Cells["colTestType"].Value?.ToString() ?? "";
+                    if (selectedType.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase))
+                    {
+                        defaultTest = TestSettingService.GetDefaults();
+                        gridConfig.Rows[e.RowIndex].Cells["colExpectedValue"].Value = defaultTest.DefaultCapacitorValue.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture);
+                        gridConfig.Rows[e.RowIndex].Cells["colTolerance"].Value = $"±{defaultTest.DefaultCapacitorTolerance}%";
+                        gridConfig.Rows[e.RowIndex].Cells["colUnit"].Value = "F";
+                    }
+                    else if (selectedType.Equals("RESISTOR", StringComparison.OrdinalIgnoreCase))
+                    {
+                        defaultTest = TestSettingService.GetDefaults();
+                        gridConfig.Rows[e.RowIndex].Cells["colExpectedValue"].Value = defaultTest.DefaultResistorValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        gridConfig.Rows[e.RowIndex].Cells["colTolerance"].Value = $"±{defaultTest.DefaultResistorTolerance}%";
+                        gridConfig.Rows[e.RowIndex].Cells["colUnit"].Value = "Ω";
+                    }
+                    else
+                    {
+                        gridConfig.Rows[e.RowIndex].Cells["colExpectedValue"].Value = "0";
+                        gridConfig.Rows[e.RowIndex].Cells["colTolerance"].Value = "0";
+                    }
                     RecalculateRowLimits(gridConfig.Rows[e.RowIndex]);
                 }
                 else if ((colExpected != null && e.ColumnIndex == colExpected.Index) ||
@@ -1033,6 +1063,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
                 if (ContinuityLikeTypes.Contains(testType, StringComparer.OrdinalIgnoreCase)) return;
+                if (testType.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase)) return;
 
                 string input = e.FormattedValue?.ToString() ?? "";
                 if (!string.IsNullOrWhiteSpace(input) && input != "-")
@@ -1044,6 +1075,93 @@ namespace AssemblyLineTester.Views.Pages
                         {
                             MessageBox.Show("Tolerance must be limited between -100% and +100%.", "Tolerance Limit Exceeded", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
+                    }
+                }
+            }
+        }
+
+        private void GridConfig_CellEndEdit(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= gridConfig.Rows.Count) return;
+            var row = gridConfig.Rows[e.RowIndex];
+            if (row.IsNewRow) return;
+
+            string testType = row.Cells["colTestType"].Value?.ToString() ?? "";
+            if (!testType.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase)) return;
+
+            var colExpected = gridConfig.Columns["colExpectedValue"];
+            var colTolerance = gridConfig.Columns["colTolerance"];
+
+            if (colExpected != null && e.ColumnIndex == colExpected.Index)
+            {
+                string text = row.Cells["colExpectedValue"].Value?.ToString()?.Trim() ?? "";
+                bool parsed = double.TryParse(text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val);
+
+                const double minVal = 0.0000000001;
+                const double maxVal = 0.001;
+                string minStr = minVal.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture);
+                string maxStr = maxVal.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture);
+
+                if (!parsed || val < minVal)
+                {
+                    row.Cells["colExpectedValue"].Value = minStr;
+                    RecalculateRowLimits(row);
+                    MessageBox.Show(
+                        $"Row {e.RowIndex + 1}: Capacitor value must be between {minStr} and {maxStr}.\r\n\r\nAutomatically adjusted to {minStr}.",
+                        "Test Parameters", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else if (val > maxVal)
+                {
+                    row.Cells["colExpectedValue"].Value = maxStr;
+                    RecalculateRowLimits(row);
+                    MessageBox.Show(
+                        $"Row {e.RowIndex + 1}: Capacitor value must be between {minStr} and {maxStr}.\r\n\r\nAutomatically adjusted to {maxStr}.",
+                        "Test Parameters", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    string formatted = val.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture);
+                    if (text != formatted)
+                    {
+                        row.Cells["colExpectedValue"].Value = formatted;
+                        RecalculateRowLimits(row);
+                    }
+                }
+            }
+            else if (colTolerance != null && e.ColumnIndex == colTolerance.Index)
+            {
+                string text = row.Cells["colTolerance"].Value?.ToString()?.Trim() ?? "";
+                string clean = text.Replace("±", "").Replace("+", "").Replace("%", "").Replace("-", "").Trim();
+                bool parsed = double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val) ||
+                              double.TryParse(clean, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out val);
+
+                const int minTol = 10;
+                const int maxTol = 99;
+
+                if (!parsed || val < minTol)
+                {
+                    row.Cells["colTolerance"].Value = $"±{minTol}%";
+                    RecalculateRowLimits(row);
+                    MessageBox.Show(
+                        $"Row {e.RowIndex + 1}: Capacitor tolerance must be between {minTol}% and {maxTol}%.\r\n\r\nAutomatically adjusted to ±{minTol}%.",
+                        "Test Parameters", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else if (val > maxTol)
+                {
+                    row.Cells["colTolerance"].Value = $"±{maxTol}%";
+                    RecalculateRowLimits(row);
+                    MessageBox.Show(
+                        $"Row {e.RowIndex + 1}: Capacitor tolerance must be between {minTol}% and {maxTol}%.\r\n\r\nAutomatically adjusted to ±{maxTol}%.",
+                        "Test Parameters", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    int intVal = (int)Math.Round(val);
+                    string formatted = $"±{intVal}%";
+                    if (text != formatted)
+                    {
+                        row.Cells["colTolerance"].Value = formatted;
+                        RecalculateRowLimits(row);
                     }
                 }
             }
@@ -1223,8 +1341,16 @@ namespace AssemblyLineTester.Views.Pages
                         (lower, upper) = (upper, lower);
                     }
 
-                    row.Cells["colLowerLimit"].Value = FormatLimit(lower);
-                    row.Cells["colUpperLimit"].Value = FormatLimit(upper);
+                    if (testType.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase))
+                    {
+                        row.Cells["colLowerLimit"].Value = FormatCapacitorLimit(lower);
+                        row.Cells["colUpperLimit"].Value = FormatCapacitorLimit(upper);
+                    }
+                    else
+                    {
+                        row.Cells["colLowerLimit"].Value = FormatLimit(lower);
+                        row.Cells["colUpperLimit"].Value = FormatLimit(upper);
+                    }
                 }
                 else
                 {
@@ -1269,6 +1395,11 @@ namespace AssemblyLineTester.Views.Pages
         private static string FormatLimit(double val)
         {
             return val.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        private static string FormatCapacitorLimit(double val)
+        {
+            return val.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void GridConfig_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -1341,6 +1472,20 @@ namespace AssemblyLineTester.Views.Pages
                 double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double upper);
 
                 string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
+                if (testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (expected < 0.0000000001 || expected > 0.001)
+                    {
+                        MessageBox.Show($"Row {i + 1}: Capacitor value must be between 0.0000000001 and 0.001.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return null;
+                    }
+                    double? tolVal = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString());
+                    if (!tolVal.HasValue || Math.Abs(tolVal.Value) < 10 || Math.Abs(tolVal.Value) > 99)
+                    {
+                        MessageBox.Show($"Row {i + 1}: Capacitor tolerance must be between 10% and 99%.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return null;
+                    }
+                }
                 var tt = _configService.GetTestTypeByName(testTypeName);
                 nets.Add(new TestConfigNet
                 {
@@ -2168,8 +2313,8 @@ namespace AssemblyLineTester.Views.Pages
                             CheckMeasurementRowMatch(gridConfig.Rows[rowIndex], measurement, k);
                         }
 
-                        // 2. Format measured value (F2 for >= 0.01, full precision for small values like capacitance)
-                        string valStr = FormatMeasuredValue(measurement.Value1);
+                        // 2. Format measured value (F2 for >= 0.01, full precision for small values like capacitance) with > / < prefix
+                        string valStr = FormatMeasuredValue(measurement.Value1, measurement.Status1);
 
                         // 3. Update the Measurement column (colUnit) in the grid
                         UpdateGridRowUnitValue(rowIndex, valStr);
@@ -2188,22 +2333,35 @@ namespace AssemblyLineTester.Views.Pages
 
         /// <summary>
         /// Formats measurement value:
+        /// - Prepends "> " or "< " if Status1 contains '>' or '<'
         /// - Normal values (>= 0.01): rounded to 2 decimals (e.g. 1.233945 -> "1.23")
         /// - Small values (< 0.01, e.g. Farads 0.000124): prints full decimal value
         /// </summary>
-        private static string FormatMeasuredValue(float val)
+        private static string FormatMeasuredValue(float val, string? status1 = null)
         {
+            string prefix = "";
+            if (!string.IsNullOrWhiteSpace(status1))
+            {
+                string trimmed = status1.Trim();
+                if (trimmed.Contains(">")) prefix = "> ";
+                else if (trimmed.Contains("<")) prefix = "< ";
+            }
+
+            string numStr;
             if (Math.Abs(val) < 1e-12f)
             {
-                return "0.00";
+                numStr = "0.00";
             }
-
-            if (Math.Abs(val) >= 0.01f)
+            else if (Math.Abs(val) >= 0.01f)
             {
-                return val.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                numStr = val.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                numStr = val.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture);
             }
 
-            return val.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture);
+            return prefix + numStr;
         }
 
         /// <summary>
@@ -2300,6 +2458,20 @@ namespace AssemblyLineTester.Views.Pages
                 double.TryParse(row.Cells["colUpperLimit"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double upper);
 
                 string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
+                if (testTypeName.Equals("CAPACITOR", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (expected < 0.0000000001 || expected > 0.001)
+                    {
+                        MessageBox.Show($"Row {rowIndex + 1}: Capacitor value must be between 0.0000000001 and 0.001.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return null;
+                    }
+                    double? tolVal = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString());
+                    if (!tolVal.HasValue || Math.Abs(tolVal.Value) < 10 || Math.Abs(tolVal.Value) > 99)
+                    {
+                        MessageBox.Show($"Row {rowIndex + 1}: Capacitor tolerance must be between 10% and 99%.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return null;
+                    }
+                }
                 var tt = _configService.GetTestTypeByName(testTypeName);
                 nets.Add(new TestConfigNet
                 {
@@ -2358,7 +2530,24 @@ namespace AssemblyLineTester.Views.Pages
                 string testTypeName = row.Cells["colTestType"].Value?.ToString() ?? "";
                 string upperType = testTypeName.Trim().ToUpperInvariant();
 
-                if (!string.IsNullOrWhiteSpace(upperType) && upperType != "WIRE" && upperType != "CONTINUITY")
+                if (upperType == "CAPACITOR")
+                {
+                    double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expected);
+                    double? tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString());
+
+                    if (expected < 0.0000000001 || expected > 0.001)
+                    {
+                        MessageBox.Show(this, $"Row {rowIndex + 1} ({testTypeName}): Capacitor value must be between 0.0000000001 and 0.001.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
+
+                    if (!tolerance.HasValue || Math.Abs(tolerance.Value) < 10 || Math.Abs(tolerance.Value) > 99)
+                    {
+                        MessageBox.Show(this, $"Row {rowIndex + 1} ({testTypeName}): Capacitor tolerance must be between 10% and 99%.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(upperType) && upperType != "WIRE" && upperType != "CONTINUITY")
                 {
                     double.TryParse(row.Cells["colExpectedValue"].Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double expected);
                     double? tolerance = ParseTolerancePercent(row.Cells["colTolerance"].Value?.ToString());

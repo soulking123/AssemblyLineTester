@@ -1,4 +1,4 @@
-﻿namespace AssemblyLineTester.Models.Dto
+namespace AssemblyLineTester.Models.Dto
 {
     public enum LiveTestStatus
     {
@@ -19,6 +19,7 @@
         public string TestType { get; set; } = string.Empty;
         public string ExpectedValue { get; set; } = string.Empty;
         public double? MeasuredValue { get; set; }
+        public string? MeasurementPrefix { get; set; }
         public LiveTestStatus Status { get; set; } = LiveTestStatus.Pending;
 
         // The threshold this row's verdict was decided against, so the report can state it.
