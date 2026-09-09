@@ -1686,6 +1686,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<DateTime?>("EndDateTime")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ErrorSummary")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("FailCount")
                         .HasColumnType("INTEGER");
 

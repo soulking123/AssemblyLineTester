@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using ClosedXML.Excel;
 using System.Linq;
@@ -110,37 +110,84 @@ namespace AssemblyLineTester.Services
             var wsSummary = wb.Worksheets.Add("Test Summary");
             int sr = 1;
 
-            wsSummary.Cell(sr, 1).Value = $"TEST RESULT = {detail.OverallResult}";
-            wsSummary.Cell(sr, 1).Style.Font.Bold = true;
-            wsSummary.Cell(sr, 1).Style.Font.FontColor =
-                detail.OverallResult?.ToUpperInvariant() == "PASS" ? XLColor.DarkGreen : XLColor.DarkRed;
-            sr += 2;
-
-            foreach (var s in detail.TypeSummaries)
+            if (!string.IsNullOrWhiteSpace(detail.ErrorSummary))
             {
-                bool allPassed = s.Fail == 0;
-                wsSummary.Cell(sr, 1).Value = $"[{(allPassed ? "OK" : "X")}]  {s.TestType} ({s.Pass}/{s.Total})";
-                if (!allPassed) wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
-                sr++;
-            }
+                var lines = detail.ErrorSummary.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    string trimmed = line.Trim();
+                    if (string.IsNullOrEmpty(trimmed))
+                    {
+                        sr++;
+                        continue;
+                    }
 
-            sr += 1;
-            wsSummary.Cell(sr, 1).Value = "TEST ERRORS";
-            wsSummary.Cell(sr, 1).Style.Font.Bold = true;
-            sr += 2;
+                    if (trimmed.StartsWith("TEST RESULT", StringComparison.OrdinalIgnoreCase))
+                    {
+                        bool isPass = trimmed.EndsWith("PASS", StringComparison.OrdinalIgnoreCase);
+                        wsSummary.Cell(sr, 1).Value = trimmed;
+                        wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+                        wsSummary.Cell(sr, 1).Style.Font.FontColor = isPass ? XLColor.DarkGreen : XLColor.DarkRed;
+                    }
+                    else if (trimmed.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) ||
+                             trimmed.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase))
+                    {
+                        wsSummary.Cell(sr, 1).Value = trimmed;
+                        wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+                    }
+                    else if (trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        wsSummary.Cell(sr, 1).Value = trimmed;
+                        wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                    }
+                    else
+                    {
+                        string displayLine = trimmed
+                            .Replace("✔", "[OK] ")
+                            .Replace("✖", "[X] ");
 
-            var failedRows = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
-            if (failedRows.Count == 0)
-            {
-                wsSummary.Cell(sr, 1).Value = "No errors were recorded for this test run.";
+                        bool isFail = displayLine.Contains("[X]") || trimmed.Contains("FAIL", StringComparison.OrdinalIgnoreCase);
+                        wsSummary.Cell(sr, 1).Value = displayLine;
+                        if (isFail) wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                    }
+
+                    sr++;
+                }
             }
             else
             {
-                foreach (var d in failedRows)
+                wsSummary.Cell(sr, 1).Value = $"TEST RESULT = {detail.OverallResult}";
+                wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+                wsSummary.Cell(sr, 1).Style.Font.FontColor =
+                    detail.OverallResult?.ToUpperInvariant() == "PASS" ? XLColor.DarkGreen : XLColor.DarkRed;
+                sr += 2;
+
+                foreach (var s in detail.TypeSummaries)
                 {
-                    wsSummary.Cell(sr, 1).Value = $"{d.NetId} ({d.TestType}) - {d.ErrorDetail}";
-                    wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                    bool allPassed = s.Fail == 0;
+                    wsSummary.Cell(sr, 1).Value = $"[{(allPassed ? "OK" : "X")}]  {s.TestType} ({s.Pass}/{s.Total})";
+                    if (!allPassed) wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
                     sr++;
+                }
+
+                sr += 1;
+                wsSummary.Cell(sr, 1).Value = "TEST ERRORS";
+                wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+                sr += 2;
+
+                var failedRows = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
+                if (failedRows.Count == 0)
+                {
+                    wsSummary.Cell(sr, 1).Value = "No errors were recorded for this test run.";
+                }
+                else
+                {
+                    foreach (var d in failedRows)
+                    {
+                        wsSummary.Cell(sr, 1).Value = $"{d.NetId} ({d.TestType}) - {d.ErrorDetail}";
+                        wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                        sr++;
+                    }
                 }
             }
 

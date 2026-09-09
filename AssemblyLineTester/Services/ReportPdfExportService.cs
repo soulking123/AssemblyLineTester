@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -81,6 +81,55 @@ namespace AssemblyLineTester.Services
 
             double lineH = 18;
             double width = page.Width - Margin * 2;
+            double bottom = page.Height - Margin - FooterReserve;
+
+            if (!string.IsNullOrWhiteSpace(detail.ErrorSummary))
+            {
+                var lines = detail.ErrorSummary.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (y + lineH > bottom) break;
+
+                    string trimmed = line.Trim();
+                    if (string.IsNullOrEmpty(trimmed))
+                    {
+                        y += lineH * 0.8;
+                        continue;
+                    }
+
+                    if (trimmed.StartsWith("TEST RESULT", StringComparison.OrdinalIgnoreCase))
+                    {
+                        bool isPass = trimmed.EndsWith("PASS", StringComparison.OrdinalIgnoreCase);
+                        gfx.DrawString(trimmed, fontBold, isPass ? XBrushes.DarkGreen : XBrushes.DarkRed,
+                            new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                    }
+                    else if (trimmed.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) ||
+                             trimmed.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase))
+                    {
+                        gfx.DrawString(trimmed, fontBold, XBrushes.Black,
+                            new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                    }
+                    else if (trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        gfx.DrawString(trimmed, font, XBrushes.DarkRed,
+                            new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                    }
+                    else
+                    {
+                        // Map Unicode tick/cross to [OK] / [X] so PdfSharp Arial font renders cleanly
+                        string displayLine = trimmed
+                            .Replace("✔", "[OK] ")
+                            .Replace("✖", "[X] ");
+
+                        bool isFail = displayLine.Contains("[X]") || trimmed.Contains("FAIL", StringComparison.OrdinalIgnoreCase);
+                        gfx.DrawString(displayLine, font, isFail ? XBrushes.DarkRed : XBrushes.Black,
+                            new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                    }
+
+                    y += lineH;
+                }
+                return;
+            }
 
             gfx.DrawString($"TEST RESULT = {detail.OverallResult}", fontBold,
                 detail.OverallResult?.ToUpperInvariant() == "PASS" ? XBrushes.DarkGreen : XBrushes.DarkRed,
@@ -110,7 +159,6 @@ namespace AssemblyLineTester.Services
                 return;
             }
 
-            double bottom = page.Height - Margin - FooterReserve;
             foreach (var d in failed)
             {
                 if (y + lineH > bottom)

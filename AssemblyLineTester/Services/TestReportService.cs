@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -163,6 +163,7 @@ namespace AssemblyLineTester.Services
                 TestTime = duration.HasValue ? duration.Value.ToString(@"hh\:mm\:ss") : "-",
                 OverallResult = report.OverallResult?.ToString().ToUpperInvariant() ?? "-",
                 Notes = report.Notes,
+                ErrorSummary = report.ErrorSummary,
                 TotalNets = report.TotalNets,
                 PassCount = report.PassCount,
                 FailCount = report.FailCount,
@@ -171,7 +172,7 @@ namespace AssemblyLineTester.Services
             };
         }
 
-        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false, string? notes = null)
+        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false, string? notes = null, string? errorSummary = null)
         {
             using var db = new AppDbContext();
 
@@ -200,6 +201,7 @@ namespace AssemblyLineTester.Services
                 Status = TestStatus.Completed,
                 OverallResult = isPass ? TestResult.Pass : TestResult.Fail,
                 Notes = notes?.Trim() ?? "",
+                ErrorSummary = errorSummary?.Trim(),
                 IsDraft = isDraft,
                 CreatedAt = DateTime.UtcNow
             };
@@ -293,14 +295,14 @@ namespace AssemblyLineTester.Services
 
         public int SaveDraftLiveTestReport(
             string productModel, string productType, string area, string ecnNumber, string revision,
-            string partNumber, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr)
+            string partNumber, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, string? errorSummary = null)
         {
             string operatorName = SessionManager.CurrentUser?.FullName ?? "Unknown";
             return SaveLiveTestReport(
                 productModel, productType, area, ecnNumber, revision, partNumber,
                 serialNumber: $"PENDING-{testDateTime:HHmmss}",
                 operatorName: operatorName,
-                testDateTime, rows, overallResultStr, isDraft: true);
+                testDateTime, rows, overallResultStr, isDraft: true, errorSummary: errorSummary);
         }
 
         // Removes drafts older than the given age; confirmed reports are never touched.
@@ -326,9 +328,9 @@ namespace AssemblyLineTester.Services
         }
 
         // Last step of running a test, so deliberately not permission-gated.
-        public void ConfirmDraft(int reportId, string serialNumber, string? notes = null)
+        public void ConfirmDraft(int reportId, string serialNumber, string? notes = null, string? errorSummary = null)
         {
-            var report = SetSerialNumber(reportId, serialNumber, markConfirmed: true, notes);
+            var report = SetSerialNumber(reportId, serialNumber, markConfirmed: true, notes, errorSummary);
 
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Info, "Test Report", "Confirm Report",
@@ -348,7 +350,7 @@ namespace AssemblyLineTester.Services
                 $"Report {report.ReportNumber} serial amended to {report.SerialNumber}.");
         }
 
-        private static TestReport SetSerialNumber(int reportId, string serialNumber, bool markConfirmed, string? notes = null)
+        private static TestReport SetSerialNumber(int reportId, string serialNumber, bool markConfirmed, string? notes = null, string? errorSummary = null)
         {
             using var db = new AppDbContext();
             var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId)
@@ -356,6 +358,7 @@ namespace AssemblyLineTester.Services
 
             if (!string.IsNullOrWhiteSpace(serialNumber)) report.SerialNumber = serialNumber.Trim();
             if (notes is not null) report.Notes = notes.Trim();
+            if (!string.IsNullOrWhiteSpace(errorSummary)) report.ErrorSummary = errorSummary.Trim();
             if (markConfirmed) report.IsDraft = false;
 
             db.SaveChanges();

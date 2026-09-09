@@ -427,12 +427,14 @@ namespace AssemblyLineTester.Views.Pages
                     }
                     string overallResult = allPass ? "PASS" : "FAIL";
 
+                    ShowSummary(_loadedRows, overallResult);
+
+                    string summaryText = string.Join("\r\n", listBoxTestSummary.Items.Cast<object>().Select(x => x.ToString()));
+
                     var reportService = new TestReportService();
                     _currentReportId = reportService.SaveDraftLiveTestReport(
                         activeConfig.ProductModelName, "N/A", "N/A", "N/A", "1.0",
-                        "N/A", AppTime.UtcNow, _loadedRows, overallResult);
-
-                    ShowSummary(_loadedRows, overallResult);
+                        "N/A", AppTime.UtcNow, _loadedRows, overallResult, errorSummary: summaryText);
 
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
@@ -938,8 +940,11 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
+            bool hasFailInSummary = listBoxTestSummary.Items.Cast<object>().Any(x => x.ToString()?.Contains("TEST RESULT = FAIL", StringComparison.OrdinalIgnoreCase) == true || x.ToString()?.Contains("SHORT", StringComparison.OrdinalIgnoreCase) == true);
+            bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass) && !hasFailInSummary;
             string overallResult = allPass ? "PASS" : "FAIL";
+
+            string summaryText = string.Join("\r\n", listBoxTestSummary.Items.Cast<object>().Select(x => x.ToString()));
 
             TestConfiguration? activeConfig = _configService.GetActiveConfig();
             string productModel = activeConfig?.ProductModelName ?? "N/A";
@@ -957,7 +962,8 @@ namespace AssemblyLineTester.Views.Pages
                 DateTime.Now,
                 _loadedRows ?? new List<LiveTestDetailRowDto>(),
                 _currentReportId,
-                txtNotes.Text
+                txtNotes.Text,
+                summaryText
             );
 
             if (modal.ShowDialog(this) == DialogResult.OK)

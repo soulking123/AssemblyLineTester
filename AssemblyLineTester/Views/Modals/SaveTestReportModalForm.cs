@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -24,6 +24,7 @@ namespace AssemblyLineTester.Views.Modals
         private readonly DateTime _testTime;
         private readonly int? _existingReportId;
         private readonly string _notes;
+        private readonly string? _errorSummary;
 
         public SaveTestReportModalForm(
             string productModel,
@@ -38,7 +39,8 @@ namespace AssemblyLineTester.Views.Modals
             DateTime testTime,
             List<LiveTestDetailRowDto> rows,
             int? existingReportId = null,
-            string? notes = null)
+            string? notes = null,
+            string? errorSummary = null)
         {
             _productModel = productModel;
             _ecnNumber = ecnNumber;
@@ -51,6 +53,7 @@ namespace AssemblyLineTester.Views.Modals
             _rows = rows;
             _existingReportId = existingReportId;
             _notes = notes?.Trim() ?? string.Empty;
+            _errorSummary = errorSummary?.Trim();
 
             InitializeComponent();
 
@@ -121,13 +124,13 @@ namespace AssemblyLineTester.Views.Modals
             {
                 if (_existingReportId.HasValue)
                 {
-                    _reportService.ConfirmDraft(_existingReportId.Value, finalSn, _notes);
+                    _reportService.ConfirmDraft(_existingReportId.Value, finalSn, _notes, _errorSummary);
                 }
                 else
                 {
                     _reportService.SaveLiveTestReport(
                         _productModel, _productType, _area, _ecnNumber, _revision, _partNumber,
-                        finalSn, finalOp, _testTime, _rows, _overallResult, notes: _notes);
+                        finalSn, finalOp, _testTime, _rows, _overallResult, notes: _notes, errorSummary: _errorSummary);
                 }
 
                 this.DialogResult = DialogResult.OK;
