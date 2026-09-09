@@ -429,6 +429,7 @@ namespace AssemblyLineTester.Views.Pages
 
             txtDefResistorTol.Leave += (s, e) => ValidateAndClampTolerance(txtDefResistorTol, "Resistor", 2, 93);
             txtDefCapacitorTol.Leave += (s, e) => ValidateAndClampTolerance(txtDefCapacitorTol, "Capacitor", 10, 99);
+            txtDefCapacitorVal.Leave += (s, e) => ValidateAndClampDouble(txtDefCapacitorVal, "Capacitor value", 0.0000000001, 0.001);
 
             PopulateTestTypes();
             PopulateTestResultColumns();
@@ -680,6 +681,7 @@ namespace AssemblyLineTester.Views.Pages
 
             ValidateAndClampTolerance(txtDefResistorTol, "Resistor", 2, 93);
             ValidateAndClampTolerance(txtDefCapacitorTol, "Capacitor", 10, 99);
+            ValidateAndClampDouble(txtDefCapacitorVal, "Capacitor value", 0.0000000001, 0.001);
 
             var defaults = ReadDefaultsFromCard();
 
@@ -798,6 +800,37 @@ namespace AssemblyLineTester.Views.Pages
             return true;
         }
 
+        private bool ValidateAndClampDouble(TextBox textBox, string fieldName, double min, double max)
+        {
+            if (textBox.ReadOnly) return true;
+            if (_btnCancelTicks != null && (_btnCancelTicks.Focused || this.FindForm()?.ActiveControl == _btnCancelTicks)) return true;
+
+            string text = textBox.Text.Trim();
+            bool parsed = double.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out double value);
+
+            string minStr = min.ToString("0.##########", CultureInfo.InvariantCulture);
+            string maxStr = max.ToString("0.##########", CultureInfo.InvariantCulture);
+
+            if (!parsed || value < min)
+            {
+                textBox.Text = minStr;
+                MessageBox.Show(
+                    $"{fieldName} must be between {minStr} and {maxStr}.\r\n\r\nAutomatically adjusted to {minStr}.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            else if (value > max)
+            {
+                textBox.Text = maxStr;
+                MessageBox.Show(
+                    $"{fieldName} must be between {minStr} and {maxStr}.\r\n\r\nAutomatically adjusted to {maxStr}.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
         private void PopulateTestTypes()
         {
             flpTestTypeAvail.SuspendLayout();
@@ -849,7 +882,7 @@ namespace AssemblyLineTester.Views.Pages
             txtDefWireInsRes.Text = defaults.DefaultMinInulationResistance.ToString(CultureInfo.InvariantCulture);
             txtDefResistorVal.Text = defaults.DefaultResistorValue.ToString(CultureInfo.InvariantCulture);
             txtDefResistorTol.Text = defaults.DefaultResistorTolerance.ToString(CultureInfo.InvariantCulture);
-            txtDefCapacitorVal.Text = defaults.DefaultCapacitorValue.ToString(CultureInfo.InvariantCulture);
+            txtDefCapacitorVal.Text = defaults.DefaultCapacitorValue.ToString("0.##########", CultureInfo.InvariantCulture);
             txtDefCapacitorTol.Text = defaults.DefaultCapacitorTolerance.ToString(CultureInfo.InvariantCulture);
         }
 
