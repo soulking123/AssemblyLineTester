@@ -999,7 +999,7 @@ namespace AssemblyLineTester.Views.Pages
             lblDefCapacitorVal.Name = "lblDefCapacitorVal";
             lblDefCapacitorVal.Size = new Size(117, 15);
             lblDefCapacitorVal.TabIndex = 12;
-            lblDefCapacitorVal.Text = "Capacitor Value (μF)";
+            lblDefCapacitorVal.Text = "Capacitor Value (F)";
             // 
             // txtDefCapacitorVal
             // 

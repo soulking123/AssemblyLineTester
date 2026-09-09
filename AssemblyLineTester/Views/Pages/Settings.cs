@@ -422,10 +422,13 @@ namespace AssemblyLineTester.Views.Pages
             txtTotalTestPoint.KeyPress += NumericTextBox_KeyPress;
             txtDefResistorVal.KeyPress += NumericTextBox_KeyPress;
             txtDefMaxWireRes.KeyPress += NumericTextBox_KeyPress;
-            txtDefResistorTol.KeyPress += NumericTextBox_KeyPress;
+            txtDefResistorTol.KeyPress += IntegerTextBox_KeyPress;
             txtDefWireInsRes.KeyPress += NumericTextBox_KeyPress;
             txtDefCapacitorVal.KeyPress += NumericTextBox_KeyPress;
-            txtDefCapacitorTol.KeyPress += NumericTextBox_KeyPress;
+            txtDefCapacitorTol.KeyPress += IntegerTextBox_KeyPress;
+
+            txtDefResistorTol.Leave += (s, e) => ValidateAndClampTolerance(txtDefResistorTol, "Resistor", 2, 93);
+            txtDefCapacitorTol.Leave += (s, e) => ValidateAndClampTolerance(txtDefCapacitorTol, "Capacitor", 10, 99);
 
             PopulateTestTypes();
             PopulateTestResultColumns();
@@ -675,6 +678,9 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!HasSettingsEditPermission()) return;
 
+            ValidateAndClampTolerance(txtDefResistorTol, "Resistor", 2, 93);
+            ValidateAndClampTolerance(txtDefCapacitorTol, "Capacitor", 10, 99);
+
             var defaults = ReadDefaultsFromCard();
 
             // Checked before anything is written: the tick lists save first, so rejecting the
@@ -753,6 +759,43 @@ namespace AssemblyLineTester.Views.Pages
             {
                 e.Handled = true;
             }
+        }
+
+        private void IntegerTextBox_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            // Allow control characters (backspace, etc.) and digits only.
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private bool ValidateAndClampTolerance(TextBox textBox, string componentName, int min, int max)
+        {
+            if (textBox.ReadOnly) return true;
+            if (_btnCancelTicks != null && (_btnCancelTicks.Focused || this.FindForm()?.ActiveControl == _btnCancelTicks)) return true;
+
+            string text = textBox.Text.Trim();
+            bool parsed = int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value);
+
+            if (!parsed || value < min)
+            {
+                textBox.Text = min.ToString(CultureInfo.InvariantCulture);
+                MessageBox.Show(
+                    $"{componentName} tolerance must be between {min}% and {max}%.\r\n\r\nAutomatically adjusted to {min}%.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            else if (value > max)
+            {
+                textBox.Text = max.ToString(CultureInfo.InvariantCulture);
+                MessageBox.Show(
+                    $"{componentName} tolerance must be between {min}% and {max}%.\r\n\r\nAutomatically adjusted to {max}%.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
         }
 
         private void PopulateTestTypes()
