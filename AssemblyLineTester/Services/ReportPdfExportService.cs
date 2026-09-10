@@ -86,6 +86,7 @@ namespace AssemblyLineTester.Services
             if (!string.IsNullOrWhiteSpace(detail.ErrorSummary))
             {
                 var lines = detail.ErrorSummary.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                bool inErrorSection = false;
                 foreach (var line in lines)
                 {
                     if (y + lineH > bottom) break;
@@ -106,10 +107,11 @@ namespace AssemblyLineTester.Services
                     else if (trimmed.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) ||
                              trimmed.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase))
                     {
+                        inErrorSection = true;
                         gfx.DrawString(trimmed, fontBold, XBrushes.Black,
                             new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
                     }
-                    else if (trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
+                    else if (inErrorSection || trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
                     {
                         gfx.DrawString(trimmed, font, XBrushes.DarkRed,
                             new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);

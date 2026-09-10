@@ -113,6 +113,7 @@ namespace AssemblyLineTester.Services
             if (!string.IsNullOrWhiteSpace(detail.ErrorSummary))
             {
                 var lines = detail.ErrorSummary.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                bool inErrorSection = false;
                 foreach (var line in lines)
                 {
                     string trimmed = line.Trim();
@@ -132,10 +133,11 @@ namespace AssemblyLineTester.Services
                     else if (trimmed.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) ||
                              trimmed.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase))
                     {
+                        inErrorSection = true;
                         wsSummary.Cell(sr, 1).Value = trimmed;
                         wsSummary.Cell(sr, 1).Style.Font.Bold = true;
                     }
-                    else if (trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
+                    else if (inErrorSection || trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
                     {
                         wsSummary.Cell(sr, 1).Value = trimmed;
                         wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;

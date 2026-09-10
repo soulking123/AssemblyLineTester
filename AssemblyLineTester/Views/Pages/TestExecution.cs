@@ -440,7 +440,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     bool allPass = _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass);
                     var getErrorsResp = _instrument.GetTestErrors();
-                    if (getErrorsResp?.ObjectReturnValue?.ErrorList != null && getErrorsResp.ObjectReturnValue.ErrorList.Any(e => e.ErrorID == "156" || e.Message.Contains("SHORT", StringComparison.OrdinalIgnoreCase)))
+                    if (getErrorsResp?.ObjectReturnValue?.ErrorList != null && getErrorsResp.ObjectReturnValue.ErrorList.Count > 0)
                     {
                         allPass = false;
                     }
@@ -761,19 +761,38 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     if (errorResult?.ErrorList != null && errorResult.ErrorList.Count > 0)
                     {
-                        var shortErrors = errorResult.ErrorList.Where(e => e.ErrorID == "156" || e.Message.Contains("SHORT", StringComparison.OrdinalIgnoreCase)).ToList();
-                        if (shortErrors.Count > 0)
+                        var allErrors = errorResult.ErrorList.ToList();
+                        var shortErrors = allErrors.Where(e => IsShortError(e)).ToList();
+                        var otherErrors = allErrors.Except(shortErrors).ToList();
+
+                        if (shortErrors.Count > 0 && !summaryList.Any(s => string.Equals(s.TestType, "SHORT", StringComparison.OrdinalIgnoreCase)))
                         {
                             listBoxTestSummary.Items.Add($"✖ SHORT ({shortErrors.Count})");
+                        }
+
+                        if (shortErrors.Count > 0)
+                        {
                             listBoxTestSummary.Items.Add("");
                             listBoxTestSummary.Items.Add("SHORT CONNECTION ERRORS");
                             listBoxTestSummary.Items.Add("");
                             foreach (var error in shortErrors)
                             {
-                                listBoxTestSummary.Items.Add(FormatShortErrorMessage(error));
+                                listBoxTestSummary.Items.Add(FormatErrorMessage(error));
+                            }
+                        }
+
+                        if (otherErrors.Count > 0)
+                        {
+                            listBoxTestSummary.Items.Add("");
+                            listBoxTestSummary.Items.Add("TEST ERRORS");
+                            listBoxTestSummary.Items.Add("");
+                            foreach (var error in otherErrors)
+                            {
+                                listBoxTestSummary.Items.Add(FormatErrorMessage(error));
                             }
                         }
                     }
+
 
                     logService.Log(LogSeverity.Info, "Instrument", "Get Test Errors Success.",
                     $"Success getting Test Error", SessionManager.CurrentUser?.Username ?? "Unknown");
@@ -796,6 +815,20 @@ namespace AssemblyLineTester.Views.Pages
 
         }
 
+        private static bool IsShortError(dynamic error)
+        {
+            try
+            {
+                string id = ((string?)error.ErrorID) ?? "";
+                string msg = ((string?)error.Message) ?? "";
+                return id == "3" || id == "156" || msg.Contains("SHORT", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private static string ConvertPointToPinNumber(string? point)
         {
             if (string.IsNullOrWhiteSpace(point)) return "";
@@ -809,10 +842,16 @@ namespace AssemblyLineTester.Views.Pages
                 int address = (conn - 1) * 64 + pin;
                 return $"Pin {address}";
             }
+            if (int.TryParse(clean, out int directAddress) && directAddress > 0)
+            {
+                return $"Pin {directAddress}";
+            }
             return point.Trim();
         }
 
-        private static string FormatShortErrorMessage(dynamic error)
+        private static string FormatShortErrorMessage(dynamic error) => FormatErrorMessage(error);
+
+        private static string FormatErrorMessage(dynamic error)
         {
             try
             {
@@ -822,54 +861,86 @@ namespace AssemblyLineTester.Views.Pages
                 string p2 = ConvertPointToPinNumber(rawP2);
                 string msg = ((string?)error.Message) ?? "";
 
-                // Extract resistance part from message (e.g. "0.1 Ohm" from "#3 Short Net2 Net6 0.1 Ohm")
-                string resistance = "";
-                var match = Regex.Match(msg, @"([\d\.]+\s*(?:mOhm|Ohm|kOhm|MOhm|Ω|mΩ|kΩ|MΩ)[^,]*)", RegexOptions.IgnoreCase);
-                if (match.Success)
+                string cleaned = Regex.Replace(msg, @"^#\d+\s*", "").Trim();
+
+                // First, convert any connector-style addresses (J1-3, etc.) anywhere in cleaned message
+                cleaned = Regex.Replace(cleaned, @"\bJ(\d+)-(\d+)\b", m =>
                 {
-                    resistance = match.Groups[1].Value.Trim();
+                    if (int.TryParse(m.Groups[1].Value, out int conn) &&
+                        int.TryParse(m.Groups[2].Value, out int pin) &&
+                        conn > 0 && pin > 0)
+                    {
+                        return $"Pin {(conn - 1) * 64 + pin}";
+                    }
+                    return m.Value;
+                }, RegexOptions.IgnoreCase);
+
+                // If raw points were numbers or something else, replace them if present
+                if (!string.IsNullOrEmpty(rawP1) && !string.IsNullOrEmpty(p1) && cleaned.Contains(rawP1))
+                {
+                    cleaned = Regex.Replace(cleaned, $@"\b{Regex.Escape(rawP1)}\b", p1);
                 }
-                else
+                if (!string.IsNullOrEmpty(rawP2) && !string.IsNullOrEmpty(p2) && cleaned.Contains(rawP2))
                 {
-                    // Fallback to Value1 if available
+                    cleaned = Regex.Replace(cleaned, $@"\b{Regex.Escape(rawP2)}\b", p2);
+                }
+
+                // If message had Net names instead of pin points (e.g. "Short Net2 Net6 0.1 Ohm" or "Open Net1 - Net2")
+                // and neither p1 nor p2 is in cleaned yet:
+                if (!string.IsNullOrEmpty(p1) && !string.IsNullOrEmpty(p2) &&
+                    !cleaned.Contains(p1) && !cleaned.Contains(p2))
+                {
+                    // Pattern: <Command/Type> <Point1> [-] <Point2> [<Rest>]
+                    var netPattern = new Regex(@"^([A-Za-z]+)\s+([^\s\-]+)\s*(?:-\s*)?([^\s]+)(.*)$");
+                    var match = netPattern.Match(cleaned);
+                    if (match.Success)
+                    {
+                        string cmd = match.Groups[1].Value;
+                        string rest = match.Groups[4].Value.Trim();
+                        cleaned = string.IsNullOrEmpty(rest) ? $"{cmd} {p1} {p2}" : $"{cmd} {p1} {p2} {rest}";
+                    }
+                    else if (cleaned.Equals("Short", StringComparison.OrdinalIgnoreCase) ||
+                             cleaned.Equals("Open", StringComparison.OrdinalIgnoreCase) ||
+                             cleaned.Equals("Miswire", StringComparison.OrdinalIgnoreCase))
+                    {
+                        cleaned = $"{cleaned} {p1} {p2}";
+                    }
+                    else if (string.IsNullOrWhiteSpace(cleaned))
+                    {
+                        cleaned = $"Error {p1} {p2}";
+                    }
+                }
+
+                // Remove unwanted hyphens between pins (e.g. "Pin 3 - Pin 4" -> "Pin 3 Pin 4")
+                cleaned = Regex.Replace(cleaned, @"(Pin\s+\d+)\s*-\s*(Pin\s+\d+)", "$1 $2");
+
+                // If it's a short error and has no resistance value in text, fallback to Value1 if available
+                if (cleaned.StartsWith("Short", StringComparison.OrdinalIgnoreCase) &&
+                    !Regex.IsMatch(cleaned, @"(?:mOhm|Ohm|kOhm|MOhm|Ω|mΩ|kΩ|MΩ)", RegexOptions.IgnoreCase))
+                {
                     try
                     {
                         double val = (double)error.Value1;
                         if (val > 0)
                         {
-                            if (val >= 1e6) resistance = (val / 1e6).ToString("0.#", CultureInfo.InvariantCulture) + " MOhm";
-                            else if (val >= 1e3) resistance = (val / 1e3).ToString("0.#", CultureInfo.InvariantCulture) + " kOhm";
-                            else resistance = val.ToString("0.#", CultureInfo.InvariantCulture) + " Ohm";
+                            string resStr = val >= 1e6 ? (val / 1e6).ToString("0.#", CultureInfo.InvariantCulture) + " MOhm"
+                                          : val >= 1e3 ? (val / 1e3).ToString("0.#", CultureInfo.InvariantCulture) + " kOhm"
+                                          : val.ToString("0.#", CultureInfo.InvariantCulture) + " Ohm";
+                            cleaned += $" {resStr}";
                         }
                     }
                     catch { }
                 }
 
-                if (!string.IsNullOrEmpty(p1) && !string.IsNullOrEmpty(p2))
-                {
-                    return string.IsNullOrEmpty(resistance)
-                        ? $"Short {p1} - {p2}"
-                        : $"Short {p1} - {p2} {resistance}";
-                }
+                // Normalize spaces
+                cleaned = Regex.Replace(cleaned, @"[ \t]+", " ").Trim();
 
-                // Fallback: clean leading error number from Message if present (e.g. "#3 Short ...")
-                if (!string.IsNullOrEmpty(msg))
-                {
-                    string cleaned = Regex.Replace(msg, @"^#\d+\s*", "");
-                    cleaned = Regex.Replace(cleaned, @"\bJ(\d+)-(\d+)\b", m =>
-                    {
-                        if (int.TryParse(m.Groups[1].Value, out int conn) && int.TryParse(m.Groups[2].Value, out int pin) && conn > 0 && pin > 0)
-                        {
-                            return $"Pin {(conn - 1) * 64 + pin}";
-                        }
-                        return m.Value;
-                    }, RegexOptions.IgnoreCase);
-                    return cleaned;
-                }
+                if (!string.IsNullOrEmpty(cleaned)) return cleaned;
+                if (!string.IsNullOrEmpty(p1) && !string.IsNullOrEmpty(p2)) return $"Error {p1} {p2}";
             }
             catch { }
 
-            return error?.Message ?? "Short error";
+            return error?.Message ?? "Test error";
         }
         private async void BtnStopTest_Click(object sender, EventArgs e)
         {
@@ -982,7 +1053,11 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
-            bool hasFailInSummary = listBoxTestSummary.Items.Cast<object>().Any(x => x.ToString()?.Contains("TEST RESULT = FAIL", StringComparison.OrdinalIgnoreCase) == true || x.ToString()?.Contains("SHORT", StringComparison.OrdinalIgnoreCase) == true);
+            bool hasFailInSummary = listBoxTestSummary.Items.Cast<object>().Any(x =>
+                x.ToString()?.Contains("TEST RESULT = FAIL", StringComparison.OrdinalIgnoreCase) == true ||
+                x.ToString()?.Contains("✖") == true ||
+                x.ToString()?.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase) == true ||
+                x.ToString()?.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) == true);
             bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass) && !hasFailInSummary;
             string overallResult = allPass ? "PASS" : "FAIL";
 
