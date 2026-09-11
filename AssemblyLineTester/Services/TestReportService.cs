@@ -6,6 +6,7 @@ using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace AssemblyLineTester.Services
 {
@@ -126,7 +127,14 @@ namespace AssemblyLineTester.Services
                 })
                 .ToList();
 
-            var detailDtos = details.Select(d =>
+            var config = !string.IsNullOrEmpty(report.ProductModelName)
+                ? db.TestConfigurations
+                    .Include(c => c.Nets)
+                    .FirstOrDefault(c => c.ProductModelName == report.ProductModelName || c.ConfigName == report.ProductModelName)
+                : null;
+            var configNets = config?.Nets?.OrderBy(n => n.SequenceNo).ToList() ?? new List<Models.TestConfigNet>();
+
+            var detailDtos = details.Select((d, idx) =>
             {
                 bool isDiode = string.Equals(d.TestTypeName, "DIODE", StringComparison.OrdinalIgnoreCase) ||
                                string.Equals(d.TestTypeName, "SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase);
@@ -138,12 +146,41 @@ namespace AssemblyLineTester.Services
                 double? mVal2 = d.MeasuredValue2 ?? (isDiode ? 6.00 : null);
                 string? pfx2 = d.MeasurementPrefix2 ?? (isDiode ? "> " : null);
 
+                string color = !string.IsNullOrEmpty(d.Color) ? d.Color : "";
+                string gauge = !string.IsNullOrEmpty(d.Gauge) ? d.Gauge : "";
+                string netId = d.NetId ?? "";
+
+                if ((string.IsNullOrEmpty(color) || string.IsNullOrEmpty(gauge) || string.IsNullOrEmpty(netId)) && configNets.Count > 0)
+                {
+                    Models.TestConfigNet? matchedNet = null;
+                    if (idx < configNets.Count &&
+                        (configNets[idx].FromAddress.ToString() == d.FromPin || configNets[idx].FromLabel == d.FromLabel))
+                    {
+                        matchedNet = configNets[idx];
+                    }
+                    else
+                    {
+                        matchedNet = configNets.FirstOrDefault(n =>
+                            (n.FromAddress.ToString() == d.FromPin || n.FromLabel == d.FromLabel) &&
+                            (n.ToAddress.ToString() == d.ToPin || n.ToLabel == d.ToLabel));
+                    }
+
+                    if (matchedNet != null)
+                    {
+                        if (string.IsNullOrEmpty(color)) color = matchedNet.Color ?? "";
+                        if (string.IsNullOrEmpty(gauge)) gauge = matchedNet.Gauge ?? "";
+                        if (string.IsNullOrEmpty(netId) && !string.IsNullOrWhiteSpace(matchedNet.NetId)) netId = matchedNet.NetId;
+                    }
+                }
+
                 string measuredStr = TestDetailDto.FormatMeasuredRow(d.MeasuredValue, d.MeasurementPrefix, mVal2, pfx2, d.TestTypeName);
 
                 return new TestDetailDto
                 {
-                    NetId = d.NetId,
+                    NetId = netId,
                     HarnessGroup = d.HarnessGroup,
+                    Color = color,
+                    Gauge = gauge,
                     FromPin = d.FromPin,
                     ToPin = d.ToPin,
                     FromLabel = d.FromLabel,
@@ -277,9 +314,11 @@ namespace AssemblyLineTester.Services
                     details.Add(new TestDetail
                     {
                         ReportId = report.ReportId,
-                        NetId = r.NetId ?? $"N{stepCount:000}",
+                        NetId = !string.IsNullOrWhiteSpace(r.NetId) ? r.NetId.Trim() : "",
                         // Empty for an instrument-driven run, which knows no harness group.
-                        HarnessGroup = r.HarnessGroup,
+                        HarnessGroup = r.HarnessGroup ?? "",
+                        Color = r.Color ?? "",
+                        Gauge = r.Gauge ?? "",
                         FromPin = string.IsNullOrEmpty(r.FromPoint) ? "-" : r.FromPoint,
                         ToPin = string.IsNullOrEmpty(r.ToPoint) ? "-" : r.ToPoint,
                         FromLabel = r.FromLabel,

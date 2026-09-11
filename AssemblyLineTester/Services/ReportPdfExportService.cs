@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using AssemblyLineTester.Models.Dto;
 using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
@@ -13,6 +14,11 @@ namespace AssemblyLineTester.Services
     // Renders a saved report as PDF; the counterpart to ReportExcelExportService.
     public class ReportPdfExportService
     {
+        static ReportPdfExportService()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         private const double Margin = 40;
 
         // Space kept clear at the foot of a page so rows never run into the footer.
@@ -22,13 +28,17 @@ namespace AssemblyLineTester.Services
         {
             var detail = new TestReportService().GetReportDetail(reportId);
             if (detail is null) throw new InvalidOperationException("Report not found.");
+            ExportReportToPdf(detail, outputPath);
+        }
 
+        public void ExportReportToPdf(ReportDetailDto detail, string outputPath)
+        {
             string logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
 
             using PdfDocument doc = new();
 
             DrawSummaryPage(doc, detail, logoPath);
-            DrawTestSummaryPage(doc, detail, logoPath);
+            DrawTestSummaryPages(doc, detail, logoPath);
             DrawDetailPages(doc, detail, logoPath);
 
             int totalPages = StampHeadersAndFooters(doc, detail, logoPath);
@@ -61,119 +71,153 @@ namespace AssemblyLineTester.Services
             DrawNotes(gfx, page, detail, font, fontBold, y);
         }
 
-        // Page 2: the Test Summary panel from the Test Execution screen, line for line.
-        private static void DrawTestSummaryPage(PdfDocument doc, ReportDetailDto detail, string logoPath)
+        // Page 2 onwards: the Test Summary panel from the Test Execution screen, line for line.
+        // Spills onto as many pages as needed when errors exceed a single page.
+        private static void DrawTestSummaryPages(PdfDocument doc, ReportDetailDto detail, string logoPath)
         {
-            var page = doc.AddPage();
-            page.Size = PdfSharp.PageSize.A4;
-            page.Orientation = PdfSharp.PageOrientation.Portrait;
-            using XGraphics gfx = XGraphics.FromPdfPage(page);
-
             var font = new XFont("Arial", 10, XFontStyle.Regular);
             var fontBold = new XFont("Arial", 10, XFontStyle.Bold);
 
-            double y = DrawPageHeader(gfx, page, detail, 0, 0, logoPath);
-
-            var titleBg = new XSolidBrush(XColor.FromArgb(40, 230, 230, 230));
-            gfx.DrawRectangle(titleBg, Margin, y - 2, 200, 18);
-            gfx.DrawString("TEST SUMMARY", fontBold, XBrushes.Black, new XRect(Margin, y, 400, 16), XStringFormats.TopLeft);
-            y += 26;
+            var page = AddTestSummaryPage(doc);
+            XGraphics gfx = XGraphics.FromPdfPage(page);
 
             double lineH = 18;
             double width = page.Width - Margin * 2;
             double bottom = page.Height - Margin - FooterReserve;
 
-            if (!string.IsNullOrWhiteSpace(detail.ErrorSummary))
+            double y = DrawTestSummaryPageTop(gfx, page, detail, logoPath, fontBold, isFirstPage: true);
+
+            void EnsureSpace(double neededHeight)
             {
-                var lines = detail.ErrorSummary.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-                bool inErrorSection = false;
-                foreach (var line in lines)
+                if (y + neededHeight > bottom)
                 {
-                    if (y + lineH > bottom) break;
+                    gfx.Dispose();
+                    page = AddTestSummaryPage(doc);
+                    gfx = XGraphics.FromPdfPage(page);
+                    width = page.Width - Margin * 2;
+                    bottom = page.Height - Margin - FooterReserve;
+                    y = DrawTestSummaryPageTop(gfx, page, detail, logoPath, fontBold, isFirstPage: false);
+                }
+            }
 
-                    string trimmed = line.Trim();
-                    if (string.IsNullOrEmpty(trimmed))
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(detail.ErrorSummary))
+                {
+                    var lines = detail.ErrorSummary.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                    bool inErrorSection = false;
+                    foreach (var line in lines)
                     {
-                        y += lineH * 0.8;
-                        continue;
-                    }
+                        string trimmed = line.Trim();
+                        if (string.IsNullOrEmpty(trimmed))
+                        {
+                            EnsureSpace(lineH * 0.8);
+                            y += lineH * 0.8;
+                            continue;
+                        }
 
-                    if (trimmed.StartsWith("TEST RESULT", StringComparison.OrdinalIgnoreCase))
-                    {
-                        bool isPass = trimmed.EndsWith("PASS", StringComparison.OrdinalIgnoreCase);
-                        gfx.DrawString(trimmed, fontBold, isPass ? XBrushes.DarkGreen : XBrushes.DarkRed,
-                            new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-                    }
-                    else if (trimmed.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) ||
-                             trimmed.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase))
-                    {
-                        inErrorSection = true;
-                        gfx.DrawString(trimmed, fontBold, XBrushes.Black,
-                            new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-                    }
-                    else if (inErrorSection || trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
-                    {
-                        gfx.DrawString(trimmed, font, XBrushes.DarkRed,
-                            new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-                    }
-                    else
-                    {
-                        // Map Unicode tick/cross to [OK] / [X] so PdfSharp Arial font renders cleanly
-                        string displayLine = trimmed
-                            .Replace("✔", "[OK] ")
-                            .Replace("✖", "[X] ");
+                        EnsureSpace(lineH);
 
-                        bool isFail = displayLine.Contains("[X]") || trimmed.Contains("FAIL", StringComparison.OrdinalIgnoreCase);
-                        gfx.DrawString(displayLine, font, isFail ? XBrushes.DarkRed : XBrushes.Black,
-                            new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-                    }
+                        if (trimmed.StartsWith("TEST RESULT", StringComparison.OrdinalIgnoreCase))
+                        {
+                            bool isPass = trimmed.EndsWith("PASS", StringComparison.OrdinalIgnoreCase);
+                            gfx.DrawString(trimmed, fontBold, isPass ? XBrushes.DarkGreen : XBrushes.DarkRed,
+                                new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                        }
+                        else if (trimmed.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) ||
+                                 trimmed.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase))
+                        {
+                            inErrorSection = true;
+                            gfx.DrawString(trimmed, fontBold, XBrushes.Black,
+                                new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                        }
+                        else if (inErrorSection || trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            gfx.DrawString(trimmed, font, XBrushes.DarkRed,
+                                new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                        }
+                        else
+                        {
+                            // Map Unicode tick/cross to [OK] / [X] so PdfSharp Arial font renders cleanly
+                            string displayLine = trimmed
+                                .Replace("✔", "[OK] ")
+                                .Replace("✖", "[X] ");
 
+                            bool isFail = displayLine.Contains("[X]") || trimmed.Contains("FAIL", StringComparison.OrdinalIgnoreCase);
+                            gfx.DrawString(displayLine, font, isFail ? XBrushes.DarkRed : XBrushes.Black,
+                                new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                        }
+
+                        y += lineH;
+                    }
+                    return;
+                }
+
+                EnsureSpace(lineH * 2);
+                gfx.DrawString($"TEST RESULT = {detail.OverallResult}", fontBold,
+                    detail.OverallResult?.ToUpperInvariant() == "PASS" ? XBrushes.DarkGreen : XBrushes.DarkRed,
+                    new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                y += lineH * 2;
+
+                // "OK"/"X" rather than the screen's tick and cross: PdfSharp maps those glyphs through
+                // the base Arial encoding and drops them, which would leave the counts unlabelled.
+                foreach (var s in detail.TypeSummaries)
+                {
+                    EnsureSpace(lineH);
+                    bool allPassed = s.Fail == 0;
+                    gfx.DrawString($"[{(allPassed ? "OK" : "X")}]  {s.TestType} ({s.Pass}/{s.Total})", font,
+                        allPassed ? XBrushes.Black : XBrushes.DarkRed,
+                        new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
                     y += lineH;
                 }
-                return;
-            }
 
-            gfx.DrawString($"TEST RESULT = {detail.OverallResult}", fontBold,
-                detail.OverallResult?.ToUpperInvariant() == "PASS" ? XBrushes.DarkGreen : XBrushes.DarkRed,
-                new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-            y += lineH * 2;
-
-            // "OK"/"X" rather than the screen's tick and cross: PdfSharp maps those glyphs through
-            // the base Arial encoding and drops them, which would leave the counts unlabelled.
-            foreach (var s in detail.TypeSummaries)
-            {
-                bool allPassed = s.Fail == 0;
-                gfx.DrawString($"[{(allPassed ? "OK" : "X")}]  {s.TestType} ({s.Pass}/{s.Total})", font,
-                    allPassed ? XBrushes.Black : XBrushes.DarkRed,
-                    new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                EnsureSpace(lineH * 2.5);
                 y += lineH;
-            }
+                gfx.DrawString("TEST ERRORS", fontBold, XBrushes.Black, new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                y += lineH * 1.5;
 
-            y += lineH;
-            gfx.DrawString("TEST ERRORS", fontBold, XBrushes.Black, new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-            y += lineH * 1.5;
-
-            var failed = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
-            if (failed.Count == 0)
-            {
-                gfx.DrawString("No errors were recorded for this test run.", font, XBrushes.Black,
-                    new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-                return;
-            }
-
-            foreach (var d in failed)
-            {
-                if (y + lineH > bottom)
+                var failed = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
+                if (failed.Count == 0)
                 {
-                    gfx.DrawString($"... and {failed.Count - failed.IndexOf(d)} more, see the detail pages.",
-                        font, XBrushes.Black, new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-                    break;
+                    EnsureSpace(lineH);
+                    gfx.DrawString("No errors were recorded for this test run.", font, XBrushes.Black,
+                        new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                    return;
                 }
 
-                gfx.DrawString($"{d.NetId} ({d.TestType}) - {d.ErrorDetail}", font, XBrushes.DarkRed,
-                    new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
-                y += lineH;
+                foreach (var d in failed)
+                {
+                    EnsureSpace(lineH);
+                    string idPrefix = !string.IsNullOrWhiteSpace(d.NetId) ? $"{d.NetId} " : "";
+                    gfx.DrawString($"{idPrefix}({d.TestType}) - {d.ErrorDetail}", font, XBrushes.DarkRed,
+                        new XRect(Margin, y, width, lineH), XStringFormats.TopLeft);
+                    y += lineH;
+                }
             }
+            finally
+            {
+                gfx.Dispose();
+            }
+        }
+
+        private static PdfPage AddTestSummaryPage(PdfDocument doc)
+        {
+            var page = doc.AddPage();
+            page.Size = PdfSharp.PageSize.A4;
+            page.Orientation = PdfSharp.PageOrientation.Portrait;
+            return page;
+        }
+
+        private static double DrawTestSummaryPageTop(XGraphics gfx, PdfPage page, ReportDetailDto detail, string logoPath, XFont fontBold, bool isFirstPage)
+        {
+            double y = DrawPageHeader(gfx, page, detail, 0, 0, logoPath);
+
+            var titleBg = new XSolidBrush(XColor.FromArgb(40, 230, 230, 230));
+            string title = isFirstPage ? "TEST SUMMARY" : "TEST SUMMARY (CONTINUED)";
+            double titleWidth = isFirstPage ? 200 : 280;
+            gfx.DrawRectangle(titleBg, Margin, y - 2, titleWidth, 18);
+            gfx.DrawString(title, fontBold, XBrushes.Black, new XRect(Margin, y, 400, 16), XStringFormats.TopLeft);
+            return y + 26;
         }
 
         // Operator notes as a wrapped paragraph under the result box.
@@ -349,6 +393,15 @@ namespace AssemblyLineTester.Services
             double rowH = 18;
 
             var columns = TestSettingService.GetEnabledResultColumns();
+            if (columns == null || columns.Count == 0)
+            {
+                columns = new List<string>
+                {
+                    "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "To",
+                    "Net To Label", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
+                    "Tolerance", "Measurement"
+                };
+            }
 
             var page = AddDetailPage(doc);
             XGraphics g = XGraphics.FromPdfPage(page);
@@ -430,21 +483,29 @@ namespace AssemblyLineTester.Services
 
         // Column widths as fractions of the printable width, so they follow the page size.
         // Relative widths per configurable column; anything unlisted gets an even share.
-        private static readonly Dictionary<string, double> DetailColumnWeights = new()
+        private static readonly Dictionary<string, double> DetailColumnWeights = new(StringComparer.OrdinalIgnoreCase)
         {
             ["Net-ID"] = 0.7,
+            ["Net ID"] = 0.7,
+            ["NetId"] = 0.7,
             ["Harness Group"] = 0.8,
+            ["Harness-Group"] = 0.8,
             ["From"] = 0.5,
-            ["Net From Label"] = 0.8,
+            ["Net From Label"] = 1.85,
+            ["Net-From Label"] = 1.85,
+            ["NetFromLabel"] = 1.85,
             ["To"] = 0.5,
-            ["Net To Label"] = 0.8,
+            ["Net To Label"] = 1.85,
+            ["Net-To Label"] = 1.85,
+            ["NetToLabel"] = 1.85,
             ["Test Type"] = 0.9,
+            ["Test-Type"] = 0.9,
             ["Color"] = 0.55,
             ["Gauge"] = 0.6,
-            ["Lower Limit"] = 1.3,
-            ["Upper Limit"] = 1.3,
-            ["Expected Value"] = 1.3,
-            ["Tolerance"] = 1.05,
+            ["Lower Limit"] = 0.7,
+            ["Upper Limit"] = 0.7,
+            ["Expected Value"] = 0.7,
+            ["Tolerance"] = 0.7,
             ["Measurement"] = 1.45
         };
 
@@ -497,7 +558,7 @@ namespace AssemblyLineTester.Services
 
             for (int i = 0; i < columns.Count; i++)
             {
-                var align = columns[i] is "Harness Group" or "From" or "To" or "Test Type" or "Net From Label" or "Net To Label" or "Color" or "Gauge"
+                var align = columns[i] is "Harness Group" or "Harness-Group" or "From" or "To" or "Test Type" or "Test-Type" or "Net From Label" or "Net-From Label" or "Net To Label" or "Net-To Label" or "Color" or "Gauge"
                     ? XStringFormats.CenterLeft
                     : XStringFormats.Center;
                 Cell(i, d.Column(columns[i]), align);

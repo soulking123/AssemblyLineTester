@@ -17,6 +17,9 @@ namespace AssemblyLineTester.Models
         public string FromLabel { get; set; } = string.Empty;
         public string ToLabel { get; set; } = string.Empty;
 
+        public string Color { get; set; } = string.Empty;
+        public string Gauge { get; set; } = string.Empty;
+
         public string TestTypeName { get; set; } = string.Empty;
         public TestType? TestTypeInfo { get; set; }
 

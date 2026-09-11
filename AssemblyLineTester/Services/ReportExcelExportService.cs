@@ -186,7 +186,8 @@ namespace AssemblyLineTester.Services
                 {
                     foreach (var d in failedRows)
                     {
-                        wsSummary.Cell(sr, 1).Value = $"{d.NetId} ({d.TestType}) - {d.ErrorDetail}";
+                        string idPrefix = !string.IsNullOrWhiteSpace(d.NetId) ? $"{d.NetId} " : "";
+                        wsSummary.Cell(sr, 1).Value = $"{idPrefix}({d.TestType}) - {d.ErrorDetail}";
                         wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
                         sr++;
                     }

@@ -264,6 +264,26 @@ namespace AssemblyLineTester.Views.Pages
         private static readonly string[] RequiredImportColumns =
             { "From", "To", "Test Type", "Lower Limit", "Upper Limit", "Tolerance", "Expected Value" };
 
+        private static string NormalizeHeader(string header) =>
+            header.Replace(" ", "").Replace("-", "").Replace("_", "");
+
+        public static string GetImportValue(Dictionary<string, string> values, string targetHeader)
+        {
+            if (values.TryGetValue(targetHeader, out string? v) && !string.IsNullOrEmpty(v))
+                return v;
+
+            string normalizedTarget = NormalizeHeader(targetHeader);
+            foreach (var kvp in values)
+            {
+                if (string.Equals(NormalizeHeader(kvp.Key), normalizedTarget, StringComparison.OrdinalIgnoreCase))
+                {
+                    return kvp.Value;
+                }
+            }
+
+            return values.TryGetValue(targetHeader, out string? fallback) ? fallback : "";
+        }
+
         // Everything wrong with one workbook row, named by its spreadsheet row number.
         internal static List<string> ValidateImportRow(Dictionary<string, string> values, int rowNumber, List<string> allowedTestTypes)
         {
@@ -271,11 +291,12 @@ namespace AssemblyLineTester.Views.Pages
 
             foreach (var required in RequiredImportColumns)
             {
-                if (!values.TryGetValue(required, out string? value) || string.IsNullOrWhiteSpace(value))
+                string value = GetImportValue(values, required);
+                if (string.IsNullOrWhiteSpace(value))
                     problems.Add($"Row {rowNumber}: {required} is empty.");
             }
 
-            values.TryGetValue("Test Type", out string? testType);
+            string testType = GetImportValue(values, "Test Type");
             if (!string.IsNullOrWhiteSpace(testType) && !allowedTestTypes.Contains(testType, StringComparer.OrdinalIgnoreCase))
             {
                 problems.Add($"Row {rowNumber}: Test Type '{testType}' is not one of the types ticked under Settings.");
@@ -352,7 +373,6 @@ namespace AssemblyLineTester.Views.Pages
         /// All-or-nothing on purpose: a partial import looks finished, and the operator would run a
         /// harness against a net list quietly missing the rows that failed.
         /// </remarks>
-        // The first row that carries the required column names; 0 when the file has none.
         private static int FindHeaderRow(ClosedXML.Excel.IXLWorksheet sheet)
         {
             int lastRow = Math.Min(sheet.LastRowUsed()?.RowNumber() ?? 1, 40);
@@ -362,9 +382,13 @@ namespace AssemblyLineTester.Views.Pages
                 var texts = sheet.Row(r).CellsUsed()
                     .Select(c => c.GetString().Trim())
                     .Where(t => t.Length > 0)
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    .ToList();
 
-                if (RequiredImportColumns.All(texts.Contains)) return r;
+                bool allFound = RequiredImportColumns.All(req =>
+                    texts.Any(t => string.Equals(t, req, StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(NormalizeHeader(t), NormalizeHeader(req), StringComparison.OrdinalIgnoreCase)));
+
+                if (allFound) return r;
             }
 
             return 0;
@@ -432,7 +456,9 @@ namespace AssemblyLineTester.Views.Pages
                 if (header.Length > 0 && !columnAt.ContainsKey(header)) columnAt[header] = c;
             }
 
-            var missingHeaders = RequiredImportColumns.Where(h => !columnAt.ContainsKey(h)).ToList();
+            var missingHeaders = RequiredImportColumns.Where(req =>
+                !columnAt.Keys.Any(k => string.Equals(k, req, StringComparison.OrdinalIgnoreCase) ||
+                                       string.Equals(NormalizeHeader(k), NormalizeHeader(req), StringComparison.OrdinalIgnoreCase))).ToList();
             if (missingHeaders.Count > 0)
             {
                 MessageBox.Show(
@@ -495,7 +521,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     var column = gridConfig.Columns[i];
                     string header = column.HeaderText.Replace("\n", " ");
-                    cells[i] = column.Name == "colNo" ? "" : (values.TryGetValue(header, out string? v) ? v : "");
+                    cells[i] = column.Name == "colNo" ? "" : GetImportValue(values, header);
                 }
 
                 int idx = gridConfig.Rows.Add(cells);

@@ -130,13 +130,13 @@ namespace AssemblyLineTester.Models.Dto
 
             return name switch
             {
-                "Net-ID" => NetId,
-                "Harness Group" => HarnessGroup,
+                "Net-ID" or "Net ID" or "NetId" => NetId,
+                "Harness Group" or "Harness-Group" or "HarnessGroup" => HarnessGroup,
                 "From" => FromPin,
-                "Net From Label" => FromLabel,
+                "Net From Label" or "Net-From Label" or "NetFromLabel" => FromLabel,
                 "To" => ToPin,
-                "Net To Label" => ToLabel,
-                "Test Type" => TestType,
+                "Net To Label" or "Net-To Label" or "NetToLabel" => ToLabel,
+                "Test Type" or "Test-Type" or "TestType" => TestType,
                 "Color" => Color,
                 "Gauge" => Gauge,
                 "Lower Limit" => (isDiode && LowerLimit2.HasValue)
