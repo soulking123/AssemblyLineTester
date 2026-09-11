@@ -13,6 +13,12 @@ namespace AssemblyLineTester.Services
         {
             var detail = new TestReportService().GetReportDetail(reportId);
             if (detail is null) throw new InvalidOperationException("Report not found.");
+            ExportReportToExcel(detail, outputPath);
+        }
+
+        public void ExportReportToExcel(ReportDetailDto detail, string outputPath)
+        {
+            if (detail is null) throw new ArgumentNullException(nameof(detail));
 
             using var wb = new XLWorkbook();
 
@@ -106,8 +112,12 @@ namespace AssemblyLineTester.Services
             ws.Column(2).Width = Math.Max(ws.Column(2).Width, 3);
             ws.Column(3).Width = Math.Max(ws.Column(3).Width, 12);
 
-            // Sheet 2: the Test Summary panel from the Test Execution screen, line for line.
-            var wsSummary = wb.Worksheets.Add("Test Summary");
+            // Sheet 2: the Error/Test Summary panel from the Test Execution screen, line for line.
+            bool isReportPass = string.Equals(detail.OverallResult, "PASS", StringComparison.OrdinalIgnoreCase) &&
+                                (detail.Details == null || !detail.Details.Any(d => !string.IsNullOrWhiteSpace(d.ErrorDetail))) &&
+                                (string.IsNullOrWhiteSpace(detail.ErrorSummary) || !detail.ErrorSummary.Contains("FAIL", StringComparison.OrdinalIgnoreCase));
+
+            var wsSummary = wb.Worksheets.Add(isReportPass ? "Test Summary" : "Error Summary");
             int sr = 1;
 
             if (!string.IsNullOrWhiteSpace(detail.ErrorSummary))

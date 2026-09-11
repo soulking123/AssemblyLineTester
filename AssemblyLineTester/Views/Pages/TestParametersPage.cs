@@ -575,7 +575,7 @@ namespace AssemblyLineTester.Views.Pages
         private const string SummaryDescription = "Description";
 
         // Mirrors the Config Summary panel above the grid, and returns the row the table starts on.
-        private int WriteConfigSummary(ClosedXML.Excel.IXLWorksheet sheet, int columnCount)
+        private int WriteConfigSummary(ClosedXML.Excel.IXLWorksheet sheet, int columnCount, bool isTemplate = false)
         {
             var title = sheet.Cell(1, 1);
             title.Value = "CONFIG SUMMARY";
@@ -584,11 +584,22 @@ namespace AssemblyLineTester.Views.Pages
             title.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(30, 41, 59);
             sheet.Range(1, 1, 1, Math.Max(4, columnCount)).Merge();
 
+            string configName = txtConfigName.Text?.Trim() ?? "";
+            string productModel = txtProductModel.Text?.Trim() ?? "";
+            string connRes = txtConnectionResistance.Text?.Trim() ?? "";
+
+            if (isTemplate)
+            {
+                if (string.IsNullOrWhiteSpace(configName)) configName = "Default 6060";
+                if (string.IsNullOrWhiteSpace(productModel)) productModel = "6060";
+                if (string.IsNullOrWhiteSpace(connRes)) connRes = "10.00";
+            }
+
             var fields = new (string Label, string Value)[]
             {
-                (SummaryConfigName, txtConfigName.Text?.Trim() ?? ""),
-                (SummaryProductModel, txtProductModel.Text?.Trim() ?? ""),
-                (SummaryConnectionResistance, txtConnectionResistance.Text?.Trim() ?? ""),
+                (SummaryConfigName, configName),
+                (SummaryProductModel, productModel),
+                (SummaryConnectionResistance, connRes),
                 (SummaryComponentResistance, txtComponentResistance.Text?.Trim() ?? ""),
                 (SummaryInsulationResistance, txtInsulationResistance.Text?.Trim() ?? ""),
                 (SummaryDescription, txtDescription.Text?.Trim() ?? "")
@@ -629,64 +640,7 @@ namespace AssemblyLineTester.Views.Pages
 
             try
             {
-                var columns = ExportableColumns();
-
-                using var workbook = new ClosedXML.Excel.XLWorkbook();
-                var sheet = workbook.Worksheets.Add("Test Parameters");
-
-                int headerRow = WriteConfigSummary(sheet, columns.Count);
-
-                for (int i = 0; i < columns.Count; i++)
-                {
-                    string header = columns[i].HeaderText.Replace("\n", " ");
-                    bool required = RequiredImportColumns.Contains(header, StringComparer.OrdinalIgnoreCase);
-
-                    var cell = sheet.Cell(headerRow, i + 1);
-                    cell.Value = header;
-                    cell.Style.Font.Bold = true;
-                    cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(30, 41, 59);
-                    cell.Style.Fill.BackgroundColor = required
-                        ? ClosedXML.Excel.XLColor.FromArgb(203, 213, 225)
-                        : ClosedXML.Excel.XLColor.FromArgb(241, 245, 249);
-                    cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
-                    cell.Style.Alignment.Vertical = ClosedXML.Excel.XLAlignmentVerticalValues.Center;
-                    cell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
-                    cell.Style.Border.OutsideBorderColor = ClosedXML.Excel.XLColor.FromArgb(148, 163, 184);
-
-                    // The importer rejects the whole file over one blank required cell, so which
-                    // columns those are has to be visible in the file itself, not only in a manual.
-                    cell.GetComment().AddText(required
-                        ? "Required. The import fails if this is empty."
-                        : "Optional.");
-                }
-
-                if (includeRows)
-                {
-                    int row = headerRow + 1;
-                    foreach (DataGridViewRow gridRow in gridConfig.Rows)
-                    {
-                        if (gridRow.IsNewRow) continue;
-
-                        for (int i = 0; i < columns.Count; i++)
-                        {
-                            sheet.Cell(row, i + 1).Value = gridRow.Cells[columns[i].Index].Value?.ToString() ?? "";
-                        }
-                        row++;
-                    }
-
-                    if (row > headerRow + 1)
-                    {
-                        sheet.Range(headerRow + 1, 1, row - 1, columns.Count)
-                            .Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Hair;
-                    }
-                }
-
-                sheet.Row(headerRow).Height = 22;
-                sheet.Columns(1, columns.Count).AdjustToContents(minWidth: 10, maxWidth: 28);
-                sheet.SheetView.FreezeRows(headerRow);
-                sheet.Range(headerRow, 1, headerRow, columns.Count).SetAutoFilter();
-                workbook.SaveAs(dialog.FileName);
-
+                WriteWorkbookToFile(dialog.FileName, includeRows);
                 MessageBox.Show($"Saved to:\r\n{dialog.FileName}", caption,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -696,6 +650,184 @@ namespace AssemblyLineTester.Views.Pages
                 MessageBox.Show($"Could not save the file: {ex.Message}", caption,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        public void WriteWorkbookToFile(string filePath, bool includeRows)
+        {
+            var columns = ExportableColumns();
+
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+            var sheet = workbook.Worksheets.Add("Test Parameters");
+
+            int headerRow = WriteConfigSummary(sheet, columns.Count, isTemplate: !includeRows);
+
+            for (int i = 0; i < columns.Count; i++)
+            {
+                string header = columns[i].HeaderText.Replace("\n", " ");
+                bool required = RequiredImportColumns.Contains(header, StringComparer.OrdinalIgnoreCase);
+
+                var cell = sheet.Cell(headerRow, i + 1);
+                cell.Value = header;
+                cell.Style.Font.Bold = true;
+                cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(30, 41, 59);
+                cell.Style.Fill.BackgroundColor = required
+                    ? ClosedXML.Excel.XLColor.FromArgb(203, 213, 225)
+                    : ClosedXML.Excel.XLColor.FromArgb(241, 245, 249);
+                cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                cell.Style.Alignment.Vertical = ClosedXML.Excel.XLAlignmentVerticalValues.Center;
+                cell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                cell.Style.Border.OutsideBorderColor = ClosedXML.Excel.XLColor.FromArgb(148, 163, 184);
+
+                // The importer rejects the whole file over one blank required cell, so which
+                // columns those are has to be visible in the file itself, not only in a manual.
+                cell.GetComment().AddText(required
+                    ? "Required. The import fails if this is empty."
+                    : "Optional.");
+            }
+
+            if (includeRows)
+            {
+                int row = headerRow + 1;
+                foreach (DataGridViewRow gridRow in gridConfig.Rows)
+                {
+                    if (gridRow.IsNewRow) continue;
+
+                    for (int i = 0; i < columns.Count; i++)
+                    {
+                        sheet.Cell(row, i + 1).Value = gridRow.Cells[columns[i].Index].Value?.ToString() ?? "";
+                    }
+                    row++;
+                }
+
+                if (row > headerRow + 1)
+                {
+                    sheet.Range(headerRow + 1, 1, row - 1, columns.Count)
+                        .Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Hair;
+                }
+            }
+            else
+            {
+                // Add 1 sample row as an example for the template matching Default 6060
+                int sampleRow = headerRow + 1;
+                for (int i = 0; i < columns.Count; i++)
+                {
+                    string header = columns[i].HeaderText.Replace("\n", " ").Trim();
+                    sheet.Cell(sampleRow, i + 1).Value = GetTemplateSampleValue(header);
+                }
+                sheet.Range(sampleRow, 1, sampleRow, columns.Count)
+                    .Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Hair;
+            }
+
+            sheet.Row(headerRow).Height = 22;
+            sheet.Columns(1, columns.Count).AdjustToContents(minWidth: 10, maxWidth: 28);
+            sheet.SheetView.FreezeRows(headerRow);
+            sheet.Range(headerRow, 1, headerRow, columns.Count).SetAutoFilter();
+            workbook.SaveAs(filePath);
+        }
+
+        public static void GenerateDefaultTemplateFile(string filePath)
+        {
+            string[] templateHeaders =
+            {
+                "Harness-Group", "Color", "Gauge", "Net-ID", "From", "Net-From Label", "To",
+                "Net-To Label", "Test Type", "Lower Limit", "Upper Limit", "Expected Value", "Tolerance"
+            };
+
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+            var sheet = workbook.Worksheets.Add("Test Parameters");
+
+            var title = sheet.Cell(1, 1);
+            title.Value = "CONFIG SUMMARY";
+            title.Style.Font.Bold = true;
+            title.Style.Font.FontSize = 12;
+            title.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(30, 41, 59);
+            sheet.Range(1, 1, 1, Math.Max(4, templateHeaders.Length)).Merge();
+
+            var fields = new (string Label, string Value)[]
+            {
+                (SummaryConfigName, "Default 6060"),
+                (SummaryProductModel, "6060"),
+                (SummaryConnectionResistance, "10.00"),
+                (SummaryComponentResistance, ""),
+                (SummaryInsulationResistance, ""),
+                (SummaryDescription, "")
+            };
+
+            int row = 2;
+            foreach (var (label, value) in fields)
+            {
+                var labelCell = sheet.Cell(row, 1);
+                labelCell.Value = label;
+                labelCell.Style.Font.Bold = true;
+                labelCell.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(71, 85, 105);
+
+                var valueCell = sheet.Cell(row, 2);
+                valueCell.Value = value;
+                valueCell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromArgb(248, 250, 252);
+                valueCell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                valueCell.Style.Border.OutsideBorderColor = ClosedXML.Excel.XLColor.FromArgb(203, 213, 225);
+                sheet.Range(row, 2, row, 4).Merge();
+
+                row++;
+            }
+
+            int headerRow = row + 1;
+            for (int i = 0; i < templateHeaders.Length; i++)
+            {
+                string header = templateHeaders[i];
+                bool required = RequiredImportColumns.Contains(header, StringComparer.OrdinalIgnoreCase);
+
+                var cell = sheet.Cell(headerRow, i + 1);
+                cell.Value = header;
+                cell.Style.Font.Bold = true;
+                cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromArgb(30, 41, 59);
+                cell.Style.Fill.BackgroundColor = required
+                    ? ClosedXML.Excel.XLColor.FromArgb(203, 213, 225)
+                    : ClosedXML.Excel.XLColor.FromArgb(241, 245, 249);
+                cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                cell.Style.Alignment.Vertical = ClosedXML.Excel.XLAlignmentVerticalValues.Center;
+                cell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                cell.Style.Border.OutsideBorderColor = ClosedXML.Excel.XLColor.FromArgb(148, 163, 184);
+
+                cell.GetComment().AddText(required
+                    ? "Required. The import fails if this is empty."
+                    : "Optional.");
+            }
+
+            int sampleRow = headerRow + 1;
+            for (int i = 0; i < templateHeaders.Length; i++)
+            {
+                sheet.Cell(sampleRow, i + 1).Value = GetTemplateSampleValue(templateHeaders[i]);
+            }
+            sheet.Range(sampleRow, 1, sampleRow, templateHeaders.Length)
+                .Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Hair;
+
+            sheet.Row(headerRow).Height = 22;
+            sheet.Columns(1, templateHeaders.Length).AdjustToContents(minWidth: 10, maxWidth: 28);
+            sheet.SheetView.FreezeRows(headerRow);
+            sheet.Range(headerRow, 1, headerRow, templateHeaders.Length).SetAutoFilter();
+            workbook.SaveAs(filePath);
+        }
+
+        private static string GetTemplateSampleValue(string header)
+        {
+            return header switch
+            {
+                "Harness-Group" or "Harness Group" => "CF-C5",
+                "Color" => "GN",
+                "Gauge" => "18",
+                "Net-ID" or "Net ID" => "",
+                "From" => "1",
+                "Net-From Label" or "Net From Label" => "A525-CF119",
+                "To" => "163",
+                "Net-To Label" or "Net To Label" => "A525-CM101",
+                "Test Type" => "WIRE",
+                "Lower Limit" => "0",
+                "Upper Limit" => "10.00",
+                "Expected Value" => "-",
+                "Tolerance" => "-",
+                _ => ""
+            };
         }
 
         // The Settings default, but only if the type column can actually hold it - a default that

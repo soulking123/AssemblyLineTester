@@ -407,23 +407,32 @@ namespace AssemblyLineTester.Services
         // Removes drafts older than the given age; confirmed reports are never touched.
         public int PurgeOldDrafts(int olderThanDays = 30)
         {
-            using var db = new AppDbContext();
-            var cutoff = DateTime.UtcNow.AddDays(-olderThanDays);
+            try
+            {
+                using var db = new AppDbContext();
+                var cutoff = DateTime.UtcNow.AddDays(-olderThanDays);
 
-            var oldDrafts = db.TestReports
-                .Where(r => r.IsDraft && r.CreatedAt < cutoff)
-                .ToList();
+                var oldDrafts = db.TestReports
+                    .Where(r => r.IsDraft && r.CreatedAt < cutoff)
+                    .ToList();
 
-            if (oldDrafts.Count == 0) return 0;
+                if (oldDrafts.Count == 0) return 0;
 
-            db.TestReports.RemoveRange(oldDrafts);
-            db.SaveChanges();
+                db.TestReports.RemoveRange(oldDrafts);
+                db.SaveChanges();
 
-            new SystemLogService().Log(
-                Models.SystemLog.LogSeverity.Info, "Test Report", "Purge Drafts",
-                $"{oldDrafts.Count} draft reports older than {olderThanDays} days removed.");
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Test Report", "Purge Drafts",
+                    $"{oldDrafts.Count} draft reports older than {olderThanDays} days removed.");
 
-            return oldDrafts.Count;
+                return oldDrafts.Count;
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("TestReportService.PurgeOldDrafts",
+                    "Database draft cleanup failed.", ex);
+                return 0;
+            }
         }
 
         // Last step of running a test, so deliberately not permission-gated.

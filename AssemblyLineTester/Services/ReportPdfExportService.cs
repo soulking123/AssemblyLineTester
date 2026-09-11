@@ -85,7 +85,7 @@ namespace AssemblyLineTester.Services
             double width = page.Width - Margin * 2;
             double bottom = page.Height - Margin - FooterReserve;
 
-            double y = DrawTestSummaryPageTop(gfx, page, detail, logoPath, fontBold, isFirstPage: true);
+            double y = DrawTestSummaryPageTop(gfx, page, detail, logoPath, fontBold);
 
             void EnsureSpace(double neededHeight)
             {
@@ -96,7 +96,7 @@ namespace AssemblyLineTester.Services
                     gfx = XGraphics.FromPdfPage(page);
                     width = page.Width - Margin * 2;
                     bottom = page.Height - Margin - FooterReserve;
-                    y = DrawTestSummaryPageTop(gfx, page, detail, logoPath, fontBold, isFirstPage: false);
+                    y = DrawTestSummaryPageTop(gfx, page, detail, logoPath, fontBold);
                 }
             }
 
@@ -208,13 +208,18 @@ namespace AssemblyLineTester.Services
             return page;
         }
 
-        private static double DrawTestSummaryPageTop(XGraphics gfx, PdfPage page, ReportDetailDto detail, string logoPath, XFont fontBold, bool isFirstPage)
+        private static double DrawTestSummaryPageTop(XGraphics gfx, PdfPage page, ReportDetailDto detail, string logoPath, XFont fontBold)
         {
             double y = DrawPageHeader(gfx, page, detail, 0, 0, logoPath);
 
+            bool isPass = string.Equals(detail.OverallResult, "PASS", StringComparison.OrdinalIgnoreCase) &&
+                          (detail.Details == null || !detail.Details.Any(d => !string.IsNullOrWhiteSpace(d.ErrorDetail))) &&
+                          (string.IsNullOrWhiteSpace(detail.ErrorSummary) || !detail.ErrorSummary.Contains("FAIL", StringComparison.OrdinalIgnoreCase));
+
+            string title = isPass ? "TEST SUMMARY" : "ERROR SUMMARY";
+
             var titleBg = new XSolidBrush(XColor.FromArgb(40, 230, 230, 230));
-            string title = isFirstPage ? "TEST SUMMARY" : "TEST SUMMARY (CONTINUED)";
-            double titleWidth = isFirstPage ? 200 : 280;
+            double titleWidth = 200;
             gfx.DrawRectangle(titleBg, Margin, y - 2, titleWidth, 18);
             gfx.DrawString(title, fontBold, XBrushes.Black, new XRect(Margin, y, 400, 16), XStringFormats.TopLeft);
             return y + 26;
