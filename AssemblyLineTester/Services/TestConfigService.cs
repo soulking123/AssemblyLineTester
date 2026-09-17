@@ -297,7 +297,7 @@ namespace AssemblyLineTester.Services
             return nets;
         }
 
-        public string ConvertToProgramText(TestConfiguration config)
+        public string ConvertToProgramText(TestConfiguration config, int testPoint)
         {
             if (config == null) return string.Empty;
 
@@ -340,19 +340,17 @@ namespace AssemblyLineTester.Services
 
             sb.AppendLine("INTERFACING");
             sb.AppendLine("BEGIN");
-            sb.AppendLine("     J1 ,  AHED-64 ");
-            sb.AppendLine("     J2 ,  AHED-64 ");
-            sb.AppendLine("     J3 ,  AHED-64 ");
-            sb.AppendLine("     J4 ,  AHED-64 ");
-            sb.AppendLine("     J5 ,  AHED-64 ");
-            sb.AppendLine("     J6 ,  AHED-64 ");
-            sb.AppendLine("     J7 ,  AHED-64 ");
+            testPoint = (testPoint + 63) / 64;
+            for (int j = 1; j <= testPoint; j++)
+            {
+                sb.AppendLine($"     J{j} ,  AHED-64 ");
+            }
             sb.AppendLine("END");
             sb.AppendLine();
 
             sb.AppendLine("ATTACH");
             sb.AppendLine("BEGIN");
-            for (int j = 1; j <= 7; j++)
+            for (int j = 1; j <= testPoint; j++)
             {
                 int startPin = (j - 1) * 64 + 1;
                 var pins = Enumerable.Range(startPin, 64);

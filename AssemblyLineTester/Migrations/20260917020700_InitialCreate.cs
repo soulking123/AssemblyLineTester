@@ -176,6 +176,7 @@ namespace AssemblyLineTester.Migrations
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     OverallResult = table.Column<int>(type: "INTEGER", nullable: true),
                     Notes = table.Column<string>(type: "TEXT", nullable: false),
+                    ErrorSummary = table.Column<string>(type: "TEXT", nullable: true),
                     IsDraft = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
@@ -390,6 +391,10 @@ namespace AssemblyLineTester.Migrations
                     MeasurementUnit = table.Column<string>(type: "TEXT", nullable: false),
                     ExpectedValue = table.Column<double>(type: "REAL", nullable: true),
                     Tolerance = table.Column<double>(type: "REAL", nullable: true),
+                    ExpectedValue2 = table.Column<double>(type: "REAL", nullable: true),
+                    Tolerance2 = table.Column<double>(type: "REAL", nullable: true),
+                    LowerLimit2 = table.Column<double>(type: "REAL", nullable: true),
+                    UpperLimit2 = table.Column<double>(type: "REAL", nullable: true),
                     Color = table.Column<string>(type: "TEXT", nullable: false),
                     Gauge = table.Column<string>(type: "TEXT", nullable: false)
                 },
@@ -447,12 +452,21 @@ namespace AssemblyLineTester.Migrations
                     ToPin = table.Column<string>(type: "TEXT", nullable: false),
                     FromLabel = table.Column<string>(type: "TEXT", nullable: false),
                     ToLabel = table.Column<string>(type: "TEXT", nullable: false),
+                    Color = table.Column<string>(type: "TEXT", nullable: false),
+                    Gauge = table.Column<string>(type: "TEXT", nullable: false),
                     TestTypeName = table.Column<string>(type: "TEXT", nullable: false),
                     MeasuredValue = table.Column<double>(type: "REAL", nullable: true),
+                    MeasurementPrefix = table.Column<string>(type: "TEXT", nullable: true),
                     LowerLimit = table.Column<double>(type: "REAL", nullable: true),
                     UpperLimit = table.Column<double>(type: "REAL", nullable: true),
                     ExpectedValue = table.Column<double>(type: "REAL", nullable: true),
                     Tolerance = table.Column<double>(type: "REAL", nullable: true),
+                    MeasuredValue2 = table.Column<double>(type: "REAL", nullable: true),
+                    MeasurementPrefix2 = table.Column<string>(type: "TEXT", nullable: true),
+                    LowerLimit2 = table.Column<double>(type: "REAL", nullable: true),
+                    UpperLimit2 = table.Column<double>(type: "REAL", nullable: true),
+                    ExpectedValue2 = table.Column<double>(type: "REAL", nullable: true),
+                    Tolerance2 = table.Column<double>(type: "REAL", nullable: true),
                     Unit = table.Column<string>(type: "TEXT", nullable: false),
                     Result = table.Column<bool>(type: "INTEGER", nullable: false),
                     ErrorDetail = table.Column<string>(type: "TEXT", nullable: true)
@@ -645,8 +659,7 @@ namespace AssemblyLineTester.Migrations
                 values: new object[,]
                 {
                     { 1, "User is active and allowed to log in", "Active" },
-                    { 2, "User is inactive and disabled", "Inactive" },
-                    { 3, "User is locked out due to multiple failed login attempts", "Locked" }
+                    { 2, "User is inactive and disabled", "Inactive" }
                 });
 
             migrationBuilder.InsertData(

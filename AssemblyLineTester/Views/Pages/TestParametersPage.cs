@@ -44,6 +44,7 @@ namespace AssemblyLineTester.Views.Pages
                 UpdateDiagram();
             }
         }
+        
         private void loadDefaultParameter()
         {
             defaultTest = TestSettingService.GetDefaults();
@@ -2651,7 +2652,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     LoadConfigurationIntoGrid(config);
                 }
-                string checkResult = _configService.ConvertToProgramText(config);
+                string checkResult = _configService.ConvertToProgramText(config, defaultTestPoint);
                 txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 //txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 //txtComponentResistance.Text = config.MinComponentResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
@@ -2888,7 +2889,7 @@ namespace AssemblyLineTester.Views.Pages
 
             _configService.SaveConfig(config);
 
-            _customTestText = _configService.ConvertToProgramText(config);
+            _customTestText = _configService.ConvertToProgramText(config, defaultTestPoint);
 
             Debug.WriteLine(_customTestText);
             //foreach (var net in config.Nets)
@@ -2946,7 +2947,7 @@ namespace AssemblyLineTester.Views.Pages
 
             _configService.SaveConfig(config);
 
-            _customTestText = _configService.ConvertToProgramText(config);
+            _customTestText = _configService.ConvertToProgramText(config, defaultTestPoint);
             //Debug.WriteLine(_customTestText);
             //foreach (var net in config.Nets)
             //{
@@ -3032,20 +3033,20 @@ namespace AssemblyLineTester.Views.Pages
                 int.TryParse(row.Cells["colToAddr"].Value?.ToString(), out int nextToAddr);
                 string from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString();
                 string to = "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString();
-                if (defaultTestPoint == 128)
-                {
-                    if (nextFromAddr > 64 )
-                    {
-                        nextFromAddr += 64;
-                    }
-                    if (nextToAddr > 64)
-                    {
-                        nextToAddr += 64;
-                    }
-                    from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3");
-                    to = "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3");
+                //if (defaultTestPoint == 128)
+                //{
+                //    if (nextFromAddr > 64 )
+                //    {
+                //        nextFromAddr += 64;
+                //    }
+                //    if (nextToAddr > 64)
+                //    {
+                //        nextToAddr += 64;
+                //    }
+                //    from = "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3");
+                //    to = "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3");
                     
-                }
+                //}
 
                 string fromLabel = row.Cells["colFromLabel"].Value?.ToString()?.Trim() ?? "";
                 string toLabel = row.Cells["colToLabel"].Value?.ToString()?.Trim() ?? "";
@@ -3226,7 +3227,7 @@ namespace AssemblyLineTester.Views.Pages
             }
             if (token.IsCancellationRequested) return;
 
-            _customTestText = _configService.ConvertToProgramText(config);
+            _customTestText = _configService.ConvertToProgramText(config,defaultTestPoint);
             //Debug.WriteLine(_customTestText);
 
             if (token.IsCancellationRequested) return;

@@ -41,6 +41,8 @@ namespace AssemblyLineTester.Views.Pages
         private DateTime _endTime;
         private readonly SystemLogService logService = new();
         private TestConfiguration config = new();
+        private DefaultTestSetting defaultTest = TestSettingService.GetDefaults();
+        private int defaultTestPoint;
 
         public TestExecution()
         {
@@ -71,7 +73,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (config == null || config.ConfigName != activeConfig.ConfigName || config.UpdatedAt != activeConfig.UpdatedAt)
                 {
                     config = activeConfig;
-                    _customTestText = configService.ConvertToProgramText(activeConfig);
+                    _customTestText = configService.ConvertToProgramText(activeConfig, defaultTestPoint);
                     lblPageHeader.Text = $"TEST EXECUTION - {activeConfig.ConfigName}";
                     var resNet = activeConfig.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
                     if (resNet != null && resNet.UpperLimit.HasValue)
@@ -103,7 +105,15 @@ namespace AssemblyLineTester.Views.Pages
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
                 RefreshActiveConfiguration();
+                loadDefaultParameter();
             }
+        }
+
+        
+        private void loadDefaultParameter()
+        {
+            defaultTest = TestSettingService.GetDefaults();
+            defaultTestPoint = defaultTest.TotalTestPointsAvailable;
         }
 
 
@@ -317,7 +327,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (dlg.SelectedConfiguration != null)
                 {
                     configService.SetActiveConfig(dlg.SelectedConfiguration.ConfigName);
-                    _customTestText = configService.ConvertToProgramText(dlg.SelectedConfiguration);
+                    _customTestText = configService.ConvertToProgramText(dlg.SelectedConfiguration, defaultTestPoint);
                     var resNet = dlg.SelectedConfiguration.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
                     config = configService.GetConfigurationByName(dlg.SelectedConfiguration.ConfigName) ?? new();
 
@@ -353,7 +363,7 @@ namespace AssemblyLineTester.Views.Pages
                                 }).ToList()
                             };
                             config = tempConfig;
-                            _customTestText = configService.ConvertToProgramText(tempConfig);
+                            _customTestText = configService.ConvertToProgramText(tempConfig, defaultTestPoint);
                             var resNet = tempConfig.Nets.FirstOrDefault(n => n.UpperLimit.HasValue);
                             if (resNet != null && resNet.UpperLimit.HasValue)
                             {
@@ -505,7 +515,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 if (token.IsCancellationRequested) return;
-                _customTestText = _configService.ConvertToProgramText(config);
+                _customTestText = _configService.ConvertToProgramText(config, defaultTestPoint);
                 Debug.WriteLine(_customTestText);
 
                 if (token.IsCancellationRequested) return;
