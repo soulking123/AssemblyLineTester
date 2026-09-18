@@ -614,20 +614,20 @@ namespace AssemblyLineTester.Migrations
                 columns: new[] { "Id", "DisplayName", "IsChecked", "TestTypeName" },
                 values: new object[,]
                 {
-                    { 1, "4RESISTOR", true, "4RESISTOR" },
-                    { 2, "4WIRE", true, "4WIRE" },
+                    { 1, "4RESISTOR", false, "4RESISTOR" },
+                    { 2, "4WIRE", false, "4WIRE" },
                     { 3, "CAPACITOR", true, "CAPACITOR" },
-                    { 4, "CLOSE", true, "CLOSE" },
-                    { 5, "COMMENT", true, "COMMENT" },
+                    { 4, "CLOSE", false, "CLOSE" },
+                    { 5, "COMMENT", false, "COMMENT" },
                     { 6, "DIODE", true, "DIODE" },
-                    { 7, "LINK", true, "LINK" },
-                    { 8, "LUA COMPONENT", true, "LUA COMPONENT" },
-                    { 9, "OPEN", true, "OPEN" },
-                    { 10, "PROBE", true, "PROBE" },
+                    { 7, "LINK", false, "LINK" },
+                    { 8, "LUA COMPONENT", false, "LUA COMPONENT" },
+                    { 9, "OPEN", false, "OPEN" },
+                    { 10, "PROBE", false, "PROBE" },
                     { 11, "RESISTOR", true, "RESISTOR" },
-                    { 12, "SIGNATURE DIODE", true, "SIGNATURE DIODE" },
+                    { 12, "SIGNATURE DIODE", false, "SIGNATURE DIODE" },
                     { 13, "SIGNATURE WIRE", true, "SIGNATURE WIRE" },
-                    { 14, "TWISTED PAIR", true, "TWISTED PAIR" },
+                    { 14, "TWISTED PAIR", false, "TWISTED PAIR" },
                     { 15, "WIRE", true, "WIRE" }
                 });
 
@@ -663,6 +663,11 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "DefaultTestSettings",
+                columns: new[] { "Id", "DefaultCapacitorTolerance", "DefaultCapacitorValue", "DefaultMaxWireResistance", "DefaultMinInulationResistance", "DefaultResistorTolerance", "DefaultResistorValue", "DefaultTestTypeId", "TotalTestPointsAvailable" },
+                values: new object[] { 1, 10, 9.9999999999999995E-07, 10.0, 500000.0, 10, 100.0, 15, 448 });
+
+            migrationBuilder.InsertData(
                 table: "LearnConnections",
                 columns: new[] { "Id", "DisplayName", "IsChecked", "TestTypeId", "TestTypeValue" },
                 values: new object[,]
@@ -671,7 +676,7 @@ namespace AssemblyLineTester.Migrations
                     { 2, "Resistance", true, 11, 0 },
                     { 3, "Capacitor", true, 3, 0 },
                     { 4, "Diode", true, 6, 0 },
-                    { 5, "Twisted Pair", true, 14, 0 }
+                    { 5, "Twisted Pair", false, 14, 0 }
                 });
 
             migrationBuilder.InsertData(

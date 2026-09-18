@@ -37,6 +37,7 @@
 
 	<!-- Suppress known compatibility warning for PdfSharp (targets .NET Framework). Replace with a .NET 10 compatible PDF library when convenient. -->
 	<PropertyGroup>
+		
 		<NoWarn>$(NoWarn);NU1701</NoWarn>
 	</PropertyGroup>
 

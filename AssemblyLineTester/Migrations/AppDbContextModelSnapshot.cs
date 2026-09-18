@@ -80,6 +80,20 @@ namespace AssemblyLineTester.Migrations
                     b.HasIndex("DefaultTestTypeId");
 
                     b.ToTable("DefaultTestSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DefaultCapacitorTolerance = 10,
+                            DefaultCapacitorValue = 9.9999999999999995E-07,
+                            DefaultMaxWireResistance = 10.0,
+                            DefaultMinInulationResistance = 500000.0,
+                            DefaultResistorTolerance = 10,
+                            DefaultResistorValue = 100.0,
+                            DefaultTestTypeId = 15,
+                            TotalTestPointsAvailable = 448
+                        });
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.LearnConnection", b =>
@@ -144,7 +158,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 5,
                             DisplayName = "Twisted Pair",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeId = 14,
                             TestTypeValue = 0
                         });
@@ -2088,14 +2102,14 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 1,
                             DisplayName = "4RESISTOR",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "4RESISTOR"
                         },
                         new
                         {
                             Id = 2,
                             DisplayName = "4WIRE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "4WIRE"
                         },
                         new
@@ -2109,14 +2123,14 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 4,
                             DisplayName = "CLOSE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "CLOSE"
                         },
                         new
                         {
                             Id = 5,
                             DisplayName = "COMMENT",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "COMMENT"
                         },
                         new
@@ -2130,28 +2144,28 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 7,
                             DisplayName = "LINK",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "LINK"
                         },
                         new
                         {
                             Id = 8,
                             DisplayName = "LUA COMPONENT",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "LUA COMPONENT"
                         },
                         new
                         {
                             Id = 9,
                             DisplayName = "OPEN",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "OPEN"
                         },
                         new
                         {
                             Id = 10,
                             DisplayName = "PROBE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "PROBE"
                         },
                         new
@@ -2165,7 +2179,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 12,
                             DisplayName = "SIGNATURE DIODE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "SIGNATURE DIODE"
                         },
                         new
@@ -2179,7 +2193,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 14,
                             DisplayName = "TWISTED PAIR",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "TWISTED PAIR"
                         },
                         new

@@ -25,15 +25,19 @@ namespace AssemblyLineTester.Services
             lock (_lockObj)
             {
                 if (IsConnected) return true;
+                Debug.WriteLine("Connecting ..."); 
                 try
                 {
                     var connectionResult = _service.Connect(ServerIPandPort, UserName, Password);
                     if (connectionResult.DllCallResult == CtaCommandResultCode.Success)
                     {
                         _connectionId = connectionResult.FunctionResult;
+                        Debug.WriteLine($"succes code : {_connectionId}");
                         return true;
                     }
                     _connectionId = -1;
+
+                    Debug.WriteLine($"failed code : {_connectionId}");
                     return false;
                 }
                 catch
