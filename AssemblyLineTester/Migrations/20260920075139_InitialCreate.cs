@@ -146,7 +146,8 @@ namespace AssemblyLineTester.Migrations
                     MaxWireResistance = table.Column<double>(type: "REAL", nullable: false),
                     MinComponentResistance = table.Column<double>(type: "REAL", nullable: false),
                     MinInsulationResistance = table.Column<double>(type: "REAL", nullable: false),
-                    HipotVoltage = table.Column<bool>(type: "INTEGER", nullable: false)
+                    HipotVoltage = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ShortTest = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -616,10 +617,10 @@ namespace AssemblyLineTester.Migrations
                 {
                     { 1, "4RESISTOR", false, "4RESISTOR" },
                     { 2, "4WIRE", false, "4WIRE" },
-                    { 3, "CAPACITOR", true, "CAPACITOR" },
+                    { 3, "CAPACITOR", false, "CAPACITOR" },
                     { 4, "CLOSE", false, "CLOSE" },
                     { 5, "COMMENT", false, "COMMENT" },
-                    { 6, "DIODE", true, "DIODE" },
+                    { 6, "DIODE", false, "DIODE" },
                     { 7, "LINK", false, "LINK" },
                     { 8, "LUA COMPONENT", false, "LUA COMPONENT" },
                     { 9, "OPEN", false, "OPEN" },
@@ -674,8 +675,8 @@ namespace AssemblyLineTester.Migrations
                 {
                     { 1, "Wire", true, 15, 0 },
                     { 2, "Resistance", true, 11, 0 },
-                    { 3, "Capacitor", true, 3, 0 },
-                    { 4, "Diode", true, 6, 0 },
+                    { 3, "Capacitor", false, 3, 0 },
+                    { 4, "Diode", false, 6, 0 },
                     { 5, "Twisted Pair", false, 14, 0 }
                 });
 

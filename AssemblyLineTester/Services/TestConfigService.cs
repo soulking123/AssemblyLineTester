@@ -85,6 +85,7 @@ namespace AssemblyLineTester.Services
                     existingProgram.MinInsulationResistance = config.MinInsulationResistance;
                     existingProgram.MinComponentResistance = config.MinComponentResistance;
                     existingProgram.HipotVoltage = config.HipotVoltage;
+                    existingProgram.ShortTest = config.ShortTest;
                     existingProgram.UpdatedAt = DateTime.UtcNow;
                     existingProgram.TestTypes = config.TestTypes;
 

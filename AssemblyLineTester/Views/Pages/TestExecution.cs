@@ -537,7 +537,7 @@ namespace AssemblyLineTester.Views.Pages
                 if (token.IsCancellationRequested) return;
 
                 // Call RunSingleTest to execute the program on hardware so CTA populates test errors (shorts, opens, etc.)
-                var testResult = _instrument.RunSingleTest(false, true);
+                var testResult = _instrument.RunSingleTest(false, config.ShortTest);
                 if (testResult != null && testResult.DllCallResult == CtaCommandResultCode.Success)
                 {
                     logService.Log(LogSeverity.Info, "Instrument", "Run Test Program Success.",
@@ -1478,6 +1478,7 @@ namespace AssemblyLineTester.Views.Pages
         private readonly Label lblMinCompResVal = new();
         private readonly Label lblMinInsResVal = new();
         private readonly Label lblHipotVoltageVal = new();
+        private readonly Label lblShortTestVal = new();
         private readonly Label lblDescriptionVal = new();
 
         private void SetupProgramInfoArea()
@@ -1518,6 +1519,7 @@ namespace AssemblyLineTester.Views.Pages
             AddProgramInfoRow("Min Component Res.:", lblMinCompResVal);
             AddProgramInfoRow("Min Insulation Res.:", lblMinInsResVal);
             AddProgramInfoRow("Hipot Voltage:", lblHipotVoltageVal);
+            AddProgramInfoRow("Short Test:", lblShortTestVal);
             AddProgramInfoRow("Description:", lblDescriptionVal);
 
             pnlContainer.Controls.Add(tblProgramInfo);
@@ -1563,7 +1565,8 @@ namespace AssemblyLineTester.Views.Pages
                 lblMaxWireResVal.Text = "-";
                 lblMinCompResVal.Text = "-";
                 lblMinInsResVal.Text = "-";
-                lblHipotVoltageVal.Text = "OFF";
+                lblHipotVoltageVal.Text = "-";
+                lblShortTestVal.Text = "-";
                 lblDescriptionVal.Text = "-";
                 return;
             }
@@ -1605,7 +1608,8 @@ namespace AssemblyLineTester.Views.Pages
             else
                 lblMinInsResVal.Text = "-";
 
-            lblHipotVoltageVal.Text = cfg.HipotVoltage ? "ON" : "OFF";
+            lblHipotVoltageVal.Text = cfg.HipotVoltage ? "Enabled" : "Disabled";
+            lblShortTestVal.Text = cfg.ShortTest ? "Enabled" : "Disabled";
             lblDescriptionVal.Text = !string.IsNullOrWhiteSpace(cfg.Description) ? cfg.Description : "-";
         }
     }

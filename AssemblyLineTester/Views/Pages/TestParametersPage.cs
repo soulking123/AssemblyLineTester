@@ -422,7 +422,10 @@ namespace AssemblyLineTester.Views.Pages
             Apply(txtConfigName, SummaryConfigName);
             Apply(txtProductModel, SummaryProductModel);
             Apply(txtConnectionResistance, SummaryConnectionResistance, SummaryConnectionResistanceOld);
-            Apply(txtComponentResistance, SummaryComponentResistance, SummaryComponentResistanceOld);
+            if (found.TryGetValue(SummaryEnableShortTest, out string? shortVal) && !string.IsNullOrWhiteSpace(shortVal))
+            {
+                chkEnableShortTest.Checked = shortVal.Equals("Yes", StringComparison.OrdinalIgnoreCase) || shortVal.Equals("True", StringComparison.OrdinalIgnoreCase) || shortVal == "1";
+            }
             Apply(txtInsulationResistance, SummaryInsulationResistance);
             Apply(txtDescription, SummaryDescription);
         }
@@ -570,8 +573,7 @@ namespace AssemblyLineTester.Views.Pages
         private const string SummaryProductModel = "Product Model";
         private const string SummaryConnectionResistance = "Connection Resistance (Ohm)";
         private const string SummaryConnectionResistanceOld = "Connection Resistance (mOhm)";
-        private const string SummaryComponentResistance = "Component Resistance (Ohm)";
-        private const string SummaryComponentResistanceOld = "Component Resistance (mOhm)";
+        private const string SummaryEnableShortTest = "Enable Short Test";
         private const string SummaryInsulationResistance = "Insulation Resistance (MOhm)";
         private const string SummaryDescription = "Description";
 
@@ -601,7 +603,7 @@ namespace AssemblyLineTester.Views.Pages
                 (SummaryConfigName, configName),
                 (SummaryProductModel, productModel),
                 (SummaryConnectionResistance, connRes),
-                (SummaryComponentResistance, txtComponentResistance.Text?.Trim() ?? ""),
+                (SummaryEnableShortTest, chkEnableShortTest.Checked ? "Yes" : "No"),
                 (SummaryInsulationResistance, txtInsulationResistance.Text?.Trim() ?? ""),
                 (SummaryDescription, txtDescription.Text?.Trim() ?? "")
             };
@@ -749,7 +751,7 @@ namespace AssemblyLineTester.Views.Pages
                 (SummaryConfigName, "Default 6060"),
                 (SummaryProductModel, "6060"),
                 (SummaryConnectionResistance, "10.00"),
-                (SummaryComponentResistance, ""),
+                (SummaryEnableShortTest, "Yes"),
                 (SummaryInsulationResistance, ""),
                 (SummaryDescription, "")
             };
@@ -1053,7 +1055,7 @@ namespace AssemblyLineTester.Views.Pages
                 txtProductModel.Text = "";
                 txtConnectionResistance.Text = "";
                 txtInsulationResistance.Text = "";
-                txtComponentResistance.Text = "";
+                chkEnableShortTest.Checked = true;
                 txtDescription.Text = "";
                 _loadedConfigName = null;
                 loadDefaultParameter();
@@ -1098,9 +1100,7 @@ namespace AssemblyLineTester.Views.Pages
             txtInsulationResistance.Text = config.MinInsulationResistance > 0 
                 ? config.MinInsulationResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
                 : "";
-            txtComponentResistance.Text = config.MinComponentResistance > 0 
-                ? config.MinComponentResistance.ToString(System.Globalization.CultureInfo.InvariantCulture) 
-                : "";
+            chkEnableShortTest.Checked = config.ShortTest;
             txtDescription.Text = config.Description ?? "";
 
             foreach (var net in config.Nets.OrderBy(n => n.SequenceNo))
@@ -2349,7 +2349,6 @@ namespace AssemblyLineTester.Views.Pages
                 return null;
             }
             double.TryParse(txtInsulationResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minInsRes);
-            double.TryParse(txtComponentResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minCompRes);
 
             return new TestConfiguration
             {
@@ -2358,7 +2357,8 @@ namespace AssemblyLineTester.Views.Pages
                 Description = description,
                 MaxWireResistance = maxWireRes,
                 MinInsulationResistance = minInsRes,
-                MinComponentResistance = minCompRes,
+                MinComponentResistance = 0,
+                ShortTest = chkEnableShortTest.Checked,
                 //TestTypes = testTypes,
                 Nets = nets
             };
@@ -2655,7 +2655,6 @@ namespace AssemblyLineTester.Views.Pages
                 string checkResult = _configService.ConvertToProgramText(config, defaultTestPoint);
                 txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 //txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-                //txtComponentResistance.Text = config.MinComponentResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
 
             }
@@ -2783,7 +2782,6 @@ namespace AssemblyLineTester.Views.Pages
                 string checkResult = _configService.ConvertToProgramText(config);
                 txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-                txtComponentResistance.Text = config.MinComponentResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
 
                 //Debug.WriteLine("Convert  = ");
@@ -3258,7 +3256,7 @@ namespace AssemblyLineTester.Views.Pages
             if (token.IsCancellationRequested) return;
 
             Debug.WriteLine("Run Test");
-            var testResult = _instrument.RunSingleTest(false, true);
+            var testResult = _instrument.RunSingleTest(false, config.ShortTest);
 
             if (token.IsCancellationRequested) return;
 
@@ -3589,7 +3587,6 @@ namespace AssemblyLineTester.Views.Pages
                 return null;
             }
             double.TryParse(txtInsulationResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minInsRes);
-            double.TryParse(txtComponentResistance.Text?.Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minCompRes);
 
             return new TestConfiguration
             {
@@ -3598,7 +3595,8 @@ namespace AssemblyLineTester.Views.Pages
                 Description = description,
                 MaxWireResistance = maxWireRes,
                 MinInsulationResistance = minInsRes,
-                MinComponentResistance = minCompRes,
+                MinComponentResistance = 0,
+                ShortTest = chkEnableShortTest.Checked,
                 Nets = nets
             };
         }

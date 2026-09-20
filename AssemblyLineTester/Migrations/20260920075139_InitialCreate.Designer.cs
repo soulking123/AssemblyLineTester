@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260918094133_InitialCreate")]
+    [Migration("20260920075139_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -145,7 +145,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 3,
                             DisplayName = "Capacitor",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeId = 3,
                             TestTypeValue = 0
                         },
@@ -153,7 +153,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 4,
                             DisplayName = "Diode",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeId = 6,
                             TestTypeValue = 0
                         },
@@ -1616,6 +1616,9 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("ProductModel");
 
+                    b.Property<bool>("ShortTest")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
@@ -2119,7 +2122,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 3,
                             DisplayName = "CAPACITOR",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "CAPACITOR"
                         },
                         new
@@ -2140,7 +2143,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 6,
                             DisplayName = "DIODE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "DIODE"
                         },
                         new
