@@ -23,7 +23,6 @@ namespace AssemblyLineTester.Views
             btnDashboard = new AssemblyLineTester.Views.Controls.MenuButton();
             btnTestExecution = new AssemblyLineTester.Views.Controls.MenuButton();
             btnManualTesting = new AssemblyLineTester.Views.Controls.MenuButton();
-            btnHarnessDatabase = new AssemblyLineTester.Views.Controls.MenuButton();
             btnProductDatabase = new AssemblyLineTester.Views.Controls.MenuButton();
             btnTestHistory = new AssemblyLineTester.Views.Controls.MenuButton();
             btnReports = new AssemblyLineTester.Views.Controls.MenuButton();
@@ -84,14 +83,12 @@ namespace AssemblyLineTester.Views
             splitContainer1.Panel1.Controls.Add(btnDashboard);
             splitContainer1.Panel1.Controls.Add(btnTestExecution);
             splitContainer1.Panel1.Controls.Add(btnManualTesting);
-            splitContainer1.Panel1.Controls.Add(btnHarnessDatabase);
             splitContainer1.Panel1.Controls.Add(btnProductDatabase);
             splitContainer1.Panel1.Controls.Add(btnTestHistory);
             splitContainer1.Panel1.Controls.Add(btnReports);
             splitContainer1.Panel1.Controls.Add(btnSystemLog);
             splitContainer1.Panel1.Controls.Add(btnSettings);
             splitContainer1.Panel1.Controls.Add(btnUserManagement);
-            splitContainer1.Panel1.Controls.Add(btnToggleSidebar);
             splitContainer1.Panel1.Controls.Add(pnlLogoHeader);
             // 
             // splitContainer1.Panel2
@@ -181,23 +178,10 @@ namespace AssemblyLineTester.Views
             btnManualTesting.UseVisualStyleBackColor = true;
             btnManualTesting.Click += BtnMenu_Click;
             // 
-            // btnHarnessDatabase
-            // 
-            btnHarnessDatabase.Font = new Font("Segoe UI", 11F);
-            btnHarnessDatabase.Location = new Point(32, 448);
-            btnHarnessDatabase.Margin = new Padding(5);
-            btnHarnessDatabase.Name = "btnHarnessDatabase";
-            btnHarnessDatabase.Size = new Size(377, 80);
-            btnHarnessDatabase.TabIndex = 4;
-            btnHarnessDatabase.Text = "        Harness Database";
-            btnHarnessDatabase.TextAlign = ContentAlignment.MiddleLeft;
-            btnHarnessDatabase.UseVisualStyleBackColor = true;
-            btnHarnessDatabase.Click += BtnMenu_Click;
-            // 
             // btnProductDatabase
             // 
             btnProductDatabase.Font = new Font("Segoe UI", 11F);
-            btnProductDatabase.Location = new Point(32, 496);
+            btnProductDatabase.Location = new Point(32, 448);
             btnProductDatabase.Margin = new Padding(5);
             btnProductDatabase.Name = "btnProductDatabase";
             btnProductDatabase.Size = new Size(377, 80);
@@ -595,7 +579,6 @@ namespace AssemblyLineTester.Views
         private AssemblyLineTester.Views.Controls.MenuButton btnDashboard;
         private AssemblyLineTester.Views.Controls.MenuButton btnTestExecution;
         private AssemblyLineTester.Views.Controls.MenuButton btnManualTesting;
-        private AssemblyLineTester.Views.Controls.MenuButton btnHarnessDatabase;
         private AssemblyLineTester.Views.Controls.MenuButton btnProductDatabase;
         private AssemblyLineTester.Views.Controls.MenuButton btnTestHistory;
         private AssemblyLineTester.Views.Controls.MenuButton btnReports;

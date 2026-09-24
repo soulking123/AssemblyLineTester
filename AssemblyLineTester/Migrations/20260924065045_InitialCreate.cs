@@ -31,20 +31,34 @@ namespace AssemblyLineTester.Migrations
                 name: "Connectors",
                 columns: table => new
                 {
-                    ConnectorId = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Perf = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
                     PartNumber = table.Column<string>(type: "TEXT", nullable: false),
-                    ContactType = table.Column<string>(type: "TEXT", nullable: false),
-                    ContactQuantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    WireSize = table.Column<string>(type: "TEXT", nullable: false),
-                    CurrentRating = table.Column<double>(type: "REAL", nullable: false),
-                    MountingStyle = table.Column<string>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: true)
+                    TotalPin = table.Column<int>(type: "INTEGER", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Connectors", x => x.ConnectorId);
+                    table.PrimaryKey("PK_Connectors", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HarnessAssemblies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    PartNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HarnessAssemblies", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,31 +80,15 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductHarnesses",
-                columns: table => new
-                {
-                    ProductHarnessId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    ProductModel = table.Column<string>(type: "TEXT", nullable: false),
-                    ProductType = table.Column<string>(type: "TEXT", nullable: false),
-                    Area = table.Column<string>(type: "TEXT", nullable: false),
-                    LastUpdate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ImagePaths = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductHarnesses", x => x.ProductHarnessId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ProductModels",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Desc = table.Column<string>(type: "TEXT", nullable: true)
+                    PartNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -246,29 +244,50 @@ namespace AssemblyLineTester.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "HarnessConnectors",
+                name: "ConnectorHarnessAssembly",
                 columns: table => new
                 {
-                    HarnessConnectorId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ProductHarnessId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConnectorId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Position = table.Column<int>(type: "INTEGER", nullable: false)
+                    ConnectorsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    HarnessAssemblyId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_HarnessConnectors", x => x.HarnessConnectorId);
+                    table.PrimaryKey("PK_ConnectorHarnessAssembly", x => new { x.ConnectorsId, x.HarnessAssemblyId });
                     table.ForeignKey(
-                        name: "FK_HarnessConnectors_Connectors_ConnectorId",
-                        column: x => x.ConnectorId,
+                        name: "FK_ConnectorHarnessAssembly_Connectors_ConnectorsId",
+                        column: x => x.ConnectorsId,
                         principalTable: "Connectors",
-                        principalColumn: "ConnectorId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_HarnessConnectors_ProductHarnesses_ProductHarnessId",
-                        column: x => x.ProductHarnessId,
-                        principalTable: "ProductHarnesses",
-                        principalColumn: "ProductHarnessId",
+                        name: "FK_ConnectorHarnessAssembly_HarnessAssemblies_HarnessAssemblyId",
+                        column: x => x.HarnessAssemblyId,
+                        principalTable: "HarnessAssemblies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HarnessAssemblyProductModel",
+                columns: table => new
+                {
+                    HarnessAssembliesId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProductModelId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HarnessAssemblyProductModel", x => new { x.HarnessAssembliesId, x.ProductModelId });
+                    table.ForeignKey(
+                        name: "FK_HarnessAssemblyProductModel_HarnessAssemblies_HarnessAssembliesId",
+                        column: x => x.HarnessAssembliesId,
+                        principalTable: "HarnessAssemblies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_HarnessAssemblyProductModel_ProductModels_ProductModelId",
+                        column: x => x.ProductModelId,
+                        principalTable: "ProductModels",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -567,13 +586,13 @@ namespace AssemblyLineTester.Migrations
 
             migrationBuilder.InsertData(
                 table: "ProductModels",
-                columns: new[] { "Id", "Desc", "Name" },
+                columns: new[] { "Id", "Description", "ImagePath", "Name", "PartNumber" },
                 values: new object[,]
                 {
-                    { 1, null, "6020" },
-                    { 2, null, "6030" },
-                    { 3, null, "6040" },
-                    { 4, null, "6060" }
+                    { 1, "", "[]", "6020", "" },
+                    { 2, "", "[]", "6030", "" },
+                    { 3, "", "[]", "6040", "" },
+                    { 4, "", "[]", "6060", "" }
                 });
 
             migrationBuilder.InsertData(
@@ -819,20 +838,19 @@ namespace AssemblyLineTester.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ConnectorHarnessAssembly_HarnessAssemblyId",
+                table: "ConnectorHarnessAssembly",
+                column: "HarnessAssemblyId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DefaultTestSettings_DefaultTestTypeId",
                 table: "DefaultTestSettings",
                 column: "DefaultTestTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_HarnessConnectors_ConnectorId",
-                table: "HarnessConnectors",
-                column: "ConnectorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_HarnessConnectors_ProductHarnessId_ConnectorId",
-                table: "HarnessConnectors",
-                columns: new[] { "ProductHarnessId", "ConnectorId" },
-                unique: true);
+                name: "IX_HarnessAssemblyProductModel_ProductModelId",
+                table: "HarnessAssemblyProductModel",
+                column: "ProductModelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LearnConnections_TestTypeId",
@@ -963,19 +981,19 @@ namespace AssemblyLineTester.Migrations
                 name: "Areas");
 
             migrationBuilder.DropTable(
+                name: "ConnectorHarnessAssembly");
+
+            migrationBuilder.DropTable(
                 name: "DefaultTestSettings");
 
             migrationBuilder.DropTable(
-                name: "HarnessConnectors");
+                name: "HarnessAssemblyProductModel");
 
             migrationBuilder.DropTable(
                 name: "LearnConnections");
 
             migrationBuilder.DropTable(
                 name: "MaintenanceStates");
-
-            migrationBuilder.DropTable(
-                name: "ProductModels");
 
             migrationBuilder.DropTable(
                 name: "ReportTestTypeSummaries");
@@ -1011,7 +1029,10 @@ namespace AssemblyLineTester.Migrations
                 name: "Connectors");
 
             migrationBuilder.DropTable(
-                name: "ProductHarnesses");
+                name: "HarnessAssemblies");
+
+            migrationBuilder.DropTable(
+                name: "ProductModels");
 
             migrationBuilder.DropTable(
                 name: "TestConfigurations");

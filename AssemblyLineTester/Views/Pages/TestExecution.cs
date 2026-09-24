@@ -1325,16 +1325,16 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
-        // The harness the two thumbnails and their modals are built from: whichever ProductHarness
-        // matches the active config's product model. One query, called from every place that needs
+        // The harness the two thumbnails and their modals are built from: whichever HarnessAssembly
+        // matches the active config's name or part number. One query, called from every place that needs
         // it, so a change to the matching rule only has to happen here.
-        private static ProductHarness? GetHarnessForActiveConfig()
+        private static HarnessAssembly? GetHarnessForActiveConfig()
         {
             var activeConfig = new TestConfigService().GetActiveConfig();
             if (activeConfig == null) return null;
 
             return new AssemblyLineTester.Services.HarnessService().GetAllHarnesses()
-                .FirstOrDefault(h => h.ProductModel == activeConfig.ProductModelName || h.Name == activeConfig.ConfigName);
+                .FirstOrDefault(h => h.Name == activeConfig.ConfigName || h.PartNumber == activeConfig.ConfigName);
         }
 
         private void LoadImagesFromConfig()
@@ -1342,13 +1342,13 @@ namespace AssemblyLineTester.Views.Pages
             var harness = GetHarnessForActiveConfig();
             if (harness == null) return;
 
-            string? harnessImage = harness.ImagePaths?
+            string? harnessImage = harness.ImagePath?
                 .Select(AssemblyLineTester.Services.HarnessService.ResolveImagePath)
                 .FirstOrDefault(p => p != null);
             AssemblyLineTester.Helpers.ImageLoader.SetImage(picMachineOverview, harnessImage);
 
             // J1's own first photo, matching the order the modal below walks the full set in.
-            var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);
+            var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.Id);
             string? firstConnectorImage = connectors
                 .SelectMany(c => AssemblyLineTester.Services.ConnectorService.GetConnectorImagePaths(c))
                 .FirstOrDefault();
@@ -1405,7 +1405,7 @@ namespace AssemblyLineTester.Views.Pages
         private void PicMachineOverview_Click(object? sender, EventArgs e)
         {
             var harness = GetHarnessForActiveConfig();
-            var paths = harness?.ImagePaths?
+            var paths = harness?.ImagePath?
                 .Select(AssemblyLineTester.Services.HarnessService.ResolveImagePath)
                 .Where(p => p != null).Select(p => p!).ToList() ?? new List<string>();
 
@@ -1421,7 +1421,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 // Every photo the connector at J1 has, then J2's, and so on - GetConnectorsByHarness
                 // already returns them in attach position order.
-                var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.ProductHarnessId);
+                var connectors = AssemblyLineTester.Services.ConnectorService.GetConnectorsByHarness(harness.Id);
                 foreach (var conn in connectors)
                 {
                     paths.AddRange(AssemblyLineTester.Services.ConnectorService.GetConnectorImagePaths(conn));

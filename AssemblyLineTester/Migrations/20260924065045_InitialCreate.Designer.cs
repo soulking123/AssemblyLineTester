@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260920075139_InitialCreate")]
+    [Migration("20260924065045_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -214,10 +214,19 @@ namespace AssemblyLineTester.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Desc")
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartNumber")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -232,22 +241,34 @@ namespace AssemblyLineTester.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "6020"
+                            Description = "",
+                            ImagePath = "[]",
+                            Name = "6020",
+                            PartNumber = ""
                         },
                         new
                         {
                             Id = 2,
-                            Name = "6030"
+                            Description = "",
+                            ImagePath = "[]",
+                            Name = "6030",
+                            PartNumber = ""
                         },
                         new
                         {
                             Id = 3,
-                            Name = "6040"
+                            Description = "",
+                            ImagePath = "[]",
+                            Name = "6040",
+                            PartNumber = ""
                         },
                         new
                         {
                             Id = 4,
-                            Name = "6060"
+                            Description = "",
+                            ImagePath = "[]",
+                            Name = "6060",
+                            PartNumber = ""
                         });
                 });
 
@@ -2331,24 +2352,19 @@ namespace AssemblyLineTester.Migrations
 
             modelBuilder.Entity("Connector", b =>
                 {
-                    b.Property<int>("ConnectorId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ContactQuantity")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ContactType")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<double>("CurrentRating")
-                        .HasColumnType("REAL");
-
                     b.Property<string>("ImagePath")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MountingStyle")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -2356,76 +2372,73 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Perf")
+                    b.Property<int>("TotalPin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("WireSize")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("ConnectorId");
+                    b.HasKey("Id");
 
                     b.ToTable("Connectors");
                 });
 
-            modelBuilder.Entity("HarnessConnector", b =>
+            modelBuilder.Entity("ConnectorHarnessAssembly", b =>
                 {
-                    b.Property<int>("HarnessConnectorId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ConnectorsId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ConnectorId")
+                    b.Property<int>("HarnessAssemblyId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Position")
-                        .HasColumnType("INTEGER");
+                    b.HasKey("ConnectorsId", "HarnessAssemblyId");
 
-                    b.Property<int>("ProductHarnessId")
-                        .HasColumnType("INTEGER");
+                    b.HasIndex("HarnessAssemblyId");
 
-                    b.HasKey("HarnessConnectorId");
-
-                    b.HasIndex("ConnectorId");
-
-                    b.HasIndex("ProductHarnessId", "ConnectorId")
-                        .IsUnique();
-
-                    b.ToTable("HarnessConnectors");
+                    b.ToTable("ConnectorHarnessAssembly");
                 });
 
-            modelBuilder.Entity("ProductHarness", b =>
+            modelBuilder.Entity("HarnessAssembly", b =>
                 {
-                    b.Property<int>("ProductHarnessId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Area")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.PrimitiveCollection<string>("ImagePaths")
+                    b.Property<string>("ImagePath")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastUpdate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ProductModel")
+                    b.Property<string>("PartNumber")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ProductType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.HasKey("Id");
 
-                    b.HasKey("ProductHarnessId");
+                    b.ToTable("HarnessAssemblies");
+                });
 
-                    b.ToTable("ProductHarnesses");
+            modelBuilder.Entity("HarnessAssemblyProductModel", b =>
+                {
+                    b.Property<int>("HarnessAssembliesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductModelId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("HarnessAssembliesId", "ProductModelId");
+
+                    b.HasIndex("ProductModelId");
+
+                    b.ToTable("HarnessAssemblyProductModel");
                 });
 
             modelBuilder.Entity("TestConfigurationTestType", b =>
@@ -2574,23 +2587,34 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Status");
                 });
 
-            modelBuilder.Entity("HarnessConnector", b =>
+            modelBuilder.Entity("ConnectorHarnessAssembly", b =>
                 {
-                    b.HasOne("Connector", "Connector")
+                    b.HasOne("Connector", null)
                         .WithMany()
-                        .HasForeignKey("ConnectorId")
+                        .HasForeignKey("ConnectorsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProductHarness", "ProductHarness")
-                        .WithMany("HarnessConnectors")
-                        .HasForeignKey("ProductHarnessId")
+                    b.HasOne("HarnessAssembly", null)
+                        .WithMany()
+                        .HasForeignKey("HarnessAssemblyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HarnessAssemblyProductModel", b =>
+                {
+                    b.HasOne("HarnessAssembly", null)
+                        .WithMany()
+                        .HasForeignKey("HarnessAssembliesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Connector");
-
-                    b.Navigation("ProductHarness");
+                    b.HasOne("AssemblyLineTester.Models.ProductModel", null)
+                        .WithMany()
+                        .HasForeignKey("ProductModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TestConfigurationTestType", b =>
@@ -2623,11 +2647,6 @@ namespace AssemblyLineTester.Migrations
                     b.Navigation("Details");
 
                     b.Navigation("Steps");
-                });
-
-            modelBuilder.Entity("ProductHarness", b =>
-                {
-                    b.Navigation("HarnessConnectors");
                 });
 #pragma warning restore 612, 618
         }
