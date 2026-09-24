@@ -513,7 +513,6 @@ namespace AssemblyLineTester.Views.Pages
             txtProductModel.Name = "txtProductModel";
             txtProductModel.Size = new Size(270, 25);
             txtProductModel.TabIndex = 1;
-            txtProductModel.Text = "6060";
             // 
             // tblCellConnRes
             // 

@@ -299,6 +299,34 @@ namespace AssemblyLineTester.Views.Pages
                   $"{activeConfig.Nets.Count}\n" +
                   $"{activeConfig.CreatedBy}\n" +
                   $"{activeConfig.UpdatedAt:dd MMM yyyy HH:mm}";
+
+            LoadActiveProgramImage(activeConfig?.ProductModelName);
+        }
+
+        private void LoadActiveProgramImage(string? productModelName)
+        {
+            if (string.IsNullOrWhiteSpace(productModelName))
+            {
+                AssemblyLineTester.Helpers.ImageLoader.SetImage(picHarness, null);
+                picHarness.Invalidate();
+                return;
+            }
+
+            try
+            {
+                var productModel = ProductModelService.GetProductModelByName(productModelName);
+                var imagePaths = ProductModelService.GetProductModelImagePaths(productModel);
+                string? firstImage = imagePaths.FirstOrDefault(System.IO.File.Exists);
+                AssemblyLineTester.Helpers.ImageLoader.SetImage(picHarness, firstImage);
+                picHarness.Invalidate();
+                FileLogService.Info("Dashboard.LoadActiveProgramImage", $"Loaded product model '{productModelName}' image: '{firstImage ?? "none"}'");
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Warn("Dashboard.LoadActiveProgramImage", $"Could not load image for '{productModelName}': {ex.Message}");
+                AssemblyLineTester.Helpers.ImageLoader.SetImage(picHarness, null);
+                picHarness.Invalidate();
+            }
         }
 
         private void GridRecent_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)

@@ -152,6 +152,7 @@ namespace AssemblyLineTester.Views.Pages
             txtConnectionResistance.KeyPress += NumericTextBox_KeyPress;
             txtConnectionResistance.Leave += (s, e) => ValidateAndClampConnectionResistance();
             txtConnectionResistance.TextChanged += (s, e) => RecalculateAllRows();
+            txtProductModel.DropDown += (s, e) => LoadProductModels();
 
             picPreview.DiagramRowClicked += PicPreview_DiagramRowClicked;
             pnlPreviewScroll.Resize += (s, e) => { UpdateDiagramSize(); UpdateDiagram(); };
@@ -210,16 +211,23 @@ namespace AssemblyLineTester.Views.Pages
         {
             try
             {
-                using var db = new Data.AppDbContext();
-                var models = db.ProductModels
+                var models = ProductModelService.GetAllProductModels()
                     .Select(p => p.Name)
-                    .Where(m => !string.IsNullOrEmpty(m))
+                    .Where(m => !string.IsNullOrWhiteSpace(m))
                     .Distinct()
                     .OrderBy(m => m)
                     .ToArray();
-                
+                string current = txtProductModel.Text;
                 txtProductModel.Items.Clear();
                 txtProductModel.Items.AddRange(models);
+                if (!string.IsNullOrEmpty(current) && txtProductModel.Items.Contains(current))
+                {
+                    txtProductModel.SelectedItem = current;
+                }
+                else if (txtProductModel.Items.Count > 0)
+                {
+                    txtProductModel.SelectedIndex = 0;
+                }
             }
             catch (Exception ex)
             {
@@ -231,6 +239,7 @@ namespace AssemblyLineTester.Views.Pages
             if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
                 loadDefaultParameter();
+                LoadProductModels();
             }
         }
         private void EnableDoubleBuffering()

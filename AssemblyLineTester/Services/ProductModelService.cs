@@ -51,6 +51,14 @@ namespace AssemblyLineTester.Services
                 .FirstOrDefault(p => p.Id == id);
         }
 
+        public static ProductModel? GetProductModelByName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return null;
+            string trimmed = name.Trim();
+            return GetAllProductModels()
+                .FirstOrDefault(p => string.Equals(p.Name, trimmed, StringComparison.OrdinalIgnoreCase));
+        }
+
         // Full path of every image belonging to one product model.
         public static List<string> GetProductModelImagePaths(ProductModel? product)
         {

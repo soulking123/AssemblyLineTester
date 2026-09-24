@@ -366,6 +366,7 @@ namespace AssemblyLineTester.Views.Pages
             // 
             picHarness.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             picHarness.BackColor = Color.FromArgb(248, 250, 252);
+            picHarness.BorderStyle = BorderStyle.None;
             picHarness.Location = new Point(322, 11);
             picHarness.Margin = new Padding(3, 2, 3, 2);
             picHarness.Name = "picHarness";

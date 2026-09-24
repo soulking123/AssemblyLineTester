@@ -84,17 +84,15 @@ namespace AssemblyLineTester.Views.Modals
 
         private void BtnPrev_Click(object? sender, EventArgs e)
         {
-            if (_imagePaths.Count <= 1) return;
+            if (_currentIndex <= 0) return;
             _currentIndex--;
-            if (_currentIndex < 0) _currentIndex = _imagePaths.Count - 1;
             UpdateImageDisplay();
         }
 
         private void BtnNext_Click(object? sender, EventArgs e)
         {
-            if (_imagePaths.Count <= 1) return;
+            if (_currentIndex >= _imagePaths.Count - 1) return;
             _currentIndex++;
-            if (_currentIndex >= _imagePaths.Count) _currentIndex = 0;
             UpdateImageDisplay();
         }
 
@@ -123,6 +121,8 @@ namespace AssemblyLineTester.Views.Modals
             {
                 btnNext.Visible = true;
                 btnPrev.Visible = true;
+                btnPrev.Enabled = (_currentIndex > 0);
+                btnNext.Enabled = (_currentIndex < _imagePaths.Count - 1);
             }
         }
 

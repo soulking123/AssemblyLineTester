@@ -199,6 +199,56 @@ namespace AssemblyLineTester.Helpers
                     e.Graphics.FillPath(cardBrush, pathOuter);
                 }
 
+                if (card is PictureBox pb && pb.Image != null)
+                {
+                    var g = e.Graphics;
+                    var state = g.Save();
+                    g.SetClip(pathOuter);
+
+                    var img = pb.Image;
+                    int pad = (int)Math.Ceiling(borderWidth) + 1;
+                    int availW = Math.Max(1, card.Width - pad * 2);
+                    int availH = Math.Max(1, card.Height - pad * 2);
+
+                    if (pb.SizeMode == PictureBoxSizeMode.Zoom && img.Width > 0 && img.Height > 0)
+                    {
+                        float imgAspect = (float)img.Width / img.Height;
+                        float boxAspect = (float)availW / availH;
+                        Rectangle destRect;
+                        if (imgAspect > boxAspect)
+                        {
+                            int h = Math.Max(1, (int)Math.Round(availW / imgAspect));
+                            int y = pad + (availH - h) / 2;
+                            destRect = new Rectangle(pad, y, availW, h);
+                        }
+                        else
+                        {
+                            int w = Math.Max(1, (int)Math.Round(availH * imgAspect));
+                            int x = pad + (availW - w) / 2;
+                            destRect = new Rectangle(x, pad, w, availH);
+                        }
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(img, destRect);
+                    }
+                    else if (pb.SizeMode == PictureBoxSizeMode.CenterImage)
+                    {
+                        int x = (card.Width - img.Width) / 2;
+                        int y = (card.Height - img.Height) / 2;
+                        g.DrawImage(img, x, y);
+                    }
+                    else if (pb.SizeMode == PictureBoxSizeMode.StretchImage)
+                    {
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(img, pad, pad, availW, availH);
+                    }
+                    else
+                    {
+                        g.DrawImage(img, pad, pad);
+                    }
+
+                    g.Restore(state);
+                }
+
                 if (borderColor != Color.Transparent && borderWidth > 0)
                 {
                     var rectBorder = new Rectangle(1, 1, Math.Max(1, card.Width - 3), Math.Max(1, card.Height - 3));
