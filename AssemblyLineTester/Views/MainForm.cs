@@ -26,6 +26,7 @@ namespace AssemblyLineTester.Views
         private TestHistory? pageTestHistory;
         private SystemLog? pageSystemLog;
         private HarnessDatabase? pageHarnessDb;
+        private ProductDatabase? pageProductDb;
         private Dashboard? pageDashboard;
         private TestExecution? pageTestExecution;
         private TestParametersPage? pageTestParameters;
@@ -239,6 +240,7 @@ namespace AssemblyLineTester.Views
             btnTestExecution.Visible = SessionManager.HasPermission("Page.TestExecution");
             btnManualTesting.Visible = SessionManager.HasPermission("Page.TestExecution");
             btnHarnessDatabase.Visible = SessionManager.HasPermission("Page.HarnessDatabase");
+            btnProductDatabase.Visible = SessionManager.HasPermission("Page.HarnessDatabase");
             btnTestHistory.Visible = SessionManager.HasPermission("Page.TestHistory");
             btnReports.Visible = SessionManager.HasPermission("Page.Reports");
             btnSystemLog.Visible = SessionManager.HasPermission("Page.SystemLog");
@@ -306,7 +308,7 @@ namespace AssemblyLineTester.Views
 
         private void ApplySidebarStyles()
         {
-            AssemblyLineTester.Views.Controls.MenuButton[] menuButtons = [btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
+            AssemblyLineTester.Views.Controls.MenuButton[] menuButtons = [btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnProductDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
             Font menuFont = new("Segoe UI", 11F, FontStyle.Regular);
 
             _customToolTipForm ??= new AssemblyLineTester.Views.Controls.CustomToolTipForm();
@@ -347,6 +349,11 @@ namespace AssemblyLineTester.Views
             btnHarnessDatabase.FullText = "  🗄️    Harness Database";
             btnHarnessDatabase.Text = "  🗄️    Harness Database";
             _tooltipTexts[btnHarnessDatabase] = "Harness Database";
+
+            btnProductDatabase.EmojiIcon = "📦";
+            btnProductDatabase.FullText = "  📦    Product Database";
+            btnProductDatabase.Text = "  📦    Product Database";
+            _tooltipTexts[btnProductDatabase] = "Product Database";
 
             btnTestHistory.EmojiIcon = "📜";
             btnTestHistory.FullText = "  📜    Test History";
@@ -401,6 +408,7 @@ namespace AssemblyLineTester.Views
                 "btnTestExecution" => pageTestExecution ??= new TestExecution(),
                 "btnManualTesting" => pageTestParameters ??= new TestParametersPage(),
                 "btnHarnessDatabase" => pageHarnessDb ??= new HarnessDatabase(),
+                "btnProductDatabase" => pageProductDb ??= new ProductDatabase(),
                 "btnTestHistory" => pageTestHistory ??= new TestHistory(),
                 "btnReports" => pageReports ??= new Reports(),
                 "btnSystemLog" => pageSystemLog ??= new SystemLog(),
@@ -446,6 +454,7 @@ namespace AssemblyLineTester.Views
             "btnTestExecution" => pageTestExecution,
             "btnManualTesting" => pageTestParameters,
             "btnHarnessDatabase" => pageHarnessDb,
+            "btnProductDatabase" => pageProductDb,
             "btnTestHistory" => pageTestHistory,
             "btnReports" => pageReports,
             "btnSystemLog" => pageSystemLog,
@@ -476,7 +485,7 @@ namespace AssemblyLineTester.Views
                 lblArrow.Text = "⌄";
             }
 
-            AssemblyLineTester.Views.Controls.MenuButton[] allMenus = [btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
+            AssemblyLineTester.Views.Controls.MenuButton[] allMenus = [btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnProductDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement];
 
             foreach (var btn in allMenus)
             {
@@ -544,7 +553,7 @@ namespace AssemblyLineTester.Views
         }
 
         private AssemblyLineTester.Views.Controls.MenuButton[] SidebarMenuButtons =>
-            new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
+            new AssemblyLineTester.Views.Controls.MenuButton[] { btnDashboard, btnTestExecution, btnManualTesting, btnHarnessDatabase, btnProductDatabase, btnTestHistory, btnReports, btnSystemLog, btnSettings, btnUserManagement };
 
         // Closes the gap left by sidebar buttons the role cannot see.
         private void RepositionSidebarButtons()

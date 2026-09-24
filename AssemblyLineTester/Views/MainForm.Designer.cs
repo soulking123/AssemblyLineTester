@@ -24,6 +24,7 @@ namespace AssemblyLineTester.Views
             btnTestExecution = new AssemblyLineTester.Views.Controls.MenuButton();
             btnManualTesting = new AssemblyLineTester.Views.Controls.MenuButton();
             btnHarnessDatabase = new AssemblyLineTester.Views.Controls.MenuButton();
+            btnProductDatabase = new AssemblyLineTester.Views.Controls.MenuButton();
             btnTestHistory = new AssemblyLineTester.Views.Controls.MenuButton();
             btnReports = new AssemblyLineTester.Views.Controls.MenuButton();
             btnSystemLog = new AssemblyLineTester.Views.Controls.MenuButton();
@@ -84,6 +85,7 @@ namespace AssemblyLineTester.Views
             splitContainer1.Panel1.Controls.Add(btnTestExecution);
             splitContainer1.Panel1.Controls.Add(btnManualTesting);
             splitContainer1.Panel1.Controls.Add(btnHarnessDatabase);
+            splitContainer1.Panel1.Controls.Add(btnProductDatabase);
             splitContainer1.Panel1.Controls.Add(btnTestHistory);
             splitContainer1.Panel1.Controls.Add(btnReports);
             splitContainer1.Panel1.Controls.Add(btnSystemLog);
@@ -191,6 +193,19 @@ namespace AssemblyLineTester.Views
             btnHarnessDatabase.TextAlign = ContentAlignment.MiddleLeft;
             btnHarnessDatabase.UseVisualStyleBackColor = true;
             btnHarnessDatabase.Click += BtnMenu_Click;
+            // 
+            // btnProductDatabase
+            // 
+            btnProductDatabase.Font = new Font("Segoe UI", 11F);
+            btnProductDatabase.Location = new Point(32, 496);
+            btnProductDatabase.Margin = new Padding(5);
+            btnProductDatabase.Name = "btnProductDatabase";
+            btnProductDatabase.Size = new Size(377, 80);
+            btnProductDatabase.TabIndex = 4;
+            btnProductDatabase.Text = "        Product Database";
+            btnProductDatabase.TextAlign = ContentAlignment.MiddleLeft;
+            btnProductDatabase.UseVisualStyleBackColor = true;
+            btnProductDatabase.Click += BtnMenu_Click;
             // 
             // btnTestHistory
             // 
@@ -581,6 +596,7 @@ namespace AssemblyLineTester.Views
         private AssemblyLineTester.Views.Controls.MenuButton btnTestExecution;
         private AssemblyLineTester.Views.Controls.MenuButton btnManualTesting;
         private AssemblyLineTester.Views.Controls.MenuButton btnHarnessDatabase;
+        private AssemblyLineTester.Views.Controls.MenuButton btnProductDatabase;
         private AssemblyLineTester.Views.Controls.MenuButton btnTestHistory;
         private AssemblyLineTester.Views.Controls.MenuButton btnReports;
         private AssemblyLineTester.Views.Controls.MenuButton btnSystemLog;
