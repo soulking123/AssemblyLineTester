@@ -127,13 +127,6 @@ namespace AssemblyLineTester.Services
                 })
                 .ToList();
 
-            var config = !string.IsNullOrEmpty(report.ProductModelName)
-                ? db.TestConfigurations
-                    .Include(c => c.Nets)
-                    .FirstOrDefault(c => c.ProductModelName == report.ProductModelName || c.ConfigName == report.ProductModelName)
-                : null;
-            var configNets = config?.Nets?.OrderBy(n => n.SequenceNo).ToList() ?? new List<Models.TestConfigNet>();
-
             var detailDtos = details.Select((d, idx) =>
             {
                 bool isDiode = string.Equals(d.TestTypeName, "DIODE", StringComparison.OrdinalIgnoreCase) ||
@@ -149,29 +142,6 @@ namespace AssemblyLineTester.Services
                 string color = !string.IsNullOrEmpty(d.Color) ? d.Color : "";
                 string gauge = !string.IsNullOrEmpty(d.Gauge) ? d.Gauge : "";
                 string netId = d.NetId ?? "";
-
-                if ((string.IsNullOrEmpty(color) || string.IsNullOrEmpty(gauge) || string.IsNullOrEmpty(netId)) && configNets.Count > 0)
-                {
-                    Models.TestConfigNet? matchedNet = null;
-                    if (idx < configNets.Count &&
-                        (configNets[idx].FromAddress.ToString() == d.FromPin || configNets[idx].FromLabel == d.FromLabel))
-                    {
-                        matchedNet = configNets[idx];
-                    }
-                    else
-                    {
-                        matchedNet = configNets.FirstOrDefault(n =>
-                            (n.FromAddress.ToString() == d.FromPin || n.FromLabel == d.FromLabel) &&
-                            (n.ToAddress.ToString() == d.ToPin || n.ToLabel == d.ToLabel));
-                    }
-
-                    if (matchedNet != null)
-                    {
-                        if (string.IsNullOrEmpty(color)) color = matchedNet.Color ?? "";
-                        if (string.IsNullOrEmpty(gauge)) gauge = matchedNet.Gauge ?? "";
-                        if (string.IsNullOrEmpty(netId) && !string.IsNullOrWhiteSpace(matchedNet.NetId)) netId = matchedNet.NetId;
-                    }
-                }
 
                 string measuredStr = TestDetailDto.FormatMeasuredRow(d.MeasuredValue, d.MeasurementPrefix, mVal2, pfx2, d.TestTypeName);
 
