@@ -140,8 +140,8 @@ namespace AssemblyLineTester.Views.Modals
             // pnlFooter
             // 
             pnlFooter.BackColor = Color.Transparent;
-            pnlFooter.Controls.Add(btnPrev);
             pnlFooter.Controls.Add(lblImageCounter);
+            pnlFooter.Controls.Add(btnPrev);
             pnlFooter.Controls.Add(btnNext);
             pnlFooter.Controls.Add(btnCloseModal);
             pnlFooter.Dock = DockStyle.Bottom;
@@ -171,12 +171,13 @@ namespace AssemblyLineTester.Views.Modals
             // 
             // lblImageCounter
             // 
-            lblImageCounter.Dock = DockStyle.Fill;
+            lblImageCounter.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lblImageCounter.Dock = DockStyle.None;
             lblImageCounter.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblImageCounter.ForeColor = Color.FromArgb(71, 85, 105);
             lblImageCounter.Location = new Point(0, 25);
             lblImageCounter.Name = "lblImageCounter";
-            lblImageCounter.Size = new Size(798, 75);
+            lblImageCounter.Size = new Size(1118, 75);
             lblImageCounter.TabIndex = 1;
             lblImageCounter.Text = "1 of 1";
             lblImageCounter.TextAlign = ContentAlignment.MiddleCenter;

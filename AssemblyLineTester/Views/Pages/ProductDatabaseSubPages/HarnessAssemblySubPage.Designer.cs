@@ -54,6 +54,8 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             pnlPicButtons = new System.Windows.Forms.FlowLayoutPanel();
             btnAddPicture = new System.Windows.Forms.Button();
             btnDeletePicture = new System.Windows.Forms.Button();
+            btnPrevPicture = new System.Windows.Forms.Button();
+            btnNextPicture = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)splitContainerMain).BeginInit();
             splitContainerMain.Panel1.SuspendLayout();
             splitContainerMain.Panel2.SuspendLayout();
@@ -212,7 +214,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             pnlTopSection.Dock = System.Windows.Forms.DockStyle.Top;
             pnlTopSection.Location = new System.Drawing.Point(16, 16);
             pnlTopSection.Name = "pnlTopSection";
-            pnlTopSection.Size = new System.Drawing.Size(552, 296);
+            pnlTopSection.Size = new System.Drawing.Size(552, 326);
             pnlTopSection.TabIndex = 0;
             // 
             // pnlBottomBar
@@ -336,7 +338,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             // 
             pnlAttachActions.Controls.Add(btnRemove);
             pnlAttachActions.Controls.Add(btnAttach);
-            pnlAttachActions.Location = new System.Drawing.Point(0, 256);
+            pnlAttachActions.Location = new System.Drawing.Point(0, 286);
             pnlAttachActions.Name = "pnlAttachActions";
             pnlAttachActions.Size = new System.Drawing.Size(220, 36);
             pnlAttachActions.TabIndex = 3;
@@ -476,7 +478,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             pnlPictureContainer.Controls.Add(picBox);
             pnlPictureContainer.Location = new System.Drawing.Point(0, 144);
             pnlPictureContainer.Name = "pnlPictureContainer";
-            pnlPictureContainer.Size = new System.Drawing.Size(552, 104);
+            pnlPictureContainer.Size = new System.Drawing.Size(552, 134);
             pnlPictureContainer.TabIndex = 2;
             // 
             // picBox
@@ -484,9 +486,10 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             picBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             picBox.BackColor = System.Drawing.Color.FromArgb(248, 250, 252);
             picBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            picBox.Cursor = System.Windows.Forms.Cursors.Hand;
             picBox.Location = new System.Drawing.Point(0, 0);
             picBox.Name = "picBox";
-            picBox.Size = new System.Drawing.Size(444, 104);
+            picBox.Size = new System.Drawing.Size(444, 134);
             picBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             picBox.TabIndex = 0;
             picBox.TabStop = false;
@@ -496,11 +499,14 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             pnlPicButtons.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             pnlPicButtons.Controls.Add(btnAddPicture);
             pnlPicButtons.Controls.Add(btnDeletePicture);
+            pnlPicButtons.Controls.Add(btnPrevPicture);
+            pnlPicButtons.Controls.Add(btnNextPicture);
             pnlPicButtons.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             pnlPicButtons.Location = new System.Drawing.Point(450, 0);
             pnlPicButtons.Name = "pnlPicButtons";
-            pnlPicButtons.Size = new System.Drawing.Size(102, 104);
+            pnlPicButtons.Size = new System.Drawing.Size(102, 134);
             pnlPicButtons.TabIndex = 1;
+            pnlPicButtons.WrapContents = false;
             // 
             // btnAddPicture
             // 
@@ -509,10 +515,10 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             btnAddPicture.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnAddPicture.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             btnAddPicture.ForeColor = System.Drawing.Color.White;
-            btnAddPicture.Location = new System.Drawing.Point(0, 2);
-            btnAddPicture.Margin = new System.Windows.Forms.Padding(0, 2, 0, 4);
+            btnAddPicture.Location = new System.Drawing.Point(0, 1);
+            btnAddPicture.Margin = new System.Windows.Forms.Padding(0, 1, 0, 2);
             btnAddPicture.Name = "btnAddPicture";
-            btnAddPicture.Size = new System.Drawing.Size(100, 32);
+            btnAddPicture.Size = new System.Drawing.Size(100, 30);
             btnAddPicture.TabIndex = 0;
             btnAddPicture.Text = "+ Add";
             btnAddPicture.UseVisualStyleBackColor = false;
@@ -524,13 +530,43 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             btnDeletePicture.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnDeletePicture.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             btnDeletePicture.ForeColor = System.Drawing.Color.White;
-            btnDeletePicture.Location = new System.Drawing.Point(0, 42);
-            btnDeletePicture.Margin = new System.Windows.Forms.Padding(0, 4, 0, 2);
+            btnDeletePicture.Location = new System.Drawing.Point(0, 35);
+            btnDeletePicture.Margin = new System.Windows.Forms.Padding(0, 2, 0, 2);
             btnDeletePicture.Name = "btnDeletePicture";
-            btnDeletePicture.Size = new System.Drawing.Size(100, 32);
+            btnDeletePicture.Size = new System.Drawing.Size(100, 30);
             btnDeletePicture.TabIndex = 1;
-            btnDeletePicture.Text = "+ Delete";
+            btnDeletePicture.Text = "Delete";
             btnDeletePicture.UseVisualStyleBackColor = false;
+            // 
+            // btnPrevPicture
+            // 
+            btnPrevPicture.BackColor = System.Drawing.Color.FromArgb(71, 85, 105);
+            btnPrevPicture.FlatAppearance.BorderSize = 0;
+            btnPrevPicture.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnPrevPicture.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            btnPrevPicture.ForeColor = System.Drawing.Color.White;
+            btnPrevPicture.Location = new System.Drawing.Point(0, 69);
+            btnPrevPicture.Margin = new System.Windows.Forms.Padding(0, 2, 0, 2);
+            btnPrevPicture.Name = "btnPrevPicture";
+            btnPrevPicture.Size = new System.Drawing.Size(100, 30);
+            btnPrevPicture.TabIndex = 2;
+            btnPrevPicture.Text = "< Prev";
+            btnPrevPicture.UseVisualStyleBackColor = false;
+            // 
+            // btnNextPicture
+            // 
+            btnNextPicture.BackColor = System.Drawing.Color.FromArgb(71, 85, 105);
+            btnNextPicture.FlatAppearance.BorderSize = 0;
+            btnNextPicture.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnNextPicture.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            btnNextPicture.ForeColor = System.Drawing.Color.White;
+            btnNextPicture.Location = new System.Drawing.Point(0, 103);
+            btnNextPicture.Margin = new System.Windows.Forms.Padding(0, 2, 0, 1);
+            btnNextPicture.Name = "btnNextPicture";
+            btnNextPicture.Size = new System.Drawing.Size(100, 30);
+            btnNextPicture.TabIndex = 3;
+            btnNextPicture.Text = "Next >";
+            btnNextPicture.UseVisualStyleBackColor = false;
             // 
             // HarnessAssemblySubPage
             // 
@@ -592,6 +628,8 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
         private System.Windows.Forms.FlowLayoutPanel pnlPicButtons;
         private System.Windows.Forms.Button btnAddPicture;
         private System.Windows.Forms.Button btnDeletePicture;
+        private System.Windows.Forms.Button btnPrevPicture;
+        private System.Windows.Forms.Button btnNextPicture;
         private System.Windows.Forms.FlowLayoutPanel pnlAttachActions;
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.Button btnAttach;

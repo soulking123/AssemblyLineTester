@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Models;
+using AssemblyLineTester.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Text.Json;
@@ -20,9 +20,8 @@ namespace AssemblyLineTester.Data
         public DbSet<TestConfiguration> TestConfigurations { get; set; } = null!;
         public DbSet<TestConfigNet> TestConfigNets { get; set; } = null!;
         public DbSet<ReportTestTypeSummary> ReportTestTypeSummaries { get; set; } = null!;
-        public DbSet<ProductHarness> ProductHarnesses { get; set; } = null!;
         public DbSet<Connector> Connectors { get; set; } = null!;
-        public DbSet<HarnessConnector> HarnessConnectors { get; set; } = null!;
+        public DbSet<HarnessAssembly> HarnessAssemblies { get; set; } = null!;
         public DbSet<DefaultTestSetting> DefaultTestSettings { get; set; } = null!;
         public DbSet<LearnConnection> LearnConnections { get; set; } = null!;
         public DbSet<TestResultCheck> TestResultChecks { get; set; } = null!;
@@ -177,21 +176,41 @@ namespace AssemblyLineTester.Data
                 .HasIndex(s => s.TestTypeName);
 
             // Join table for the many-to-many between harnesses and connectors.
-            modelBuilder.Entity<HarnessConnector>()
-                .HasOne(hc => hc.ProductHarness)
-                .WithMany(p => p.HarnessConnectors)
-                .HasForeignKey(hc => hc.ProductHarnessId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // 1. Relational join between ProductModel and HarnessAssembly (Many-to-Many)
+            modelBuilder.Entity<ProductModel>()
+                .HasMany(p => p.HarnessAssemblies)
+                .WithMany();
+            // 2. Relational join between HarnessAssembly and Connector (Many-to-Many)
+            modelBuilder.Entity<HarnessAssembly>()
+                .HasMany(h => h.Connectors)
+                .WithMany();
 
-            modelBuilder.Entity<HarnessConnector>()
-                .HasOne(hc => hc.Connector)
-                .WithMany()
-                .HasForeignKey(hc => hc.ConnectorId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<HarnessConnector>()
-                .HasIndex(hc => new { hc.ProductHarnessId, hc.ConnectorId })
-                .IsUnique();
+            var stringListComparer = new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
+    (c1, c2) => (c1 ?? new()).SequenceEqual(c2 ?? new()),
+    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+    c => c.ToList()
+);
+            modelBuilder.Entity<ProductModel>()
+                .Property(e => e.ImagePath)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>()
+                )
+                .Metadata.SetValueComparer(stringListComparer);
+            modelBuilder.Entity<HarnessAssembly>()
+                .Property(e => e.ImagePath)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>()
+                )
+                .Metadata.SetValueComparer(stringListComparer);
+            modelBuilder.Entity<Connector>()
+                .Property(e => e.ImagePath)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>()
+                )
+                .Metadata.SetValueComparer(stringListComparer);
 
             // Restrict, so deleting a test type cannot orphan default settings or learn connections that reference it.
             modelBuilder.Entity<DefaultTestSetting>()

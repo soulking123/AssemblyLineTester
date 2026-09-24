@@ -328,7 +328,7 @@ namespace AssemblyLineTester.Views.Pages
             lblMachineOverviewTitle.Name = "lblMachineOverviewTitle";
             lblMachineOverviewTitle.Size = new Size(637, 46);
             lblMachineOverviewTitle.TabIndex = 0;
-            lblMachineOverviewTitle.Text = "MACHINE OVERVIEW";
+            lblMachineOverviewTitle.Text = "HARNESS ASSEMBLIES";
             lblMachineOverviewTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // cardHarnessConn
@@ -393,7 +393,7 @@ namespace AssemblyLineTester.Views.Pages
             lblHarnessConnTitle.Name = "lblHarnessConnTitle";
             lblHarnessConnTitle.Size = new Size(637, 46);
             lblHarnessConnTitle.TabIndex = 0;
-            lblHarnessConnTitle.Text = "HARNESS CONNECTOR";
+            lblHarnessConnTitle.Text = "CONNECTORS";
             lblHarnessConnTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // cardAreaDetail

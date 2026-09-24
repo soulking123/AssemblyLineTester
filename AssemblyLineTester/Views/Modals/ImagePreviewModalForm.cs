@@ -13,7 +13,7 @@ namespace AssemblyLineTester.Views.Modals
         private List<string> _imagePaths = new List<string>();
         private int _currentIndex = 0;
 
-        public ImagePreviewModalForm(List<string> imagePaths, string title = "IMAGE PREVIEW")
+        public ImagePreviewModalForm(List<string> imagePaths, string title = "IMAGE PREVIEW", int initialIndex = 0)
         {
             InitializeComponent();
             lblCustomTitle.Text = title.ToUpper();
@@ -21,17 +21,29 @@ namespace AssemblyLineTester.Views.Modals
             if (imagePaths != null && imagePaths.Count > 0)
             {
                 _imagePaths = imagePaths;
+                if (initialIndex >= 0 && initialIndex < _imagePaths.Count)
+                {
+                    _currentIndex = initialIndex;
+                }
             }
 
             SetupEvents();
             ApplyFormRounding();
+            UpdateCounterBounds();
             UpdateImageDisplay();
+        }
+
+        private void UpdateCounterBounds()
+        {
+            lblImageCounter.Bounds = new Rectangle(0, pnlFooter.Padding.Top, pnlFooter.ClientSize.Width, Math.Max(1, pnlFooter.ClientSize.Height - pnlFooter.Padding.Top));
+            lblImageCounter.SendToBack();
         }
 
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
             ApplyFormRounding();
+            UpdateCounterBounds();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -61,6 +73,7 @@ namespace AssemblyLineTester.Views.Modals
 
         private void SetupEvents()
         {
+            pnlFooter.Resize += (s, e) => UpdateCounterBounds();
             btnCloseModal.Click += (s, e) => Close();
             btnNext.Click += BtnNext_Click;
             btnPrev.Click += BtnPrev_Click;
@@ -80,17 +93,15 @@ namespace AssemblyLineTester.Views.Modals
 
         private void BtnPrev_Click(object? sender, EventArgs e)
         {
-            if (_imagePaths.Count <= 1) return;
+            if (_currentIndex <= 0) return;
             _currentIndex--;
-            if (_currentIndex < 0) _currentIndex = _imagePaths.Count - 1;
             UpdateImageDisplay();
         }
 
         private void BtnNext_Click(object? sender, EventArgs e)
         {
-            if (_imagePaths.Count <= 1) return;
+            if (_currentIndex >= _imagePaths.Count - 1) return;
             _currentIndex++;
-            if (_currentIndex >= _imagePaths.Count) _currentIndex = 0;
             UpdateImageDisplay();
         }
 
@@ -119,6 +130,8 @@ namespace AssemblyLineTester.Views.Modals
             {
                 btnNext.Visible = true;
                 btnPrev.Visible = true;
+                btnPrev.Enabled = (_currentIndex > 0);
+                btnNext.Enabled = (_currentIndex < _imagePaths.Count - 1);
             }
         }
 
