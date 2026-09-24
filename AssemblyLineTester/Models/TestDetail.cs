@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace AssemblyLineTester.Models
 {
@@ -17,14 +17,26 @@ namespace AssemblyLineTester.Models
         public string FromLabel { get; set; } = string.Empty;
         public string ToLabel { get; set; } = string.Empty;
 
+        public string Color { get; set; } = string.Empty;
+        public string Gauge { get; set; } = string.Empty;
+
         public string TestTypeName { get; set; } = string.Empty;
         public TestType? TestTypeInfo { get; set; }
 
         public double? MeasuredValue { get; set; }
+        public string? MeasurementPrefix { get; set; }
         public double? LowerLimit { get; set; }
         public double? UpperLimit { get; set; }
         public double? ExpectedValue { get; set; }
         public double? Tolerance { get; set; }
+
+        public double? MeasuredValue2 { get; set; }
+        public string? MeasurementPrefix2 { get; set; }
+        public double? LowerLimit2 { get; set; }
+        public double? UpperLimit2 { get; set; }
+        public double? ExpectedValue2 { get; set; }
+        public double? Tolerance2 { get; set; }
+
         public string Unit { get; set; } = string.Empty;
 
         public bool Result { get; set; }

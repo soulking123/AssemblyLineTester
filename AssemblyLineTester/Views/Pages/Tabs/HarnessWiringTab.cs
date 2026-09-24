@@ -28,10 +28,6 @@ namespace AssemblyLineTester.Views.Pages.Tabs
             colTestType.Items.Add("Resistance");
             colTestType.Items.Add("Hipot");
             colTestType.Items.Add("IR");
-
-            // Add some dummy data to preview
-            gridWiring.Rows.Add("NEW_NET", "1", "2", "Continuity", "Pass");
-            gridWiring.Rows.Add("NET_2", "3", "4", "Resistance", "0.5");
         }
 
         private void GridWiring_DataError(object? sender, DataGridViewDataErrorEventArgs e)

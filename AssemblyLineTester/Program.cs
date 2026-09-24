@@ -22,6 +22,7 @@ namespace AssemblyLineTester
             LicenseService.SelfCheck();
             TestSettingService.SelfCheck();
             MaintenanceService.SelfCheck();
+            Helpers.ImageLoader.SelfCheck();
             Views.Pages.TestParametersPage.SelfCheck();
             FileLogService.Info("Startup", AppInfo.Describe());
 

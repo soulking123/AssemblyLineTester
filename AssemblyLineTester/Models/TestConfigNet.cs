@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace AssemblyLineTester.Models
 {
@@ -34,6 +34,14 @@ namespace AssemblyLineTester.Models
         public double? ExpectedValue { get; set; }                          //100
 
         public double? Tolerance { get; set; }                              //10
+
+        public double? ExpectedValue2 { get; set; }
+
+        public double? Tolerance2 { get; set; }
+
+        public double? LowerLimit2 { get; set; }
+
+        public double? UpperLimit2 { get; set; }
 
         public string Color { get; set; } = string.Empty;                   // BLK, RED, BLU
 

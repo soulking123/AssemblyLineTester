@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260802110954_InitialCreate")]
+    [Migration("20260920075139_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -83,6 +83,20 @@ namespace AssemblyLineTester.Migrations
                     b.HasIndex("DefaultTestTypeId");
 
                     b.ToTable("DefaultTestSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DefaultCapacitorTolerance = 10,
+                            DefaultCapacitorValue = 9.9999999999999995E-07,
+                            DefaultMaxWireResistance = 10.0,
+                            DefaultMinInulationResistance = 500000.0,
+                            DefaultResistorTolerance = 10,
+                            DefaultResistorValue = 100.0,
+                            DefaultTestTypeId = 15,
+                            TotalTestPointsAvailable = 448
+                        });
                 });
 
             modelBuilder.Entity("AssemblyLineTester.Models.LearnConnection", b =>
@@ -131,7 +145,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 3,
                             DisplayName = "Capacitor",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeId = 3,
                             TestTypeValue = 0
                         },
@@ -139,7 +153,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 4,
                             DisplayName = "Diode",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeId = 6,
                             TestTypeValue = 0
                         },
@@ -147,7 +161,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 5,
                             DisplayName = "Twisted Pair",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeId = 14,
                             TestTypeValue = 0
                         });
@@ -1496,6 +1510,9 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("ExpectedValue")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("ExpectedValue2")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("FromAddress")
                         .HasColumnType("INTEGER");
 
@@ -1512,6 +1529,9 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<double?>("LowerLimit")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("LowerLimit2")
                         .HasColumnType("REAL");
 
                     b.Property<string>("MeasurementUnit")
@@ -1538,7 +1558,13 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("Tolerance")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("Tolerance2")
+                        .HasColumnType("REAL");
+
                     b.Property<double?>("UpperLimit")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("UpperLimit2")
                         .HasColumnType("REAL");
 
                     b.HasKey("NetConfigId");
@@ -1590,6 +1616,9 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("ProductModel");
 
+                    b.Property<bool>("ShortTest")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
@@ -1604,10 +1633,17 @@ namespace AssemblyLineTester.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ErrorDetail")
                         .HasColumnType("TEXT");
 
                     b.Property<double?>("ExpectedValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("ExpectedValue2")
                         .HasColumnType("REAL");
 
                     b.Property<string>("FromLabel")
@@ -1618,6 +1654,10 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Gauge")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("HarnessGroup")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1625,8 +1665,20 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("LowerLimit")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("LowerLimit2")
+                        .HasColumnType("REAL");
+
                     b.Property<double?>("MeasuredValue")
                         .HasColumnType("REAL");
+
+                    b.Property<double?>("MeasuredValue2")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("MeasurementPrefix")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MeasurementPrefix2")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NetId")
                         .IsRequired()
@@ -1653,11 +1705,17 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("Tolerance")
                         .HasColumnType("REAL");
 
+                    b.Property<double?>("Tolerance2")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<double?>("UpperLimit")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("UpperLimit2")
                         .HasColumnType("REAL");
 
                     b.HasKey("DetailId");
@@ -1687,6 +1745,9 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("EndDateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorSummary")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("FailCount")
@@ -2047,70 +2108,70 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 1,
                             DisplayName = "4RESISTOR",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "4RESISTOR"
                         },
                         new
                         {
                             Id = 2,
                             DisplayName = "4WIRE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "4WIRE"
                         },
                         new
                         {
                             Id = 3,
                             DisplayName = "CAPACITOR",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "CAPACITOR"
                         },
                         new
                         {
                             Id = 4,
                             DisplayName = "CLOSE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "CLOSE"
                         },
                         new
                         {
                             Id = 5,
                             DisplayName = "COMMENT",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "COMMENT"
                         },
                         new
                         {
                             Id = 6,
                             DisplayName = "DIODE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "DIODE"
                         },
                         new
                         {
                             Id = 7,
                             DisplayName = "LINK",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "LINK"
                         },
                         new
                         {
                             Id = 8,
                             DisplayName = "LUA COMPONENT",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "LUA COMPONENT"
                         },
                         new
                         {
                             Id = 9,
                             DisplayName = "OPEN",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "OPEN"
                         },
                         new
                         {
                             Id = 10,
                             DisplayName = "PROBE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "PROBE"
                         },
                         new
@@ -2124,7 +2185,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 12,
                             DisplayName = "SIGNATURE DIODE",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "SIGNATURE DIODE"
                         },
                         new
@@ -2138,7 +2199,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 14,
                             DisplayName = "TWISTED PAIR",
-                            IsChecked = true,
+                            IsChecked = false,
                             TestTypeName = "TWISTED PAIR"
                         },
                         new
@@ -2265,12 +2326,6 @@ namespace AssemblyLineTester.Migrations
                             Id = 2,
                             Description = "User is inactive and disabled",
                             Name = "Inactive"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "User is locked out due to multiple failed login attempts",
-                            Name = "Locked"
                         });
                 });
 

@@ -145,6 +145,7 @@ namespace AssemblyLineTester.Services
         /// </remarks>
         public static bool SetRemaining(int days, double hours)
         {
+            if (!SessionManager.HasPermission("Action.Maintenance.Reset")) return false;
             if (days < 0 || hours < 0) return false;
             return Apply(days, hours, storeAsInterval: true, action: "Set Maintenance Interval",
                 message: $"Maintenance interval set to {days} day(s) or {FormatHours(hours)} of operating time.");
@@ -153,6 +154,8 @@ namespace AssemblyLineTester.Services
         // Puts the countdown back to the interval held in Settings.
         public static bool ResetToInterval()
         {
+            if (!SessionManager.HasPermission("Action.Maintenance.Reset")) return false;
+
             int days = IntervalDays;
             double hours = IntervalHours;
 

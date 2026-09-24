@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Services;
+using AssemblyLineTester.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace AssemblyLineTester.Data
                 string[] pending = [.. db.Database.GetPendingMigrations()];
                 db.Database.Migrate();
 
-            // WAL survives an unclean shutdown; a factory losing power mid-test is routine.
+                // WAL survives an unclean shutdown; a factory losing power mid-test is routine.
                 db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
 
                 if (pending.Length > 0)

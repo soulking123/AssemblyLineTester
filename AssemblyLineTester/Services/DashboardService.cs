@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AssemblyLineTester.Data;
@@ -98,7 +98,10 @@ namespace AssemblyLineTester.Services
 
             var completedDurations = reports
                 .Where(r => r.Status == TestStatus.Completed && r.EndDateTime.HasValue)
+                .Select(r => new { r.TestDateTime, r.EndDateTime })
+                .AsEnumerable()
                 .Select(r => (r.EndDateTime!.Value - r.TestDateTime).TotalSeconds)
+                .Where(s => s > 0)
                 .ToList();
 
             double avgCycleSeconds = completedDurations.Count == 0 ? 0 : completedDurations.Average();
@@ -110,7 +113,7 @@ namespace AssemblyLineTester.Services
                 FailCount = fail,
                 YieldPercent = total == 0 ? 0 : Math.Round(pass * 100.0 / total, 2),
                 AvgCycleTimeSeconds = avgCycleSeconds,
-                AvgCycleTimeFormatted = TimeSpan.FromSeconds(avgCycleSeconds).ToString(@"hh\:mm\:ss")
+                AvgCycleTimeFormatted = TimeSpan.FromSeconds(Math.Max(0, Math.Round(avgCycleSeconds))).ToString(@"hh\:mm\:ss")
             };
         }
 

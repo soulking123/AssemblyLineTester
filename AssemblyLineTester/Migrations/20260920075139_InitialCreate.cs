@@ -146,7 +146,8 @@ namespace AssemblyLineTester.Migrations
                     MaxWireResistance = table.Column<double>(type: "REAL", nullable: false),
                     MinComponentResistance = table.Column<double>(type: "REAL", nullable: false),
                     MinInsulationResistance = table.Column<double>(type: "REAL", nullable: false),
-                    HipotVoltage = table.Column<bool>(type: "INTEGER", nullable: false)
+                    HipotVoltage = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ShortTest = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,6 +177,7 @@ namespace AssemblyLineTester.Migrations
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     OverallResult = table.Column<int>(type: "INTEGER", nullable: true),
                     Notes = table.Column<string>(type: "TEXT", nullable: false),
+                    ErrorSummary = table.Column<string>(type: "TEXT", nullable: true),
                     IsDraft = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
@@ -390,6 +392,10 @@ namespace AssemblyLineTester.Migrations
                     MeasurementUnit = table.Column<string>(type: "TEXT", nullable: false),
                     ExpectedValue = table.Column<double>(type: "REAL", nullable: true),
                     Tolerance = table.Column<double>(type: "REAL", nullable: true),
+                    ExpectedValue2 = table.Column<double>(type: "REAL", nullable: true),
+                    Tolerance2 = table.Column<double>(type: "REAL", nullable: true),
+                    LowerLimit2 = table.Column<double>(type: "REAL", nullable: true),
+                    UpperLimit2 = table.Column<double>(type: "REAL", nullable: true),
                     Color = table.Column<string>(type: "TEXT", nullable: false),
                     Gauge = table.Column<string>(type: "TEXT", nullable: false)
                 },
@@ -447,12 +453,21 @@ namespace AssemblyLineTester.Migrations
                     ToPin = table.Column<string>(type: "TEXT", nullable: false),
                     FromLabel = table.Column<string>(type: "TEXT", nullable: false),
                     ToLabel = table.Column<string>(type: "TEXT", nullable: false),
+                    Color = table.Column<string>(type: "TEXT", nullable: false),
+                    Gauge = table.Column<string>(type: "TEXT", nullable: false),
                     TestTypeName = table.Column<string>(type: "TEXT", nullable: false),
                     MeasuredValue = table.Column<double>(type: "REAL", nullable: true),
+                    MeasurementPrefix = table.Column<string>(type: "TEXT", nullable: true),
                     LowerLimit = table.Column<double>(type: "REAL", nullable: true),
                     UpperLimit = table.Column<double>(type: "REAL", nullable: true),
                     ExpectedValue = table.Column<double>(type: "REAL", nullable: true),
                     Tolerance = table.Column<double>(type: "REAL", nullable: true),
+                    MeasuredValue2 = table.Column<double>(type: "REAL", nullable: true),
+                    MeasurementPrefix2 = table.Column<string>(type: "TEXT", nullable: true),
+                    LowerLimit2 = table.Column<double>(type: "REAL", nullable: true),
+                    UpperLimit2 = table.Column<double>(type: "REAL", nullable: true),
+                    ExpectedValue2 = table.Column<double>(type: "REAL", nullable: true),
+                    Tolerance2 = table.Column<double>(type: "REAL", nullable: true),
                     Unit = table.Column<string>(type: "TEXT", nullable: false),
                     Result = table.Column<bool>(type: "INTEGER", nullable: false),
                     ErrorDetail = table.Column<string>(type: "TEXT", nullable: true)
@@ -600,20 +615,20 @@ namespace AssemblyLineTester.Migrations
                 columns: new[] { "Id", "DisplayName", "IsChecked", "TestTypeName" },
                 values: new object[,]
                 {
-                    { 1, "4RESISTOR", true, "4RESISTOR" },
-                    { 2, "4WIRE", true, "4WIRE" },
-                    { 3, "CAPACITOR", true, "CAPACITOR" },
-                    { 4, "CLOSE", true, "CLOSE" },
-                    { 5, "COMMENT", true, "COMMENT" },
-                    { 6, "DIODE", true, "DIODE" },
-                    { 7, "LINK", true, "LINK" },
-                    { 8, "LUA COMPONENT", true, "LUA COMPONENT" },
-                    { 9, "OPEN", true, "OPEN" },
-                    { 10, "PROBE", true, "PROBE" },
+                    { 1, "4RESISTOR", false, "4RESISTOR" },
+                    { 2, "4WIRE", false, "4WIRE" },
+                    { 3, "CAPACITOR", false, "CAPACITOR" },
+                    { 4, "CLOSE", false, "CLOSE" },
+                    { 5, "COMMENT", false, "COMMENT" },
+                    { 6, "DIODE", false, "DIODE" },
+                    { 7, "LINK", false, "LINK" },
+                    { 8, "LUA COMPONENT", false, "LUA COMPONENT" },
+                    { 9, "OPEN", false, "OPEN" },
+                    { 10, "PROBE", false, "PROBE" },
                     { 11, "RESISTOR", true, "RESISTOR" },
-                    { 12, "SIGNATURE DIODE", true, "SIGNATURE DIODE" },
+                    { 12, "SIGNATURE DIODE", false, "SIGNATURE DIODE" },
                     { 13, "SIGNATURE WIRE", true, "SIGNATURE WIRE" },
-                    { 14, "TWISTED PAIR", true, "TWISTED PAIR" },
+                    { 14, "TWISTED PAIR", false, "TWISTED PAIR" },
                     { 15, "WIRE", true, "WIRE" }
                 });
 
@@ -645,9 +660,13 @@ namespace AssemblyLineTester.Migrations
                 values: new object[,]
                 {
                     { 1, "User is active and allowed to log in", "Active" },
-                    { 2, "User is inactive and disabled", "Inactive" },
-                    { 3, "User is locked out due to multiple failed login attempts", "Locked" }
+                    { 2, "User is inactive and disabled", "Inactive" }
                 });
+
+            migrationBuilder.InsertData(
+                table: "DefaultTestSettings",
+                columns: new[] { "Id", "DefaultCapacitorTolerance", "DefaultCapacitorValue", "DefaultMaxWireResistance", "DefaultMinInulationResistance", "DefaultResistorTolerance", "DefaultResistorValue", "DefaultTestTypeId", "TotalTestPointsAvailable" },
+                values: new object[] { 1, 10, 9.9999999999999995E-07, 10.0, 500000.0, 10, 100.0, 15, 448 });
 
             migrationBuilder.InsertData(
                 table: "LearnConnections",
@@ -656,9 +675,9 @@ namespace AssemblyLineTester.Migrations
                 {
                     { 1, "Wire", true, 15, 0 },
                     { 2, "Resistance", true, 11, 0 },
-                    { 3, "Capacitor", true, 3, 0 },
-                    { 4, "Diode", true, 6, 0 },
-                    { 5, "Twisted Pair", true, 14, 0 }
+                    { 3, "Capacitor", false, 3, 0 },
+                    { 4, "Diode", false, 6, 0 },
+                    { 5, "Twisted Pair", false, 14, 0 }
                 });
 
             migrationBuilder.InsertData(

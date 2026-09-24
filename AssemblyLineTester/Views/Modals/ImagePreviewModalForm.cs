@@ -99,29 +99,13 @@ namespace AssemblyLineTester.Views.Modals
             if (_imagePaths.Count == 0)
             {
                 lblImageCounter.Text = "No images available";
-                picPreview.Image = null;
+                AssemblyLineTester.Helpers.ImageLoader.SetImage(picPreview, null);
                 btnNext.Visible = false;
                 btnPrev.Visible = false;
                 return;
             }
 
-            try
-            {
-                string path = _imagePaths[_currentIndex];
-                if (System.IO.File.Exists(path))
-                {
-                    picPreview.Image = Image.FromFile(path);
-                }
-                else
-                {
-                    // Fallback to placeholder or null if not found
-                    picPreview.Image = null;
-                }
-            }
-            catch
-            {
-                picPreview.Image = null;
-            }
+            AssemblyLineTester.Helpers.ImageLoader.SetImage(picPreview, _imagePaths[_currentIndex]);
 
             lblImageCounter.Text = $"{_currentIndex + 1} of {_imagePaths.Count}";
             

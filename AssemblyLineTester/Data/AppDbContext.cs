@@ -227,8 +227,7 @@ namespace AssemblyLineTester.Data
 
             modelBuilder.Entity<UserStatus>().HasData(
                 new UserStatus { Id = 1, Name = "Active", Description = "User is active and allowed to log in" },
-                new UserStatus { Id = 2, Name = "Inactive", Description = "User is inactive and disabled" },
-                new UserStatus { Id = 3, Name = "Locked", Description = "User is locked out due to multiple failed login attempts" }
+                new UserStatus { Id = 2, Name = "Inactive", Description = "User is inactive and disabled" }
             );
 
             // Same starting password as UserService.DefaultNewUserPassword ("Cat12345")
@@ -271,20 +270,20 @@ namespace AssemblyLineTester.Data
 
             // One check row per test type, so the Settings list is complete the first time it opens.
             modelBuilder.Entity<TestTypeCheck>().HasData(
-                new TestTypeCheck { Id = 1, TestTypeName = "4RESISTOR", DisplayName = "4RESISTOR", IsChecked = true },
-                new TestTypeCheck { Id = 2, TestTypeName = "4WIRE", DisplayName = "4WIRE", IsChecked = true },
-                new TestTypeCheck { Id = 3, TestTypeName = "CAPACITOR", DisplayName = "CAPACITOR", IsChecked = true },
-                new TestTypeCheck { Id = 4, TestTypeName = "CLOSE", DisplayName = "CLOSE", IsChecked = true },
-                new TestTypeCheck { Id = 5, TestTypeName = "COMMENT", DisplayName = "COMMENT", IsChecked = true },
-                new TestTypeCheck { Id = 6, TestTypeName = "DIODE", DisplayName = "DIODE", IsChecked = true },
-                new TestTypeCheck { Id = 7, TestTypeName = "LINK", DisplayName = "LINK", IsChecked = true },
-                new TestTypeCheck { Id = 8, TestTypeName = "LUA COMPONENT", DisplayName = "LUA COMPONENT", IsChecked = true },
-                new TestTypeCheck { Id = 9, TestTypeName = "OPEN", DisplayName = "OPEN", IsChecked = true },
-                new TestTypeCheck { Id = 10, TestTypeName = "PROBE", DisplayName = "PROBE", IsChecked = true },
+                new TestTypeCheck { Id = 1, TestTypeName = "4RESISTOR", DisplayName = "4RESISTOR", IsChecked = false },
+                new TestTypeCheck { Id = 2, TestTypeName = "4WIRE", DisplayName = "4WIRE", IsChecked = false },
+                new TestTypeCheck { Id = 3, TestTypeName = "CAPACITOR", DisplayName = "CAPACITOR", IsChecked = false },
+                new TestTypeCheck { Id = 4, TestTypeName = "CLOSE", DisplayName = "CLOSE", IsChecked = false },
+                new TestTypeCheck { Id = 5, TestTypeName = "COMMENT", DisplayName = "COMMENT", IsChecked = false },
+                new TestTypeCheck { Id = 6, TestTypeName = "DIODE", DisplayName = "DIODE", IsChecked = false },
+                new TestTypeCheck { Id = 7, TestTypeName = "LINK", DisplayName = "LINK", IsChecked = false },
+                new TestTypeCheck { Id = 8, TestTypeName = "LUA COMPONENT", DisplayName = "LUA COMPONENT", IsChecked = false },
+                new TestTypeCheck { Id = 9, TestTypeName = "OPEN", DisplayName = "OPEN", IsChecked = false },
+                new TestTypeCheck { Id = 10, TestTypeName = "PROBE", DisplayName = "PROBE", IsChecked = false },
                 new TestTypeCheck { Id = 11, TestTypeName = "RESISTOR", DisplayName = "RESISTOR", IsChecked = true },
-                new TestTypeCheck { Id = 12, TestTypeName = "SIGNATURE DIODE", DisplayName = "SIGNATURE DIODE", IsChecked = true },
+                new TestTypeCheck { Id = 12, TestTypeName = "SIGNATURE DIODE", DisplayName = "SIGNATURE DIODE", IsChecked = false },
                 new TestTypeCheck { Id = 13, TestTypeName = "SIGNATURE WIRE", DisplayName = "SIGNATURE WIRE", IsChecked = true },
-                new TestTypeCheck { Id = 14, TestTypeName = "TWISTED PAIR", DisplayName = "TWISTED PAIR", IsChecked = true },
+                new TestTypeCheck { Id = 14, TestTypeName = "TWISTED PAIR", DisplayName = "TWISTED PAIR", IsChecked = false },
                 new TestTypeCheck { Id = 15, TestTypeName = "WIRE", DisplayName = "WIRE", IsChecked = true }
             );
 
@@ -292,9 +291,9 @@ namespace AssemblyLineTester.Data
             modelBuilder.Entity<LearnConnection>().HasData(
                 new LearnConnection { Id = 1, TestTypeId = 15, DisplayName = "Wire", IsChecked = true },
                 new LearnConnection { Id = 2, TestTypeId = 11, DisplayName = "Resistance", IsChecked = true },
-                new LearnConnection { Id = 3, TestTypeId = 3, DisplayName = "Capacitor", IsChecked = true },
-                new LearnConnection { Id = 4, TestTypeId = 6, DisplayName = "Diode", IsChecked = true },
-                new LearnConnection { Id = 5, TestTypeId = 14, DisplayName = "Twisted Pair", IsChecked = true }
+                new LearnConnection { Id = 3, TestTypeId = 3, DisplayName = "Capacitor", IsChecked = false },
+                new LearnConnection { Id = 4, TestTypeId = 6, DisplayName = "Diode", IsChecked = false },
+                new LearnConnection { Id = 5, TestTypeId = 14, DisplayName = "Twisted Pair", IsChecked = false }
             );
 
             // TestResultName doubles as the column header wherever a result row is rendered.
@@ -329,6 +328,29 @@ namespace AssemblyLineTester.Data
             );
 
             modelBuilder.Entity<RolePermission>().HasData(GetInitialRolePermissions());
+
+            modelBuilder.Entity<DefaultTestSetting>().HasData(GetInitialDefaultTestSetting());
+
+
+        }
+
+        private static DefaultTestSetting[] GetInitialDefaultTestSetting()
+        {
+            return
+            [
+                new DefaultTestSetting
+                {
+                    Id = 1,
+                    TotalTestPointsAvailable = 448,
+                    DefaultTestTypeId = 15,
+                    DefaultMaxWireResistance = 10.0,
+                    DefaultMinInulationResistance = 500000.0,
+                    DefaultResistorValue = 100.0,
+                    DefaultResistorTolerance = 10,
+                    DefaultCapacitorValue = 0.000001,
+                    DefaultCapacitorTolerance = 10
+                }
+            ];
         }
 
         private static RolePermission[] GetInitialRolePermissions()

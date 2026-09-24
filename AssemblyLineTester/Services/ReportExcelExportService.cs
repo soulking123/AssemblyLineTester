@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using ClosedXML.Excel;
 using System.Linq;
@@ -13,6 +13,12 @@ namespace AssemblyLineTester.Services
         {
             var detail = new TestReportService().GetReportDetail(reportId);
             if (detail is null) throw new InvalidOperationException("Report not found.");
+            ExportReportToExcel(detail, outputPath);
+        }
+
+        public void ExportReportToExcel(ReportDetailDto detail, string outputPath)
+        {
+            if (detail is null) throw new ArgumentNullException(nameof(detail));
 
             using var wb = new XLWorkbook();
 
@@ -106,41 +112,95 @@ namespace AssemblyLineTester.Services
             ws.Column(2).Width = Math.Max(ws.Column(2).Width, 3);
             ws.Column(3).Width = Math.Max(ws.Column(3).Width, 12);
 
-            // Sheet 2: the Test Summary panel from the Test Execution screen, line for line.
-            var wsSummary = wb.Worksheets.Add("Test Summary");
+            // Sheet 2: the Error/Test Summary panel from the Test Execution screen, line for line.
+            bool isReportPass = string.Equals(detail.OverallResult, "PASS", StringComparison.OrdinalIgnoreCase) &&
+                                (detail.Details == null || !detail.Details.Any(d => !string.IsNullOrWhiteSpace(d.ErrorDetail))) &&
+                                (string.IsNullOrWhiteSpace(detail.ErrorSummary) || !detail.ErrorSummary.Contains("FAIL", StringComparison.OrdinalIgnoreCase));
+
+            var wsSummary = wb.Worksheets.Add(isReportPass ? "Test Summary" : "Error Summary");
             int sr = 1;
 
-            wsSummary.Cell(sr, 1).Value = $"TEST RESULT = {detail.OverallResult}";
-            wsSummary.Cell(sr, 1).Style.Font.Bold = true;
-            wsSummary.Cell(sr, 1).Style.Font.FontColor =
-                detail.OverallResult?.ToUpperInvariant() == "PASS" ? XLColor.DarkGreen : XLColor.DarkRed;
-            sr += 2;
-
-            foreach (var s in detail.TypeSummaries)
+            if (!string.IsNullOrWhiteSpace(detail.ErrorSummary))
             {
-                bool allPassed = s.Fail == 0;
-                wsSummary.Cell(sr, 1).Value = $"[{(allPassed ? "OK" : "X")}]  {s.TestType} ({s.Pass}/{s.Total})";
-                if (!allPassed) wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
-                sr++;
-            }
+                var lines = detail.ErrorSummary.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                bool inErrorSection = false;
+                foreach (var line in lines)
+                {
+                    string trimmed = line.Trim();
+                    if (string.IsNullOrEmpty(trimmed))
+                    {
+                        sr++;
+                        continue;
+                    }
 
-            sr += 1;
-            wsSummary.Cell(sr, 1).Value = "TEST ERRORS";
-            wsSummary.Cell(sr, 1).Style.Font.Bold = true;
-            sr += 2;
+                    if (trimmed.StartsWith("TEST RESULT", StringComparison.OrdinalIgnoreCase))
+                    {
+                        bool isPass = trimmed.EndsWith("PASS", StringComparison.OrdinalIgnoreCase);
+                        wsSummary.Cell(sr, 1).Value = trimmed;
+                        wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+                        wsSummary.Cell(sr, 1).Style.Font.FontColor = isPass ? XLColor.DarkGreen : XLColor.DarkRed;
+                    }
+                    else if (trimmed.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) ||
+                             trimmed.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase))
+                    {
+                        inErrorSection = true;
+                        wsSummary.Cell(sr, 1).Value = trimmed;
+                        wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+                    }
+                    else if (inErrorSection || trimmed.StartsWith("Short ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        wsSummary.Cell(sr, 1).Value = trimmed;
+                        wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                    }
+                    else
+                    {
+                        string displayLine = trimmed
+                            .Replace("✔", "[OK] ")
+                            .Replace("✖", "[X] ");
 
-            var failedRows = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
-            if (failedRows.Count == 0)
-            {
-                wsSummary.Cell(sr, 1).Value = "No errors were recorded for this test run.";
+                        bool isFail = displayLine.Contains("[X]") || trimmed.Contains("FAIL", StringComparison.OrdinalIgnoreCase);
+                        wsSummary.Cell(sr, 1).Value = displayLine;
+                        if (isFail) wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                    }
+
+                    sr++;
+                }
             }
             else
             {
-                foreach (var d in failedRows)
+                wsSummary.Cell(sr, 1).Value = $"TEST RESULT = {detail.OverallResult}";
+                wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+                wsSummary.Cell(sr, 1).Style.Font.FontColor =
+                    detail.OverallResult?.ToUpperInvariant() == "PASS" ? XLColor.DarkGreen : XLColor.DarkRed;
+                sr += 2;
+
+                foreach (var s in detail.TypeSummaries)
                 {
-                    wsSummary.Cell(sr, 1).Value = $"{d.NetId} ({d.TestType}) - {d.ErrorDetail}";
-                    wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                    bool allPassed = s.Fail == 0;
+                    wsSummary.Cell(sr, 1).Value = $"[{(allPassed ? "OK" : "X")}]  {s.TestType} ({s.Pass}/{s.Total})";
+                    if (!allPassed) wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
                     sr++;
+                }
+
+                sr += 1;
+                wsSummary.Cell(sr, 1).Value = "TEST ERRORS";
+                wsSummary.Cell(sr, 1).Style.Font.Bold = true;
+                sr += 2;
+
+                var failedRows = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
+                if (failedRows.Count == 0)
+                {
+                    wsSummary.Cell(sr, 1).Value = "No errors were recorded for this test run.";
+                }
+                else
+                {
+                    foreach (var d in failedRows)
+                    {
+                        string idPrefix = !string.IsNullOrWhiteSpace(d.NetId) ? $"{d.NetId} " : "";
+                        wsSummary.Cell(sr, 1).Value = $"{idPrefix}({d.TestType}) - {d.ErrorDetail}";
+                        wsSummary.Cell(sr, 1).Style.Font.FontColor = XLColor.DarkRed;
+                        sr++;
+                    }
                 }
             }
 
@@ -171,12 +231,12 @@ namespace AssemblyLineTester.Services
                 for (int c = 0; c < columns.Count; c++)
                 {
                     var cell = ws2.Cell(rr, c + 2);
-                    // Limits stay numeric so the columns sort numerically; everything else is text.
+                    // Limits stay numeric so the columns sort numerically; dual values (diode) or non-numeric stay formatted text.
                     switch (columns[c])
                     {
-                        case "Lower Limit" when d.LowerLimit.HasValue: cell.Value = d.LowerLimit.Value; break;
-                        case "Upper Limit" when d.UpperLimit.HasValue: cell.Value = d.UpperLimit.Value; break;
-                        case "Expected Value" when d.ExpectedValue.HasValue: cell.Value = d.ExpectedValue.Value; break;
+                        case "Lower Limit" when d.LowerLimit.HasValue && !d.LowerLimit2.HasValue: cell.Value = d.LowerLimit.Value; break;
+                        case "Upper Limit" when d.UpperLimit.HasValue && !d.UpperLimit2.HasValue: cell.Value = d.UpperLimit.Value; break;
+                        case "Expected Value" when d.ExpectedValue.HasValue && !d.ExpectedValue2.HasValue: cell.Value = d.ExpectedValue.Value; break;
                         default: cell.Value = d.Column(columns[c]); break;
                     }
                 }

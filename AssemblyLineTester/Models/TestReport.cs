@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -48,6 +48,7 @@ namespace AssemblyLineTester.Models
         public TestResult? OverallResult { get; set; }
 
         public string Notes { get; set; } = string.Empty;
+        public string? ErrorSummary { get; set; }
 
         public bool IsDraft { get; set; } = true;
 

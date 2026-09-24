@@ -999,7 +999,7 @@ namespace AssemblyLineTester.Views.Pages
             lblDefCapacitorVal.Name = "lblDefCapacitorVal";
             lblDefCapacitorVal.Size = new Size(117, 15);
             lblDefCapacitorVal.TabIndex = 12;
-            lblDefCapacitorVal.Text = "Capacitor Value (μF)";
+            lblDefCapacitorVal.Text = "Capacitor Value (F)";
             // 
             // txtDefCapacitorVal
             // 
@@ -1043,7 +1043,7 @@ namespace AssemblyLineTester.Views.Pages
             lblDefWireInsRes.Name = "lblDefWireInsRes";
             lblDefWireInsRes.Size = new Size(172, 15);
             lblDefWireInsRes.TabIndex = 11;
-            lblDefWireInsRes.Text = "Min Wire Insulation Res. (MΩ)";
+            lblDefWireInsRes.Text = "Min Wire Insulation Res. (Ω)";
             // 
             // txtDefWireInsRes
             // 

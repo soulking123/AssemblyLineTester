@@ -30,5 +30,7 @@ namespace AssemblyLineTester.Models
         public double MinInsulationResistance { get; set; }
 
         public bool HipotVoltage { get; set; }
+
+        public bool ShortTest { get; set; }
     }
 }

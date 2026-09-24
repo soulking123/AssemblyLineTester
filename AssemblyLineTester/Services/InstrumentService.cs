@@ -10,7 +10,7 @@ namespace AssemblyLineTester.Services
     public class InstrumentService
     {
         private const string ServerIPandPort = "127.0.0.1:55555";
-        private const string UserName = "User1";
+        private const string UserName = "Master Login";
         private const string Password = "";
 
         private static readonly CtaService _service = new();
@@ -25,15 +25,19 @@ namespace AssemblyLineTester.Services
             lock (_lockObj)
             {
                 if (IsConnected) return true;
+                Debug.WriteLine("Connecting ..."); 
                 try
                 {
                     var connectionResult = _service.Connect(ServerIPandPort, UserName, Password);
                     if (connectionResult.DllCallResult == CtaCommandResultCode.Success)
                     {
                         _connectionId = connectionResult.FunctionResult;
+                        Debug.WriteLine($"succes code : {_connectionId}");
                         return true;
                     }
                     _connectionId = -1;
+
+                    Debug.WriteLine($"failed code : {_connectionId}");
                     return false;
                 }
                 catch

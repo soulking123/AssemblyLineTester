@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace AssemblyLineTester.Models.Dto
@@ -18,6 +18,7 @@ namespace AssemblyLineTester.Models.Dto
         public string TestTime { get; set; } = string.Empty; 
         public string OverallResult { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
+        public string? ErrorSummary { get; set; }
         public int TotalNets { get; set; }
         public int PassCount { get; set; }
         public int FailCount { get; set; }

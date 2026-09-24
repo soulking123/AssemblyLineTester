@@ -101,6 +101,8 @@ namespace AssemblyLineTester.Services
         // Writes the whole card in one go, so a half-saved set of defaults cannot be left behind.
         public static bool SaveDefaults(DefaultTestSetting values)
         {
+            if (!SessionManager.HasPermission("Action.Settings.Edit")) return false;
+
             try
             {
                 using var db = new AppDbContext();
@@ -179,6 +181,8 @@ namespace AssemblyLineTester.Services
             Action<T, bool> apply,
             Func<T, string> name) where T : class
         {
+            if (!SessionManager.HasPermission("Action.Settings.Edit")) return false;
+
             try
             {
                 using var db = new AppDbContext();

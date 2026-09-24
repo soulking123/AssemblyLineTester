@@ -27,9 +27,12 @@ namespace AssemblyLineTester.Views.Pages
 
         private const string ActivateLabel = "Activate";
         private const string DeactivateLabel = "Deactivate";
+        private const string EditLabel = "Edit";
 
         // Row whose action button the pointer is over, or -1.
         private int _hoveredActionRow = -1;
+        // Which of the two pills in that row, so only the one under the pointer highlights.
+        private bool _hoveredEditButton;
 
         // Pill text is drawn, so it never passes through the page's AutoScale pass.
         private Font _pillFont = AssemblyLineTester.Helpers.UIStyleHelper.Font85Bold;
@@ -58,7 +61,7 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.CellFormatting += GridUsers_CellFormatting;
             gridUsers.CellPainting += GridUsers_CellPainting;
             gridUsers.SelectionChanged += GridUsers_SelectionChanged;
-            gridUsers.CellClick += GridUsers_CellClick;
+            gridUsers.CellMouseClick += GridUsers_CellMouseClick;
             gridUsers.CellMouseMove += GridUsers_CellMouseMove;
             gridUsers.MouseLeave += GridUsers_MouseLeave;
 
@@ -134,7 +137,7 @@ namespace AssemblyLineTester.Views.Pages
         private void InitializeFilters()
         {
             cmbFilterStatus.Items.Clear();
-            cmbFilterStatus.Items.AddRange(["Status: All", "Active", "Inactive", "Locked"]);
+            cmbFilterStatus.Items.AddRange(["Status: All", "Active", "Inactive"]);
             cmbFilterStatus.SelectedIndex = 0;
 
             cmbFilterRole.Items.Clear();
@@ -158,7 +161,6 @@ namespace AssemblyLineTester.Views.Pages
                 // Counted by seeded id; the names are editable and renaming one zeroed these.
                 int activeUsers = _allUsers.Count(u => u.StatusId == UserStatus.Active);
                 int inactiveUsers = _allUsers.Count(u => u.StatusId == UserStatus.Inactive);
-                int lockedUsers = _allUsers.Count(u => u.StatusId == UserStatus.Locked);
                 // Local on both sides; CreatedAt is UTC and drifted across the month boundary.
                 int newUsersThisMonth = _allUsers.Count(u =>
                     AppTime.ToLocal(u.CreatedAt).Month == DateTime.Now.Month &&
@@ -170,8 +172,6 @@ namespace AssemblyLineTester.Views.Pages
                 lblKpiSub2.Text = $"Users ({(_totalUserCount > 0 ? (activeUsers * 100.0 / _totalUserCount) : 0):0.0}%)";
                 lblKpiVal3.Text = inactiveUsers.ToString();
                 lblKpiSub3.Text = $"Users ({(_totalUserCount > 0 ? (inactiveUsers * 100.0 / _totalUserCount) : 0):0.0}%)";
-                lblKpiVal4.Text = lockedUsers.ToString();
-                lblKpiSub4.Text = $"Users ({(_totalUserCount > 0 ? (lockedUsers * 100.0 / _totalUserCount) : 0):0.0}%)";
                 lblKpiVal5.Text = latestUser?.FullName ?? "-";
                 lblKpiSub5.Text = AppTime.ToLocal(latestUser?.LastLogin)?.ToString("dd MMM yyyy hh:mm:ss tt") ?? "No logins";
                 lblKpiVal6.Text = newUsersThisMonth.ToString();
@@ -379,13 +379,39 @@ namespace AssemblyLineTester.Views.Pages
             PopulateUserGrid();
         }
 
-        // Activates or deactivates the clicked account, granting or withdrawing access.
-        private void GridUsers_CellClick(object? sender, DataGridViewCellEventArgs e)
+        // Routes a click on the Action cell to Edit or to the status toggle, by which pill it landed on.
+        private void GridUsers_CellMouseClick(object? sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
             if (gridUsers.Columns[e.ColumnIndex].Name != "colAction") return;
             if (gridUsers.Rows[e.RowIndex].Tag is not User user) return;
 
+            var cellBounds = gridUsers.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
+            var (editRect, statusRect) = ComputeActionRects(cellBounds, StatusLabelFor(user));
+            var clickPoint = new Point(cellBounds.X + e.X, cellBounds.Y + e.Y);
+
+            if (editRect.Contains(clickPoint))
+            {
+                EditUser(user);
+            }
+            else if (statusRect.Contains(clickPoint))
+            {
+                ToggleUserStatus(user);
+            }
+        }
+
+        // Opens the Edit modal for one account and reloads the grid if it was saved.
+        private void EditUser(User user)
+        {
+            using var modal = new EditUserModalForm(_userService, user);
+            if (modal.ShowDialog(this.FindForm()) == DialogResult.OK)
+            {
+                LoadDatabaseData();
+            }
+        }
+
+        private void ToggleUserStatus(User user)
+        {
             bool activating = user.StatusId != UserStatus.Active;
             int targetStatus = activating ? UserStatus.Active : UserStatus.Inactive;
 
@@ -420,25 +446,57 @@ namespace AssemblyLineTester.Views.Pages
                 && gridUsers.Columns[e.ColumnIndex].Name == "colAction";
 
             gridUsers.Cursor = onAction ? Cursors.Hand : Cursors.Default;
-            SetHoveredActionRow(onAction ? e.RowIndex : -1);
+
+            bool onEdit = false;
+            if (onAction && gridUsers.Rows[e.RowIndex].Tag is User user)
+            {
+                var cellBounds = gridUsers.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
+                var (editRect, _) = ComputeActionRects(cellBounds, StatusLabelFor(user));
+                onEdit = editRect.Contains(cellBounds.X + e.X, cellBounds.Y + e.Y);
+            }
+
+            SetHoveredActionRow(onAction ? e.RowIndex : -1, onEdit);
         }
 
         private void GridUsers_MouseLeave(object? sender, EventArgs e)
         {
             gridUsers.Cursor = Cursors.Default;
-            SetHoveredActionRow(-1);
+            SetHoveredActionRow(-1, false);
         }
 
         // Repaints only the rows entering and leaving hover, not the whole grid.
-        private void SetHoveredActionRow(int rowIndex)
+        private void SetHoveredActionRow(int rowIndex, bool editButton)
         {
-            if (rowIndex == _hoveredActionRow) return;
+            if (rowIndex == _hoveredActionRow && editButton == _hoveredEditButton) return;
 
             int previous = _hoveredActionRow;
             _hoveredActionRow = rowIndex;
+            _hoveredEditButton = editButton;
 
             if (previous >= 0 && previous < gridUsers.Rows.Count) gridUsers.InvalidateRow(previous);
             if (rowIndex >= 0 && rowIndex < gridUsers.Rows.Count) gridUsers.InvalidateRow(rowIndex);
+        }
+
+        private static string StatusLabelFor(User user) => user.StatusId == UserStatus.Active ? DeactivateLabel : ActivateLabel;
+
+        // Both action pills, laid out as a pair centered in the cell.
+        private (Rectangle Edit, Rectangle Status) ComputeActionRects(Rectangle cellBounds, string statusLabel)
+        {
+            Size editSize = TextRenderer.MeasureText(EditLabel, _pillFont);
+            Size statusSize = TextRenderer.MeasureText(statusLabel, _pillFont);
+
+            int btnHeight = Scaled(28);
+            int editWidth = editSize.Width + Scaled(22);
+            int statusWidth = statusSize.Width + Scaled(22);
+            int gap = Scaled(8);
+
+            int totalWidth = editWidth + gap + statusWidth;
+            int startX = cellBounds.X + (cellBounds.Width - totalWidth) / 2;
+            int y = cellBounds.Y + (cellBounds.Height - btnHeight) / 2;
+
+            var editRect = new Rectangle(startX, y, editWidth, btnHeight);
+            var statusRect = new Rectangle(startX + editWidth + gap, y, statusWidth, btnHeight);
+            return (editRect, statusRect);
         }
 
         // Writes the accounts currently listed to an .xlsx.
@@ -607,7 +665,7 @@ namespace AssemblyLineTester.Views.Pages
             gridUsers.Columns[cCreated].FillWeight = 110F;
 
             var cAction = gridUsers.Columns.Add("colAction", "Action");
-            gridUsers.Columns[cAction].FillWeight = 95F;
+            gridUsers.Columns[cAction].FillWeight = 140F;
             gridUsers.Columns[cAction].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
@@ -628,8 +686,8 @@ namespace AssemblyLineTester.Views.Pages
                 e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
                 
                 string status = e.Value.ToString() ?? "";
-                Color pillColor = status == "Active" ? Color.FromArgb(220, 252, 231) : (status == "Locked" ? Color.FromArgb(254, 226, 226) : Color.FromArgb(226, 232, 240));
-                Color textColor = status == "Active" ? Color.FromArgb(22, 101, 52) : (status == "Locked" ? Color.FromArgb(153, 27, 27) : Color.FromArgb(71, 85, 105));
+                Color pillColor = status == "Active" ? Color.FromArgb(220, 252, 231) : Color.FromArgb(226, 232, 240);
+                Color textColor = status == "Active" ? Color.FromArgb(22, 101, 52) : Color.FromArgb(71, 85, 105);
                 
                 Size textSize = TextRenderer.MeasureText(status, _pillFont);
                 int badgeWidth = Math.Max(Scaled(72), textSize.Width + Scaled(20));
@@ -653,43 +711,49 @@ namespace AssemblyLineTester.Views.Pages
             {
                 e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
 
-                string label = e.Value.ToString() ?? string.Empty;
-                if (label.Length == 0)
+                string statusLabel = e.Value.ToString() ?? string.Empty;
+                if (statusLabel.Length == 0)
                 {
                     e.Handled = true;
                     return;
                 }
 
-                // Outlined, so a pressable control reads apart from the solid status pill beside it.
-                bool activates = label == ActivateLabel;
-                bool hovered = e.RowIndex == _hoveredActionRow;
-
-                Color borderColor = activates ? Color.FromArgb(134, 239, 172) : Color.FromArgb(252, 165, 165);
-                Color labelColor = activates ? Color.FromArgb(21, 128, 61) : Color.FromArgb(185, 28, 28);
-                Color fillColor = hovered
-                    ? (activates ? Color.FromArgb(220, 252, 231) : Color.FromArgb(254, 226, 226))
-                    : Color.White;
-
-                Size labelSize = TextRenderer.MeasureText(label, _pillFont);
-                int btnHeight = Scaled(28);
-                int btnWidth = Math.Min(e.CellBounds.Width - Scaled(8), labelSize.Width + Scaled(28));
-                int bx = e.CellBounds.X + (e.CellBounds.Width - btnWidth) / 2;
-                int by = e.CellBounds.Y + (e.CellBounds.Height - btnHeight) / 2;
-                Rectangle btnRect = new(bx, by, btnWidth, btnHeight);
+                bool rowHovered = e.RowIndex == _hoveredActionRow;
+                var (editRect, statusRect) = ComputeActionRects(e.CellBounds, statusLabel);
 
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                using (var fill = new SolidBrush(fillColor))
-                using (var shape = AssemblyLineTester.Helpers.UIStyleHelper.GetRoundedRectPath(btnRect, Scaled(6)))
-                {
-                    e.Graphics.FillPath(fill, shape);
-                    using var pen = new Pen(borderColor, 1.4f * _uiScale);
-                    e.Graphics.DrawPath(pen, shape);
-                }
 
-                TextRenderer.DrawText(e.Graphics, label, _pillFont, btnRect, labelColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding);
+                DrawActionPill(e.Graphics, editRect, EditLabel,
+                    border: Color.FromArgb(191, 219, 254), labelColor: Color.FromArgb(29, 78, 216),
+                    hoverFill: Color.FromArgb(219, 234, 254), hovered: rowHovered && _hoveredEditButton);
+
+                // Outlined, so a pressable control reads apart from the solid status pill beside it.
+                bool activates = statusLabel == ActivateLabel;
+                Color statusBorder = activates ? Color.FromArgb(134, 239, 172) : Color.FromArgb(252, 165, 165);
+                Color statusLabelColor = activates ? Color.FromArgb(21, 128, 61) : Color.FromArgb(185, 28, 28);
+                Color statusHoverFill = activates ? Color.FromArgb(220, 252, 231) : Color.FromArgb(254, 226, 226);
+
+                DrawActionPill(e.Graphics, statusRect, statusLabel,
+                    border: statusBorder, labelColor: statusLabelColor,
+                    hoverFill: statusHoverFill, hovered: rowHovered && !_hoveredEditButton);
 
                 e.Handled = true;
             }
+        }
+
+        private void DrawActionPill(Graphics g, Rectangle rect, string label, Color border, Color labelColor, Color hoverFill, bool hovered)
+        {
+            Color fillColor = hovered ? hoverFill : Color.White;
+
+            using (var fill = new SolidBrush(fillColor))
+            using (var shape = AssemblyLineTester.Helpers.UIStyleHelper.GetRoundedRectPath(rect, Scaled(6)))
+            {
+                g.FillPath(fill, shape);
+                using var pen = new Pen(border, 1.4f * _uiScale);
+                g.DrawPath(pen, shape);
+            }
+
+            TextRenderer.DrawText(g, label, _pillFont, rect, labelColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding);
         }
 
         // Converts a design-time pixel measurement into this machine's pixels.
@@ -767,7 +831,6 @@ namespace AssemblyLineTester.Views.Pages
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi1, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi2, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi3, 10, Color.FromArgb(34, 40, 49), 2.5f);
-            AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi4, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi5, 10, Color.FromArgb(34, 40, 49), 2.5f);
             AssemblyLineTester.Helpers.UIStyleHelper.SetupCardRoundedEdges(cardKpi6, 10, Color.FromArgb(34, 40, 49), 2.5f);
 

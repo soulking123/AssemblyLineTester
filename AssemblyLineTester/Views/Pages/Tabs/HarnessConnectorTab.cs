@@ -127,7 +127,7 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         private bool HasConnectorEditPermission()
         {
-            if (!SessionManager.HasPermission("Action.Database.Backup") && SessionManager.CurrentUser?.Role?.Name != "Administrator")
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
             {
                 MessageBox.Show("You do not have permission to modify connector records.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -268,22 +268,10 @@ namespace AssemblyLineTester.Views.Pages.Tabs
 
         private static void LoadGalleryImage(PictureBox pic, List<string> paths, int index)
         {
-            var oldImage = pic.Image;
-            pic.Image = null;
-            oldImage?.Dispose();
+            pic.SizeMode = PictureBoxSizeMode.Zoom;
 
-            if (paths.Count > 0 && index >= 0 && index < paths.Count)
-            {
-                try
-                {
-                    pic.SizeMode = PictureBoxSizeMode.Zoom;
-                    pic.Image = Image.FromFile(paths[index]);
-                }
-                catch (Exception ex)
-                {
-                    FileLogService.Warn("HarnessConnectorTab.ShowImage", $"Image '{paths[index]}' could not be loaded: {ex.Message}");
-                }
-            }
+            string? path = paths.Count > 0 && index >= 0 && index < paths.Count ? paths[index] : null;
+            AssemblyLineTester.Helpers.ImageLoader.SetImage(pic, path);
 
             pic.Invalidate();
         }

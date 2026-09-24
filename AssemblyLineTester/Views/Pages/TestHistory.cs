@@ -78,32 +78,26 @@ namespace AssemblyLineTester.Views.Pages
 
             btnRefresh.Click += (s, ev) => LoadHistoryData();
 
-            btnSearch.Click += (s, ev) =>
-            {
-                _dateFilterApplied = true; // user explicitly asked for this date range now
-                GoToPage(1);
-            };
+            // Only an actual date pick counts as "user wants this date range" - Search itself
+            // must not silently narrow every query to today just because the pickers default to it.
+            dtpStart.ValueChanged += (s, ev) => _dateFilterApplied = true;
+            dtpEnd.ValueChanged += (s, ev) => _dateFilterApplied = true;
+
+            btnSearch.Click += (s, ev) => GoToPage(1);
 
             // Enter in the free-text box does what Search does, or the box reads like a dead end.
             txtOperator.KeyDown += (s, ev) =>
             {
                 if (ev.KeyCode != Keys.Enter) return;
                 ev.SuppressKeyPress = true;
-                _dateFilterApplied = true;
                 GoToPage(1);
             };
 
             btnReset.Click += (s, ev) =>
             {
                 ResetFilterControls();
-                _dateFilterApplied = false; // back to showing everything
                 GoToPage(1);
             };
-            {
-                ResetFilterControls();
-                GoToPage(1);
-            }
-            ;
 
             cmbPageSize.SelectedIndexChanged += (s, ev) =>
             {
@@ -148,6 +142,7 @@ namespace AssemblyLineTester.Views.Pages
             if (cmbArea.Items.Count > 0) cmbArea.SelectedIndex = 0;
             if (cmbResult.Items.Count > 0) cmbResult.SelectedIndex = 0;
             txtOperator.Clear();
+            _dateFilterApplied = false; // back to showing everything, even though the pickers show today
         }
 
         private void GoToPage(int page)
@@ -446,17 +441,24 @@ namespace AssemblyLineTester.Views.Pages
             if (MessageBox.Show("Delete this test history and its steps? This cannot be undone.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
                 return;
 
-            bool ok = _historyService.DeleteHistory(reportId);
-            if (ok)
+            try
             {
-                MessageBox.Show("History deleted.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadHistoryData();
-                ClearDetailPanel();
-                btnDeleteHistory.Enabled = false;
+                bool ok = _historyService.DeleteHistory(reportId);
+                if (ok)
+                {
+                    MessageBox.Show("History deleted.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadHistoryData();
+                    ClearDetailPanel();
+                    btnDeleteHistory.Enabled = false;
+                }
+                else
+                {
+                    MessageBox.Show("Failed to delete history.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Failed to delete history.", "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Delete History", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

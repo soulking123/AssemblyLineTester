@@ -1,0 +1,10 @@
+Resistance_Range,Resistance_SI_Ohm,Resistance_Notes,Capacitance_Range,Capacitance_SI_uF,Voltage_Range,Voltage_SI_V
+0.3 ohm,0.3,Min Resistance,100 pF,0.0001,10 mV,0.01
+1.0 ohm,1.0,,1.00 nF,0.001,100 mV,0.1
+10.0 ohm,10.0,Shorthand: 10 Ω,10.0 nF,0.01,1.00 V,1.0
+100 ohm,100.0,Shorthand: 100 Ω,100 nF,0.1,6.00 V,6.0
+1.00 K ohm,1000.0,Shorthand: 1.00 K,1.00 uF,1.0,> 6.00 V,> 6.00 V
+10.0 K ohm,10000.0,Shorthand: 10 K,10.0 uF,10.0,,
+100 K ohm,100000.0,Shorthand: 100 K,100 uF,100.0,,
+1.00 M ohm,1000000.0,,1.00 mF,1000.0,,
+3.00 M ohm,3000000.0,Max Resistance,,,,

@@ -81,7 +81,7 @@ namespace AssemblyLineTester.Views.Modals
             cmbDepartment.SelectedIndex = 1;
 
             cmbStatus.Items.Clear();
-            cmbStatus.Items.AddRange(["Active", "Inactive", "Locked"]);
+            cmbStatus.Items.AddRange(["Active", "Inactive"]);
             cmbStatus.SelectedIndex = 0;
         }
 

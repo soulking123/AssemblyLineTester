@@ -422,10 +422,15 @@ namespace AssemblyLineTester.Views.Pages
             txtTotalTestPoint.KeyPress += NumericTextBox_KeyPress;
             txtDefResistorVal.KeyPress += NumericTextBox_KeyPress;
             txtDefMaxWireRes.KeyPress += NumericTextBox_KeyPress;
-            txtDefResistorTol.KeyPress += NumericTextBox_KeyPress;
+            txtDefResistorTol.KeyPress += IntegerTextBox_KeyPress;
             txtDefWireInsRes.KeyPress += NumericTextBox_KeyPress;
             txtDefCapacitorVal.KeyPress += NumericTextBox_KeyPress;
-            txtDefCapacitorTol.KeyPress += NumericTextBox_KeyPress;
+            txtDefCapacitorTol.KeyPress += IntegerTextBox_KeyPress;
+
+            txtDefResistorTol.Leave += (s, e) => ValidateAndClampTolerance(txtDefResistorTol, "Resistor", 2, 93);
+            txtDefCapacitorTol.Leave += (s, e) => ValidateAndClampTolerance(txtDefCapacitorTol, "Capacitor", 10, 99);
+            txtDefCapacitorVal.Leave += (s, e) => ValidateAndClampDouble(txtDefCapacitorVal, "Capacitor value", 0.0000000001, 0.001);
+            txtDefMaxWireRes.Leave += (s, e) => ValidateAndClampDouble(txtDefMaxWireRes, "Continuity resistance", 0.1, 100);
 
             PopulateTestTypes();
             PopulateTestResultColumns();
@@ -675,6 +680,11 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (!HasSettingsEditPermission()) return;
 
+            ValidateAndClampTolerance(txtDefResistorTol, "Resistor", 2, 93);
+            ValidateAndClampTolerance(txtDefCapacitorTol, "Capacitor", 10, 99);
+            ValidateAndClampDouble(txtDefCapacitorVal, "Capacitor value", 0.0000000001, 0.001);
+            ValidateAndClampDouble(txtDefMaxWireRes, "Continuity resistance", 0.1, 100);
+
             var defaults = ReadDefaultsFromCard();
 
             // Checked before anything is written: the tick lists save first, so rejecting the
@@ -755,6 +765,74 @@ namespace AssemblyLineTester.Views.Pages
             }
         }
 
+        private void IntegerTextBox_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            // Allow control characters (backspace, etc.) and digits only.
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private bool ValidateAndClampTolerance(TextBox textBox, string componentName, int min, int max)
+        {
+            if (textBox.ReadOnly) return true;
+            if (_btnCancelTicks != null && (_btnCancelTicks.Focused || this.FindForm()?.ActiveControl == _btnCancelTicks)) return true;
+
+            string text = textBox.Text.Trim();
+            bool parsed = int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value);
+
+            if (!parsed || value < min)
+            {
+                textBox.Text = min.ToString(CultureInfo.InvariantCulture);
+                MessageBox.Show(
+                    $"{componentName} tolerance must be between {min}% and {max}%.\r\n\r\nAutomatically adjusted to {min}%.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            else if (value > max)
+            {
+                textBox.Text = max.ToString(CultureInfo.InvariantCulture);
+                MessageBox.Show(
+                    $"{componentName} tolerance must be between {min}% and {max}%.\r\n\r\nAutomatically adjusted to {max}%.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateAndClampDouble(TextBox textBox, string fieldName, double min, double max)
+        {
+            if (textBox.ReadOnly) return true;
+            if (_btnCancelTicks != null && (_btnCancelTicks.Focused || this.FindForm()?.ActiveControl == _btnCancelTicks)) return true;
+
+            string text = textBox.Text.Trim();
+            bool parsed = double.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out double value);
+
+            string minStr = min.ToString("0.##########", CultureInfo.InvariantCulture);
+            string maxStr = max.ToString("0.##########", CultureInfo.InvariantCulture);
+
+            if (!parsed || value < min)
+            {
+                textBox.Text = minStr;
+                MessageBox.Show(
+                    $"{fieldName} must be between {minStr} and {maxStr}.\r\n\r\nAutomatically adjusted to {minStr}.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            else if (value > max)
+            {
+                textBox.Text = maxStr;
+                MessageBox.Show(
+                    $"{fieldName} must be between {minStr} and {maxStr}.\r\n\r\nAutomatically adjusted to {maxStr}.",
+                    "Default Test Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
         private void PopulateTestTypes()
         {
             flpTestTypeAvail.SuspendLayout();
@@ -806,7 +884,7 @@ namespace AssemblyLineTester.Views.Pages
             txtDefWireInsRes.Text = defaults.DefaultMinInulationResistance.ToString(CultureInfo.InvariantCulture);
             txtDefResistorVal.Text = defaults.DefaultResistorValue.ToString(CultureInfo.InvariantCulture);
             txtDefResistorTol.Text = defaults.DefaultResistorTolerance.ToString(CultureInfo.InvariantCulture);
-            txtDefCapacitorVal.Text = defaults.DefaultCapacitorValue.ToString(CultureInfo.InvariantCulture);
+            txtDefCapacitorVal.Text = defaults.DefaultCapacitorValue.ToString("0.##########", CultureInfo.InvariantCulture);
             txtDefCapacitorTol.Text = defaults.DefaultCapacitorTolerance.ToString(CultureInfo.InvariantCulture);
         }
 

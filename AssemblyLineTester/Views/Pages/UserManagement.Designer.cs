@@ -52,13 +52,6 @@ namespace AssemblyLineTester.Views.Pages
             lblKpiTitle3 = new Label();
             lblKpiVal3 = new Label();
             lblKpiSub3 = new Label();
-            cardKpi4 = new Panel();
-            tblKpiCard4 = new TableLayoutPanel();
-            lblIconKpi4 = new Label();
-            tblKpiText4 = new TableLayoutPanel();
-            lblKpiTitle4 = new Label();
-            lblKpiVal4 = new Label();
-            lblKpiSub4 = new Label();
             cardKpi5 = new Panel();
             tblKpiCard5 = new TableLayoutPanel();
             lblIconKpi5 = new Label();
@@ -165,9 +158,6 @@ namespace AssemblyLineTester.Views.Pages
             cardKpi3.SuspendLayout();
             tblKpiCard3.SuspendLayout();
             tblKpiText3.SuspendLayout();
-            cardKpi4.SuspendLayout();
-            tblKpiCard4.SuspendLayout();
-            tblKpiText4.SuspendLayout();
             cardKpi5.SuspendLayout();
             tblKpiCard5.SuspendLayout();
             tblKpiText5.SuspendLayout();
@@ -232,19 +222,17 @@ namespace AssemblyLineTester.Views.Pages
             // 
             // tblKpiRow
             // 
-            tblKpiRow.ColumnCount = 6;
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66F));
-            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.7F));
+            tblKpiRow.ColumnCount = 5;
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tblKpiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
             tblKpiRow.Controls.Add(cardKpi1, 0, 0);
             tblKpiRow.Controls.Add(cardKpi2, 1, 0);
             tblKpiRow.Controls.Add(cardKpi3, 2, 0);
-            tblKpiRow.Controls.Add(cardKpi4, 3, 0);
-            tblKpiRow.Controls.Add(cardKpi5, 4, 0);
-            tblKpiRow.Controls.Add(cardKpi6, 5, 0);
+            tblKpiRow.Controls.Add(cardKpi5, 3, 0);
+            tblKpiRow.Controls.Add(cardKpi6, 4, 0);
             tblKpiRow.Dock = DockStyle.Fill;
             tblKpiRow.Location = new Point(10, 73);
             tblKpiRow.Margin = new Padding(10);
@@ -544,104 +532,7 @@ namespace AssemblyLineTester.Views.Pages
             lblKpiSub3.Size = new Size(212, 35);
             lblKpiSub3.TabIndex = 2;
             lblKpiSub3.Text = "Users (12.5%)";
-            // 
-            // cardKpi4
-            // 
-            cardKpi4.BackColor = Color.White;
-            cardKpi4.Controls.Add(tblKpiCard4);
-            cardKpi4.Dock = DockStyle.Fill;
-            cardKpi4.Location = new Point(1016, 5);
-            cardKpi4.Margin = new Padding(5);
-            cardKpi4.Name = "cardKpi4";
-            cardKpi4.Padding = new Padding(8);
-            cardKpi4.Size = new Size(327, 159);
-            cardKpi4.TabIndex = 3;
-            // 
-            // tblKpiCard4
-            // 
-            tblKpiCard4.ColumnCount = 2;
-            tblKpiCard4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
-            tblKpiCard4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 72F));
-            tblKpiCard4.Controls.Add(lblIconKpi4, 0, 0);
-            tblKpiCard4.Controls.Add(tblKpiText4, 1, 0);
-            tblKpiCard4.Dock = DockStyle.Fill;
-            tblKpiCard4.Location = new Point(8, 8);
-            tblKpiCard4.Name = "tblKpiCard4";
-            tblKpiCard4.RowCount = 1;
-            tblKpiCard4.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblKpiCard4.Size = new Size(311, 143);
-            tblKpiCard4.TabIndex = 0;
-            // 
-            // lblIconKpi4
-            // 
-            lblIconKpi4.AutoSize = true;
-            lblIconKpi4.BackColor = Color.FromArgb(254, 243, 199);
-            lblIconKpi4.Dock = DockStyle.Fill;
-            lblIconKpi4.Font = new Font("Segoe UI", 18F);
-            lblIconKpi4.ForeColor = Color.FromArgb(180, 83, 9);
-            lblIconKpi4.Location = new Point(10, 25);
-            lblIconKpi4.Margin = new Padding(10, 25, 10, 25);
-            lblIconKpi4.Name = "lblIconKpi4";
-            lblIconKpi4.Size = new Size(67, 93);
-            lblIconKpi4.TabIndex = 0;
-            lblIconKpi4.Text = "🔒";
-            lblIconKpi4.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // tblKpiText4
-            // 
-            tblKpiText4.ColumnCount = 1;
-            tblKpiText4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tblKpiText4.Controls.Add(lblKpiTitle4, 0, 0);
-            tblKpiText4.Controls.Add(lblKpiVal4, 0, 1);
-            tblKpiText4.Controls.Add(lblKpiSub4, 0, 2);
-            tblKpiText4.Dock = DockStyle.Fill;
-            tblKpiText4.Location = new Point(90, 3);
-            tblKpiText4.Name = "tblKpiText4";
-            tblKpiText4.RowCount = 3;
-            tblKpiText4.RowStyles.Add(new RowStyle(SizeType.Percent, 30F));
-            tblKpiText4.RowStyles.Add(new RowStyle(SizeType.Percent, 45F));
-            tblKpiText4.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tblKpiText4.Size = new Size(218, 137);
-            tblKpiText4.TabIndex = 1;
-            // 
-            // lblKpiTitle4
-            // 
-            lblKpiTitle4.AutoSize = true;
-            lblKpiTitle4.Dock = DockStyle.Fill;
-            lblKpiTitle4.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblKpiTitle4.ForeColor = Color.FromArgb(100, 116, 139);
-            lblKpiTitle4.Location = new Point(3, 0);
-            lblKpiTitle4.Name = "lblKpiTitle4";
-            lblKpiTitle4.Size = new Size(212, 41);
-            lblKpiTitle4.TabIndex = 0;
-            lblKpiTitle4.Text = "Locked Users";
-            lblKpiTitle4.TextAlign = ContentAlignment.BottomLeft;
-            // 
-            // lblKpiVal4
-            // 
-            lblKpiVal4.AutoSize = true;
-            lblKpiVal4.Dock = DockStyle.Fill;
-            lblKpiVal4.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            lblKpiVal4.ForeColor = Color.FromArgb(30, 41, 59);
-            lblKpiVal4.Location = new Point(3, 41);
-            lblKpiVal4.Name = "lblKpiVal4";
-            lblKpiVal4.Size = new Size(212, 61);
-            lblKpiVal4.TabIndex = 1;
-            lblKpiVal4.Text = "0";
-            lblKpiVal4.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblKpiSub4
-            // 
-            lblKpiSub4.AutoSize = true;
-            lblKpiSub4.Dock = DockStyle.Fill;
-            lblKpiSub4.Font = new Font("Segoe UI", 8F);
-            lblKpiSub4.ForeColor = Color.FromArgb(100, 116, 139);
-            lblKpiSub4.Location = new Point(3, 102);
-            lblKpiSub4.Name = "lblKpiSub4";
-            lblKpiSub4.Size = new Size(212, 35);
-            lblKpiSub4.TabIndex = 2;
-            lblKpiSub4.Text = "Users (0%)";
-            // 
+            //
             // cardKpi5
             // 
             cardKpi5.BackColor = Color.White;
@@ -1953,11 +1844,6 @@ namespace AssemblyLineTester.Views.Pages
             tblKpiCard3.PerformLayout();
             tblKpiText3.ResumeLayout(false);
             tblKpiText3.PerformLayout();
-            cardKpi4.ResumeLayout(false);
-            tblKpiCard4.ResumeLayout(false);
-            tblKpiCard4.PerformLayout();
-            tblKpiText4.ResumeLayout(false);
-            tblKpiText4.PerformLayout();
             cardKpi5.ResumeLayout(false);
             tblKpiCard5.ResumeLayout(false);
             tblKpiCard5.PerformLayout();
@@ -2026,13 +1912,6 @@ namespace AssemblyLineTester.Views.Pages
         private System.Windows.Forms.Label lblKpiTitle3;
         private System.Windows.Forms.Label lblKpiVal3;
         private System.Windows.Forms.Label lblKpiSub3;
-        private System.Windows.Forms.Panel cardKpi4;
-        private System.Windows.Forms.TableLayoutPanel tblKpiCard4;
-        private System.Windows.Forms.Label lblIconKpi4;
-        private System.Windows.Forms.TableLayoutPanel tblKpiText4;
-        private System.Windows.Forms.Label lblKpiTitle4;
-        private System.Windows.Forms.Label lblKpiVal4;
-        private System.Windows.Forms.Label lblKpiSub4;
         private System.Windows.Forms.Panel cardKpi5;
         private System.Windows.Forms.TableLayoutPanel tblKpiCard5;
         private System.Windows.Forms.Label lblIconKpi5;

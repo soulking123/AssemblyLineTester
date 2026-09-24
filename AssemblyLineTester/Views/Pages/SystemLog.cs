@@ -75,7 +75,7 @@ namespace AssemblyLineTester.Views.Pages
         // Two exports: the filtered log as a spreadsheet, or a diagnostics bundle to send.
         private void BtnExport_Click(object? sender, EventArgs e)
         {
-            if (!SessionManager.HasPermission("Action.SystemLog.Clear"))
+            if (!SessionManager.HasPermission("Action.Reports.Export"))
             {
                 MessageBox.Show("You do not have permission to export system logs.", "Access Denied",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);

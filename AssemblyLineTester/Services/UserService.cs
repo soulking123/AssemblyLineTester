@@ -85,6 +85,64 @@ namespace AssemblyLineTester.Services
             }
         }
 
+        // Updates an existing account's identity, role, department and status.
+        public void UpdateUser(User updated)
+        {
+            if (!SessionManager.HasPermission("Action.UserManagement.Edit"))
+            {
+                throw new UnauthorizedAccessException("Access denied. You are not allowed to manage user accounts.");
+            }
+
+            if (updated == null) throw new ArgumentNullException(nameof(updated));
+            if (string.IsNullOrWhiteSpace(updated.Username)) throw new ArgumentException("Username is required.");
+            if (string.IsNullOrWhiteSpace(updated.FullName)) throw new ArgumentException("Full Name is required.");
+
+            using var db = new AppDbContext();
+
+            var user = db.Users.FirstOrDefault(u => u.UserId == updated.UserId)
+                ?? throw new InvalidOperationException("User not found.");
+
+            string cleanUsername = updated.Username.Trim().ToLower();
+            if (db.Users.Any(u => u.UserId != updated.UserId && u.Username.ToLower() == cleanUsername))
+            {
+                throw new InvalidOperationException($"A user with username '{updated.Username}' already exists.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(updated.CompanyId))
+            {
+                string cleanCompanyId = updated.CompanyId.Trim().ToLower();
+                if (db.Users.Any(u => u.UserId != updated.UserId && u.CompanyId.ToLower() == cleanCompanyId))
+                {
+                    throw new InvalidOperationException($"A user with Company ID '{updated.CompanyId}' already exists.");
+                }
+            }
+
+            // Same rule UpdateUserStatus enforces: nobody may lock themselves out, and no second
+            // admin is guaranteed to be there to undo it.
+            if (SessionManager.CurrentUser?.UserId == updated.UserId && user.StatusId != updated.StatusId)
+            {
+                throw new InvalidOperationException("You cannot change the status of your own account.");
+            }
+
+            string previousDetails = $"{user.FullName}, {user.Department}, role {user.RoleId}, status {user.StatusId}";
+
+            user.Username = updated.Username.Trim();
+            user.CompanyId = updated.CompanyId?.Trim() ?? string.Empty;
+            user.FullName = updated.FullName.Trim();
+            user.RoleId = updated.RoleId;
+            user.Department = updated.Department;
+            user.StatusId = updated.StatusId;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            db.SaveChanges();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Warning,
+                "User Management",
+                "Edit Account",
+                $"Account '{user.Username}' updated (was: {previousDetails}).");
+        }
+
         // Shortest password the application will accept.
         public const int MinimumPasswordLength = 8;
 

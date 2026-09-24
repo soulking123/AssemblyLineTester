@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -6,6 +6,7 @@ using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace AssemblyLineTester.Services
 {
@@ -126,23 +127,52 @@ namespace AssemblyLineTester.Services
                 })
                 .ToList();
 
-            var detailDtos = details.Select(d => new TestDetailDto
+            var detailDtos = details.Select((d, idx) =>
             {
-                NetId = d.NetId,
-                HarnessGroup = d.HarnessGroup,
-                FromPin = d.FromPin,
-                ToPin = d.ToPin,
-                FromLabel = d.FromLabel,
-                ToLabel = d.ToLabel,
-                TestType = d.TestTypeName,
-                LowerLimit = d.LowerLimit,
-                UpperLimit = d.UpperLimit,
-                ExpectedValue = d.ExpectedValue,
-                ToleranceValue = d.Tolerance,
-                Unit = d.Unit,
-                Measured = d.MeasuredValue.HasValue ? $"{d.MeasuredValue.Value} {d.Unit}" : "N/A",
-                Result = FormatResult(d.Result, d.MeasuredValue),
-                ErrorDetail = d.ErrorDetail
+                bool isDiode = string.Equals(d.TestTypeName, "DIODE", StringComparison.OrdinalIgnoreCase) ||
+                               string.Equals(d.TestTypeName, "SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase);
+
+                double? exp2 = d.ExpectedValue2 ?? (isDiode ? 6.00 : null);
+                double? low2 = d.LowerLimit2 ?? (isDiode ? 4.80 : null);
+                double? up2 = d.UpperLimit2 ?? (isDiode ? 6.00 : null);
+                double? tol2 = d.Tolerance2 ?? (isDiode ? 20.0 : null);
+                double? mVal2 = d.MeasuredValue2 ?? (isDiode ? 6.00 : null);
+                string? pfx2 = d.MeasurementPrefix2 ?? (isDiode ? "> " : null);
+
+                string color = !string.IsNullOrEmpty(d.Color) ? d.Color : "";
+                string gauge = !string.IsNullOrEmpty(d.Gauge) ? d.Gauge : "";
+                string netId = d.NetId ?? "";
+
+                string measuredStr = TestDetailDto.FormatMeasuredRow(d.MeasuredValue, d.MeasurementPrefix, mVal2, pfx2, d.TestTypeName);
+
+                return new TestDetailDto
+                {
+                    NetId = netId,
+                    HarnessGroup = d.HarnessGroup,
+                    Color = color,
+                    Gauge = gauge,
+                    FromPin = d.FromPin,
+                    ToPin = d.ToPin,
+                    FromLabel = d.FromLabel,
+                    ToLabel = d.ToLabel,
+                    TestType = d.TestTypeName,
+                    LowerLimit = d.LowerLimit,
+                    UpperLimit = d.UpperLimit,
+                    ExpectedValue = d.ExpectedValue,
+                    ToleranceValue = d.Tolerance,
+                    LowerLimit2 = low2,
+                    UpperLimit2 = up2,
+                    ExpectedValue2 = exp2,
+                    ToleranceValue2 = tol2,
+                    MeasuredValue = d.MeasuredValue,
+                    MeasurementPrefix = d.MeasurementPrefix,
+                    MeasuredValue2 = mVal2,
+                    MeasurementPrefix2 = pfx2,
+                    Unit = d.Unit,
+                    Measured = measuredStr,
+                    Result = FormatResult(d.Result, d.MeasuredValue),
+                    ErrorDetail = d.ErrorDetail
+                };
             }).ToList();
 
 
@@ -163,6 +193,7 @@ namespace AssemblyLineTester.Services
                 TestTime = duration.HasValue ? duration.Value.ToString(@"hh\:mm\:ss") : "-",
                 OverallResult = report.OverallResult?.ToString().ToUpperInvariant() ?? "-",
                 Notes = report.Notes,
+                ErrorSummary = report.ErrorSummary,
                 TotalNets = report.TotalNets,
                 PassCount = report.PassCount,
                 FailCount = report.FailCount,
@@ -171,7 +202,7 @@ namespace AssemblyLineTester.Services
             };
         }
 
-        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false, string? notes = null)
+        public int SaveLiveTestReport(string productModel, string productType, string area, string ecnNumber, string revision, string partNumber, string serialNumber, string operatorName, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr, bool isDraft = false, string? notes = null, string? errorSummary = null, DateTime? endDateTime = null)
         {
             using var db = new AppDbContext();
 
@@ -179,6 +210,13 @@ namespace AssemblyLineTester.Services
             int passCount = rows != null ? rows.Count(r => r.Status == LiveTestStatus.Pass) : 0;
             int totalCount = rows != null ? rows.Count : 0;
             int failCount = totalCount - passCount;
+
+            DateTime startUtc = testDateTime == default ? AppTime.UtcNow : (testDateTime.Kind == DateTimeKind.Utc ? testDateTime : AppTime.ToUtc(testDateTime));
+            DateTime endUtc = endDateTime.HasValue ? (endDateTime.Value.Kind == DateTimeKind.Utc ? endDateTime.Value : AppTime.ToUtc(endDateTime.Value)) : AppTime.UtcNow;
+            if (endUtc < startUtc)
+            {
+                endUtc = startUtc;
+            }
 
             var report = new TestReport
             {
@@ -191,15 +229,15 @@ namespace AssemblyLineTester.Services
                 PartNumber = partNumber ?? "",
                 SerialNumber = string.IsNullOrEmpty(serialNumber) ? $"SN-{DateTime.Now:HHmmss}" : serialNumber,
                 Operator = string.IsNullOrEmpty(operatorName) ? "Unknown" : operatorName,
-                // Stored UTC; ReportNumber and the fallback serial stay local, they are labels.
-                TestDateTime = testDateTime == default ? AppTime.UtcNow : testDateTime,
-                EndDateTime = AppTime.UtcNow,
+                TestDateTime = startUtc,
+                EndDateTime = endUtc,
                 TotalNets = totalCount,
                 PassCount = passCount,
                 FailCount = failCount,
                 Status = TestStatus.Completed,
                 OverallResult = isPass ? TestResult.Pass : TestResult.Fail,
                 Notes = notes?.Trim() ?? "",
+                ErrorSummary = errorSummary?.Trim(),
                 IsDraft = isDraft,
                 CreatedAt = DateTime.UtcNow
             };
@@ -220,23 +258,55 @@ namespace AssemblyLineTester.Services
                     bool rowPass = r.Status == LiveTestStatus.Pass;
                     string rowTypeName = ResolveTestTypeName(knownTypeNames, r.TestType);
 
+                    bool isDiode = string.Equals(rowTypeName, "DIODE", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(rowTypeName, "SIGNATURE DIODE", StringComparison.OrdinalIgnoreCase);
+
+                    double? exp1 = null;
+                    double? exp2 = null;
+                    if (!string.IsNullOrWhiteSpace(r.ExpectedValue))
+                    {
+                        var parts = r.ExpectedValue.Split(',');
+                        if (parts.Length > 0 && double.TryParse(parts[0].Trim().TrimStart('>', '<', ' '), NumberStyles.Any, CultureInfo.InvariantCulture, out double e1))
+                        {
+                            exp1 = e1;
+                        }
+                        if (parts.Length > 1 && double.TryParse(parts[1].Trim().TrimStart('>', '<', ' '), NumberStyles.Any, CultureInfo.InvariantCulture, out double e2))
+                        {
+                            exp2 = e2;
+                        }
+                    }
+
+                    if (isDiode)
+                    {
+                        exp2 ??= r.UpperLimit2 ?? 6.0;
+                    }
+
                     details.Add(new TestDetail
                     {
                         ReportId = report.ReportId,
-                        NetId = r.NetId ?? $"N{stepCount:000}",
+                        NetId = !string.IsNullOrWhiteSpace(r.NetId) ? r.NetId.Trim() : "",
                         // Empty for an instrument-driven run, which knows no harness group.
-                        HarnessGroup = r.HarnessGroup,
+                        HarnessGroup = r.HarnessGroup ?? "",
+                        Color = r.Color ?? "",
+                        Gauge = r.Gauge ?? "",
                         FromPin = string.IsNullOrEmpty(r.FromPoint) ? "-" : r.FromPoint,
                         ToPin = string.IsNullOrEmpty(r.ToPoint) ? "-" : r.ToPoint,
                         FromLabel = r.FromLabel,
                         ToLabel = r.ToLabel,
                         TestTypeName = rowTypeName,
                         MeasuredValue = r.MeasuredValue,
+                        MeasurementPrefix = r.MeasurementPrefix,
                         LowerLimit = r.LowerLimit,
                         UpperLimit = r.UpperLimit,
-                        ExpectedValue = double.TryParse(r.ExpectedValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double expected) ? expected : null,
+                        ExpectedValue = exp1,
                         Tolerance = r.Tolerance,
-                        Unit = string.IsNullOrWhiteSpace(r.Unit) ? "Ω" : r.Unit,
+                        MeasuredValue2 = r.MeasuredValue2,
+                        MeasurementPrefix2 = r.MeasurementPrefix2,
+                        LowerLimit2 = r.LowerLimit2,
+                        UpperLimit2 = r.UpperLimit2,
+                        ExpectedValue2 = exp2,
+                        Tolerance2 = r.Tolerance2 ?? (isDiode ? r.Tolerance : null),
+                        Unit = string.IsNullOrWhiteSpace(r.Unit) ? (isDiode ? "V" : "Ω") : r.Unit,
                         Result = rowPass,
                         ErrorDetail = rowPass ? null : "Measurement out of limits"
                     });
@@ -293,42 +363,52 @@ namespace AssemblyLineTester.Services
 
         public int SaveDraftLiveTestReport(
             string productModel, string productType, string area, string ecnNumber, string revision,
-            string partNumber, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr)
+            string partNumber, DateTime testDateTime, List<LiveTestDetailRowDto> rows, string overallResultStr,
+            string? errorSummary = null, DateTime? endDateTime = null)
         {
             string operatorName = SessionManager.CurrentUser?.FullName ?? "Unknown";
             return SaveLiveTestReport(
                 productModel, productType, area, ecnNumber, revision, partNumber,
                 serialNumber: $"PENDING-{testDateTime:HHmmss}",
                 operatorName: operatorName,
-                testDateTime, rows, overallResultStr, isDraft: true);
+                testDateTime, rows, overallResultStr, isDraft: true, errorSummary: errorSummary, endDateTime: endDateTime);
         }
 
         // Removes drafts older than the given age; confirmed reports are never touched.
         public int PurgeOldDrafts(int olderThanDays = 30)
         {
-            using var db = new AppDbContext();
-            var cutoff = DateTime.UtcNow.AddDays(-olderThanDays);
+            try
+            {
+                using var db = new AppDbContext();
+                var cutoff = DateTime.UtcNow.AddDays(-olderThanDays);
 
-            var oldDrafts = db.TestReports
-                .Where(r => r.IsDraft && r.CreatedAt < cutoff)
-                .ToList();
+                var oldDrafts = db.TestReports
+                    .Where(r => r.IsDraft && r.CreatedAt < cutoff)
+                    .ToList();
 
-            if (oldDrafts.Count == 0) return 0;
+                if (oldDrafts.Count == 0) return 0;
 
-            db.TestReports.RemoveRange(oldDrafts);
-            db.SaveChanges();
+                db.TestReports.RemoveRange(oldDrafts);
+                db.SaveChanges();
 
-            new SystemLogService().Log(
-                Models.SystemLog.LogSeverity.Info, "Test Report", "Purge Drafts",
-                $"{oldDrafts.Count} draft reports older than {olderThanDays} days removed.");
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Test Report", "Purge Drafts",
+                    $"{oldDrafts.Count} draft reports older than {olderThanDays} days removed.");
 
-            return oldDrafts.Count;
+                return oldDrafts.Count;
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Error("TestReportService.PurgeOldDrafts",
+                    "Database draft cleanup failed.", ex);
+                return 0;
+            }
         }
 
         // Last step of running a test, so deliberately not permission-gated.
-        public void ConfirmDraft(int reportId, string serialNumber, string? notes = null)
+        public void ConfirmDraft(int reportId, string serialNumber, string? notes = null, string? errorSummary = null)
         {
-            var report = SetSerialNumber(reportId, serialNumber, markConfirmed: true, notes);
+            var report = SetSerialNumber(reportId, serialNumber, markConfirmed: true, notes, errorSummary);
 
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Info, "Test Report", "Confirm Report",
@@ -348,7 +428,7 @@ namespace AssemblyLineTester.Services
                 $"Report {report.ReportNumber} serial amended to {report.SerialNumber}.");
         }
 
-        private static TestReport SetSerialNumber(int reportId, string serialNumber, bool markConfirmed, string? notes = null)
+        private static TestReport SetSerialNumber(int reportId, string serialNumber, bool markConfirmed, string? notes = null, string? errorSummary = null)
         {
             using var db = new AppDbContext();
             var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId)
@@ -356,6 +436,7 @@ namespace AssemblyLineTester.Services
 
             if (!string.IsNullOrWhiteSpace(serialNumber)) report.SerialNumber = serialNumber.Trim();
             if (notes is not null) report.Notes = notes.Trim();
+            if (!string.IsNullOrWhiteSpace(errorSummary)) report.ErrorSummary = errorSummary.Trim();
             if (markConfirmed) report.IsDraft = false;
 
             db.SaveChanges();
