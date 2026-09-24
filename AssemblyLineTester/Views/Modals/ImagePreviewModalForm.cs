@@ -29,13 +29,21 @@ namespace AssemblyLineTester.Views.Modals
 
             SetupEvents();
             ApplyFormRounding();
+            UpdateCounterBounds();
             UpdateImageDisplay();
+        }
+
+        private void UpdateCounterBounds()
+        {
+            lblImageCounter.Bounds = new Rectangle(0, pnlFooter.Padding.Top, pnlFooter.ClientSize.Width, Math.Max(1, pnlFooter.ClientSize.Height - pnlFooter.Padding.Top));
+            lblImageCounter.SendToBack();
         }
 
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
             ApplyFormRounding();
+            UpdateCounterBounds();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -65,6 +73,7 @@ namespace AssemblyLineTester.Views.Modals
 
         private void SetupEvents()
         {
+            pnlFooter.Resize += (s, e) => UpdateCounterBounds();
             btnCloseModal.Click += (s, e) => Close();
             btnNext.Click += BtnNext_Click;
             btnPrev.Click += BtnPrev_Click;
