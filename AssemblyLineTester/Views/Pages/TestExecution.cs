@@ -1333,7 +1333,7 @@ namespace AssemblyLineTester.Views.Pages
             var activeConfig = new TestConfigService().GetActiveConfig();
             if (activeConfig == null) return null;
 
-            return new AssemblyLineTester.Services.HarnessService().GetAllHarnesses()
+            return AssemblyLineTester.Services.HarnessService.GetAllHarnesses()
                 .FirstOrDefault(h => h.Name == activeConfig.ConfigName || h.PartNumber == activeConfig.ConfigName);
         }
 

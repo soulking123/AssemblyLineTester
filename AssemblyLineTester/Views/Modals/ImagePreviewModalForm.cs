@@ -13,7 +13,7 @@ namespace AssemblyLineTester.Views.Modals
         private List<string> _imagePaths = new List<string>();
         private int _currentIndex = 0;
 
-        public ImagePreviewModalForm(List<string> imagePaths, string title = "IMAGE PREVIEW")
+        public ImagePreviewModalForm(List<string> imagePaths, string title = "IMAGE PREVIEW", int initialIndex = 0)
         {
             InitializeComponent();
             lblCustomTitle.Text = title.ToUpper();
@@ -21,6 +21,10 @@ namespace AssemblyLineTester.Views.Modals
             if (imagePaths != null && imagePaths.Count > 0)
             {
                 _imagePaths = imagePaths;
+                if (initialIndex >= 0 && initialIndex < _imagePaths.Count)
+                {
+                    _currentIndex = initialIndex;
+                }
             }
 
             SetupEvents();

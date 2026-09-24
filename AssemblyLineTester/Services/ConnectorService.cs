@@ -156,6 +156,126 @@ namespace AssemblyLineTester.Services
             return (true, null);
         }
 
+        // Updates fields and syncs images with an ordered list (preserving index positions).
+        public static (bool Success, string? Error) UpdateConnectorOrdered(Connector connector, List<string> orderedImageItems)
+        {
+            if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
+                return (false, "You do not have permission to modify connector records.");
+
+            string? validationError = Validate(connector);
+            if (validationError != null) return (false, validationError);
+
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            orderedImageItems ??= new List<string>();
+
+            // Validate any external/new source files
+            var newSources = orderedImageItems
+                .Where(p => Path.IsPathRooted(p) && !p.StartsWith(baseDir, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            string? imageError = ValidateImages(newSources);
+            if (imageError != null) return (false, imageError);
+
+            using var db = new AppDbContext();
+            var existing = db.Connectors.FirstOrDefault(c => c.Id == connector.Id);
+            if (existing == null) return (false, "Connector not found.");
+
+            existing.Name = connector.Name;
+            existing.PartNumber = connector.PartNumber;
+            existing.TotalPin = connector.TotalPin;
+            existing.Type = connector.Type;
+            existing.Description = connector.Description;
+            existing.ImagePath ??= new List<string>();
+
+            // Identify removed images
+            var currentPathsNormalized = existing.ImagePath.ToDictionary(
+                p => (Path.IsPathRooted(p) ? p : Path.Combine(baseDir, p)).Replace('\\', '/').ToLowerInvariant(),
+                p => p);
+
+            var orderedNormalized = orderedImageItems
+                .Select(p => (Path.IsPathRooted(p) ? p : Path.Combine(baseDir, p)).Replace('\\', '/').ToLowerInvariant())
+                .ToHashSet();
+
+            var removedPaths = currentPathsNormalized
+                .Where(kvp => !orderedNormalized.Contains(kvp.Key))
+                .Select(kvp => kvp.Value)
+                .ToList();
+
+            if (removedPaths.Count > 0)
+            {
+                DeleteRemovedImages(existing, removedPaths);
+            }
+
+            // Folder setup for copying any new images
+            string partFolderName = SanitizeFolderName(string.IsNullOrWhiteSpace(existing.PartNumber) ? $"Connector_{existing.Id}" : existing.PartNumber);
+            string relativeFolder = Path.Combine(ConnectorImageRoot, partFolderName);
+            string fullFolder = Path.Combine(baseDir, relativeFolder);
+            Directory.CreateDirectory(fullFolder);
+
+            int fileIndex = 1;
+            var existingFiles = Directory.GetFiles(fullFolder);
+            while (existingFiles.Any(f => Path.GetFileNameWithoutExtension(f) == $"{existing.Id}_{fileIndex}"))
+            {
+                fileIndex++;
+            }
+
+            var finalPaths = new List<string>();
+            foreach (var item in orderedImageItems)
+            {
+                if (string.IsNullOrWhiteSpace(item)) continue;
+
+                string fullItemPath = Path.IsPathRooted(item) ? item : Path.Combine(baseDir, item);
+
+                // If this is an existing file already inside the connector folder
+                if (fullItemPath.StartsWith(fullFolder, StringComparison.OrdinalIgnoreCase) && File.Exists(fullItemPath))
+                {
+                    string rel = Path.GetRelativePath(baseDir, fullItemPath);
+                    finalPaths.Add(rel);
+                }
+                else if (File.Exists(fullItemPath))
+                {
+                    // It's a new file from outside, copy it in
+                    string ext = Path.GetExtension(fullItemPath).ToLowerInvariant();
+                    string destFileName = $"{existing.Id}_{fileIndex}{ext}";
+                    string destPath = Path.Combine(fullFolder, destFileName);
+
+                    while (File.Exists(destPath))
+                    {
+                        fileIndex++;
+                        destFileName = $"{existing.Id}_{fileIndex}{ext}";
+                        destPath = Path.Combine(fullFolder, destFileName);
+                    }
+
+                    try
+                    {
+                        File.Copy(fullItemPath, destPath, overwrite: false);
+                        string relPath = Path.Combine(relativeFolder, destFileName);
+                        finalPaths.Add(relPath);
+                        fileIndex++;
+                    }
+                    catch (Exception ex)
+                    {
+                        FileLogService.Warn("ConnectorService.UpdateConnectorOrdered",
+                            $"Image '{fullItemPath}' could not be copied: {ex.Message}");
+                        return (false, $"Could not save image {Path.GetFileName(fullItemPath)}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    finalPaths.Add(item);
+                }
+            }
+
+            existing.ImagePath = finalPaths;
+            db.SaveChanges();
+
+            new SystemLogService().Log(
+                Models.SystemLog.LogSeverity.Info, "Product Database", "Update Connector",
+                $"Connector '{existing.PartNumber}' updated with {existing.ImagePath.Count} images.");
+
+            return (true, null);
+        }
+
         // Deletes the connector row and its image files.
         public static (bool Success, string? Error) DeleteConnector(int connectorId)
         {
@@ -165,6 +285,24 @@ namespace AssemblyLineTester.Services
             using var db = new AppDbContext();
             var existing = db.Connectors.FirstOrDefault(c => c.Id == connectorId);
             if (existing == null) return (false, "Connector not found.");
+
+            // Check if connector is used by any harness assembly
+            var usingHarnesses = db.HarnessAssemblies
+                .Where(h => h.Connectors.Any(c => c.Id == connectorId))
+                .Select(h => $"{h.Name} ({h.PartNumber})")
+                .ToList();
+
+            if (usingHarnesses.Count > 0)
+            {
+                var displayList = usingHarnesses.Take(5).ToList();
+                string listText = "• " + string.Join("\n• ", displayList);
+                if (usingHarnesses.Count > 5)
+                {
+                    listText += $"\n...and {usingHarnesses.Count - 5} more";
+                }
+
+                return (false, $"Cannot delete connector '{existing.PartNumber}' because it is currently used in the following Harness Assemblies:\n\n{listText}\n\nPlease detach it from these harnesses before deleting.");
+            }
 
             string partNumber = existing.PartNumber;
             var imagesToDelete = existing.ImagePath?.ToList() ?? new List<string>();
