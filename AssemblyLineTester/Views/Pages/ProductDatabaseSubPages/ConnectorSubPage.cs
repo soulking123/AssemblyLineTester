@@ -20,9 +20,11 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
 
         // Image tracking for the active connector in the form (preserves exact order)
         private List<string> _orderedImagePaths = new();
+        private List<bool> _orderedReportInclusions = new();
         private int _currentImageIndex = -1;
 
         private bool _isPopulatingForm = false;
+        private bool _isUpdatingCheckbox = false;
 
         public ConnectorSubPage()
         {
@@ -85,6 +87,15 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             btnPrevPicture.Click += BtnPrevPicture_Click;
             btnNextPicture.Click += BtnNextPicture_Click;
             picBox.Click += PicBox_Click;
+
+            chkIncludeInReport.CheckedChanged += (s, e) =>
+            {
+                if (_isUpdatingCheckbox) return;
+                if (_currentImageIndex >= 0 && _currentImageIndex < _orderedReportInclusions.Count)
+                {
+                    _orderedReportInclusions[_currentImageIndex] = chkIncludeInReport.Checked;
+                }
+            };
 
             btnSave.Click += BtnSave_Click;
             btnDelete.Click += BtnDelete_Click;
@@ -165,6 +176,17 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
 
             // Load attached images (preserving exact stored order)
             _orderedImagePaths = ConnectorService.GetConnectorImagePaths(connector);
+            _orderedReportInclusions = connector.IncludedForReport != null
+                ? new List<bool>(connector.IncludedForReport)
+                : new List<bool>();
+            while (_orderedReportInclusions.Count < _orderedImagePaths.Count)
+            {
+                _orderedReportInclusions.Add(false);
+            }
+            if (_orderedReportInclusions.Count > _orderedImagePaths.Count)
+            {
+                _orderedReportInclusions = _orderedReportInclusions.Take(_orderedImagePaths.Count).ToList();
+            }
             _currentImageIndex = _orderedImagePaths.Count > 0 ? 0 : -1;
 
             UpdateImageDisplay();
@@ -183,6 +205,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             txtDescription.Clear();
 
             _orderedImagePaths.Clear();
+            _orderedReportInclusions.Clear();
             _currentImageIndex = -1;
 
             UpdateImageDisplay();
@@ -208,6 +231,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                 btnDeletePicture.Enabled = false;
                 btnPrevPicture.Enabled = false;
                 btnNextPicture.Enabled = false;
+                chkIncludeInReport.Visible = false;
                 return;
             }
 
@@ -218,6 +242,14 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             ImageLoader.SetImage(picBox, currentFile);
 
             lblPicture.Text = $"Picture ({_currentImageIndex + 1}/{_orderedImagePaths.Count})";
+            chkIncludeInReport.Visible = true;
+
+            _isUpdatingCheckbox = true;
+            chkIncludeInReport.Checked = _currentImageIndex >= 0 &&
+                                         _currentImageIndex < _orderedReportInclusions.Count &&
+                                         _orderedReportInclusions[_currentImageIndex];
+            _isUpdatingCheckbox = false;
+
             btnDeletePicture.Enabled = true;
             btnPrevPicture.Enabled = _currentImageIndex > 0;
             btnNextPicture.Enabled = _currentImageIndex < _orderedImagePaths.Count - 1;
@@ -279,6 +311,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                     if (!_orderedImagePaths.Contains(file))
                     {
                         _orderedImagePaths.Insert(insertPos, file);
+                        _orderedReportInclusions.Insert(insertPos, false);
                         if (firstInsertedIndex == -1) firstInsertedIndex = insertPos;
                         insertPos++;
                     }
@@ -297,6 +330,10 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             if (_currentImageIndex < 0 || _currentImageIndex >= _orderedImagePaths.Count) return;
 
             _orderedImagePaths.RemoveAt(_currentImageIndex);
+            if (_currentImageIndex < _orderedReportInclusions.Count)
+            {
+                _orderedReportInclusions.RemoveAt(_currentImageIndex);
+            }
 
             if (_currentImageIndex >= _orderedImagePaths.Count && _currentImageIndex > 0)
             {
@@ -336,7 +373,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                     Description = txtDescription.Text.Trim()
                 };
 
-                var (created, error) = ConnectorService.AddConnector(newConnector, _orderedImagePaths);
+                var (created, error) = ConnectorService.AddConnector(newConnector, _orderedImagePaths, _orderedReportInclusions);
                 if (created == null)
                 {
                     MessageBox.Show(error ?? "Failed to create connector.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -356,7 +393,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                 _selectedConnector.Type = txtType.Text.Trim();
                 _selectedConnector.Description = txtDescription.Text.Trim();
 
-                var (success, error) = ConnectorService.UpdateConnectorOrdered(_selectedConnector, _orderedImagePaths);
+                var (success, error) = ConnectorService.UpdateConnectorOrdered(_selectedConnector, _orderedImagePaths, _orderedReportInclusions);
                 if (!success)
                 {
                     MessageBox.Show(error ?? "Failed to update connector.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

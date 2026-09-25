@@ -32,23 +32,44 @@ namespace AssemblyLineTester.Services
             return File.Exists(candidateAppData) ? candidateAppData : null;
         }
 
-        // Loads every product model with its linked harness assemblies.
+        // Loads every product model with its linked harness assemblies and their connectors.
         public static List<ProductModel> GetAllProductModels()
         {
             using var db = new AppDbContext();
-            return db.ProductModels
+            var list = db.ProductModels
                 .Include(p => p.HarnessAssemblies)
+                    .ThenInclude(h => h.Connectors)
                 .OrderBy(p => p.Name)
                 .ThenBy(p => p.PartNumber)
                 .ToList();
+            foreach (var p in list) EnsureInclusionListMatches(p);
+            return list;
         }
 
         public static ProductModel? GetProductModelById(int id)
         {
             using var db = new AppDbContext();
-            return db.ProductModels
+            var p = db.ProductModels
                 .Include(p => p.HarnessAssemblies)
+                    .ThenInclude(h => h.Connectors)
                 .FirstOrDefault(p => p.Id == id);
+            EnsureInclusionListMatches(p);
+            return p;
+        }
+
+        private static void EnsureInclusionListMatches(ProductModel? product)
+        {
+            if (product == null) return;
+            product.IncludedForReport ??= new List<bool>();
+            product.ImagePath ??= new List<string>();
+            while (product.IncludedForReport.Count < product.ImagePath.Count)
+            {
+                product.IncludedForReport.Add(false);
+            }
+            if (product.IncludedForReport.Count > product.ImagePath.Count)
+            {
+                product.IncludedForReport = product.IncludedForReport.Take(product.ImagePath.Count).ToList();
+            }
         }
 
         public static ProductModel? GetProductModelByName(string? name)
@@ -96,7 +117,8 @@ namespace AssemblyLineTester.Services
         public static (ProductModel? Product, string? Error) AddProductModel(
             ProductModel product,
             List<int>? harnessIds = null,
-            List<string>? sourceImagePaths = null)
+            List<string>? sourceImagePaths = null,
+            List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (null, "You do not have permission to modify product model records.");
@@ -111,6 +133,7 @@ namespace AssemblyLineTester.Services
 
             product.Id = 0;
             product.ImagePath ??= new List<string>();
+            product.IncludedForReport ??= new List<bool>();
 
             if (harnessIds != null && harnessIds.Count > 0)
             {
@@ -131,6 +154,14 @@ namespace AssemblyLineTester.Services
                 }
 
                 product.ImagePath = savedPaths;
+                if (includedForReport != null)
+                {
+                    product.IncludedForReport = includedForReport.Take(savedPaths.Count).ToList();
+                }
+                while (product.IncludedForReport.Count < product.ImagePath.Count)
+                {
+                    product.IncludedForReport.Add(false);
+                }
                 db.SaveChanges();
             }
 
@@ -145,7 +176,8 @@ namespace AssemblyLineTester.Services
         public static (bool Success, string? Error) UpdateProductModelOrdered(
             ProductModel product,
             List<int>? harnessIds,
-            List<string>? orderedImageItems)
+            List<string>? orderedImageItems,
+            List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (false, "You do not have permission to modify product model records.");
@@ -264,6 +296,15 @@ namespace AssemblyLineTester.Services
             }
 
             existing.ImagePath = finalPaths;
+            if (includedForReport != null)
+            {
+                existing.IncludedForReport = includedForReport.Take(finalPaths.Count).ToList();
+            }
+            existing.IncludedForReport ??= new List<bool>();
+            while (existing.IncludedForReport.Count < existing.ImagePath.Count)
+            {
+                existing.IncludedForReport.Add(false);
+            }
             db.SaveChanges();
 
             new SystemLogService().Log(

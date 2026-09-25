@@ -38,7 +38,9 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             txtType = new System.Windows.Forms.TextBox();
             lblDescription = new System.Windows.Forms.Label();
             txtDescription = new System.Windows.Forms.TextBox();
+            pnlPictureHeader = new System.Windows.Forms.FlowLayoutPanel();
             lblPicture = new System.Windows.Forms.Label();
+            chkIncludeInReport = new System.Windows.Forms.CheckBox();
             pnlPictureContainer = new System.Windows.Forms.Panel();
             picBox = new System.Windows.Forms.PictureBox();
             pnlPicButtons = new System.Windows.Forms.FlowLayoutPanel();
@@ -58,6 +60,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             ((System.ComponentModel.ISupportInitialize)dgvConnectorList).BeginInit();
             pnlRightContainer.SuspendLayout();
             tblForm.SuspendLayout();
+            pnlPictureHeader.SuspendLayout();
             pnlPictureContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picBox).BeginInit();
             pnlPicButtons.SuspendLayout();
@@ -215,7 +218,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             tblForm.Controls.Add(txtType, 1, 3);
             tblForm.Controls.Add(lblDescription, 0, 4);
             tblForm.Controls.Add(txtDescription, 0, 5);
-            tblForm.Controls.Add(lblPicture, 0, 6);
+            tblForm.Controls.Add(pnlPictureHeader, 0, 6);
             tblForm.Controls.Add(pnlPictureContainer, 0, 7);
             tblForm.Dock = System.Windows.Forms.DockStyle.Top;
             tblForm.Location = new System.Drawing.Point(16, 16);
@@ -340,17 +343,44 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             txtDescription.Size = new System.Drawing.Size(546, 68);
             txtDescription.TabIndex = 9;
             // 
+            // pnlPictureHeader
+            // 
+            pnlPictureHeader.BackColor = System.Drawing.Color.Transparent;
+            tblForm.SetColumnSpan(pnlPictureHeader, 2);
+            pnlPictureHeader.Controls.Add(lblPicture);
+            pnlPictureHeader.Controls.Add(chkIncludeInReport);
+            pnlPictureHeader.Dock = System.Windows.Forms.DockStyle.Fill;
+            pnlPictureHeader.Location = new System.Drawing.Point(0, 208);
+            pnlPictureHeader.Margin = new System.Windows.Forms.Padding(0);
+            pnlPictureHeader.Name = "pnlPictureHeader";
+            pnlPictureHeader.Size = new System.Drawing.Size(552, 22);
+            pnlPictureHeader.TabIndex = 10;
+            // 
             // lblPicture
             // 
             lblPicture.AutoSize = true;
-            tblForm.SetColumnSpan(lblPicture, 2);
             lblPicture.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular);
             lblPicture.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
-            lblPicture.Location = new System.Drawing.Point(3, 208);
+            lblPicture.Location = new System.Drawing.Point(3, 0);
             lblPicture.Name = "lblPicture";
             lblPicture.Size = new System.Drawing.Size(47, 17);
-            lblPicture.TabIndex = 10;
+            lblPicture.TabIndex = 0;
             lblPicture.Text = "Picture";
+            // 
+            // chkIncludeInReport
+            // 
+            chkIncludeInReport.AutoSize = true;
+            chkIncludeInReport.Cursor = System.Windows.Forms.Cursors.Hand;
+            chkIncludeInReport.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
+            chkIncludeInReport.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            chkIncludeInReport.Location = new System.Drawing.Point(65, 0);
+            chkIncludeInReport.Margin = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            chkIncludeInReport.Name = "chkIncludeInReport";
+            chkIncludeInReport.Size = new System.Drawing.Size(120, 19);
+            chkIncludeInReport.TabIndex = 1;
+            chkIncludeInReport.Text = "Include in Report";
+            chkIncludeInReport.UseVisualStyleBackColor = true;
+            chkIncludeInReport.Visible = false;
             // 
             // pnlPictureContainer
             // 
@@ -522,6 +552,8 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             pnlRightContainer.ResumeLayout(false);
             tblForm.ResumeLayout(false);
             tblForm.PerformLayout();
+            pnlPictureHeader.ResumeLayout(false);
+            pnlPictureHeader.PerformLayout();
             pnlPictureContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picBox).EndInit();
             pnlPicButtons.ResumeLayout(false);
@@ -554,7 +586,9 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
         private System.Windows.Forms.TextBox txtType;
         private System.Windows.Forms.Label lblDescription;
         private System.Windows.Forms.TextBox txtDescription;
+        private System.Windows.Forms.FlowLayoutPanel pnlPictureHeader;
         private System.Windows.Forms.Label lblPicture;
+        private System.Windows.Forms.CheckBox chkIncludeInReport;
         private System.Windows.Forms.Panel pnlPictureContainer;
         private System.Windows.Forms.PictureBox picBox;
         private System.Windows.Forms.FlowLayoutPanel pnlPicButtons;

@@ -36,19 +36,38 @@ namespace AssemblyLineTester.Services
         public static List<HarnessAssembly> GetAllHarnesses()
         {
             using var db = new AppDbContext();
-            return db.HarnessAssemblies
+            var list = db.HarnessAssemblies
                 .Include(h => h.Connectors)
                 .OrderBy(h => h.Name)
                 .ThenBy(h => h.PartNumber)
                 .ToList();
+            foreach (var h in list) EnsureInclusionListMatches(h);
+            return list;
         }
 
         public static HarnessAssembly? GetHarnessById(int id)
         {
             using var db = new AppDbContext();
-            return db.HarnessAssemblies
+            var h = db.HarnessAssemblies
                 .Include(h => h.Connectors)
                 .FirstOrDefault(h => h.Id == id);
+            EnsureInclusionListMatches(h);
+            return h;
+        }
+
+        private static void EnsureInclusionListMatches(HarnessAssembly? harness)
+        {
+            if (harness == null) return;
+            harness.IncludedForReport ??= new List<bool>();
+            harness.ImagePath ??= new List<string>();
+            while (harness.IncludedForReport.Count < harness.ImagePath.Count)
+            {
+                harness.IncludedForReport.Add(false);
+            }
+            if (harness.IncludedForReport.Count > harness.ImagePath.Count)
+            {
+                harness.IncludedForReport = harness.IncludedForReport.Take(harness.ImagePath.Count).ToList();
+            }
         }
 
         // Full path of every image belonging to one harness assembly.
@@ -88,7 +107,8 @@ namespace AssemblyLineTester.Services
         public static (HarnessAssembly? Harness, string? Error) AddHarness(
             HarnessAssembly harness,
             List<int>? connectorIds = null,
-            List<string>? sourceImagePaths = null)
+            List<string>? sourceImagePaths = null,
+            List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (null, "You do not have permission to modify harness records.");
@@ -103,6 +123,7 @@ namespace AssemblyLineTester.Services
 
             harness.Id = 0;
             harness.ImagePath ??= new List<string>();
+            harness.IncludedForReport ??= new List<bool>();
 
             if (connectorIds != null && connectorIds.Count > 0)
             {
@@ -123,6 +144,14 @@ namespace AssemblyLineTester.Services
                 }
 
                 harness.ImagePath = savedPaths;
+                if (includedForReport != null)
+                {
+                    harness.IncludedForReport = includedForReport.Take(savedPaths.Count).ToList();
+                }
+                while (harness.IncludedForReport.Count < harness.ImagePath.Count)
+                {
+                    harness.IncludedForReport.Add(false);
+                }
                 db.SaveChanges();
             }
 
@@ -137,7 +166,8 @@ namespace AssemblyLineTester.Services
         public static (bool Success, string? Error) UpdateHarnessOrdered(
             HarnessAssembly harness,
             List<int>? connectorIds,
-            List<string>? orderedImageItems)
+            List<string>? orderedImageItems,
+            List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (false, "You do not have permission to modify harness records.");
@@ -256,6 +286,15 @@ namespace AssemblyLineTester.Services
             }
 
             existing.ImagePath = finalPaths;
+            if (includedForReport != null)
+            {
+                existing.IncludedForReport = includedForReport.Take(finalPaths.Count).ToList();
+            }
+            existing.IncludedForReport ??= new List<bool>();
+            while (existing.IncludedForReport.Count < existing.ImagePath.Count)
+            {
+                existing.IncludedForReport.Add(false);
+            }
             db.SaveChanges();
 
             new SystemLogService().Log(

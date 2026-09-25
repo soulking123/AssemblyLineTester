@@ -18,13 +18,32 @@ namespace AssemblyLineTester.Services
         public static List<Connector> GetAllConnectors()
         {
             using var db = new AppDbContext();
-            return db.Connectors.OrderBy(c => c.Name).ThenBy(c => c.PartNumber).ToList();
+            var list = db.Connectors.OrderBy(c => c.Name).ThenBy(c => c.PartNumber).ToList();
+            foreach (var c in list) EnsureInclusionListMatches(c);
+            return list;
         }
 
         public static Connector? GetConnectorById(int id)
         {
             using var db = new AppDbContext();
-            return db.Connectors.FirstOrDefault(c => c.Id == id);
+            var c = db.Connectors.FirstOrDefault(c => c.Id == id);
+            EnsureInclusionListMatches(c);
+            return c;
+        }
+
+        private static void EnsureInclusionListMatches(Connector? connector)
+        {
+            if (connector == null) return;
+            connector.IncludedForReport ??= new List<bool>();
+            connector.ImagePath ??= new List<string>();
+            while (connector.IncludedForReport.Count < connector.ImagePath.Count)
+            {
+                connector.IncludedForReport.Add(false);
+            }
+            if (connector.IncludedForReport.Count > connector.ImagePath.Count)
+            {
+                connector.IncludedForReport = connector.IncludedForReport.Take(connector.ImagePath.Count).ToList();
+            }
         }
 
         // Connectors linked to a harness assembly.
@@ -70,7 +89,7 @@ namespace AssemblyLineTester.Services
         }
 
         // Inserts a connector into the shared catalog and copies its images in.
-        public static (Connector? Connector, string? Error) AddConnector(Connector connector, List<string> sourceImagePaths)
+        public static (Connector? Connector, string? Error) AddConnector(Connector connector, List<string>? sourceImagePaths = null, List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (null, "You do not have permission to modify connector records.");
@@ -85,6 +104,7 @@ namespace AssemblyLineTester.Services
 
             connector.Id = 0;
             connector.ImagePath ??= new List<string>();
+            connector.IncludedForReport ??= new List<bool>();
             db.Connectors.Add(connector);
             db.SaveChanges();
 
@@ -99,6 +119,14 @@ namespace AssemblyLineTester.Services
                 }
 
                 connector.ImagePath = savedPaths;
+                if (includedForReport != null)
+                {
+                    connector.IncludedForReport = includedForReport.Take(savedPaths.Count).ToList();
+                }
+                while (connector.IncludedForReport.Count < connector.ImagePath.Count)
+                {
+                    connector.IncludedForReport.Add(false);
+                }
                 db.SaveChanges();
             }
 
@@ -157,7 +185,7 @@ namespace AssemblyLineTester.Services
         }
 
         // Updates fields and syncs images with an ordered list (preserving index positions).
-        public static (bool Success, string? Error) UpdateConnectorOrdered(Connector connector, List<string> orderedImageItems)
+        public static (bool Success, string? Error) UpdateConnectorOrdered(Connector connector, List<string> orderedImageItems, List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (false, "You do not have permission to modify connector records.");
@@ -267,6 +295,15 @@ namespace AssemblyLineTester.Services
             }
 
             existing.ImagePath = finalPaths;
+            if (includedForReport != null)
+            {
+                existing.IncludedForReport = includedForReport.Take(finalPaths.Count).ToList();
+            }
+            existing.IncludedForReport ??= new List<bool>();
+            while (existing.IncludedForReport.Count < existing.ImagePath.Count)
+            {
+                existing.IncludedForReport.Add(false);
+            }
             db.SaveChanges();
 
             new SystemLogService().Log(

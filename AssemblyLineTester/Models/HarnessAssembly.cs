@@ -19,5 +19,6 @@ public class HarnessAssembly
     public string PartNumber { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public List<string> ImagePath { get; set; } = new();
+    public List<bool> IncludedForReport { get; set; } = new();
     public List<Connector> Connectors { get; set; } = new();
 }

@@ -49,6 +49,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             lblPartNumber = new System.Windows.Forms.Label();
             txtPartNumber = new System.Windows.Forms.TextBox();
             lblPicture = new System.Windows.Forms.Label();
+            chkIncludeInReport = new System.Windows.Forms.CheckBox();
             pnlPictureContainer = new System.Windows.Forms.Panel();
             picBox = new System.Windows.Forms.PictureBox();
             pnlPicButtons = new System.Windows.Forms.FlowLayoutPanel();
@@ -209,6 +210,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             pnlTopSection.BackColor = System.Drawing.Color.Transparent;
             pnlTopSection.Controls.Add(pnlAttachActions);
             pnlTopSection.Controls.Add(pnlPictureContainer);
+            pnlTopSection.Controls.Add(chkIncludeInReport);
             pnlTopSection.Controls.Add(lblPicture);
             pnlTopSection.Controls.Add(tblTopForm);
             pnlTopSection.Dock = System.Windows.Forms.DockStyle.Top;
@@ -471,6 +473,20 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             lblPicture.TabIndex = 1;
             lblPicture.Text = "Picture";
             // 
+            // chkIncludeInReport
+            // 
+            chkIncludeInReport.AutoSize = true;
+            chkIncludeInReport.Cursor = System.Windows.Forms.Cursors.Hand;
+            chkIncludeInReport.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
+            chkIncludeInReport.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            chkIncludeInReport.Location = new System.Drawing.Point(120, 122);
+            chkIncludeInReport.Name = "chkIncludeInReport";
+            chkIncludeInReport.Size = new System.Drawing.Size(120, 19);
+            chkIncludeInReport.TabIndex = 4;
+            chkIncludeInReport.Text = "Include in Report";
+            chkIncludeInReport.UseVisualStyleBackColor = true;
+            chkIncludeInReport.Visible = false;
+            // 
             // pnlPictureContainer
             // 
             pnlPictureContainer.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
@@ -623,6 +639,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
         private System.Windows.Forms.Label lblPartNumber;
         private System.Windows.Forms.TextBox txtPartNumber;
         private System.Windows.Forms.Label lblPicture;
+        private System.Windows.Forms.CheckBox chkIncludeInReport;
         private System.Windows.Forms.Panel pnlPictureContainer;
         private System.Windows.Forms.PictureBox picBox;
         private System.Windows.Forms.FlowLayoutPanel pnlPicButtons;

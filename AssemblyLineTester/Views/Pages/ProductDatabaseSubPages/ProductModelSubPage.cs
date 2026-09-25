@@ -22,7 +22,9 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
 
         // Image tracking for the active product model in the form (preserves exact order)
         private List<string> _orderedImagePaths = new();
+        private List<bool> _orderedReportInclusions = new();
         private int _currentImageIndex = -1;
+        private bool _isUpdatingCheckbox = false;
 
         private bool _isPopulatingForm = false;
 
@@ -95,6 +97,15 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             btnPrevPicture.Click += BtnPrevPicture_Click;
             btnNextPicture.Click += BtnNextPicture_Click;
             picBox.Click += PicBox_Click;
+
+            chkIncludeInReport.CheckedChanged += (s, e) =>
+            {
+                if (_isUpdatingCheckbox) return;
+                if (_currentImageIndex >= 0 && _currentImageIndex < _orderedReportInclusions.Count)
+                {
+                    _orderedReportInclusions[_currentImageIndex] = chkIncludeInReport.Checked;
+                }
+            };
 
             btnAttach.Click += BtnAttach_Click;
             btnRemove.Click += BtnRemove_Click;
@@ -180,6 +191,17 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
 
             // Load attached images (preserving stored order)
             _orderedImagePaths = ProductModelService.GetProductModelImagePaths(product);
+            _orderedReportInclusions = product.IncludedForReport != null
+                ? new List<bool>(product.IncludedForReport)
+                : new List<bool>();
+            while (_orderedReportInclusions.Count < _orderedImagePaths.Count)
+            {
+                _orderedReportInclusions.Add(false);
+            }
+            if (_orderedReportInclusions.Count > _orderedImagePaths.Count)
+            {
+                _orderedReportInclusions = _orderedReportInclusions.Take(_orderedImagePaths.Count).ToList();
+            }
             _currentImageIndex = _orderedImagePaths.Count > 0 ? 0 : -1;
 
             UpdateImageDisplay();
@@ -198,6 +220,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             RefreshAttachedHarnessGrid();
 
             _orderedImagePaths.Clear();
+            _orderedReportInclusions.Clear();
             _currentImageIndex = -1;
 
             UpdateImageDisplay();
@@ -268,6 +291,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                 btnDeletePicture.Enabled = false;
                 btnPrevPicture.Enabled = false;
                 btnNextPicture.Enabled = false;
+                chkIncludeInReport.Visible = false;
                 return;
             }
 
@@ -278,6 +302,16 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             ImageLoader.SetImage(picBox, currentFile);
 
             lblPicture.Text = $"Picture ({_currentImageIndex + 1}/{_orderedImagePaths.Count})";
+            chkIncludeInReport.Left = lblPicture.Right + 14;
+            chkIncludeInReport.Top = lblPicture.Top - 1;
+            chkIncludeInReport.Visible = true;
+
+            _isUpdatingCheckbox = true;
+            chkIncludeInReport.Checked = _currentImageIndex >= 0 &&
+                                         _currentImageIndex < _orderedReportInclusions.Count &&
+                                         _orderedReportInclusions[_currentImageIndex];
+            _isUpdatingCheckbox = false;
+
             btnDeletePicture.Enabled = true;
             btnPrevPicture.Enabled = _currentImageIndex > 0;
             btnNextPicture.Enabled = _currentImageIndex < _orderedImagePaths.Count - 1;
@@ -339,6 +373,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                     if (!_orderedImagePaths.Contains(file))
                     {
                         _orderedImagePaths.Insert(insertPos, file);
+                        _orderedReportInclusions.Insert(insertPos, false);
                         if (firstInsertedIndex == -1) firstInsertedIndex = insertPos;
                         insertPos++;
                     }
@@ -357,6 +392,10 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             if (_currentImageIndex < 0 || _currentImageIndex >= _orderedImagePaths.Count) return;
 
             _orderedImagePaths.RemoveAt(_currentImageIndex);
+            if (_currentImageIndex < _orderedReportInclusions.Count)
+            {
+                _orderedReportInclusions.RemoveAt(_currentImageIndex);
+            }
 
             if (_currentImageIndex >= _orderedImagePaths.Count && _currentImageIndex > 0)
             {
@@ -394,7 +433,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                     Description = txtDescription.Text.Trim()
                 };
 
-                var (created, error) = ProductModelService.AddProductModel(newProduct, harnessIds, _orderedImagePaths);
+                var (created, error) = ProductModelService.AddProductModel(newProduct, harnessIds, _orderedImagePaths, _orderedReportInclusions);
                 if (created == null)
                 {
                     MessageBox.Show(error ?? "Failed to create product model.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -412,7 +451,7 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                 _selectedProduct.PartNumber = partNumber;
                 _selectedProduct.Description = txtDescription.Text.Trim();
 
-                var (success, error) = ProductModelService.UpdateProductModelOrdered(_selectedProduct, harnessIds, _orderedImagePaths);
+                var (success, error) = ProductModelService.UpdateProductModelOrdered(_selectedProduct, harnessIds, _orderedImagePaths, _orderedReportInclusions);
                 if (!success)
                 {
                     MessageBox.Show(error ?? "Failed to update product model.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

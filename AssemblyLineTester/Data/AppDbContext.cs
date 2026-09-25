@@ -194,23 +194,50 @@ namespace AssemblyLineTester.Data
                 .Property(e => e.ImagePath)
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>()
+                    v => string.IsNullOrWhiteSpace(v) ? new List<string>() : (System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
                 )
                 .Metadata.SetValueComparer(stringListComparer);
             modelBuilder.Entity<HarnessAssembly>()
                 .Property(e => e.ImagePath)
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>()
+                    v => string.IsNullOrWhiteSpace(v) ? new List<string>() : (System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
                 )
                 .Metadata.SetValueComparer(stringListComparer);
             modelBuilder.Entity<Connector>()
                 .Property(e => e.ImagePath)
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>()
+                    v => string.IsNullOrWhiteSpace(v) ? new List<string>() : (System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
                 )
                 .Metadata.SetValueComparer(stringListComparer);
+
+            var boolListComparer = new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<bool>>(
+                (c1, c2) => (c1 ?? new()).SequenceEqual(c2 ?? new()),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            );
+            modelBuilder.Entity<ProductModel>()
+                .Property(e => e.IncludedForReport)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => string.IsNullOrWhiteSpace(v) ? new List<bool>() : (System.Text.Json.JsonSerializer.Deserialize<List<bool>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<bool>())
+                )
+                .Metadata.SetValueComparer(boolListComparer);
+            modelBuilder.Entity<HarnessAssembly>()
+                .Property(e => e.IncludedForReport)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => string.IsNullOrWhiteSpace(v) ? new List<bool>() : (System.Text.Json.JsonSerializer.Deserialize<List<bool>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<bool>())
+                )
+                .Metadata.SetValueComparer(boolListComparer);
+            modelBuilder.Entity<Connector>()
+                .Property(e => e.IncludedForReport)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => string.IsNullOrWhiteSpace(v) ? new List<bool>() : (System.Text.Json.JsonSerializer.Deserialize<List<bool>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<bool>())
+                )
+                .Metadata.SetValueComparer(boolListComparer);
 
             // Restrict, so deleting a test type cannot orphan default settings or learn connections that reference it.
             modelBuilder.Entity<DefaultTestSetting>()
