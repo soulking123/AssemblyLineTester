@@ -11,12 +11,20 @@ namespace AssemblyLineTester.Views.Modals
     public partial class ImagePreviewModalForm : Form
     {
         private List<string> _imagePaths = new List<string>();
+        private List<string> _imageTitles = new List<string>();
+        private string _defaultTitle = "IMAGE PREVIEW";
         private int _currentIndex = 0;
 
-        public ImagePreviewModalForm(List<string> imagePaths, string title = "IMAGE PREVIEW", int initialIndex = 0)
+        public ImagePreviewModalForm(List<string> imagePaths, string title = "IMAGE PREVIEW", int initialIndex = 0, List<string>? imageTitles = null)
         {
             InitializeComponent();
+            _defaultTitle = title;
             lblCustomTitle.Text = title.ToUpper();
+
+            if (imageTitles != null)
+            {
+                _imageTitles = imageTitles;
+            }
             
             if (imagePaths != null && imagePaths.Count > 0)
             {
@@ -109,11 +117,21 @@ namespace AssemblyLineTester.Views.Modals
         {
             if (_imagePaths.Count == 0)
             {
+                lblCustomTitle.Text = _defaultTitle.ToUpper();
                 lblImageCounter.Text = "No images available";
                 AssemblyLineTester.Helpers.ImageLoader.SetImage(picPreview, null);
                 btnNext.Visible = false;
                 btnPrev.Visible = false;
                 return;
+            }
+
+            if (_currentIndex >= 0 && _currentIndex < _imageTitles.Count && !string.IsNullOrWhiteSpace(_imageTitles[_currentIndex]))
+            {
+                lblCustomTitle.Text = _imageTitles[_currentIndex].ToUpper();
+            }
+            else
+            {
+                lblCustomTitle.Text = _defaultTitle.ToUpper();
             }
 
             AssemblyLineTester.Helpers.ImageLoader.SetImage(picPreview, _imagePaths[_currentIndex]);

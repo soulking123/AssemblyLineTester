@@ -44,7 +44,9 @@ namespace AssemblyLineTester.Views.Pages
         private DefaultTestSetting defaultTest = TestSettingService.GetDefaults();
         private int defaultTestPoint;
         private readonly List<string> _currentHarnessImages = [];
+        private readonly List<string> _currentHarnessTitles = [];
         private readonly List<string> _currentConnectorImages = [];
+        private readonly List<string> _currentConnectorTitles = [];
 
         public TestExecution()
         {
@@ -76,7 +78,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     config = activeConfig;
                     _customTestText = configService.ConvertToProgramText(activeConfig, defaultTestPoint);
-                    lblPageHeader.Text = $"TEST EXECUTION - {activeConfig.ConfigName}";
+                    lblPageHeader.Text = $"⚡  TEST EXECUTION - {activeConfig.ConfigName}";
                     var resNet = activeConfig.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
                     if (resNet != null && resNet.UpperLimit.HasValue)
                     {
@@ -90,7 +92,7 @@ namespace AssemblyLineTester.Views.Pages
             else if (config != null)
             {
                 config = null;
-                lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
+                lblPageHeader.Text = "⚡  TEST EXECUTION - No Active Program Loaded";
                 UpdateProgramInfoDisplay(null);
                 LoadConfigurationIntoGrid(null);
             }
@@ -339,7 +341,7 @@ namespace AssemblyLineTester.Views.Pages
                     }
 
                     UpdateProgramInfoDisplay(config);
-                    lblPageHeader.Text = $"TEST EXECUTION - {config.ConfigName}";
+                    lblPageHeader.Text = $"⚡  TEST EXECUTION - {config.ConfigName}";
                     LoadConfigurationIntoGrid(config);
                     LoadImagesFromConfig();
 
@@ -372,7 +374,7 @@ namespace AssemblyLineTester.Views.Pages
                                 _continuityResistance = resNet.UpperLimit.Value;
                             }
                             UpdateProgramInfoDisplay(tempConfig);
-                            lblPageHeader.Text = $"TEST EXECUTION - {tempConfig.ConfigName}";
+                            lblPageHeader.Text = $"⚡  TEST EXECUTION - {tempConfig.ConfigName}";
                             LoadConfigurationIntoGrid(tempConfig);
                         }
                         else
@@ -382,7 +384,7 @@ namespace AssemblyLineTester.Views.Pages
                             textConfig.ConfigName = System.IO.Path.GetFileNameWithoutExtension(dlg.LoadedFilePath);
                             config = textConfig;
                             UpdateProgramInfoDisplay(textConfig);
-                            lblPageHeader.Text = $"TEST EXECUTION - {textConfig.ConfigName}";
+                            lblPageHeader.Text = $"⚡  TEST EXECUTION - {textConfig.ConfigName}";
                             LoadConfigurationIntoGrid(textConfig);
                         }
 
@@ -1330,7 +1332,9 @@ namespace AssemblyLineTester.Views.Pages
         private void LoadImagesFromConfig()
         {
             _currentHarnessImages.Clear();
+            _currentHarnessTitles.Clear();
             _currentConnectorImages.Clear();
+            _currentConnectorTitles.Clear();
 
             var activeConfig = _configService.GetActiveConfig();
             if (activeConfig != null && !string.IsNullOrWhiteSpace(activeConfig.ProductModelName))
@@ -1342,11 +1346,16 @@ namespace AssemblyLineTester.Views.Pages
                     foreach (var harness in productModel.HarnessAssemblies)
                     {
                         var paths = HarnessService.GetHarnessImagePaths(harness);
+                        string harnessTitle = !string.IsNullOrWhiteSpace(harness.Name)
+                            ? $"HARNESS: {harness.Name}"
+                            : (!string.IsNullOrWhiteSpace(harness.PartNumber) ? $"HARNESS: {harness.PartNumber}" : "HARNESS");
+
                         foreach (var path in paths)
                         {
                             if (File.Exists(path) && !_currentHarnessImages.Contains(path, StringComparer.OrdinalIgnoreCase))
                             {
                                 _currentHarnessImages.Add(path);
+                                _currentHarnessTitles.Add(harnessTitle);
                             }
                         }
                     }
@@ -1358,11 +1367,16 @@ namespace AssemblyLineTester.Views.Pages
                         foreach (var conn in connectors)
                         {
                             var paths = ConnectorService.GetConnectorImagePaths(conn);
+                            string connTitle = !string.IsNullOrWhiteSpace(conn.Name)
+                                ? $"CONNECTOR: {conn.Name}"
+                                : (!string.IsNullOrWhiteSpace(conn.PartNumber) ? $"CONNECTOR: {conn.PartNumber}" : "CONNECTOR");
+
                             foreach (var path in paths)
                             {
                                 if (File.Exists(path) && !_currentConnectorImages.Contains(path, StringComparer.OrdinalIgnoreCase))
                                 {
                                     _currentConnectorImages.Add(path);
+                                    _currentConnectorTitles.Add(connTitle);
                                 }
                             }
                         }
@@ -1429,14 +1443,14 @@ namespace AssemblyLineTester.Views.Pages
         private void PicMachineOverview_Click(object? sender, EventArgs e)
         {
             using var modal = new AssemblyLineTester.Views.Modals.ImagePreviewModalForm(
-                _currentHarnessImages, "HARNESS ASSEMBLIES PREVIEW");
+                _currentHarnessImages, "HARNESS ASSEMBLIES PREVIEW", 0, _currentHarnessTitles);
             modal.ShowDialog(this);
         }
 
         private void PicHarnessConn_Click(object? sender, EventArgs e)
         {
             using var modal = new AssemblyLineTester.Views.Modals.ImagePreviewModalForm(
-                _currentConnectorImages, "CONNECTORS PREVIEW");
+                _currentConnectorImages, "CONNECTORS PREVIEW", 0, _currentConnectorTitles);
             modal.ShowDialog(this);
         }
 
