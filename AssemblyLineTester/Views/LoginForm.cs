@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Data;
+using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views.Modals;
@@ -324,6 +324,7 @@ namespace AssemblyLineTester.Views
                         }
                         else
                         {
+                            InstrumentService.Shutdown();
                             this.Close();
                         }
                     };

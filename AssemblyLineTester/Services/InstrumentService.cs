@@ -50,27 +50,57 @@ namespace AssemblyLineTester.Services
 
         public void Disconnect()
         {
+            DisconnectInternal(waitForCompletion: false);
+        }
+
+        public static void Shutdown()
+        {
+            StopMonitoring();
+            DisconnectInternal(waitForCompletion: true);
+        }
+
+        private static void DisconnectInternal(bool waitForCompletion)
+        {
+            short idToDisconnect = -1;
             lock (_lockObj)
             {
                 if (_connectionId != -1)
                 {
-                    short idToDisconnect = _connectionId;
+                    idToDisconnect = _connectionId;
                     _connectionId = -1;
-
-                    // Fire-and-forget so a dead socket never blocks the monitoring loop.
-                    System.Threading.Tasks.Task.Run(() =>
+                    if (IsOnline)
                     {
-                        lock (_lockObj)
+                        IsOnline = false;
+                        try { OnConnectionStatusChanged?.Invoke(false); } catch { }
+                    }
+                }
+            }
+
+            if (idToDisconnect != -1)
+            {
+                var task = System.Threading.Tasks.Task.Run(() =>
+                {
+                    lock (_lockObj)
+                    {
+                        try
                         {
-                            try
-                            {
-                                _service.Disconnect(idToDisconnect, false);
-                            }
-                            catch
-                            {
-                            }
+                            _service.Disconnect(idToDisconnect, false);
                         }
-                    });
+                        catch
+                        {
+                        }
+                    }
+                });
+
+                if (waitForCompletion)
+                {
+                    try
+                    {
+                        task.Wait(1000);
+                    }
+                    catch
+                    {
+                    }
                 }
             }
         }

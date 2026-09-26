@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Data;
+using AssemblyLineTester.Data;
 using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views;
@@ -62,9 +62,20 @@ namespace AssemblyLineTester
             // Drafts are started-but-never-saved tests; nothing in the UI ever shows them.
             new TestReportService().PurgeOldDrafts();
 
-            Application.Run(new LoginForm());
+            Application.ApplicationExit += (s, e) =>
+            {
+                InstrumentService.Shutdown();
+            };
 
-            FileLogService.Info("Shutdown", "Application closed normally.");
+            try
+            {
+                Application.Run(new LoginForm());
+            }
+            finally
+            {
+                InstrumentService.Shutdown();
+                FileLogService.Info("Shutdown", "Application closed normally.");
+            }
         }
 
         // Both handlers are needed: ThreadException survives, UnhandledException only records.
