@@ -31,7 +31,7 @@ namespace AssemblyLineTester.Services
             ExportReportToPdf(detail, outputPath);
         }
 
-        public void ExportReportToPdf(ReportDetailDto detail, string outputPath)
+        public void ExportReportToPdf(ReportDetailDto detail, string outputPath, bool logToDatabase = true)
         {
             string logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
 
@@ -47,9 +47,12 @@ namespace AssemblyLineTester.Services
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
             doc.Save(outputPath);
 
-            new SystemLogService().Log(
-                Models.SystemLog.LogSeverity.Info, "Test Report", "Export PDF",
-                $"Report {detail.ReportNumber} exported to PDF ({totalPages} pages).");
+            if (logToDatabase)
+            {
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Test Report", "Export PDF",
+                    $"Report {detail.ReportNumber} exported to PDF ({totalPages} pages).");
+            }
         }
 
         // Page 1: general information, summary table and result box, portrait.
@@ -402,8 +405,8 @@ namespace AssemblyLineTester.Services
             {
                 columns = new List<string>
                 {
-                    "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "To",
-                    "Net To Label", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
+                    "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "Net From Connector", "To",
+                    "Net To Label", "Net To Connector", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
                     "Tolerance", "Measurement"
                 };
             }
@@ -412,6 +415,7 @@ namespace AssemblyLineTester.Services
             XGraphics g = XGraphics.FromPdfPage(page);
             double y = DrawDetailPageTop(g, page, detail, logoPath, fontBold, rowH, columns);
 
+            int rowNum = 1;
             bool alt = false;
             foreach (var d in detail.Details)
             {
@@ -424,7 +428,7 @@ namespace AssemblyLineTester.Services
                     y = DrawDetailPageTop(g, page, detail, logoPath, fontBold, rowH, columns);
                 }
 
-                y = DrawDetailRow(g, page, d, font, fontBold, y, rowH, ref alt, columns);
+                y = DrawDetailRow(g, page, d, rowNum++, font, fontBold, y, rowH, ref alt, columns);
             }
 
             g.Dispose();
@@ -447,7 +451,7 @@ namespace AssemblyLineTester.Services
             y += 18;
 
             double[] cols = DetailColumnWidths(page, columns);
-            string[] headers = columns.Concat(new[] { "Result" }).ToArray();
+            string[] headers = new[] { "No" }.Concat(columns).Concat(new[] { "Result" }).ToArray();
             var hdrBg = new XSolidBrush(XColor.FromArgb(28, 230, 230, 230));
 
             double headerH = 22;
@@ -456,7 +460,14 @@ namespace AssemblyLineTester.Services
             {
                 g.DrawRectangle(hdrBg, x, y, cols[i], headerH);
                 g.DrawRectangle(XPens.LightGray, x, y, cols[i], headerH);
-                DrawHeaderCell(g, headers[i], fontBold, new XRect(x + 2, y, cols[i] - 4, headerH));
+                if (i == 0)
+                {
+                    g.DrawString(headers[i], fontBold, XBrushes.Black, new XRect(x, y, cols[i], headerH), XStringFormats.Center);
+                }
+                else
+                {
+                    DrawHeaderCell(g, headers[i], fontBold, new XRect(x + 2, y, cols[i] - 4, headerH));
+                }
                 x += cols[i];
             }
 
@@ -490,45 +501,53 @@ namespace AssemblyLineTester.Services
         // Relative widths per configurable column; anything unlisted gets an even share.
         private static readonly Dictionary<string, double> DetailColumnWeights = new(StringComparer.OrdinalIgnoreCase)
         {
-            ["Net-ID"] = 0.7,
-            ["Net ID"] = 0.7,
-            ["NetId"] = 0.7,
-            ["Harness Group"] = 0.8,
-            ["Harness-Group"] = 0.8,
-            ["From"] = 0.5,
-            ["Net From Label"] = 1.85,
-            ["Net-From Label"] = 1.85,
-            ["NetFromLabel"] = 1.85,
-            ["To"] = 0.5,
-            ["Net To Label"] = 1.85,
-            ["Net-To Label"] = 1.85,
-            ["NetToLabel"] = 1.85,
-            ["Test Type"] = 0.9,
-            ["Test-Type"] = 0.9,
-            ["Color"] = 0.55,
-            ["Gauge"] = 0.6,
-            ["Lower Limit"] = 0.7,
-            ["Upper Limit"] = 0.7,
-            ["Expected Value"] = 0.7,
-            ["Tolerance"] = 0.7,
-            ["Measurement"] = 1.45
+            ["No"] = 0.35,
+            ["#"] = 0.35,
+            ["Net-ID"] = 0.65,
+            ["Net ID"] = 0.65,
+            ["NetId"] = 0.65,
+            ["Harness Group"] = 0.75,
+            ["Harness-Group"] = 0.75,
+            ["From"] = 0.45,
+            ["Net From Label"] = 1.3,
+            ["Net-From Label"] = 1.3,
+            ["NetFromLabel"] = 1.3,
+            ["Net From Connector"] = 1.05,
+            ["Net-From Connector"] = 1.05,
+            ["NetFromConnector"] = 1.05,
+            ["To"] = 0.45,
+            ["Net To Label"] = 1.3,
+            ["Net-To Label"] = 1.3,
+            ["NetToLabel"] = 1.3,
+            ["Net To Connector"] = 1.05,
+            ["Net-To Connector"] = 1.05,
+            ["NetToConnector"] = 1.05,
+            ["Test Type"] = 0.85,
+            ["Test-Type"] = 0.85,
+            ["Color"] = 0.5,
+            ["Gauge"] = 0.55,
+            ["Lower Limit"] = 0.65,
+            ["Upper Limit"] = 0.65,
+            ["Expected Value"] = 0.65,
+            ["Tolerance"] = 0.65,
+            ["Measurement"] = 1.35
         };
 
-        // The trailing entry is the Result column, which is always drawn.
+        // The leading entry is "No", and trailing entry is the Result column, which are always drawn.
         private static double[] DetailColumnWidths(PdfPage page, List<string> columns)
         {
             double w = page.Width - Margin * 2;
 
-            var weights = columns
-                .Select(c => DetailColumnWeights.TryGetValue(c, out double weight) ? weight : 1.0)
-                .ToList();
-            weights.Add(0.7);
+            var weights = new List<double> { 0.35 };
+            weights.AddRange(columns
+                .Select(c => DetailColumnWeights.TryGetValue(c, out double weight) ? weight : 1.0));
+            weights.Add(0.65);
 
             double total = weights.Sum();
             return weights.Select(weight => w * weight / total).ToArray();
         }
 
-        private static double DrawDetailRow(XGraphics g, PdfPage page, TestDetailDto d, XFont font, XFont fontBold, double y, double rowH, ref bool alt, List<string> columns)
+        private static double DrawDetailRow(XGraphics g, PdfPage page, TestDetailDto d, int rowNum, XFont font, XFont fontBold, double y, double rowH, ref bool alt, List<string> columns)
         {
             double[] cols = DetailColumnWidths(page, columns);
 
@@ -561,15 +580,18 @@ namespace AssemblyLineTester.Services
                 x += cols[i];
             }
 
+            Cell(0, rowNum.ToString(), XStringFormats.Center);
+
             for (int i = 0; i < columns.Count; i++)
             {
-                var align = columns[i] is "Harness Group" or "Harness-Group" or "From" or "To" or "Test Type" or "Test-Type" or "Net From Label" or "Net-From Label" or "Net To Label" or "Net-To Label" or "Color" or "Gauge"
+                var align = columns[i] is "Harness Group" or "Harness-Group" or "From" or "To" or "Test Type" or "Test-Type" or "Net From Label" or "Net-From Label" or "Net To Label" or "Net-To Label" or "Net From Connector" or "Net-From Connector" or "Net To Connector" or "Net-To Connector" or "Color" or "Gauge"
                     ? XStringFormats.CenterLeft
                     : XStringFormats.Center;
-                Cell(i, d.Column(columns[i]), align);
+                Cell(i + 1, d.Column(columns[i]), align);
             }
 
-            var resultRect = new XRect(x, y, cols[columns.Count], rowH);
+            int resultColIdx = columns.Count + 1;
+            var resultRect = new XRect(x, y, cols[resultColIdx], rowH);
             XColor resultFill;
             XBrush resultText;
             if (isPass)
@@ -589,7 +611,7 @@ namespace AssemblyLineTester.Services
             }
 
             g.DrawRectangle(new XSolidBrush(resultFill), resultRect);
-            g.DrawRectangle(XPens.LightGray, x, y, cols[columns.Count], rowH);
+            g.DrawRectangle(XPens.LightGray, x, y, cols[resultColIdx], rowH);
             g.DrawString(d.Result, fontBold, resultText, resultRect, XStringFormats.Center);
 
             return y + rowH;

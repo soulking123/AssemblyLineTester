@@ -155,6 +155,8 @@ namespace AssemblyLineTester.Services
                     ToPin = d.ToPin,
                     FromLabel = d.FromLabel,
                     ToLabel = d.ToLabel,
+                    FromConnector = TestDetailDto.ExtractConnector(d.FromLabel, d.FromPin),
+                    ToConnector = TestDetailDto.ExtractConnector(d.ToLabel, d.ToPin),
                     TestType = d.TestTypeName,
                     LowerLimit = d.LowerLimit,
                     UpperLimit = d.UpperLimit,

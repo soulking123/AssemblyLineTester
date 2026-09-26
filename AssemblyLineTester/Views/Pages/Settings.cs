@@ -932,6 +932,15 @@ namespace AssemblyLineTester.Views.Pages
                 _resultBoxes.Add((check.Id, box));
             }
 
+            for (int i = 0; i < checks.Count; i++)
+            {
+                var match = _resultBoxes.FirstOrDefault(b => b.Id == checks[i].Id);
+                if (match.Box != null)
+                {
+                    flpTestResultCol.Controls.SetChildIndex(match.Box, i);
+                }
+            }
+
             // A designer box with no row behind it can only mislead, so it is shown disabled.
             foreach (var orphan in flpTestResultCol.Controls.OfType<CheckBox>()
                          .Where(c => checks.All(k => k.TestResultName != c.Text)))

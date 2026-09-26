@@ -741,8 +741,8 @@ namespace AssemblyLineTester.Views.Pages
         {
             string[] templateHeaders =
             {
-                "Harness-Group", "Color", "Gauge", "Net-ID", "From", "Net-From Label", "To",
-                "Net-To Label", "Test Type", "Lower Limit", "Upper Limit", "Expected Value", "Tolerance"
+                "Harness-Group", "Color", "Gauge", "Net-ID", "From", "Net-From Label", "Net-From Connector", "To",
+                "Net-To Label", "Net-To Connector", "Test Type", "Lower Limit", "Upper Limit", "Expected Value", "Tolerance"
             };
 
             using var workbook = new ClosedXML.Excel.XLWorkbook();
@@ -831,8 +831,10 @@ namespace AssemblyLineTester.Views.Pages
                 "Net-ID" or "Net ID" => "",
                 "From" => "1",
                 "Net-From Label" or "Net From Label" => "A525-CF119",
+                "Net-From Connector" or "Net From Connector" => "CF119",
                 "To" => "163",
                 "Net-To Label" or "Net To Label" => "A525-CM101",
+                "Net-To Connector" or "Net To Connector" => "CM101",
                 "Test Type" => "WIRE",
                 "Lower Limit" => "0",
                 "Upper Limit" => "10.00",
@@ -975,8 +977,10 @@ namespace AssemblyLineTester.Views.Pages
                 "",                             // Net-ID
                 nextFromAddr.ToString(),                                    // From
                 "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3"),                   // Net-From Label
+                "J" + ((nextFromAddr - 1) / 64 + 1).ToString(),                                                                         // Net-From Connector
                 nextToAddr.ToString(),                                      // To
-                "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // To-From Label
+                "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // Net-To Label
+                "J" + ((nextToAddr - 1) / 64 + 1).ToString(),                                                                         // Net-To Connector
                 defaultType,                                                // Test Type
                 lowerStr,                                                   // Lower Limit
                 upperStr,                                                   // Upper Limit
@@ -1165,8 +1169,10 @@ namespace AssemblyLineTester.Views.Pages
                     net.NetId,
                     net.FromAddress.ToString(),
                     net.FromLabel,
+                    TestDetailDto.ExtractConnector(net.FromLabel, net.FromAddress.ToString()),
                     net.ToAddress.ToString(),
                     net.ToLabel,
+                    TestDetailDto.ExtractConnector(net.ToLabel, net.ToAddress.ToString()),
                     testTypeName,
                     lowerStr,
                     upperStr,
@@ -2483,8 +2489,10 @@ namespace AssemblyLineTester.Views.Pages
                         "",                     // Net-ID
                         fromAddr.ToString(),    // from
                         "",                     // from label
+                        TestDetailDto.ExtractConnector("", fromPin), // from connector
                         toAddr.ToString(),      // to
                         "",                     // to label
+                        TestDetailDto.ExtractConnector("", toPin),   // to connector
                         rowTestType,            // test type
                         "",                     // lower limit
                         "",                     // upper limit

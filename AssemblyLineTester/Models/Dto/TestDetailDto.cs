@@ -11,6 +11,8 @@ namespace AssemblyLineTester.Models.Dto
         public string ToPin { get; set; } = string.Empty;
         public string FromLabel { get; set; } = string.Empty;
         public string ToLabel { get; set; } = string.Empty;
+        public string FromConnector { get; set; } = string.Empty;
+        public string ToConnector { get; set; } = string.Empty;
         public string TestType { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty;
         public string Gauge { get; set; } = string.Empty;
@@ -122,6 +124,43 @@ namespace AssemblyLineTester.Models.Dto
             return FormatMeasuredValue(val1, prefix1);
         }
 
+        public static string ExtractConnector(string? label, string? pin = null)
+        {
+            if (!string.IsNullOrWhiteSpace(label))
+            {
+                string trimmed = label.Trim();
+                int sepIdx = trimmed.LastIndexOfAny(new[] { '-', ':', '_' });
+                if (sepIdx >= 0 && sepIdx < trimmed.Length - 1)
+                {
+                    string partAfter = trimmed.Substring(sepIdx + 1).Trim();
+                    string partBefore = trimmed.Substring(0, sepIdx).Trim();
+                    if (char.IsLetter(partAfter.FirstOrDefault()) && partAfter.Length > 1)
+                        return partAfter;
+                    if (!string.IsNullOrEmpty(partBefore))
+                        return partBefore;
+                }
+                return trimmed;
+            }
+
+            if (!string.IsNullOrWhiteSpace(pin))
+            {
+                string trimmedPin = pin.Trim().TrimStart('$');
+                int sepIdx = trimmedPin.IndexOfAny(new[] { '-', ':', '_' });
+                if (sepIdx > 0)
+                {
+                    return trimmedPin.Substring(0, sepIdx).Trim();
+                }
+                if (int.TryParse(trimmedPin, out int addr) && addr > 0)
+                {
+                    int connIdx = ((addr - 1) / 64) + 1;
+                    return $"J{connIdx}";
+                }
+                return trimmedPin;
+            }
+
+            return "-";
+        }
+
         // Renders one configurable result column by the name Settings stores it under.
         public string Column(string name)
         {
@@ -134,8 +173,12 @@ namespace AssemblyLineTester.Models.Dto
                 "Harness Group" or "Harness-Group" or "HarnessGroup" => HarnessGroup,
                 "From" => FromPin,
                 "Net From Label" or "Net-From Label" or "NetFromLabel" => FromLabel,
+                "Net From Connector" or "Net-From Connector" or "NetFromConnector" =>
+                    !string.IsNullOrWhiteSpace(FromConnector) ? FromConnector : ExtractConnector(FromLabel, FromPin),
                 "To" => ToPin,
                 "Net To Label" or "Net-To Label" or "NetToLabel" => ToLabel,
+                "Net To Connector" or "Net-To Connector" or "NetToConnector" =>
+                    !string.IsNullOrWhiteSpace(ToConnector) ? ToConnector : ExtractConnector(ToLabel, ToPin),
                 "Test Type" or "Test-Type" or "TestType" => TestType,
                 "Color" => Color,
                 "Gauge" => Gauge,
