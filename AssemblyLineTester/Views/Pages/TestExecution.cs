@@ -406,6 +406,7 @@ namespace AssemblyLineTester.Views.Pages
 
             btnLoadProgram.Enabled = false;
             btnStartTest.Enabled = false;
+            btnSelfTest.Enabled = false;
             btnSaveReport.Enabled = false;
             txtNotes.Clear();
 
@@ -499,7 +500,11 @@ namespace AssemblyLineTester.Views.Pages
             {
                 btnLoadProgram.Enabled = true;
                 btnStartTest.Enabled = true;
+                btnSelfTest.Enabled = true;
                 btnSaveReport.Enabled = true;
+
+                _testCts?.Dispose();
+                _testCts = null;
             }
         }
 
@@ -1031,7 +1036,10 @@ namespace AssemblyLineTester.Views.Pages
                     
                     if (!_instrument.IsConnected)
                     {
-                        throw new Exception("Instrument not connected.");
+                        if (!_instrument.Connect())
+                        {
+                            throw new Exception("Instrument not connected.");
+                        }
                     }
                     
                     var res = _instrument.GetServerInformation();
