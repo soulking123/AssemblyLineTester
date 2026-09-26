@@ -255,9 +255,15 @@ namespace AssemblyLineTester.Services
             double infoTableWidth = page.Width - Margin * 2;
             double infoRowH = 20;
 
+            string SafeValue(string? v) =>
+                string.IsNullOrWhiteSpace(v) || v == "-" ? "N/A" : v;
+
             var infoRows = new List<(string Label, string Value)>
             {
                 ("Product Model", detail.ProductModel),
+                ("Product Type", SafeValue(detail.ProductType)),
+                ("Area", SafeValue(detail.Area)),
+                ("ECN No.", SafeValue(detail.ECNNumber)),
                 ("Part Number", detail.PartNumber),
                 ("Serial Number", detail.SerialNumber),
                 ("Operator", detail.Operator),
