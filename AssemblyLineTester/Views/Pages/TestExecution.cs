@@ -404,6 +404,7 @@ namespace AssemblyLineTester.Views.Pages
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
 
+            InstrumentService.StopMonitoring();
             btnLoadProgram.Enabled = false;
             btnStartTest.Enabled = false;
             btnSelfTest.Enabled = false;
@@ -472,10 +473,20 @@ namespace AssemblyLineTester.Views.Pages
                         endUtc = startUtc.Add(_testStopwatch.Elapsed);
                     }
 
+                    string partNumber = "-";
+                    if (!string.IsNullOrWhiteSpace(activeConfig.ProductModelName))
+                    {
+                        var pm = ProductModelService.GetProductModelByName(activeConfig.ProductModelName);
+                        if (!string.IsNullOrWhiteSpace(pm?.PartNumber))
+                        {
+                            partNumber = pm.PartNumber;
+                        }
+                    }
+
                     var reportService = new TestReportService();
                     _currentReportId = reportService.SaveDraftLiveTestReport(
-                        activeConfig.ProductModelName, "N/A", "N/A", "N/A", "1.0",
-                        "N/A", startUtc, _loadedRows, overallResult, errorSummary: summaryText, endDateTime: endUtc);
+                        activeConfig.ProductModelName, "-", "-", "-", "1.0",
+                        partNumber, startUtc, _loadedRows, overallResult, errorSummary: summaryText, endDateTime: endUtc);
 
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
@@ -500,11 +511,14 @@ namespace AssemblyLineTester.Views.Pages
             {
                 btnLoadProgram.Enabled = true;
                 btnStartTest.Enabled = true;
+                btnStopTest.Enabled = true;
                 btnSelfTest.Enabled = true;
                 btnSaveReport.Enabled = true;
 
                 _testCts?.Dispose();
                 _testCts = null;
+
+                InstrumentService.StartMonitoring();
             }
         }
 
@@ -547,6 +561,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 // Call RunSingleTest to execute the program on hardware so CTA populates test errors (shorts, opens, etc.)
                 var testResult = _instrument.RunSingleTest(false, config.ShortTest);
+                if (token.IsCancellationRequested) return;
                 if (testResult != null && testResult.DllCallResult == CtaCommandResultCode.Success)
                 {
                     logService.Log(LogSeverity.Info, "Instrument", "Run Test Program Success.",
@@ -964,6 +979,7 @@ namespace AssemblyLineTester.Views.Pages
         private async void BtnStopTest_Click(object sender, EventArgs e)
         {
             _testCts?.Cancel();
+            btnStopTest.Enabled = false;
 
             // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
@@ -972,6 +988,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 if (abortResult == CtaCommandResultCode.Success)
                 {
+                    btnStopTest.Enabled = true;
                     lblStatusRunning.Text = "Aborted";
                     lblStatusRunning.ForeColor = Color.Red;
                     StopTestTiming();
@@ -1026,7 +1043,9 @@ namespace AssemblyLineTester.Views.Pages
                 btnLoadProgram.Enabled = false;
                 btnStartTest.Enabled = false;
                 btnSelfTest.Enabled = false;
+                btnStopTest.Enabled = false;
                 btnSaveReport.Enabled = false;
+                lblStatusRunning.ForeColor = Color.Gray;
                 lblStatusRunning.Text = "RUNNING SELF TEST...";
                 
                 await System.Threading.Tasks.Task.Run(() =>
@@ -1059,6 +1078,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 btnLoadProgram.Enabled = true;
                 btnStartTest.Enabled = true;
+                btnStopTest.Enabled = true;
                 btnSelfTest.Enabled = true;
                 btnSaveReport.Enabled = true;
                 lblStatusRunning.Text = "READY";
@@ -1088,14 +1108,24 @@ namespace AssemblyLineTester.Views.Pages
             TestConfiguration? activeConfig = _configService.GetActiveConfig();
             string productModel = activeConfig?.ProductModelName ?? "N/A";
 
+            string partNumber = "-";
+            if (!string.IsNullOrWhiteSpace(activeConfig?.ProductModelName))
+            {
+                var pm = ProductModelService.GetProductModelByName(activeConfig.ProductModelName);
+                if (!string.IsNullOrWhiteSpace(pm?.PartNumber))
+                {
+                    partNumber = pm.PartNumber;
+                }
+            }
+
             using var modal = new AssemblyLineTester.Views.Modals.SaveTestReportModalForm(
                 productModel,
-                "N/A",
-                "N/A",
+                "",
+                "",
                 "1.0",
-                "N/A",
+                "",
                 SessionManager.CurrentUser?.FullName ?? "Unknown",
-                "N/A",
+                partNumber,
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
                 _startTime != default ? _startTime : DateTime.Now,
@@ -1546,7 +1576,6 @@ namespace AssemblyLineTester.Views.Pages
             AddProgramInfoRow("Total Nets:", lblTotalNetsVal);
             AddProgramInfoRow("Test Types:", lblTestTypesVal);
             AddProgramInfoRow("Max Wire Res.:", lblMaxWireResVal);
-            AddProgramInfoRow("Min Component Res.:", lblMinCompResVal);
             AddProgramInfoRow("Min Insulation Res.:", lblMinInsResVal);
             AddProgramInfoRow("Hipot Voltage:", lblHipotVoltageVal);
             AddProgramInfoRow("Short Test:", lblShortTestVal);

@@ -2820,6 +2820,7 @@ namespace AssemblyLineTester.Views.Pages
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
 
+            InstrumentService.StopMonitoring();
             string originalText = btnStartAll.Text;
             btnStartAll.Text = "Loading.....";
             btnLearnConnection.Enabled = false;
@@ -2842,6 +2843,11 @@ namespace AssemblyLineTester.Views.Pages
                 btnStartAll.Enabled = true;
                 btnStartSelected.Enabled = true;
                 btnAbort.Enabled = false;
+
+                _testCts?.Dispose();
+                _testCts = null;
+
+                InstrumentService.StartMonitoring();
             }
         }
 
@@ -2853,6 +2859,7 @@ namespace AssemblyLineTester.Views.Pages
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
 
+            InstrumentService.StopMonitoring();
             string originalText = btnStartSelected.Text;
             btnStartSelected.Text = "Loading.....";
             btnLearnConnection.Enabled = false;
@@ -2875,6 +2882,11 @@ namespace AssemblyLineTester.Views.Pages
                 btnStartAll.Enabled = true;
                 btnStartSelected.Enabled = true;
                 btnAbort.Enabled = false;
+
+                _testCts?.Dispose();
+                _testCts = null;
+
+                InstrumentService.StartMonitoring();
             }
         }
 
@@ -3180,6 +3192,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             // 1. Cancel software task execution loop
             _testCts?.Cancel();
+            btnAbort.Enabled = false;
 
             // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
@@ -3265,7 +3278,7 @@ namespace AssemblyLineTester.Views.Pages
             if (token.IsCancellationRequested) return;
 
             Debug.WriteLine("Run Test");
-            var testResult = _instrument.RunSingleTest(false, config.ShortTest);
+            var testResult = _instrument.RunSingleTest(false, false);
 
             if (token.IsCancellationRequested) return;
 

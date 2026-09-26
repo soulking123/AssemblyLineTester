@@ -415,17 +415,17 @@ namespace AssemblyLineTester.Services
         public CtaCommandResultCode Abort()
         {
             if (!IsConnected) return (CtaCommandResultCode)(-1);
-            lock (_lockObj)
+            try
             {
-                try
-                {
-                    var res = _service.Abort(_connectionId);
-                    return res != null ? res.DllCallResult : (CtaCommandResultCode)(-2);
-                }
-                catch
-                {
-                    return (CtaCommandResultCode)(-2);
-                }
+                // Must not lock _lockObj here: SingleTest or Learn holds _lockObj while
+                // executing on the hardware. Cirris CtaService.Abort is designed to be called
+                // concurrently from another thread to signal the CTA server to halt immediately.
+                var res = _service.Abort(_connectionId);
+                return res != null ? res.DllCallResult : (CtaCommandResultCode)(-2);
+            }
+            catch
+            {
+                return (CtaCommandResultCode)(-2);
             }
         }
 
