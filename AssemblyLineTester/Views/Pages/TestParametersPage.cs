@@ -2,6 +2,7 @@
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
+using CtaDotNet.Enums;
 using FontAwesome.Sharp;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -2629,18 +2630,23 @@ namespace AssemblyLineTester.Views.Pages
                     : await Task.Run(() => _instrument.LearnComplexConnection("", testLearnValue), token);
 
                 if (token.IsCancellationRequested) return;
+                Debug.WriteLine($"test learn value = {testLearnValue}");
 
                 if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                 {
-                    string errorMessage = "No Error";
+                    string errorMessage = "";
+                    if (_instrument.GetLastError().DllCallResult == CtaCommandResultCode.Success)
+                    {
+                        errorMessage = _instrument.GetLastError().Result;
+                    }
 
                     // Fallback: If the API completely refuses to give the error, force a generic message
                     if (string.IsNullOrWhiteSpace(errorMessage) || errorMessage == "No Error")
                     {
                         errorMessage = "Hardware Learn Aborted. Please check the actual error message from Instrument for further clarification.";
                     }
-                    MessageBox.Show(this, $"Failed to execute learn operation on instrument.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    MessageBox.Show(this, $"learn operation failed.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //return;
                 }
 
                 var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);

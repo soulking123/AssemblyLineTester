@@ -57,6 +57,56 @@ namespace AssemblyLineTester.Services
         {
             StopMonitoring();
             DisconnectInternal(waitForCompletion: true);
+            TerminateEasyWire();
+        }
+
+        public static void TerminateEasyWire()
+        {
+            try
+            {
+                var processes = Process.GetProcessesByName("easywire");
+                foreach (var process in processes)
+                {
+                    try
+                    {
+                        process.Kill();
+                        process.WaitForExit(3000);
+                        try
+                        {
+                            new SystemLogService().Log(
+                                AssemblyLineTester.Models.SystemLog.LogSeverity.Info,
+                                "Instrument",
+                                "Cirris Tester API Terminated",
+                                "Terminated running Cirris Tester API / Easy Wire on application shutdown.",
+                                SessionManager.CurrentUser?.Username ?? "-");
+                        }
+                        catch { }
+                        FileLogService.Info("Instrument", "Terminated running Cirris Tester API / Easy Wire on application shutdown.");
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            new SystemLogService().Log(
+                                AssemblyLineTester.Models.SystemLog.LogSeverity.Warning,
+                                "Instrument",
+                                "Failed Terminating Cirris Tester API",
+                                $"Failed to terminate running Cirris Tester API on shutdown: {ex.Message}",
+                                SessionManager.CurrentUser?.Username ?? "-");
+                        }
+                        catch { }
+                        FileLogService.Warn("Instrument", $"Failed to terminate running Cirris Tester API on shutdown: {ex.Message}");
+                    }
+                    finally
+                    {
+                        process.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Warn("Instrument", $"Error checking EasyWire processes on shutdown: {ex.Message}");
+            }
         }
 
         private static void DisconnectInternal(bool waitForCompletion)
