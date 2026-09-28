@@ -107,8 +107,11 @@ namespace AssemblyLineTester.Data
                         conn.PartNumber = def.PartNo;
                         conn.TotalPin = def.Pins;
                         conn.Type = def.Type;
-                        conn.ImagePath = imgPaths;
-                        conn.IncludedForReport = inclusions;
+                        conn.ImagePath ??= imgPaths;
+                        if (conn.IncludedForReport == null || conn.IncludedForReport.Count == 0)
+                        {
+                            conn.IncludedForReport = inclusions;
+                        }
                     }
                     connectorMap[def.Name] = conn;
                 }
@@ -166,8 +169,11 @@ namespace AssemblyLineTester.Data
                     {
                         h.Name = hDef.Name;
                         h.PartNumber = hDef.PartNo;
-                        h.ImagePath = new List<string> { hDef.Image };
-                        h.IncludedForReport = new List<bool> { true };
+                        h.ImagePath ??= new List<string> { hDef.Image };
+                        if (h.IncludedForReport == null || h.IncludedForReport.Count == 0)
+                        {
+                            h.IncludedForReport = new List<bool> { true };
+                        }
                     }
 
                     // Attach connectors
@@ -218,8 +224,11 @@ namespace AssemblyLineTester.Data
                     {
                         m.Name = mDef.Name;
                         m.PartNumber = mDef.PartNo;
-                        m.ImagePath = new List<string> { mDef.Image };
-                        m.IncludedForReport = new List<bool> { true };
+                        m.ImagePath ??= new List<string> { mDef.Image };
+                        if (m.IncludedForReport == null || m.IncludedForReport.Count == 0)
+                        {
+                            m.IncludedForReport = new List<bool> { true };
+                        }
                     }
 
                     m.HarnessAssemblies ??= new List<HarnessAssembly>();

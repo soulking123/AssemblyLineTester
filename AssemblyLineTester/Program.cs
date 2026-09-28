@@ -22,6 +22,17 @@ namespace AssemblyLineTester
                 return;
             }
 
+            if (args.Length >= 3 && args[0] == "--export-report")
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                DbInitialize.Initialize();
+                int repId = int.Parse(args[1]);
+                string outPath = args[2];
+                new ReportPdfExportService().ExportReportToPdf(repId, outPath);
+                Console.WriteLine($"Successfully exported report {repId} to {outPath}");
+                return;
+            }
+
             ApplicationConfiguration.Initialize();
 
             // Installed first, so a startup failure still leaves a trace.
