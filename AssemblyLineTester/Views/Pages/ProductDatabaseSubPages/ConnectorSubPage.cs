@@ -93,6 +93,28 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
                 if (_isUpdatingCheckbox) return;
                 if (_currentImageIndex >= 0 && _currentImageIndex < _orderedReportInclusions.Count)
                 {
+                    if (chkIncludeInReport.Checked)
+                    {
+                        bool alreadyHasIncluded = false;
+                        for (int i = 0; i < _orderedReportInclusions.Count; i++)
+                        {
+                            if (i != _currentImageIndex && _orderedReportInclusions[i])
+                            {
+                                alreadyHasIncluded = true;
+                                break;
+                            }
+                        }
+
+                        if (alreadyHasIncluded)
+                        {
+                            MessageBox.Show("Only 1 picture can be included to report", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            _isUpdatingCheckbox = true;
+                            chkIncludeInReport.Checked = false;
+                            _isUpdatingCheckbox = false;
+                            return;
+                        }
+                    }
+
                     _orderedReportInclusions[_currentImageIndex] = chkIncludeInReport.Checked;
                 }
             };
@@ -186,6 +208,15 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             if (_orderedReportInclusions.Count > _orderedImagePaths.Count)
             {
                 _orderedReportInclusions = _orderedReportInclusions.Take(_orderedImagePaths.Count).ToList();
+            }
+            bool foundIncluded = false;
+            for (int i = 0; i < _orderedReportInclusions.Count; i++)
+            {
+                if (_orderedReportInclusions[i])
+                {
+                    if (foundIncluded) _orderedReportInclusions[i] = false;
+                    else foundIncluded = true;
+                }
             }
             _currentImageIndex = _orderedImagePaths.Count > 0 ? 0 : -1;
 
