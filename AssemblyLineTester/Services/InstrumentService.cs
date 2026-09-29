@@ -178,7 +178,7 @@ namespace AssemblyLineTester.Services
                         OnConnectionStatusChanged?.Invoke(IsOnline);
                     }
 
-                    await System.Threading.Tasks.Task.Delay(3000, token);
+                    await System.Threading.Tasks.Task.Delay(60000, token);
                 }
             }, token);
         }

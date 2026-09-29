@@ -2802,7 +2802,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     LoadConfigurationIntoGrid(config);
                 }
-                string checkResult = _configService.ConvertToProgramText(config);
+                string checkResult = _configService.ConvertToProgramText(config, defaultTestPoint);
                 txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 

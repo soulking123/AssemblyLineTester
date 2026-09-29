@@ -64,17 +64,18 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                RefreshActiveConfiguration();
+                loadDefaultParameter();
+                RefreshActiveConfiguration(forceRefresh: true);
             }
         }
 
-        private void RefreshActiveConfiguration()
+        private void RefreshActiveConfiguration(bool forceRefresh = false)
         {
             var configService = new TestConfigService();
             var activeConfig = configService.GetActiveConfig();
             if (activeConfig != null)
             {
-                if (config == null || config.ConfigName != activeConfig.ConfigName || config.UpdatedAt != activeConfig.UpdatedAt)
+                if (forceRefresh || config == null || config.ConfigName != activeConfig.ConfigName || config.UpdatedAt != activeConfig.UpdatedAt)
                 {
                     config = activeConfig;
                     _customTestText = configService.ConvertToProgramText(activeConfig, defaultTestPoint);
@@ -108,8 +109,8 @@ namespace AssemblyLineTester.Views.Pages
 
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                RefreshActiveConfiguration();
                 loadDefaultParameter();
+                RefreshActiveConfiguration(forceRefresh: true);
             }
         }
 
