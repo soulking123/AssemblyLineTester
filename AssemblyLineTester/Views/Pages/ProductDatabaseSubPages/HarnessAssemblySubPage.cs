@@ -54,6 +54,20 @@ namespace AssemblyLineTester.Views.Pages.ProductDatabaseSubPages
             UIStyleHelper.StyleDataGridView(dgvHarnessList);
             UIStyleHelper.StyleDataGridView(dgvAttachedConnectors);
 
+            float scale1 = UIStyleHelper.GetHostScaleFactor(dgvHarnessList);
+            colNo.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            colNo.Width = (int)Math.Round(55 * scale1);
+            colTotalConnector.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            colTotalConnector.Width = (int)Math.Round(130 * scale1);
+
+            float scale2 = UIStyleHelper.GetHostScaleFactor(dgvAttachedConnectors);
+            colAttNo.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            colAttNo.Width = (int)Math.Round(55 * scale2);
+            colAttTotalPin.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            colAttTotalPin.Width = (int)Math.Round(90 * scale2);
+            colAttType.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            colAttType.Width = (int)Math.Round(110 * scale2);
+
             UIStyleHelper.SetupButtonRoundedEdges(btnNewHarness, 8,
                 Color.FromArgb(245, 158, 11), Color.FromArgb(217, 119, 6), Color.FromArgb(180, 83, 9), Color.Transparent);
 
