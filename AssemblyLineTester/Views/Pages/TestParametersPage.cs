@@ -292,6 +292,32 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
+            // Check common column aliases for connector columns
+            if (normalizedTarget.Equals("NetFromConnector", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var kvp in values)
+                {
+                    string norm = NormalizeHeader(kvp.Key);
+                    if (norm.Equals("FromConnector", StringComparison.OrdinalIgnoreCase) ||
+                        norm.Equals("ConnectorFrom", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return kvp.Value;
+                    }
+                }
+            }
+            else if (normalizedTarget.Equals("NetToConnector", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var kvp in values)
+                {
+                    string norm = NormalizeHeader(kvp.Key);
+                    if (norm.Equals("ToConnector", StringComparison.OrdinalIgnoreCase) ||
+                        norm.Equals("ConnectorTo", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return kvp.Value;
+                    }
+                }
+            }
+
             return values.TryGetValue(targetHeader, out string? fallback) ? fallback : "";
         }
 
@@ -419,13 +445,34 @@ namespace AssemblyLineTester.Views.Pages
 
             void Apply(Control box, string primaryLabel, string? fallbackLabel = null)
             {
+                string? targetVal = null;
                 if (found.TryGetValue(primaryLabel, out string? value) && !string.IsNullOrWhiteSpace(value))
                 {
-                    box.Text = value;
+                    targetVal = value;
                 }
                 else if (fallbackLabel != null && found.TryGetValue(fallbackLabel, out string? fallbackValue) && !string.IsNullOrWhiteSpace(fallbackValue))
                 {
-                    box.Text = fallbackValue;
+                    targetVal = fallbackValue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(targetVal))
+                {
+                    if (box is ComboBox combo)
+                    {
+                        int idx = combo.FindStringExact(targetVal);
+                        if (idx >= 0)
+                        {
+                            combo.SelectedIndex = idx;
+                        }
+                        else
+                        {
+                            combo.Text = targetVal;
+                        }
+                    }
+                    else
+                    {
+                        box.Text = targetVal;
+                    }
                 }
             }
 
@@ -458,6 +505,7 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
+            LoadProductModels();
             ReadConfigSummary(sheet, headerRowNumber);
 
             var headerRow = sheet.Row(headerRowNumber);
@@ -539,13 +587,14 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 int idx = gridConfig.Rows.Add(cells);
+                var rowObj = gridConfig.Rows[idx];
 
                 // Measurement is not in the file, so it comes from the test type the row declares.
-                string rowTestType = gridConfig.Rows[idx].Cells["colTestType"].Value?.ToString() ?? "";
-                gridConfig.Rows[idx].Cells["colUnit"].Value = UnitConversionHelper.GetBaseUnit(rowTestType);
+                string rowTestType = rowObj.Cells["colTestType"].Value?.ToString() ?? "";
+                rowObj.Cells["colUnit"].Value = UnitConversionHelper.GetBaseUnit(rowTestType);
 
                 UpdateRowUnitDropdown(idx);
-                RecalculateRowLimits(gridConfig.Rows[idx]);
+                RecalculateRowLimits(rowObj);
             }
 
             RenumberRows();

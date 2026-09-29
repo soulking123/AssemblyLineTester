@@ -293,6 +293,10 @@ namespace AssemblyLineTester.Views.Pages
 
                 row.FromLabel = net.FromLabel;
                 row.ToLabel = net.ToLabel;
+                string fromPin = TestConfigService.FormatPin(net.FromAddress);
+                string toPin = TestConfigService.FormatPin(net.ToAddress);
+                row.FromConnector = TestDetailDto.ExtractConnector(net.FromLabel, fromPin);
+                row.ToConnector = TestDetailDto.ExtractConnector(net.ToLabel, toPin);
                 row.Tolerance = net.Tolerance;
                 row.Tolerance2 = net.Tolerance2;
                 row.Unit = net.MeasurementUnit;
@@ -1185,11 +1189,11 @@ namespace AssemblyLineTester.Views.Pages
             "Net-ID" => row.NetId,
             "Harness Group" => row.HarnessGroup,
             "From" => row.FromPoint,
-            "Net From Label" => row.FromLabel,
-            "Net From Connector" => !string.IsNullOrWhiteSpace(row.FromConnector) ? row.FromConnector : TestDetailDto.ExtractConnector(row.FromLabel, row.FromPoint),
+            "Net From Label" or "Net-From Label" => row.FromLabel,
+            "Net From Connector" or "Net-From Connector" => !string.IsNullOrWhiteSpace(row.FromConnector) ? row.FromConnector : TestDetailDto.ExtractConnector(row.FromLabel, row.FromPoint),
             "To" => row.ToPoint,
-            "Net To Label" => row.ToLabel,
-            "Net To Connector" => !string.IsNullOrWhiteSpace(row.ToConnector) ? row.ToConnector : TestDetailDto.ExtractConnector(row.ToLabel, row.ToPoint),
+            "Net To Label" or "Net-To Label" => row.ToLabel,
+            "Net To Connector" or "Net-To Connector" => !string.IsNullOrWhiteSpace(row.ToConnector) ? row.ToConnector : TestDetailDto.ExtractConnector(row.ToLabel, row.ToPoint),
             "Test Type" => row.TestType,
             "Color" => row.Color,
             "Gauge" => row.Gauge,
