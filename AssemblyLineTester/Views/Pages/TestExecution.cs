@@ -51,6 +51,7 @@ namespace AssemblyLineTester.Views.Pages
         public TestExecution()
         {
             InitializeComponent();
+            ResetTimeLabels();
             SetupGridLiveDetails();
             SetupDiagramPointers();
             SetupProgramInfoArea();
@@ -121,6 +122,13 @@ namespace AssemblyLineTester.Views.Pages
             defaultTestPoint = defaultTest.TotalTestPointsAvailable;
         }
 
+
+        private void ResetTimeLabels()
+        {
+            lblStartTimeVal.Text = "-";
+            lblElapsedTimeVal.Text = "-";
+            lblEndTimeVal.Text = "-";
+        }
 
         private void SetupTimer()
         {
