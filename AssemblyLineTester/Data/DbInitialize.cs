@@ -86,7 +86,7 @@ namespace AssemblyLineTester.Data
                 {
                     var conn = existingConnectors.FirstOrDefault(c => string.Equals(c.Name, def.Name, StringComparison.OrdinalIgnoreCase));
                     var imgPaths = def.Files.Select(f => Path.Combine("Assets", "img", "connector", def.Folder, f)).ToList();
-                    var inclusions = def.Files.Select((_, i) => i == 0).ToList();
+                    var inclusions = def.Files.Select(_ => false).ToList(); // Default: all connectors unchecklist
 
                     if (conn == null)
                     {
@@ -107,11 +107,12 @@ namespace AssemblyLineTester.Data
                         conn.PartNumber = def.PartNo;
                         conn.TotalPin = def.Pins;
                         conn.Type = def.Type;
-                        conn.ImagePath ??= imgPaths;
-                        if (conn.IncludedForReport == null || conn.IncludedForReport.Count == 0)
+                        if (conn.ImagePath == null || conn.ImagePath.Count == 0)
                         {
-                            conn.IncludedForReport = inclusions;
+                            conn.ImagePath = imgPaths;
                         }
+                        // Default all connector images to unchecked
+                        conn.IncludedForReport = conn.ImagePath.Select(_ => false).ToList();
                     }
                     connectorMap[def.Name] = conn;
                 }
@@ -160,7 +161,7 @@ namespace AssemblyLineTester.Data
                             PartNumber = hDef.PartNo,
                             Description = "",
                             ImagePath = new List<string> { hDef.Image },
-                            IncludedForReport = new List<bool> { true },
+                            IncludedForReport = new List<bool> { true }, // Default: all harness assemblies checklist
                             Connectors = new List<Connector>()
                         };
                         db.HarnessAssemblies.Add(h);
@@ -169,11 +170,12 @@ namespace AssemblyLineTester.Data
                     {
                         h.Name = hDef.Name;
                         h.PartNumber = hDef.PartNo;
-                        h.ImagePath ??= new List<string> { hDef.Image };
-                        if (h.IncludedForReport == null || h.IncludedForReport.Count == 0)
+                        if (h.ImagePath == null || h.ImagePath.Count == 0)
                         {
-                            h.IncludedForReport = new List<bool> { true };
+                            h.ImagePath = new List<string> { hDef.Image };
                         }
+                        // Default all harness assemblies checklist
+                        h.IncludedForReport = h.ImagePath.Select(_ => true).ToList();
                     }
 
                     // Attach connectors
@@ -193,10 +195,42 @@ namespace AssemblyLineTester.Data
                 // 3. Seed or Update Product Models
                 var modelDefs = new[]
                 {
-                    new { Name = "6020", PartNo = "", Image = Path.Combine("Assets", "img", "product_model", "6020", "HMS6020.jpeg"), Harnesses = Array.Empty<string>() },
-                    new { Name = "6030", PartNo = "", Image = Path.Combine("Assets", "img", "product_model", "6030", "HMS6030.jpeg"), Harnesses = Array.Empty<string>() },
-                    new { Name = "6040", PartNo = "6040D", Image = Path.Combine("Assets", "img", "product_model", "6040", "HMS6040.jpeg"), Harnesses = new[] { "660-2031/00", "671-0554/00", "646-3490/00" } },
-                    new { Name = "6060", PartNo = "6060D", Image = Path.Combine("Assets", "img", "product_model", "6060", "HMS6060.jpeg"), Harnesses = new[] { "660-2031/00", "671-0554/00", "646-3490/00" } },
+                    new
+                    {
+                        Name = "6020",
+                        PartNo = "",
+                        Images = new List<string> { Path.Combine("Assets", "img", "product_model", "6020", "HMS6020.jpeg") },
+                        Harnesses = Array.Empty<string>()
+                    },
+                    new
+                    {
+                        Name = "6030",
+                        PartNo = "",
+                        Images = new List<string> { Path.Combine("Assets", "img", "product_model", "6030", "HMS6030.jpeg") },
+                        Harnesses = Array.Empty<string>()
+                    },
+                    new
+                    {
+                        Name = "6040",
+                        PartNo = "6040D",
+                        Images = new List<string>
+                        {
+                            Path.Combine("Assets", "img", "product_model", "6040", "HMS6040.jpeg"),
+                            Path.Combine("Assets", "img", "product_model", "6040", "Harness Assembly.png")
+                        },
+                        Harnesses = new[] { "660-2031/00", "671-0554/00", "646-3490/00" }
+                    },
+                    new
+                    {
+                        Name = "6060",
+                        PartNo = "6060D",
+                        Images = new List<string>
+                        {
+                            Path.Combine("Assets", "img", "product_model", "6060", "HMS6060.jpeg"),
+                            Path.Combine("Assets", "img", "product_model", "6060", "Harness Assembly.png")
+                        },
+                        Harnesses = new[] { "660-2031/00", "671-0554/00", "646-3490/00" }
+                    },
                 };
 
                 var existingModels = db.ProductModels.Include(p => p.HarnessAssemblies).ToList();
@@ -214,8 +248,8 @@ namespace AssemblyLineTester.Data
                             Name = mDef.Name,
                             PartNumber = mDef.PartNo,
                             Description = "",
-                            ImagePath = new List<string> { mDef.Image },
-                            IncludedForReport = new List<bool> { true },
+                            ImagePath = new List<string>(mDef.Images),
+                            IncludedForReport = mDef.Images.Select(img => IsRiserHarnessImage(img)).ToList(),
                             HarnessAssemblies = new List<HarnessAssembly>()
                         };
                         db.ProductModels.Add(m);
@@ -224,11 +258,26 @@ namespace AssemblyLineTester.Data
                     {
                         m.Name = mDef.Name;
                         m.PartNumber = mDef.PartNo;
-                        m.ImagePath ??= new List<string> { mDef.Image };
-                        if (m.IncludedForReport == null || m.IncludedForReport.Count == 0)
+                        m.ImagePath ??= new List<string>();
+
+                        if (m.ImagePath.Count == 0)
                         {
-                            m.IncludedForReport = new List<bool> { true };
+                            m.ImagePath = new List<string>(mDef.Images);
                         }
+                        else
+                        {
+                            // Ensure all default seeded images (like the riser Harness Assembly.png) are included
+                            foreach (var defaultImg in mDef.Images)
+                            {
+                                if (!m.ImagePath.Any(p => string.Equals(Path.GetFileName(p), Path.GetFileName(defaultImg), StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    m.ImagePath.Add(defaultImg);
+                                }
+                            }
+                        }
+
+                        // Default: riser harness image = true, full machine image = false
+                        m.IncludedForReport = m.ImagePath.Select(img => IsRiserHarnessImage(img)).ToList();
                     }
 
                     m.HarnessAssemblies ??= new List<HarnessAssembly>();
@@ -257,7 +306,20 @@ namespace AssemblyLineTester.Data
                 string readOnlyAssets = Path.Combine(ImageStorageHelper.ReadOnlyRoot, "Assets", "img");
                 string writableAssets = Path.Combine(ImageStorageHelper.WritableRoot, "Assets", "img");
 
-                if (!Directory.Exists(readOnlyAssets)) return;
+                // If running in development environment and bin does not have Assets yet, check project root
+                if (!Directory.Exists(readOnlyAssets))
+                {
+                    string devAssets = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Assets", "img");
+                    if (Directory.Exists(devAssets))
+                    {
+                        readOnlyAssets = Path.GetFullPath(devAssets);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
                 if (string.Equals(Path.GetFullPath(readOnlyAssets), Path.GetFullPath(writableAssets), StringComparison.OrdinalIgnoreCase)) return;
 
                 Directory.CreateDirectory(writableAssets);
@@ -272,9 +334,9 @@ namespace AssemblyLineTester.Data
                 {
                     string relFile = Path.GetRelativePath(readOnlyAssets, file);
                     string target = Path.Combine(writableAssets, relFile);
-                    if (!File.Exists(target))
+                    if (!File.Exists(target) || File.GetLastWriteTimeUtc(file) > File.GetLastWriteTimeUtc(target) || new FileInfo(target).Length == 0)
                     {
-                        File.Copy(file, target, overwrite: false);
+                        File.Copy(file, target, overwrite: true);
                     }
                 }
             }
@@ -282,6 +344,13 @@ namespace AssemblyLineTester.Data
             {
                 FileLogService.Warn("DbInitialize.CopyBundledAssetsToAppData", $"Could not copy bundled assets to app data: {ex.Message}");
             }
+        }
+
+        private static bool IsRiserHarnessImage(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return false;
+            string fn = Path.GetFileName(path).ToLowerInvariant();
+            return fn.Contains("harness") || fn.Contains("riser");
         }
     }
 }

@@ -61,6 +61,8 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 ; WebAssembly builds as well; on a Windows factory PC they are about 60 MB of dead weight.
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
     Excludes: "runtimes\android-*,runtimes\ios-*,runtimes\iossimulator-*,runtimes\linux-*,runtimes\osx*,runtimes\maccatalyst*,runtimes\browser-*,runtimes\tvos*,runtimes\unix,*.pdb"
+; Explicitly bundle all project assets into {app}\Assets to guarantee images are always included in the installer
+Source: "..\AssemblyLineTester\Assets\*"; DestDir: "{app}\Assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Dirs]
 ; Created up front and made writable by everyone, because the logs and the diagnostics bundle are

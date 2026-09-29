@@ -497,7 +497,9 @@ namespace AssemblyLineTester.Services
                 }
 
                 var conn = connectors[idx];
-                string label = !string.IsNullOrWhiteSpace(conn.Name) ? conn.Name : conn.PartNumber;
+                string label = !string.IsNullOrWhiteSpace(conn.Name) && !string.IsNullOrWhiteSpace(conn.PartNumber)
+                    ? $"{conn.Name}: {conn.PartNumber}"
+                    : (!string.IsNullOrWhiteSpace(conn.Name) ? conn.Name : conn.PartNumber);
 
                 // Pill container
                 DrawRoundedBox(gfx, new XPen(BorderColor, 0.8), XBrushes.White, px, py, pillW, pillH, 3);
@@ -505,10 +507,11 @@ namespace AssemblyLineTester.Services
                 // Left accent strip in harness color
                 DrawRoundedBox(gfx, null, new XSolidBrush(hColor), px + 1.2, py + 2, 2.5, pillH - 4, 1);
 
-                // Connector name (ellipsized if necessary)
-                string displayLabel = Ellipsize(gfx, label, new XFont("Arial", 7.5, XFontStyle.Bold), pillW - 8);
-                gfx.DrawString(displayLabel, new XFont("Arial", 7.5, XFontStyle.Bold), new XSolidBrush(TextDarkColor),
-                    new XRect(px + 6, py, pillW - 8, pillH), XStringFormats.CenterLeft);
+                // Connector name & part number (ellipsized if necessary)
+                var pillFont = new XFont("Arial", 6.8, XFontStyle.Bold);
+                string displayLabel = Ellipsize(gfx, label, pillFont, pillW - 7);
+                gfx.DrawString(displayLabel, pillFont, new XSolidBrush(TextDarkColor),
+                    new XRect(px + 5.5, py, pillW - 7, pillH), XStringFormats.CenterLeft);
             }
         }
 
