@@ -134,7 +134,7 @@ namespace AssemblyLineTester.Services
                     {
                         try
                         {
-                            _service.Disconnect(idToDisconnect, false);
+                            _service.Disconnect(idToDisconnect, true);
                         }
                         catch
                         {
