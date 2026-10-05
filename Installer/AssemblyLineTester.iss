@@ -79,49 +79,9 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; Tasks: deskto
 Filename: "{app}\{#AppExeName}"; Description: "Start {#AppName}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
-; By default, remove the application installation directory if empty
+; Only the folder the installer created. Test reports, the database and the logs are the
+; customer's records and are deliberately left behind - an uninstall during a version upgrade
+; must not take the production history with it.
 Type: dirifempty; Name: "{app}"
 
-[Code]
-var
-  RemoveUserData: Boolean;
-
-procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
-var
-  AppDir: String;
-  CommonDataDir: String;
-  LocalDataDir: String;
-begin
-  if CurUninstallStep = usUninstall then
-  begin
-    if not WizardSilent then
-    begin
-      RemoveUserData := (MsgBox(
-        'Do you want to delete all application data, database records, licenses, and logs?' + #13#10 + #13#10 +
-        'Click Yes to remove everything completely, or No to keep your data for future use or upgrades.',
-        mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES);
-    end;
-  end
-  else if CurUninstallStep = usPostUninstall then
-  begin
-    if RemoveUserData then
-    begin
-      CommonDataDir := ExpandConstant('{commonappdata}\{#AppShortName}');
-      LocalDataDir := ExpandConstant('{localappdata}\{#AppShortName}');
-      AppDir := ExpandConstant('{app}');
-
-      // Clean up ProgramData (logs, licenses, diagnostic bundles)
-      if DirExists(CommonDataDir) then
-        DelTree(CommonDataDir, True, True, True);
-
-      // Clean up LocalAppData (users.db SQLite database, auto-backups, user assets)
-      if DirExists(LocalDataDir) then
-        DelTree(LocalDataDir, True, True, True);
-
-      // Clean up any remaining files or directories in the app install folder
-      if DirExists(AppDir) then
-        DelTree(AppDir, True, True, True);
-    end;
-  end;
-end;
 
