@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Services;
+using AssemblyLineTester.Services;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -30,13 +30,13 @@ namespace AssemblyLineTester.Views.Modals
             lblGenModelKey = new Label();
             lblGenModelVal = new Label();
             lblGenEcnKey = new Label();
-            lblGenEcnVal = new Label();
+            txtGenEcnVal = new TextBox();
             lblGenTypeKey = new Label();
-            lblGenTypeVal = new Label();
+            txtGenTypeVal = new TextBox();
             lblGenRevKey = new Label();
-            lblGenRevVal = new Label();
+            txtGenRevVal = new TextBox();
             lblGenAreaKey = new Label();
-            lblGenAreaVal = new Label();
+            txtGenAreaVal = new TextBox();
             lblGenOpKey = new Label();
             txtGenOpVal = new TextBox();
             lblGenPartKey = new Label();
@@ -133,13 +133,13 @@ namespace AssemblyLineTester.Views.Modals
             tblGenGrid.Controls.Add(lblGenModelKey, 0, 0);
             tblGenGrid.Controls.Add(lblGenModelVal, 1, 0);
             tblGenGrid.Controls.Add(lblGenEcnKey, 2, 0);
-            tblGenGrid.Controls.Add(lblGenEcnVal, 3, 0);
+            tblGenGrid.Controls.Add(txtGenEcnVal, 3, 0);
             tblGenGrid.Controls.Add(lblGenTypeKey, 0, 1);
-            tblGenGrid.Controls.Add(lblGenTypeVal, 1, 1);
+            tblGenGrid.Controls.Add(txtGenTypeVal, 1, 1);
             tblGenGrid.Controls.Add(lblGenRevKey, 2, 1);
-            tblGenGrid.Controls.Add(lblGenRevVal, 3, 1);
+            tblGenGrid.Controls.Add(txtGenRevVal, 3, 1);
             tblGenGrid.Controls.Add(lblGenAreaKey, 0, 2);
-            tblGenGrid.Controls.Add(lblGenAreaVal, 1, 2);
+            tblGenGrid.Controls.Add(txtGenAreaVal, 1, 2);
             tblGenGrid.Controls.Add(lblGenOpKey, 2, 2);
             tblGenGrid.Controls.Add(txtGenOpVal, 3, 2);
             tblGenGrid.Controls.Add(lblGenPartKey, 0, 3);
@@ -206,18 +206,16 @@ namespace AssemblyLineTester.Views.Modals
             lblGenEcnKey.Text = "ECN No:";
             lblGenEcnKey.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblGenEcnVal
+            // txtGenEcnVal
             // 
-            lblGenEcnVal.Dock = DockStyle.Fill;
-            lblGenEcnVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblGenEcnVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenEcnVal.Location = new Point(1181, 0);
-            lblGenEcnVal.Margin = new Padding(6, 0, 6, 0);
-            lblGenEcnVal.Name = "lblGenEcnVal";
-            lblGenEcnVal.Size = new Size(446, 113);
-            lblGenEcnVal.TabIndex = 3;
-            lblGenEcnVal.Text = "-";
-            lblGenEcnVal.TextAlign = ContentAlignment.MiddleLeft;
+            txtGenEcnVal.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtGenEcnVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            txtGenEcnVal.ForeColor = Color.FromArgb(30, 41, 59);
+            txtGenEcnVal.Location = new Point(1181, 37);
+            txtGenEcnVal.Margin = new Padding(6);
+            txtGenEcnVal.Name = "txtGenEcnVal";
+            txtGenEcnVal.Size = new Size(446, 39);
+            txtGenEcnVal.TabIndex = 3;
             // 
             // lblGenTypeKey
             // 
@@ -232,18 +230,16 @@ namespace AssemblyLineTester.Views.Modals
             lblGenTypeKey.Text = "Product Type:";
             lblGenTypeKey.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblGenTypeVal
+            // txtGenTypeVal
             // 
-            lblGenTypeVal.Dock = DockStyle.Fill;
-            lblGenTypeVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblGenTypeVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenTypeVal.Location = new Point(365, 113);
-            lblGenTypeVal.Margin = new Padding(6, 0, 6, 0);
-            lblGenTypeVal.Name = "lblGenTypeVal";
-            lblGenTypeVal.Size = new Size(445, 113);
-            lblGenTypeVal.TabIndex = 5;
-            lblGenTypeVal.Text = "-";
-            lblGenTypeVal.TextAlign = ContentAlignment.MiddleLeft;
+            txtGenTypeVal.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtGenTypeVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            txtGenTypeVal.ForeColor = Color.FromArgb(30, 41, 59);
+            txtGenTypeVal.Location = new Point(365, 150);
+            txtGenTypeVal.Margin = new Padding(6);
+            txtGenTypeVal.Name = "txtGenTypeVal";
+            txtGenTypeVal.Size = new Size(445, 39);
+            txtGenTypeVal.TabIndex = 5;
             // 
             // lblGenRevKey
             // 
@@ -258,18 +254,16 @@ namespace AssemblyLineTester.Views.Modals
             lblGenRevKey.Text = "Revision:";
             lblGenRevKey.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblGenRevVal
+            // txtGenRevVal
             // 
-            lblGenRevVal.Dock = DockStyle.Fill;
-            lblGenRevVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblGenRevVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenRevVal.Location = new Point(1181, 113);
-            lblGenRevVal.Margin = new Padding(6, 0, 6, 0);
-            lblGenRevVal.Name = "lblGenRevVal";
-            lblGenRevVal.Size = new Size(446, 113);
-            lblGenRevVal.TabIndex = 7;
-            lblGenRevVal.Text = "-";
-            lblGenRevVal.TextAlign = ContentAlignment.MiddleLeft;
+            txtGenRevVal.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtGenRevVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            txtGenRevVal.ForeColor = Color.FromArgb(30, 41, 59);
+            txtGenRevVal.Location = new Point(1181, 150);
+            txtGenRevVal.Margin = new Padding(6);
+            txtGenRevVal.Name = "txtGenRevVal";
+            txtGenRevVal.Size = new Size(446, 39);
+            txtGenRevVal.TabIndex = 7;
             // 
             // lblGenAreaKey
             // 
@@ -284,18 +278,16 @@ namespace AssemblyLineTester.Views.Modals
             lblGenAreaKey.Text = "Area:";
             lblGenAreaKey.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblGenAreaVal
+            // txtGenAreaVal
             // 
-            lblGenAreaVal.Dock = DockStyle.Fill;
-            lblGenAreaVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblGenAreaVal.ForeColor = Color.FromArgb(30, 41, 59);
-            lblGenAreaVal.Location = new Point(365, 226);
-            lblGenAreaVal.Margin = new Padding(6, 0, 6, 0);
-            lblGenAreaVal.Name = "lblGenAreaVal";
-            lblGenAreaVal.Size = new Size(445, 113);
-            lblGenAreaVal.TabIndex = 9;
-            lblGenAreaVal.Text = "-";
-            lblGenAreaVal.TextAlign = ContentAlignment.MiddleLeft;
+            txtGenAreaVal.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtGenAreaVal.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            txtGenAreaVal.ForeColor = Color.FromArgb(30, 41, 59);
+            txtGenAreaVal.Location = new Point(365, 263);
+            txtGenAreaVal.Margin = new Padding(6);
+            txtGenAreaVal.Name = "txtGenAreaVal";
+            txtGenAreaVal.Size = new Size(445, 39);
+            txtGenAreaVal.TabIndex = 9;
             // 
             // lblGenOpKey
             // 
@@ -469,7 +461,7 @@ namespace AssemblyLineTester.Views.Modals
             lblInstruction.Name = "lblInstruction";
             lblInstruction.Size = new Size(1693, 73);
             lblInstruction.TabIndex = 0;
-            lblInstruction.Text = "Please verify the general information for this test run below. You may adjust the Operator or Serial Number before saving.";
+            lblInstruction.Text = "Please verify the general information for this test run below. You may adjust the Serial Number, ECN No, Product Type, Revision, and Area before saving.";
             // 
             // pnlFooter
             // 
@@ -551,13 +543,13 @@ namespace AssemblyLineTester.Views.Modals
         private Label lblGenModelKey;
         private Label lblGenModelVal;
         private Label lblGenEcnKey;
-        private Label lblGenEcnVal;
+        private TextBox txtGenEcnVal;
         private Label lblGenTypeKey;
-        private Label lblGenTypeVal;
+        private TextBox txtGenTypeVal;
         private Label lblGenRevKey;
-        private Label lblGenRevVal;
+        private TextBox txtGenRevVal;
         private Label lblGenAreaKey;
-        private Label lblGenAreaVal;
+        private TextBox txtGenAreaVal;
         private Label lblGenOpKey;
         private TextBox txtGenOpVal;
         private Label lblGenPartKey;

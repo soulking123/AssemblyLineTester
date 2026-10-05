@@ -28,8 +28,8 @@ namespace AssemblyLineTester.Services
         // order is stated here rather than by renumbering rows an operator has already ticked.
         private static readonly string[] ResultColumnOrder =
         {
-            "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "To",
-            "Net To Label", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
+            "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "Net From Connector", "To",
+            "Net To Label", "Net To Connector", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
             "Tolerance", "Measurement"
         };
 
@@ -37,6 +37,15 @@ namespace AssemblyLineTester.Services
         {
             using var db = new AppDbContext();
             var checks = db.TestResultChecks.AsNoTracking().ToList();
+
+            int virtualId = 1000;
+            foreach (var col in ResultColumnOrder)
+            {
+                if (!checks.Any(c => string.Equals(c.TestResultName, col, StringComparison.OrdinalIgnoreCase)))
+                {
+                    checks.Add(new TestResultCheck { Id = virtualId++, TestResultName = col, IsChecked = true });
+                }
+            }
 
             // A column this list has never heard of sorts to the end instead of disappearing.
             return checks

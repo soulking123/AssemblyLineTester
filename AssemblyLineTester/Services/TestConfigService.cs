@@ -306,7 +306,7 @@ namespace AssemblyLineTester.Services
 
             sb.AppendLine("TESTDEFAULTS");
             sb.AppendLine("BEGIN");
-            sb.AppendLine("    TESTER , 8100, 448, AHED-64");
+            sb.AppendLine($"    TESTER , 8100, {testPoint}, AHED-64");
             sb.AppendLine("    STARTEVENT , ATTACHED");
             sb.AppendLine("    SERIALENTRY , NONE");
             sb.AppendLine("    TESTTYPE , BUILD");

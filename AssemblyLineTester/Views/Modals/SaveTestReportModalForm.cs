@@ -58,11 +58,11 @@ namespace AssemblyLineTester.Views.Modals
             InitializeComponent();
 
             lblGenModelVal.Text = _productModel;
-            lblGenEcnVal.Text = _ecnNumber;
-            lblGenTypeVal.Text = _productType;
-            lblGenRevVal.Text = _revision;
-            lblGenAreaVal.Text = _area;
-            lblGenPartVal.Text = _partNumber;
+            txtGenEcnVal.Text = string.Equals(_ecnNumber, "N/A", StringComparison.OrdinalIgnoreCase) || _ecnNumber == "-" ? "" : _ecnNumber;
+            txtGenTypeVal.Text = string.Equals(_productType, "N/A", StringComparison.OrdinalIgnoreCase) || _productType == "-" ? "" : _productType;
+            txtGenRevVal.Text = string.IsNullOrWhiteSpace(_revision) || string.Equals(_revision, "N/A", StringComparison.OrdinalIgnoreCase) ? "1.0" : _revision;
+            txtGenAreaVal.Text = string.Equals(_area, "N/A", StringComparison.OrdinalIgnoreCase) || _area == "-" ? "" : _area;
+            lblGenPartVal.Text = string.IsNullOrWhiteSpace(_partNumber) ? "-" : _partNumber;
             lblGenTimeVal.Text = _testTime.ToString("dd MMM yyyy HH:mm:ss");
             txtGenSnVal.Text = string.IsNullOrEmpty(serialNumber) ? $"SN-{_testTime:HHmmss}" : serialNumber;
             lblGenResVal.Text = _overallResult;
@@ -120,16 +120,31 @@ namespace AssemblyLineTester.Views.Modals
                 return;
             }
 
+            string finalEcn = string.IsNullOrWhiteSpace(txtGenEcnVal.Text) ? "-" : txtGenEcnVal.Text.Trim();
+            string finalType = string.IsNullOrWhiteSpace(txtGenTypeVal.Text) ? "-" : txtGenTypeVal.Text.Trim();
+            string finalRev = string.IsNullOrWhiteSpace(txtGenRevVal.Text) ? "-" : txtGenRevVal.Text.Trim();
+            string finalArea = string.IsNullOrWhiteSpace(txtGenAreaVal.Text) ? "-" : txtGenAreaVal.Text.Trim();
+            string finalPart = string.IsNullOrWhiteSpace(_partNumber) || _partNumber == "-" ? "-" : _partNumber.Trim();
+
             try
             {
                 if (_existingReportId.HasValue)
                 {
-                    _reportService.ConfirmDraft(_existingReportId.Value, finalSn, _notes, _errorSummary);
+                    _reportService.ConfirmDraft(
+                        _existingReportId.Value,
+                        finalSn,
+                        finalEcn,
+                        finalType,
+                        finalRev,
+                        finalArea,
+                        finalPart,
+                        _notes,
+                        _errorSummary);
                 }
                 else
                 {
                     _reportService.SaveLiveTestReport(
-                        _productModel, _productType, _area, _ecnNumber, _revision, _partNumber,
+                        _productModel, finalType, finalArea, finalEcn, finalRev, finalPart,
                         finalSn, finalOp, _testTime, _rows, _overallResult, notes: _notes, errorSummary: _errorSummary);
                 }
 

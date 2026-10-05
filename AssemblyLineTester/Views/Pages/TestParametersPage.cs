@@ -2,6 +2,7 @@
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
+using CtaDotNet.Enums;
 using FontAwesome.Sharp;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -291,6 +292,32 @@ namespace AssemblyLineTester.Views.Pages
                 }
             }
 
+            // Check common column aliases for connector columns
+            if (normalizedTarget.Equals("NetFromConnector", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var kvp in values)
+                {
+                    string norm = NormalizeHeader(kvp.Key);
+                    if (norm.Equals("FromConnector", StringComparison.OrdinalIgnoreCase) ||
+                        norm.Equals("ConnectorFrom", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return kvp.Value;
+                    }
+                }
+            }
+            else if (normalizedTarget.Equals("NetToConnector", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var kvp in values)
+                {
+                    string norm = NormalizeHeader(kvp.Key);
+                    if (norm.Equals("ToConnector", StringComparison.OrdinalIgnoreCase) ||
+                        norm.Equals("ConnectorTo", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return kvp.Value;
+                    }
+                }
+            }
+
             return values.TryGetValue(targetHeader, out string? fallback) ? fallback : "";
         }
 
@@ -418,13 +445,34 @@ namespace AssemblyLineTester.Views.Pages
 
             void Apply(Control box, string primaryLabel, string? fallbackLabel = null)
             {
+                string? targetVal = null;
                 if (found.TryGetValue(primaryLabel, out string? value) && !string.IsNullOrWhiteSpace(value))
                 {
-                    box.Text = value;
+                    targetVal = value;
                 }
                 else if (fallbackLabel != null && found.TryGetValue(fallbackLabel, out string? fallbackValue) && !string.IsNullOrWhiteSpace(fallbackValue))
                 {
-                    box.Text = fallbackValue;
+                    targetVal = fallbackValue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(targetVal))
+                {
+                    if (box is ComboBox combo)
+                    {
+                        int idx = combo.FindStringExact(targetVal);
+                        if (idx >= 0)
+                        {
+                            combo.SelectedIndex = idx;
+                        }
+                        else
+                        {
+                            combo.Text = targetVal;
+                        }
+                    }
+                    else
+                    {
+                        box.Text = targetVal;
+                    }
                 }
             }
 
@@ -457,6 +505,7 @@ namespace AssemblyLineTester.Views.Pages
                 return;
             }
 
+            LoadProductModels();
             ReadConfigSummary(sheet, headerRowNumber);
 
             var headerRow = sheet.Row(headerRowNumber);
@@ -538,13 +587,14 @@ namespace AssemblyLineTester.Views.Pages
                 }
 
                 int idx = gridConfig.Rows.Add(cells);
+                var rowObj = gridConfig.Rows[idx];
 
                 // Measurement is not in the file, so it comes from the test type the row declares.
-                string rowTestType = gridConfig.Rows[idx].Cells["colTestType"].Value?.ToString() ?? "";
-                gridConfig.Rows[idx].Cells["colUnit"].Value = UnitConversionHelper.GetBaseUnit(rowTestType);
+                string rowTestType = rowObj.Cells["colTestType"].Value?.ToString() ?? "";
+                rowObj.Cells["colUnit"].Value = UnitConversionHelper.GetBaseUnit(rowTestType);
 
                 UpdateRowUnitDropdown(idx);
-                RecalculateRowLimits(gridConfig.Rows[idx]);
+                RecalculateRowLimits(rowObj);
             }
 
             RenumberRows();
@@ -741,8 +791,8 @@ namespace AssemblyLineTester.Views.Pages
         {
             string[] templateHeaders =
             {
-                "Harness-Group", "Color", "Gauge", "Net-ID", "From", "Net-From Label", "To",
-                "Net-To Label", "Test Type", "Lower Limit", "Upper Limit", "Expected Value", "Tolerance"
+                "Harness-Group", "Color", "Gauge", "Net-ID", "From", "Net-From Label", "Net-From Connector", "To",
+                "Net-To Label", "Net-To Connector", "Test Type", "Lower Limit", "Upper Limit", "Expected Value", "Tolerance"
             };
 
             using var workbook = new ClosedXML.Excel.XLWorkbook();
@@ -831,8 +881,10 @@ namespace AssemblyLineTester.Views.Pages
                 "Net-ID" or "Net ID" => "",
                 "From" => "1",
                 "Net-From Label" or "Net From Label" => "A525-CF119",
+                "Net-From Connector" or "Net From Connector" => "CF119",
                 "To" => "163",
                 "Net-To Label" or "Net To Label" => "A525-CM101",
+                "Net-To Connector" or "Net To Connector" => "CM101",
                 "Test Type" => "WIRE",
                 "Lower Limit" => "0",
                 "Upper Limit" => "10.00",
@@ -975,8 +1027,10 @@ namespace AssemblyLineTester.Views.Pages
                 "",                             // Net-ID
                 nextFromAddr.ToString(),                                    // From
                 "J" + ((nextFromAddr - 1) / 64 + 1).ToString() + "-" + ((nextFromAddr - 1) % 64 + 1).ToString("D3"),                   // Net-From Label
+                "J" + ((nextFromAddr - 1) / 64 + 1).ToString(),                                                                         // Net-From Connector
                 nextToAddr.ToString(),                                      // To
-                "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // To-From Label
+                "J" + ((nextToAddr - 1) / 64 + 1).ToString() + "-" + ((nextToAddr - 1) % 64 + 1).ToString("D3"),                     // Net-To Label
+                "J" + ((nextToAddr - 1) / 64 + 1).ToString(),                                                                         // Net-To Connector
                 defaultType,                                                // Test Type
                 lowerStr,                                                   // Lower Limit
                 upperStr,                                                   // Upper Limit
@@ -1165,8 +1219,10 @@ namespace AssemblyLineTester.Views.Pages
                     net.NetId,
                     net.FromAddress.ToString(),
                     net.FromLabel,
+                    TestDetailDto.ExtractConnector(net.FromLabel, net.FromAddress.ToString()),
                     net.ToAddress.ToString(),
                     net.ToLabel,
+                    TestDetailDto.ExtractConnector(net.ToLabel, net.ToAddress.ToString()),
                     testTypeName,
                     lowerStr,
                     upperStr,
@@ -2483,8 +2539,10 @@ namespace AssemblyLineTester.Views.Pages
                         "",                     // Net-ID
                         fromAddr.ToString(),    // from
                         "",                     // from label
+                        TestDetailDto.ExtractConnector("", fromPin), // from connector
                         toAddr.ToString(),      // to
                         "",                     // to label
+                        TestDetailDto.ExtractConnector("", toPin),   // to connector
                         rowTestType,            // test type
                         "",                     // lower limit
                         "",                     // upper limit
@@ -2621,18 +2679,23 @@ namespace AssemblyLineTester.Views.Pages
                     : await Task.Run(() => _instrument.LearnComplexConnection("", testLearnValue), token);
 
                 if (token.IsCancellationRequested) return;
+                Debug.WriteLine($"test learn value = {testLearnValue}");
 
                 if (learnResult != CtaDotNet.Enums.CtaCommandResultCode.Success)
                 {
-                    string errorMessage = "No Error";
+                    string errorMessage = "";
+                    if (_instrument.GetLastError().DllCallResult == CtaCommandResultCode.Success)
+                    {
+                        errorMessage = _instrument.GetLastError().Result;
+                    }
 
                     // Fallback: If the API completely refuses to give the error, force a generic message
                     if (string.IsNullOrWhiteSpace(errorMessage) || errorMessage == "No Error")
                     {
                         errorMessage = "Hardware Learn Aborted. Please check the actual error message from Instrument for further clarification.";
                     }
-                    MessageBox.Show(this, $"Failed to execute learn operation on instrument.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    MessageBox.Show(this, $"learn operation failed.\n\nResult Code: {learnResult}\nMessage: {errorMessage}", "Learn Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //return;
                 }
 
                 var getTestResult = await Task.Run(() => _instrument.GetLearnedConnection(), token);
@@ -2788,7 +2851,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     LoadConfigurationIntoGrid(config);
                 }
-                string checkResult = _configService.ConvertToProgramText(config);
+                string checkResult = _configService.ConvertToProgramText(config, defaultTestPoint);
                 txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
@@ -2820,6 +2883,7 @@ namespace AssemblyLineTester.Views.Pages
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
 
+            InstrumentService.StopMonitoring();
             string originalText = btnStartAll.Text;
             btnStartAll.Text = "Loading.....";
             btnLearnConnection.Enabled = false;
@@ -2842,6 +2906,11 @@ namespace AssemblyLineTester.Views.Pages
                 btnStartAll.Enabled = true;
                 btnStartSelected.Enabled = true;
                 btnAbort.Enabled = false;
+
+                _testCts?.Dispose();
+                _testCts = null;
+
+                InstrumentService.StartMonitoring();
             }
         }
 
@@ -2853,6 +2922,7 @@ namespace AssemblyLineTester.Views.Pages
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
 
+            InstrumentService.StopMonitoring();
             string originalText = btnStartSelected.Text;
             btnStartSelected.Text = "Loading.....";
             btnLearnConnection.Enabled = false;
@@ -2875,6 +2945,11 @@ namespace AssemblyLineTester.Views.Pages
                 btnStartAll.Enabled = true;
                 btnStartSelected.Enabled = true;
                 btnAbort.Enabled = false;
+
+                _testCts?.Dispose();
+                _testCts = null;
+
+                InstrumentService.StartMonitoring();
             }
         }
 
@@ -3180,6 +3255,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             // 1. Cancel software task execution loop
             _testCts?.Cancel();
+            btnAbort.Enabled = false;
 
             // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
@@ -3265,7 +3341,7 @@ namespace AssemblyLineTester.Views.Pages
             if (token.IsCancellationRequested) return;
 
             Debug.WriteLine("Run Test");
-            var testResult = _instrument.RunSingleTest(false, config.ShortTest);
+            var testResult = _instrument.RunSingleTest(false, false);
 
             if (token.IsCancellationRequested) return;
 

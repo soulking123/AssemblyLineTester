@@ -24,4 +24,5 @@ public class Connector
     public string Type { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public List<string> ImagePath { get; set; } = new();
+    public List<bool> IncludedForReport { get; set; } = new();
 }

@@ -50,27 +50,107 @@ namespace AssemblyLineTester.Services
 
         public void Disconnect()
         {
+            DisconnectInternal(waitForCompletion: false);
+        }
+
+        public static void Shutdown()
+        {
+            StopMonitoring();
+            DisconnectInternal(waitForCompletion: true);
+            TerminateEasyWire();
+        }
+
+        public static void TerminateEasyWire()
+        {
+            try
+            {
+                var processes = Process.GetProcessesByName("easywire");
+                foreach (var process in processes)
+                {
+                    try
+                    {
+                        process.Kill();
+                        process.WaitForExit(3000);
+                        try
+                        {
+                            new SystemLogService().Log(
+                                AssemblyLineTester.Models.SystemLog.LogSeverity.Info,
+                                "Instrument",
+                                "Cirris Tester API Terminated",
+                                "Terminated running Cirris Tester API / Easy Wire on application shutdown.",
+                                SessionManager.CurrentUser?.Username ?? "-");
+                        }
+                        catch { }
+                        FileLogService.Info("Instrument", "Terminated running Cirris Tester API / Easy Wire on application shutdown.");
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            new SystemLogService().Log(
+                                AssemblyLineTester.Models.SystemLog.LogSeverity.Warning,
+                                "Instrument",
+                                "Failed Terminating Cirris Tester API",
+                                $"Failed to terminate running Cirris Tester API on shutdown: {ex.Message}",
+                                SessionManager.CurrentUser?.Username ?? "-");
+                        }
+                        catch { }
+                        FileLogService.Warn("Instrument", $"Failed to terminate running Cirris Tester API on shutdown: {ex.Message}");
+                    }
+                    finally
+                    {
+                        process.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Warn("Instrument", $"Error checking EasyWire processes on shutdown: {ex.Message}");
+            }
+        }
+
+        private static void DisconnectInternal(bool waitForCompletion)
+        {
+            short idToDisconnect = -1;
             lock (_lockObj)
             {
                 if (_connectionId != -1)
                 {
-                    short idToDisconnect = _connectionId;
+                    idToDisconnect = _connectionId;
                     _connectionId = -1;
-
-                    // Fire-and-forget so a dead socket never blocks the monitoring loop.
-                    System.Threading.Tasks.Task.Run(() =>
+                    if (IsOnline)
                     {
-                        lock (_lockObj)
+                        IsOnline = false;
+                        try { OnConnectionStatusChanged?.Invoke(false); } catch { }
+                    }
+                }
+            }
+
+            if (idToDisconnect != -1)
+            {
+                var task = System.Threading.Tasks.Task.Run(() =>
+                {
+                    lock (_lockObj)
+                    {
+                        try
                         {
-                            try
-                            {
-                                _service.Disconnect(idToDisconnect, false);
-                            }
-                            catch
-                            {
-                            }
+                            _service.Disconnect(idToDisconnect, true);
                         }
-                    });
+                        catch
+                        {
+                        }
+                    }
+                });
+
+                if (waitForCompletion)
+                {
+                    try
+                    {
+                        task.Wait(1000);
+                    }
+                    catch
+                    {
+                    }
                 }
             }
         }
@@ -98,7 +178,7 @@ namespace AssemblyLineTester.Services
                         OnConnectionStatusChanged?.Invoke(IsOnline);
                     }
 
-                    await System.Threading.Tasks.Task.Delay(3000, token);
+                    await System.Threading.Tasks.Task.Delay(60000, token);
                 }
             }, token);
         }
@@ -385,17 +465,17 @@ namespace AssemblyLineTester.Services
         public CtaCommandResultCode Abort()
         {
             if (!IsConnected) return (CtaCommandResultCode)(-1);
-            lock (_lockObj)
+            try
             {
-                try
-                {
-                    var res = _service.Abort(_connectionId);
-                    return res != null ? res.DllCallResult : (CtaCommandResultCode)(-2);
-                }
-                catch
-                {
-                    return (CtaCommandResultCode)(-2);
-                }
+                // Must not lock _lockObj here: SingleTest or Learn holds _lockObj while
+                // executing on the hardware. Cirris CtaService.Abort is designed to be called
+                // concurrently from another thread to signal the CTA server to halt immediately.
+                var res = _service.Abort(_connectionId);
+                return res != null ? res.DllCallResult : (CtaCommandResultCode)(-2);
+            }
+            catch
+            {
+                return (CtaCommandResultCode)(-2);
             }
         }
 

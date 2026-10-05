@@ -1,4 +1,5 @@
 using AssemblyLineTester.Data;
+using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,39 +17,46 @@ namespace AssemblyLineTester.Services
         private static readonly string ProductModelImageRoot = Path.Combine("Assets", "img", "product_model");
 
         // Resolves a relative image path to an existing absolute path.
-        public static string? ResolveImagePath(string? relativePath)
-        {
-            if (string.IsNullOrWhiteSpace(relativePath)) return null;
+        public static string? ResolveImagePath(string? relativePath) => ImageStorageHelper.ResolveImagePath(relativePath);
 
-            if (Path.IsPathRooted(relativePath) && File.Exists(relativePath)) return relativePath;
-
-            string candidateApp = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
-            if (File.Exists(candidateApp)) return candidateApp;
-
-            string imagesFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "AssemblyLineTester", "Images");
-            string candidateAppData = Path.Combine(imagesFolder, relativePath);
-            return File.Exists(candidateAppData) ? candidateAppData : null;
-        }
-
-        // Loads every product model with its linked harness assemblies.
+        // Loads every product model with its linked harness assemblies and their connectors.
         public static List<ProductModel> GetAllProductModels()
         {
             using var db = new AppDbContext();
-            return db.ProductModels
+            var list = db.ProductModels
                 .Include(p => p.HarnessAssemblies)
+                    .ThenInclude(h => h.Connectors)
                 .OrderBy(p => p.Name)
                 .ThenBy(p => p.PartNumber)
                 .ToList();
+            foreach (var p in list) EnsureInclusionListMatches(p);
+            return list;
         }
 
         public static ProductModel? GetProductModelById(int id)
         {
             using var db = new AppDbContext();
-            return db.ProductModels
+            var p = db.ProductModels
                 .Include(p => p.HarnessAssemblies)
+                    .ThenInclude(h => h.Connectors)
                 .FirstOrDefault(p => p.Id == id);
+            EnsureInclusionListMatches(p);
+            return p;
+        }
+
+        private static void EnsureInclusionListMatches(ProductModel? product)
+        {
+            if (product == null) return;
+            product.IncludedForReport ??= new List<bool>();
+            product.ImagePath ??= new List<string>();
+            while (product.IncludedForReport.Count < product.ImagePath.Count)
+            {
+                product.IncludedForReport.Add(false);
+            }
+            if (product.IncludedForReport.Count > product.ImagePath.Count)
+            {
+                product.IncludedForReport = product.IncludedForReport.Take(product.ImagePath.Count).ToList();
+            }
         }
 
         public static ProductModel? GetProductModelByName(string? name)
@@ -62,41 +70,16 @@ namespace AssemblyLineTester.Services
         // Full path of every image belonging to one product model.
         public static List<string> GetProductModelImagePaths(ProductModel? product)
         {
-            var result = new List<string>();
-            if (product == null || product.ImagePath == null || product.ImagePath.Count == 0) return result;
-
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            foreach (var path in product.ImagePath)
-            {
-                if (string.IsNullOrWhiteSpace(path)) continue;
-                string fullPath = Path.IsPathRooted(path) ? path : Path.Combine(baseDir, path);
-
-                if (File.Exists(fullPath))
-                {
-                    result.Add(fullPath);
-                }
-                else
-                {
-                    string? resolved = ResolveImagePath(path);
-                    if (resolved != null && File.Exists(resolved))
-                    {
-                        result.Add(resolved);
-                    }
-                    else
-                    {
-                        result.Add(path);
-                    }
-                }
-            }
-
-            return result;
+            if (product == null || product.ImagePath == null || product.ImagePath.Count == 0) return new List<string>();
+            return ImageStorageHelper.ResolveImagePaths(product.ImagePath);
         }
 
         // Inserts a new product model into the database and copies its images in.
         public static (ProductModel? Product, string? Error) AddProductModel(
             ProductModel product,
             List<int>? harnessIds = null,
-            List<string>? sourceImagePaths = null)
+            List<string>? sourceImagePaths = null,
+            List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (null, "You do not have permission to modify product model records.");
@@ -111,6 +94,7 @@ namespace AssemblyLineTester.Services
 
             product.Id = 0;
             product.ImagePath ??= new List<string>();
+            product.IncludedForReport ??= new List<bool>();
 
             if (harnessIds != null && harnessIds.Count > 0)
             {
@@ -131,6 +115,14 @@ namespace AssemblyLineTester.Services
                 }
 
                 product.ImagePath = savedPaths;
+                if (includedForReport != null)
+                {
+                    product.IncludedForReport = includedForReport.Take(savedPaths.Count).ToList();
+                }
+                while (product.IncludedForReport.Count < product.ImagePath.Count)
+                {
+                    product.IncludedForReport.Add(false);
+                }
                 db.SaveChanges();
             }
 
@@ -145,7 +137,8 @@ namespace AssemblyLineTester.Services
         public static (bool Success, string? Error) UpdateProductModelOrdered(
             ProductModel product,
             List<int>? harnessIds,
-            List<string>? orderedImageItems)
+            List<string>? orderedImageItems,
+            List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (false, "You do not have permission to modify product model records.");
@@ -153,16 +146,7 @@ namespace AssemblyLineTester.Services
             string? validationError = Validate(product);
             if (validationError != null) return (false, validationError);
 
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             orderedImageItems ??= new List<string>();
-
-            // Validate any external/new source files
-            var newSources = orderedImageItems
-                .Where(p => Path.IsPathRooted(p) && !p.StartsWith(baseDir, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            string? imageError = ValidateImages(newSources);
-            if (imageError != null) return (false, imageError);
 
             using var db = new AppDbContext();
             var existing = db.ProductModels
@@ -176,6 +160,18 @@ namespace AssemblyLineTester.Services
             existing.Description = product.Description;
             existing.ImagePath ??= new List<string>();
 
+            string partFolderName = SanitizeFolderName(string.IsNullOrWhiteSpace(existing.PartNumber) ? $"Product_{existing.Id}" : existing.PartNumber);
+            string relativeFolder = Path.Combine(ProductModelImageRoot, partFolderName);
+            string fullFolder = ImageStorageHelper.GetWritableFolder(relativeFolder);
+
+            // Validate any external/new source files
+            var newSources = orderedImageItems
+                .Where(p => Path.IsPathRooted(p) && !ImageStorageHelper.IsManagedImageFile(p, relativeFolder))
+                .ToList();
+
+            string? imageError = ValidateImages(newSources);
+            if (imageError != null) return (false, imageError);
+
             // Sync harness assemblies
             existing.HarnessAssemblies.Clear();
             if (harnessIds != null && harnessIds.Count > 0)
@@ -186,11 +182,11 @@ namespace AssemblyLineTester.Services
 
             // Identify removed images
             var currentPathsNormalized = existing.ImagePath.ToDictionary(
-                p => (Path.IsPathRooted(p) ? p : Path.Combine(baseDir, p)).Replace('\\', '/').ToLowerInvariant(),
+                p => (ImageStorageHelper.ResolveImagePath(p) ?? p).Replace('\\', '/').ToLowerInvariant(),
                 p => p);
 
             var orderedNormalized = orderedImageItems
-                .Select(p => (Path.IsPathRooted(p) ? p : Path.Combine(baseDir, p)).Replace('\\', '/').ToLowerInvariant())
+                .Select(p => (ImageStorageHelper.ResolveImagePath(p) ?? p).Replace('\\', '/').ToLowerInvariant())
                 .ToHashSet();
 
             var removedPaths = currentPathsNormalized
@@ -202,12 +198,6 @@ namespace AssemblyLineTester.Services
             {
                 DeleteRemovedImages(existing, removedPaths);
             }
-
-            // Folder setup for copying any new images
-            string partFolderName = SanitizeFolderName(string.IsNullOrWhiteSpace(existing.PartNumber) ? $"Product_{existing.Id}" : existing.PartNumber);
-            string relativeFolder = Path.Combine(ProductModelImageRoot, partFolderName);
-            string fullFolder = Path.Combine(baseDir, relativeFolder);
-            Directory.CreateDirectory(fullFolder);
 
             int fileIndex = 1;
             var existingFiles = Directory.GetFiles(fullFolder);
@@ -221,18 +211,16 @@ namespace AssemblyLineTester.Services
             {
                 if (string.IsNullOrWhiteSpace(item)) continue;
 
-                string fullItemPath = Path.IsPathRooted(item) ? item : Path.Combine(baseDir, item);
-
                 // If this is an existing file already inside the product folder
-                if (fullItemPath.StartsWith(fullFolder, StringComparison.OrdinalIgnoreCase) && File.Exists(fullItemPath))
+                if (ImageStorageHelper.IsManagedImageFile(item, relativeFolder) && File.Exists(item))
                 {
-                    string rel = Path.GetRelativePath(baseDir, fullItemPath);
+                    string rel = ImageStorageHelper.ToRelativePath(item, relativeFolder);
                     finalPaths.Add(rel);
                 }
-                else if (File.Exists(fullItemPath))
+                else if (File.Exists(item))
                 {
                     // It's a new file from outside, copy it in
-                    string ext = Path.GetExtension(fullItemPath).ToLowerInvariant();
+                    string ext = Path.GetExtension(item).ToLowerInvariant();
                     string destFileName = $"{existing.Id}_{fileIndex}{ext}";
                     string destPath = Path.Combine(fullFolder, destFileName);
 
@@ -245,7 +233,7 @@ namespace AssemblyLineTester.Services
 
                     try
                     {
-                        File.Copy(fullItemPath, destPath, overwrite: false);
+                        File.Copy(item, destPath, overwrite: false);
                         string relPath = Path.Combine(relativeFolder, destFileName);
                         finalPaths.Add(relPath);
                         fileIndex++;
@@ -253,8 +241,8 @@ namespace AssemblyLineTester.Services
                     catch (Exception ex)
                     {
                         FileLogService.Warn("ProductModelService.UpdateProductModelOrdered",
-                            $"Image '{fullItemPath}' could not be copied: {ex.Message}");
-                        return (false, $"Could not save image {Path.GetFileName(fullItemPath)}: {ex.Message}");
+                            $"Image '{item}' could not be copied: {ex.Message}");
+                        return (false, $"Could not save image {Path.GetFileName(item)}: {ex.Message}");
                     }
                 }
                 else
@@ -264,6 +252,15 @@ namespace AssemblyLineTester.Services
             }
 
             existing.ImagePath = finalPaths;
+            if (includedForReport != null)
+            {
+                existing.IncludedForReport = includedForReport.Take(finalPaths.Count).ToList();
+            }
+            existing.IncludedForReport ??= new List<bool>();
+            while (existing.IncludedForReport.Count < existing.ImagePath.Count)
+            {
+                existing.IncludedForReport.Add(false);
+            }
             db.SaveChanges();
 
             new SystemLogService().Log(
@@ -297,19 +294,8 @@ namespace AssemblyLineTester.Services
 
             // Clean up files and folder
             string partFolderName = SanitizeFolderName(partNumber);
-            string folderFull = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ProductModelImageRoot, partFolderName);
-            if (Directory.Exists(folderFull))
-            {
-                try
-                {
-                    Directory.Delete(folderFull, recursive: true);
-                }
-                catch (Exception ex)
-                {
-                    FileLogService.Warn("ProductModelService.DeleteProductModel",
-                        $"Product Model image folder '{folderFull}' could not be deleted: {ex.Message}");
-                }
-            }
+            string relativeFolder = Path.Combine(ProductModelImageRoot, partFolderName);
+            ImageStorageHelper.DeleteFolder(relativeFolder);
 
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Warning, "Product Database", "Delete Product Model",
@@ -347,7 +333,6 @@ namespace AssemblyLineTester.Services
         {
             if (removedImageFileNames.Count == 0 || product.ImagePath == null) return;
 
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var remaining = new List<string>();
 
             foreach (var path in product.ImagePath)
@@ -355,11 +340,7 @@ namespace AssemblyLineTester.Services
                 string fileName = Path.GetFileName(path);
                 if (removedImageFileNames.Contains(fileName) || removedImageFileNames.Contains(path))
                 {
-                    string fullPath = Path.IsPathRooted(path) ? path : Path.Combine(baseDir, path);
-                    if (File.Exists(fullPath))
-                    {
-                        try { File.Delete(fullPath); } catch { }
-                    }
+                    ImageStorageHelper.DeleteImageFile(path);
                 }
                 else
                 {
@@ -375,8 +356,7 @@ namespace AssemblyLineTester.Services
             var savedRelativePaths = new List<string>();
             string partFolderName = SanitizeFolderName(string.IsNullOrWhiteSpace(product.PartNumber) ? $"Product_{product.Id}" : product.PartNumber);
             string relativeFolder = Path.Combine(ProductModelImageRoot, partFolderName);
-            string fullFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativeFolder);
-            Directory.CreateDirectory(fullFolder);
+            string fullFolder = ImageStorageHelper.GetWritableFolder(relativeFolder);
 
             int index = 1;
             var existingFiles = Directory.GetFiles(fullFolder);

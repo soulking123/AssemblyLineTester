@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssemblyLineTester.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260924065045_InitialCreate")]
+    [Migration("20260930053239_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -222,6 +222,10 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("IncludedForReport")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -243,6 +247,7 @@ namespace AssemblyLineTester.Migrations
                             Id = 1,
                             Description = "",
                             ImagePath = "[]",
+                            IncludedForReport = "[]",
                             Name = "6020",
                             PartNumber = ""
                         },
@@ -251,6 +256,7 @@ namespace AssemblyLineTester.Migrations
                             Id = 2,
                             Description = "",
                             ImagePath = "[]",
+                            IncludedForReport = "[]",
                             Name = "6030",
                             PartNumber = ""
                         },
@@ -259,6 +265,7 @@ namespace AssemblyLineTester.Migrations
                             Id = 3,
                             Description = "",
                             ImagePath = "[]",
+                            IncludedForReport = "[]",
                             Name = "6040",
                             PartNumber = ""
                         },
@@ -267,6 +274,7 @@ namespace AssemblyLineTester.Migrations
                             Id = 4,
                             Description = "",
                             ImagePath = "[]",
+                            IncludedForReport = "[]",
                             Name = "6060",
                             PartNumber = ""
                         });
@@ -2364,6 +2372,10 @@ namespace AssemblyLineTester.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("IncludedForReport")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -2410,6 +2422,10 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IncludedForReport")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

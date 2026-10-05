@@ -38,7 +38,8 @@ namespace AssemblyLineTester.Migrations
                     TotalPin = table.Column<int>(type: "INTEGER", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: false)
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: false),
+                    IncludedForReport = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,7 +55,8 @@ namespace AssemblyLineTester.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     PartNumber = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: false)
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: false),
+                    IncludedForReport = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,7 +90,8 @@ namespace AssemblyLineTester.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     PartNumber = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: false)
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: false),
+                    IncludedForReport = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -586,13 +589,13 @@ namespace AssemblyLineTester.Migrations
 
             migrationBuilder.InsertData(
                 table: "ProductModels",
-                columns: new[] { "Id", "Description", "ImagePath", "Name", "PartNumber" },
+                columns: new[] { "Id", "Description", "ImagePath", "IncludedForReport", "Name", "PartNumber" },
                 values: new object[,]
                 {
-                    { 1, "", "[]", "6020", "" },
-                    { 2, "", "[]", "6030", "" },
-                    { 3, "", "[]", "6040", "" },
-                    { 4, "", "[]", "6060", "" }
+                    { 1, "", "[]", "[]", "6020", "" },
+                    { 2, "", "[]", "[]", "6030", "" },
+                    { 3, "", "[]", "[]", "6040", "" },
+                    { 4, "", "[]", "[]", "6060", "" }
                 });
 
             migrationBuilder.InsertData(

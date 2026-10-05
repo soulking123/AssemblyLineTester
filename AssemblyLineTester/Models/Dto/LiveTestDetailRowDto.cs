@@ -30,6 +30,8 @@ namespace AssemblyLineTester.Models.Dto
         // Carried over from the loaded TestConfigNet; blank on a run with no matching config row.
         public string FromLabel { get; set; } = string.Empty;
         public string ToLabel { get; set; } = string.Empty;
+        public string FromConnector { get; set; } = string.Empty;
+        public string ToConnector { get; set; } = string.Empty;
         public double? LowerLimit { get; set; }
         public double? Tolerance { get; set; }
         public double? LowerLimit2 { get; set; }

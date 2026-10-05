@@ -44,11 +44,14 @@ namespace AssemblyLineTester.Views.Pages
         private DefaultTestSetting defaultTest = TestSettingService.GetDefaults();
         private int defaultTestPoint;
         private readonly List<string> _currentHarnessImages = [];
+        private readonly List<string> _currentHarnessTitles = [];
         private readonly List<string> _currentConnectorImages = [];
+        private readonly List<string> _currentConnectorTitles = [];
 
         public TestExecution()
         {
             InitializeComponent();
+            ResetTimeLabels();
             SetupGridLiveDetails();
             SetupDiagramPointers();
             SetupProgramInfoArea();
@@ -62,21 +65,22 @@ namespace AssemblyLineTester.Views.Pages
         {
             if (this.Visible && !DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                RefreshActiveConfiguration();
+                loadDefaultParameter();
+                RefreshActiveConfiguration(forceRefresh: true);
             }
         }
 
-        private void RefreshActiveConfiguration()
+        private void RefreshActiveConfiguration(bool forceRefresh = false)
         {
             var configService = new TestConfigService();
             var activeConfig = configService.GetActiveConfig();
             if (activeConfig != null)
             {
-                if (config == null || config.ConfigName != activeConfig.ConfigName || config.UpdatedAt != activeConfig.UpdatedAt)
+                if (forceRefresh || config == null || config.ConfigName != activeConfig.ConfigName || config.UpdatedAt != activeConfig.UpdatedAt)
                 {
                     config = activeConfig;
                     _customTestText = configService.ConvertToProgramText(activeConfig, defaultTestPoint);
-                    lblPageHeader.Text = $"TEST EXECUTION - {activeConfig.ConfigName}";
+                    lblPageHeader.Text = $"⚡  TEST EXECUTION - {activeConfig.ConfigName}";
                     var resNet = activeConfig.Nets?.FirstOrDefault(n => n.UpperLimit.HasValue);
                     if (resNet != null && resNet.UpperLimit.HasValue)
                     {
@@ -90,7 +94,7 @@ namespace AssemblyLineTester.Views.Pages
             else if (config != null)
             {
                 config = null;
-                lblPageHeader.Text = "TEST EXECUTION - No Active Program Loaded";
+                lblPageHeader.Text = "⚡  TEST EXECUTION - No Active Program Loaded";
                 UpdateProgramInfoDisplay(null);
                 LoadConfigurationIntoGrid(null);
             }
@@ -106,8 +110,8 @@ namespace AssemblyLineTester.Views.Pages
 
             if (!DesignMode && System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                RefreshActiveConfiguration();
                 loadDefaultParameter();
+                RefreshActiveConfiguration(forceRefresh: true);
             }
         }
 
@@ -118,6 +122,13 @@ namespace AssemblyLineTester.Views.Pages
             defaultTestPoint = defaultTest.TotalTestPointsAvailable;
         }
 
+
+        private void ResetTimeLabels()
+        {
+            lblStartTimeVal.Text = "-";
+            lblElapsedTimeVal.Text = "-";
+            lblEndTimeVal.Text = "-";
+        }
 
         private void SetupTimer()
         {
@@ -239,9 +250,11 @@ namespace AssemblyLineTester.Views.Pages
                     FromPoint = net.FromAddress.ToString(),
                     //FromPoint = fromPin,
                     FromLabel = net.FromLabel ?? "",
+                    FromConnector = TestDetailDto.ExtractConnector(net.FromLabel, fromPin),
                     ToPoint = net.ToAddress.ToString(),
                     //ToPoint = toPin,
                     ToLabel = net.ToLabel ?? "",
+                    ToConnector = TestDetailDto.ExtractConnector(net.ToLabel, toPin),
                     TestType = testTypeName,
                     Color = net.Color ?? "",
                     Gauge = net.Gauge ?? "",
@@ -280,6 +293,10 @@ namespace AssemblyLineTester.Views.Pages
 
                 row.FromLabel = net.FromLabel;
                 row.ToLabel = net.ToLabel;
+                string fromPin = TestConfigService.FormatPin(net.FromAddress);
+                string toPin = TestConfigService.FormatPin(net.ToAddress);
+                row.FromConnector = TestDetailDto.ExtractConnector(net.FromLabel, fromPin);
+                row.ToConnector = TestDetailDto.ExtractConnector(net.ToLabel, toPin);
                 row.Tolerance = net.Tolerance;
                 row.Tolerance2 = net.Tolerance2;
                 row.Unit = net.MeasurementUnit;
@@ -339,7 +356,7 @@ namespace AssemblyLineTester.Views.Pages
                     }
 
                     UpdateProgramInfoDisplay(config);
-                    lblPageHeader.Text = $"TEST EXECUTION - {config.ConfigName}";
+                    lblPageHeader.Text = $"⚡  TEST EXECUTION - {config.ConfigName}";
                     LoadConfigurationIntoGrid(config);
                     LoadImagesFromConfig();
 
@@ -372,7 +389,7 @@ namespace AssemblyLineTester.Views.Pages
                                 _continuityResistance = resNet.UpperLimit.Value;
                             }
                             UpdateProgramInfoDisplay(tempConfig);
-                            lblPageHeader.Text = $"TEST EXECUTION - {tempConfig.ConfigName}";
+                            lblPageHeader.Text = $"⚡  TEST EXECUTION - {tempConfig.ConfigName}";
                             LoadConfigurationIntoGrid(tempConfig);
                         }
                         else
@@ -382,7 +399,7 @@ namespace AssemblyLineTester.Views.Pages
                             textConfig.ConfigName = System.IO.Path.GetFileNameWithoutExtension(dlg.LoadedFilePath);
                             config = textConfig;
                             UpdateProgramInfoDisplay(textConfig);
-                            lblPageHeader.Text = $"TEST EXECUTION - {textConfig.ConfigName}";
+                            lblPageHeader.Text = $"⚡  TEST EXECUTION - {textConfig.ConfigName}";
                             LoadConfigurationIntoGrid(textConfig);
                         }
 
@@ -402,8 +419,10 @@ namespace AssemblyLineTester.Views.Pages
             _testCts = new System.Threading.CancellationTokenSource();
             var token = _testCts.Token;
 
+            InstrumentService.StopMonitoring();
             btnLoadProgram.Enabled = false;
             btnStartTest.Enabled = false;
+            btnSelfTest.Enabled = false;
             btnSaveReport.Enabled = false;
             txtNotes.Clear();
 
@@ -469,10 +488,20 @@ namespace AssemblyLineTester.Views.Pages
                         endUtc = startUtc.Add(_testStopwatch.Elapsed);
                     }
 
+                    string partNumber = "-";
+                    if (!string.IsNullOrWhiteSpace(activeConfig.ProductModelName))
+                    {
+                        var pm = ProductModelService.GetProductModelByName(activeConfig.ProductModelName);
+                        if (!string.IsNullOrWhiteSpace(pm?.PartNumber))
+                        {
+                            partNumber = pm.PartNumber;
+                        }
+                    }
+
                     var reportService = new TestReportService();
                     _currentReportId = reportService.SaveDraftLiveTestReport(
-                        activeConfig.ProductModelName, "N/A", "N/A", "N/A", "1.0",
-                        "N/A", startUtc, _loadedRows, overallResult, errorSummary: summaryText, endDateTime: endUtc);
+                        activeConfig.ProductModelName, "-", "-", "-", "1.0",
+                        partNumber, startUtc, _loadedRows, overallResult, errorSummary: summaryText, endDateTime: endUtc);
 
                     Debug.WriteLine($"Draft report auto-saved to Test History as ReportId={_currentReportId}");
                 }
@@ -497,7 +526,14 @@ namespace AssemblyLineTester.Views.Pages
             {
                 btnLoadProgram.Enabled = true;
                 btnStartTest.Enabled = true;
+                btnStopTest.Enabled = true;
+                btnSelfTest.Enabled = true;
                 btnSaveReport.Enabled = true;
+
+                _testCts?.Dispose();
+                _testCts = null;
+
+                InstrumentService.StartMonitoring();
             }
         }
 
@@ -540,6 +576,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 // Call RunSingleTest to execute the program on hardware so CTA populates test errors (shorts, opens, etc.)
                 var testResult = _instrument.RunSingleTest(false, config.ShortTest);
+                if (token.IsCancellationRequested) return;
                 if (testResult != null && testResult.DllCallResult == CtaCommandResultCode.Success)
                 {
                     logService.Log(LogSeverity.Info, "Instrument", "Run Test Program Success.",
@@ -957,6 +994,7 @@ namespace AssemblyLineTester.Views.Pages
         private async void BtnStopTest_Click(object sender, EventArgs e)
         {
             _testCts?.Cancel();
+            btnStopTest.Enabled = false;
 
             // 2. Send abort command to CTA instrument
             var abortResult = await Task.Run(() => _instrument.Abort());
@@ -965,6 +1003,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 if (abortResult == CtaCommandResultCode.Success)
                 {
+                    btnStopTest.Enabled = true;
                     lblStatusRunning.Text = "Aborted";
                     lblStatusRunning.ForeColor = Color.Red;
                     StopTestTiming();
@@ -1019,7 +1058,9 @@ namespace AssemblyLineTester.Views.Pages
                 btnLoadProgram.Enabled = false;
                 btnStartTest.Enabled = false;
                 btnSelfTest.Enabled = false;
+                btnStopTest.Enabled = false;
                 btnSaveReport.Enabled = false;
+                lblStatusRunning.ForeColor = Color.Gray;
                 lblStatusRunning.Text = "RUNNING SELF TEST...";
                 
                 await System.Threading.Tasks.Task.Run(() =>
@@ -1029,7 +1070,10 @@ namespace AssemblyLineTester.Views.Pages
                     
                     if (!_instrument.IsConnected)
                     {
-                        throw new Exception("Instrument not connected.");
+                        if (!_instrument.Connect())
+                        {
+                            throw new Exception("Instrument not connected.");
+                        }
                     }
                     
                     var res = _instrument.GetServerInformation();
@@ -1049,6 +1093,7 @@ namespace AssemblyLineTester.Views.Pages
             {
                 btnLoadProgram.Enabled = true;
                 btnStartTest.Enabled = true;
+                btnStopTest.Enabled = true;
                 btnSelfTest.Enabled = true;
                 btnSaveReport.Enabled = true;
                 lblStatusRunning.Text = "READY";
@@ -1078,14 +1123,24 @@ namespace AssemblyLineTester.Views.Pages
             TestConfiguration? activeConfig = _configService.GetActiveConfig();
             string productModel = activeConfig?.ProductModelName ?? "N/A";
 
+            string partNumber = "-";
+            if (!string.IsNullOrWhiteSpace(activeConfig?.ProductModelName))
+            {
+                var pm = ProductModelService.GetProductModelByName(activeConfig.ProductModelName);
+                if (!string.IsNullOrWhiteSpace(pm?.PartNumber))
+                {
+                    partNumber = pm.PartNumber;
+                }
+            }
+
             using var modal = new AssemblyLineTester.Views.Modals.SaveTestReportModalForm(
                 productModel,
-                "N/A",
-                "N/A",
+                "",
+                "",
                 "1.0",
-                "N/A",
+                "",
                 SessionManager.CurrentUser?.FullName ?? "Unknown",
-                "N/A",
+                partNumber,
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
                 _startTime != default ? _startTime : DateTime.Now,
@@ -1134,9 +1189,11 @@ namespace AssemblyLineTester.Views.Pages
             "Net-ID" => row.NetId,
             "Harness Group" => row.HarnessGroup,
             "From" => row.FromPoint,
-            "Net From Label" => row.FromLabel,
+            "Net From Label" or "Net-From Label" => row.FromLabel,
+            "Net From Connector" or "Net-From Connector" => !string.IsNullOrWhiteSpace(row.FromConnector) ? row.FromConnector : TestDetailDto.ExtractConnector(row.FromLabel, row.FromPoint),
             "To" => row.ToPoint,
-            "Net To Label" => row.ToLabel,
+            "Net To Label" or "Net-To Label" => row.ToLabel,
+            "Net To Connector" or "Net-To Connector" => !string.IsNullOrWhiteSpace(row.ToConnector) ? row.ToConnector : TestDetailDto.ExtractConnector(row.ToLabel, row.ToPoint),
             "Test Type" => row.TestType,
             "Color" => row.Color,
             "Gauge" => row.Gauge,
@@ -1330,7 +1387,9 @@ namespace AssemblyLineTester.Views.Pages
         private void LoadImagesFromConfig()
         {
             _currentHarnessImages.Clear();
+            _currentHarnessTitles.Clear();
             _currentConnectorImages.Clear();
+            _currentConnectorTitles.Clear();
 
             var activeConfig = _configService.GetActiveConfig();
             if (activeConfig != null && !string.IsNullOrWhiteSpace(activeConfig.ProductModelName))
@@ -1342,11 +1401,16 @@ namespace AssemblyLineTester.Views.Pages
                     foreach (var harness in productModel.HarnessAssemblies)
                     {
                         var paths = HarnessService.GetHarnessImagePaths(harness);
+                        string harnessTitle = !string.IsNullOrWhiteSpace(harness.Name)
+                            ? $"HARNESS: {harness.Name}"
+                            : (!string.IsNullOrWhiteSpace(harness.PartNumber) ? $"HARNESS: {harness.PartNumber}" : "HARNESS");
+
                         foreach (var path in paths)
                         {
                             if (File.Exists(path) && !_currentHarnessImages.Contains(path, StringComparer.OrdinalIgnoreCase))
                             {
                                 _currentHarnessImages.Add(path);
+                                _currentHarnessTitles.Add(harnessTitle);
                             }
                         }
                     }
@@ -1358,11 +1422,16 @@ namespace AssemblyLineTester.Views.Pages
                         foreach (var conn in connectors)
                         {
                             var paths = ConnectorService.GetConnectorImagePaths(conn);
+                            string connTitle = !string.IsNullOrWhiteSpace(conn.Name)
+                                ? $"CONNECTOR: {conn.Name}"
+                                : (!string.IsNullOrWhiteSpace(conn.PartNumber) ? $"CONNECTOR: {conn.PartNumber}" : "CONNECTOR");
+
                             foreach (var path in paths)
                             {
                                 if (File.Exists(path) && !_currentConnectorImages.Contains(path, StringComparer.OrdinalIgnoreCase))
                                 {
                                     _currentConnectorImages.Add(path);
+                                    _currentConnectorTitles.Add(connTitle);
                                 }
                             }
                         }
@@ -1429,14 +1498,14 @@ namespace AssemblyLineTester.Views.Pages
         private void PicMachineOverview_Click(object? sender, EventArgs e)
         {
             using var modal = new AssemblyLineTester.Views.Modals.ImagePreviewModalForm(
-                _currentHarnessImages, "HARNESS ASSEMBLIES PREVIEW");
+                _currentHarnessImages, "HARNESS ASSEMBLIES PREVIEW", 0, _currentHarnessTitles);
             modal.ShowDialog(this);
         }
 
         private void PicHarnessConn_Click(object? sender, EventArgs e)
         {
             using var modal = new AssemblyLineTester.Views.Modals.ImagePreviewModalForm(
-                _currentConnectorImages, "CONNECTORS PREVIEW");
+                _currentConnectorImages, "CONNECTORS PREVIEW", 0, _currentConnectorTitles);
             modal.ShowDialog(this);
         }
 
@@ -1524,7 +1593,6 @@ namespace AssemblyLineTester.Views.Pages
             AddProgramInfoRow("Total Nets:", lblTotalNetsVal);
             AddProgramInfoRow("Test Types:", lblTestTypesVal);
             AddProgramInfoRow("Max Wire Res.:", lblMaxWireResVal);
-            AddProgramInfoRow("Min Component Res.:", lblMinCompResVal);
             AddProgramInfoRow("Min Insulation Res.:", lblMinInsResVal);
             AddProgramInfoRow("Hipot Voltage:", lblHipotVoltageVal);
             AddProgramInfoRow("Short Test:", lblShortTestVal);

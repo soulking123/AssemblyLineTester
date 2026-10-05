@@ -1,4 +1,5 @@
 using AssemblyLineTester.Data;
+using AssemblyLineTester.Helpers;
 using AssemblyLineTester.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,16 +16,37 @@ namespace AssemblyLineTester.Services
         private const long MaxImageSizeBytes = 2 * 1024 * 1024;
         private static readonly string ConnectorImageRoot = Path.Combine("Assets", "img", "connector");
 
+        public static string? ResolveImagePath(string? relativePath) => ImageStorageHelper.ResolveImagePath(relativePath);
+
         public static List<Connector> GetAllConnectors()
         {
             using var db = new AppDbContext();
-            return db.Connectors.OrderBy(c => c.Name).ThenBy(c => c.PartNumber).ToList();
+            var list = db.Connectors.OrderBy(c => c.Name).ThenBy(c => c.PartNumber).ToList();
+            foreach (var c in list) EnsureInclusionListMatches(c);
+            return list;
         }
 
         public static Connector? GetConnectorById(int id)
         {
             using var db = new AppDbContext();
-            return db.Connectors.FirstOrDefault(c => c.Id == id);
+            var c = db.Connectors.FirstOrDefault(c => c.Id == id);
+            EnsureInclusionListMatches(c);
+            return c;
+        }
+
+        private static void EnsureInclusionListMatches(Connector? connector)
+        {
+            if (connector == null) return;
+            connector.IncludedForReport ??= new List<bool>();
+            connector.ImagePath ??= new List<string>();
+            while (connector.IncludedForReport.Count < connector.ImagePath.Count)
+            {
+                connector.IncludedForReport.Add(false);
+            }
+            if (connector.IncludedForReport.Count > connector.ImagePath.Count)
+            {
+                connector.IncludedForReport = connector.IncludedForReport.Take(connector.ImagePath.Count).ToList();
+            }
         }
 
         // Connectors linked to a harness assembly.
@@ -40,37 +62,12 @@ namespace AssemblyLineTester.Services
         // Full path of every image belonging to one connector.
         public static List<string> GetConnectorImagePaths(Connector? connector)
         {
-            var result = new List<string>();
-            if (connector == null || connector.ImagePath == null || connector.ImagePath.Count == 0) return result;
-
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            foreach (var path in connector.ImagePath)
-            {
-                if (string.IsNullOrWhiteSpace(path)) continue;
-                string fullPath = Path.IsPathRooted(path) ? path : Path.Combine(baseDir, path);
-
-                if (File.Exists(fullPath))
-                {
-                    result.Add(fullPath);
-                }
-                else if (Directory.Exists(fullPath))
-                {
-                    result.AddRange(
-                        Directory.GetFiles(fullPath)
-                            .Where(f => AllowedImageExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
-                            .OrderBy(f => f));
-                }
-                else
-                {
-                    result.Add(path);
-                }
-            }
-
-            return result;
+            if (connector == null || connector.ImagePath == null || connector.ImagePath.Count == 0) return new List<string>();
+            return ImageStorageHelper.ResolveImagePaths(connector.ImagePath);
         }
 
         // Inserts a connector into the shared catalog and copies its images in.
-        public static (Connector? Connector, string? Error) AddConnector(Connector connector, List<string> sourceImagePaths)
+        public static (Connector? Connector, string? Error) AddConnector(Connector connector, List<string>? sourceImagePaths = null, List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (null, "You do not have permission to modify connector records.");
@@ -85,6 +82,7 @@ namespace AssemblyLineTester.Services
 
             connector.Id = 0;
             connector.ImagePath ??= new List<string>();
+            connector.IncludedForReport ??= new List<bool>();
             db.Connectors.Add(connector);
             db.SaveChanges();
 
@@ -99,6 +97,14 @@ namespace AssemblyLineTester.Services
                 }
 
                 connector.ImagePath = savedPaths;
+                if (includedForReport != null)
+                {
+                    connector.IncludedForReport = includedForReport.Take(savedPaths.Count).ToList();
+                }
+                while (connector.IncludedForReport.Count < connector.ImagePath.Count)
+                {
+                    connector.IncludedForReport.Add(false);
+                }
                 db.SaveChanges();
             }
 
@@ -157,7 +163,7 @@ namespace AssemblyLineTester.Services
         }
 
         // Updates fields and syncs images with an ordered list (preserving index positions).
-        public static (bool Success, string? Error) UpdateConnectorOrdered(Connector connector, List<string> orderedImageItems)
+        public static (bool Success, string? Error) UpdateConnectorOrdered(Connector connector, List<string> orderedImageItems, List<bool>? includedForReport = null)
         {
             if (!SessionManager.HasPermission("Action.HarnessDatabase.Edit"))
                 return (false, "You do not have permission to modify connector records.");
@@ -165,16 +171,7 @@ namespace AssemblyLineTester.Services
             string? validationError = Validate(connector);
             if (validationError != null) return (false, validationError);
 
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             orderedImageItems ??= new List<string>();
-
-            // Validate any external/new source files
-            var newSources = orderedImageItems
-                .Where(p => Path.IsPathRooted(p) && !p.StartsWith(baseDir, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            string? imageError = ValidateImages(newSources);
-            if (imageError != null) return (false, imageError);
 
             using var db = new AppDbContext();
             var existing = db.Connectors.FirstOrDefault(c => c.Id == connector.Id);
@@ -187,13 +184,25 @@ namespace AssemblyLineTester.Services
             existing.Description = connector.Description;
             existing.ImagePath ??= new List<string>();
 
+            string partFolderName = SanitizeFolderName(string.IsNullOrWhiteSpace(existing.PartNumber) ? $"Connector_{existing.Id}" : existing.PartNumber);
+            string relativeFolder = Path.Combine(ConnectorImageRoot, partFolderName);
+            string fullFolder = ImageStorageHelper.GetWritableFolder(relativeFolder);
+
+            // Validate any external/new source files
+            var newSources = orderedImageItems
+                .Where(p => Path.IsPathRooted(p) && !ImageStorageHelper.IsManagedImageFile(p, relativeFolder))
+                .ToList();
+
+            string? imageError = ValidateImages(newSources);
+            if (imageError != null) return (false, imageError);
+
             // Identify removed images
             var currentPathsNormalized = existing.ImagePath.ToDictionary(
-                p => (Path.IsPathRooted(p) ? p : Path.Combine(baseDir, p)).Replace('\\', '/').ToLowerInvariant(),
+                p => (ImageStorageHelper.ResolveImagePath(p) ?? p).Replace('\\', '/').ToLowerInvariant(),
                 p => p);
 
             var orderedNormalized = orderedImageItems
-                .Select(p => (Path.IsPathRooted(p) ? p : Path.Combine(baseDir, p)).Replace('\\', '/').ToLowerInvariant())
+                .Select(p => (ImageStorageHelper.ResolveImagePath(p) ?? p).Replace('\\', '/').ToLowerInvariant())
                 .ToHashSet();
 
             var removedPaths = currentPathsNormalized
@@ -205,12 +214,6 @@ namespace AssemblyLineTester.Services
             {
                 DeleteRemovedImages(existing, removedPaths);
             }
-
-            // Folder setup for copying any new images
-            string partFolderName = SanitizeFolderName(string.IsNullOrWhiteSpace(existing.PartNumber) ? $"Connector_{existing.Id}" : existing.PartNumber);
-            string relativeFolder = Path.Combine(ConnectorImageRoot, partFolderName);
-            string fullFolder = Path.Combine(baseDir, relativeFolder);
-            Directory.CreateDirectory(fullFolder);
 
             int fileIndex = 1;
             var existingFiles = Directory.GetFiles(fullFolder);
@@ -224,18 +227,16 @@ namespace AssemblyLineTester.Services
             {
                 if (string.IsNullOrWhiteSpace(item)) continue;
 
-                string fullItemPath = Path.IsPathRooted(item) ? item : Path.Combine(baseDir, item);
-
                 // If this is an existing file already inside the connector folder
-                if (fullItemPath.StartsWith(fullFolder, StringComparison.OrdinalIgnoreCase) && File.Exists(fullItemPath))
+                if (ImageStorageHelper.IsManagedImageFile(item, relativeFolder) && File.Exists(item))
                 {
-                    string rel = Path.GetRelativePath(baseDir, fullItemPath);
+                    string rel = ImageStorageHelper.ToRelativePath(item, relativeFolder);
                     finalPaths.Add(rel);
                 }
-                else if (File.Exists(fullItemPath))
+                else if (File.Exists(item))
                 {
                     // It's a new file from outside, copy it in
-                    string ext = Path.GetExtension(fullItemPath).ToLowerInvariant();
+                    string ext = Path.GetExtension(item).ToLowerInvariant();
                     string destFileName = $"{existing.Id}_{fileIndex}{ext}";
                     string destPath = Path.Combine(fullFolder, destFileName);
 
@@ -248,7 +249,7 @@ namespace AssemblyLineTester.Services
 
                     try
                     {
-                        File.Copy(fullItemPath, destPath, overwrite: false);
+                        File.Copy(item, destPath, overwrite: false);
                         string relPath = Path.Combine(relativeFolder, destFileName);
                         finalPaths.Add(relPath);
                         fileIndex++;
@@ -256,8 +257,8 @@ namespace AssemblyLineTester.Services
                     catch (Exception ex)
                     {
                         FileLogService.Warn("ConnectorService.UpdateConnectorOrdered",
-                            $"Image '{fullItemPath}' could not be copied: {ex.Message}");
-                        return (false, $"Could not save image {Path.GetFileName(fullItemPath)}: {ex.Message}");
+                            $"Image '{item}' could not be copied: {ex.Message}");
+                        return (false, $"Could not save image {Path.GetFileName(item)}: {ex.Message}");
                     }
                 }
                 else
@@ -267,6 +268,15 @@ namespace AssemblyLineTester.Services
             }
 
             existing.ImagePath = finalPaths;
+            if (includedForReport != null)
+            {
+                existing.IncludedForReport = includedForReport.Take(finalPaths.Count).ToList();
+            }
+            existing.IncludedForReport ??= new List<bool>();
+            while (existing.IncludedForReport.Count < existing.ImagePath.Count)
+            {
+                existing.IncludedForReport.Add(false);
+            }
             db.SaveChanges();
 
             new SystemLogService().Log(
@@ -312,19 +322,8 @@ namespace AssemblyLineTester.Services
 
             // Clean up files and folder
             string partFolderName = SanitizeFolderName(partNumber);
-            string folderFull = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ConnectorImageRoot, partFolderName);
-            if (Directory.Exists(folderFull))
-            {
-                try
-                {
-                    Directory.Delete(folderFull, recursive: true);
-                }
-                catch (Exception ex)
-                {
-                    FileLogService.Warn("ConnectorService.DeleteConnector",
-                        $"Connector image folder '{folderFull}' could not be deleted: {ex.Message}");
-                }
-            }
+            string relativeFolder = Path.Combine(ConnectorImageRoot, partFolderName);
+            ImageStorageHelper.DeleteFolder(relativeFolder);
 
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Warning, "Product Database", "Delete Connector",
@@ -362,7 +361,6 @@ namespace AssemblyLineTester.Services
         {
             if (removedImageFileNames.Count == 0 || connector.ImagePath == null) return;
 
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var remaining = new List<string>();
 
             foreach (var path in connector.ImagePath)
@@ -370,11 +368,7 @@ namespace AssemblyLineTester.Services
                 string fileName = Path.GetFileName(path);
                 if (removedImageFileNames.Contains(fileName) || removedImageFileNames.Contains(path))
                 {
-                    string fullPath = Path.IsPathRooted(path) ? path : Path.Combine(baseDir, path);
-                    if (File.Exists(fullPath))
-                    {
-                        try { File.Delete(fullPath); } catch { }
-                    }
+                    ImageStorageHelper.DeleteImageFile(path);
                 }
                 else
                 {
@@ -390,8 +384,7 @@ namespace AssemblyLineTester.Services
             var savedRelativePaths = new List<string>();
             string partFolderName = SanitizeFolderName(string.IsNullOrWhiteSpace(connector.PartNumber) ? $"Connector_{connector.Id}" : connector.PartNumber);
             string relativeFolder = Path.Combine(ConnectorImageRoot, partFolderName);
-            string fullFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativeFolder);
-            Directory.CreateDirectory(fullFolder);
+            string fullFolder = ImageStorageHelper.GetWritableFolder(relativeFolder);
 
             int index = 1;
             var existingFiles = Directory.GetFiles(fullFolder);

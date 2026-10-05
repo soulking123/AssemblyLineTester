@@ -48,7 +48,7 @@ namespace AssemblyLineTester.Views.Pages
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new System.Drawing.Size(217, 32);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "Product Database";
+            lblTitle.Text = "📦  PRODUCT DATABASE";
             // 
             // flpTabs
             // 

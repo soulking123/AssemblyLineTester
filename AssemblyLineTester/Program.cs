@@ -1,17 +1,38 @@
-﻿using AssemblyLineTester.Data;
+using AssemblyLineTester.Data;
 using AssemblyLineTester.Helpers;
+using AssemblyLineTester.Models.Dto;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
-
 
 namespace AssemblyLineTester
 {
     internal static class Program
     {
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
+            if (args.Length > 0 && args[0] == "--init-db")
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                DbInitialize.Initialize();
+                return;
+            }
+
+            if (args.Length >= 3 && args[0] == "--export-report")
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                DbInitialize.Initialize();
+                int repId = int.Parse(args[1]);
+                string outPath = args[2];
+                new ReportPdfExportService().ExportReportToPdf(repId, outPath);
+                Console.WriteLine($"Successfully exported report {repId} to {outPath}");
+                return;
+            }
+
             ApplicationConfiguration.Initialize();
 
             // Installed first, so a startup failure still leaves a trace.
@@ -62,9 +83,20 @@ namespace AssemblyLineTester
             // Drafts are started-but-never-saved tests; nothing in the UI ever shows them.
             new TestReportService().PurgeOldDrafts();
 
-            Application.Run(new LoginForm());
+            Application.ApplicationExit += (s, e) =>
+            {
+                InstrumentService.Shutdown();
+            };
 
-            FileLogService.Info("Shutdown", "Application closed normally.");
+            try
+            {
+                Application.Run(new LoginForm());
+            }
+            finally
+            {
+                InstrumentService.Shutdown();
+                FileLogService.Info("Shutdown", "Application closed normally.");
+            }
         }
 
         // Both handlers are needed: ThreadException survives, UnhandledException only records.
@@ -140,3 +172,5 @@ namespace AssemblyLineTester
         }
     }
 }
+
+

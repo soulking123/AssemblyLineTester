@@ -16,6 +16,7 @@ namespace AssemblyLineTester.Models
         public string PartNumber { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public List<string> ImagePath { get; set; } = new();
+        public List<bool> IncludedForReport { get; set; } = new();
         public List<HarnessAssembly> HarnessAssemblies { get; set; } = new();
     }
 }

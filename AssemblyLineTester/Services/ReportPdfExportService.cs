@@ -4,6 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using AssemblyLineTester.Helpers;
+using AssemblyLineTester.Models;
 using AssemblyLineTester.Models.Dto;
 using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
@@ -31,13 +33,14 @@ namespace AssemblyLineTester.Services
             ExportReportToPdf(detail, outputPath);
         }
 
-        public void ExportReportToPdf(ReportDetailDto detail, string outputPath)
+        public void ExportReportToPdf(ReportDetailDto detail, string outputPath, bool logToDatabase = true)
         {
             string logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "cat_logo.png");
 
             using PdfDocument doc = new();
 
             DrawSummaryPage(doc, detail, logoPath);
+            DrawProductHarnessPages(doc, detail, logoPath);
             DrawTestSummaryPages(doc, detail, logoPath);
             DrawDetailPages(doc, detail, logoPath);
 
@@ -47,9 +50,12 @@ namespace AssemblyLineTester.Services
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
             doc.Save(outputPath);
 
-            new SystemLogService().Log(
-                Models.SystemLog.LogSeverity.Info, "Test Report", "Export PDF",
-                $"Report {detail.ReportNumber} exported to PDF ({totalPages} pages).");
+            if (logToDatabase)
+            {
+                new SystemLogService().Log(
+                    Models.SystemLog.LogSeverity.Info, "Test Report", "Export PDF",
+                    $"Report {detail.ReportNumber} exported to PDF ({totalPages} pages).");
+            }
         }
 
         // Page 1: general information, summary table and result box, portrait.
@@ -69,6 +75,714 @@ namespace AssemblyLineTester.Services
             y = DrawTypeSummaryTable(gfx, detail, font, fontBold, y);
             y = DrawOverallResultBox(gfx, page, detail, y);
             DrawNotes(gfx, page, detail, font, fontBold, y);
+        }
+
+        private static readonly XColor[] HarnessPalette = new[]
+        {
+            XColor.FromArgb(22, 163, 74),   // Green (#16A34A)
+            XColor.FromArgb(220, 38, 38),  // Red (#DC2626)
+            XColor.FromArgb(37, 99, 235),  // Blue (#2563EB)
+            XColor.FromArgb(217, 119, 6),  // Amber / Orange (#D97706)
+            XColor.FromArgb(124, 58, 237), // Purple (#7C3AED)
+            XColor.FromArgb(13, 148, 136), // Teal (#0D9488)
+            XColor.FromArgb(225, 29, 72),  // Rose (#E11D48)
+            XColor.FromArgb(79, 70, 229),  // Indigo (#4F46E5)
+        };
+
+        private static readonly XColor BannerBgColor = XColor.FromArgb(238, 242, 248);
+        private static readonly XColor BorderColor = XColor.FromArgb(203, 213, 225);
+        private static readonly XColor CardBorderColor = XColor.FromArgb(203, 213, 225);
+        private static readonly XColor InnerBoxBorderColor = XColor.FromArgb(226, 232, 240);
+        private static readonly XColor SubBannerBgColor = XColor.FromArgb(241, 245, 249);
+        private static readonly XColor TextDarkColor = XColor.FromArgb(15, 23, 42);
+        private static readonly XColor TextMutedColor = XColor.FromArgb(100, 116, 139);
+
+        // Page 2: Product Harness Routing & Installation / Specification page.
+        // Displays the overall machine routing and assembly matrix in Section 1,
+        // and harness cards with tested connectors in Section 2.
+        // If more than 3 harnesses exist, Section 2 continues onto a new page.
+        // Visual catalog pages for Product Model (Point 1), Harness Assemblies (Point 2), and Connectors (Point 3).
+        // Only elements with 'Include in Report' checked in the database are rendered.
+        private static void DrawProductHarnessPages(PdfDocument doc, ReportDetailDto detail, string logoPath)
+        {
+            var productModel = FindProductModelForReport(detail.ProductModel, detail.PartNumber);
+            var allHarnesses = productModel?.HarnessAssemblies?.ToList() ?? new List<HarnessAssembly>();
+
+            // 1. Point 1: Overall Harness Routing & Installation (Product Model)
+            bool hasOverall = productModel != null && IsIncludedInReport(productModel.ImagePath, productModel.IncludedForReport);
+
+            // 2. Point 2: Harness Assemblies Specification
+            var includedHarnesses = allHarnesses
+                .Where(h => IsIncludedInReport(h.ImagePath, h.IncludedForReport))
+                .ToList();
+
+            // 3. Point 3: Connector Specifications & Pinouts
+            var includedConnectors = new List<ConnectorCardItem>();
+            var seenConnectorIds = new HashSet<int>();
+
+            for (int hIdx = 0; hIdx < includedHarnesses.Count; hIdx++)
+            {
+                var harness = includedHarnesses[hIdx];
+                int origIdx = allHarnesses.IndexOf(harness);
+                var hColor = HarnessPalette[(origIdx >= 0 ? origIdx : hIdx) % HarnessPalette.Length];
+                var conns = harness.Connectors ?? new List<Connector>();
+
+                foreach (var conn in conns)
+                {
+                    if (conn == null) continue;
+                    if (seenConnectorIds.Contains(conn.Id)) continue;
+
+                    string? imgPath = GetPreferredImagePath(conn.ImagePath, conn.IncludedForReport);
+                    if (imgPath != null)
+                    {
+                        seenConnectorIds.Add(conn.Id);
+                        includedConnectors.Add(new ConnectorCardItem
+                        {
+                            Connector = conn,
+                            ParentHarness = harness,
+                            AccentColor = hColor,
+                            ResolvedImagePath = imgPath
+                        });
+                    }
+                }
+            }
+
+            // If none of the 3 points are active, do not generate any visual pages
+            if (!hasOverall && includedHarnesses.Count == 0 && includedConnectors.Count == 0)
+            {
+                return;
+            }
+
+            // --- Render Point 1 (Overall) & Point 2 (Harnesses) ---
+            if (hasOverall || includedHarnesses.Count > 0)
+            {
+                const int harnessChunkSize = 3;
+                int totalHarnessChunks = includedHarnesses.Count == 0
+                    ? 1
+                    : (int)Math.Ceiling((double)includedHarnesses.Count / harnessChunkSize);
+
+                for (int chunkIndex = 0; chunkIndex < totalHarnessChunks; chunkIndex++)
+                {
+                    var page = doc.AddPage();
+                    page.Size = PdfSharp.PageSize.A4;
+                    page.Orientation = PdfSharp.PageOrientation.Portrait;
+                    using XGraphics gfx = XGraphics.FromPdfPage(page);
+
+                    double usableWidth = page.Width - Margin * 2;
+                    double bottom = page.Height - Margin - FooterReserve;
+                    double y = DrawPageHeader(gfx, page, detail, 0, 0, logoPath);
+
+                    var currentChunkHarnesses = includedHarnesses.Skip(chunkIndex * harnessChunkSize).Take(harnessChunkSize).ToList();
+                    int harnessOffset = chunkIndex * harnessChunkSize;
+
+                    if (chunkIndex == 0)
+                    {
+                        if (hasOverall)
+                        {
+                            y = DrawSection1OverallRouting(gfx, detail, productModel, allHarnesses, usableWidth, y);
+                            y += 12; // Gap between Section 1 and Section 2
+                        }
+
+                        if (includedHarnesses.Count > 0)
+                        {
+                            DrawSection2HarnessSpecifications(gfx, currentChunkHarnesses, harnessOffset, usableWidth, y, bottom, isContinuation: false);
+                        }
+                    }
+                    else
+                    {
+                        DrawSection2HarnessSpecifications(gfx, currentChunkHarnesses, harnessOffset, usableWidth, y, bottom, isContinuation: true);
+                    }
+                }
+            }
+
+            // --- Render Point 3: Connector Specifications & Pinouts ---
+            if (includedConnectors.Count > 0)
+            {
+                const int connectorChunkSize = 6;
+                int totalConnectorChunks = (int)Math.Ceiling((double)includedConnectors.Count / connectorChunkSize);
+
+                for (int chunkIndex = 0; chunkIndex < totalConnectorChunks; chunkIndex++)
+                {
+                    var page = doc.AddPage();
+                    page.Size = PdfSharp.PageSize.A4;
+                    page.Orientation = PdfSharp.PageOrientation.Portrait;
+                    using XGraphics gfx = XGraphics.FromPdfPage(page);
+
+                    double usableWidth = page.Width - Margin * 2;
+                    double bottom = page.Height - Margin - FooterReserve;
+                    double y = DrawPageHeader(gfx, page, detail, 0, 0, logoPath);
+
+                    var currentChunkConns = includedConnectors.Skip(chunkIndex * connectorChunkSize).Take(connectorChunkSize).ToList();
+                    DrawSection3ConnectorSpecifications(gfx, currentChunkConns, usableWidth, y, bottom, isContinuation: chunkIndex > 0);
+                }
+            }
+        }
+
+        private static double DrawSection1OverallRouting(
+            XGraphics gfx,
+            ReportDetailDto detail,
+            ProductModel? productModel,
+            List<HarnessAssembly> harnesses,
+            double usableWidth,
+            double y)
+        {
+            var bannerFont = new XFont("Arial", 9.5, XFontStyle.Bold);
+            var bannerPen = new XPen(BorderColor, 1);
+            var bannerBrush = new XSolidBrush(BannerBgColor);
+
+            double bannerH = 22;
+            DrawRoundedBox(gfx, bannerPen, bannerBrush, Margin, y, usableWidth, bannerH, 4);
+            gfx.DrawString("1.  OVERALL HARNESS ROUTING & INSTALLATION", bannerFont, new XSolidBrush(TextDarkColor),
+                new XRect(Margin + 10, y, usableWidth - 20, bannerH), XStringFormats.CenterLeft);
+
+            y += bannerH + 8;
+
+            double cardH = 195;
+            double gap = 10;
+            double leftCardW = 230;
+            double rightCardW = usableWidth - leftCardW - gap;
+
+            var cardPen = new XPen(CardBorderColor, 1);
+
+            // --- Left Card: Overall Routing Image ---
+            double leftX = Margin;
+            DrawRoundedBox(gfx, cardPen, XBrushes.White, leftX, y, leftCardW, cardH, 4);
+
+            string? overallImgPath = GetPreferredImagePath(productModel?.ImagePath, productModel?.IncludedForReport);
+            DrawImageFitted(gfx, overallImgPath, leftX + 8, y + 8, leftCardW - 16, cardH - 16, "No Overall Routing Image Available");
+
+            // --- Right Card: Test Configuration & Assembly Matrix ---
+            double rightX = leftX + leftCardW + gap;
+            DrawRoundedBox(gfx, cardPen, XBrushes.White, rightX, y, rightCardW, cardH, 4);
+
+            // Right Card Header Banner
+            double headerH = 22;
+            DrawRoundedBox(gfx, new XPen(BorderColor, 0.8), new XSolidBrush(BannerBgColor), rightX, y, rightCardW, headerH, 4);
+            // Overdraw bottom corners to keep flush with box
+            gfx.DrawRectangle(new XSolidBrush(BannerBgColor), rightX, y + headerH - 4, rightCardW, 4);
+            gfx.DrawLine(new XPen(BorderColor, 0.8), rightX, y + headerH, rightX + rightCardW, y + headerH);
+
+            gfx.DrawString("TEST CONFIGURATION & ASSEMBLY MATRIX", new XFont("Arial", 8.5, XFontStyle.Bold),
+                new XSolidBrush(TextDarkColor), new XRect(rightX + 10, y, rightCardW - 20, headerH), XStringFormats.CenterLeft);
+
+            // Metadata Row: Machine Model & Test Type
+            double metaY = y + headerH + 6;
+            var metaLabelFont = new XFont("Arial", 8, XFontStyle.Bold);
+            var metaValFont = new XFont("Arial", 8, XFontStyle.Bold);
+
+            string modelDisplay = !string.IsNullOrWhiteSpace(detail.ProductModel) && detail.ProductModel != "N/A"
+                ? detail.ProductModel
+                : (productModel?.Name ?? "N/A");
+            string testTypeDisplay = !string.IsNullOrWhiteSpace(detail.ProductType) && detail.ProductType != "N/A" && detail.ProductType != "-"
+                ? detail.ProductType
+                : "Harness Assembly";
+
+            double col1W = (rightCardW - 20) * 0.48;
+            double col2X = rightX + 10 + col1W;
+            double col2W = (rightCardW - 20) * 0.52;
+
+            double mLabelW = 75;
+            gfx.DrawString("Machine Model:", metaLabelFont, XBrushes.Black, new XRect(rightX + 10, metaY, mLabelW, 14), XStringFormats.CenterLeft);
+            string elModel = Ellipsize(gfx, modelDisplay, metaValFont, col1W - mLabelW - 4);
+            gfx.DrawString(elModel, metaValFont, new XSolidBrush(XColor.FromArgb(15, 23, 42)), new XRect(rightX + 10 + mLabelW, metaY, col1W - mLabelW, 14), XStringFormats.CenterLeft);
+
+            double tLabelW = 55;
+            gfx.DrawString("Test Type:", metaLabelFont, XBrushes.Black, new XRect(col2X, metaY, tLabelW, 14), XStringFormats.CenterLeft);
+            string elType = Ellipsize(gfx, testTypeDisplay, metaValFont, col2W - tLabelW - 4);
+            gfx.DrawString(elType, metaValFont, new XSolidBrush(XColor.FromArgb(15, 23, 42)), new XRect(col2X + tLabelW, metaY, col2W - tLabelW, 14), XStringFormats.CenterLeft);
+
+            // Separator line under metadata
+            double divY = metaY + 18;
+            gfx.DrawLine(new XPen(XColor.FromArgb(226, 232, 240), 1), rightX + 8, divY, rightX + rightCardW - 8, divY);
+
+            // Harness List
+            double rowStartY = divY + 6;
+            double rowH = 20;
+
+            if (harnesses.Count == 0)
+            {
+                gfx.DrawString("No harness assemblies configured.", new XFont("Arial", 8, XFontStyle.Italic),
+                    new XSolidBrush(TextMutedColor), new XRect(rightX + 10, rowStartY + 10, rightCardW - 20, 16), XStringFormats.CenterLeft);
+            }
+            else
+            {
+                int maxMatrixRows = Math.Min(harnesses.Count, 5);
+                for (int i = 0; i < maxMatrixRows; i++)
+                {
+                    var h = harnesses[i];
+                    var hColor = HarnessPalette[i % HarnessPalette.Length];
+                    double curRowY = rowStartY + i * rowH;
+
+                    // Color badge
+                    DrawRoundedBox(gfx, null, new XSolidBrush(hColor), rightX + 10, curRowY + 4, 12, 10, 2);
+
+                    // Part Number
+                    string pnText = string.IsNullOrWhiteSpace(h.PartNumber) ? h.Name : $"P/N: {h.PartNumber}";
+                    gfx.DrawString(pnText, new XFont("Arial", 8.5, XFontStyle.Bold), new XSolidBrush(TextDarkColor),
+                        new XRect(rightX + 28, curRowY, 140, rowH), XStringFormats.CenterLeft);
+
+                    // Connector count
+                    int connCount = h.Connectors?.Count ?? 0;
+                    string connText = $"{connCount} Connectors";
+                    gfx.DrawString(connText, new XFont("Arial", 8, XFontStyle.Regular), new XSolidBrush(TextDarkColor),
+                        new XRect(rightX + rightCardW - 100, curRowY, 90, rowH), XStringFormats.CenterRight);
+                }
+
+                if (harnesses.Count > 5)
+                {
+                    gfx.DrawString($"+ {harnesses.Count - 5} more harnesses...", new XFont("Arial", 7.5, XFontStyle.Italic),
+                        new XSolidBrush(TextMutedColor), new XRect(rightX + 28, rowStartY + 5 * rowH, 140, 14), XStringFormats.CenterLeft);
+                }
+            }
+
+            // Separator line before Scope footer
+            double footerDivY = y + cardH - 24;
+            gfx.DrawLine(new XPen(XColor.FromArgb(226, 232, 240), 1), rightX + 8, footerDivY, rightX + rightCardW - 8, footerDivY);
+
+            // Scope footer
+            string scopeText = $"Scope: {harnesses.Count} Harnesses Tested";
+            gfx.DrawString(scopeText, new XFont("Arial", 8, XFontStyle.Bold), new XSolidBrush(TextDarkColor),
+                new XRect(rightX + 10, footerDivY + 2, rightCardW - 20, 20), XStringFormats.CenterLeft);
+
+            return y + cardH;
+        }
+
+        private static void DrawSection2HarnessSpecifications(
+            XGraphics gfx,
+            List<HarnessAssembly> chunkHarnesses,
+            int harnessOffset,
+            double usableWidth,
+            double y,
+            double bottom,
+            bool isContinuation)
+        {
+            var bannerFont = new XFont("Arial", 9.5, XFontStyle.Bold);
+            var bannerPen = new XPen(BorderColor, 1);
+            var bannerBrush = new XSolidBrush(BannerBgColor);
+
+            double bannerH = 22;
+            string title = isContinuation
+                ? "2.  HARNESS ASSEMBLIES & CONNECTOR SPECIFICATION (CONT.)"
+                : "2.  HARNESS ASSEMBLIES & CONNECTOR SPECIFICATION";
+
+            DrawRoundedBox(gfx, bannerPen, bannerBrush, Margin, y, usableWidth, bannerH, 4);
+            gfx.DrawString(title, bannerFont, new XSolidBrush(TextDarkColor),
+                new XRect(Margin + 10, y, usableWidth - 20, bannerH), XStringFormats.CenterLeft);
+
+            y += bannerH + 8;
+            double cardH = Math.Max(180, bottom - y);
+
+            if (chunkHarnesses.Count == 0)
+            {
+                var cardPen = new XPen(CardBorderColor, 1);
+                DrawRoundedBox(gfx, cardPen, XBrushes.White, Margin, y, usableWidth, cardH, 4);
+
+                gfx.DrawString("No harness assembly specification data configured in the product database.",
+                    new XFont("Arial", 9, XFontStyle.Italic), new XSolidBrush(TextMutedColor),
+                    new XRect(Margin + 20, y, usableWidth - 40, cardH), XStringFormats.Center);
+                return;
+            }
+
+            int count = chunkHarnesses.Count;
+            double cardGap;
+            double cardW;
+            double startX;
+
+            if (count == 3)
+            {
+                cardGap = 10;
+                cardW = (usableWidth - (2 * cardGap)) / 3.0;
+                startX = Margin;
+            }
+            else if (count == 2)
+            {
+                cardGap = 12;
+                cardW = (usableWidth - cardGap) / 2.0;
+                startX = Margin;
+            }
+            else
+            {
+                cardGap = 0;
+                cardW = Math.Min(320, usableWidth);
+                startX = Margin + (usableWidth - cardW) / 2.0;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                var harness = chunkHarnesses[i];
+                int globalIndex = harnessOffset + i;
+                var hColor = HarnessPalette[globalIndex % HarnessPalette.Length];
+                double cx = startX + i * (cardW + cardGap);
+
+                DrawHarnessCard(gfx, harness, hColor, cx, y, cardW, cardH);
+            }
+        }
+
+        private static void DrawHarnessCard(
+            XGraphics gfx,
+            HarnessAssembly harness,
+            XColor hColor,
+            double x,
+            double y,
+            double width,
+            double height)
+        {
+            var cardPen = new XPen(CardBorderColor, 1);
+            DrawRoundedBox(gfx, cardPen, XBrushes.White, x, y, width, height, 4);
+
+            // 1. Header (P/N: ...)
+            double headerH = 26;
+            // Left colored vertical accent strip
+            DrawRoundedBox(gfx, null, new XSolidBrush(hColor), x + 6, y + 5, 3.5, 16, 1);
+
+            string pnText = string.IsNullOrWhiteSpace(harness.PartNumber) ? harness.Name : $"P/N: {harness.PartNumber}";
+            gfx.DrawString(pnText, new XFont("Arial", 9, XFontStyle.Bold), new XSolidBrush(TextDarkColor),
+                new XRect(x + 14, y + 4, width - 18, 18), XStringFormats.CenterLeft);
+
+            // 2. Image Container
+            double inset = 6;
+            double imgBoxX = x + inset;
+            double imgBoxW = width - inset * 2;
+            double imgBoxY = y + headerH;
+            double imgBoxH = height * 0.52;
+
+            gfx.DrawRectangle(new XPen(InnerBoxBorderColor, 1), imgBoxX, imgBoxY, imgBoxW, imgBoxH);
+
+            string? harnessImg = GetPreferredImagePath(harness.ImagePath, harness.IncludedForReport);
+            DrawImageFitted(gfx, harnessImg, imgBoxX + 4, imgBoxY + 4, imgBoxW - 8, imgBoxH - 8, "No Harness Image");
+
+            // 3. Sub-banner: TESTED CONNECTORS (N)
+            double subH = 18;
+            double subY = imgBoxY + imgBoxH + 6;
+
+            DrawRoundedBox(gfx, new XPen(BorderColor, 0.8), new XSolidBrush(SubBannerBgColor), imgBoxX, subY, imgBoxW, subH, 3);
+            int connCount = harness.Connectors?.Count ?? 0;
+            gfx.DrawString($"TESTED CONNECTORS ({connCount})", new XFont("Arial", 7.5, XFontStyle.Bold),
+                new XSolidBrush(TextDarkColor), new XRect(imgBoxX + 6, subY, imgBoxW - 12, subH), XStringFormats.CenterLeft);
+
+            // 4. Connector Pills Grid
+            double pillsStartY = subY + subH + 6;
+            double pillsAreaH = height - (pillsStartY - y) - 6;
+
+            var connectors = harness.Connectors ?? new List<Connector>();
+            if (connectors.Count == 0)
+            {
+                gfx.DrawString("No connectors attached", new XFont("Arial", 7.5, XFontStyle.Italic),
+                    new XSolidBrush(TextMutedColor), new XRect(imgBoxX, pillsStartY + 4, imgBoxW, 16), XStringFormats.Center);
+                return;
+            }
+
+            int colCount = 2;
+            double pillGapX = 4;
+            double pillGapY = 4;
+            double pillW = (imgBoxW - pillGapX) / 2.0;
+            double pillH = 18;
+
+            int maxRows = Math.Max(1, (int)(pillsAreaH / (pillH + pillGapY)));
+            int maxPills = maxRows * colCount;
+
+            for (int idx = 0; idx < connectors.Count && idx < maxPills; idx++)
+            {
+                int col = idx % colCount;
+                int row = idx / colCount;
+                double px = imgBoxX + col * (pillW + pillGapX);
+                double py = pillsStartY + row * (pillH + pillGapY);
+
+                if (idx == maxPills - 1 && connectors.Count > maxPills)
+                {
+                    DrawRoundedBox(gfx, new XPen(InnerBoxBorderColor, 0.8), new XSolidBrush(SubBannerBgColor), px, py, pillW, pillH, 3);
+                    gfx.DrawString($"+{connectors.Count - idx} more", new XFont("Arial", 7, XFontStyle.Italic),
+                        new XSolidBrush(TextMutedColor), new XRect(px, py, pillW, pillH), XStringFormats.Center);
+                    break;
+                }
+
+                var conn = connectors[idx];
+                string label = !string.IsNullOrWhiteSpace(conn.Name) && !string.IsNullOrWhiteSpace(conn.PartNumber)
+                    ? $"{conn.Name}: {conn.PartNumber}"
+                    : (!string.IsNullOrWhiteSpace(conn.Name) ? conn.Name : conn.PartNumber);
+
+                // Pill container
+                DrawRoundedBox(gfx, new XPen(BorderColor, 0.8), XBrushes.White, px, py, pillW, pillH, 3);
+
+                // Left accent strip in harness color
+                DrawRoundedBox(gfx, null, new XSolidBrush(hColor), px + 1.2, py + 2, 2.5, pillH - 4, 1);
+
+                // Connector name & part number (ellipsized if necessary)
+                var pillFont = new XFont("Arial", 6.8, XFontStyle.Bold);
+                string displayLabel = Ellipsize(gfx, label, pillFont, pillW - 7);
+                gfx.DrawString(displayLabel, pillFont, new XSolidBrush(TextDarkColor),
+                    new XRect(px + 5.5, py, pillW - 7, pillH), XStringFormats.CenterLeft);
+            }
+        }
+
+        private static void DrawSection3ConnectorSpecifications(
+            XGraphics gfx,
+            List<ConnectorCardItem> chunkConnectors,
+            double usableWidth,
+            double y,
+            double bottom,
+            bool isContinuation)
+        {
+            var bannerFont = new XFont("Arial", 9.5, XFontStyle.Bold);
+            var bannerPen = new XPen(BorderColor, 1);
+            var bannerBrush = new XSolidBrush(BannerBgColor);
+
+            double bannerH = 22;
+            string title = isContinuation
+                ? "3.  CONNECTOR SPECIFICATIONS & PINOUTS (CONT.)"
+                : "3.  CONNECTOR SPECIFICATIONS & PINOUTS";
+
+            DrawRoundedBox(gfx, bannerPen, bannerBrush, Margin, y, usableWidth, bannerH, 4);
+            gfx.DrawString(title, bannerFont, new XSolidBrush(TextDarkColor),
+                new XRect(Margin + 10, y, usableWidth - 20, bannerH), XStringFormats.CenterLeft);
+
+            y += bannerH + 8;
+            double availableH = bottom - y;
+
+            int count = chunkConnectors.Count;
+            if (count == 0) return;
+
+            int colCount;
+            int rowCount;
+            double gapX = 10;
+            double gapY = 10;
+
+            if (count <= 2)
+            {
+                colCount = 2;
+                rowCount = 1;
+            }
+            else if (count == 3)
+            {
+                colCount = 3;
+                rowCount = 1;
+            }
+            else
+            {
+                colCount = 3;
+                rowCount = 2;
+            }
+
+            double cardW = (usableWidth - (colCount - 1) * gapX) / colCount;
+            double cardH = rowCount == 1
+                ? Math.Min(320, availableH)
+                : Math.Min(320, (availableH - gapY) / 2.0);
+
+            for (int i = 0; i < count; i++)
+            {
+                int col = i % colCount;
+                int row = i / colCount;
+                double cx = Margin + col * (cardW + gapX);
+                double cy = y + row * (cardH + gapY);
+
+                DrawConnectorCard(gfx, chunkConnectors[i], cx, cy, cardW, cardH);
+            }
+        }
+
+        private static void DrawConnectorCard(
+            XGraphics gfx,
+            ConnectorCardItem item,
+            double x,
+            double y,
+            double width,
+            double height)
+        {
+            var cardPen = new XPen(CardBorderColor, 1);
+            DrawRoundedBox(gfx, cardPen, XBrushes.White, x, y, width, height, 4);
+
+            var conn = item.Connector;
+
+            // 1. Header (Connector Name & Part Number)
+            double headerH = 26;
+            // Left accent vertical strip with parent harness color
+            DrawRoundedBox(gfx, null, new XSolidBrush(item.AccentColor), x + 6, y + 4, 3.5, 18, 1);
+
+            string connName = !string.IsNullOrWhiteSpace(conn.Name) ? conn.Name : "Connector";
+            string pnText = !string.IsNullOrWhiteSpace(conn.PartNumber) ? $"P/N: {conn.PartNumber}" : "";
+
+            gfx.DrawString(connName, new XFont("Arial", 8.5, XFontStyle.Bold), new XSolidBrush(TextDarkColor),
+                new XRect(x + 14, y + 3, width - 20, 12), XStringFormats.CenterLeft);
+
+            if (!string.IsNullOrEmpty(pnText))
+            {
+                gfx.DrawString(pnText, new XFont("Arial", 7.5, XFontStyle.Bold), new XSolidBrush(TextMutedColor),
+                    new XRect(x + 14, y + 14, width - 20, 11), XStringFormats.CenterLeft);
+            }
+
+            // 2. Image Container
+            double inset = 6;
+            double imgBoxX = x + inset;
+            double imgBoxW = width - inset * 2;
+            double imgBoxY = y + headerH + 2;
+            double imgBoxH = height * 0.54;
+
+            gfx.DrawRectangle(new XPen(InnerBoxBorderColor, 1), imgBoxX, imgBoxY, imgBoxW, imgBoxH);
+            DrawImageFitted(gfx, item.ResolvedImagePath, imgBoxX + 4, imgBoxY + 4, imgBoxW - 8, imgBoxH - 8, "No Connector Image");
+
+            // 3. Specification Details Block
+            double specY = imgBoxY + imgBoxH + 6;
+            double specH = height - (specY - y) - 6;
+
+            DrawRoundedBox(gfx, new XPen(BorderColor, 0.8), new XSolidBrush(SubBannerBgColor), imgBoxX, specY, imgBoxW, specH, 3);
+
+            // Spec Rows inside the details block
+            double curY = specY + 4;
+            var labelFont = new XFont("Arial", 7.5, XFontStyle.Regular);
+            var valFont = new XFont("Arial", 7.5, XFontStyle.Bold);
+            var labelBrush = new XSolidBrush(TextMutedColor);
+            var valBrush = new XSolidBrush(TextDarkColor);
+
+            // Row 1: Parent Harness tag with color dot
+            DrawRoundedBox(gfx, null, new XSolidBrush(item.AccentColor), imgBoxX + 6, curY + 3, 5, 5, 2.5);
+            string harnessLabel = item.ParentHarness != null
+                ? (string.IsNullOrWhiteSpace(item.ParentHarness.PartNumber) ? item.ParentHarness.Name : item.ParentHarness.PartNumber)
+                : "Harness";
+            string hText = Ellipsize(gfx, $"Harness: {harnessLabel}", valFont, imgBoxW - 20);
+            gfx.DrawString(hText, valFont, valBrush, new XRect(imgBoxX + 15, curY, imgBoxW - 20, 12), XStringFormats.CenterLeft);
+
+            curY += 14;
+            gfx.DrawLine(new XPen(InnerBoxBorderColor, 0.8), imgBoxX + 4, curY, imgBoxX + imgBoxW - 4, curY);
+            curY += 3;
+
+            // Row 2: Type
+            string typeVal = !string.IsNullOrWhiteSpace(conn.Type) ? conn.Type : "N/A";
+            gfx.DrawString("Type:", labelFont, labelBrush, new XRect(imgBoxX + 6, curY, 40, 12), XStringFormats.CenterLeft);
+            gfx.DrawString(typeVal, valFont, valBrush, new XRect(imgBoxX + 46, curY, imgBoxW - 50, 12), XStringFormats.CenterLeft);
+
+            curY += 13;
+
+            // Row 3: Total Pin
+            string pinVal = conn.TotalPin > 0 ? $"{conn.TotalPin} Pins" : "N/A";
+            gfx.DrawString("Pins:", labelFont, labelBrush, new XRect(imgBoxX + 6, curY, 40, 12), XStringFormats.CenterLeft);
+            gfx.DrawString(pinVal, valFont, valBrush, new XRect(imgBoxX + 46, curY, imgBoxW - 50, 12), XStringFormats.CenterLeft);
+
+            curY += 13;
+
+            // Row 4: Description (if fits)
+            if (!string.IsNullOrWhiteSpace(conn.Description) && curY + 12 < specY + specH)
+            {
+                string descEl = Ellipsize(gfx, conn.Description, new XFont("Arial", 7, XFontStyle.Italic), imgBoxW - 12);
+                gfx.DrawString(descEl, new XFont("Arial", 7, XFontStyle.Italic), labelBrush,
+                    new XRect(imgBoxX + 6, curY, imgBoxW - 12, 12), XStringFormats.CenterLeft);
+            }
+        }
+
+        private static ProductModel? FindProductModelForReport(string? modelName, string? partNumber)
+        {
+            var all = ProductModelService.GetAllProductModels();
+            if (all == null || all.Count == 0) return null;
+
+            if (!string.IsNullOrWhiteSpace(modelName) && modelName != "N/A" && modelName != "-")
+            {
+                string trimmed = modelName.Trim();
+                var found = all.FirstOrDefault(p => string.Equals(p.Name, trimmed, StringComparison.OrdinalIgnoreCase));
+                if (found != null) return found;
+
+                found = all.FirstOrDefault(p => string.Equals(p.PartNumber, trimmed, StringComparison.OrdinalIgnoreCase));
+                if (found != null) return found;
+
+                found = all.FirstOrDefault(p => !string.IsNullOrEmpty(p.Name) &&
+                    (trimmed.Contains(p.Name, StringComparison.OrdinalIgnoreCase) || p.Name.Contains(trimmed, StringComparison.OrdinalIgnoreCase)));
+                if (found != null) return found;
+            }
+
+            if (!string.IsNullOrWhiteSpace(partNumber) && partNumber != "N/A" && partNumber != "-")
+            {
+                string trimmed = partNumber.Trim();
+                var found = all.FirstOrDefault(p => string.Equals(p.PartNumber, trimmed, StringComparison.OrdinalIgnoreCase));
+                if (found != null) return found;
+            }
+
+            return null;
+        }
+
+        private static string? GetPreferredImagePath(List<string>? imagePaths, List<bool>? includedForReport)
+        {
+            if (imagePaths == null || imagePaths.Count == 0 || includedForReport == null || includedForReport.Count == 0)
+                return null;
+
+            for (int i = 0; i < imagePaths.Count && i < includedForReport.Count; i++)
+            {
+                if (includedForReport[i])
+                {
+                    string? resolved = ImageStorageHelper.ResolveImagePath(imagePaths[i]);
+                    if (resolved != null && File.Exists(resolved))
+                        return resolved;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool IsIncludedInReport(List<string>? imagePaths, List<bool>? includedForReport)
+        {
+            return GetPreferredImagePath(imagePaths, includedForReport) != null;
+        }
+
+        private sealed class ConnectorCardItem
+        {
+            public Connector Connector { get; set; } = null!;
+            public HarnessAssembly? ParentHarness { get; set; }
+            public XColor AccentColor { get; set; }
+            public string ResolvedImagePath { get; set; } = string.Empty;
+        }
+
+        private static void DrawRoundedBox(XGraphics gfx, XPen? pen, XBrush? brush, double x, double y, double width, double height, double radius)
+        {
+            double d = radius * 2;
+            if (d > width) d = width;
+            if (d > height) d = height;
+
+            if (pen != null && brush != null)
+            {
+                gfx.DrawRoundedRectangle(pen, brush, x, y, width, height, d, d);
+            }
+            else if (pen != null)
+            {
+                gfx.DrawRoundedRectangle(pen, x, y, width, height, d, d);
+            }
+            else if (brush != null)
+            {
+                gfx.DrawRoundedRectangle(brush, x, y, width, height, d, d);
+            }
+        }
+
+        private static void DrawImageFitted(XGraphics gfx, string? imagePath, double x, double y, double width, double height, string placeholderText = "No Image Available")
+        {
+            if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
+            {
+                var placeholderBrush = new XSolidBrush(XColor.FromArgb(148, 163, 184));
+                var placeholderFont = new XFont("Arial", 8.5, XFontStyle.Italic);
+                gfx.DrawString(placeholderText, placeholderFont, placeholderBrush,
+                    new XRect(x, y, width, height), XStringFormats.Center);
+                return;
+            }
+
+            try
+            {
+                using var img = XImage.FromFile(imagePath);
+                double imgW = img.PointWidth > 0 ? img.PointWidth : img.PixelWidth;
+                double imgH = img.PointHeight > 0 ? img.PointHeight : img.PixelHeight;
+
+                if (imgW <= 0 || imgH <= 0) return;
+
+                double scale = Math.Min(width / imgW, height / imgH);
+                double drawW = imgW * scale;
+                double drawH = imgH * scale;
+                double drawX = x + (width - drawW) / 2.0;
+                double drawY = y + (height - drawH) / 2.0;
+
+                gfx.DrawImage(img, drawX, drawY, drawW, drawH);
+            }
+            catch (Exception ex)
+            {
+                FileLogService.Warn("ReportPdfExportService.DrawImageFitted",
+                    $"Could not draw image '{imagePath}': {ex.Message}");
+                var placeholderBrush = new XSolidBrush(XColor.FromArgb(239, 68, 68));
+                var placeholderFont = new XFont("Arial", 8, XFontStyle.Italic);
+                gfx.DrawString("Image Load Error", placeholderFont, placeholderBrush,
+                    new XRect(x, y, width, height), XStringFormats.Center);
+            }
         }
 
         // Page 2 onwards: the Test Summary panel from the Test Execution screen, line for line.
@@ -252,9 +966,15 @@ namespace AssemblyLineTester.Services
             double infoTableWidth = page.Width - Margin * 2;
             double infoRowH = 20;
 
+            string SafeValue(string? v) =>
+                string.IsNullOrWhiteSpace(v) || v == "-" ? "N/A" : v;
+
             var infoRows = new List<(string Label, string Value)>
             {
                 ("Product Model", detail.ProductModel),
+                ("Product Type", SafeValue(detail.ProductType)),
+                ("Area", SafeValue(detail.Area)),
+                ("ECN No.", SafeValue(detail.ECNNumber)),
                 ("Part Number", detail.PartNumber),
                 ("Serial Number", detail.SerialNumber),
                 ("Operator", detail.Operator),
@@ -402,8 +1122,8 @@ namespace AssemblyLineTester.Services
             {
                 columns = new List<string>
                 {
-                    "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "To",
-                    "Net To Label", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
+                    "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "Net From Connector", "To",
+                    "Net To Label", "Net To Connector", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
                     "Tolerance", "Measurement"
                 };
             }
@@ -412,6 +1132,7 @@ namespace AssemblyLineTester.Services
             XGraphics g = XGraphics.FromPdfPage(page);
             double y = DrawDetailPageTop(g, page, detail, logoPath, fontBold, rowH, columns);
 
+            int rowNum = 1;
             bool alt = false;
             foreach (var d in detail.Details)
             {
@@ -424,7 +1145,7 @@ namespace AssemblyLineTester.Services
                     y = DrawDetailPageTop(g, page, detail, logoPath, fontBold, rowH, columns);
                 }
 
-                y = DrawDetailRow(g, page, d, font, fontBold, y, rowH, ref alt, columns);
+                y = DrawDetailRow(g, page, d, rowNum++, font, fontBold, y, rowH, ref alt, columns);
             }
 
             g.Dispose();
@@ -447,7 +1168,7 @@ namespace AssemblyLineTester.Services
             y += 18;
 
             double[] cols = DetailColumnWidths(page, columns);
-            string[] headers = columns.Concat(new[] { "Result" }).ToArray();
+            string[] headers = new[] { "No" }.Concat(columns).Concat(new[] { "Result" }).ToArray();
             var hdrBg = new XSolidBrush(XColor.FromArgb(28, 230, 230, 230));
 
             double headerH = 22;
@@ -456,7 +1177,14 @@ namespace AssemblyLineTester.Services
             {
                 g.DrawRectangle(hdrBg, x, y, cols[i], headerH);
                 g.DrawRectangle(XPens.LightGray, x, y, cols[i], headerH);
-                DrawHeaderCell(g, headers[i], fontBold, new XRect(x + 2, y, cols[i] - 4, headerH));
+                if (i == 0)
+                {
+                    g.DrawString(headers[i], fontBold, XBrushes.Black, new XRect(x, y, cols[i], headerH), XStringFormats.Center);
+                }
+                else
+                {
+                    DrawHeaderCell(g, headers[i], fontBold, new XRect(x + 2, y, cols[i] - 4, headerH));
+                }
                 x += cols[i];
             }
 
@@ -490,45 +1218,53 @@ namespace AssemblyLineTester.Services
         // Relative widths per configurable column; anything unlisted gets an even share.
         private static readonly Dictionary<string, double> DetailColumnWeights = new(StringComparer.OrdinalIgnoreCase)
         {
-            ["Net-ID"] = 0.7,
-            ["Net ID"] = 0.7,
-            ["NetId"] = 0.7,
-            ["Harness Group"] = 0.8,
-            ["Harness-Group"] = 0.8,
-            ["From"] = 0.5,
-            ["Net From Label"] = 1.85,
-            ["Net-From Label"] = 1.85,
-            ["NetFromLabel"] = 1.85,
-            ["To"] = 0.5,
-            ["Net To Label"] = 1.85,
-            ["Net-To Label"] = 1.85,
-            ["NetToLabel"] = 1.85,
-            ["Test Type"] = 0.9,
-            ["Test-Type"] = 0.9,
-            ["Color"] = 0.55,
-            ["Gauge"] = 0.6,
-            ["Lower Limit"] = 0.7,
-            ["Upper Limit"] = 0.7,
-            ["Expected Value"] = 0.7,
-            ["Tolerance"] = 0.7,
-            ["Measurement"] = 1.45
+            ["No"] = 0.35,
+            ["#"] = 0.35,
+            ["Net-ID"] = 0.65,
+            ["Net ID"] = 0.65,
+            ["NetId"] = 0.65,
+            ["Harness Group"] = 0.75,
+            ["Harness-Group"] = 0.75,
+            ["From"] = 0.45,
+            ["Net From Label"] = 1.3,
+            ["Net-From Label"] = 1.3,
+            ["NetFromLabel"] = 1.3,
+            ["Net From Connector"] = 1.05,
+            ["Net-From Connector"] = 1.05,
+            ["NetFromConnector"] = 1.05,
+            ["To"] = 0.45,
+            ["Net To Label"] = 1.3,
+            ["Net-To Label"] = 1.3,
+            ["NetToLabel"] = 1.3,
+            ["Net To Connector"] = 1.05,
+            ["Net-To Connector"] = 1.05,
+            ["NetToConnector"] = 1.05,
+            ["Test Type"] = 0.85,
+            ["Test-Type"] = 0.85,
+            ["Color"] = 0.5,
+            ["Gauge"] = 0.55,
+            ["Lower Limit"] = 0.65,
+            ["Upper Limit"] = 0.65,
+            ["Expected Value"] = 0.65,
+            ["Tolerance"] = 0.65,
+            ["Measurement"] = 1.35
         };
 
-        // The trailing entry is the Result column, which is always drawn.
+        // The leading entry is "No", and trailing entry is the Result column, which are always drawn.
         private static double[] DetailColumnWidths(PdfPage page, List<string> columns)
         {
             double w = page.Width - Margin * 2;
 
-            var weights = columns
-                .Select(c => DetailColumnWeights.TryGetValue(c, out double weight) ? weight : 1.0)
-                .ToList();
-            weights.Add(0.7);
+            var weights = new List<double> { 0.35 };
+            weights.AddRange(columns
+                .Select(c => DetailColumnWeights.TryGetValue(c, out double weight) ? weight : 1.0));
+            weights.Add(0.65);
 
             double total = weights.Sum();
             return weights.Select(weight => w * weight / total).ToArray();
         }
 
-        private static double DrawDetailRow(XGraphics g, PdfPage page, TestDetailDto d, XFont font, XFont fontBold, double y, double rowH, ref bool alt, List<string> columns)
+        private static double DrawDetailRow(XGraphics g, PdfPage page, TestDetailDto d, int rowNum, XFont font, XFont fontBold, double y, double rowH, ref bool alt, List<string> columns)
         {
             double[] cols = DetailColumnWidths(page, columns);
 
@@ -561,15 +1297,18 @@ namespace AssemblyLineTester.Services
                 x += cols[i];
             }
 
+            Cell(0, rowNum.ToString(), XStringFormats.Center);
+
             for (int i = 0; i < columns.Count; i++)
             {
-                var align = columns[i] is "Harness Group" or "Harness-Group" or "From" or "To" or "Test Type" or "Test-Type" or "Net From Label" or "Net-From Label" or "Net To Label" or "Net-To Label" or "Color" or "Gauge"
+                var align = columns[i] is "Harness Group" or "Harness-Group" or "From" or "To" or "Test Type" or "Test-Type" or "Net From Label" or "Net-From Label" or "Net To Label" or "Net-To Label" or "Net From Connector" or "Net-From Connector" or "Net To Connector" or "Net-To Connector" or "Color" or "Gauge"
                     ? XStringFormats.CenterLeft
                     : XStringFormats.Center;
-                Cell(i, d.Column(columns[i]), align);
+                Cell(i + 1, d.Column(columns[i]), align);
             }
 
-            var resultRect = new XRect(x, y, cols[columns.Count], rowH);
+            int resultColIdx = columns.Count + 1;
+            var resultRect = new XRect(x, y, cols[resultColIdx], rowH);
             XColor resultFill;
             XBrush resultText;
             if (isPass)
@@ -589,7 +1328,7 @@ namespace AssemblyLineTester.Services
             }
 
             g.DrawRectangle(new XSolidBrush(resultFill), resultRect);
-            g.DrawRectangle(XPens.LightGray, x, y, cols[columns.Count], rowH);
+            g.DrawRectangle(XPens.LightGray, x, y, cols[resultColIdx], rowH);
             g.DrawString(d.Result, fontBold, resultText, resultRect, XStringFormats.Center);
 
             return y + rowH;

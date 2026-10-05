@@ -1,4 +1,4 @@
-﻿using AssemblyLineTester.Data;
+using AssemblyLineTester.Data;
 using AssemblyLineTester.Models;
 using AssemblyLineTester.Services;
 using AssemblyLineTester.Views.Modals;
@@ -22,22 +22,22 @@ namespace AssemblyLineTester.Views
 
         public LoginForm()
         {
-            var processes = System.Diagnostics.Process.GetProcessesByName("easywire");
-            foreach (var process in processes)
-            {
-                try
-                {
-                    process.Kill();
-                    process.WaitForExit(3000);
-                    logService.Log(LogSeverity.Info, "Instrument", "Cirris Tester API Terminated",
-                        $"Cirris Tester API Already Running, terminating Cirris Tester API / Easy Wire for App Initialization ", "-");
-                }
-                catch (Exception ex)
-                {
-                    logService.Log(LogSeverity.Info, "Instrument", "Failed Terminating Cirris Tester API",
-                        $"Failed to terminate running Cirris Tester API with error message : {ex.Message}\n Please Terminate Cirris Tester API / Easy Wire manually", "-");
-                }     
-            }
+            //var processes = System.Diagnostics.Process.GetProcessesByName("easywire");
+            //foreach (var process in processes)
+            //{
+            //    try
+            //    {
+            //        process.Kill();
+            //        process.WaitForExit(3000);
+            //        logService.Log(LogSeverity.Info, "Instrument", "Cirris Tester API Terminated",
+            //            $"Cirris Tester API Already Running, terminating Cirris Tester API / Easy Wire for App Initialization ", "-");
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        logService.Log(LogSeverity.Info, "Instrument", "Failed Terminating Cirris Tester API",
+            //            $"Failed to terminate running Cirris Tester API with error message : {ex.Message}\n Please Terminate Cirris Tester API / Easy Wire manually", "-");
+            //    }     
+            //}
 
             _instrument.Connect(); //run the first Connect, it will initiate Cirris Tester API, but will return faise (first initialization)
             
@@ -324,6 +324,7 @@ namespace AssemblyLineTester.Views
                         }
                         else
                         {
+                            InstrumentService.Shutdown();
                             this.Close();
                         }
                     };

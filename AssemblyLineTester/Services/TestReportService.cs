@@ -155,6 +155,8 @@ namespace AssemblyLineTester.Services
                     ToPin = d.ToPin,
                     FromLabel = d.FromLabel,
                     ToLabel = d.ToLabel,
+                    FromConnector = TestDetailDto.ExtractConnector(d.FromLabel, d.FromPin),
+                    ToConnector = TestDetailDto.ExtractConnector(d.ToLabel, d.ToPin),
                     TestType = d.TestTypeName,
                     LowerLimit = d.LowerLimit,
                     UpperLimit = d.UpperLimit,
@@ -406,9 +408,18 @@ namespace AssemblyLineTester.Services
         }
 
         // Last step of running a test, so deliberately not permission-gated.
-        public void ConfirmDraft(int reportId, string serialNumber, string? notes = null, string? errorSummary = null)
+        public void ConfirmDraft(
+            int reportId,
+            string serialNumber,
+            string? ecnNumber = null,
+            string? productType = null,
+            string? revision = null,
+            string? area = null,
+            string? partNumber = null,
+            string? notes = null,
+            string? errorSummary = null)
         {
-            var report = SetSerialNumber(reportId, serialNumber, markConfirmed: true, notes, errorSummary);
+            var report = SetSerialNumber(reportId, serialNumber, markConfirmed: true, ecnNumber, productType, revision, area, partNumber, notes, errorSummary);
 
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Info, "Test Report", "Confirm Report",
@@ -428,13 +439,28 @@ namespace AssemblyLineTester.Services
                 $"Report {report.ReportNumber} serial amended to {report.SerialNumber}.");
         }
 
-        private static TestReport SetSerialNumber(int reportId, string serialNumber, bool markConfirmed, string? notes = null, string? errorSummary = null)
+        private static TestReport SetSerialNumber(
+            int reportId,
+            string serialNumber,
+            bool markConfirmed,
+            string? ecnNumber = null,
+            string? productType = null,
+            string? revision = null,
+            string? area = null,
+            string? partNumber = null,
+            string? notes = null,
+            string? errorSummary = null)
         {
             using var db = new AppDbContext();
             var report = db.TestReports.FirstOrDefault(r => r.ReportId == reportId)
                 ?? throw new InvalidOperationException($"Report {reportId} not found.");
 
             if (!string.IsNullOrWhiteSpace(serialNumber)) report.SerialNumber = serialNumber.Trim();
+            if (!string.IsNullOrWhiteSpace(ecnNumber)) report.ECNNumber = ecnNumber.Trim();
+            if (!string.IsNullOrWhiteSpace(productType)) report.ProductType = productType.Trim();
+            if (!string.IsNullOrWhiteSpace(revision)) report.Revision = revision.Trim();
+            if (!string.IsNullOrWhiteSpace(area)) report.Area = area.Trim();
+            if (!string.IsNullOrWhiteSpace(partNumber)) report.PartNumber = partNumber.Trim();
             if (notes is not null) report.Notes = notes.Trim();
             if (!string.IsNullOrWhiteSpace(errorSummary)) report.ErrorSummary = errorSummary.Trim();
             if (markConfirmed) report.IsDraft = false;

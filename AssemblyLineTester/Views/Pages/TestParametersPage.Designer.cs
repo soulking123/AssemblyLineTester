@@ -42,8 +42,10 @@ namespace AssemblyLineTester.Views.Pages
             colNetId = new DataGridViewTextBoxColumn();
             colFromAddr = new DataGridViewTextBoxColumn();
             colFromLabel = new DataGridViewTextBoxColumn();
+            colFromConnector = new DataGridViewTextBoxColumn();
             colToAddr = new DataGridViewTextBoxColumn();
             colToLabel = new DataGridViewTextBoxColumn();
+            colToConnector = new DataGridViewTextBoxColumn();
             colTestType = new DataGridViewComboBoxColumn();
             colLowerLimit = new DataGridViewTextBoxColumn();
             colUpperLimit = new DataGridViewTextBoxColumn();
@@ -260,7 +262,7 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.CausesValidation = false;
             gridConfig.ColumnHeadersHeight = 45;
             gridConfig.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colHarnessGroup, colColor, colGauge, colNetId, colFromAddr, colFromLabel, colToAddr, colToLabel, colTestType, colLowerLimit, colUpperLimit, colExpectedValue, colTolerance, colUnit });
+            gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colHarnessGroup, colColor, colGauge, colNetId, colFromAddr, colFromLabel, colFromConnector, colToAddr, colToLabel, colToConnector, colTestType, colLowerLimit, colUpperLimit, colExpectedValue, colTolerance, colUnit });
             gridConfig.Dock = DockStyle.Fill;
             gridConfig.EnableHeadersVisualStyles = false;
             gridConfig.Location = new Point(0, 278);
@@ -322,6 +324,13 @@ namespace AssemblyLineTester.Views.Pages
             colFromLabel.MinimumWidth = 95;
             colFromLabel.Name = "colFromLabel";
             // 
+            // colFromConnector
+            // 
+            colFromConnector.FillWeight = 11F;
+            colFromConnector.HeaderText = "Net-From\nConnector";
+            colFromConnector.MinimumWidth = 90;
+            colFromConnector.Name = "colFromConnector";
+            // 
             // colToAddr
             // 
             colToAddr.FillWeight = 5F;
@@ -335,6 +344,13 @@ namespace AssemblyLineTester.Views.Pages
             colToLabel.HeaderText = "Net-To\nLabel";
             colToLabel.MinimumWidth = 95;
             colToLabel.Name = "colToLabel";
+            // 
+            // colToConnector
+            // 
+            colToConnector.FillWeight = 11F;
+            colToConnector.HeaderText = "Net-To\nConnector";
+            colToConnector.MinimumWidth = 90;
+            colToConnector.Name = "colToConnector";
             // 
             // colTestType
             // 
@@ -1090,7 +1106,9 @@ namespace AssemblyLineTester.Views.Pages
         private DataGridViewTextBoxColumn colColor;
         private DataGridViewTextBoxColumn colGauge;
         private DataGridViewTextBoxColumn colFromLabel;
+        private DataGridViewTextBoxColumn colFromConnector;
         private DataGridViewTextBoxColumn colToLabel;
+        private DataGridViewTextBoxColumn colToConnector;
         private DataGridViewComboBoxColumn colTestType;
         private DataGridViewTextBoxColumn colLowerLimit;
         private DataGridViewTextBoxColumn colUpperLimit;

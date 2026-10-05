@@ -857,7 +857,11 @@ namespace AssemblyLineTester.Views
             }
 
             base.OnFormClosed(e);
-            if (!IsLoggingOut) Application.Exit();
+            if (!IsLoggingOut)
+            {
+                InstrumentService.Shutdown();
+                Application.Exit();
+            }
         }
 
 
