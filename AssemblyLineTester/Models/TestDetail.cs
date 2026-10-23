@@ -11,6 +11,7 @@ namespace AssemblyLineTester.Models
         public TestReport Report { get; set; } = null!;
 
         public string NetId { get; set; } = string.Empty;
+        public string ConnectorGroup { get; set; } = string.Empty;
         public string HarnessGroup { get; set; } = string.Empty;
         public string FromPin { get; set; } = string.Empty;
         public string ToPin { get; set; } = string.Empty;

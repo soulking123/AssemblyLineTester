@@ -36,6 +36,7 @@ namespace AssemblyLineTester.Views.Pages
             pnlLeftBox = new Panel();
             gridConfig = new DataGridView();
             colNo = new DataGridViewTextBoxColumn();
+            colConnectorGroup = new DataGridViewTextBoxColumn();
             colHarnessGroup = new DataGridViewTextBoxColumn();
             colColor = new DataGridViewTextBoxColumn();
             colGauge = new DataGridViewTextBoxColumn();
@@ -262,7 +263,7 @@ namespace AssemblyLineTester.Views.Pages
             gridConfig.CausesValidation = false;
             gridConfig.ColumnHeadersHeight = 45;
             gridConfig.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colHarnessGroup, colColor, colGauge, colNetId, colFromAddr, colFromLabel, colFromConnector, colToAddr, colToLabel, colToConnector, colTestType, colLowerLimit, colUpperLimit, colExpectedValue, colTolerance, colUnit });
+            gridConfig.Columns.AddRange(new DataGridViewColumn[] { colNo, colConnectorGroup, colHarnessGroup, colColor, colGauge, colNetId, colFromAddr, colFromLabel, colFromConnector, colToAddr, colToLabel, colToConnector, colTestType, colLowerLimit, colUpperLimit, colExpectedValue, colTolerance, colUnit });
             gridConfig.Dock = DockStyle.Fill;
             gridConfig.EnableHeadersVisualStyles = false;
             gridConfig.Location = new Point(0, 278);
@@ -281,9 +282,16 @@ namespace AssemblyLineTester.Views.Pages
             colNo.MinimumWidth = 44;
             colNo.Name = "colNo";
             colNo.ReadOnly = true;
-            // 
+            //
+            // colConnectorGroup
+            //
+            colConnectorGroup.FillWeight = 16F;
+            colConnectorGroup.HeaderText = "Connector-Group";
+            colConnectorGroup.MinimumWidth = 120;
+            colConnectorGroup.Name = "colConnectorGroup";
+            //
             // colHarnessGroup
-            // 
+            //
             colHarnessGroup.FillWeight = 16F;
             colHarnessGroup.HeaderText = "Harness-Group";
             colHarnessGroup.MinimumWidth = 110;
@@ -1102,6 +1110,7 @@ namespace AssemblyLineTester.Views.Pages
         private Panel pnlLeftBox;
         private DataGridView gridConfig;
         private DataGridViewTextBoxColumn colNetId;
+        private DataGridViewTextBoxColumn colConnectorGroup;
         private DataGridViewTextBoxColumn colHarnessGroup;
         private DataGridViewTextBoxColumn colColor;
         private DataGridViewTextBoxColumn colGauge;

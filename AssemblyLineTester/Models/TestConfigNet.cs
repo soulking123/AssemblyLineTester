@@ -14,6 +14,8 @@ namespace AssemblyLineTester.Models
 
         public int SequenceNo { get; set; }                                 // 1,2,3,4,
 
+        public string ConnectorGroup { get; set; } = string.Empty;
+
         public string HarnessGroup { get; set; } = string.Empty;
 
         public int FromAddress { get; set; }                                // 0,1,2,3,4  

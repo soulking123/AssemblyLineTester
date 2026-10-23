@@ -791,7 +791,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             string[] templateHeaders =
             {
-                "Harness-Group", "Color", "Gauge", "Net-ID", "From", "Net-From Label", "Net-From Connector", "To",
+                "Connector-Group", "Harness-Group", "Color", "Gauge", "Net-ID", "From", "Net-From Label", "Net-From Connector", "To",
                 "Net-To Label", "Net-To Connector", "Test Type", "Lower Limit", "Upper Limit", "Expected Value", "Tolerance"
             };
 
@@ -875,6 +875,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             return header switch
             {
+                "Connector-Group" or "Connector Group" => "660-2031/00",
                 "Harness-Group" or "Harness Group" => "CF-C5",
                 "Color" => "GN",
                 "Gauge" => "18",
@@ -1213,6 +1214,7 @@ namespace AssemblyLineTester.Views.Pages
 
                 int idx = gridConfig.Rows.Add(
                     net.SequenceNo.ToString(),
+                    net.ConnectorGroup,
                     net.HarnessGroup,
                     net.Color,
                     net.Gauge,
@@ -2386,6 +2388,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     SequenceNo = i + 1,
                     NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
+                    ConnectorGroup = row.Cells["colConnectorGroup"].Value?.ToString() ?? "",
                     HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
                     FromAddress = fromAddr,
                     FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",
@@ -3644,6 +3647,7 @@ namespace AssemblyLineTester.Views.Pages
                 {
                     SequenceNo = nets.Count + 1,
                     NetId = row.Cells["colNetId"].Value?.ToString() ?? "",
+                    ConnectorGroup = row.Cells["colConnectorGroup"].Value?.ToString() ?? "",
                     HarnessGroup = row.Cells["colHarnessGroup"].Value?.ToString() ?? "",
                     FromAddress = fromAddr,
                     FromLabel = row.Cells["colFromLabel"].Value?.ToString() ?? "",

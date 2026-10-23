@@ -178,7 +178,6 @@ namespace AssemblyLineTester.Views.Pages
         {
             gridLiveDetails.Columns.Clear();
             _resultColumns = TestSettingService.GetEnabledResultColumns();
-            _harnessPartNumbers = null;
 
             gridLiveDetails.Columns.Add("StepNo", "#");
             foreach (string column in _resultColumns)
@@ -246,6 +245,7 @@ namespace AssemblyLineTester.Views.Pages
                 var dto = new LiveTestDetailRowDto
                 {
                     StepNo = i + 1,
+                    ConnectorGroup = net.ConnectorGroup ?? "",
                     HarnessGroup = net.HarnessGroup ?? "",
                     NetId = net.NetId ?? "",
                     FromPoint = net.FromAddress.ToString(),
@@ -335,6 +335,7 @@ namespace AssemblyLineTester.Views.Pages
                 }
                 if (string.IsNullOrWhiteSpace(row.NetId)) row.NetId = net.NetId;
                 if (string.IsNullOrWhiteSpace(row.HarnessGroup)) row.HarnessGroup = net.HarnessGroup;
+                if (string.IsNullOrWhiteSpace(row.ConnectorGroup)) row.ConnectorGroup = net.ConnectorGroup;
             }
         }
 
@@ -1189,7 +1190,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             "Net-ID" => row.NetId,
             "Harness Group" => row.HarnessGroup,
-            "Connector Group" or "Connector-Group" => HarnessPartNumberFor(row.HarnessGroup),
+            "Connector Group" or "Connector-Group" => row.ConnectorGroup,
             "From" => row.FromPoint,
             "Net From Label" or "Net-From Label" => row.FromLabel,
             "Net From Connector" or "Net-From Connector" => !string.IsNullOrWhiteSpace(row.FromConnector) ? row.FromConnector : TestDetailDto.ExtractConnector(row.FromLabel, row.FromPoint),
@@ -1225,14 +1226,6 @@ namespace AssemblyLineTester.Views.Pages
             return $"{value} {unit}";
         }
 
-        // Harness assembly part numbers keyed by connector name; cleared whenever the grid is rebuilt.
-        private static Dictionary<string, string>? _harnessPartNumbers;
-
-        private static string HarnessPartNumberFor(string? connectorName)
-        {
-            _harnessPartNumbers ??= HarnessService.GetHarnessPartNumbersByConnectorName();
-            return _harnessPartNumbers.TryGetValue(connectorName ?? "", out string? partNumber) ? partNumber : "";
-        }
 
         private static string FormatMeasuredRowValue(LiveTestDetailRowDto row)
         {

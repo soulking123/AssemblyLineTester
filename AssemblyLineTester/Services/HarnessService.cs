@@ -32,27 +32,6 @@ namespace AssemblyLineTester.Services
             return list;
         }
 
-        // Harness assembly part number keyed by the connector name a test row carries as its harness group.
-        public static Dictionary<string, string> GetHarnessPartNumbersByConnectorName()
-        {
-            using var db = new AppDbContext();
-            var harnesses = db.HarnessAssemblies
-                .AsNoTracking()
-                .Include(h => h.Connectors)
-                .ToList();
-
-            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var harness in harnesses)
-            {
-                foreach (var connector in harness.Connectors ?? new List<Connector>())
-                {
-                    if (string.IsNullOrWhiteSpace(connector.Name)) continue;
-                    map[connector.Name] = harness.PartNumber ?? "";
-                }
-            }
-            return map;
-        }
-
         public static HarnessAssembly? GetHarnessById(int id)
         {
             using var db = new AppDbContext();

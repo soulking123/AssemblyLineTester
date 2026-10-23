@@ -1533,6 +1533,10 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("ConfigId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ConnectorGroup")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<double?>("ExpectedValue")
                         .HasColumnType("REAL");
 
@@ -1660,6 +1664,10 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConnectorGroup")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

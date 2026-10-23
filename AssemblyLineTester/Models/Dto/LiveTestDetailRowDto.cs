@@ -43,5 +43,6 @@ namespace AssemblyLineTester.Models.Dto
 
         // Empty for an instrument-driven run, which knows nothing about harness groups.
         public string HarnessGroup { get; set; } = string.Empty;
+        public string ConnectorGroup { get; set; } = string.Empty;
     }
 }
