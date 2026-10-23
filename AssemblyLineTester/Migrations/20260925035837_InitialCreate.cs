@@ -739,7 +739,7 @@ namespace AssemblyLineTester.Migrations
                     { 30, "Add and Edit Test Parameters & Harness Specs", false, "Test Operations", "Action.TestConfig.Edit", 2 },
                     { 31, "Calibrate and Configure Hardware Instruments", false, "Test Operations", "Action.Instruments.Calibrate", 2 },
                     { 32, "Add, Edit, and Manage System User Accounts", false, "System & Logs", "Action.UserManagement.Edit", 2 },
-                    { 33, "Export and Print Test Reports & Analytics", false, "System & Logs", "Action.Reports.Export", 2 },
+                    { 33, "Export and Print Test Reports & Analytics", true, "System & Logs", "Action.Reports.Export", 2 },
                     { 34, "Clear and Purge System Activity Logs", false, "System & Logs", "Action.SystemLog.Clear", 2 },
                     { 35, "Create and Restore Database Backups", false, "System & Logs", "Action.Database.Backup", 2 },
                     { 36, "Amend and Delete Saved Test Reports", false, "System & Logs", "Action.Reports.Edit", 2 },

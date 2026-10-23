@@ -147,7 +147,7 @@ namespace AssemblyLineTester.Services
             if (roleId == 1) return true;
             if (roleId == 2) // Operator
             {
-                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.TestHistory" or "Action.TestExecution.Run";
+                return key is "Page.Dashboard" or "Page.TestExecution" or "Page.TestHistory" or "Action.TestExecution.Run" or "Action.Reports.Export";
             }
             if (roleId == 3) // Engineer
             {

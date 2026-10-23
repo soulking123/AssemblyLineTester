@@ -28,7 +28,7 @@ namespace AssemblyLineTester.Services
         // order is stated here rather than by renumbering rows an operator has already ticked.
         private static readonly string[] ResultColumnOrder =
         {
-            "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "Net From Connector", "To",
+            "Connector Group", "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "Net From Connector", "To",
             "Net To Label", "Net To Connector", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
             "Tolerance", "Measurement"
         };
@@ -36,15 +36,27 @@ namespace AssemblyLineTester.Services
         public static List<TestResultCheck> GetTestResultChecks()
         {
             using var db = new AppDbContext();
-            var checks = db.TestResultChecks.AsNoTracking().ToList();
+            var checks = db.TestResultChecks.ToList();
 
-            int virtualId = 1000;
-            foreach (var col in ResultColumnOrder)
+            // A column named here but absent from the table gets a real row, not a stand-in: a made-up
+            // id matches nothing on save, so its tick would silently never persist.
+            var missing = ResultColumnOrder
+                .Where(col => !checks.Any(c => string.Equals(c.TestResultName, col, StringComparison.OrdinalIgnoreCase)))
+                .Select(col => new TestResultCheck { TestResultName = col, IsChecked = true })
+                .ToList();
+
+            if (missing.Count > 0)
             {
-                if (!checks.Any(c => string.Equals(c.TestResultName, col, StringComparison.OrdinalIgnoreCase)))
+                try
                 {
-                    checks.Add(new TestResultCheck { Id = virtualId++, TestResultName = col, IsChecked = true });
+                    db.TestResultChecks.AddRange(missing);
+                    db.SaveChanges();
                 }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"TestSettingService.GetTestResultChecks could not add {missing.Count} column rows: {ex}");
+                }
+                checks.AddRange(missing);
             }
 
             // A column this list has never heard of sorts to the end instead of disappearing.

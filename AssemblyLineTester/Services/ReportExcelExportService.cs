@@ -20,6 +20,8 @@ namespace AssemblyLineTester.Services
         {
             if (detail is null) throw new ArgumentNullException(nameof(detail));
 
+            var details = detail.Details ?? new List<TestDetailDto>();
+
             using var wb = new XLWorkbook();
 
             var ws = wb.Worksheets.Add("General Information");
@@ -114,7 +116,7 @@ namespace AssemblyLineTester.Services
 
             // Sheet 2: the Error/Test Summary panel from the Test Execution screen, line for line.
             bool isReportPass = string.Equals(detail.OverallResult, "PASS", StringComparison.OrdinalIgnoreCase) &&
-                                (detail.Details == null || !detail.Details.Any(d => !string.IsNullOrWhiteSpace(d.ErrorDetail))) &&
+                                !details.Any(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)) &&
                                 (string.IsNullOrWhiteSpace(detail.ErrorSummary) || !detail.ErrorSummary.Contains("FAIL", StringComparison.OrdinalIgnoreCase));
 
             var wsSummary = wb.Worksheets.Add(isReportPass ? "Test Summary" : "Error Summary");
@@ -187,7 +189,7 @@ namespace AssemblyLineTester.Services
                 wsSummary.Cell(sr, 1).Style.Font.Bold = true;
                 sr += 2;
 
-                var failedRows = detail.Details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
+                var failedRows = details.Where(d => !string.IsNullOrWhiteSpace(d.ErrorDetail)).ToList();
                 if (failedRows.Count == 0)
                 {
                     wsSummary.Cell(sr, 1).Value = "No errors were recorded for this test run.";
@@ -223,22 +225,15 @@ namespace AssemblyLineTester.Services
             rr++;
 
             int idx = 1;
-            foreach (var d in detail.Details)
+            foreach (var d in details)
             {
                 int resultCol = dHdr.Length;
                 ws2.Cell(rr, 1).Value = idx;
 
                 for (int c = 0; c < columns.Count; c++)
                 {
-                    var cell = ws2.Cell(rr, c + 2);
-                    // Limits stay numeric so the columns sort numerically; dual values (diode) or non-numeric stay formatted text.
-                    switch (columns[c])
-                    {
-                        case "Lower Limit" when d.LowerLimit.HasValue && !d.LowerLimit2.HasValue: cell.Value = d.LowerLimit.Value; break;
-                        case "Upper Limit" when d.UpperLimit.HasValue && !d.UpperLimit2.HasValue: cell.Value = d.UpperLimit.Value; break;
-                        case "Expected Value" when d.ExpectedValue.HasValue && !d.ExpectedValue2.HasValue: cell.Value = d.ExpectedValue.Value; break;
-                        default: cell.Value = d.Column(columns[c]); break;
-                    }
+                    // Every cell is text: the limit and measurement columns now carry their unit with the value.
+                    ws2.Cell(rr, c + 2).Value = d.Column(columns[c]);
                 }
 
                 ws2.Cell(rr, resultCol).Value = d.Result;
@@ -280,7 +275,7 @@ namespace AssemblyLineTester.Services
 
             new SystemLogService().Log(
                 Models.SystemLog.LogSeverity.Info, "Test Report", "Export Excel",
-                $"Report {detail.ReportNumber} exported to Excel ({detail.Details.Count} detail rows).");
+                $"Report {detail.ReportNumber} exported to Excel ({details.Count} detail rows).");
         }
     }
 }

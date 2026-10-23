@@ -692,7 +692,7 @@ namespace AssemblyLineTester.Migrations
                         {
                             Id = 33,
                             Description = "Export and Print Test Reports & Analytics",
-                            IsGranted = false,
+                            IsGranted = true,
                             PermissionGroup = "System & Logs",
                             PermissionKey = "Action.Reports.Export",
                             RoleId = 2

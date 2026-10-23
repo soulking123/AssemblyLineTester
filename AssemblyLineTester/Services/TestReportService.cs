@@ -127,6 +127,8 @@ namespace AssemblyLineTester.Services
                 })
                 .ToList();
 
+            var harnessPartNumbers = HarnessService.GetHarnessPartNumbersByConnectorName();
+
             var detailDtos = details.Select((d, idx) =>
             {
                 bool isDiode = string.Equals(d.TestTypeName, "DIODE", StringComparison.OrdinalIgnoreCase) ||
@@ -149,6 +151,7 @@ namespace AssemblyLineTester.Services
                 {
                     NetId = netId,
                     HarnessGroup = d.HarnessGroup,
+                    ConnectorGroup = harnessPartNumbers.TryGetValue(d.HarnessGroup ?? "", out string? harnessPn) ? harnessPn : "",
                     Color = color,
                     Gauge = gauge,
                     FromPin = d.FromPin,

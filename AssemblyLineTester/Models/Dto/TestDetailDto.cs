@@ -7,6 +7,9 @@ namespace AssemblyLineTester.Models.Dto
     {
         public string NetId { get; set; } = string.Empty;
         public string HarnessGroup { get; set; } = string.Empty;
+
+        // Part number of the harness assembly HarnessGroup belongs to; resolved when the report is read.
+        public string ConnectorGroup { get; set; } = string.Empty;
         public string FromPin { get; set; } = string.Empty;
         public string ToPin { get; set; } = string.Empty;
         public string FromLabel { get; set; } = string.Empty;
@@ -161,6 +164,13 @@ namespace AssemblyLineTester.Models.Dto
             return "-";
         }
 
+        // Appends the row's measurement unit to an already rendered value, leaving placeholders alone.
+        private string WithUnit(string value)
+        {
+            if (string.IsNullOrWhiteSpace(Unit) || string.IsNullOrWhiteSpace(value) || value == "-") return value;
+            return $"{value} {Unit}";
+        }
+
         // Renders one configurable result column by the name Settings stores it under.
         public string Column(string name)
         {
@@ -171,6 +181,7 @@ namespace AssemblyLineTester.Models.Dto
             {
                 "Net-ID" or "Net ID" or "NetId" => NetId,
                 "Harness Group" or "Harness-Group" or "HarnessGroup" => HarnessGroup,
+                "Connector Group" or "Connector-Group" or "ConnectorGroup" => ConnectorGroup,
                 "From" => FromPin,
                 "Net From Label" or "Net-From Label" or "NetFromLabel" => FromLabel,
                 "Net From Connector" or "Net-From Connector" or "NetFromConnector" =>
@@ -182,19 +193,19 @@ namespace AssemblyLineTester.Models.Dto
                 "Test Type" or "Test-Type" or "TestType" => TestType,
                 "Color" => Color,
                 "Gauge" => Gauge,
-                "Lower Limit" => (isDiode && LowerLimit2.HasValue)
+                "Lower Limit" => WithUnit((isDiode && LowerLimit2.HasValue)
                     ? $"{FormatLimitValue(LowerLimit, TestType)}, > {FormatLimitValue(LowerLimit2, TestType)}"
-                    : (LowerLimit.HasValue ? FormatLimitValue(LowerLimit, TestType) : "-"),
-                "Upper Limit" => (isDiode && UpperLimit2.HasValue)
+                    : (LowerLimit.HasValue ? FormatLimitValue(LowerLimit, TestType) : "-")),
+                "Upper Limit" => WithUnit((isDiode && UpperLimit2.HasValue)
                     ? $"{FormatLimitValue(UpperLimit, TestType)}, > {FormatLimitValue(UpperLimit2, TestType)}"
-                    : (UpperLimit.HasValue ? FormatLimitValue(UpperLimit, TestType) : "-"),
-                "Expected Value" => (isDiode && ExpectedValue2.HasValue)
+                    : (UpperLimit.HasValue ? FormatLimitValue(UpperLimit, TestType) : "-")),
+                "Expected Value" => WithUnit((isDiode && ExpectedValue2.HasValue)
                     ? $"{FormatLimitValue(ExpectedValue, TestType)}, > {FormatLimitValue(ExpectedValue2, TestType)}"
-                    : (ExpectedValue.HasValue ? FormatLimitValue(ExpectedValue, TestType) : "-"),
+                    : (ExpectedValue.HasValue ? FormatLimitValue(ExpectedValue, TestType) : "-")),
                 "Tolerance" => Tolerance,
-                "Measurement" => !string.IsNullOrEmpty(Measured) ? Measured : FormatMeasuredRow(MeasuredValue, MeasurementPrefix, MeasuredValue2, MeasurementPrefix2, TestType),
-                "Measured Value" => !string.IsNullOrEmpty(Measured) ? Measured : FormatMeasuredRow(MeasuredValue, MeasurementPrefix, MeasuredValue2, MeasurementPrefix2, TestType),
-                "Measured" => !string.IsNullOrEmpty(Measured) ? Measured : FormatMeasuredRow(MeasuredValue, MeasurementPrefix, MeasuredValue2, MeasurementPrefix2, TestType),
+                "Measurement" => WithUnit(!string.IsNullOrEmpty(Measured) ? Measured : FormatMeasuredRow(MeasuredValue, MeasurementPrefix, MeasuredValue2, MeasurementPrefix2, TestType)),
+                "Measured Value" => WithUnit(!string.IsNullOrEmpty(Measured) ? Measured : FormatMeasuredRow(MeasuredValue, MeasurementPrefix, MeasuredValue2, MeasurementPrefix2, TestType)),
+                "Measured" => WithUnit(!string.IsNullOrEmpty(Measured) ? Measured : FormatMeasuredRow(MeasuredValue, MeasurementPrefix, MeasuredValue2, MeasurementPrefix2, TestType)),
                 _ => ""
             };
         }

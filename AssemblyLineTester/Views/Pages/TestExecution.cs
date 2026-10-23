@@ -40,7 +40,7 @@ namespace AssemblyLineTester.Views.Pages
         private DateTime _startTime;
         private DateTime _endTime;
         private readonly SystemLogService logService = new();
-        private TestConfiguration config = new();
+        private TestConfiguration? config = new();
         private DefaultTestSetting defaultTest = TestSettingService.GetDefaults();
         private int defaultTestPoint;
         private readonly List<string> _currentHarnessImages = [];
@@ -136,7 +136,7 @@ namespace AssemblyLineTester.Views.Pages
             _elapsedTimer.Interval = 1000;
             _elapsedTimer.Tick += ElapsedTimer_Tick;
         }
-        private void ElapsedTimer_Tick(object sender, EventArgs e)
+        private void ElapsedTimer_Tick(object? sender, EventArgs e)
         {
             // Update Elapsed Time display every 1 second (HH:mm:ss format)
             lblElapsedTimeVal.Text = _testStopwatch.Elapsed.ToString(@"hh\:mm\:ss");
@@ -178,6 +178,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             gridLiveDetails.Columns.Clear();
             _resultColumns = TestSettingService.GetEnabledResultColumns();
+            _harnessPartNumbers = null;
 
             gridLiveDetails.Columns.Add("StepNo", "#");
             foreach (string column in _resultColumns)
@@ -446,7 +447,7 @@ namespace AssemblyLineTester.Views.Pages
                 lblEndTimeVal.Text = "-";
                 listBoxTestSummary.Items.Clear();
 
-                if (_loadedRows != null && _loadedRows.Count > 0)
+                if (_loadedRows.Count > 0)
                 {
                     foreach (var row in _loadedRows)
                     {
@@ -1010,7 +1011,7 @@ namespace AssemblyLineTester.Views.Pages
                     lblStartTimeVal.Text = "-";
                     lblElapsedTimeVal.Text = "-";
                     listBoxTestSummary.Items.Clear();
-                    if (_loadedRows != null && _loadedRows.Count > 0)
+                    if (_loadedRows.Count > 0)
                     {
                         foreach (var row in _loadedRows)
                         {
@@ -1102,7 +1103,7 @@ namespace AssemblyLineTester.Views.Pages
 
         private void BtnSaveReport_Click(object? sender, EventArgs e)
         {
-            if (_loadedRows == null || _loadedRows.Count == 0)
+            if (_loadedRows.Count == 0)
             {
                 if (MessageBox.Show("No active test data in grid. Do you want to open the save report modal anyway?", "No Test Results", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                 {
@@ -1115,7 +1116,7 @@ namespace AssemblyLineTester.Views.Pages
                 x.ToString()?.Contains("✖") == true ||
                 x.ToString()?.Equals("TEST ERRORS", StringComparison.OrdinalIgnoreCase) == true ||
                 x.ToString()?.Equals("SHORT CONNECTION ERRORS", StringComparison.OrdinalIgnoreCase) == true);
-            bool allPass = _loadedRows != null && _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass) && !hasFailInSummary;
+            bool allPass = _loadedRows.Count > 0 && _loadedRows.TrueForAll(r => r.Status == LiveTestStatus.Pass) && !hasFailInSummary;
             string overallResult = allPass ? "PASS" : "FAIL";
 
             string summaryText = string.Join("\r\n", listBoxTestSummary.Items.Cast<object>().Select(x => x.ToString()));
@@ -1144,7 +1145,7 @@ namespace AssemblyLineTester.Views.Pages
                 $"SN-{DateTime.Now:HHmmss}",
                 overallResult,
                 _startTime != default ? _startTime : DateTime.Now,
-                _loadedRows ?? new List<LiveTestDetailRowDto>(),
+                _loadedRows,
                 _currentReportId,
                 txtNotes.Text,
                 summaryText
@@ -1188,6 +1189,7 @@ namespace AssemblyLineTester.Views.Pages
         {
             "Net-ID" => row.NetId,
             "Harness Group" => row.HarnessGroup,
+            "Connector Group" or "Connector-Group" => HarnessPartNumberFor(row.HarnessGroup),
             "From" => row.FromPoint,
             "Net From Label" or "Net-From Label" => row.FromLabel,
             "Net From Connector" or "Net-From Connector" => !string.IsNullOrWhiteSpace(row.FromConnector) ? row.FromConnector : TestDetailDto.ExtractConnector(row.FromLabel, row.FromPoint),
@@ -1197,24 +1199,40 @@ namespace AssemblyLineTester.Views.Pages
             "Test Type" => row.TestType,
             "Color" => row.Color,
             "Gauge" => row.Gauge,
-            "Lower Limit" => (string.Equals(row.TestType, "DIODE", StringComparison.OrdinalIgnoreCase) && row.LowerLimit2.HasValue)
+            "Lower Limit" => WithUnit((string.Equals(row.TestType, "DIODE", StringComparison.OrdinalIgnoreCase) && row.LowerLimit2.HasValue)
                 ? $"{FormatLimitValue(row.LowerLimit, row.TestType)}, > {FormatLimitValue(row.LowerLimit2, row.TestType)}"
-                : FormatLimitValue(row.LowerLimit, row.TestType),
-            "Upper Limit" => (string.Equals(row.TestType, "DIODE", StringComparison.OrdinalIgnoreCase) && row.UpperLimit2.HasValue)
+                : FormatLimitValue(row.LowerLimit, row.TestType), row.Unit),
+            "Upper Limit" => WithUnit((string.Equals(row.TestType, "DIODE", StringComparison.OrdinalIgnoreCase) && row.UpperLimit2.HasValue)
                 ? $"{FormatLimitValue(row.UpperLimit, row.TestType)}, > {FormatLimitValue(row.UpperLimit2, row.TestType)}"
-                : FormatLimitValue(row.UpperLimit, row.TestType),
-            "Expected Value" => FormatExpectedValue(row.ExpectedValue, row.TestType),
+                : FormatLimitValue(row.UpperLimit, row.TestType), row.Unit),
+            "Expected Value" => WithUnit(FormatExpectedValue(row.ExpectedValue, row.TestType), row.Unit),
             // Wire is plain continuity, not a component with a rated value - tolerance means nothing here.
             "Tolerance" => string.Equals(row.TestType, "WIRE", StringComparison.OrdinalIgnoreCase)
                 ? "-"
                 : (string.Equals(row.TestType, "DIODE", StringComparison.OrdinalIgnoreCase) && row.Tolerance2.HasValue)
                     ? $"±{row.Tolerance?.ToString("0.##", CultureInfo.InvariantCulture)}%, ±{row.Tolerance2?.ToString("0.##", CultureInfo.InvariantCulture)}%"
                     : row.Tolerance.HasValue ? $"±{row.Tolerance.Value.ToString("0.##", CultureInfo.InvariantCulture)}%" : "",
-            "Measurement" => FormatMeasuredRowValue(row),
-            "Measured Value" => FormatMeasuredRowValue(row),
-            "Measured" => FormatMeasuredRowValue(row),
+            "Measurement" => WithUnit(FormatMeasuredRowValue(row), row.Unit),
+            "Measured Value" => WithUnit(FormatMeasuredRowValue(row), row.Unit),
+            "Measured" => WithUnit(FormatMeasuredRowValue(row), row.Unit),
             _ => ""
         };
+
+        // Appends the row's measurement unit to an already rendered value, leaving placeholders alone.
+        private static string WithUnit(string value, string unit)
+        {
+            if (string.IsNullOrWhiteSpace(unit) || string.IsNullOrWhiteSpace(value) || value == "-") return value;
+            return $"{value} {unit}";
+        }
+
+        // Harness assembly part numbers keyed by connector name; cleared whenever the grid is rebuilt.
+        private static Dictionary<string, string>? _harnessPartNumbers;
+
+        private static string HarnessPartNumberFor(string? connectorName)
+        {
+            _harnessPartNumbers ??= HarnessService.GetHarnessPartNumbersByConnectorName();
+            return _harnessPartNumbers.TryGetValue(connectorName ?? "", out string? partNumber) ? partNumber : "";
+        }
 
         private static string FormatMeasuredRowValue(LiveTestDetailRowDto row)
         {

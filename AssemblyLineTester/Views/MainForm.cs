@@ -380,7 +380,7 @@ namespace AssemblyLineTester.Views
         {
             if (sender is Button btn && !isSidebarExpanded)
             {
-                if (_tooltipTexts.TryGetValue(btn, out string text))
+                if (_tooltipTexts.TryGetValue(btn, out string? text))
                 {
                     Point screenLoc = btn.PointToScreen(new Point(btn.Width, 0));
                     _customToolTipForm?.ShowToolTip(text, screenLoc, btn.Height);

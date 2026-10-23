@@ -1553,7 +1553,7 @@ namespace AssemblyLineTester.Views.Pages
 
         }
 
-        private SettingSystemInfo? settingSystemInfo;
+        private SettingSystemInfo settingSystemInfo;
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tblMain;

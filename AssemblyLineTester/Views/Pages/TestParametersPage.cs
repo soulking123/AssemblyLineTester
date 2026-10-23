@@ -2723,9 +2723,9 @@ namespace AssemblyLineTester.Views.Pages
                 if (config != null)
                 {
                     LoadConfigurationIntoGrid(config);
+                    string checkResult = _configService.ConvertToProgramText(config, defaultTestPoint);
+                    txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 }
-                string checkResult = _configService.ConvertToProgramText(config, defaultTestPoint);
-                txtConnectionResistance.Text = config.MaxWireResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
                 //txtInsulationResistance.Text = config.MinInsulationResistance.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
 

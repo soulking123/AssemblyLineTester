@@ -1122,7 +1122,7 @@ namespace AssemblyLineTester.Services
             {
                 columns = new List<string>
                 {
-                    "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "Net From Connector", "To",
+                    "Connector Group", "Harness Group", "Color", "Gauge", "Net-ID", "From", "Net From Label", "Net From Connector", "To",
                     "Net To Label", "Net To Connector", "Test Type", "Lower Limit", "Upper Limit", "Expected Value",
                     "Tolerance", "Measurement"
                 };
@@ -1225,6 +1225,8 @@ namespace AssemblyLineTester.Services
             ["NetId"] = 0.65,
             ["Harness Group"] = 0.75,
             ["Harness-Group"] = 0.75,
+            ["Connector Group"] = 0.9,
+            ["Connector-Group"] = 0.9,
             ["From"] = 0.45,
             ["Net From Label"] = 1.3,
             ["Net-From Label"] = 1.3,
@@ -1243,9 +1245,9 @@ namespace AssemblyLineTester.Services
             ["Test-Type"] = 0.85,
             ["Color"] = 0.5,
             ["Gauge"] = 0.55,
-            ["Lower Limit"] = 0.65,
-            ["Upper Limit"] = 0.65,
-            ["Expected Value"] = 0.65,
+            ["Lower Limit"] = 0.8,
+            ["Upper Limit"] = 0.8,
+            ["Expected Value"] = 0.8,
             ["Tolerance"] = 0.65,
             ["Measurement"] = 1.35
         };
@@ -1301,7 +1303,7 @@ namespace AssemblyLineTester.Services
 
             for (int i = 0; i < columns.Count; i++)
             {
-                var align = columns[i] is "Harness Group" or "Harness-Group" or "From" or "To" or "Test Type" or "Test-Type" or "Net From Label" or "Net-From Label" or "Net To Label" or "Net-To Label" or "Net From Connector" or "Net-From Connector" or "Net To Connector" or "Net-To Connector" or "Color" or "Gauge"
+                var align = columns[i] is "Harness Group" or "Harness-Group" or "Connector Group" or "Connector-Group" or "From" or "To" or "Test Type" or "Test-Type" or "Net From Label" or "Net-From Label" or "Net To Label" or "Net-To Label" or "Net From Connector" or "Net-From Connector" or "Net To Connector" or "Net-To Connector" or "Color" or "Gauge"
                     ? XStringFormats.CenterLeft
                     : XStringFormats.Center;
                 Cell(i + 1, d.Column(columns[i]), align);
