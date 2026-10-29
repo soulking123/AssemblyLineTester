@@ -127,6 +127,12 @@ namespace AssemblyLineTester.Models.Dto
             return FormatMeasuredValue(val1, prefix1);
         }
 
+        // The connector typed in Test Parameters, falling back to the one derived from the label.
+        public static string ResolveConnector(string? stored, string? label, string? pin = null)
+        {
+            return !string.IsNullOrWhiteSpace(stored) ? stored.Trim() : ExtractConnector(label, pin);
+        }
+
         public static string ExtractConnector(string? label, string? pin = null)
         {
             if (!string.IsNullOrWhiteSpace(label))
@@ -185,11 +191,11 @@ namespace AssemblyLineTester.Models.Dto
                 "From" => FromPin,
                 "Net From Label" or "Net-From Label" or "NetFromLabel" => FromLabel,
                 "Net From Connector" or "Net-From Connector" or "NetFromConnector" =>
-                    !string.IsNullOrWhiteSpace(FromConnector) ? FromConnector : ExtractConnector(FromLabel, FromPin),
+                    ResolveConnector(FromConnector, FromLabel, FromPin),
                 "To" => ToPin,
                 "Net To Label" or "Net-To Label" or "NetToLabel" => ToLabel,
                 "Net To Connector" or "Net-To Connector" or "NetToConnector" =>
-                    !string.IsNullOrWhiteSpace(ToConnector) ? ToConnector : ExtractConnector(ToLabel, ToPin),
+                    ResolveConnector(ToConnector, ToLabel, ToPin),
                 "Test Type" or "Test-Type" or "TestType" => TestType,
                 "Color" => Color,
                 "Gauge" => Gauge,

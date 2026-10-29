@@ -1546,6 +1546,10 @@ namespace AssemblyLineTester.Migrations
                     b.Property<int>("FromAddress")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("FromConnector")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FromLabel")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1580,6 +1584,10 @@ namespace AssemblyLineTester.Migrations
 
                     b.Property<int>("ToAddress")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ToConnector")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ToLabel")
                         .IsRequired()
@@ -1680,6 +1688,10 @@ namespace AssemblyLineTester.Migrations
                     b.Property<double?>("ExpectedValue2")
                         .HasColumnType("REAL");
 
+                    b.Property<string>("FromConnector")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FromLabel")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1725,6 +1737,10 @@ namespace AssemblyLineTester.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("TestTypeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ToConnector")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

@@ -251,11 +251,11 @@ namespace AssemblyLineTester.Views.Pages
                     FromPoint = net.FromAddress.ToString(),
                     //FromPoint = fromPin,
                     FromLabel = net.FromLabel ?? "",
-                    FromConnector = TestDetailDto.ExtractConnector(net.FromLabel, fromPin),
+                    FromConnector = TestDetailDto.ResolveConnector(net.FromConnector, net.FromLabel, fromPin),
                     ToPoint = net.ToAddress.ToString(),
                     //ToPoint = toPin,
                     ToLabel = net.ToLabel ?? "",
-                    ToConnector = TestDetailDto.ExtractConnector(net.ToLabel, toPin),
+                    ToConnector = TestDetailDto.ResolveConnector(net.ToConnector, net.ToLabel, toPin),
                     TestType = testTypeName,
                     Color = net.Color ?? "",
                     Gauge = net.Gauge ?? "",
@@ -296,8 +296,8 @@ namespace AssemblyLineTester.Views.Pages
                 row.ToLabel = net.ToLabel;
                 string fromPin = TestConfigService.FormatPin(net.FromAddress);
                 string toPin = TestConfigService.FormatPin(net.ToAddress);
-                row.FromConnector = TestDetailDto.ExtractConnector(net.FromLabel, fromPin);
-                row.ToConnector = TestDetailDto.ExtractConnector(net.ToLabel, toPin);
+                row.FromConnector = TestDetailDto.ResolveConnector(net.FromConnector, net.FromLabel, fromPin);
+                row.ToConnector = TestDetailDto.ResolveConnector(net.ToConnector, net.ToLabel, toPin);
                 row.Tolerance = net.Tolerance;
                 row.Tolerance2 = net.Tolerance2;
                 row.Unit = net.MeasurementUnit;
@@ -1193,10 +1193,10 @@ namespace AssemblyLineTester.Views.Pages
             "Connector Group" or "Connector-Group" => row.ConnectorGroup,
             "From" => row.FromPoint,
             "Net From Label" or "Net-From Label" => row.FromLabel,
-            "Net From Connector" or "Net-From Connector" => !string.IsNullOrWhiteSpace(row.FromConnector) ? row.FromConnector : TestDetailDto.ExtractConnector(row.FromLabel, row.FromPoint),
+            "Net From Connector" or "Net-From Connector" => TestDetailDto.ResolveConnector(row.FromConnector, row.FromLabel, row.FromPoint),
             "To" => row.ToPoint,
             "Net To Label" or "Net-To Label" => row.ToLabel,
-            "Net To Connector" or "Net-To Connector" => !string.IsNullOrWhiteSpace(row.ToConnector) ? row.ToConnector : TestDetailDto.ExtractConnector(row.ToLabel, row.ToPoint),
+            "Net To Connector" or "Net-To Connector" => TestDetailDto.ResolveConnector(row.ToConnector, row.ToLabel, row.ToPoint),
             "Test Type" => row.TestType,
             "Color" => row.Color,
             "Gauge" => row.Gauge,

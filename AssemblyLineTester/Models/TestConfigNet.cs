@@ -18,11 +18,16 @@ namespace AssemblyLineTester.Models
 
         public string HarnessGroup { get; set; } = string.Empty;
 
-        public int FromAddress { get; set; }                                // 0,1,2,3,4  
+        public int FromAddress { get; set; }                                // 0,1,2,3,4
         public string FromLabel { get; set; } = string.Empty;
+
+        // Typed by the operator in Test Parameters; falls back to the label when left blank.
+        public string FromConnector { get; set; } = string.Empty;
 
         public int ToAddress { get; set; }                                  // 0,1,2,3,4
         public string ToLabel { get; set; } = string.Empty;
+
+        public string ToConnector { get; set; } = string.Empty;
         public int TestTypeId { get; set; }                                 // 
 
         public TestType? TestType { get; set; }

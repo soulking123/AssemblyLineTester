@@ -17,6 +17,8 @@ namespace AssemblyLineTester.Models
         public string ToPin { get; set; } = string.Empty;
         public string FromLabel { get; set; } = string.Empty;
         public string ToLabel { get; set; } = string.Empty;
+        public string FromConnector { get; set; } = string.Empty;
+        public string ToConnector { get; set; } = string.Empty;
 
         public string Color { get; set; } = string.Empty;
         public string Gauge { get; set; } = string.Empty;
